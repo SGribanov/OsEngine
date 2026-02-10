@@ -43,36 +43,72 @@ namespace OsEngine.Robots.Trend
     [Bot("FractalBreakthrough")]
     public class FractalBreakthrough : BotPanel
     {
-        private BotTabSimple _tab;
+        #region Constants
+
+        // Fractal detection constants
+        private const int FractalOffset = 3;           // Fractal detection at candles.Count - 3
+        private const int FractalLookback = 2;         // Look 2 candles on each side
+        private const int MinFractalBars = 5;          // Minimum bars needed for fractal detection
+
+        // Stop/Take offset constants
+        private const int StopTickOffset = 2;          // Stop offset from fractal in ticks
+        private const int StopOrderTickOffset = 3;     // Stop order additional offset
+        private const int EntryTickOffset = 1;         // Entry offset from fractal in ticks
+
+        // Regime constants
+        private const string RegimeOff = "Off";
+        private const string RegimeOn = "On";
+        private const string RegimeOnlyLong = "OnlyLong";
+        private const string RegimeOnlyShort = "OnlyShort";
+
+        // Volume type constants
+        private const string VolumeTypeContracts = "Contracts";
+        private const string VolumeTypeContractCurrency = "Contract currency";
+        private const string VolumeTypeDepositPercent = "Deposit percent";
+
+        // Asset constants
+        private const string AssetPrime = "Prime";
+
+        // Rounding constants
+        private const int DefaultVolumeDecimals = 6;
+        private const int TesterVolumeDecimals = 7;
+
+        #endregion
+
+        #region Fields
+
+        private readonly BotTabSimple _tab;
 
         // Basic Settings
-        private StrategyParameterString _regime;
+        private readonly StrategyParameterString _regime;
 
         // Strategy Settings
-        private StrategyParameterDecimal _kTake;
-        private StrategyParameterDecimal _comiss;
-        private StrategyParameterDecimal _kComiss;
-        private StrategyParameterInt _atrLength;
-        private StrategyParameterDecimal _kATR;
-        private StrategyParameterDecimal _k2ATR;
-        private StrategyParameterInt _ema1Length;
-        private StrategyParameterInt _ema2Length;
+        private readonly StrategyParameterDecimal _kTake;
+        private readonly StrategyParameterDecimal _comiss;
+        private readonly StrategyParameterDecimal _kComiss;
+        private readonly StrategyParameterInt _atrLength;
+        private readonly StrategyParameterDecimal _kATR;
+        private readonly StrategyParameterDecimal _k2ATR;
+        private readonly StrategyParameterInt _ema1Length;
+        private readonly StrategyParameterInt _ema2Length;
 
         // GetVolume Settings
-        private StrategyParameterString _volumeType;
-        private StrategyParameterDecimal _volume;
-        private StrategyParameterString _tradeAssetInPortfolio;
+        private readonly StrategyParameterString _volumeType;
+        private readonly StrategyParameterDecimal _volume;
+        private readonly StrategyParameterString _tradeAssetInPortfolio;
 
         // Internal indicator values
-        private decimal _currentATR = 0;
-        private decimal _currentEMA1 = 0;
-        private decimal _currentEMA2 = 0;
-        private decimal _previousEMA1 = 0;
-        private decimal _previousEMA2 = 0;
+        private decimal _currentATR;
+        private decimal _currentEMA1;
+        private decimal _currentEMA2;
+        private decimal _previousEMA1;
+        private decimal _previousEMA2;
 
         // Fractal state
-        private decimal _lastUpperFractal = 0;
-        private decimal _lastLowerFractal = 0;
+        private decimal _lastUpperFractal;
+        private decimal _lastLowerFractal;
+
+        #endregion
 
         public FractalBreakthrough(string name, StartProgram startProgram) : base(name, startProgram)
         {
@@ -81,7 +117,7 @@ namespace OsEngine.Robots.Trend
             _tab = TabsSimple[0];
 
             // 2. Basic settings
-            _regime = CreateParameter("Regime", "Off", new[] { "Off", "On", "OnlyLong", "OnlyShort" }, "Base");
+            _regime = CreateParameter("Regime", RegimeOff, [RegimeOff, RegimeOn, RegimeOnlyLong, RegimeOnlyShort], "Base");
 
             // 3. Strategy settings
             _kTake = CreateParameter("kTake", 1.5m, 0.5m, 5.0m, 0.1m, "Base");
@@ -94,14 +130,15 @@ namespace OsEngine.Robots.Trend
             _ema2Length = CreateParameter("Ema2 Length", 50, 5, 200, 1, "Indicator");
 
             // 4. Volume settings
-            _volumeType = CreateParameter("Volume type", "Deposit percent", new[] { "Contracts", "Contract currency", "Deposit percent" });
+            _volumeType = CreateParameter("Volume type", VolumeTypeDepositPercent,
+                [VolumeTypeContracts, VolumeTypeContractCurrency, VolumeTypeDepositPercent]);
             _volume = CreateParameter("Volume", 20, 1.0m, 50, 4);
-            _tradeAssetInPortfolio = CreateParameter("Asset in portfolio", "Prime");
+            _tradeAssetInPortfolio = CreateParameter("Asset in portfolio", AssetPrime);
 
             // 5. Subscribe to events
             _tab.CandleFinishedEvent += _tab_CandleFinishedEvent;
 
-            // 7. Description
+            // 6. Description
             Description = "Fractal Breakthrough - breakout strategy based on fractal levels with EMA trend filter and ATR volatility filter.";
         }
 
@@ -116,13 +153,13 @@ namespace OsEngine.Robots.Trend
 
         private void _tab_CandleFinishedEvent(List<Candle> candles)
         {
-            if (_regime.ValueString == "Off")
+            if (_regime.ValueString == RegimeOff)
             {
                 return;
             }
 
-            // Need at least 5 candles for fractal + enough for indicators
-            int minBars = Math.Max(5, Math.Max(_ema1Length.ValueInt, Math.Max(_ema2Length.ValueInt, _atrLength.ValueInt)));
+            // Need at least MinFractalBars candles for fractal + enough for indicators
+            int minBars = Math.Max(MinFractalBars, Math.Max(_ema1Length.ValueInt, Math.Max(_ema2Length.ValueInt, _atrLength.ValueInt)));
 
             if (candles.Count < minBars + 1)
             {
@@ -146,60 +183,17 @@ namespace OsEngine.Robots.Trend
 
             int last = candles.Count - 1;
             decimal lastClose = candles[last].Close;
-            decimal tick = _tab.Securiti.PriceStep;
+            decimal tick = _tab.Security.PriceStep;
 
-            // 1. Detect new fractals at index [count - 3]
-            int fi = candles.Count - 3;
-
-            // Upper fractal: center High > both neighbors' Highs
-            if (candles[fi].High > candles[fi - 2].High &&
-                candles[fi].High > candles[fi - 1].High &&
-                candles[fi].High > candles[fi + 1].High &&
-                candles[fi].High > candles[fi + 2].High)
-            {
-                _lastUpperFractal = candles[fi].High;
-            }
-
-            // Lower fractal: center Low < both neighbors' Lows
-            if (candles[fi].Low < candles[fi - 2].Low &&
-                candles[fi].Low < candles[fi - 1].Low &&
-                candles[fi].Low < candles[fi + 1].Low &&
-                candles[fi].Low < candles[fi + 2].Low)
-            {
-                _lastLowerFractal = candles[fi].Low;
-            }
+            // 1. Detect new fractals
+            DetectFractals(candles);
 
             // 2. Fractal invalidation: cancel if price crossed fractal level
-            if (_lastUpperFractal != 0 && lastClose > _lastUpperFractal)
-            {
-                _lastUpperFractal = 0;
-            }
-
-            if (_lastLowerFractal != 0 && lastClose < _lastLowerFractal)
-            {
-                _lastLowerFractal = 0;
-            }
+            InvalidateFractals(lastClose);
 
             // 3. Handle open positions - set stop and take if not yet set
-            List<Position> openPositions = _tab.PositionsOpenAll;
-
-            if (openPositions != null && openPositions.Count != 0)
+            if (HandleOpenPositions(tick))
             {
-                for (int i = 0; i < openPositions.Count; i++)
-                {
-                    Position pos = openPositions[i];
-
-                    if (pos.State != PositionStateType.Open)
-                    {
-                        continue;
-                    }
-
-                    if (pos.StopOrderIsActive == false)
-                    {
-                        SetStopAndTake(pos, tick);
-                    }
-                }
-
                 return;
             }
 
@@ -218,68 +212,181 @@ namespace OsEngine.Robots.Trend
             decimal ema2Prev = _previousEMA2;
 
             // 6. Try to place Long pending order
-            if (_regime.ValueString != "OnlyShort")
+            if (_regime.ValueString != RegimeOnlyShort)
             {
-                // EMA filter: both EMAs rising
-                if (ema1Last > ema1Prev && ema2Last > ema2Prev)
-                {
-                    decimal stopPrice = _lastLowerFractal - 2 * tick;
-                    decimal entryApprox = _lastUpperFractal;
-                    decimal stopDistance = entryApprox - stopPrice;
-                    decimal takeDistance = _kTake.ValueDecimal * stopDistance;
-
-                    // Commission filter: take must cover commission
-                    if (takeDistance >= lastClose * _kComiss.ValueDecimal * _comiss.ValueDecimal)
-                    {
-                        // ATR filter: stop distance within acceptable range
-                        if (stopDistance >= _kATR.ValueDecimal * atrValue &&
-                            stopDistance <= _k2ATR.ValueDecimal * atrValue)
-                        {
-                            decimal activationPrice = _lastUpperFractal + tick;
-                            decimal orderPrice = _lastUpperFractal - tick;
-
-                            _tab.BuyAtStop(
-                                GetVolume(_tab),
-                                orderPrice,
-                                activationPrice,
-                                StopActivateType.HigherOrEqual);
-                        }
-                    }
-                }
+                TryPlaceLongOrder(lastClose, tick, atrValue, ema1Last, ema1Prev, ema2Last, ema2Prev);
             }
 
             // 7. Try to place Short pending order
-            if (_regime.ValueString != "OnlyLong")
+            if (_regime.ValueString != RegimeOnlyLong)
             {
-                // EMA filter: both EMAs falling
-                if (ema1Last < ema1Prev && ema2Last < ema2Prev)
-                {
-                    decimal stopPrice = _lastUpperFractal + 2 * tick;
-                    decimal entryApprox = _lastLowerFractal;
-                    decimal stopDistance = stopPrice - entryApprox;
-                    decimal takeDistance = _kTake.ValueDecimal * stopDistance;
-
-                    // Commission filter: take must cover commission
-                    if (takeDistance >= lastClose * _kComiss.ValueDecimal * _comiss.ValueDecimal)
-                    {
-                        // ATR filter: stop distance within acceptable range
-                        if (stopDistance >= _kATR.ValueDecimal * atrValue &&
-                            stopDistance <= _k2ATR.ValueDecimal * atrValue)
-                        {
-                            decimal activationPrice = _lastLowerFractal - tick;
-                            decimal orderPrice = _lastLowerFractal + tick;
-
-                            _tab.SellAtStop(
-                                GetVolume(_tab),
-                                orderPrice,
-                                activationPrice,
-                                StopActivateType.LowerOrEqual);
-                        }
-                    }
-                }
+                TryPlaceShortOrder(lastClose, tick, atrValue, ema1Last, ema1Prev, ema2Last, ema2Prev);
             }
         }
 
+        #region Helper Methods
+
+        /// <summary>
+        /// Detect fractals at the specified index
+        /// </summary>
+        private void DetectFractals(List<Candle> candles)
+        {
+            int fi = candles.Count - FractalOffset;
+
+            // Upper fractal: center High > both neighbors' Highs
+            if (IsUpperFractal(candles, fi))
+            {
+                _lastUpperFractal = candles[fi].High;
+            }
+
+            // Lower fractal: center Low < both neighbors' Lows
+            if (IsLowerFractal(candles, fi))
+            {
+                _lastLowerFractal = candles[fi].Low;
+            }
+        }
+
+        /// <summary>
+        /// Check if the candle at index forms an upper fractal
+        /// </summary>
+        private static bool IsUpperFractal(List<Candle> candles, int index)
+        {
+            decimal centerHigh = candles[index].High;
+            return centerHigh > candles[index - FractalLookback].High &&
+                   centerHigh > candles[index - 1].High &&
+                   centerHigh > candles[index + 1].High &&
+                   centerHigh > candles[index + FractalLookback].High;
+        }
+
+        /// <summary>
+        /// Check if the candle at index forms a lower fractal
+        /// </summary>
+        private static bool IsLowerFractal(List<Candle> candles, int index)
+        {
+            decimal centerLow = candles[index].Low;
+            return centerLow < candles[index - FractalLookback].Low &&
+                   centerLow < candles[index - 1].Low &&
+                   centerLow < candles[index + 1].Low &&
+                   centerLow < candles[index + FractalLookback].Low;
+        }
+
+        /// <summary>
+        /// Invalidate fractals if price crosses them
+        /// </summary>
+        private void InvalidateFractals(decimal lastClose)
+        {
+            if (_lastUpperFractal != 0 && lastClose > _lastUpperFractal)
+            {
+                _lastUpperFractal = 0;
+            }
+
+            if (_lastLowerFractal != 0 && lastClose < _lastLowerFractal)
+            {
+                _lastLowerFractal = 0;
+            }
+        }
+
+        /// <summary>
+        /// Handle open positions - set stop and take if not yet set
+        /// Returns true if there are open positions (strategy should return)
+        /// </summary>
+        private bool HandleOpenPositions(decimal tick)
+        {
+            List<Position> openPositions = _tab.PositionsOpenAll;
+
+            if (openPositions is null || openPositions.Count == 0)
+            {
+                return false;
+            }
+
+            foreach (Position pos in openPositions)
+            {
+                if (pos.State == PositionStateType.Open && !pos.StopOrderIsActive)
+                {
+                    SetStopAndTake(pos, tick);
+                }
+            }
+
+            return true;
+        }
+
+        /// <summary>
+        /// Try to place a long pending order if conditions are met
+        /// </summary>
+        private void TryPlaceLongOrder(decimal lastClose, decimal tick, decimal atrValue,
+            decimal ema1Last, decimal ema1Prev, decimal ema2Last, decimal ema2Prev)
+        {
+            // EMA filter: both EMAs rising
+            if (ema1Last <= ema1Prev || ema2Last <= ema2Prev)
+            {
+                return;
+            }
+
+            decimal stopPrice = _lastLowerFractal - StopTickOffset * tick;
+            decimal entryApprox = _lastUpperFractal;
+            decimal stopDistance = entryApprox - stopPrice;
+            decimal takeDistance = _kTake.ValueDecimal * stopDistance;
+
+            // Commission filter: take must cover commission
+            if (takeDistance < lastClose * _kComiss.ValueDecimal * _comiss.ValueDecimal)
+            {
+                return;
+            }
+
+            // ATR filter: stop distance within acceptable range
+            if (stopDistance < _kATR.ValueDecimal * atrValue ||
+                stopDistance > _k2ATR.ValueDecimal * atrValue)
+            {
+                return;
+            }
+
+            decimal activationPrice = _lastUpperFractal + EntryTickOffset * tick;
+            decimal orderPrice = _lastUpperFractal - EntryTickOffset * tick;
+
+            _tab.BuyAtStop(GetVolume(_tab), orderPrice, activationPrice, StopActivateType.HigherOrEqual);
+        }
+
+        /// <summary>
+        /// Try to place a short pending order if conditions are met
+        /// </summary>
+        private void TryPlaceShortOrder(decimal lastClose, decimal tick, decimal atrValue,
+            decimal ema1Last, decimal ema1Prev, decimal ema2Last, decimal ema2Prev)
+        {
+            // EMA filter: both EMAs falling
+            if (ema1Last >= ema1Prev || ema2Last >= ema2Prev)
+            {
+                return;
+            }
+
+            decimal stopPrice = _lastUpperFractal + StopTickOffset * tick;
+            decimal entryApprox = _lastLowerFractal;
+            decimal stopDistance = stopPrice - entryApprox;
+            decimal takeDistance = _kTake.ValueDecimal * stopDistance;
+
+            // Commission filter: take must cover commission
+            if (takeDistance < lastClose * _kComiss.ValueDecimal * _comiss.ValueDecimal)
+            {
+                return;
+            }
+
+            // ATR filter: stop distance within acceptable range
+            if (stopDistance < _kATR.ValueDecimal * atrValue ||
+                stopDistance > _k2ATR.ValueDecimal * atrValue)
+            {
+                return;
+            }
+
+            decimal activationPrice = _lastLowerFractal - EntryTickOffset * tick;
+            decimal orderPrice = _lastLowerFractal + EntryTickOffset * tick;
+
+            _tab.SellAtStop(GetVolume(_tab), orderPrice, activationPrice, StopActivateType.LowerOrEqual);
+        }
+
+        #endregion
+
+        /// <summary>
+        /// Set stop-loss and take-profit for an open position
+        /// </summary>
         private void SetStopAndTake(Position position, decimal tick)
         {
             decimal entryPrice = position.EntryPrice;
@@ -291,8 +398,8 @@ namespace OsEngine.Robots.Trend
                     return;
                 }
 
-                decimal stopActivation = _lastLowerFractal - 2 * tick;
-                decimal stopOrder = _lastLowerFractal - 3 * tick;
+                decimal stopActivation = _lastLowerFractal - StopTickOffset * tick;
+                decimal stopOrder = _lastLowerFractal - StopOrderTickOffset * tick;
                 decimal stopDistance = entryPrice - stopActivation;
                 decimal takeDistance = _kTake.ValueDecimal * stopDistance;
                 decimal takeActivation = entryPrice + takeDistance;
@@ -308,8 +415,8 @@ namespace OsEngine.Robots.Trend
                     return;
                 }
 
-                decimal stopActivation = _lastUpperFractal + 2 * tick;
-                decimal stopOrder = _lastUpperFractal + 3 * tick;
+                decimal stopActivation = _lastUpperFractal + StopTickOffset * tick;
+                decimal stopOrder = _lastUpperFractal + StopOrderTickOffset * tick;
                 decimal stopDistance = stopActivation - entryPrice;
                 decimal takeDistance = _kTake.ValueDecimal * stopDistance;
                 decimal takeActivation = entryPrice - takeDistance;
@@ -397,103 +504,110 @@ namespace OsEngine.Robots.Trend
             }
         }
 
+        /// <summary>
+        /// Calculate volume for order based on selected volume type
+        /// </summary>
         private decimal GetVolume(BotTabSimple tab)
         {
-            decimal volume = 0;
-
-            if (_volumeType.ValueString == "Contracts")
+            return _volumeType.ValueString switch
             {
-                volume = _volume.ValueDecimal;
-            }
-            else if (_volumeType.ValueString == "Contract currency")
+                VolumeTypeContracts => _volume.ValueDecimal,
+                VolumeTypeContractCurrency => CalculateVolumeByContractCurrency(tab),
+                VolumeTypeDepositPercent => CalculateVolumeByDepositPercent(tab),
+                _ => 0
+            };
+        }
+
+        /// <summary>
+        /// Calculate volume based on contract currency
+        /// </summary>
+        private decimal CalculateVolumeByContractCurrency(BotTabSimple tab)
+        {
+            decimal contractPrice = tab.PriceBestAsk;
+            decimal volume = _volume.ValueDecimal / contractPrice;
+
+            if (StartProgram == StartProgram.IsOsTrader)
             {
-                decimal contractPrice = tab.PriceBestAsk;
-                volume = _volume.ValueDecimal / contractPrice;
+                IServerPermission serverPermission = ServerMaster.GetServerPermission(tab.Connector.ServerType);
 
-                if (StartProgram == StartProgram.IsOsTrader)
+                if (serverPermission is not null &&
+                    serverPermission.IsUseLotToCalculateProfit &&
+                    tab.Security.Lot > 1)
                 {
-                    IServerPermission serverPermission = ServerMaster.GetServerPermission(tab.Connector.ServerType);
-
-                    if (serverPermission != null &&
-                        serverPermission.IsUseLotToCalculateProfit &&
-                        tab.Security.Lot != 0 &&
-                        tab.Security.Lot > 1)
-                    {
-                        volume = _volume.ValueDecimal / (contractPrice * tab.Security.Lot);
-                    }
-
-                    volume = Math.Round(volume, tab.Security.DecimalsVolume);
-                }
-                else
-                {
-                    volume = Math.Round(volume, 6);
-                }
-            }
-            else if (_volumeType.ValueString == "Deposit percent")
-            {
-                Portfolio myPortfolio = tab.Portfolio;
-
-                if (myPortfolio == null)
-                {
-                    return 0;
+                    volume = _volume.ValueDecimal / (contractPrice * tab.Security.Lot);
                 }
 
-                decimal portfolioPrimeAsset = 0;
-
-                if (_tradeAssetInPortfolio.ValueString == "Prime")
-                {
-                    portfolioPrimeAsset = myPortfolio.ValueCurrent;
-                }
-                else
-                {
-                    List<PositionOnBoard> positionOnBoard = myPortfolio.GetPositionOnBoard();
-
-                    if (positionOnBoard == null)
-                    {
-                        return 0;
-                    }
-
-                    for (int i = 0; i < positionOnBoard.Count; i++)
-                    {
-                        if (positionOnBoard[i].SecurityNameCode == _tradeAssetInPortfolio.ValueString)
-                        {
-                            portfolioPrimeAsset = positionOnBoard[i].ValueCurrent;
-                            break;
-                        }
-                    }
-                }
-
-                if (portfolioPrimeAsset == 0)
-                {
-                    SendNewLogMessage("Can`t found portfolio " + _tradeAssetInPortfolio.ValueString, Logging.LogMessageType.Error);
-                    return 0;
-                }
-
-                decimal moneyOnPosition = portfolioPrimeAsset * (_volume.ValueDecimal / 100);
-
-                decimal qty = moneyOnPosition / tab.PriceBestAsk / tab.Security.Lot;
-
-                if (tab.StartProgram == StartProgram.IsOsTrader)
-                {
-                    if (tab.Security.UsePriceStepCostToCalculateVolume == true
-                       && tab.Security.PriceStep != tab.Security.PriceStepCost
-                       && tab.PriceBestAsk != 0
-                       && tab.Security.PriceStep != 0
-                       && tab.Security.PriceStepCost != 0)
-                    {
-                        qty = moneyOnPosition / (tab.PriceBestAsk / tab.Security.PriceStep * tab.Security.PriceStepCost);
-                    }
-                    qty = Math.Round(qty, tab.Security.DecimalsVolume);
-                }
-                else
-                {
-                    qty = Math.Round(qty, 7);
-                }
-
-                return qty;
+                return Math.Round(volume, tab.Security.DecimalsVolume);
             }
 
-            return volume;
+            return Math.Round(volume, DefaultVolumeDecimals);
+        }
+
+        /// <summary>
+        /// Calculate volume based on deposit percent
+        /// </summary>
+        private decimal CalculateVolumeByDepositPercent(BotTabSimple tab)
+        {
+            Portfolio myPortfolio = tab.Portfolio;
+
+            if (myPortfolio is null)
+            {
+                return 0;
+            }
+
+            decimal portfolioPrimeAsset = GetPortfolioPrimeAsset(myPortfolio);
+
+            if (portfolioPrimeAsset == 0)
+            {
+                SendNewLogMessage($"Can't found portfolio {_tradeAssetInPortfolio.ValueString}", Logging.LogMessageType.Error);
+                return 0;
+            }
+
+            decimal moneyOnPosition = portfolioPrimeAsset * (_volume.ValueDecimal / 100);
+            decimal qty = moneyOnPosition / tab.PriceBestAsk / tab.Security.Lot;
+
+            if (tab.StartProgram == StartProgram.IsOsTrader)
+            {
+                if (tab.Security.UsePriceStepCostToCalculateVolume &&
+                    tab.Security.PriceStep != tab.Security.PriceStepCost &&
+                    tab.PriceBestAsk != 0 &&
+                    tab.Security.PriceStep != 0 &&
+                    tab.Security.PriceStepCost != 0)
+                {
+                    qty = moneyOnPosition / (tab.PriceBestAsk / tab.Security.PriceStep * tab.Security.PriceStepCost);
+                }
+                return Math.Round(qty, tab.Security.DecimalsVolume);
+            }
+
+            return Math.Round(qty, TesterVolumeDecimals);
+        }
+
+        /// <summary>
+        /// Get portfolio prime asset value
+        /// </summary>
+        private decimal GetPortfolioPrimeAsset(Portfolio portfolio)
+        {
+            if (_tradeAssetInPortfolio.ValueString == AssetPrime)
+            {
+                return portfolio.ValueCurrent;
+            }
+
+            List<PositionOnBoard> positionOnBoard = portfolio.GetPositionOnBoard();
+
+            if (positionOnBoard is null)
+            {
+                return 0;
+            }
+
+            foreach (PositionOnBoard position in positionOnBoard)
+            {
+                if (position.SecurityNameCode == _tradeAssetInPortfolio.ValueString)
+                {
+                    return position.ValueCurrent;
+                }
+            }
+
+            return 0;
         }
     }
 }
