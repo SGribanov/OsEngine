@@ -142,6 +142,12 @@ namespace OsEngine.OsTrader.Grids
             {
                 ButtonPosts.Visibility = Visibility.Hidden;
                 ButtonTrailUpInstruction.Visibility = Visibility.Hidden;
+                ButtonStopAndProfit.Visibility = Visibility.Hidden;
+                ButtonError.Visibility = Visibility.Hidden;
+                ButtonBase.Visibility = Visibility.Hidden;
+                ButtonCreation.Visibility = Visibility.Hidden;
+                ButtonStopTrading.Visibility = Visibility.Hidden;
+                ButtonAutoStart.Visibility = Visibility.Hidden;
             }
             else
             {
@@ -538,6 +544,8 @@ namespace OsEngine.OsTrader.Grids
 
             LabelNonTradePeriod1IsActive.Content = OsLocalization.Trader.Label638; 
             LabelNonTradePeriod2IsActive.Content = OsLocalization.Trader.Label638;
+
+            LabelServerTime.Content = OsLocalization.Trader.Label672;
 
             // stop grid by event
             CheckBoxStopGridByMoveUpIsOn.Content = OsLocalization.Trader.Label481;
@@ -1870,7 +1878,6 @@ namespace OsEngine.OsTrader.Grids
                     return;
                 }
 
-
                 if (_gridDataGrid.InvokeRequired)
                 {
                     _gridDataGrid.Invoke(new Action(TryUpdateGridTable));
@@ -1880,6 +1887,7 @@ namespace OsEngine.OsTrader.Grids
                 TextBoxFailOpenOrdersCountFact.Text = TradeGrid.ErrorsReaction.FailOpenOrdersCountFact.ToString();
                 TextBoxFailCancelOrdersCountFact.Text = TradeGrid.ErrorsReaction.FailCancelOrdersCountFact.ToString();
 
+                TextBoxCurrentServerTime.Text = TradeGrid.Tab.TimeServerCurrent.ToShortTimeString();
 
                 if (TradeGrid.GridType == TradeGridPrimeType.OpenPosition)
                 {
