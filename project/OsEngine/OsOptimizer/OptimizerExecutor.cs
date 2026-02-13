@@ -80,14 +80,14 @@ namespace OsEngine.OsOptimizer
 
             int countBots = BotCountOneFaze(_parameters, _parametersOn);
 
-            _countAllServersMax = countBots * (_master.IterationCount * 2);
+            int estimatedMaxTests = countBots * (_master.IterationCount * 2);
 
             if (_master.LastInSample)
             {
-                _countAllServersMax = _countAllServersMax - countBots;
+                estimatedMaxTests = estimatedMaxTests - countBots;
             }
 
-            SendLogMessage(OsLocalization.Optimizer.Message4 + _countAllServersMax, LogMessageType.System);
+            SendLogMessage(OsLocalization.Optimizer.Message4 + estimatedMaxTests, LogMessageType.System);
 
             DateTime timeStart = DateTime.Now;
 
@@ -109,7 +109,7 @@ namespace OsEngine.OsOptimizer
 
                     StartAsuncBotFactoryInSample(countBots, _master.StrategyName, _master.IsScript, "InSample");
 
-                    StartOptimizeFazeInSample(_master.Fazes[i], report, _parameters, _parametersOn);
+                    StartOptimizeFazeInSample(_master.Fazes[i], report, _parameters, _parametersOn, countBots);
 
                     EndOfFazeFiltration(ReportsToFazes[ReportsToFazes.Count - 1]);
                 }
@@ -328,9 +328,19 @@ namespace OsEngine.OsOptimizer
         public List<OptimizerFazeReport> ReportsToFazes = new List<OptimizerFazeReport>();
 
         private void StartOptimizeFazeInSample(OptimizerFaze faze, OptimizerFazeReport report,
-            List<IIStrategyParameter> allParameters, List<bool> parametersToOptimization)
+            List<IIStrategyParameter> allParameters, List<bool> parametersToOptimization, int inSampleBotsCount)
         {
             ReloadAllParam(allParameters);
+
+            if (inSampleBotsCount > 0)
+            {
+                lock (_serverRemoveLocker)
+                {
+                    _countAllServersMax += inSampleBotsCount;
+                }
+
+                PrimeProgressChangeEvent?.Invoke(_countAllServersEndTest, _countAllServersMax);
+            }
 
             // 2 проходим первую фазу, когда нужно обойти все варианты
 
@@ -488,6 +498,17 @@ namespace OsEngine.OsOptimizer
         private void StartOptimizeFazeOutOfSample(OptimizerFazeReport report, OptimizerFazeReport reportInSample)
         {
             SendLogMessage(OsLocalization.Optimizer.Message6, LogMessageType.System);
+
+            int outOfSampleBotsCount = reportInSample?.Reports?.Count ?? 0;
+            if (outOfSampleBotsCount > 0)
+            {
+                lock (_serverRemoveLocker)
+                {
+                    _countAllServersMax += outOfSampleBotsCount;
+                }
+
+                PrimeProgressChangeEvent?.Invoke(_countAllServersEndTest, _countAllServersMax);
+            }
 
             for (int i = 0; i < reportInSample.Reports.Count; i++)
             {
@@ -1221,7 +1242,7 @@ namespace OsEngine.OsOptimizer
 
                 _testBotsTime.Add(testTime);
 
-                if (_testBotsTime.Count % 20 == 0)
+                if (_testBotsTime.Count >= _master.ThreadsCount)
                 {
                     TimeSpan allTime = TimeSpan.Zero;
 
@@ -1232,7 +1253,14 @@ namespace OsEngine.OsOptimizer
 
                     decimal secondsOnOneTest = Convert.ToDecimal(allTime.TotalSeconds / _testBotsTime.Count);
 
-                    decimal secondsToEndAllTests = (_countAllServersMax - _testBotsTime.Count) * secondsOnOneTest;
+                    int testsToEndCount = _countAllServersMax - _countAllServersEndTest;
+
+                    if (testsToEndCount < 0)
+                    {
+                        testsToEndCount = 0;
+                    }
+
+                    decimal secondsToEndAllTests = testsToEndCount * secondsOnOneTest;
 
                     decimal secondsToEndDivideThreads = secondsToEndAllTests / _master.ThreadsCount;
 

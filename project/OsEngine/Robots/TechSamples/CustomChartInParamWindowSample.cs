@@ -63,16 +63,25 @@ namespace OsEngine.Robots.TechSamples
             this.ParamGuiSettings.Title = "CustomChartInParamWindowSample Parameters";
             this.ParamGuiSettings.Height = 300;
             this.ParamGuiSettings.Width = 600;
-            CustomTabToParametersUi customTab = ParamGuiSettings.CreateCustomTab("Chart Spread");
+            if (StartProgram != StartProgram.IsOsOptimizer)
+            {
+                CustomTabToParametersUi customTab = ParamGuiSettings.CreateCustomTab("Chart Spread");
 
-            // Create chart
-            CreateChart();
-            customTab.AddChildren(_host);
+                // Create chart
+                CreateChart();
+                if (_host != null)
+                {
+                    customTab.AddChildren(_host);
+                }
+            }
 
             // Worker area
-            Thread worker = new Thread(StartPaintChart);
-            worker.IsBackground = true;
-            worker.Start();
+            if (StartProgram != StartProgram.IsOsOptimizer)
+            {
+                Thread worker = new Thread(StartPaintChart);
+                worker.IsBackground = true;
+                worker.Start();
+            }
 
             Description = OsLocalization.Description.DescriptionLabel101;
         }
@@ -126,7 +135,8 @@ namespace OsEngine.Robots.TechSamples
         // Create chart
         private void CreateChart()
         {
-            if (MainWindow.GetDispatcher.CheckAccess() == false)
+            if (MainWindow.GetDispatcher != null &&
+                MainWindow.GetDispatcher.CheckAccess() == false)
             {
                 MainWindow.GetDispatcher.InvokeAsync(new Action(CreateChart));
                 return;
@@ -240,7 +250,13 @@ namespace OsEngine.Robots.TechSamples
         {
             try
             {
-                if (MainWindow.GetDispatcher.CheckAccess() == false)
+                if (_chart == null)
+                {
+                    return;
+                }
+
+                if (MainWindow.GetDispatcher != null &&
+                    MainWindow.GetDispatcher.CheckAccess() == false)
                 {
                     MainWindow.GetDispatcher.InvokeAsync(new Action(() => SetSeries(lineSeries)));
                     return;

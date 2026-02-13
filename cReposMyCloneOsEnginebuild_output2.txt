@@ -1,0 +1,10 @@
+c:\Repos\MyCloneOsEngine\project\OsEngine\OsEngine.csproj : warning NU1510: PackageReference System.Text.Encoding.CodePages не будет урезано. Рассмотрите возможность удаления этого пакета из зависимостей, так как он, вероятно, не требуется.
+  OsEngine -> c:\Repos\MyCloneOsEngine\project\OsEngine\bin\Debug\OsEngine.dll
+
+Сборка успешно завершена.
+
+c:\Repos\MyCloneOsEngine\project\OsEngine\OsEngine.csproj : warning NU1510: PackageReference System.Text.Encoding.CodePages не будет урезано. Рассмотрите возможность удаления этого пакета из зависимостей, так как он, вероятно, не требуется.
+    Предупреждений: 1
+    Ошибок: 0
+
+Прошло времени 00:00:01.02

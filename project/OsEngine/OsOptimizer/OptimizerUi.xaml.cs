@@ -388,6 +388,14 @@ namespace OsEngine.OsOptimizer
         {
             lock (_testEndEventLocker)
             {
+                if (_master != null &&
+                    _master.PrimeProgressBarStatus != null &&
+                    _master.PrimeProgressBarStatus.MaxValue > 0 &&
+                    _master.PrimeProgressBarStatus.CurrentValue < _master.PrimeProgressBarStatus.MaxValue)
+                {
+                    return;
+                }
+
                 if (_lastTestEndEventTime.AddSeconds(3) > DateTime.Now)
                 {
                     return;
@@ -614,6 +622,43 @@ namespace OsEngine.OsOptimizer
                     return;
                 }
 
+                if(_master == null)
+                {
+                    return;
+                }
+
+                ProgressBarStatus primeStatus = _master.PrimeProgressBarStatus;
+                List<ProgressBarStatus> statuses = _master.ProgressBarStatuses;
+
+                bool optimizationInProgress = false;
+
+                if (primeStatus != null &&
+                    primeStatus.MaxValue > 0 &&
+                    primeStatus.CurrentValue < primeStatus.MaxValue)
+                {
+                    optimizationInProgress = true;
+                }
+
+                if (!optimizationInProgress &&
+                    statuses != null)
+                {
+                    for (int i = 0; i < statuses.Count; i++)
+                    {
+                        if (statuses[i] != null &&
+                            statuses[i].MaxValue > 0 &&
+                            statuses[i].CurrentValue < statuses[i].MaxValue)
+                        {
+                            optimizationInProgress = true;
+                            break;
+                        }
+                    }
+                }
+
+                if (_testIsEnd && optimizationInProgress)
+                {
+                    _testIsEnd = false;
+                }
+
                 if (_testIsEnd)
                 {
                     ProgressBarPrime.Maximum = 100;
@@ -628,21 +673,12 @@ namespace OsEngine.OsOptimizer
                     return;
                 }
 
-                if(_master == null)
-                {
-                    return;
-                }
-
-                ProgressBarStatus primeStatus = _master.PrimeProgressBarStatus;
-
                 if (primeStatus.MaxValue != 0 &&
                     primeStatus.CurrentValue != 0)
                 {
                     ProgressBarPrime.Maximum = primeStatus.MaxValue;
                     ProgressBarPrime.Value = primeStatus.CurrentValue;
                 }
-
-                List<ProgressBarStatus> statuses = _master.ProgressBarStatuses;
 
                 if (statuses == null ||
                     statuses.Count == 0)

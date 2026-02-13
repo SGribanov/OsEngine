@@ -1,4 +1,4 @@
-﻿/*
+/*
  * Your rights to use code governed by this license https://github.com/AlexWan/OsEngine/blob/master/LICENSE
  * Ваши права на использование кода регулируются данной лицензией http://o-s-a.net/doc/license_simple_engine.pdf
 */
@@ -73,7 +73,10 @@ namespace OsEngine.Robots.TechSamples
         {
             // Create tabs
             TabCreate(BotTabType.Screener);
-            _tab = TabsScreener[0];
+            if (TabsScreener != null && TabsScreener.Count > 0)
+            {
+                _tab = TabsScreener[0];
+            }
 
             // Basic settings
             Regime = CreateParameter("Regime", "Off", new string[] { "Off", "On" }, " Base settings ");
@@ -93,17 +96,29 @@ namespace OsEngine.Robots.TechSamples
             this.ParamGuiSettings.Width = 780;
 
             // Create table
-            CustomTabToParametersUi customTabOrderGrid = ParamGuiSettings.CreateCustomTab(" Table settings ");
-            CreateColumnsTable();
-            customTabOrderGrid.AddChildren(_hostTable);
+            if (StartProgram != StartProgram.IsOsOptimizer)
+            {
+                CustomTabToParametersUi customTabOrderGrid = ParamGuiSettings.CreateCustomTab(" Table settings ");
+                CreateColumnsTable();
+                if (_hostTable != null)
+                {
+                    customTabOrderGrid.AddChildren(_hostTable);
+                }
+            }
 
             // Load data table
             LoadLines();
 
             // Events
-            _tab.CandleFinishedEvent += _tab_CandleFinishedEvent;
+            if (_tab != null)
+            {
+                _tab.CandleFinishedEvent += _tab_CandleFinishedEvent;
+            }
             this.DeleteEvent += DeleteBotEvent;
-            _tableDataGrid.CellValueChanged += CellValueChanged;
+            if (_tableDataGrid != null)
+            {
+                _tableDataGrid.CellValueChanged += CellValueChanged;
+            }
 
             Description = OsLocalization.Description.DescriptionLabel104;
         }
@@ -125,7 +140,7 @@ namespace OsEngine.Robots.TechSamples
             }
             catch(Exception ex)
             {
-                _tab.SendNewLogMessage(ex.ToString(), OsEngine.Logging.LogMessageType.Error);
+                SendNewLogMessage(ex.ToString(), OsEngine.Logging.LogMessageType.Error);
             }
         }
 
@@ -155,7 +170,7 @@ namespace OsEngine.Robots.TechSamples
             }
             catch (Exception ex)
             {
-                _tab.SendNewLogMessage(ex.ToString(), OsEngine.Logging.LogMessageType.Error);
+                SendNewLogMessage(ex.ToString(), OsEngine.Logging.LogMessageType.Error);
             }
         }
 
@@ -183,7 +198,7 @@ namespace OsEngine.Robots.TechSamples
 
                 int cnt = 0;
 
-                while (Lines.Count > cnt)
+                while (_tableDataGrid != null && Lines.Count > cnt)
                 {
                     CreateRowsTable(cnt);
                     cnt++;
@@ -191,7 +206,7 @@ namespace OsEngine.Robots.TechSamples
             }
             catch (Exception ex)
             {
-                _tab.SendNewLogMessage(ex.ToString(), OsEngine.Logging.LogMessageType.Error);
+                SendNewLogMessage(ex.ToString(), OsEngine.Logging.LogMessageType.Error);
             }
         }
 
@@ -212,7 +227,8 @@ namespace OsEngine.Robots.TechSamples
         {
             try
             {
-                if (MainWindow.GetDispatcher.CheckAccess() == false)
+                if (MainWindow.GetDispatcher != null &&
+                    MainWindow.GetDispatcher.CheckAccess() == false)
                 {
                     MainWindow.GetDispatcher.InvokeAsync(new Action(CreateColumnsTable));
                     return;
@@ -264,7 +280,7 @@ namespace OsEngine.Robots.TechSamples
             }
             catch (Exception ex)
             {
-                _tab.SendNewLogMessage(ex.ToString(), OsEngine.Logging.LogMessageType.Error);
+                SendNewLogMessage(ex.ToString(), OsEngine.Logging.LogMessageType.Error);
             }
         }
 
@@ -273,6 +289,28 @@ namespace OsEngine.Robots.TechSamples
         {
             if(tab.Security == null)
             {
+                return;
+            }
+
+            if (_tableDataGrid == null)
+            {
+                for (int i = 0; i < Lines.Count; i++)
+                {
+                    if (Lines[i].Security == tab.Security.Name)
+                    {
+                        return;
+                    }
+                }
+
+                TableBotLine line = new TableBotLine();
+                line.Security = tab.Security.Name;
+                line.CandleCount = 100;
+                line.MovementToEnter = 1;
+                line.CurrentMovement = 0;
+                line.Side = Side.Sell;
+
+                Lines.Add(line);
+                SaveLines();
                 return;
             }
 
@@ -310,6 +348,11 @@ namespace OsEngine.Robots.TechSamples
         // Create line in table
         private void CreateRowsTable(int index)
         {
+            if (_tableDataGrid == null)
+            {
+                return;
+            }
+
             if (_tableDataGrid.InvokeRequired)
             {
                 _tableDataGrid.Invoke(new Action(() => CreateRowsTable(index)));
@@ -324,7 +367,7 @@ namespace OsEngine.Robots.TechSamples
             }
             catch(Exception ex)
             {
-                _tab.SendNewLogMessage(ex.ToString(), OsEngine.Logging.LogMessageType.Error);
+                SendNewLogMessage(ex.ToString(), OsEngine.Logging.LogMessageType.Error);
             }
         }
 
@@ -361,7 +404,7 @@ namespace OsEngine.Robots.TechSamples
             }
             catch (Exception ex)
             {
-                _tab.SendNewLogMessage(ex.ToString(), OsEngine.Logging.LogMessageType.Error);
+                SendNewLogMessage(ex.ToString(), OsEngine.Logging.LogMessageType.Error);
             }
 
             return row;
@@ -370,6 +413,11 @@ namespace OsEngine.Robots.TechSamples
         // Line sorting method
         private void SortLine()
         {
+            if (_tableDataGrid == null)
+            {
+                return;
+            }
+
             if (_tableDataGrid.InvokeRequired)
             {
                 _tableDataGrid.Invoke(new Action(SortLine));
@@ -418,14 +466,14 @@ namespace OsEngine.Robots.TechSamples
             }
             catch (Exception ex)
             {
-                _tab.SendNewLogMessage(ex.ToString(), OsEngine.Logging.LogMessageType.Error);
+                SendNewLogMessage(ex.ToString(), OsEngine.Logging.LogMessageType.Error);
             }
         }
 
         // Movement percentage update event
         private void MovementPercentUpdate(List<Candle> candles, BotTabSimple tab)
         {
-            if (_tableDataGrid.InvokeRequired)
+            if (_tableDataGrid != null && _tableDataGrid.InvokeRequired)
             {
                 _tableDataGrid.Invoke(new Action(() => MovementPercentUpdate(candles, tab)));
                 return;
@@ -446,14 +494,14 @@ namespace OsEngine.Robots.TechSamples
                     }
                 }
 
-                int TableCandlesCount = Convert.ToInt32(_tableDataGrid.Rows[indexLine].Cells[1].Value.ToString());
-
-                if (candles.Count < TableCandlesCount)
+                if (GotLine == false)
                 {
                     return;
                 }
 
-                if (GotLine == false)
+                int tableCandlesCount = Lines[indexLine].CandleCount;
+
+                if (candles.Count < tableCandlesCount)
                 {
                     return;
                 }
@@ -463,13 +511,19 @@ namespace OsEngine.Robots.TechSamples
                     {
                         Lines[indexLine].CurrentMovement = Math.Round((candles[candles.Count - Lines[indexLine].CandleCount].Close - candles[candles.Count - 1].Close) / 
                             candles[candles.Count - 1].Close * 100, 2);
-                        _tableDataGrid.Rows[indexLine].Cells[3].Value = Lines[indexLine].CurrentMovement.ToString() + '%';
+                        if (_tableDataGrid != null && _tableDataGrid.Rows.Count > indexLine)
+                        {
+                            _tableDataGrid.Rows[indexLine].Cells[3].Value = Lines[indexLine].CurrentMovement.ToString() + '%';
+                        }
                     }
                     else
                     {
                         Lines[indexLine].CurrentMovement = Math.Round((candles[candles.Count - 1].Close - candles[candles.Count - Lines[indexLine].CandleCount].Close) / 
                             candles[candles.Count - Lines[indexLine].CandleCount].Close * 100, 2);
-                        _tableDataGrid.Rows[indexLine].Cells[3].Value = Lines[indexLine].CurrentMovement.ToString() + '%';
+                        if (_tableDataGrid != null && _tableDataGrid.Rows.Count > indexLine)
+                        {
+                            _tableDataGrid.Rows[indexLine].Cells[3].Value = Lines[indexLine].CurrentMovement.ToString() + '%';
+                        }
                     }
                 }
 
@@ -477,7 +531,7 @@ namespace OsEngine.Robots.TechSamples
             }
             catch (Exception ex)
             {
-                _tab.SendNewLogMessage(ex.ToString(), OsEngine.Logging.LogMessageType.Error);
+                SendNewLogMessage(ex.ToString(), OsEngine.Logging.LogMessageType.Error);
             }
         }
 
@@ -526,7 +580,7 @@ namespace OsEngine.Robots.TechSamples
                     return;
                 }
 
-                decimal movementToEnter = _tableDataGrid.Rows[indexLine].Cells[2].Value.ToString().ToDecimal();
+                decimal movementToEnter = Lines[indexLine].MovementToEnter;
 
                 if (movementToEnter < Lines[indexLine].CurrentMovement)
                 {

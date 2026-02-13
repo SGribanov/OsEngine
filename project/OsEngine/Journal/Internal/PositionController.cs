@@ -28,19 +28,27 @@ namespace OsEngine.Journal.Internal
 
         public static void Activate()
         {
-            if (_worker == null)
+            lock (_workerLocker)
             {
+                if (_worker != null &&
+                    _worker.IsCompleted == false &&
+                    _worker.IsCanceled == false &&
+                    _worker.IsFaulted == false)
+                {
+                    return;
+                }
+
                 _currentCulture = OsLocalization.CurCulture;
-                _worker = new Task(WatcherHome);
-                _worker.Start();
+                _worker = Task.Run(WatcherHome);
             }
         }
 
         private static Task _worker;
+        private static readonly object _workerLocker = new object();
 
         private static CultureInfo _currentCulture;
 
-        public static async void WatcherHome()
+        private static async Task WatcherHome()
         {
 
             while (true)
@@ -83,10 +91,9 @@ namespace OsEngine.Journal.Internal
             _name = name;
             _startProgram = startProgram;
 
-            Activate();
-
             if (_startProgram != StartProgram.IsOsOptimizer)
             {
+                Activate();
                 ControllersToCheck.Add(this);
                 Load();
             }
