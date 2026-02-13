@@ -183,6 +183,7 @@ namespace OsEngine.OsOptimizer
             LabelRobustnessMetric.Content = OsLocalization.Optimizer.Label53;
             ButtonSetStandardParameters.Content = OsLocalization.Optimizer.Label57;
             LabelSeriesResultChart.Content = OsLocalization.Optimizer.Label67;
+            LabelTotalAbsProfit.Content = OsLocalization.Optimizer.Label54;
 
             _resultsCharting = new OptimizerReportCharting(
                 HostStepsOfOptimizationTable,
@@ -1322,7 +1323,7 @@ namespace OsEngine.OsOptimizer
             row.Cells.Add(cell2);
 
             DataGridViewButtonCell button = new DataGridViewButtonCell();
-            button.Value = "Settings";
+            button.Value = OsLocalization.Optimizer.Message22;
             row.Cells.Add(button);
 
             return row;
@@ -1359,7 +1360,7 @@ namespace OsEngine.OsOptimizer
             row.Cells.Add(cell2);
 
             DataGridViewButtonCell button = new DataGridViewButtonCell();
-            button.Value = "Settings";
+            button.Value = OsLocalization.Optimizer.Message22;
             row.Cells.Add(button);
 
             return row;
@@ -1399,7 +1400,7 @@ namespace OsEngine.OsOptimizer
             cell2.ReadOnly = true;
 
             DataGridViewButtonCell button = new DataGridViewButtonCell();
-            button.Value = "Settings";
+            button.Value = OsLocalization.Optimizer.Message22;
             row.Cells.Add(button);
 
             return row;

@@ -276,8 +276,12 @@ namespace OsEngine.Market.Servers.TInvest
                     }
                     else
                     {
-                        GetPortfolios();
-                        Thread.Sleep(20000);
+                        if (_lastTimeGetPortfolio.AddSeconds(10) < DateTime.Now)
+                        {
+                            GetPortfolios();
+                        }
+                      
+                        Thread.Sleep(5000);
                     }
                 }
                 catch (Exception ex)
@@ -1994,7 +1998,7 @@ namespace OsEngine.Market.Servers.TInvest
                     }
                 }
 
-                if(_myPortfolios.Count == 0)
+                if (_myPortfolios.Count == 0)
                 {
                     return false;
                 }
@@ -2009,7 +2013,7 @@ namespace OsEngine.Market.Servers.TInvest
                     _operationsStreamClient.PositionsStream(new PositionsStreamRequest { Accounts = { accountsList } },
                         headers: _gRpcMetadata, cancellationToken: _cancellationTokenSource.Token);
 
-               
+
 
                 _lastPositionsDataTime = DateTime.UtcNow;
             }
@@ -3425,7 +3429,7 @@ namespace OsEngine.Market.Servers.TInvest
 
                 try
                 {
-                    response = _ordersClient.PostOrder(request, _gRpcMetadata);
+                    response = PostOrderPrivateLoop(request, 0, order);
                 }
                 catch (RpcException ex)
                 {
@@ -3433,6 +3437,7 @@ namespace OsEngine.Market.Servers.TInvest
 
                     if (message.Contains("Not enough assets"))
                     {
+                        CheckCrazyNotEnoughAssetsOrderSpam();
                         message = OsLocalization.Market.Label301;
                     }
                     else if (message.Contains("The price is too high"))
@@ -3474,6 +3479,13 @@ namespace OsEngine.Market.Servers.TInvest
                 {
                     order.State = OrderStateType.Active;
                     order.NumberMarket = response.OrderId;
+
+                    if (_lastMyOrderStateDataTime.AddSeconds(5) < DateTime.UtcNow)
+                    {   // Сбрасываем счётчики жизни потока принимающего статусы ордеров
+                        // если он отсох, надо чтобы через 3 секунды уже переподключался.
+                        _lastMyOrderStateDataTime = DateTime.UtcNow.AddSeconds(-177);
+                        _lastTryReconnectOrdersStream = DateTime.Now.AddMinutes(-1);
+                    }
                 }
 
                 MyOrderEvent!(order);
@@ -3482,6 +3494,81 @@ namespace OsEngine.Market.Servers.TInvest
             {
                 SendLogMessage(OsLocalization.Market.Label291 + "\n" + exception, LogMessageType.Error);
             }
+        }
+
+        private void CheckCrazyNotEnoughAssetsOrderSpam()
+        {
+            // некоторые пользователи выставляют внутри дня тысячи заявок без обеспечения
+            // отключая при этом все реакции в роботах, нагружая сервера Т-Банк
+            // решение: вырубаем у них коннектор, когда за час больше 100 ошибок "Not enough assets"
+
+            if(_hourNotEnoughAssetsOrders != DateTime.Now.Hour)
+            {
+                _hourNotEnoughAssetsOrders = DateTime.Now.Hour;
+                _badOrdersCount = 0;
+            }
+
+            _badOrdersCount++;
+
+            if(_badOrdersCount > 100)
+            {
+                if (ServerStatus == ServerConnectStatus.Connect)
+                {
+                    SendLogMessage(
+                        " Сервер был отключен. Т.к. кол-во необеспеченных ордеров внутри часа больше 100\n "
+                        + "Прекратите спамить биржу, это мешает людям торговать\n "
+                        + "Пожалуйста посчитайте обеспечение и баланс. И в соответствии с этим настройте роботов. ", LogMessageType.Error);
+
+                    ServerStatus = ServerConnectStatus.Disconnect;
+                    DisconnectEvent();
+                }
+            }
+        }
+
+        private int _hourNotEnoughAssetsOrders;
+        private int _badOrdersCount;
+
+        private PostOrderResponse PostOrderPrivateLoop(PostOrderRequest request, int attemptNumber, Order order)
+        {
+            // Метод для обработки ошибок в ядре брокера, не позволяющих принять заявку с первого раза
+            // В таком случае приходит ошибка: "Internal network error"
+            // Рекомендация поддержки: Выслать тут же ещё раз, с тем же номером ордера. Сделали
+
+            attemptNumber++;
+
+            if(attemptNumber > 2)
+            {
+                throw new Exception("Internal network error. Ошибки на стороне Т-Апи. Две попытки выставить ордер не привели к успеху.");
+            }
+
+            PostOrderResponse response = null;
+
+            try
+            {
+                response = _ordersClient.PostOrder(request, _gRpcMetadata);
+            }
+            catch (RpcException ex)
+            {
+                string message = GetGRPCErrorMessage(ex);
+
+                if (message.Contains("Internal network error"))
+                {
+                    OrderStateType orderStateType = GetOrderStatus(order);
+
+                    if(orderStateType == OrderStateType.None)
+                    {
+                        return PostOrderPrivateLoop(request, attemptNumber, order);
+                    }
+                    else
+                    { // ордер всё таки выставлен, но отчёт о нём не пришёл!
+                        throw new Exception("Internal network error. Ошибки на стороне Т-Апи. Ордер выставлен, но его номер в торговом ядре не известен. Нужно синхронизировать позиции");
+                    }
+                }
+
+                throw;
+            }
+
+            return response;
         }
 
         public void ChangeOrderPrice(Order order, decimal newPrice)
@@ -3664,6 +3751,13 @@ namespace OsEngine.Market.Servers.TInvest
 
                 if (response != null)
                 {
+                    if (_lastMyOrderStateDataTime.AddSeconds(5) < DateTime.UtcNow)
+                    {   // Сбрасываем счётчики жизни потока принимающего статусы ордеров
+                        // если он отсох, надо чтобы через 3 секунды уже переподключался.
+                        _lastMyOrderStateDataTime = DateTime.UtcNow.AddSeconds(-177);
+                        _lastTryReconnectOrdersStream = DateTime.Now.AddMinutes(-1);
+                    }
+
                     return true;
                 }
                 else
@@ -4239,6 +4333,40 @@ namespace OsEngine.Market.Servers.TInvest
         public event Action<Funding> FundingUpdateEvent { add { } remove { } }
 
         public event Action<SecurityVolumes> Volume24hUpdateEvent { add { } remove { } }
+
+        #endregion
+
+        #region 12 Set trade mode
+
+        public void SetLeverage(string securityName, string className, string leverage, string leverageLong, string leverageShort)
+        {
+         
+        }
+
+        public void SetHedgeMode(string securityName, string className, string hedgeMode)
+        {
+          
+        }
+
+        public void SetMarginMode(string securityName, string className, string marginMode)
+        {
+           
+        }
+
+        public void SetCommonLeverage(string selectedClass, string leverage)
+        {
+        
+        }
+
+        public void SetCommonHedgeMode(string selectedClass, string hedgeMode)
+        {
+           
+        }
+
+        public void SetCommonMarginMode(string selectedClass, string marginMode)
+        {
+            
+        }
 
         #endregion
     }
