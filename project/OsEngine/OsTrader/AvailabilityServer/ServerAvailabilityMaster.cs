@@ -20,6 +20,7 @@ namespace OsEngine.OsTrader.ServerAvailability
 
                 _worker = new Thread(PingAnalysisThread);
                 _worker.Name = "PingAnalysisThread";
+                _worker.IsBackground = true;
                 _worker.CurrentCulture = new System.Globalization.CultureInfo("ru-Ru");
                 _worker.Start();
             }
@@ -163,7 +164,7 @@ namespace OsEngine.OsTrader.ServerAvailability
 
         private static ServerAvailabilityUi _ui;
 
-        private static string _lockListIpConnectors = "lockListIpConnectors";
+        private static readonly Lock _lockListIpConnectors = new();
 
         #endregion
 

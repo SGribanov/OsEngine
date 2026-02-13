@@ -252,8 +252,7 @@ namespace OsEngine
                     _awaitUiBotsInfoLoading = new AwaitObject(OsLocalization.Trader.Label391, 100, 0, true);
                     AwaitUi ui = new AwaitUi(_awaitUiBotsInfoLoading);
 
-                    Thread worker = new Thread(Await7Seconds);
-                    worker.Start();
+                    Task.Run(Await7Seconds);
 
                     ui.ShowDialog();
                 }
@@ -295,7 +294,7 @@ namespace OsEngine
 
             if (ImageGear.Dispatcher.CheckAccess() == false)
             {
-                ImageGear.Dispatcher.Invoke(new Action(ChangeText));
+                ImageGear.Dispatcher.InvokeAsync(new Action(ChangeText));
                 return;
             }
 
@@ -494,8 +493,7 @@ namespace OsEngine
             message = System.Reflection.Assembly.GetExecutingAssembly() + "\n" + message;
 
             _messageToCrashServer = "Crash% " + message;
-            Thread worker = new Thread(SendMessageInCrashServer);
-            worker.Start();
+            Task.Run(SendMessageInCrashServer);
 
             if (PrimeSettingsMaster.RebootTradeUiLight == true &&
                 RobotUiLite.IsRobotUiLightStart)
@@ -523,8 +521,7 @@ namespace OsEngine
             message = System.Reflection.Assembly.GetExecutingAssembly() + "\n" + message;
 
             _messageToCrashServer = "Crash% " + message;
-            Thread worker = new Thread(SendMessageInCrashServer);
-            worker.Start();
+            Task.Run(SendMessageInCrashServer);
 
             if (PrimeSettingsMaster.RebootTradeUiLight == true &&
                 RobotUiLite.IsRobotUiLightStart)
@@ -544,7 +541,7 @@ namespace OsEngine
 
             if (!CheckAccess())
             {
-                Dispatcher.Invoke(() =>
+                Dispatcher.InvokeAsync(() =>
                 {
                     Reboot(message);
                 });
@@ -721,7 +718,7 @@ namespace OsEngine
         {
             if (ImageGear.Dispatcher.CheckAccess() == false)
             {
-                ImageGear.Dispatcher.Invoke(new Action<double>(RotatePic), angle);
+                ImageGear.Dispatcher.InvokeAsync(new Action(() => RotatePic(angle)));
                 return;
             }
 

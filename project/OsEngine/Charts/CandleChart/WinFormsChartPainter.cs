@@ -175,7 +175,7 @@ namespace OsEngine.Charts.CandleChart
 
                 if (_host != null && !_host.Dispatcher.CheckAccess())
                 {
-                    _host.Dispatcher.Invoke(new Action<Grid, WindowsFormsHost,Rectangle>(StartPaintPrimeChart),gridChart, host,rectangle);
+                    _host.Dispatcher.InvokeAsync(new Action(() => StartPaintPrimeChart(gridChart, host, rectangle)));
                     return;
                 }
                 _host.Child = _chart;
@@ -1069,8 +1069,7 @@ ContextMenuStrip menu)
 
                         await Task.Delay(1000);
 
-                        GC.Collect();
-                        GC.WaitForPendingFinalizers();
+                        GC.Collect(2, GCCollectionMode.Optimized, blocking: false);
                         return;
                     }
 

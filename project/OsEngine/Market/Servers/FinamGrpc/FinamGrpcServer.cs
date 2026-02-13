@@ -63,15 +63,18 @@ namespace OsEngine.Market.Servers.FinamGrpc
             ServerTime = DateTime.UtcNow;
             Thread worker1 = new Thread(ConnectionCheckThread);
             worker1.Name = "CheckAliveFinamGrpc";
+            worker1.IsBackground = true;
             worker1.Start();
 
             Thread worker2 = new Thread(ReSubscribeThread);
             worker2.Name = "ReIssueTokenThreadFinamGrpc";
+            worker2.IsBackground = true;
             worker2.Start();
 
 
             Thread worker3 = new Thread(MyOrderTradeMessageReader);
             worker3.Name = "MyOrderTradeMessageReaderFinamGrpc";
+            worker3.IsBackground = true;
             worker3.Start();
 
             Thread worker3s = new Thread(MyOrderTradeKeepAlive);
@@ -81,6 +84,7 @@ namespace OsEngine.Market.Servers.FinamGrpc
 
             Thread worker4 = new Thread(PortfolioUpdater);
             worker4.Name = "PortfolioUpdaterFinamGrpc";
+            worker4.IsBackground = true;
             worker4.Start();
 
         }
@@ -378,7 +382,7 @@ namespace OsEngine.Market.Servers.FinamGrpc
 
         private List<Portfolio> _myPortfolios = new List<Portfolio>();
 
-        private string _portfolioLocker = "portfolioLockerFinamGrpc";
+        private readonly Lock _portfolioLocker = new();
         #endregion
 
         #region 5 Data
@@ -719,6 +723,7 @@ namespace OsEngine.Market.Servers.FinamGrpc
             {
                 Credentials = ChannelCredentials.SecureSsl,
                 HttpClient = httpClient,
+                DisposeHttpClient = true,
                 MaxRetryAttempts = 5,
             });
 

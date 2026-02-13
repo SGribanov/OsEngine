@@ -1364,6 +1364,7 @@ namespace OsEngine.OsTrader.Panels.Tab
                 if (painterThread == null)
                 {
                     painterThread = new Thread(PainterThread);
+                    painterThread.IsBackground = true;
                     painterThread.Start();
                 }
 

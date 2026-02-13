@@ -613,7 +613,7 @@ namespace OsEngine.OsTrader.Panels.Tab
         {
             if (ButtonSec1Connection.Dispatcher.CheckAccess() == false)
             {
-                ButtonSec1Connection.Dispatcher.Invoke(UpdateButtonSecConnectionContent);
+                ButtonSec1Connection.Dispatcher.InvokeAsync(UpdateButtonSecConnectionContent);
                 return;
             }
 
@@ -648,7 +648,7 @@ namespace OsEngine.OsTrader.Panels.Tab
         {
             if (ButtonSec1Connection.Dispatcher.CheckAccess() == false)
             {
-                ButtonSec1Connection.Dispatcher.Invoke(UpdateCurPositionInTextBox);
+                ButtonSec1Connection.Dispatcher.InvokeAsync(UpdateCurPositionInTextBox);
                 return;
             }
 
@@ -660,7 +660,7 @@ namespace OsEngine.OsTrader.Panels.Tab
         {
             if (ButtonSec1Connection.Dispatcher.CheckAccess() == false)
             {
-                ButtonSec1Connection.Dispatcher.Invoke(UpdatePositionsOnChart);
+                ButtonSec1Connection.Dispatcher.InvokeAsync(UpdatePositionsOnChart);
                 return;
             }
 

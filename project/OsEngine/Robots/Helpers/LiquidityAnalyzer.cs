@@ -79,6 +79,7 @@ namespace OsEngine.Robots.Helpers
             _spreadValues = new List<SpreadValues>();
 
             Thread worker = new Thread(WorkArea);
+            worker.IsBackground = true;
             worker.Start();
         }
 

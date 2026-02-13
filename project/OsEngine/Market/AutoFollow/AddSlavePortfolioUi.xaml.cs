@@ -37,6 +37,7 @@ namespace OsEngine.Market.AutoFollow
             Title = OsLocalization.Market.Label225;
 
             Thread worker = new Thread(PainterThreadArea);
+            worker.IsBackground = true;
             worker.Start();
         }
 

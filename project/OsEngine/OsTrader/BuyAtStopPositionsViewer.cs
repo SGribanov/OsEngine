@@ -58,7 +58,7 @@ namespace OsEngine.OsTrader
             {
                 if (!_positionHost.CheckAccess())
                 {
-                    _positionHost.Dispatcher.Invoke(StopPaint);
+                    _positionHost.Dispatcher.InvokeAsync(StopPaint);
                     return;
                 }
 
@@ -79,7 +79,7 @@ namespace OsEngine.OsTrader
             {
                 if (!_positionHost.CheckAccess())
                 {
-                    _positionHost.Dispatcher.Invoke(StartPaint);
+                    _positionHost.Dispatcher.InvokeAsync(StartPaint);
                     return;
                 }
 

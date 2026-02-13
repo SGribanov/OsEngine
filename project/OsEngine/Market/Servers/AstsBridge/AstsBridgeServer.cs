@@ -278,7 +278,7 @@ namespace OsEngine.Market.Servers.AstsBridge
             }
         }
 
-        private ServerTickStorage _tickStorage;
+        private ServerTickStorage _tickStorage = null;
 
         // server status
         // статус сервера

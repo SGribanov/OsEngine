@@ -133,6 +133,7 @@ namespace OsEngine.OsTrader.Panels.Tab
             this.Closed += BotTabPolygonUi_Closed;
 
             Thread painterThread = new Thread(PainterThread);
+            painterThread.IsBackground = true;
             painterThread.Start();
 
             if (Polygon.ShowTradePanelOnChart == false)
@@ -670,6 +671,7 @@ namespace OsEngine.OsTrader.Panels.Tab
             try
             {
                 Thread worker = new Thread(Polygon.TradeLogic);
+                worker.IsBackground = true;
                 worker.Start();
             }
             catch (Exception ex)

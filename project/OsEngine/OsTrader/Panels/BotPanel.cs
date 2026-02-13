@@ -8,6 +8,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Forms.Integration;
@@ -103,23 +104,18 @@ namespace OsEngine.OsTrader.Panels
 
         private void OsTraderMaster_CriticalErrorEvent()
         {
-            new Thread(() =>
+            Task.Run(async () =>
             {
-                Thread.Sleep(20000);
+                await Task.Delay(20000);
                 try
                 {
-                    if (CriticalErrorEvent != null)
-                    {
-                        CriticalErrorEvent(CriticalErrorHandler.ErrorMessage);
-                    }
-
+                    CriticalErrorEvent?.Invoke(CriticalErrorHandler.ErrorMessage);
                 }
                 catch (Exception error)
                 {
                     SendNewLogMessage(error.Message, LogMessageType.Error);
                 }
-            }).Start();
-
+            });
         }
 
         protected event Action<string> CriticalErrorEvent;
@@ -602,12 +598,9 @@ namespace OsEngine.OsTrader.Panels
 
                 if (!_tabBotTab.Dispatcher.CheckAccess())
                 {
-                    _tabBotTab.Dispatcher.Invoke(new Action<Grid, WindowsFormsHost, WindowsFormsHost, WindowsFormsHost,
-                    WindowsFormsHost, WindowsFormsHost, Rectangle, WindowsFormsHost, TabControl, TextBox,
-                    Grid, TextBox, TabControl, WindowsFormsHost>
-                    (StartPaint), gridChart, hostChart, glass, hostOpenDeals, hostCloseDeals,
+                    _tabBotTab.Dispatcher.InvokeAsync(() => StartPaint(gridChart, hostChart, glass, hostOpenDeals, hostCloseDeals,
                     boxLog, rectangle, hostAlerts, tabBotTab, textBoxLimitPrice,
-                    gridChartControlPanel, textBoxVolume, tabControlControl, hostGrids);
+                    gridChartControlPanel, textBoxVolume, tabControlControl, hostGrids));
                     return;
                 }
 
@@ -656,7 +649,7 @@ namespace OsEngine.OsTrader.Panels
             {
                 if (!_tabBotTab.Dispatcher.CheckAccess())
                 {
-                    _tabBotTab.Dispatcher.Invoke(StopPaint);
+                    _tabBotTab.Dispatcher.InvokeAsync(StopPaint);
                     return;
                 }
 
@@ -766,7 +759,7 @@ namespace OsEngine.OsTrader.Panels
 
                 if (_chartUi.Dispatcher.CheckAccess() == false)
                 {
-                    _chartUi.Dispatcher.Invoke(CloseGui);
+                    _chartUi.Dispatcher.InvokeAsync(CloseGui);
                     return;
                 }
 
@@ -1620,7 +1613,7 @@ position => position.State != PositionStateType.OpeningFail
             {
                 if (!_hostChart.CheckAccess())
                 {
-                    _hostChart.Dispatcher.Invoke(new Action<string>(ShowMessageInNewThread), message);
+                    _hostChart.Dispatcher.InvokeAsync(() => ShowMessageInNewThread(message));
                     return;
                 }
 
@@ -2146,7 +2139,7 @@ position => position.State != PositionStateType.OpeningFail
 
                 if (!_tabBotTab.Dispatcher.CheckAccess())
                 {
-                    _tabBotTab.Dispatcher.Invoke(new Action<int>(ChangeActiveTab), tabNumber);
+                    _tabBotTab.Dispatcher.InvokeAsync(() => ChangeActiveTab(tabNumber));
                     return;
                 }
 
@@ -2237,7 +2230,7 @@ position => position.State != PositionStateType.OpeningFail
                 }
                 if (!_tabBotTab.Dispatcher.CheckAccess())
                 {
-                    _tabBotTab.Dispatcher.Invoke(ReloadTab);
+                    _tabBotTab.Dispatcher.InvokeAsync(ReloadTab);
                     return;
                 }
                 _tabBotTab.SelectionChanged -= _tabBotTab_SelectionChanged;
@@ -2709,7 +2702,7 @@ position => position.State != PositionStateType.OpeningFail
         {
             if (MainWindow.GetDispatcher.CheckAccess() == false)
             {
-                MainWindow.GetDispatcher.Invoke(new Action(CreateGrid));
+                MainWindow.GetDispatcher.InvokeAsync(CreateGrid);
                 return;
             }
 
@@ -2736,7 +2729,7 @@ position => position.State != PositionStateType.OpeningFail
             {
                 if (GridToPaint.Dispatcher.CheckAccess() == false)
                 {
-                    GridToPaint.Dispatcher.Invoke(new Action<object>(AddChildren), children);
+                    GridToPaint.Dispatcher.InvokeAsync(() => AddChildren(children));
                     return;
                 }
 

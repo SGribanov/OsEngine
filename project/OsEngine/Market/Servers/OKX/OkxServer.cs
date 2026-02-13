@@ -68,46 +68,57 @@ namespace OsEngine.Market.Servers.OKX
 
             Thread threadMessageReaderPublic = new Thread(MessageReaderPublic);
             threadMessageReaderPublic.Name = "MessageReaderPublic";
+            threadMessageReaderPublic.IsBackground = true;
             threadMessageReaderPublic.Start();
 
             Thread threadMessageReaderPrivate = new Thread(MessageReaderPrivate);
             threadMessageReaderPrivate.Name = "MessageReaderPrivate";
+            threadMessageReaderPrivate.IsBackground = true;
             threadMessageReaderPrivate.Start();
 
             Thread thread = new Thread(CheckAliveWebSocket);
             thread.Name = "CheckAliveWebSocket";
+            thread.IsBackground = true;
             thread.Start();
 
             Thread threadMessageReaderMarketDepthSpot = new Thread(ThreadMessageReaderMarketDepthSpot);
             threadMessageReaderMarketDepthSpot.Name = "ThreadOkxMessageReaderMarketDepthSpot";
+            threadMessageReaderMarketDepthSpot.IsBackground = true;
             threadMessageReaderMarketDepthSpot.Start();
 
             Thread threadMessageReaderMarketDepthSwap = new Thread(ThreadMessageReaderMarketDepthSwap);
             threadMessageReaderMarketDepthSwap.Name = "ThreadOkxMessageReaderMarketDepthSwap";
+            threadMessageReaderMarketDepthSwap.IsBackground = true;
             threadMessageReaderMarketDepthSwap.Start();
 
             Thread threadMessageReaderMarketDepthFutures = new Thread(ThreadMessageReaderMarketDepthFutures);
             threadMessageReaderMarketDepthFutures.Name = "ThreadOkxMessageReaderMarketDepthFutures";
+            threadMessageReaderMarketDepthFutures.IsBackground = true;
             threadMessageReaderMarketDepthFutures.Start();
 
             Thread threadMessageReaderMarketDepthOption = new Thread(ThreadMessageReaderMarketDepthOption);
             threadMessageReaderMarketDepthOption.Name = "ThreadOkxMessageReaderMarketDepthOption";
+            threadMessageReaderMarketDepthOption.IsBackground = true;
             threadMessageReaderMarketDepthOption.Start();
 
             Thread threadMessageReaderTradesSpot = new Thread(ThreadMessageReaderTradesSpot);
             threadMessageReaderTradesSpot.Name = "ThreadOkxMessageReaderTradesSpot";
+            threadMessageReaderTradesSpot.IsBackground = true;
             threadMessageReaderTradesSpot.Start();
 
             Thread threadMessageReaderTradesSwap = new Thread(ThreadMessageReaderTradesSwap);
             threadMessageReaderTradesSwap.Name = "ThreadOkxMessageReaderTradesSwap";
+            threadMessageReaderTradesSwap.IsBackground = true;
             threadMessageReaderTradesSwap.Start();
 
             Thread threadMessageReaderTradesFutures = new Thread(ThreadMessageReaderTradesFutures);
             threadMessageReaderTradesFutures.Name = "ThreadOkxMessageReaderTradesFutures";
+            threadMessageReaderTradesFutures.IsBackground = true;
             threadMessageReaderTradesFutures.Start();
 
             Thread threadMessageReaderTradesOption = new Thread(ThreadMessageReaderTradesOption);
             threadMessageReaderTradesOption.Name = "ThreadOkxMessageReaderTradesOption";
+            threadMessageReaderTradesOption.IsBackground = true;
             threadMessageReaderTradesOption.Start();
         }
 
@@ -1234,7 +1245,7 @@ namespace OsEngine.Market.Servers.OKX
             }
         }
 
-        private string _socketActivateLocker = "socketActivateLocker";
+        private readonly Lock _socketActivateLocker = new();
 
         private void CheckSocketsActivate()
         {
@@ -1324,7 +1335,7 @@ namespace OsEngine.Market.Servers.OKX
         {
             string url = $"{_baseUrl}{"/api/v5/account/set-position-mode"}";
             string bodyStr = JsonConvert.SerializeObject(requestParams);
-            HttpClient client = new HttpClient(new HttpInterceptor(_publicKey, _secretKey, _password, bodyStr, _demoMode, _myProxy));
+            using HttpClient client = new HttpClient(new HttpInterceptor(_publicKey, _secretKey, _password, bodyStr, _demoMode, _myProxy));
 
             HttpResponseMessage res = client.PostAsync(url, new StringContent(bodyStr, Encoding.UTF8, "application/json")).Result;
             string contentStr = res.Content.ReadAsStringAsync().Result;
@@ -3159,7 +3170,7 @@ namespace OsEngine.Market.Servers.OKX
 
                 string url = $"{_baseUrl}/api/v5/trade/order";
 
-                HttpClient responseMessage = new HttpClient(new HttpInterceptor(_publicKey, _secretKey, _password, json, _demoMode, _myProxy));
+                using HttpClient responseMessage = new HttpClient(new HttpInterceptor(_publicKey, _secretKey, _password, json, _demoMode, _myProxy));
                 HttpResponseMessage res = responseMessage.PostAsync(url, new StringContent(json, Encoding.UTF8, "application/json")).Result;
                 string contentStr = res.Content.ReadAsStringAsync().Result;
 
@@ -3223,7 +3234,7 @@ namespace OsEngine.Market.Servers.OKX
 
                 string url = $"{_baseUrl}/api/v5/trade/order";
 
-                HttpClient responseMessage = new HttpClient(new HttpInterceptor(_publicKey, _secretKey, _password, json, _demoMode, _myProxy));
+                using HttpClient responseMessage = new HttpClient(new HttpInterceptor(_publicKey, _secretKey, _password, json, _demoMode, _myProxy));
                 HttpResponseMessage res = responseMessage.PostAsync(url, new StringContent(json, Encoding.UTF8, "application/json")).Result;
                 string contentStr = res.Content.ReadAsStringAsync().Result;
 
@@ -3291,7 +3302,7 @@ namespace OsEngine.Market.Servers.OKX
 
                 string url = $"{_baseUrl}/api/v5/trade/cancel-order";
 
-                HttpClient responseMessage = new HttpClient(new HttpInterceptor(_publicKey, _secretKey, _password, json, _demoMode, _myProxy));
+                using HttpClient responseMessage = new HttpClient(new HttpInterceptor(_publicKey, _secretKey, _password, json, _demoMode, _myProxy));
                 HttpResponseMessage res = responseMessage.PostAsync(url, new StringContent(json, Encoding.UTF8, "application/json")).Result;
                 string contentStr = res.Content.ReadAsStringAsync().Result;
 
@@ -3846,8 +3857,8 @@ namespace OsEngine.Market.Servers.OKX
 
         public HttpResponseMessage GetPrivateRequest(string url)
         {
-            HttpClient _client = new HttpClient(new HttpInterceptor(_publicKey, _secretKey, _password, null, _demoMode, _myProxy));
-            return _client.GetAsync(url).Result;
+            using HttpClient client = new HttpClient(new HttpInterceptor(_publicKey, _secretKey, _password, null, _demoMode, _myProxy));
+            return client.GetAsync(url).Result;
         }
 
         public void SetLeverage(Security security, decimal leverage) { }

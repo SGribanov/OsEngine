@@ -14,7 +14,7 @@ using System.Threading.Tasks;
 
 namespace OsEngine.Entity.WebSocketOsEngine
 {
-    public class WebSocket
+    public class WebSocket : IDisposable
     {
         public WebSocket(string url)
         {
@@ -31,7 +31,7 @@ namespace OsEngine.Entity.WebSocketOsEngine
 
         private CancellationTokenSource _cts;
 
-        private string _ctsLocker = "_ctsLocker";
+        private readonly object _ctsLocker = new();
 
         private Task _receiveTask;
 
@@ -49,10 +49,16 @@ namespace OsEngine.Entity.WebSocketOsEngine
             }
         }
 
+        public bool IgnoreSslErrors { get; set; } = false;
+
         public void SetCertificate(X509Certificate2 certificate)
         {
             _client.Options.ClientCertificates = new X509CertificateCollection { certificate };
-            _client.Options.RemoteCertificateValidationCallback = (sender, cert, chain, errors) => true;
+
+            if (IgnoreSslErrors)
+            {
+                _client.Options.RemoteCertificateValidationCallback = (sender, cert, chain, errors) => true;
+            }
         }
 
         public async Task Connect(TimeSpan? timeout = null)
@@ -160,7 +166,7 @@ namespace OsEngine.Entity.WebSocketOsEngine
                     try
                     {
                         // Timeout for closing operation
-                        var closeCts = new CancellationTokenSource(TimeSpan.FromSeconds(5));
+                        using var closeCts = new CancellationTokenSource(TimeSpan.FromSeconds(5));
                         await _client.CloseAsync(WebSocketCloseStatus.NormalClosure, "Client initiated close", closeCts.Token);
                     }
                     catch (Exception) { /* Ignore close errors, client might be disposed already or connection lost */ }
@@ -175,9 +181,11 @@ namespace OsEngine.Entity.WebSocketOsEngine
                     }
                 }
             }
-            catch
+            catch (Exception ex)
             {
-                // ignore
+                ErrorEventArgs eventArgs = new ErrorEventArgs();
+                eventArgs.Exception = ex;
+                OnError?.Invoke(this, eventArgs);
             }
 
             ReadyState = WebSocketState.Closed;

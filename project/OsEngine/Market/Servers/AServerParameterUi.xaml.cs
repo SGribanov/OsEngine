@@ -80,6 +80,7 @@ namespace OsEngine.Market.Servers
                 ChangeActiveServer(numServerInArray);
 
                 Thread worker = new Thread(UpdateStatusThread);
+                worker.IsBackground = true;
                 worker.Start();
             }
 
@@ -99,7 +100,7 @@ namespace OsEngine.Market.Servers
             {
                 if (HostPreConfiguredConnections.Dispatcher.CheckAccess() == false)
                 {
-                    HostPreConfiguredConnections.Dispatcher.Invoke(new Action(UpDateTitle));
+                    HostPreConfiguredConnections.Dispatcher.InvokeAsync(new Action(UpDateTitle));
                     return;
                 }
 
@@ -488,7 +489,7 @@ namespace OsEngine.Market.Servers
         {
             if (LabelStatus.Dispatcher.CheckAccess() == false)
             {
-                LabelStatus.Dispatcher.Invoke(new Action(PaintGridConnectionsInstance));
+                LabelStatus.Dispatcher.InvokeAsync(new Action(PaintGridConnectionsInstance));
                 return;
             }
 
@@ -633,7 +634,7 @@ namespace OsEngine.Market.Servers
             {
                 if (HostPreConfiguredConnections.Dispatcher.CheckAccess() == false)
                 {
-                    HostPreConfiguredConnections.Dispatcher.Invoke(new Action(TryRepaintConnectionStatus));
+                    HostPreConfiguredConnections.Dispatcher.InvokeAsync(new Action(TryRepaintConnectionStatus));
                     return;
                 }
 
@@ -702,7 +703,7 @@ namespace OsEngine.Market.Servers
             {
                 if (LabelStatus.Dispatcher.CheckAccess() == false)
                 {
-                    LabelStatus.Dispatcher.Invoke(new Action<string>(Server_ConnectStatusChangeEvent), s);
+                    LabelStatus.Dispatcher.InvokeAsync(new Action(() => Server_ConnectStatusChangeEvent(s)));
                     return;
                 }
 

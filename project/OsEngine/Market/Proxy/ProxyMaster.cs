@@ -3,6 +3,7 @@
  * Ваши права на использование кода регулируются данной лицензией http://o-s-a.net/doc/license_simple_engine.pdf
 */
 
+#pragma warning disable SYSLIB0014 // WebRequest/WebClient are obsolete
 using Newtonsoft.Json;
 using OsEngine.Logging;
 using System;
@@ -108,7 +109,7 @@ namespace OsEngine.Market.Proxy
 
         public List<ProxyOsa> Proxies = new List<ProxyOsa>();
 
-        private string _getProxyLocker = "getProxyLocker";
+        private readonly Lock _getProxyLocker = new();
 
         public WebProxy GetProxyAutoRegime(ServerType serverType, string serverName)
         {
@@ -369,6 +370,7 @@ namespace OsEngine.Market.Proxy
                 }
 
                 _pingThread = new Thread(CheckPingThreadArea);
+                _pingThread.IsBackground = true;
                 _pingThread.Start();
             }
             catch (Exception ex)
@@ -514,6 +516,7 @@ namespace OsEngine.Market.Proxy
             }
 
             _locationThread = new Thread(CheckLocationThreadArea);
+            _locationThread.IsBackground = true;
             _locationThread.Start();
         }
 

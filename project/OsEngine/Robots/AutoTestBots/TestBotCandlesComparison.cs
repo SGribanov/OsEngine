@@ -142,6 +142,7 @@ namespace OsEngine.Robots.AutoTestBots
             _servCandles = candlesFromServer;
 
             Thread worker = new Thread(RePaintDiffCandles);
+            worker.IsBackground = true;
             worker.Start();
         }
 
@@ -280,6 +281,7 @@ namespace OsEngine.Robots.AutoTestBots
             _servCandles = candlesFromServer;
 
             Thread worker = new Thread(RePaintDiffVolume);
+            worker.IsBackground = true;
             worker.Start();
         }
 

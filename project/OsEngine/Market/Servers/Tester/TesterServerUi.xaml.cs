@@ -219,6 +219,7 @@ namespace OsEngine.Market.Servers.Tester
             CheckBoxRemoveTrades.Content = OsLocalization.Market.Label130;
 
             Thread worker = new Thread(SecuritiesGridPainterWorkerPlace);
+            worker.IsBackground = true;
             worker.Start();
 
             Thread barUpdater = new Thread(UpdaterProgressBarThreadArea);
@@ -227,6 +228,7 @@ namespace OsEngine.Market.Servers.Tester
             barUpdater.Start();
 
             Thread profitChartUpdater = new Thread(ResizeWorker);
+            profitChartUpdater.IsBackground = true;
             profitChartUpdater.Start();
 
             this.Activate();
@@ -372,7 +374,7 @@ namespace OsEngine.Market.Servers.Tester
             {
                 if (!ProgressBar.Dispatcher.CheckAccess())
                 {
-                    ProgressBar.Dispatcher.Invoke(ChangeProgressBar);
+                    ProgressBar.Dispatcher.InvokeAsync(ChangeProgressBar);
                     return;
                 }
 
@@ -449,7 +451,7 @@ namespace OsEngine.Market.Servers.Tester
         {
             if (!LabelStatus.Dispatcher.CheckAccess())
             {
-                LabelStatus.Dispatcher.Invoke(new Action<string>(_server_ConnectStatusChangeEvent), status);
+                LabelStatus.Dispatcher.InvokeAsync(new Action(() => _server_ConnectStatusChangeEvent(status)));
                 return;
             }
             LabelStatus.Content = status;
@@ -504,6 +506,7 @@ namespace OsEngine.Market.Servers.Tester
             if (_buttonStartLockerThread == null)
             {
                 _buttonStartLockerThread = new Thread(ButtonStartThreadWorkArea);
+                _buttonStartLockerThread.IsBackground = true;
                 _buttonStartLockerThread.Start();
             }
         }
@@ -549,7 +552,7 @@ namespace OsEngine.Market.Servers.Tester
             {
                 if (ButtonStartTest.Dispatcher.CheckAccess() == false)
                 {
-                    ButtonStartTest.Dispatcher.Invoke(BlockButtonStartTests);
+                    ButtonStartTest.Dispatcher.InvokeAsync(BlockButtonStartTests);
                     return;
                 }
 
@@ -583,7 +586,7 @@ namespace OsEngine.Market.Servers.Tester
             {
                 if (ButtonStartTest.Dispatcher.CheckAccess() == false)
                 {
-                    ButtonStartTest.Dispatcher.Invoke(UnblockButtonStartTests);
+                    ButtonStartTest.Dispatcher.InvokeAsync(UnblockButtonStartTests);
                     return;
                 }
 
@@ -614,7 +617,7 @@ namespace OsEngine.Market.Servers.Tester
         {
             if (ButtonPausePlay.Dispatcher.CheckAccess() == false)
             {
-                ButtonPausePlay.Dispatcher.Invoke(PaintPausePlayButtonByActualServerState);
+                ButtonPausePlay.Dispatcher.InvokeAsync(PaintPausePlayButtonByActualServerState);
                 return;
             }
 
@@ -768,7 +771,7 @@ namespace OsEngine.Market.Servers.Tester
         {
             if (!HostPortfolio.Dispatcher.CheckAccess())
             {
-                HostPortfolio.Dispatcher.Invoke(CreateChart);
+                HostPortfolio.Dispatcher.InvokeAsync(CreateChart);
                 return;
             }
 

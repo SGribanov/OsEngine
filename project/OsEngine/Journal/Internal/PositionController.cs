@@ -8,6 +8,7 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Windows.Forms.Integration;
@@ -429,7 +430,7 @@ namespace OsEngine.Journal.Internal
 
         private List<Position> _deals;
 
-        private string _dealsLocker = "_dealsLocker";
+        private readonly Lock _dealsLocker = new();
 
         public void SetNewPosition(Position newPosition)
         {
@@ -1472,7 +1473,7 @@ namespace OsEngine.Journal.Internal
             _hostCloseDeal = dataGridCloseDeal;
             if (!_hostCloseDeal.Dispatcher.CheckAccess())
             {
-                _hostCloseDeal.Dispatcher.Invoke(new Action<WindowsFormsHost, WindowsFormsHost>(StartPaint), dataGridOpenDeal, dataGridCloseDeal);
+                _hostCloseDeal.Dispatcher.InvokeAsync(new Action(() => StartPaint(dataGridOpenDeal, dataGridCloseDeal)));
                 return;
             }
 
@@ -1506,7 +1507,7 @@ namespace OsEngine.Journal.Internal
 
                 if (!_hostCloseDeal.Dispatcher.CheckAccess())
                 {
-                    _hostCloseDeal.Dispatcher.Invoke(StopPaint);
+                    _hostCloseDeal.Dispatcher.InvokeAsync(StopPaint);
                     return;
                 }
 

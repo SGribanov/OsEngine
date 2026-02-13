@@ -26,8 +26,7 @@ namespace OsEngine.Alerts
         {
             if (!TextBoxFromStaThread.Dispatcher.CheckAccess())
             {
-                TextBoxFromStaThread.Dispatcher.Invoke(
-                    new Action<Stream, string, string>(ThrowAlert), stream, botName, message);
+                TextBoxFromStaThread.Dispatcher.InvokeAsync(new Action(() => ThrowAlert(stream, botName, message)));
                 return;
 
             }

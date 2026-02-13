@@ -48,22 +48,27 @@ namespace OsEngine.Market.Servers.Mexc
         {
             Thread worker = new Thread(ConnectionCheckThread);
             worker.Name = "CheckAliveMexc";
+            worker.IsBackground = true;
             worker.Start();
 
             Thread threadMessageReaderPublic = new Thread(MessageReaderPublic);
             threadMessageReaderPublic.Name = "MessageReaderPublicMexcSpot";
+            threadMessageReaderPublic.IsBackground = true;
             threadMessageReaderPublic.Start();
 
             Thread threadMessageReaderPrivate = new Thread(MessageReaderPrivate);
             threadMessageReaderPrivate.Name = "MessageReaderPrivateMexcSpot";
+            threadMessageReaderPrivate.IsBackground = true;
             threadMessageReaderPrivate.Start();
 
             Thread threadMessageReaderMarketDepth = new Thread(ThreadMessageReaderMarketDepth);
             threadMessageReaderMarketDepth.Name = "ThreadMexcMessageReaderMarketDepth";
+            threadMessageReaderMarketDepth.IsBackground = true;
             threadMessageReaderMarketDepth.Start();
 
             Thread threadMessageReaderTrades = new Thread(ThreadMessageReaderTrades);
             threadMessageReaderTrades.Name = "ThreadMexcMessageReaderTrades";
+            threadMessageReaderTrades.IsBackground = true;
             threadMessageReaderTrades.Start();
         }
 
@@ -647,7 +652,7 @@ namespace OsEngine.Market.Servers.Mexc
 
         private WebSocket _webSocketPrivate;
 
-        private string _socketLocker = "webSocketLockerMexc";
+        private readonly Lock _socketLocker = new();
 
         private string _listenKey = "";
 
@@ -814,7 +819,7 @@ namespace OsEngine.Market.Servers.Mexc
             }
         }
 
-        private string _lockerCheckActivateionSockets = "lockerCheckActivateionSocketsMexcSpot";
+        private readonly Lock _lockerCheckActivateionSockets = new();
 
         private void CheckActivationSockets()
         {

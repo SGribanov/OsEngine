@@ -61,46 +61,57 @@ namespace OsEngine.Market.Servers.MoexFixFastSpot
         {            
             Thread worker0 = new Thread(ConnectionCheckThread);
             worker0.Name = "ConnectionCheckerMoexFixFastSpot";
+            worker0.IsBackground = true;
             worker0.Start();
 
             Thread worker1 = new Thread(InstrumentDefinitionsReader);
             worker1.Name = "InstrumentsMoexFixFastSpot";
+            worker1.IsBackground = true;
             worker1.Start();
 
             Thread worker2 = new Thread(TradesIncrementalReader);
             worker2.Name = "TradesIncremenalMoexFixFastSpot";
+            worker2.IsBackground = true;
             worker2.Start();
 
             Thread worker3 = new Thread(TradesSnapshotsReader);
             worker3.Name = "TradesSnapshotsMoexFixFastSpot";
+            worker3.IsBackground = true;
             worker3.Start();
 
             Thread worker4 = new Thread(TradeMessagesReader);
             worker4.Name = "TradeMessagesReaderMoexFixFastSpot";
+            worker4.IsBackground = true;
             worker4.Start();
 
             Thread worker5 = new Thread(OrderMessagesReader);
             worker5.Name = "OrderMessagesReaderMoexFixFastSpot";
+            worker5.IsBackground = true;
             worker5.Start();
 
             Thread worker6 = new Thread(OrdersIncrementalReaderA);
             worker6.Name = "OrdersIncremenalAMoexFixFastSpot";
+            worker6.IsBackground = true;
             worker6.Start();
 
             Thread worker7 = new Thread(OrdersIncrementalReaderB);
             worker7.Name = "OrdersIncremenalBMoexFixFastSpot";
+            worker7.IsBackground = true;
             worker7.Start();
 
             Thread worker8 = new Thread(OrderSnapshotsReader);
             worker8.Name = "OrdersSnapshotsMoexFixFastSpot";
+            worker8.IsBackground = true;
             worker8.Start();
 
             Thread worker9 = new Thread(MFIXTradeServerConnection);
             worker9.Name = "MFIXTradeServerConnectionMoexFixFastSpot";
-            worker9.Start();                       
+            worker9.IsBackground = true;
+            worker9.Start();
 
             Thread worker10 = new Thread(HistoricalReplayThread);
             worker10.Name = "HistoricalReplayMoexFixFastSpot";
+            worker10.IsBackground = true;
             worker10.Start();            
         }
 
@@ -247,10 +258,14 @@ namespace OsEngine.Market.Servers.MoexFixFastSpot
         public void Dispose()
         {
             _securities.Clear();
-            _myPortfolios.Clear();      
+            _myPortfolios.Clear();
             DeleteWebSocketConnection();
 
             SendLogMessage("Connection Closed by MoexFixFastSpot. Socket Data Closed Event", LogMessageType.System);
+
+            try { _logFile?.Close(); } catch { }
+            try { _logFileXOrders?.Close(); } catch { }
+            try { _logFileMFIX?.Close(); } catch { }
 
             if (ServerStatus != ServerConnectStatus.Disconnect)
             {
@@ -378,12 +393,12 @@ namespace OsEngine.Market.Servers.MoexFixFastSpot
 
         #region 6 Socket creation
 
-        private string _socketLockerHistoricalReplay = "socketLockerMoexFixFastSpotHistoricalReplay";
-        private string _socketLockerInstruments = "socketLockerMoexFixFastSpotInstruments";
-        private string _socketLockerTradesSnapshots = "socketLockerMoexFixFastSpotTradeSnapshots";
-        private string _socketLockerTradesIncremental = "socketLockerMoexFixFastSpotTradesIncremental";
-        private string _socketLockerOrdersSnapshots = "socketLockerMoexFixFastSpotOrdersSnapshots";
-        private string _socketLockerOrdersIncremental = "socketLockerMoexFixFastSpotOrdersIncremental";
+        private readonly Lock _socketLockerHistoricalReplay = new();
+        private readonly Lock _socketLockerInstruments = new();
+        private readonly Lock _socketLockerTradesSnapshots = new();
+        private readonly Lock _socketLockerTradesIncremental = new();
+        private readonly Lock _socketLockerOrdersSnapshots = new();
+        private readonly Lock _socketLockerOrdersIncremental = new();
         
         private void CreateSocketConnections()
         {
@@ -1637,7 +1652,7 @@ namespace OsEngine.Market.Servers.MoexFixFastSpot
             }
         }       
 
-        private string _ordersIncrementalLocker = "OrdersIncrementalLocker";
+        private readonly Lock _ordersIncrementalLocker = new();
         private Dictionary<long, OpenFAST.Message> _ordersIncremental = new Dictionary<long, OpenFAST.Message>();
         // накапливаем все сообщения из снэпшотов 
         private Dictionary<long, OpenFAST.Message> _tradesIncremental = new Dictionary<long, OpenFAST.Message>();
@@ -3820,7 +3835,7 @@ namespace OsEngine.Market.Servers.MoexFixFastSpot
 
         #region 11 Log
 
-        private string _logLock = "locker for stream writer";
+        private readonly object _logLock = new();
         private StreamWriter _logFile = new StreamWriter("Engine\\Log\\FIXFAST_Multicast_UDP-log.txt");
         private StreamWriter _logFileXOrders = new StreamWriter("Engine\\Log\\FIXFAST_Multicast_UDP-log-XOrders.txt");
 

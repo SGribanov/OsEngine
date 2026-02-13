@@ -46,10 +46,12 @@ namespace OsEngine.Market.Servers.TraderNet
 
             Thread threadMessageReader = new Thread(MessageReader);
             threadMessageReader.Name = "MessageReader";
+            threadMessageReader.IsBackground = true;
             threadMessageReader.Start();
 
             Thread threadUpdateSubscribe = new Thread(ThreadUpdatePortfolio);
             threadUpdateSubscribe.Name = "ThreadUpdatePortfolio";
+            threadUpdateSubscribe.IsBackground = true;
             threadUpdateSubscribe.Start();
         }
 
@@ -1280,7 +1282,9 @@ namespace OsEngine.Market.Servers.TraderNet
             return strFromList;
         }
 
+#pragma warning disable CS0414
         private bool _portfolioReceived = false;
+#pragma warning restore CS0414
 
         public bool SubscribeNews()
         {

@@ -107,8 +107,6 @@ namespace OsEngine.Market.Servers.Optimizer
                     Enum.TryParse(reader.ReadLine(), out _typeTesterData);
                     Enum.TryParse(reader.ReadLine(), out _sourceDataType);
                     _pathToFolder = reader.ReadLine();
-
-                    reader.Close();
                 }
             }
             catch (Exception)
@@ -127,7 +125,6 @@ namespace OsEngine.Market.Servers.Optimizer
                     writer.WriteLine(_typeTesterData);
                     writer.WriteLine(_sourceDataType);
                     writer.WriteLine(_pathToFolder);
-                    writer.Close();
                 }
             }
             catch (Exception)
@@ -707,6 +704,7 @@ namespace OsEngine.Market.Servers.Optimizer
                         candle3.SetCandleFromString(lastString);
                         security[security.Count - 1].TimeEnd = candle3.TimeStart;
                         security[security.Count - 1].Security.Expiration = candle3.TimeStart;
+                        reader.Close();
                         continue;
                     }
                     catch (Exception)
@@ -807,7 +805,7 @@ namespace OsEngine.Market.Servers.Optimizer
                 // begin / начало
                 // end / конец
 
-                StreamReader reader = new StreamReader(files[i]);
+                using StreamReader reader = new StreamReader(files[i]);
 
                 // candles / свечи: 20110111,100000,19577.00000,19655.00000,19533.00000,19585.00000,2752
                 // ticks ver.1 / тики 1 вар: 20150401,100000,86160.000000000,2
@@ -945,8 +943,6 @@ namespace OsEngine.Market.Servers.Optimizer
                     security.Remove(security[security.Count - 1]);
                 }
 
-                reader.Close();
-
 
             }
 
@@ -1035,7 +1031,7 @@ namespace OsEngine.Market.Servers.Optimizer
                 // begin / начало
                 // end / конец
 
-                StreamReader reader = new StreamReader(files[i]);
+                using StreamReader reader = new StreamReader(files[i]);
 
                 // NameSecurity_Time_Bids_Asks
                 // Bids: level*level*level
@@ -1177,8 +1173,6 @@ namespace OsEngine.Market.Servers.Optimizer
                 {
                     security.Remove(security[security.Count - 1]);
                 }
-
-                reader.Close();
             }
 
             // save securities / сохраняем бумаги
@@ -1402,8 +1396,6 @@ namespace OsEngine.Market.Servers.Optimizer
                     {
                         writer.WriteLine(SecuritiesTester[i].Security.Name + "#" + SecuritiesTester[i].TimeFrame);
                     }
-
-                    writer.Close();
                 }
             }
             catch
@@ -1467,8 +1459,6 @@ namespace OsEngine.Market.Servers.Optimizer
                             SecuritiesTester[i].TimeFrame = frame;
                         }
                     }
-
-                    reader.Close();
                 }
             }
             catch
@@ -1584,7 +1574,6 @@ namespace OsEngine.Market.Servers.Optimizer
                         array.Add(set);
                     }
 
-                    reader.Close();
                     return array;
                 }
             }
@@ -1711,8 +1700,6 @@ namespace OsEngine.Market.Servers.Optimizer
                             saves[i][6]
                             );
                     }
-
-                    writer.Close();
                 }
             }
             catch (Exception)
@@ -1727,7 +1714,7 @@ namespace OsEngine.Market.Servers.Optimizer
 
         private List<DataStorage> _storages = new List<DataStorage>();
 
-        private object _storageLocker = new object();
+        private readonly Lock _storageLocker = new();
 
         public DataStorage GetStorageToSecurity(Security security, TimeFrame timeFrame, DateTime timeStart, DateTime timeEnd)
         {
@@ -1843,7 +1830,7 @@ namespace OsEngine.Market.Servers.Optimizer
             }
         }
 
-        private object _lockerLoadCandles = "candlesLocker";
+        private readonly Lock _lockerLoadCandles = new();
 
         private long _tradesId;
 
@@ -1867,7 +1854,7 @@ namespace OsEngine.Market.Servers.Optimizer
                         return null;
                     }
 
-                    StreamReader reader = new StreamReader(sec.FileAddress);
+                    using StreamReader reader = new StreamReader(sec.FileAddress);
                     List<Candle> candles = new List<Candle>();
 
                     while (!reader.EndOfStream)
@@ -1931,7 +1918,7 @@ namespace OsEngine.Market.Servers.Optimizer
                     return null;
                 }
 
-                StreamReader reader = new StreamReader(sec.FileAddress);
+                using StreamReader reader = new StreamReader(sec.FileAddress);
                 List<Trade> trades = new List<Trade>();
 
                 while (!reader.EndOfStream)
@@ -1993,7 +1980,7 @@ namespace OsEngine.Market.Servers.Optimizer
                     return null;
                 }
 
-                StreamReader reader = new StreamReader(sec.FileAddress);
+                using StreamReader reader = new StreamReader(sec.FileAddress);
                 List<MarketDepth> marketDepths = new List<MarketDepth>();
 
                 while (!reader.EndOfStream)

@@ -52,18 +52,22 @@ namespace OsEngine.Market.Servers.Binance.Spot
 
             Thread worker1 = new Thread(KeepaliveUserDataStream);
             worker1.Name = "BinanceSpotThread_KeepaliveUserDataStream";
+            worker1.IsBackground = true;
             worker1.Start();
 
             Thread worker2 = new Thread(ConverterPublicData);
             worker2.Name = "BinanceSpotThread_ConverterPublicData";
+            worker2.IsBackground = true;
             worker2.Start();
 
             Thread worker3 = new Thread(ConverterUserData);
             worker3.Name = "BinanceSpotThread_ConverterUserData";
+            worker3.IsBackground = true;
             worker3.Start();
 
             Thread worker4 = new Thread(ConverterPublicDataMarketDepth);
             worker4.Name = "BinanceSpotThread_ConverterUserDataMarketDepth";
+            worker4.IsBackground = true;
             worker4.Start();
         }
 
@@ -2226,7 +2230,7 @@ namespace OsEngine.Market.Servers.Binance.Spot
             }
         }
 
-        private string _lockOrder = "lockOrder";
+        private readonly Lock _lockOrder = new();
 
         private void ExecuteOrderOnMarginExchange(Order order)
         {
@@ -2934,7 +2938,7 @@ namespace OsEngine.Market.Servers.Binance.Spot
 
         #region 12 Queries
 
-        private object _queryHttpLocker = new object();
+        private readonly Lock _queryHttpLocker = new();
 
         private RateGate _rateGate = new RateGate(1, TimeSpan.FromMilliseconds(100));
 

@@ -262,7 +262,7 @@ namespace OsEngine.Journal
             {
                 if (!TabControlLeft.CheckAccess())
                 {
-                    TabControlLeft.Dispatcher.Invoke(RePaint);
+                    TabControlLeft.Dispatcher.InvokeAsync(RePaint);
                     return;
                 }
 
@@ -357,7 +357,7 @@ namespace OsEngine.Journal
 
                 if (TabControlLeft.Dispatcher.CheckAccess() == false)
                 {
-                    TabControlLeft.Dispatcher.Invoke(new Action<List<BotPanelJournal>>(CreatePositionsLists), _botsJournals);
+                    TabControlLeft.Dispatcher.InvokeAsync(new Action(() => CreatePositionsLists(_botsJournals)));
                     return;
                 }
 
@@ -883,8 +883,7 @@ namespace OsEngine.Journal
             {
                 if (!TabBots.Dispatcher.CheckAccess())
                 {
-                    TabBots.Dispatcher.Invoke(
-                        new Action<List<Position>>(PaintProfitOnChart), positionsAll);
+                    TabBots.Dispatcher.InvokeAsync(new Action(() => PaintProfitOnChart(positionsAll)));
                     return;
                 }
 
@@ -1154,8 +1153,7 @@ namespace OsEngine.Journal
             {
                 if (!GridTabPrime.Dispatcher.CheckAccess())
                 {
-                    GridTabPrime.Dispatcher.Invoke(
-                        new Action<List<Position>>(UpdateVolumeShowNumbers), positionsAll);
+                    GridTabPrime.Dispatcher.InvokeAsync(new Action(() => UpdateVolumeShowNumbers(positionsAll)));
                     return;
                 }
 
@@ -1233,8 +1231,7 @@ namespace OsEngine.Journal
 
                 if (!GridTabPrime.Dispatcher.CheckAccess())
                 {
-                    GridTabPrime.Dispatcher.Invoke(
-                        new Action<List<Position>>(PaintVolumeOnChart), positionsAll);
+                    GridTabPrime.Dispatcher.InvokeAsync(new Action(() => PaintVolumeOnChart(positionsAll)));
                     return;
                 }
 
@@ -2180,9 +2177,8 @@ namespace OsEngine.Journal
                     fileName = fileName + ".txt";
                 }
 
-                StreamWriter writer = new StreamWriter(fileName);
+                using StreamWriter writer = new StreamWriter(fileName);
                 writer.Write(workSheet);
-                writer.Close();
             }
             catch (Exception error)
             {
@@ -2545,9 +2541,8 @@ namespace OsEngine.Journal
                     fileName = fileName + ".txt";
                 }
 
-                StreamWriter writer = new StreamWriter(fileName);
+                using StreamWriter writer = new StreamWriter(fileName);
                 writer.Write(workSheet);
-                writer.Close();
             }
             catch (Exception error)
             {

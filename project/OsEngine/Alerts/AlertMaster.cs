@@ -143,7 +143,7 @@ namespace OsEngine.Alerts
 
                 if (!HostAlert.Dispatcher.CheckAccess())
                 {
-                    HostAlert.Dispatcher.Invoke(new Action<WindowsFormsHost>(StartPaint), alertHost);
+                    HostAlert.Dispatcher.InvokeAsync(new Action(() => StartPaint(alertHost)));
                     return;
                 }
 
@@ -171,7 +171,7 @@ namespace OsEngine.Alerts
                 }
                 if (!HostAlert.Dispatcher.CheckAccess())
                 {
-                    HostAlert.Dispatcher.Invoke(StopPaint);
+                    HostAlert.Dispatcher.InvokeAsync(StopPaint);
                     return;
                 }
 
@@ -203,7 +203,7 @@ namespace OsEngine.Alerts
 
                 if (!HostAlert.Dispatcher.CheckAccess())
                 {
-                    HostAlert.Dispatcher.Invoke((Paint));
+                    HostAlert.Dispatcher.InvokeAsync((Paint));
                     return;
                 }
 
@@ -281,7 +281,7 @@ namespace OsEngine.Alerts
 
             if (!HostAlert.Dispatcher.CheckAccess())
             {
-                HostAlert.Dispatcher.Invoke(new Action(CreateGrid));
+                HostAlert.Dispatcher.InvokeAsync(new Action(CreateGrid));
                 return;
             }
 
@@ -337,7 +337,7 @@ namespace OsEngine.Alerts
 
             if (!HostAlert.Dispatcher.CheckAccess())
             {
-                HostAlert.Dispatcher.Invoke(new Action(DeleteGrid));
+                HostAlert.Dispatcher.InvokeAsync(new Action(DeleteGrid));
                 return;
             }
 
@@ -620,7 +620,7 @@ namespace OsEngine.Alerts
 
             if (!HostAlert.Dispatcher.CheckAccess())
             {
-                HostAlert.Dispatcher.Invoke(new Action(DeleteVisual));
+                HostAlert.Dispatcher.InvokeAsync(new Action(DeleteVisual));
                 return;
             }
 

@@ -515,14 +515,12 @@ namespace OsEngine.Market.Servers.MFD
 
             StringBuilder builder = new StringBuilder();
 
-            StreamReader reader = new StreamReader(fileName);
+            using StreamReader reader = new StreamReader(fileName);
 
             while (!reader.EndOfStream)
             {
                 builder.Append(reader.ReadLine() + "\n");
             }
-
-            reader.Close();
 
             return builder.ToString();
         }

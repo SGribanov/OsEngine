@@ -148,7 +148,7 @@ namespace OsEngine.Market.Servers.Finam.Entity
                     {
                         continue;
                     }
-                    StreamReader reader = new StreamReader(trades[i]);
+                    using StreamReader reader = new StreamReader(trades[i]);
 
                     while (!reader.EndOfStream)
                     {
@@ -165,7 +165,6 @@ namespace OsEngine.Market.Servers.Finam.Entity
                         }
 
                     }
-                    reader.Close();
                 }
 
                 if (listTrades.Count == 0)
@@ -209,8 +208,7 @@ namespace OsEngine.Market.Servers.Finam.Entity
                 {
                     trades.Add(tradesOneDay);
                 }
-                GC.Collect();
-                GC.WaitForPendingFinalizers();
+                GC.Collect(2, GCCollectionMode.Optimized, blocking: false);
             }
 
             string tradesToday = GetTrades(timeStart.Date, timeStart.Date, 1);
@@ -396,41 +394,39 @@ namespace OsEngine.Market.Servers.Finam.Entity
 
             StringBuilder list = new StringBuilder();
 
-            StreamReader reader = new StreamReader(fileName);
-
-            while (!reader.EndOfStream)
+            using (StreamReader reader = new StreamReader(fileName))
             {
-                string[] s = reader.ReadLine().Split(',');
-
-                if (s.Length < 5)
+                while (!reader.EndOfStream)
                 {
-                    continue;
+                    string[] s = reader.ReadLine().Split(',');
+
+                    if (s.Length < 5)
+                    {
+                        continue;
+                    }
+
+                    StringBuilder builder = new StringBuilder();
+
+                    builder.Append(s[0] + ",");
+                    builder.Append(s[1] + ",");
+                    builder.Append(s[2] + ",");
+                    builder.Append(s[3] + ",");
+
+                    if (s[5] == "S")
+                    {
+                        builder.Append("Sell");
+                    }
+                    else
+                    {
+                        builder.Append("Buy");
+                    }
+
+                    list.Append(builder + "\r\n");
                 }
-
-                StringBuilder builder = new StringBuilder();
-
-                builder.Append(s[0] + ",");
-                builder.Append(s[1] + ",");
-                builder.Append(s[2] + ",");
-                builder.Append(s[3] + ",");
-
-                if (s[5] == "S")
-                {
-                    builder.Append("Sell");
-                }
-                else
-                {
-                    builder.Append("Buy");
-                }
-
-                list.Append(builder + "\r\n");
             }
 
-            reader.Close();
-
-            StreamWriter writer = new StreamWriter(fileName);
+            using StreamWriter writer = new StreamWriter(fileName);
             writer.Write(list);
-            writer.Close();
 
             return fileName;
         }

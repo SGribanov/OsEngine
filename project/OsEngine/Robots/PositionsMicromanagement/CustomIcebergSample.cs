@@ -14,6 +14,7 @@ using System;
 using System.Collections.Generic;
 using OsEngine.Logging;
 using System.Threading;
+using System.Threading.Tasks;
 using OsEngine.Language;
 
 /* Description
@@ -404,13 +405,11 @@ namespace OsEngine.Robots.PositionsMicromanagement
         {
             if (PositionToClose == null)
             {
-                Thread worker = new Thread(OpenPositionMethod);
-                worker.Start();
+                Task.Run(OpenPositionMethod);
             }
             else
             {
-                Thread worker = new Thread(ClosePositionMethod);
-                worker.Start();
+                Task.Run(ClosePositionMethod);
             }
         }
 

@@ -51,7 +51,7 @@ namespace OsEngine.Entity
             {
                 if (LabelAwaitString.Dispatcher.CheckAccess() == false)
                 {
-                    LabelAwaitString.Dispatcher.Invoke(new Action(_master_DisposedEvent));
+                    LabelAwaitString.Dispatcher.InvokeAsync(new Action(_master_DisposedEvent));
                     return;
                 }
 
@@ -76,7 +76,7 @@ namespace OsEngine.Entity
             {
                 if (LabelAwaitString.Dispatcher.CheckAccess() == false)
                 {
-                    LabelAwaitString.Dispatcher.Invoke(new Action<decimal>(_master_ValueMaximumChangedEvent), value);
+                    LabelAwaitString.Dispatcher.InvokeAsync(new Action(() => _master_ValueMaximumChangedEvent(value)));
                     return;
                 }
 
@@ -96,7 +96,7 @@ namespace OsEngine.Entity
             {
                 if (LabelAwaitString.Dispatcher.CheckAccess() == false)
                 {
-                    LabelAwaitString.Dispatcher.Invoke(new Action<decimal>(_master_ValueCurrentChangedEvent), value);
+                    LabelAwaitString.Dispatcher.InvokeAsync(new Action(() => _master_ValueCurrentChangedEvent(value)));
                     return;
                 }
 
@@ -117,7 +117,7 @@ namespace OsEngine.Entity
             {
                 if (LabelAwaitString.Dispatcher.CheckAccess() == false)
                 {
-                    LabelAwaitString.Dispatcher.Invoke(new Action<string>(_master_LabelChangedEvent), value);
+                    LabelAwaitString.Dispatcher.InvokeAsync(new Action(() => _master_LabelChangedEvent(value)));
                     return;
                 }
                 LabelAwaitString.Content = _master.Label;

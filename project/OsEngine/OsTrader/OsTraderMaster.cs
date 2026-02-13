@@ -230,7 +230,7 @@ namespace OsEngine.OsTrader
         private TabControl _tabBotTab;
         private ConnectorWorkType _typeWorkKeeper;
         private TextBox _textBoxLimitPrice;
-        private TextBox _textBoxVolume;
+        private TextBox _textBoxVolume = null;
         private Grid _gridChartControlPanel;
         private TabControl _tabControlControl;
         private WindowsFormsHost _hostGrids;
@@ -420,7 +420,7 @@ namespace OsEngine.OsTrader
                 if (_tabBotNames != null && !_tabBotNames.Dispatcher.CheckAccess())
                 {
                     await Task.Delay(1000);
-                    _tabBotNames.Dispatcher.Invoke(TabEnadler);
+                    _ = _tabBotNames.Dispatcher.InvokeAsync(TabEnadler);
                     return;
                 }
 
@@ -639,7 +639,7 @@ namespace OsEngine.OsTrader
             {
                 if (!_hostGlass.Dispatcher.CheckAccess())
                 {
-                    _hostGlass.Dispatcher.Invoke(ShowRiskManagerAlert);
+                    _hostGlass.Dispatcher.InvokeAsync(ShowRiskManagerAlert);
                     return;
                 }
 
@@ -1105,8 +1105,7 @@ namespace OsEngine.OsTrader
                 _journalUi1 = null;
             }
 
-            GC.Collect();
-            GC.WaitForPendingFinalizers();
+            GC.Collect(2, GCCollectionMode.Optimized, blocking: false);
         }
 
         #endregion
@@ -1363,7 +1362,7 @@ namespace OsEngine.OsTrader
                 if (_tabBotNames != null &&
                     !_tabBotNames.Dispatcher.CheckAccess())
                 {
-                    _tabBotNames.Dispatcher.Invoke(StrategyKeeper_TestingFastEvent);
+                    _tabBotNames.Dispatcher.InvokeAsync(StrategyKeeper_TestingFastEvent);
                     return;
                 }
 
@@ -1409,7 +1408,7 @@ namespace OsEngine.OsTrader
                 {
                     if (!_tabBotNames.Dispatcher.CheckAccess())
                     {
-                        _tabBotNames.Dispatcher.Invoke(StrategyKeeper_TestingEndEvent);
+                        _tabBotNames.Dispatcher.InvokeAsync(StrategyKeeper_TestingEndEvent);
                         return;
                     }
                     _tabBotNames.IsEnabled = true;

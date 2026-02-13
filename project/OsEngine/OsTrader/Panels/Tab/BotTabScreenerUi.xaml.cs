@@ -261,7 +261,7 @@ namespace OsEngine.OsTrader.Panels.Tab
         {
             if (CheckBoxSaveTradeArrayInCandle.Dispatcher.CheckAccess() == false)
             {
-                CheckBoxSaveTradeArrayInCandle.Dispatcher.Invoke(new Action<bool>(IsCanChangeSaveTradesInCandles), canChangeSettingsSaveCandlesIn);
+                CheckBoxSaveTradeArrayInCandle.Dispatcher.InvokeAsync(new Action(() => IsCanChangeSaveTradesInCandles(canChangeSettingsSaveCandlesIn)));
                 return;
             }
 
@@ -619,7 +619,7 @@ namespace OsEngine.OsTrader.Panels.Tab
 
                 if (!ComboBoxClass.CheckAccess())
                 {
-                    ComboBoxClass.Dispatcher.Invoke(new Action<bool>(LoadPortfolioOnBox), hard);
+                    ComboBoxClass.Dispatcher.InvokeAsync(new Action(() => LoadPortfolioOnBox(hard)));
                     return;
                 }
 
@@ -731,7 +731,7 @@ namespace OsEngine.OsTrader.Panels.Tab
             {
                 if (!ComboBoxClass.Dispatcher.CheckAccess())
                 {
-                    ComboBoxClass.Dispatcher.Invoke(LoadClassOnBox);
+                    ComboBoxClass.Dispatcher.InvokeAsync(LoadClassOnBox);
                     return;
                 }
 
@@ -875,8 +875,7 @@ namespace OsEngine.OsTrader.Panels.Tab
             {
                 if (CheckBoxSaveTradeArrayInCandle.Dispatcher.CheckAccess() == false)
                 {
-                    CheckBoxSaveTradeArrayInCandle.Dispatcher.Invoke(
-                        new Action<bool>(LoadSecurityOnBox), loadExpirationStrikeComboBox);
+                    CheckBoxSaveTradeArrayInCandle.Dispatcher.InvokeAsync(new Action(() => LoadSecurityOnBox(loadExpirationStrikeComboBox)));
                     return;
                 }
 
@@ -1267,7 +1266,7 @@ namespace OsEngine.OsTrader.Panels.Tab
 
                 if (CheckBoxSaveTradeArrayInCandle.Dispatcher.CheckAccess() == false)
                 {
-                    CheckBoxSaveTradeArrayInCandle.Dispatcher.Invoke(
+                    CheckBoxSaveTradeArrayInCandle.Dispatcher.InvokeAsync(
                         new Action(TryUpdateTimeFramePermissions));
                     return;
                 }

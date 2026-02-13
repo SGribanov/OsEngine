@@ -3,6 +3,7 @@
  *Ваши права на использование кода регулируются данной лицензией http://o-s-a.net/doc/license_simple_engine.pdf
 */
 
+#pragma warning disable SYSLIB0006 // Thread.Abort is obsolete
 using System;
 using System.Collections.Generic;
 using System.Globalization;
@@ -28,7 +29,7 @@ namespace OsEngine.Market.Servers.InteractiveBrokers
 
         private bool _isConnected;
 
-        private string _sendMessageLocker = "sendMessageLocker";
+        private readonly Lock _sendMessageLocker = new();
 
         private int _serverVersion;
 

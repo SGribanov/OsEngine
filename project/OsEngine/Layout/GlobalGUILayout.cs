@@ -35,6 +35,7 @@ namespace OsEngine.Layout
                     }
 
                     Thread worker = new Thread(SaveWorkerPlace);
+                    worker.IsBackground = true;
                     worker.Start();
                 }
             }
@@ -68,7 +69,7 @@ namespace OsEngine.Layout
       
         }
 
-        private static string _lockerArrayWithWindows = "openUiLocker";
+        private static readonly Lock _lockerArrayWithWindows = new();
 
         private static void UiLocationChangeEvent(System.Windows.Window ui, string name)
         {

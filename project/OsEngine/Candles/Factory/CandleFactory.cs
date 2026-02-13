@@ -10,6 +10,7 @@ using System.Reflection;
 using OsEngine.Candles.Series;
 using System.IO;
 using System.Linq;
+using System.Threading;
 using System.Windows;
 
 // Roslyn specific usings
@@ -143,7 +144,7 @@ namespace OsEngine.Candles
 
         private static readonly List<ACandlesSeriesRealization> _compiledScriptInstancesCache = new List<ACandlesSeriesRealization>();
         private static List<MetadataReference> _baseReferences;
-        private static readonly object _referencesLock = new object();
+        private static readonly Lock _referencesLock = new();
 
         // Comparer for MetadataReference based on Display path to avoid duplicates
         private class MetadataReferenceComparer : IEqualityComparer<MetadataReference>

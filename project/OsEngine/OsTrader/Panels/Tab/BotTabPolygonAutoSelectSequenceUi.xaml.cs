@@ -235,7 +235,7 @@ namespace OsEngine.OsTrader.Panels.Tab
 
                 if (!TextBoxSearchSecurity.CheckAccess())
                 {
-                    TextBoxSearchSecurity.Dispatcher.Invoke(LoadPortfolioOnBox);
+                    TextBoxSearchSecurity.Dispatcher.InvokeAsync(LoadPortfolioOnBox);
                     return;
                 }
 

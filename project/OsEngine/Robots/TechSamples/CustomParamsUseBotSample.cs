@@ -136,7 +136,7 @@ namespace OsEngine.Robots.TechSamples
         {
             if (MainWindow.GetDispatcher.CheckAccess() == false)
             {
-                MainWindow.GetDispatcher.Invoke(new Action(CreateTable));
+                MainWindow.GetDispatcher.InvokeAsync(new Action(CreateTable));
                 return;
             }
 

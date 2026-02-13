@@ -12,6 +12,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Threading;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Forms;
@@ -896,8 +897,7 @@ namespace OsEngine.Robots
 
             _descriptionsFromBotFactoryLast = null;
 
-            Thread worker = new Thread(GetBotDescriptionsFromBotFactory);
-            worker.Start();
+            Task.Run(GetBotDescriptionsFromBotFactory);
 
             ui.ShowDialog();
 
@@ -1005,8 +1005,7 @@ namespace OsEngine.Robots
                             _countNameError = 0;
                         }
 
-                        Thread worker = new Thread(PaintTextBoxBotName);
-                        worker.Start();
+                        Task.Run(PaintTextBoxBotName);
 
                         return;
                     }
@@ -1065,6 +1064,7 @@ namespace OsEngine.Robots
                             }
 
                             Thread worker = new Thread(PaintTextBoxBotName);
+                            worker.IsBackground = true;
                             worker.Start();
 
                             return;
@@ -1083,8 +1083,7 @@ namespace OsEngine.Robots
                         _countNoSelectBotTypeError = 0;
                     }
 
-                    Thread worker = new Thread(PaintBotsNameOnGrid);
-                    worker.Start();
+                    Task.Run(PaintBotsNameOnGrid);
 
                     return;
                 }

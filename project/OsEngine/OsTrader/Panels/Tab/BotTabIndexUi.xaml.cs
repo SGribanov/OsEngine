@@ -133,6 +133,7 @@ namespace OsEngine.OsTrader.Panels.Tab
 
             Thread worker = new Thread(PricePainterThreadWorker);
             worker.Name = "BotTabIndexPricePainter";
+            worker.IsBackground = true;
             worker.Start();
         }
 

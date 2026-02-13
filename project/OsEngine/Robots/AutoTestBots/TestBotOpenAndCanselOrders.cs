@@ -42,6 +42,7 @@ namespace OsEngine.Robots.AutoTestBots
             Volume = CreateParameter("Volume", 1m, 1, 50, 1);
 
             Thread worker = new Thread(WorkerThreadArea);
+            worker.IsBackground = true;
             worker.Start();
         }
 

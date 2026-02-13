@@ -142,6 +142,7 @@ namespace OsEngine.OsOptimizer
             TextBoxStrategyName.Text = _master.StrategyName;
 
             Thread worker = new Thread(PainterProgressArea);
+            worker.IsBackground = true;
             worker.Start();
 
             Label7.Content = OsLocalization.Optimizer.Label7;
@@ -354,7 +355,7 @@ namespace OsEngine.OsOptimizer
         {
             if (!ButtonGo.Dispatcher.CheckAccess())
             {
-                ButtonGo.Dispatcher.Invoke(StartUserActivity);
+                ButtonGo.Dispatcher.InvokeAsync(StartUserActivity);
                 return;
             }
 
@@ -381,7 +382,7 @@ namespace OsEngine.OsOptimizer
 
         private DateTime _lastTestEndEventTime = DateTime.MinValue;
 
-        private string _testEndEventLocker = "testEndEventLocker";
+        private readonly Lock _testEndEventLocker = new();
 
         private void _master_TestReadyEvent(List<OptimizerFazeReport> reports)
         {
@@ -411,7 +412,7 @@ namespace OsEngine.OsOptimizer
             {
                 if (!ProgressBarPrime.Dispatcher.CheckAccess())
                 {
-                    ProgressBarPrime.Dispatcher.Invoke(RepaintResults);
+                    ProgressBarPrime.Dispatcher.InvokeAsync(RepaintResults);
                     return;
                 }
 
@@ -457,7 +458,7 @@ namespace OsEngine.OsOptimizer
             {
                 if (LabelTimeToEnd.Dispatcher.CheckAccess() == false)
                 {
-                    LabelTimeToEnd.Dispatcher.Invoke(new Action<string>(SetTimeToEnd), timeToEnd);
+                    LabelTimeToEnd.Dispatcher.InvokeAsync(() => SetTimeToEnd(timeToEnd));
                     return;
                 }
 
@@ -477,7 +478,7 @@ namespace OsEngine.OsOptimizer
             // Moving the screen to the desired interface element, if the user has not managed to configure everything
             if (!TabControlPrime.Dispatcher.CheckAccess())
             {
-                TabControlPrime.Dispatcher.Invoke(new Action<NeedToMoveUiTo>(_master_NeedToMoveUiToEvent), move);
+                TabControlPrime.Dispatcher.InvokeAsync(() => _master_NeedToMoveUiToEvent(move));
                 return;
             }
 
@@ -532,7 +533,7 @@ namespace OsEngine.OsOptimizer
 
             if (!DatePickerStart.Dispatcher.CheckAccess())
             {
-                DatePickerStart.Dispatcher.Invoke(_master_DateTimeStartEndChange);
+                DatePickerStart.Dispatcher.InvokeAsync(_master_DateTimeStartEndChange);
                 return;
             }
 
@@ -555,7 +556,7 @@ namespace OsEngine.OsOptimizer
         {
             if (!ComboBoxThreadsCount.Dispatcher.CheckAccess())
             {
-                ComboBoxThreadsCount.Dispatcher.Invoke(CreateThreadsProgressBars);
+                ComboBoxThreadsCount.Dispatcher.InvokeAsync(CreateThreadsProgressBars);
                 return;
             }
             _progressBars = new List<ProgressBar>();
@@ -609,7 +610,7 @@ namespace OsEngine.OsOptimizer
 
                 if (!_progressBars[0].Dispatcher.CheckAccess())
                 {
-                    _progressBars[0].Dispatcher.Invoke(PaintAllProgressBars);
+                    _progressBars[0].Dispatcher.InvokeAsync(PaintAllProgressBars);
                     return;
                 }
 
@@ -680,7 +681,7 @@ namespace OsEngine.OsOptimizer
         {
             if (!ProgressBarPrime.Dispatcher.CheckAccess())
             {
-                ProgressBarPrime.Dispatcher.Invoke(PaintEndOnAllProgressBars);
+                ProgressBarPrime.Dispatcher.InvokeAsync(PaintEndOnAllProgressBars);
                 return;
             }
 
@@ -2565,7 +2566,7 @@ namespace OsEngine.OsOptimizer
             Task.Run(new Action(PaintCountBotsInOptimization));
         }
 
-        private object _locker = new object();
+        private readonly Lock _locker = new();
 
         private void PaintCountBotsInOptimization()
         {
@@ -2580,7 +2581,7 @@ namespace OsEngine.OsOptimizer
         {
             if (LabelIteartionCountNumber.Dispatcher.CheckAccess() == false)
             {
-                LabelIteartionCountNumber.Dispatcher.Invoke(new Action<int>(PaintBotsCount), value);
+                LabelIteartionCountNumber.Dispatcher.InvokeAsync(() => PaintBotsCount(value));
                 return;
             }
 

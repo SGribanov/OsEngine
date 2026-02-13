@@ -129,6 +129,7 @@ namespace OsEngine.Market.AutoFollow
             LoadPanelsPositions();
 
             Thread worker = new Thread(PaintFormThreadArea);
+            worker.IsBackground = true;
             worker.Start();
         }
 

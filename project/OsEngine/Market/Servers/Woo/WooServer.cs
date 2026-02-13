@@ -912,7 +912,7 @@ namespace OsEngine.Market.Servers.Woo
             }
         }
 
-        private string _socketActivateLocker = "socketAcvateLocker";
+        private readonly Lock _socketActivateLocker = new();
 
         private void CheckSocketsActivate()
         {

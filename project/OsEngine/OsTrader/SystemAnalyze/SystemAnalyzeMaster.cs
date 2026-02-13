@@ -33,6 +33,7 @@ namespace OsEngine.OsTrader.SystemAnalyze
                 _moqUsageAnalyze.MoqUsageCollectionChange += _moqUsageAnalyze_MoqUsageCollectionChange;
 
                 _worker = new Thread(WorkMethod);
+                _worker.IsBackground = true;
                 _worker.Start();
             }
         }
@@ -493,7 +494,6 @@ namespace OsEngine.OsTrader.SystemAnalyze
                     _ramCollectDataIsOn = Convert.ToBoolean(reader.ReadLine());
                     Enum.TryParse(reader.ReadLine(), out _ramPeriodSavePoint);
                     _ramPointsMax = Convert.ToInt32(reader.ReadLine());
-                    reader.Close();
                 }
             }
             catch (Exception)
@@ -516,7 +516,6 @@ namespace OsEngine.OsTrader.SystemAnalyze
                     writer.WriteLine(_ramCollectDataIsOn);
                     writer.WriteLine(_ramPeriodSavePoint);
                     writer.WriteLine(_ramPointsMax);
-                    writer.Close();
                 }
             }
             catch (Exception)
@@ -679,7 +678,6 @@ namespace OsEngine.OsTrader.SystemAnalyze
                     _cpuCollectDataIsOn = Convert.ToBoolean(reader.ReadLine());
                     Enum.TryParse(reader.ReadLine(), out _cpuPeriodSavePoint);
                     _cpuPointsMax = Convert.ToInt32(reader.ReadLine());
-                    reader.Close();
                 }
             }
             catch (Exception)
@@ -702,7 +700,6 @@ namespace OsEngine.OsTrader.SystemAnalyze
                     writer.WriteLine(_cpuCollectDataIsOn);
                     writer.WriteLine(_cpuPeriodSavePoint);
                     writer.WriteLine(_cpuPointsMax);
-                    writer.Close();
                 }
             }
             catch (Exception)
@@ -865,7 +862,6 @@ namespace OsEngine.OsTrader.SystemAnalyze
                     _ecqCollectDataIsOn = Convert.ToBoolean(reader.ReadLine());
                     Enum.TryParse(reader.ReadLine(), out _ecqPeriodSavePoint);
                     _ecqPointsMax = Convert.ToInt32(reader.ReadLine());
-                    reader.Close();
                 }
             }
             catch (Exception)
@@ -888,8 +884,6 @@ namespace OsEngine.OsTrader.SystemAnalyze
                     writer.WriteLine(_ecqCollectDataIsOn);
                     writer.WriteLine(_ecqPeriodSavePoint);
                     writer.WriteLine(_ecqPointsMax);
-
-                    writer.Close();
                 }
             }
             catch (Exception)
@@ -1062,7 +1056,6 @@ namespace OsEngine.OsTrader.SystemAnalyze
                     _moqCollectDataIsOn = Convert.ToBoolean(reader.ReadLine());
                     Enum.TryParse(reader.ReadLine(), out _moqPeriodSavePoint);
                     _moqPointsMax = Convert.ToInt32(reader.ReadLine());
-                    reader.Close();
                 }
             }
             catch (Exception)
@@ -1085,8 +1078,6 @@ namespace OsEngine.OsTrader.SystemAnalyze
                     writer.WriteLine(_moqCollectDataIsOn);
                     writer.WriteLine(_moqPeriodSavePoint);
                     writer.WriteLine(_moqPointsMax);
-
-                    writer.Close();
                 }
             }
             catch (Exception)

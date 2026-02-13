@@ -657,7 +657,7 @@ namespace OsEngine.Market.Servers.Pionex
             }
         }
 
-        private string _socketActivateLocker = "socketAcvateLocker";
+        private readonly Lock _socketActivateLocker = new();
 
         private void CheckSocketsActivate()
         {

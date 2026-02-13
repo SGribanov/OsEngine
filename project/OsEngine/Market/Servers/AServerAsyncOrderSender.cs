@@ -9,7 +9,7 @@ using OsEngine.Market.Servers.Entity;
 
 namespace OsEngine.Market.Servers
 {
-    public class AServerAsyncOrderSender
+    public class AServerAsyncOrderSender : IDisposable
     {
         public AServerAsyncOrderSender(int rateGateLimitMls)
         {
@@ -34,6 +34,12 @@ namespace OsEngine.Market.Servers
             }
 
             Task.Run(() => ExecuteOrderInRealizationEvent(order));
+        }
+
+        public void Dispose()
+        {
+            _rateGate?.Dispose();
+            _rateGate = null;
         }
 
         public event Action<OrderAserverSender> ExecuteOrderInRealizationEvent;

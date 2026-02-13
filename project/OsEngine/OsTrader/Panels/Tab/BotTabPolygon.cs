@@ -12,6 +12,7 @@ using System.IO;
 using System.Windows.Forms;
 using System.Windows.Forms.Integration;
 using System.Threading;
+using System.Threading.Tasks;
 using OsEngine.Market;
 using OsEngine.Market.Servers;
 
@@ -30,6 +31,7 @@ namespace OsEngine.OsTrader.Panels.Tab
             LoadSequences();
 
             Thread worker = new Thread(WorkerPlace);
+            worker.IsBackground = true;
             worker.Start();
         }
 
@@ -437,7 +439,7 @@ namespace OsEngine.OsTrader.Panels.Tab
         /// </summary>
         public List<PolygonToTrade> Sequences = new List<PolygonToTrade>();
 
-        private string _pairsLocker = "pairsLocker";
+        private readonly Lock _pairsLocker = new();
 
         /// <summary>
         /// Method sorting array of sequences by profitability
@@ -914,6 +916,7 @@ namespace OsEngine.OsTrader.Panels.Tab
                 if (painterThread == null)
                 {
                     painterThread = new Thread(PainterThread);
+                    painterThread.IsBackground = true;
                     painterThread.Start();
                 }
             }
@@ -1382,8 +1385,7 @@ namespace OsEngine.OsTrader.Panels.Tab
                         return;
                     }
 
-                    Thread worker = new Thread(pair.TradeLogic);
-                    worker.Start();
+                    Task.Run(pair.TradeLogic);
                 }
 
                 else if (column == 5 && row == 0)

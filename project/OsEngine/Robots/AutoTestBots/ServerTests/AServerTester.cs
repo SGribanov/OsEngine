@@ -346,6 +346,7 @@ namespace OsEngine.Robots.AutoTestBots.ServerTests
             CurTestType = ServerTestType.Data_1;
 
             Thread worker = new Thread(WorkerThreadArea);
+            worker.IsBackground = true;
             worker.Start();
         }
 
@@ -359,6 +360,7 @@ namespace OsEngine.Robots.AutoTestBots.ServerTests
             CurTestType = ServerTestType.Data_2;
 
             Thread worker = new Thread(WorkerThreadArea);
+            worker.IsBackground = true;
             worker.Start();
         }
 
@@ -372,6 +374,7 @@ namespace OsEngine.Robots.AutoTestBots.ServerTests
             CurTestType = ServerTestType.Data_3;
 
             Thread worker = new Thread(WorkerThreadArea);
+            worker.IsBackground = true;
             worker.Start();
         }
 
@@ -385,6 +388,7 @@ namespace OsEngine.Robots.AutoTestBots.ServerTests
             CurTestType = ServerTestType.Data_4;
 
             Thread worker = new Thread(WorkerThreadArea);
+            worker.IsBackground = true;
             worker.Start();
         }
 
@@ -398,6 +402,7 @@ namespace OsEngine.Robots.AutoTestBots.ServerTests
             CurTestType = ServerTestType.Data_5;
 
             Thread worker = new Thread(WorkerThreadArea);
+            worker.IsBackground = true;
             worker.Start();
         }
 
@@ -411,6 +416,7 @@ namespace OsEngine.Robots.AutoTestBots.ServerTests
             CurTestType = ServerTestType.Var_2_MarketDepth;
 
             Thread worker = new Thread(WorkerThreadArea);
+            worker.IsBackground = true;
             worker.Start();
         }
 
@@ -424,6 +430,7 @@ namespace OsEngine.Robots.AutoTestBots.ServerTests
             CurTestType = ServerTestType.Var_3_Trades;
 
             Thread worker = new Thread(WorkerThreadArea);
+            worker.IsBackground = true;
             worker.Start();
         }
 
@@ -437,6 +444,7 @@ namespace OsEngine.Robots.AutoTestBots.ServerTests
             CurTestType = ServerTestType.Var_1_Securities;
 
             Thread worker = new Thread(WorkerThreadArea);
+            worker.IsBackground = true;
             worker.Start();
         }
 
@@ -450,6 +458,7 @@ namespace OsEngine.Robots.AutoTestBots.ServerTests
             CurTestType = ServerTestType.Conn_1;
 
             Thread worker = new Thread(WorkerThreadArea);
+            worker.IsBackground = true;
             worker.Start();
         }
 
@@ -463,6 +472,7 @@ namespace OsEngine.Robots.AutoTestBots.ServerTests
             CurTestType = ServerTestType.Conn_2;
 
             Thread worker = new Thread(WorkerThreadArea);
+            worker.IsBackground = true;
             worker.Start();
         }
 
@@ -476,6 +486,7 @@ namespace OsEngine.Robots.AutoTestBots.ServerTests
             CurTestType = ServerTestType.Conn_3;
 
             Thread worker = new Thread(WorkerThreadArea);
+            worker.IsBackground = true;
             worker.Start();
         }
 
@@ -489,6 +500,7 @@ namespace OsEngine.Robots.AutoTestBots.ServerTests
             CurTestType = ServerTestType.Conn_4;
 
             Thread worker = new Thread(WorkerThreadArea);
+            worker.IsBackground = true;
             worker.Start();
         }
 
@@ -502,6 +514,7 @@ namespace OsEngine.Robots.AutoTestBots.ServerTests
             CurTestType = ServerTestType.Conn_5;
 
             Thread worker = new Thread(WorkerThreadArea);
+            worker.IsBackground = true;
             worker.Start();
         }
 
@@ -538,6 +551,7 @@ namespace OsEngine.Robots.AutoTestBots.ServerTests
             CurTestType = ServerTestType.Order_1;
 
             Thread worker = new Thread(WorkerThreadArea);
+            worker.IsBackground = true;
             worker.Start();
         }
 
@@ -551,6 +565,7 @@ namespace OsEngine.Robots.AutoTestBots.ServerTests
             CurTestType = ServerTestType.Order_2;
 
             Thread worker = new Thread(WorkerThreadArea);
+            worker.IsBackground = true;
             worker.Start();
         }
 
@@ -564,6 +579,7 @@ namespace OsEngine.Robots.AutoTestBots.ServerTests
             CurTestType = ServerTestType.Order_3;
 
             Thread worker = new Thread(WorkerThreadArea);
+            worker.IsBackground = true;
             worker.Start();
         }
 
@@ -577,6 +593,7 @@ namespace OsEngine.Robots.AutoTestBots.ServerTests
             CurTestType = ServerTestType.Order_4;
 
             Thread worker = new Thread(WorkerThreadArea);
+            worker.IsBackground = true;
             worker.Start();
         }
 
@@ -590,6 +607,7 @@ namespace OsEngine.Robots.AutoTestBots.ServerTests
             CurTestType = ServerTestType.Order_5;
 
             Thread worker = new Thread(WorkerThreadArea);
+            worker.IsBackground = true;
             worker.Start();
         }
 
@@ -603,6 +621,7 @@ namespace OsEngine.Robots.AutoTestBots.ServerTests
             CurTestType = ServerTestType.Order_6;
 
             Thread worker = new Thread(WorkerThreadArea);
+            worker.IsBackground = true;
             worker.Start();
         }
 
@@ -616,6 +635,7 @@ namespace OsEngine.Robots.AutoTestBots.ServerTests
             CurTestType = ServerTestType.Order_7;
 
             Thread worker = new Thread(WorkerThreadArea);
+            worker.IsBackground = true;
             worker.Start();
         }
 
@@ -629,6 +649,7 @@ namespace OsEngine.Robots.AutoTestBots.ServerTests
             CurTestType = ServerTestType.Order_8;
 
             Thread worker = new Thread(WorkerThreadArea);
+            worker.IsBackground = true;
             worker.Start();
         }
 
@@ -642,6 +663,7 @@ namespace OsEngine.Robots.AutoTestBots.ServerTests
             CurTestType = ServerTestType.Order_9;
 
             Thread worker = new Thread(WorkerThreadArea);
+            worker.IsBackground = true;
             worker.Start();
         }
 
@@ -655,6 +677,7 @@ namespace OsEngine.Robots.AutoTestBots.ServerTests
             CurTestType = ServerTestType.Order_10;
 
             Thread worker = new Thread(WorkerThreadArea);
+            worker.IsBackground = true;
             worker.Start();
         }
 
@@ -668,6 +691,7 @@ namespace OsEngine.Robots.AutoTestBots.ServerTests
             CurTestType = ServerTestType.Order_11;
 
             Thread worker = new Thread(WorkerThreadArea);
+            worker.IsBackground = true;
             worker.Start();
         }
 
@@ -681,6 +705,7 @@ namespace OsEngine.Robots.AutoTestBots.ServerTests
             CurTestType = ServerTestType.Order_12;
 
             Thread worker = new Thread(WorkerThreadArea);
+            worker.IsBackground = true;
             worker.Start();
         }
 
@@ -694,6 +719,7 @@ namespace OsEngine.Robots.AutoTestBots.ServerTests
             CurTestType = ServerTestType.Portfolio_1;
 
             Thread worker = new Thread(WorkerThreadArea);
+            worker.IsBackground = true;
             worker.Start();
         }
 
@@ -1110,7 +1136,7 @@ namespace OsEngine.Robots.AutoTestBots.ServerTests
 
         List<AServerTester> _testers = new List<AServerTester>();
 
-        private string _testerLocker = "testerLocker";
+        private readonly Lock _testerLocker = new();
 
         private void Tester_TestEndEvent(AServerTester serverTest)
         {
@@ -1186,6 +1212,7 @@ namespace OsEngine.Robots.AutoTestBots.ServerTests
         public void Start()
         {
             Thread worker = new Thread(WorkerPlace);
+            worker.IsBackground = true;
             worker.Start();
         }
 

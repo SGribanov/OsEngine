@@ -214,7 +214,7 @@ namespace OsEngine.Robots.TechSamples
             {
                 if (MainWindow.GetDispatcher.CheckAccess() == false)
                 {
-                    MainWindow.GetDispatcher.Invoke(new Action(CreateColumnsTable));
+                    MainWindow.GetDispatcher.InvokeAsync(new Action(CreateColumnsTable));
                     return;
                 }
 

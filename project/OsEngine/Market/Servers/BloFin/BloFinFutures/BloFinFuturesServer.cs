@@ -60,22 +60,27 @@ namespace OsEngine.Market.Servers.BloFin
 
             Thread threadCheckAliveWebSocket = new Thread(CheckAliveWebSocket);
             threadCheckAliveWebSocket.Name = "CheckAliveWebSocketBloFinFutures";
+            threadCheckAliveWebSocket.IsBackground = true;
             threadCheckAliveWebSocket.Start();
 
             Thread threadMessageReaderPublic = new Thread(MessageReaderPublic);
             threadMessageReaderPublic.Name = "MessageReaderPublic";
+            threadMessageReaderPublic.IsBackground = true;
             threadMessageReaderPublic.Start();
 
             Thread threadMessageReaderPrivate = new Thread(MessageReaderPrivate);
             threadMessageReaderPrivate.Name = "MessageReaderPrivate";
+            threadMessageReaderPrivate.IsBackground = true;
             threadMessageReaderPrivate.Start();
 
             Thread threadMessageReaderMarketDepth = new Thread(ThreadMessageReaderMarketDepth);
             threadMessageReaderMarketDepth.Name = "ThreadBlofinFuturesMessageReaderMarketDepth";
+            threadMessageReaderMarketDepth.IsBackground = true;
             threadMessageReaderMarketDepth.Start();
 
             Thread threadMessageReaderTrades = new Thread(ThreadMessageReaderTrades);
             threadMessageReaderTrades.Name = "ThreadBlofinFuturesMessageReaderTrades";
+            threadMessageReaderTrades.IsBackground = true;
             threadMessageReaderTrades.Start();
         }
 
@@ -800,7 +805,7 @@ namespace OsEngine.Market.Servers.BloFin
             }
         }
 
-        private string _socketActivateLocker = "socketAcvateLocker";
+        private readonly Lock _socketActivateLocker = new();
 
         private void CheckSocketsActivate()
         {

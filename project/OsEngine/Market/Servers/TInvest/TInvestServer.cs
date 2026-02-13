@@ -70,21 +70,26 @@ namespace OsEngine.Market.Servers.TInvest
         {
             Thread worker = new Thread(ConnectionCheckThread);
             worker.Name = "CheckAliveTInvest";
+            worker.IsBackground = true;
             worker.Start();
 
             Thread worker3 = new Thread(PortfolioMessageReader);
             worker3.Name = "PortfolioMessageReaderTInvest";
+            worker3.IsBackground = true;
             worker3.Start();
 
             Thread worker4 = new Thread(PositionsMessageReader);
             worker4.Name = "PositionsMessageReaderTInvest";
+            worker4.IsBackground = true;
             worker4.Start();
 
             Thread worker6 = new Thread(LastPricesPoller);
+            worker6.IsBackground = true;
             worker6.Start();
 
             Thread worker7 = new Thread(OrderStateMessageReader);
             worker7.Name = "OrderStateMessageReaderTInvest";
+            worker7.IsBackground = true;
             worker7.Start();
         }
 
@@ -446,7 +451,7 @@ namespace OsEngine.Market.Servers.TInvest
 
         private Dictionary<string, int> _orderNumbers = new Dictionary<string, int>();
 
-        private string _orderNumbersLocker = "_orderNumbersLocker";
+        private readonly Lock _orderNumbersLocker = new();
 
         private ConcurrentDictionary<string, decimal> _orderPrices = new ConcurrentDictionary<string, decimal>();
 
@@ -456,7 +461,7 @@ namespace OsEngine.Market.Servers.TInvest
 
         private RateGate _rateGateInstruments = new RateGate(200, TimeSpan.FromMinutes(1));
 
-        private string _getSecuritiesLocker = "_getSecuritiesLocker";
+        private readonly Lock _getSecuritiesLocker = new();
 
         public void GetSecurities()
         {
@@ -2195,7 +2200,7 @@ namespace OsEngine.Market.Servers.TInvest
         private DateTime _lastMyOrderStateDataTime = DateTime.MinValue;
 
 
-        private string _marketDataStreamLocker = "_marketDataStreamLocker";
+        private readonly Lock _marketDataStreamLocker = new();
 
         public void Subscribe(Security security)
         {
@@ -2349,7 +2354,7 @@ namespace OsEngine.Market.Servers.TInvest
                     return;
                 }
             }
-            catch (Exception exception)
+            catch (Exception)
             {
                 if (_securityStreamMap.ContainsKey(security.NameId))
                 {
@@ -3359,10 +3364,10 @@ namespace OsEngine.Market.Servers.TInvest
         #region 9 Trade
 
         private RateGate _rateGateOrders = new RateGate(98, TimeSpan.FromMinutes(1)); // https://russianinvestments.github.io/investAPI/limits/
-        private string _rageGateOrdersLocker = "_rageGateOrdersLocker";
+        private readonly Lock _rageGateOrdersLocker = new();
 
         private RateGate _rateGatePostOrders = new RateGate(500, TimeSpan.FromMinutes(1));
-        private string _rageGatePostOrdersLocker = "_rageGatePostOrdersLocker";
+        private readonly Lock _rageGatePostOrdersLocker = new();
 
         public void SendOrder(Order order)
         {
@@ -3598,7 +3603,7 @@ namespace OsEngine.Market.Servers.TInvest
 
         List<string> _cancelOrderNums = new List<string>();
 
-        private string _cancelOrdersLocker = "_cancelOrdersLocker";
+        private readonly Lock _cancelOrdersLocker = new();
 
         public bool CancelOrder(Order order)
         {

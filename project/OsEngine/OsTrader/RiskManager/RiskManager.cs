@@ -6,6 +6,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Threading;
 using System.Threading.Tasks;
 using OsEngine.Entity;
 using OsEngine.Logging;
@@ -27,7 +28,7 @@ namespace OsEngine.OsTrader.RiskManager
         /// </summary>
         public static List<RiskManager> RiskManagersToCheck = new List<RiskManager>();
 
-        private static object _activatorLocker = new object();
+        private static readonly Lock _activatorLocker = new();
 
         /// <summary>
         /// Activate flow

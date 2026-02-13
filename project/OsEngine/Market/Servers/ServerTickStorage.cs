@@ -178,7 +178,7 @@ namespace OsEngine.Market.Servers
                         int lastSecond = allTrades[i1][tradeInfo.LastSaveIndex].Time.Second;
                         int lastMillisecond = allTrades[i1][tradeInfo.LastSaveIndex].MicroSeconds;
 
-                        StreamWriter writer =
+                        using StreamWriter writer =
                             new StreamWriter(_pathName + @"\" + allTrades[i1][0].SecurityNameCode + ".txt", true);
                         for (int i = tradeInfo.LastSaveIndex; i < allTrades[i1].Count - 1; i++)
                         {
@@ -196,7 +196,6 @@ namespace OsEngine.Market.Servers
                             writer.WriteLine(allTrades[i1][i].GetSaveString());
                         }
                         tradeInfo.LastSaveIndex = allTrades[i1].Count - 1;
-                        writer.Close();
 
 
                     }
@@ -231,7 +230,7 @@ namespace OsEngine.Market.Servers
                 for (int i = 0; i < saves.Length; i++)
                 {
                     // upload / загружаем
-                    StreamReader reader = new StreamReader(saves[i]);
+                    using StreamReader reader = new StreamReader(saves[i]);
 
                     List<Trade> newList = new List<Trade>();
 
@@ -325,7 +324,6 @@ namespace OsEngine.Market.Servers
                         allTrades = newListsArray;
                     }
 
-                    reader.Close();
                 }
 
                 if (TickLoadedEvent != null

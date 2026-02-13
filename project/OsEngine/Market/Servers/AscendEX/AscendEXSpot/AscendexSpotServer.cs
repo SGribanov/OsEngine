@@ -767,7 +767,7 @@ namespace OsEngine.Market.Servers.AscendexSpot
             }
         }
 
-        private readonly object _socketActivateLocker = new object();
+        private readonly Lock _socketActivateLocker = new();
 
         private void CheckSocketsActivate()
         {

@@ -145,7 +145,7 @@ namespace OsEngine.OsTrader.Panels
         {
             if (!TabPosition.CheckAccess())
             {
-                TabPosition.Dispatcher.Invoke(new Action(Local));
+                TabPosition.Dispatcher.InvokeAsync(new Action(Local));
                 return;
             }
 

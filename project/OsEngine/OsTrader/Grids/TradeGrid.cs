@@ -66,6 +66,7 @@ namespace OsEngine.OsTrader.Grids
             {
                 Thread worker = new Thread(ThreadWorkerPlace);
                 worker.Name = "GridThread." + tab.TabName;
+                worker.IsBackground = true;
                 worker.Start();
 
                 RegimeLogicEntry = TradeGridLogicEntryRegime.OncePerSecond;

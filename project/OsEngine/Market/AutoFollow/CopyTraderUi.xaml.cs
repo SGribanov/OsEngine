@@ -69,6 +69,7 @@ namespace OsEngine.Market.AutoFollow
             LoadPanelsPositions();
 
             Thread painterThread = new Thread(PainterThreadArea);
+            painterThread.IsBackground = true;
             painterThread.Start();
         }
 

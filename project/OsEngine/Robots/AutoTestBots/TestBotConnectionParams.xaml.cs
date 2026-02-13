@@ -73,7 +73,7 @@ namespace OsEngine.Robots.AutoTestBots
                 {
                     testBotConnection.StartTestingConnector(server, CountToReLoadServer,
                         SecondToReloadServer, CountTabsToConnectServer);
-                }).Start();
+                }) { IsBackground = true }.Start();
             }
             else
             {
@@ -108,7 +108,7 @@ namespace OsEngine.Robots.AutoTestBots
         {
             if (!Dispatcher.CheckAccess())
             {
-                Dispatcher.Invoke(() =>
+                Dispatcher.InvokeAsync(() =>
                 {
                     DrawingRamLabelRam(ram);
                 });
@@ -129,7 +129,7 @@ namespace OsEngine.Robots.AutoTestBots
         {
             if (!Dispatcher.CheckAccess())
             {
-                Dispatcher.Invoke(() =>
+                Dispatcher.InvokeAsync(() =>
                 {
                     DrawingRectagle(IsConnect);
                 });
@@ -156,7 +156,7 @@ namespace OsEngine.Robots.AutoTestBots
 
             if (!Dispatcher.CheckAccess())
             {
-                Dispatcher.Invoke(() =>
+                Dispatcher.InvokeAsync(() =>
                 {
                     DrawingLabeleStatusTest(value);
                 });
@@ -170,7 +170,7 @@ namespace OsEngine.Robots.AutoTestBots
         {
             if (!Dispatcher.CheckAccess())
             {
-                Dispatcher.Invoke(() =>
+                Dispatcher.InvokeAsync(() =>
                 {
                     DrawingProgressBar(value);
                 });

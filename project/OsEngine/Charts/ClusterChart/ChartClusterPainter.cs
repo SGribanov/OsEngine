@@ -133,7 +133,7 @@ namespace OsEngine.Charts.ClusterChart
 
                 if (_host != null && !_host.Dispatcher.CheckAccess())
                 {
-                    _host.Dispatcher.Invoke(new Action<WindowsFormsHost, Rectangle>(StartPaintPrimeChart), host, rectangle);
+                    _host.Dispatcher.InvokeAsync(new Action(() => StartPaintPrimeChart(host, rectangle)));
                     return;
                 }
                 _host.Child = _chart;

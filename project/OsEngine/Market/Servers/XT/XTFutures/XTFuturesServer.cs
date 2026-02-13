@@ -878,7 +878,7 @@ namespace OsEngine.Market.Servers.XT.XTFutures
                 }
             }
 
-            private string _socketActivateLocker = "socketAcvateLocker";
+            private readonly Lock _socketActivateLocker = new();
 
             private void CheckSocketsActivate()
             {

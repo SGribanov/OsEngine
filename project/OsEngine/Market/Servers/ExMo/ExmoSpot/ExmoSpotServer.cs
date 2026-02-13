@@ -669,7 +669,7 @@ namespace OsEngine.Market.Servers.ExMo.ExmoSpot
             }
         }
 
-        private string _socketActivateLocker = "socketAcvateLocker";
+        private readonly Lock _socketActivateLocker = new();
 
         private void CheckSocketsActivate()
         {

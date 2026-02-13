@@ -136,6 +136,7 @@ namespace OsEngine.OsTrader.Panels.Tab
 
                         Thread worker = new Thread(PositionsSenderThreadArea);
                         worker.Name = "Static. BotTabSimple. PositionsSenderThreadArea";
+                        worker.IsBackground = true;
                         worker.Start();
                     }
 
@@ -5515,7 +5516,7 @@ namespace OsEngine.OsTrader.Panels.Tab
 
         // handling alerts and stop maintenance
 
-        private object _lockerManualReload = new object();
+        private readonly Lock _lockerManualReload = new();
 
         /// <summary>
         /// Check the manual support of the stop and profi
@@ -6554,13 +6555,7 @@ namespace OsEngine.OsTrader.Panels.Tab
 
                 while (_chartMaster == null)
                 {
-                    Task delay = new Task(() =>
-                    {
-                        Thread.Sleep(100);
-                    });
-
-                    delay.Start();
-                    delay.Wait();
+                    Thread.Sleep(100);
                 }
 
                 _chartMaster.SetCandles(candles);

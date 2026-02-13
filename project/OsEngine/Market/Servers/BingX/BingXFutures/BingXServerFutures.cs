@@ -1049,7 +1049,7 @@ namespace OsEngine.Market.Servers.BingX.BingXFutures
             }
         }
 
-        private string _socketActivateLocker = "socketActivateLocker";
+        private readonly Lock _socketActivateLocker = new();
 
         private void CheckSocketsActivate()
         {

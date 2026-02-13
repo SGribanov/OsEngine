@@ -73,26 +73,32 @@ namespace OsEngine.Market.Servers.Binance.Futures
 
             Thread worker1 = new Thread(PortfolioUpdater);
             worker1.Name = "BinanceFutThread_PortfolioUpdater";
+            worker1.IsBackground = true;
             worker1.Start();
 
             Thread worker2 = new Thread(KeepaliveUserDataStream);
             worker2.Name = "BinanceFutThread_KeepaliveUserDataStream";
+            worker2.IsBackground = true;
             worker2.Start();
 
             Thread worker3 = new Thread(ConverterPublicMessagesAll);
             worker3.Name = "BinanceFutThread_ConverterPublicMessages";
+            worker3.IsBackground = true;
             worker3.Start();
 
             Thread worker4 = new Thread(ConverterUserData);
             worker4.Name = "BinanceFutThread_ConverterUserData";
+            worker4.IsBackground = true;
             worker4.Start();
 
             Thread worker5 = new Thread(ThreadExtendedData);
             worker5.Name = "BinanceFutThread_ExtendedData";
+            worker5.IsBackground = true;
             worker5.Start();
 
             Thread worker6 = new Thread(ConverterPublicMessagesMarketDepths);
             worker6.Name = "BinanceFutThread_MarketDepthParse";
+            worker6.IsBackground = true;
             worker6.Start();
         }
 
@@ -520,7 +526,7 @@ namespace OsEngine.Market.Servers.Binance.Futures
             }
         }
 
-        private object _getAccountLocker = "getAccountLocker";
+        private readonly Lock _getAccountLocker = new();
 
         public AccountResponseFutures GetAccountInfo()
         {
@@ -971,7 +977,7 @@ namespace OsEngine.Market.Servers.Binance.Futures
             return null;
         }
 
-        private string _candleLocker = "candleLocker";
+        private readonly Lock _candleLocker = new();
 
         private List<Candle> GetCandles(string nameSec, TimeSpan tf)
         {
@@ -1291,7 +1297,7 @@ namespace OsEngine.Market.Servers.Binance.Futures
             return trades;
         }
 
-        private string _lockerTrades = "lockerTrades";
+        private readonly Lock _lockerTrades = new();
 
         private List<Trade> GetTickHistoryToSecurity(string security, DateTime startTime)
         {
@@ -2446,7 +2452,7 @@ namespace OsEngine.Market.Servers.Binance.Futures
             return 0;
         }
 
-        private readonly object _depthLocker = new object();
+        private readonly Lock _depthLocker = new();
 
         private void UpdateMarketDepth(DepthResponseFutures myDepth)
         {
@@ -2571,7 +2577,7 @@ namespace OsEngine.Market.Servers.Binance.Futures
 
         #region 11 Trade
 
-        private object _lockOrder = new object();
+        private readonly Lock _lockOrder = new();
 
         public void SendOrder(Order order)
         {
@@ -3149,7 +3155,7 @@ namespace OsEngine.Market.Servers.Binance.Futures
 
         #region 12 Queries
 
-        private string _queryHttpLocker = "queryHttpLocker";
+        private readonly Lock _queryHttpLocker = new();
 
         RateGate _rateGate = new RateGate(1, TimeSpan.FromMilliseconds(100));
 

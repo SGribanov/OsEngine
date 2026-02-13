@@ -1,4 +1,5 @@
-﻿using System;
+﻿#pragma warning disable SYSLIB0060 // Rfc2898DeriveBytes constructor is obsolete
+using System;
 using System.IO;
 using System.Security.Cryptography;
 using System.Text;

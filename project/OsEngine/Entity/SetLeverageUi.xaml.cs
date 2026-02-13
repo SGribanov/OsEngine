@@ -401,7 +401,7 @@ namespace OsEngine.Entity
             {
                 if (ComboBoxClass.Dispatcher.CheckAccess() == false)
                 {
-                    ComboBoxClass.Dispatcher.Invoke(UpdateClassComboBox);
+                    ComboBoxClass.Dispatcher.InvokeAsync(UpdateClassComboBox);
                     return;
                 }
 

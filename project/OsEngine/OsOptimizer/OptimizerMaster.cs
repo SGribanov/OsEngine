@@ -121,8 +121,6 @@ namespace OsEngine.OsOptimizer
                     writer.WriteLine(_orderExecutionType);
                     writer.WriteLine(_slippageToSimpleOrder);
                     writer.WriteLine(_slippageToStopOrder);
-
-                    writer.Close();
                 }
             }
             catch (Exception error)
@@ -169,8 +167,6 @@ namespace OsEngine.OsOptimizer
                     Enum.TryParse(reader.ReadLine(), out _orderExecutionType);
                     _slippageToSimpleOrder = Convert.ToInt32(reader.ReadLine());
                     _slippageToStopOrder = Convert.ToInt32(reader.ReadLine());
-
-                    reader.Close();
                 }
             }
             catch
@@ -619,8 +615,6 @@ namespace OsEngine.OsOptimizer
                     {
                         writer.WriteLine(ClearingTimes[i].GetSaveString());
                     }
-
-                    writer.Close();
                 }
             }
             catch (Exception)
@@ -651,8 +645,6 @@ namespace OsEngine.OsOptimizer
                             ClearingTimes.Add(clearings);
                         }
                     }
-
-                    reader.Close();
                 }
             }
             catch (Exception)
@@ -697,8 +689,6 @@ namespace OsEngine.OsOptimizer
                     {
                         writer.WriteLine(NonTradePeriods[i].GetSaveString());
                     }
-
-                    writer.Close();
                 }
             }
             catch (Exception)
@@ -729,8 +719,6 @@ namespace OsEngine.OsOptimizer
                             NonTradePeriods.Add(period);
                         }
                     }
-
-                    reader.Close();
                 }
             }
             catch (Exception)
@@ -1244,7 +1232,6 @@ namespace OsEngine.OsOptimizer
                             parameter.LoadParamFromString(save);
                         }
                     }
-                    reader.Close();
                 }
             }
             catch (Exception)
@@ -1270,8 +1257,6 @@ namespace OsEngine.OsOptimizer
                     {
                         writer.WriteLine(_parameters[i].GetStringToSave());
                     }
-
-                    writer.Close();
                 }
             }
             catch (Exception)
@@ -1322,7 +1307,6 @@ namespace OsEngine.OsOptimizer
                     {
                         result.Add(Convert.ToBoolean(reader.ReadLine()));
                     }
-                    reader.Close();
                 }
             }
             catch (Exception)
@@ -1350,8 +1334,6 @@ namespace OsEngine.OsOptimizer
                     {
                         writer.WriteLine(_parametersOn[i].ToString());
                     }
-
-                    writer.Close();
                 }
             }
             catch (Exception)

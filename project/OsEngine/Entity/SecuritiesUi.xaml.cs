@@ -101,7 +101,7 @@ namespace OsEngine.Entity
             {
                 if (ComboBoxClass.Dispatcher.CheckAccess() == false)
                 {
-                    ComboBoxClass.Dispatcher.Invoke(new Action<List<Security>>(UpdateClassComboBox), securities);
+                    ComboBoxClass.Dispatcher.InvokeAsync(new Action(() => UpdateClassComboBox(securities)));
                     return;
                 }
 

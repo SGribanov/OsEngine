@@ -8,6 +8,7 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.Globalization;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Windows.Forms.Integration;
@@ -27,7 +28,7 @@ namespace OsEngine.Entity
 
         public static List<MarketDepthPainter> MarketDepthsToCheck = new List<MarketDepthPainter>();
 
-        private static object _activatorLocker = new object();
+        private static readonly Lock _activatorLocker = new();
 
         public static void Activate()
         {
@@ -291,7 +292,7 @@ namespace OsEngine.Entity
             {
                 if (glass.Dispatcher.CheckAccess() == false)
                 {
-                    glass.Dispatcher.Invoke(new Action<WindowsFormsHost, System.Windows.Controls.TextBox, System.Windows.Controls.TextBox>(StartPaint), glass, textBoxLimitPrice, textBoxVolume);
+                    glass.Dispatcher.InvokeAsync(new Action(() => StartPaint(glass, textBoxLimitPrice, textBoxVolume)));
                     return;
                 }
 

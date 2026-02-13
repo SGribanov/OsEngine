@@ -49,30 +49,37 @@ namespace OsEngine.Market.Servers.MoexFixFastCurrency
 
             Thread thread1 = new Thread(InstrumentDefinitionsReader);
             thread1.Name = "GetterSecurity";
+            thread1.IsBackground = true;
             thread1.Start();
 
             Thread thread2 = new Thread(GetFastMessagesByTrades);
             thread2.Name = "GetterTrades";
+            thread2.IsBackground = true;
             thread2.Start();
 
             Thread thread3 = new Thread(TradeMessagesReader);
             thread3.Name = "TradesReaderFromQueue";
+            thread3.IsBackground = true;
             thread3.Start();
 
             Thread thread4 = new Thread(GetFastMessagesByOrders);
             thread4.Name = "GetterOrders";
+            thread4.IsBackground = true;
             thread4.Start();
 
             Thread thread5 = new Thread(OrderMessagesReader);
             thread5.Name = "OrdersReaderFromQueue";
+            thread5.IsBackground = true;
             thread5.Start();
 
             Thread thread6 = new Thread(RecoveryData);
             thread6.Name = "HistoricalReplayMoexFixFastCurrency";
+            thread6.IsBackground = true;
             thread6.Start();
 
             Thread thread7 = new Thread(MFIXTradeServerProcessing);
             thread7.Name = "MFIXTradeServerProcessing";
+            thread7.IsBackground = true;
             thread7.Start();
         }
 
@@ -184,6 +191,11 @@ namespace OsEngine.Market.Servers.MoexFixFastCurrency
             DataCleaning();
 
             SendLogMessage("Connection Closed by FixFastCurrency. WebSocket Data Closed Event", LogMessageType.System);
+
+            try { _logFileTrades?.Close(); } catch { }
+            try { _logFileOrders?.Close(); } catch { }
+            try { _logFXMFIXMsg?.Close(); } catch { }
+            try { _logFileRecover?.Close(); } catch { }
 
             if (ServerStatus != ServerConnectStatus.Disconnect)
             {
@@ -495,7 +507,9 @@ namespace OsEngine.Market.Servers.MoexFixFastCurrency
 
         private bool _afterStartTrading = true;
         private string _configDir;
+#pragma warning disable CS0169
         private Context _contextFAST;
+#pragma warning restore CS0169
         private MessageTemplate[] _templates;
 
         private Socket _socketSecurityStreamA;
@@ -600,13 +614,13 @@ namespace OsEngine.Market.Servers.MoexFixFastCurrency
 
         #region 6 Sockets creation
 
-        private string _socketLockerHistoricalReplay = "socketLockerMoexFixFastCurrencyHistoricalReplay";
-        private string _socketLockerInstruments = "socketLockerMoexFixFastCurrencyInstruments";
-        private string _socketLockerTradesSnapshots = "socketLockerMoexFixFastCurrencyTradeSnapshots";
-        private string _socketLockerTradesIncremental = "socketLockerMoexFixFastCurrencyTradesIncremental";
-        private string _socketLockerOrdersSnapshots = "socketLockerMoexFixFastCurrencyOrdersSnapshots";
-        private string _socketLockerOrdersIncremental = "socketLockerMoexFixFastCurrencyOrdersIncremental";
-        private string _socketLockerFXMFIXTrade = "_socketLockerFXMFIXTradeCurrency";
+        private readonly Lock _socketLockerHistoricalReplay = new();
+        private readonly Lock _socketLockerInstruments = new();
+        private readonly Lock _socketLockerTradesSnapshots = new();
+        private readonly Lock _socketLockerTradesIncremental = new();
+        private readonly Lock _socketLockerOrdersSnapshots = new();
+        private readonly Lock _socketLockerOrdersIncremental = new();
+        private readonly Lock _socketLockerFXMFIXTrade = new();
         private TcpClient _fxMFIXTradeTcpClient;
         private NetworkStream _fxMFIXTradeStream;
         private MessageConstructor _fxMFIXTradeMessages;
@@ -3309,16 +3323,16 @@ namespace OsEngine.Market.Servers.MoexFixFastCurrency
 
         #region 11 Log
 
-        private string _logLockTrade = "locker for trades stream ";
+        private readonly object _logLockTrade = new();
         private StreamWriter _logFileTrades = new StreamWriter($"Engine\\Log\\FAST_Trades_{DateTime.Now:dd-MM-yyyy}.txt");
 
-        private string _logLockOrder = "locker for orders stream";
+        private readonly object _logLockOrder = new();
         private StreamWriter _logFileOrders = new StreamWriter($"Engine\\Log\\FAST_Orders_{DateTime.Now:dd-MM-yyyy}.txt");
 
-        private string _logLockMFIX = "locker for incoming FIX";
+        private readonly object _logLockMFIX = new();
         private StreamWriter _logFXMFIXMsg = new StreamWriter($"Engine\\Log\\IncomingMFIX_{DateTime.Now:dd-MM-yyyy}.txt", true);
 
-        private string _logLockRecover = "locker for Recover";
+        private readonly object _logLockRecover = new();
         private StreamWriter _logFileRecover = new StreamWriter($"Engine\\Log\\DataRecoveryLog_{DateTime.Now:dd-MM-yyyy}.txt");
 
         private void WriteLogTrades(string message)

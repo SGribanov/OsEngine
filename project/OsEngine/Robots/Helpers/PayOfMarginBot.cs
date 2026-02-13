@@ -167,7 +167,7 @@ namespace OsEngine.Robots.Helpers
 
                 _hostSumm.Child = _dgvSumm;
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 //SendNewLogMessage(ex.ToString(), Logging.LogMessageType.Error);
             }

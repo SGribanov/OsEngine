@@ -18,7 +18,7 @@ namespace OsEngine.Market.Servers.MoexFixFastSpot.FIX
         public string TransactTime; // UTCTimestamp
         public string OrdType;
         public string OrderQty;
-        public string PriceType;
+        public string PriceType = null;
         public string Price = "0";
 
         public override string ToString()

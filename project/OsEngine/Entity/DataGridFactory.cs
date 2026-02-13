@@ -183,9 +183,8 @@ namespace OsEngine.Entity
                         }
 
 
-                        StreamWriter writer = new StreamWriter(fileName);
+                        using StreamWriter writer = new StreamWriter(fileName);
                         writer.Write(saveStr);
-                        writer.Close();
                     }
                     catch (Exception error)
                     {

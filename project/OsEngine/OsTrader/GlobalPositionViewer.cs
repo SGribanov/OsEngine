@@ -188,7 +188,7 @@ namespace OsEngine.OsTrader
 
                 if (!_hostOpenPoses.CheckAccess())
                 {
-                    _hostOpenPoses.Dispatcher.Invoke(StopPaint);
+                    _hostOpenPoses.Dispatcher.InvokeAsync(StopPaint);
                     return;
                 }
 
@@ -231,8 +231,7 @@ namespace OsEngine.OsTrader
 
                 if (!_hostOpenPoses.CheckAccess())
                 {
-                    _hostOpenPoses.Dispatcher.Invoke(
-                        new Action<WindowsFormsHost, WindowsFormsHost>(StartPaint),openPositionHost,closePositionHost);
+                    _hostOpenPoses.Dispatcher.InvokeAsync(new Action(() => StartPaint(openPositionHost, closePositionHost)));
                     return;
                 }
 

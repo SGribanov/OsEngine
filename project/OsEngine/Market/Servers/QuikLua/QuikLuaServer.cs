@@ -104,26 +104,31 @@ namespace OsEngine.Market.Servers.QuikLua
             Thread worker1 = new Thread(GetPortfoliosArea);
             worker1.CurrentCulture = new CultureInfo("ru-Ru");
             worker1.Name = "QuikLuaGetPortfoliosArea";
+            worker1.IsBackground = true;
             worker1.Start();
 
             Thread worker2 = new Thread(ThreadTradesParsingWorkPlace);
             worker2.CurrentCulture = new CultureInfo("ru-Ru");
             worker2.Name = "QuikLuaThreadTradesParsingWorkPlace";
+            worker2.IsBackground = true;
             worker2.Start();
 
             Thread worker3 = new Thread(ThreadMarketDepthsParsingWorkPlace);
             worker3.CurrentCulture = new CultureInfo("ru-Ru");
             worker3.Name = "QuikLuaThreadMarketDepthsParsingWorkPlace";
+            worker3.IsBackground = true;
             worker3.Start();
 
             Thread worker4 = new Thread(ThreadDataParsingWorkPlace);
             worker4.CurrentCulture = new CultureInfo("ru-RU");
             worker4.Name = "QuikLuaThreadDataParsingWorkPlace";
+            worker4.IsBackground = true;
             worker4.Start();
 
             Thread worker5 = new Thread(ThreadPing);
             worker5.CurrentCulture = new CultureInfo("ru-RU");
             worker5.Name = "QuikLuaThreadPing";
+            worker5.IsBackground = true;
             worker5.Start();
         }
 
@@ -344,7 +349,7 @@ namespace OsEngine.Market.Servers.QuikLua
 
         public QuikSharp.Quik QuikLua;
 
-        private object _serverLocker = new object();
+        private readonly Lock _serverLocker = new();
 
         private static readonly Char Separator = CultureInfo.CurrentCulture.NumberFormat.NumberDecimalSeparator[0];
 
@@ -1349,20 +1354,20 @@ namespace OsEngine.Market.Servers.QuikLua
                 DateTime fileNameDate = DateTime.Now.TimeOfDay.Hours < 19 ? DateTime.Now.Date : DateTime.Now.Date.AddDays(1);
                 string fileName = @"Data\Temp\" + security.Name + "_QuikLuaServer_" + fileNameDate.ToShortDateString() + ".txt";
 
-                StreamWriter writer = new StreamWriter(fileName, false);
-                for (int i = 0; i < newTrades.Count; i++)
+                using (StreamWriter writer = new StreamWriter(fileName, false))
                 {
-                    writer.WriteLine(newTrades[i].GetSaveString());
+                    for (int i = 0; i < newTrades.Count; i++)
+                    {
+                        writer.WriteLine(newTrades[i].GetSaveString());
+                    }
                 }
-
-                writer.Close();
 
                 // объединим со старыми данными, если они есть	
                 List<string> files = Directory.GetFiles(@"Data\Temp\", "*").ToList().FindAll(x => x.Contains(security.Name + "_QuikLuaServer_"));
 
                 for (int i = 0; i < files.Count; i++)
                 {
-                    StreamReader reader = new StreamReader(files[i]);
+                    using StreamReader reader = new StreamReader(files[i]);
 
                     while (!reader.EndOfStream)
                     {
@@ -1378,7 +1383,6 @@ namespace OsEngine.Market.Servers.QuikLua
                             // ignore	
                         }
                     }
-                    reader.Close();
                 }
                 return AllHistoricalTrades;
 
@@ -1450,7 +1454,7 @@ namespace OsEngine.Market.Servers.QuikLua
         /// </summary>
         private List<Candle> _candles;
 
-        private object _getCandlesLocker = new object();
+        private readonly Lock _getCandlesLocker = new();
 
         public List<Candle> GetLastCandleHistory(Security security, TimeFrameBuilder timeFrameBuilder, int candleCount)
         {

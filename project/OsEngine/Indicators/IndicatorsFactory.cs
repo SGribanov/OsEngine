@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Threading;
 using System.Windows; // Used for MessageBox
 using OsEngine.Entity; // Assuming Aindicator and IndicatorAttribute are here
 
@@ -80,7 +81,7 @@ namespace OsEngine.Indicators
         }
 
         private static readonly List<NamesFilesFromFolder> _filesInDirCache = new List<NamesFilesFromFolder>();
-        private static readonly object _filesInDirCacheLock = new object();
+        private static readonly Lock _filesInDirCacheLock = new();
 
 
         public static List<string> GetFullNamesFromFolder(string directory)
@@ -190,10 +191,10 @@ namespace OsEngine.Indicators
         }
 
         private static List<MetadataReference> _baseReferences;
-        private static readonly object _referencesLock = new object();
+        private static readonly Lock _referencesLock = new();
         // Cache for successfully compiled indicator types. Key: nameClass, Value: Type
         private static readonly Dictionary<string, Type> _compiledIndicatorTypesCache = new Dictionary<string, Type>(StringComparer.OrdinalIgnoreCase);
-        private static readonly object _compiledTypesCacheLock = new object();
+        private static readonly Lock _compiledTypesCacheLock = new();
 
 
         // Comparer for MetadataReference based on Display path to avoid duplicates

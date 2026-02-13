@@ -889,7 +889,7 @@ contract =>
 
         private RateGate _rateGate = new RateGate(1, TimeSpan.FromMilliseconds(2000));
 
-        private string _subLocker = "subLocker";
+        private readonly Lock _subLocker = new();
 
         public void Subscribe(Security security)
         {

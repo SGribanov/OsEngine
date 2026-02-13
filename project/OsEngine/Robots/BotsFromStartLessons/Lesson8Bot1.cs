@@ -99,6 +99,7 @@ namespace OsEngine.Robots.BotsFromStartLessons
 
             //Create a new thread that works in WorkerPlace()
             Thread worker = new Thread(WorkerPlace);
+            worker.IsBackground = true;
             worker.Start();
 
             Description = OsLocalization.Description.DescriptionLabel16;

@@ -35,6 +35,7 @@ namespace OsEngine.Robots.CurrencyArbitrage
 
             // Create worker Area
             Thread worker = new Thread(ThreadWorkerArea);
+            worker.IsBackground = true;
             worker.Start();
 
             Description = OsLocalization.Description.DescriptionLabel27;

@@ -32,6 +32,7 @@ namespace OsEngine.OsTrader.Gui
             _master.BotDeleteEvent += _master_BotDeleteEvent;
             _master.UserClickOnPositionShowBotInTableEvent += _master_UserClickOnPositionShowBotInTableEvent;
             Thread painterThread = new Thread(UpdaterThreadArea);
+            painterThread.IsBackground = true;
             painterThread.Start();
         }
 

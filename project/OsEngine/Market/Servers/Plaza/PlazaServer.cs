@@ -405,9 +405,9 @@ namespace OsEngine.Market.Servers.Plaza
         /// объект участвующий в блокировке многопоточного доступа к объектам Плаза
         /// </summary>
 
-        private object _publisherLocker = new object();
+        private readonly System.Threading.Lock _publisherLocker = new();
 
-        private object _currentOrdersLosker = new object();
+        private readonly System.Threading.Lock _currentOrdersLosker = new();
 
         /// <summary>
         /// if the limit on the number of applications per second is exceeded, the system blocks the acceptance of new applications for a certain time |
@@ -415,7 +415,7 @@ namespace OsEngine.Market.Servers.Plaza
         /// </summary>
         private int _penaltyRemain = 0;
 
-        private object _penaltyRemainLock = new object();
+        private readonly System.Threading.Lock _penaltyRemainLock = new();
 
         /// <summary>
 		/// order queue for execution |
@@ -516,7 +516,7 @@ namespace OsEngine.Market.Servers.Plaza
 
         #region 3 Main stream, ConnectEvent
 
-        private object _ConnectionLocker = new object();
+        private readonly System.Threading.Lock _ConnectionLocker = new();
 
         private DateTime _connectionDateTime = DateTime.MinValue;
 
@@ -1628,7 +1628,7 @@ namespace OsEngine.Market.Servers.Plaza
             }
         }
 
-        private object _lockerUpdatePosition = new object();
+        private readonly System.Threading.Lock _lockerUpdatePosition = new();
 
         private void PlazaControllerOnUpdatePosition(PositionOnBoard positionOnBoard)
         {
@@ -3086,7 +3086,7 @@ namespace OsEngine.Market.Servers.Plaza
             }
         }
 
-        private object _changePriceOrdersArrayLocker = new object();
+        private readonly System.Threading.Lock _changePriceOrdersArrayLocker = new();
 
         /// <summary>
         /// contains a list of change orders |

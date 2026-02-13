@@ -51,14 +51,17 @@ namespace OsEngine.Market.Servers.Alor
         {
             Thread worker = new Thread(ConnectionCheckThread);
             worker.Name = "AlorCheckAlive";
+            worker.IsBackground = true;
             worker.Start();
 
             Thread worker2 = new Thread(DataMessageReader);
             worker2.Name = "AlorDataMessageReader";
+            worker2.IsBackground = true;
             worker2.Start();
 
             Thread worker3 = new Thread(PortfolioMessageReader);
             worker3.Name = "AlorPortfolioMessageReader";
+            worker3.IsBackground = true;
             worker3.Start();
         }
 
@@ -1076,7 +1079,7 @@ namespace OsEngine.Market.Servers.Alor
 
         private readonly string _wsHost = "wss://api.alor.ru/ws";
 
-        private string _socketLocker = "webSocketLockerAlor";
+        private readonly Lock _socketLocker = new();
 
         private string GetGuid()
         {
@@ -1192,7 +1195,7 @@ namespace OsEngine.Market.Servers.Alor
 
         private bool _socketPortfolioIsActive;
 
-        private string _activationLocker = "activationLocker";
+        private readonly Lock _activationLocker = new();
 
         private void CheckActivationSockets()
         {
@@ -2390,10 +2393,10 @@ namespace OsEngine.Market.Servers.Alor
 
         private List<Order> _sendOrders = new List<Order>();
 
-        private string _sendOrdersArrayLocker = "alorSendOrdersArrayLocker";
+        private readonly Lock _sendOrdersArrayLocker = new();
 
         private List<Order> _spreadOrders = new List<Order>();
-        private string _spreadOrdersLocker = "_spreadOrdersLocker";
+        private readonly Lock _spreadOrdersLocker = new();
 
         public void SendOrder(Order order)
         {
@@ -2564,7 +2567,7 @@ namespace OsEngine.Market.Servers.Alor
 
         List<AlorChangePriceOrder> _changePriceOrders = new List<AlorChangePriceOrder>();
 
-        private string _changePriceOrdersArrayLocker = "cangePriceArrayLocker";
+        private readonly Lock _changePriceOrdersArrayLocker = new();
 
         /// <summary>
         /// Order price change
@@ -2657,7 +2660,7 @@ namespace OsEngine.Market.Servers.Alor
         }
 
         List<string> _cancelOrderNums = new List<string>();
-        private string _cancelOrderNumsLocker = "_cancelOrderNumsLocker";
+        private readonly Lock _cancelOrderNumsLocker = new();
 
         public bool CancelOrder(Order order)
         {

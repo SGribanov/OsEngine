@@ -3309,7 +3309,7 @@ namespace OsEngine.Market.Servers.Tester
                 // begin / начало
                 // end / конец
 
-                StreamReader reader = new StreamReader(files[i]);
+                using StreamReader reader = new StreamReader(files[i]);
 
                 // candles / свечи: 20110111,100000,19577.00000,19655.00000,19533.00000,19585.00000,2752
                 // ticks ver.1 / тики 1 вар: 20150401,100000,86160.000000000,2
@@ -3320,7 +3320,6 @@ namespace OsEngine.Market.Servers.Tester
                 if (string.IsNullOrEmpty(firstRowInFile))
                 {
                     security.Remove(security[security.Count - 1]);
-                    reader.Close();
                     continue;
                 }
 
@@ -3453,8 +3452,6 @@ namespace OsEngine.Market.Servers.Tester
                 {
                     security.Remove(security[security.Count - 1]);
                 }
-
-                reader.Close();
             }
 
             // save securities / сохраняем бумаги
@@ -3972,7 +3969,7 @@ namespace OsEngine.Market.Servers.Tester
 
         private CandleManager _candleManager;
 
-        private object _starterLocker = new object();
+        private readonly Lock _starterLocker = new();
 
         private DateTime _lastStartSecurityTime;
 
@@ -5113,7 +5110,9 @@ namespace OsEngine.Market.Servers.Tester
 
         #region MarketDepth
 
+#pragma warning disable CS0067
         public event Action<Trade> NewMarketDepthTradeEvent;
+#pragma warning restore CS0067
 
         public event Action<MarketDepth> NewMarketDepthEvent;
 
@@ -5714,6 +5713,7 @@ namespace OsEngine.Market.Servers.Tester
             {
                 OffStreamMarketDepth();
 
+                _reader?.Close();
                 _reader = new StreamReader(FileAddress);
                 _dealsStream = null;
                 LastDateTime = DateTime.MinValue;

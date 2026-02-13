@@ -21,7 +21,7 @@ namespace OsEngine.OsData
 
         private static List<OsDataSetPainter> _painters = new List<OsDataSetPainter>();
 
-        private static string _locker = "painterAreaLocker";
+        private static readonly Lock _locker = new();
 
         private static Thread _worker;
 
@@ -32,6 +32,7 @@ namespace OsEngine.OsData
             if (_worker == null)
             {
                 _worker = new Thread(PainterThreadArea);
+                _worker.IsBackground = true;
                 _worker.Start();
             }
         }
@@ -913,7 +914,7 @@ colum12.HeaderText = "Delete";   11
 
                 if (_bar.Dispatcher.CheckAccess() == false)
                 {
-                    _bar.Dispatcher.Invoke(new Action(RePaintProgressBar));
+                    _bar.Dispatcher.InvokeAsync(new Action(RePaintProgressBar));
                     return;
                 }
 

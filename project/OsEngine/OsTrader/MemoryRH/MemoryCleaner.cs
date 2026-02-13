@@ -6,6 +6,7 @@
 using OsEngine.Logging;
 using System;
 using System.Diagnostics;
+using System.IO;
 using System.Threading;
 
 namespace OsEngine.OsTrader.MemoryRH
@@ -17,6 +18,7 @@ namespace OsEngine.OsTrader.MemoryRH
             _maxTimeWithNoCleaning = maxTimeWithNoCleaning;
             _timeCreateObj = DateTime.Now;
             Thread worker = new Thread(WorkMethod);
+            worker.IsBackground = true;
             worker.Start();
         }
 
@@ -73,19 +75,22 @@ namespace OsEngine.OsTrader.MemoryRH
 
         private void CleanUpSystem()
         {
-            string curDir = Environment.CurrentDirectory;
-
-            string dirExe = curDir + "\\MemoryRH\\ByeByeBill.exe";
+            string dirExe = Path.Combine(Environment.CurrentDirectory, "MemoryRH", "ByeByeBill.exe");
 
             try
             {
+                if (!File.Exists(dirExe))
+                {
+                    SendNewLogMessage("MemoryCleaner: file not found " + dirExe, LogMessageType.Error);
+                    return;
+                }
+
                 Process.Start(dirExe);
             }
             catch (Exception e)
             {
                 SendNewLogMessage(e.ToString(), LogMessageType.Error);
             }
-
         }
 
         private void SendNewLogMessage(string message, LogMessageType type)

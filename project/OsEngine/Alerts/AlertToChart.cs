@@ -478,7 +478,7 @@ namespace OsEngine.Alerts
 
             if (!_gridView.Dispatcher.CheckAccess())
             {
-                _gridView.Dispatcher.Invoke((SetMessage));
+                _gridView.Dispatcher.InvokeAsync((SetMessage));
                 return;
             }
 

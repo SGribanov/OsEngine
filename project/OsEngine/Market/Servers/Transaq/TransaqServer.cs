@@ -89,34 +89,42 @@ namespace OsEngine.Market.Servers.Transaq
 
             Thread worker = new Thread(CycleGettingPortfolios);
             worker.Name = "ThreadTransaqGetPortfolio";
+            worker.IsBackground = true;
             worker.Start();
 
             Thread worker2 = new Thread(ThreadPrivateDataParsingWorkPlace);
             worker2.Name = "ThreadTransaqDataParsing";
+            worker2.IsBackground = true;
             worker2.Start();
 
             Thread worker3 = new Thread(ThreadTradesParsingWorkPlace);
             worker3.Name = "TransaqThreadTradesParsing";
+            worker3.IsBackground = true;
             worker3.Start();
 
             Thread worker4 = new Thread(ThreadMarketDepthsParsingWorkPlace);
             worker4.Name = "TransaqThreadDepthsParsing";
+            worker4.IsBackground = true;
             worker4.Start();
 
             Thread worker5 = new Thread(Converter);
             worker5.Name = "TransaqThreadConverter";
+            worker5.IsBackground = true;
             worker5.Start();
 
             Thread worker6 = new Thread(ThreadUpdateAndSubscribeSecurity);
             worker6.Name = "TransaqThreadUpdateSecurity";
+            worker6.IsBackground = true;
             worker6.Start();
 
             Thread worker7 = new Thread(ThreadHistoricalDataParsingWorkPlace);
             worker7.Name = "TransaqThreadUpdateHistoricalData";
+            worker7.IsBackground = true;
             worker7.Start();
 
             Thread worker8 = new Thread(ThreadSecurityInfoParsingWorkPlace);
             worker8.Name = "TransaqThreadUpdateSecurityInfo";
+            worker8.IsBackground = true;
             worker8.Start();
         }
 
@@ -679,7 +687,7 @@ namespace OsEngine.Market.Servers.Transaq
 
         private DateTime _lastUpdateSecurityArrayTime;
 
-        private object _lockerCreateSecurities = new object();
+        private readonly Lock _lockerCreateSecurities = new();
 
         private bool IsCreateSecurities(string data)
         {
@@ -867,7 +875,7 @@ namespace OsEngine.Market.Servers.Transaq
             }
         }
 
-        private object _filterLocker = new object();
+        private readonly Lock _filterLocker = new();
 
         private bool CheckFilter(TransaqEntity.Security security)
         {
@@ -2005,7 +2013,7 @@ namespace OsEngine.Market.Servers.Transaq
 
         private List<Order> _sendOrders = new List<Order>();
 
-        private string _sendOrdersLocker = "sendOrdersLocker";
+        private readonly Lock _sendOrdersLocker = new();
 
         public bool CancelOrder(Order order)
         {
@@ -3326,7 +3334,7 @@ namespace OsEngine.Market.Servers.Transaq
 
         #region 11 Queries
 
-        private string _commandLocker = "commandSendLocker";
+        private readonly Lock _commandLocker = new();
 
         /// <summary>
         /// sent the command
@@ -3369,7 +3377,7 @@ namespace OsEngine.Market.Servers.Transaq
 
         #region 12 Helpers
 
-        private object _securityAvabilityLocker = new object();
+        private readonly Lock _securityAvabilityLocker = new();
 
         private bool CheckSecurityAvailability(Security security)
         {

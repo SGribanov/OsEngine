@@ -53,7 +53,7 @@ namespace OsEngine.Instructions
             {
                 if (MainWindow.GetDispatcher.CheckAccess() == false)
                 {
-                    MainWindow.GetDispatcher.Invoke(new Action(CreateLinksGrid));
+                    MainWindow.GetDispatcher.InvokeAsync(new Action(CreateLinksGrid));
                     return;
                 }
 

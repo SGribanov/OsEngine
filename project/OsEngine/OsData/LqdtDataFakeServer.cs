@@ -88,13 +88,13 @@ namespace OsEngine.OsData
         {
             try
             {
-                HttpClient HttpClient = new HttpClient();
+                using HttpClient httpClient = new HttpClient();
 
                 string url = "https://sbcharts.investing.com/events_charts/eu/168.json";
 
-                HttpClient.DefaultRequestHeaders.Add("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36");
+                httpClient.DefaultRequestHeaders.Add("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36");
 
-                var response = HttpClient.GetAsync(url).GetAwaiter().GetResult();
+                var response = httpClient.GetAsync(url).GetAwaiter().GetResult();
 
                 var cont = response.Content.ReadAsStringAsync().Result;
 
@@ -524,6 +524,7 @@ namespace OsEngine.OsData
 
         void IServer.CancelOrder(Order order) { }
 
+#pragma warning disable CS0067 // Interface-required events not used in this fake server
         public event Action<string, LogMessageType> NewLogMessageEvent;
         public event Action<string> ConnectStatusChangeEvent;
         public event Action NeedToReconnectEvent;
@@ -542,6 +543,7 @@ namespace OsEngine.OsData
         public event Action<MyTrade> NewMyTradeEvent;
         public event Action<Order> CancelOrderFailEvent;
         public event Action<string, LogMessageType> LogMessageEvent;
+#pragma warning restore CS0067
 
         public decimal GetLeverage(Security security)
         {

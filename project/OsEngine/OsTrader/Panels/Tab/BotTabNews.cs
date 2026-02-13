@@ -32,6 +32,7 @@ namespace OsEngine.OsTrader.Panels.Tab
                 }
 
                 _staticThread = new Thread(StaticThreadArea);
+                _staticThread.IsBackground = true;
                 _staticThread.Start();
             }
         }
@@ -41,7 +42,7 @@ namespace OsEngine.OsTrader.Panels.Tab
         /// </summary>
         private static List<BotTabNews> _newsSources = new List<BotTabNews>();
 
-        private static string _newsListLocker = "scrLocker";
+        private static readonly Lock _newsListLocker = new();
 
         /// <summary>
         /// Add a new tracking tab
@@ -77,7 +78,7 @@ namespace OsEngine.OsTrader.Panels.Tab
         /// <summary>
         /// Blocker of multi-threaded access to the activation of the rendering of screeners
         /// </summary>
-        private static object _staticThreadLocker = new object();
+        private static readonly Lock _staticThreadLocker = new();
 
         /// <summary>
         /// Thread rendering screeners

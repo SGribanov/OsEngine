@@ -1003,7 +1003,7 @@ namespace OsEngine.Market.Servers.Bitfinex.BitfinexFutures
 
         private string _webSocketPrivateUrl = "wss://api.bitfinex.com/ws/2";
 
-        private string _lockerCheckActivateionSockets = "lockerCheckActivateionSockets";
+        private readonly Lock _lockerCheckActivateionSockets = new();
 
         private List<WebSocket> _webSocketPublicMarketDepths = new List<WebSocket>();
 

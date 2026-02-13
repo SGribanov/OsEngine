@@ -71,6 +71,7 @@ namespace OsEngine.Robots.TechSamples
 
             // Worker area
             Thread worker = new Thread(StartPaintChart);
+            worker.IsBackground = true;
             worker.Start();
 
             Description = OsLocalization.Description.DescriptionLabel101;
@@ -127,7 +128,7 @@ namespace OsEngine.Robots.TechSamples
         {
             if (MainWindow.GetDispatcher.CheckAccess() == false)
             {
-                MainWindow.GetDispatcher.Invoke(new Action(CreateChart));
+                MainWindow.GetDispatcher.InvokeAsync(new Action(CreateChart));
                 return;
             }
 
@@ -241,8 +242,7 @@ namespace OsEngine.Robots.TechSamples
             {
                 if (MainWindow.GetDispatcher.CheckAccess() == false)
                 {
-                    MainWindow.GetDispatcher.Invoke(new Action<Series>(SetSeries),
-                        lineSeries);
+                    MainWindow.GetDispatcher.InvokeAsync(new Action(() => SetSeries(lineSeries)));
                     return;
                 }
 

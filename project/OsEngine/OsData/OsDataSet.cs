@@ -71,9 +71,9 @@ namespace OsEngine.OsData
                     writer.Close();
                 }
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                // ignored
+                SendNewLogMessage("OsDataSet Save error: " + ex.Message, LogMessageType.Error);
             }
         }
 
@@ -177,9 +177,9 @@ namespace OsEngine.OsData
                     DirectoryInfo info = new DirectoryInfo("Data\\" + SetName);
                     info.Delete(true);
                 }
-                catch (Exception)
+                catch (Exception ex)
                 {
-                    // ignore
+                    SendNewLogMessage("OsDataSet Delete directory error: " + ex.Message, LogMessageType.Error);
                 }
             }
 

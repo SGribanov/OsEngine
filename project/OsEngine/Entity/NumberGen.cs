@@ -5,6 +5,7 @@
 
 using System;
 using System.IO;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace OsEngine.Entity
@@ -56,7 +57,7 @@ namespace OsEngine.Entity
         /// </summary>
         private static int _numberOrderForTesting;
 
-        private static object _locker = new object();
+        private static readonly Lock _locker = new();
 
         /// <summary>
         /// take a number for a deal

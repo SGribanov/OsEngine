@@ -120,7 +120,7 @@ namespace OsEngine.Market.Servers.InteractiveBrokers
         {
             if (!Host.CheckAccess())
             {
-                Host.Dispatcher.Invoke(new Action(LoadSecOnTable));
+                Host.Dispatcher.InvokeAsync(new Action(LoadSecOnTable));
                 return;
             }
 

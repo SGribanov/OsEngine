@@ -168,6 +168,7 @@ namespace OsEngine.OsTrader.Panels.Tab.Internal
             }
 
             Thread worker = new Thread(WorkerPlace);
+            worker.IsBackground = true;
             worker.Start();
         }
 

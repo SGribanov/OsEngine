@@ -9,6 +9,7 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Threading;
 using OsEngine.OsTrader.Panels; // Assuming BotPanel is here
 
 // Roslyn specific usings
@@ -31,7 +32,7 @@ namespace OsEngine.OsTrader
         // Cache key: Tuple<ClassName, StrategyTypeName>, Value: Full path to the source file
         private readonly Dictionary<Tuple<string, string>, string> _classPathCache =
             new Dictionary<Tuple<string, string>, string>();
-        private readonly object _cacheLock = new object();
+        private readonly Lock _cacheLock = new();
 
 
         private HotUpdateManager()
@@ -184,7 +185,7 @@ namespace OsEngine.OsTrader
 
         // --- Roslyn Compilation Logic ---
         private static List<MetadataReference> _baseReferences;
-        private static readonly object _referencesLock = new object();
+        private static readonly Lock _referencesLock = new();
 
         // Comparer for MetadataReference based on Display path to avoid duplicates
         private class MetadataReferenceComparer : IEqualityComparer<MetadataReference>

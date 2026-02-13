@@ -22,11 +22,12 @@ namespace OsEngine.OsOptimizer.OptimizerEntity
                 _botsToStart.Add(new List<string>());
                 Thread worker = new Thread(WorkerArea);
                 worker.Name = i.ToString();
+                worker.IsBackground = true;
                 worker.Start();
             }
         }
 
-        private string _botLocker = "botLocker";
+        private readonly Lock _botLocker = new();
 
         public BotPanel GetBot(string botType, string botName)
         {

@@ -274,7 +274,7 @@ namespace OsEngine.Market.Servers.MoexAlgopack
 
             #region 5 Data
 
-            private readonly object _locker = new object();
+            private readonly Lock _locker = new();
 
             private ConcurrentQueue<Trade> _recievedTrades = new ConcurrentQueue<Trade>();
 

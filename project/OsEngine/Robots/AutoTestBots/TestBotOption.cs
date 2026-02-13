@@ -77,7 +77,7 @@ namespace OsEngine.Robots.AutoTestBots
 
                 if (MainWindow.GetDispatcher.CheckAccess() == false)
                 {
-                    MainWindow.GetDispatcher.Invoke(new Action(AddDataToGrid));
+                    MainWindow.GetDispatcher.InvokeAsync(new Action(AddDataToGrid));
                     return;
                 }
 
@@ -251,7 +251,7 @@ namespace OsEngine.Robots.AutoTestBots
 
             if (MainWindow.GetDispatcher.CheckAccess() == false)
             {
-                MainWindow.GetDispatcher.Invoke((Action<BotTabSimple>)_tab_NewTabCreateEvent, tab);
+                MainWindow.GetDispatcher.InvokeAsync(new Action(() => _tab_NewTabCreateEvent(tab)));
                 return;
             }
 
@@ -273,7 +273,7 @@ namespace OsEngine.Robots.AutoTestBots
         {
             if (MainWindow.GetDispatcher.CheckAccess() == false)
             {
-                MainWindow.GetDispatcher.Invoke((Action<OptionMarketData, int>)SetDataInTable, obj, row);
+                MainWindow.GetDispatcher.InvokeAsync(new Action(() => SetDataInTable(obj, row)));
                 return;
             }
 

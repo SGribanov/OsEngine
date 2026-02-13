@@ -52,22 +52,27 @@ namespace OsEngine.Market.Servers.KuCoin.KuCoinSpot
 
             Thread threadForPublicMessages = new Thread(PublicMessageReader);
             threadForPublicMessages.Name = "PublicMessageReaderKuCoin";
+            threadForPublicMessages.IsBackground = true;
             threadForPublicMessages.Start();
 
             Thread threadForPrivateMessages = new Thread(PrivateMessageReader);
             threadForPrivateMessages.Name = "PrivateMessageReaderKuCoin";
+            threadForPrivateMessages.IsBackground = true;
             threadForPrivateMessages.Start();
 
             Thread threadCheckAliveWebSocket = new Thread(CheckAliveWebSocket);
             threadCheckAliveWebSocket.Name = "CheckAliveWebSocketKuCoinSpot";
+            threadCheckAliveWebSocket.IsBackground = true;
             threadCheckAliveWebSocket.Start();
 
             Thread threadMarketDepthParsing = new Thread(ThreadMarketDepthParsing);
             threadMarketDepthParsing.Name = "ThreadKuCoinSpotMarketDepthParsing";
+            threadMarketDepthParsing.IsBackground = true;
             threadMarketDepthParsing.Start();
 
             Thread threadTradesParsing = new Thread(ThreadTradesParsing);
             threadTradesParsing.Name = "ThreadKuCoinSpotTradesParsing";
+            threadTradesParsing.IsBackground = true;
             threadTradesParsing.Start();
         }
 
@@ -581,7 +586,7 @@ namespace OsEngine.Market.Servers.KuCoin.KuCoinSpot
 
         private string _webSocketPublicUrl = "wss://ws-api-spot.kucoin.com/?token=xxx&[connectId=xxxxx]";
 
-        private string _socketLocker = "webSocketLockerKuCoin";
+        private readonly Lock _socketLocker = new();
 
         private void CreatePublicWebSocketConnect()
         {
@@ -683,7 +688,7 @@ namespace OsEngine.Market.Servers.KuCoin.KuCoinSpot
             }
         }
 
-        private string _lockerCheckActivateionSockets = "lockerCheckActivateionSocketsKuCoinFutures";
+        private readonly Lock _lockerCheckActivateionSockets = new();
 
         private void CheckActivationSockets()
         {

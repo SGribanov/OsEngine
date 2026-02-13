@@ -12,6 +12,7 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace OsEngine.OsTrader.Panels.Tab.Internal
@@ -34,9 +35,9 @@ namespace OsEngine.OsTrader.Panels.Tab.Internal
         /// </summary>
         public static List<BotManualControl> TabsToCheck = new List<BotManualControl>();
 
-        private static string _tabsAddLocker = "tabsLocker";
+        private static readonly Lock _tabsAddLocker = new();
 
-        private static string _activatorLocker = "activatorLocker";
+        private static readonly Lock _activatorLocker = new();
 
         /// <summary>
         /// Activate stream to view deals

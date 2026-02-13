@@ -70,7 +70,7 @@ namespace OsEngine.Robots.Funding
 
                 if (MainWindow.GetDispatcher.CheckAccess() == false)
                 {
-                    MainWindow.GetDispatcher.Invoke(new Action(AddDataToGrid));
+                    MainWindow.GetDispatcher.InvokeAsync(new Action(AddDataToGrid));
                     return;
                 }
 
@@ -160,7 +160,7 @@ namespace OsEngine.Robots.Funding
 
             if (MainWindow.GetDispatcher.CheckAccess() == false)
             {
-                MainWindow.GetDispatcher.Invoke(_tab_NewTabCreateEvent, tab);
+                MainWindow.GetDispatcher.InvokeAsync(new Action(() => _tab_NewTabCreateEvent(tab)));
                 return;
             }
 
@@ -182,7 +182,7 @@ namespace OsEngine.Robots.Funding
         {
             if (MainWindow.GetDispatcher.CheckAccess() == false)
             {
-                MainWindow.GetDispatcher.Invoke(SetDataInTable, tab, row);
+                MainWindow.GetDispatcher.InvokeAsync(new Action(() => SetDataInTable(tab, row)));
                 return;
             }
 

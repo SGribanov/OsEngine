@@ -85,7 +85,7 @@ namespace OsEngine.Logging
         {
             if (File.Exists(@"Engine\mailSet.txt"))
             {
-                StreamReader reader = new StreamReader(@"Engine\mailSet.txt");
+                using StreamReader reader = new StreamReader(@"Engine\mailSet.txt");
 
                 MyAdress = reader.ReadLine();
                 MyPassword = reader.ReadLine();
@@ -115,8 +115,6 @@ namespace OsEngine.Logging
 
                 }
 
-                reader.Close();
-
             }
             else
             {
@@ -133,7 +131,7 @@ namespace OsEngine.Logging
         /// </summary>
         public void Save()
         {
-            StreamWriter writer = new StreamWriter(@"Engine\mailSet.txt");
+            using StreamWriter writer = new StreamWriter(@"Engine\mailSet.txt");
             writer.WriteLine(MyAdress);
             writer.WriteLine(MyPassword);
             writer.WriteLine(Smtp);
@@ -146,7 +144,6 @@ namespace OsEngine.Logging
                     writer.WriteLine(Adress[i]);
                 }
             }
-            writer.Close();
         }
 
         /// <summary>

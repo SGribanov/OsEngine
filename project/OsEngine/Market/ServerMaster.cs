@@ -11,6 +11,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms.Integration;
 using OsEngine.Entity;
@@ -557,7 +558,7 @@ namespace OsEngine.Market
             }
         }
 
-        private static string _serversArrayLocker = "_serversArrayLocker";
+        private static readonly Lock _serversArrayLocker = new();
 
         /// <summary>
         /// disable all servers
@@ -1083,7 +1084,7 @@ namespace OsEngine.Market
             return servers;
         }
 
-        private static object _optimizerGeneratorLocker = new object();
+        private static readonly Lock _optimizerGeneratorLocker = new();
 
         /// <summary>
         /// create a new optimization server
@@ -1192,7 +1193,7 @@ namespace OsEngine.Market
         /// </summary>
         public static bool NeedToConnectAuto;
 
-        private static string _startServerLocker = "startServerLocker";
+        private static readonly Lock _startServerLocker = new();
 
         /// <summary>
         /// select a specific server type for auto connection
@@ -1383,7 +1384,7 @@ namespace OsEngine.Market
         /// <summary>
         /// object blocking multithreaded access to the functions of creating permission objects.
         /// </summary>
-        private static string _serverPermissionGeterLocker = "serverPermissionLocker";
+        private static readonly Lock _serverPermissionGeterLocker = new();
 
         /// <summary>
         /// request server permissions of the type

@@ -84,8 +84,9 @@ namespace OsEngine.Robots.High_Frequency
 
             // Create worker area
             Thread worker = new Thread(WorkerPlace);
+            worker.IsBackground = true;
             worker.Start();
-            
+
             DeleteEvent += MarketDepthScreener_DeleteEvent;
 
             Description = OsLocalization.Description.DescriptionLabel44;

@@ -5,6 +5,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Windows.Forms.Integration;
@@ -121,7 +122,7 @@ namespace OsEngine.Market
         {
             if (_hostPortfolio.Dispatcher.CheckAccess() == false)
             {
-                _hostPortfolio.Dispatcher.Invoke(new Action(StartPaint));
+                _hostPortfolio.Dispatcher.InvokeAsync(new Action(StartPaint));
                 return;
             }
 
@@ -276,7 +277,7 @@ namespace OsEngine.Market
 
                 if (!_hostPortfolio.CheckAccess())
                 {
-                    _hostPortfolio.Dispatcher.Invoke(RePaintPortfolio);
+                    _hostPortfolio.Dispatcher.InvokeAsync(RePaintPortfolio);
                     return;
                 }
 
@@ -517,7 +518,7 @@ namespace OsEngine.Market
         /// <summary>
         /// multi-thread locker to portfolios
         /// </summary>
-        private string _lockerPortfolio = "portfolio_locker";
+        private readonly Lock _lockerPortfolio = new();
 
         /// <summary>
         /// portfolios changed in the server

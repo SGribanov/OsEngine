@@ -60,18 +60,22 @@ namespace OsEngine.Market.Servers.BitMartFutures
         {
             Thread worker = new Thread(ConnectionCheckThread);
             worker.Name = "CheckAliveBitMartFutures";
+            worker.IsBackground = true;
             worker.Start();
 
             Thread worker2 = new Thread(MessageReaderPublic);
             worker2.Name = "MessageReaderPublicBitMartFutures";
+            worker2.IsBackground = true;
             worker2.Start();
 
             Thread worker3 = new Thread(MessageReaderPrivate);
             worker3.Name = "MessageReaderPrivateBitMartFutures";
+            worker3.IsBackground = true;
             worker3.Start();
 
             Thread threadGetPortfolios = new Thread(ThreadGetPortfolios);
             threadGetPortfolios.Name = "ThreadBitMartFuturesPortfolios";
+            threadGetPortfolios.IsBackground = true;
             threadGetPortfolios.Start();
 
             Thread threadExtendedData = new Thread(ThreadExtendedData);
@@ -847,7 +851,7 @@ namespace OsEngine.Market.Servers.BitMartFutures
             }
         }
 
-        private string _socketActivateLocker = "socketAcvateLocker";
+        private readonly Lock _socketActivateLocker = new();
 
         private void CheckActivationSockets()
         {
@@ -1709,7 +1713,7 @@ namespace OsEngine.Market.Servers.BitMartFutures
             return 0;
         }
 
-        private readonly object _lastMarketDepthLock = new object();
+        private readonly Lock _lastMarketDepthLock = new();
         Dictionary<string, MarketDepth> _lastMarketDepth = new Dictionary<string, MarketDepth>();
 
         private void UpdateMarketDepth(string data)

@@ -523,7 +523,7 @@ namespace OsEngine.Market.Connectors
             {
                 if (CheckBoxSaveTradeArrayInCandle.Dispatcher.CheckAccess() == false)
                 {
-                    CheckBoxSaveTradeArrayInCandle.Dispatcher.Invoke(new Action<bool>(IsCanChangeSaveTradesInCandles), canChangeSettingsSaveCandlesIn);
+                    CheckBoxSaveTradeArrayInCandle.Dispatcher.InvokeAsync(new Action(() => IsCanChangeSaveTradesInCandles(canChangeSettingsSaveCandlesIn)));
                     return;
                 }
 
@@ -585,7 +585,7 @@ namespace OsEngine.Market.Connectors
 
                 if (!ComboBoxClass.CheckAccess())
                 {
-                    ComboBoxClass.Dispatcher.Invoke(LoadPortfolioOnBox);
+                    ComboBoxClass.Dispatcher.InvokeAsync(LoadPortfolioOnBox);
                     return;
                 }
 
@@ -659,7 +659,7 @@ namespace OsEngine.Market.Connectors
             {
                 if (!ComboBoxClass.Dispatcher.CheckAccess())
                 {
-                    ComboBoxClass.Dispatcher.Invoke(LoadClassOnBox);
+                    ComboBoxClass.Dispatcher.InvokeAsync(LoadClassOnBox);
                     return;
                 }
 
@@ -1156,7 +1156,7 @@ namespace OsEngine.Market.Connectors
 
                 if (CheckBoxSaveTradeArrayInCandle.Dispatcher.CheckAccess() == false)
                 {
-                    CheckBoxSaveTradeArrayInCandle.Dispatcher.Invoke(
+                    CheckBoxSaveTradeArrayInCandle.Dispatcher.InvokeAsync(
                         new Action(TryUpdateTimeFramePermissions));
                     return;
                 }

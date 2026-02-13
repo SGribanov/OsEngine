@@ -411,6 +411,7 @@ namespace OsEngine.OsTrader.Grids
             StartButtonBlinkAnimation();
 
             Thread worker = new Thread(TableUpdateThread);
+            worker.IsBackground = true;
             worker.Start();
         }
 
@@ -1679,7 +1680,7 @@ namespace OsEngine.OsTrader.Grids
             {
                 if (MainWindow.GetDispatcher.CheckAccess() == false)
                 {
-                    MainWindow.GetDispatcher.Invoke(new Action(CreateGridTable));
+                    MainWindow.GetDispatcher.InvokeAsync(new Action(CreateGridTable));
                     return;
                 }
 

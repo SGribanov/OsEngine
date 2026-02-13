@@ -112,7 +112,7 @@ namespace OsEngine.OsTrader.Panels.Tab.Internal
         {
             if (TextBoxLimitPrice.Dispatcher.CheckAccess() == false)
             {
-                TextBoxLimitPrice.Dispatcher.Invoke(new Action(RepaintMainLabels));
+                TextBoxLimitPrice.Dispatcher.InvokeAsync(new Action(RepaintMainLabels));
                 return;
             }
 
@@ -173,7 +173,7 @@ namespace OsEngine.OsTrader.Panels.Tab.Internal
         {
             if (TextBoxLimitPrice.Dispatcher.CheckAccess() == false)
             {
-                TextBoxLimitPrice.Dispatcher.Invoke(new Action<decimal>(_marketDepthPainter_UserClickOnMDAndSelectPriceEvent), priceSelectedUser);
+                TextBoxLimitPrice.Dispatcher.InvokeAsync(new Action(() => _marketDepthPainter_UserClickOnMDAndSelectPriceEvent(priceSelectedUser)));
                 return;
             }
 
@@ -408,7 +408,7 @@ namespace OsEngine.OsTrader.Panels.Tab.Internal
         {
             if (TextBoxFakeOpenTime.Dispatcher.CheckAccess() == false)
             {
-                TextBoxFakeOpenTime.Dispatcher.Invoke(SetNowTimeInControlsFakeOpenPos);
+                TextBoxFakeOpenTime.Dispatcher.InvokeAsync(SetNowTimeInControlsFakeOpenPos);
                 return;
             }
 

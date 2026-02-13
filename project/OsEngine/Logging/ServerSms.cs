@@ -3,6 +3,7 @@
  *Ваши права на использование кода регулируются данной лицензией http://o-s-a.net/doc/license_simple_engine.pdf
 */
 
+#pragma warning disable SYSLIB0014 // WebRequest is obsolete
 using System;
 using System.IO;
 using System.Net;
@@ -50,13 +51,11 @@ namespace OsEngine.Logging
         {
             if (File.Exists(@"Engine\smsSet.txt"))
             {
-                StreamReader reader = new StreamReader(@"Engine\smsSet.txt");
+                using StreamReader reader = new StreamReader(@"Engine\smsSet.txt");
 
                 SmscLogin = reader.ReadLine();
                 SmscPassword = reader.ReadLine();
                 Phones = reader.ReadLine();
-
-                reader.Close();
             }
 
         }
@@ -67,12 +66,10 @@ namespace OsEngine.Logging
         /// </summary>
         public void Save()
         {
-            StreamWriter writer = new StreamWriter(@"Engine\smsSet.txt");
+            using StreamWriter writer = new StreamWriter(@"Engine\smsSet.txt");
             writer.WriteLine(SmscLogin);
             writer.WriteLine(SmscPassword);
             writer.WriteLine(Phones);
-
-            writer.Close();
         }
 
         /// <summary>
@@ -154,7 +151,6 @@ namespace OsEngine.Logging
             string ret;
             int i = 0;
             HttpWebRequest request;
-            StreamReader sr;
             HttpWebResponse response;
 
             do
@@ -227,7 +223,7 @@ namespace OsEngine.Logging
 
                             if (pof)
                             {
-                                FileStream fileStream = new FileStream(files[pcnt], FileMode.Open, FileAccess.Read);
+                                using FileStream fileStream = new FileStream(files[pcnt], FileMode.Open, FileAccess.Read);
 
                                 // Write out the file contents
                                 byte[] buffer = new Byte[checked((uint)Math.Min(4096, (int)fileStream.Length))];
@@ -253,7 +249,7 @@ namespace OsEngine.Logging
                         request.ContentLength = output.Length;
                     }
 
-                    Stream requestStream = request.GetRequestStream();
+                    using Stream requestStream = request.GetRequestStream();
                     requestStream.Write(output, 0, output.Length);
                 }
 
@@ -261,7 +257,7 @@ namespace OsEngine.Logging
                 {
                     response = (HttpWebResponse)request.GetResponse();
 
-                    sr = new StreamReader(response.GetResponseStream());
+                    using StreamReader sr = new StreamReader(response.GetResponseStream());
                     ret = sr.ReadToEnd();
                 }
                 catch (WebException) {

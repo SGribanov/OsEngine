@@ -129,9 +129,7 @@ namespace OsEngine.OsOptimizer
                 }
             }
 
-            GC.Collect();
-            GC.WaitForPendingFinalizers();
-            GC.Collect();
+            GC.Collect(2, GCCollectionMode.Optimized, blocking: false);
 
             TimeSpan time = DateTime.Now - timeStart;
 
@@ -1164,7 +1162,7 @@ namespace OsEngine.OsOptimizer
 
         private int _countAllServersEndTest;
 
-        private object _serverRemoveLocker = new object();
+        private readonly Lock _serverRemoveLocker = new();
 
         private List<TimeSpan> _testBotsTime = new List<TimeSpan>();
 

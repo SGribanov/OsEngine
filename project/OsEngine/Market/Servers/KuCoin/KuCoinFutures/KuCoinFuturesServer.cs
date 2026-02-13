@@ -64,30 +64,37 @@ namespace OsEngine.Market.Servers.KuCoin.KuCoinFutures
 
             Thread threadForPublicMessages = new Thread(PublicMessageReader);
             threadForPublicMessages.Name = "PublicMessageReaderKuCoin";
+            threadForPublicMessages.IsBackground = true;
             threadForPublicMessages.Start();
 
             Thread threadForPrivateMessages = new Thread(PrivateMessageReader);
             threadForPrivateMessages.Name = "PrivateMessageReaderKuCoin";
+            threadForPrivateMessages.IsBackground = true;
             threadForPrivateMessages.Start();
 
             Thread threadCheckAliveWebSocket = new Thread(CheckAliveWebSocket);
             threadCheckAliveWebSocket.Name = "CheckAliveWebSocketKuCoinFutures";
+            threadCheckAliveWebSocket.IsBackground = true;
             threadCheckAliveWebSocket.Start();
 
             Thread threadGetPortfolios = new Thread(ThreadGetPortfolios);
             threadGetPortfolios.Name = "ThreadKuCoinFuturesPortfolios";
+            threadGetPortfolios.IsBackground = true;
             threadGetPortfolios.Start();
 
             Thread threadExtendedData = new Thread(ThreadExtendedData);
             threadExtendedData.Name = "ThreadKuCoinFuturesExtendedData";
+            threadExtendedData.IsBackground = true;
             threadExtendedData.Start();
 
             Thread threadMarketDepthParsing = new Thread(ThreadMarketDepthParsing);
             threadMarketDepthParsing.Name = "ThreadKuCoinFuturesMarketDepthParsing";
+            threadMarketDepthParsing.IsBackground = true;
             threadMarketDepthParsing.Start();
 
             Thread threadTradesParsing = new Thread(ThreadTradesParsing);
             threadTradesParsing.Name = "ThreadKuCoinFuturesTradesParsing";
+            threadTradesParsing.IsBackground = true;
             threadTradesParsing.Start();
         }
 
@@ -958,7 +965,7 @@ namespace OsEngine.Market.Servers.KuCoin.KuCoinFutures
             _webSocketPrivate.ConnectAsync();
         }
 
-        private string _lockerCheckActivateionSockets = "lockerCheckActivateionSocketsKuCoinFutures";
+        private readonly Lock _lockerCheckActivateionSockets = new();
 
         private void CheckActivationSockets()
         {

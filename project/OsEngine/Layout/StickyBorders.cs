@@ -5,6 +5,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Threading;
 
 namespace OsEngine.Layout
 {
@@ -31,7 +32,7 @@ namespace OsEngine.Layout
 
         private static List<MoveWindow> _windows = new List<MoveWindow>();
 
-        private static string _windowsArrayLoker = "lockerWinArray";
+        private static readonly Lock _windowsArrayLoker = new();
 
         private static void SubscribeEvents(System.Windows.Window ui)
         {

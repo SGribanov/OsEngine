@@ -25,7 +25,9 @@ namespace OsEngine.Market.Servers.MoexFixFastTwimeFutures.Entity
         private uint DisplayQty;
         private uint DisplayVarianceQty;
         private long PrevOrderID;
+#pragma warning disable CS0169
         private int TotalAffectedOrders;
+#pragma warning restore CS0169
         private long TrdMatchID;
         private long LastPx;
         private uint LastQty;

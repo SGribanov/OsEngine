@@ -7,6 +7,7 @@ using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Globalization;
+using System.Threading;
 using System.Threading.Tasks;
 using OsEngine.Entity;
 
@@ -231,7 +232,7 @@ namespace OsEngine.Market.Connectors
 
         private List<Order> ordersOnBoard;
 
-        private string _executorLocker = "lockerOrderExecutor";
+        private readonly Lock _executorLocker = new();
 
         private bool CheckExecution(bool isFirstTime, Order order)
         {

@@ -52,14 +52,17 @@ namespace OsEngine.Market.Servers.CoinEx.Spot
         {
             Thread threadMessageReaderPublic = new Thread(MessageReaderPublic);
             threadMessageReaderPublic.Name = "MessageReaderPublicCoinExSpot";
+            threadMessageReaderPublic.IsBackground = true;
             threadMessageReaderPublic.Start();
 
             Thread threadMessageReaderPrivate = new Thread(MessageReaderPrivate);
             threadMessageReaderPrivate.Name = "MessageReaderPrivateCoinExSpot";
+            threadMessageReaderPrivate.IsBackground = true;
             threadMessageReaderPrivate.Start();
 
             Thread threadConnectionCheck = new Thread(ConnectionCheckThread);
             threadConnectionCheck.Name = "CheckAliveCoinExSpot";
+            threadConnectionCheck.IsBackground = true;
             threadConnectionCheck.Start();
         }
 
@@ -823,7 +826,7 @@ namespace OsEngine.Market.Servers.CoinEx.Spot
             _webSocketPrivate?.SendAsync($"{{\"method\":\"server.sign\",\"params\":{{\"access_id\":\"{_publicKey}\",\"signed_str\":\"{sign}\",\"timestamp\":{timestamp}}},\"id\":1}}");
         }
 
-        private string _socketActivateLocker = "socketAcvateLocker";
+        private readonly Lock _socketActivateLocker = new();
 
         private void CheckActivationSockets()
         {

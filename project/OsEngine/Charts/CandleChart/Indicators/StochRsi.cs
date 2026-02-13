@@ -6,6 +6,7 @@
 using System;
 using System.Collections.Generic;
 using System.Drawing;
+using System.Threading;
 using System.IO;
 using OsEngine.Entity;
 using OsEngine.Indicators;
@@ -424,7 +425,7 @@ namespace OsEngine.Charts.CandleChart.Indicators
             }
         }
 
-        private object _locker = new object();
+        private readonly Lock _locker = new();
 
         private Rsi _rsi = new Rsi(false);
 

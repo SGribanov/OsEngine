@@ -51,14 +51,17 @@ namespace OsEngine.Market.Servers.CoinEx.Futures
         {
             Thread threadMessageReaderPublic = new Thread(MessageReaderPublic);
             threadMessageReaderPublic.Name = "MessageReaderPublicCoinExFutures";
+            threadMessageReaderPublic.IsBackground = true;
             threadMessageReaderPublic.Start();
 
             Thread threadMessageReaderPrivate = new Thread(MessageReaderPrivate);
             threadMessageReaderPrivate.Name = "MessageReaderPrivateCoinExFutures";
+            threadMessageReaderPrivate.IsBackground = true;
             threadMessageReaderPrivate.Start();
 
             Thread threadConnectionCheck = new Thread(ConnectionCheckThread);
             threadConnectionCheck.Name = "CheckAliveCoinEx";
+            threadConnectionCheck.IsBackground = true;
             threadConnectionCheck.Start();
 
             Thread threadGetPortfolios = new Thread(ThreadGetPortfolios);
@@ -912,7 +915,7 @@ namespace OsEngine.Market.Servers.CoinEx.Futures
             wsClient.SendAsync($"{{\"method\":\"server.sign\",\"params\":{{\"access_id\":\"{_publicKey}\",\"signed_str\":\"{sign}\",\"timestamp\":{timestamp}}},\"id\":1}}");
         }
 
-        private string _socketActivateLocker = "socketAcvateLocker";
+        private readonly Lock _socketActivateLocker = new();
 
         private void CheckActivationSockets()
         {

@@ -154,7 +154,7 @@ namespace OsEngine.Robots
 
         // Cache for GetFullNamesFromFolder to avoid redundant disk I/O if called repeatedly with same path
         private static readonly Dictionary<string, List<string>> _folderFileCache = new Dictionary<string, List<string>>(StringComparer.OrdinalIgnoreCase);
-        private static readonly object _folderFileCacheLock = new object();
+        private static readonly Lock _folderFileCacheLock = new();
 
         private static List<string> GetFullNamesFromFolder(string directory)
         {
@@ -215,9 +215,9 @@ namespace OsEngine.Robots
 
         // --- Roslyn Compilation Section ---
         private static List<MetadataReference> _baseReferences;
-        private static readonly object _referencesLock = new object();
+        private static readonly Lock _referencesLock = new();
         private static readonly Dictionary<string, Type> _compiledBotTypesCache = new Dictionary<string, Type>(StringComparer.OrdinalIgnoreCase);
-        private static readonly object _compiledTypesCacheLock = new object();
+        private static readonly Lock _compiledTypesCacheLock = new();
 
         // Comparer for MetadataReference based on Display path to avoid duplicates
         private class MetadataReferenceComparer : IEqualityComparer<MetadataReference>
@@ -260,7 +260,10 @@ namespace OsEngine.Robots
                                     if (!string.IsNullOrEmpty(assembly.Location))
                                         references.Add(MetadataReference.CreateFromFile(assembly.Location));
                                 }
-                                catch { /* Ignore if assembly can't be loaded */ }
+                                catch (Exception ex)
+                                {
+                                    Console.WriteLine($"Warning: Could not load assembly {assemblyName.FullName}: {ex.Message}");
+                                }
                             }
                         }
 
@@ -496,7 +499,7 @@ namespace OsEngine.Robots
 
         public static bool NeedToReloadOptimizerBots = true; // Renamed for clarity
         private static List<string> _optimizerBotsWithParam = new List<string>();
-        private static readonly object _optimizerBotsLocker = new object();
+        private static readonly Lock _optimizerBotsLocker = new();
         private const string OptimizerBotsFileName = "Engine\\OptimizerBots.txt";
 
 
@@ -583,6 +586,7 @@ namespace OsEngine.Robots
                 // Here, passing the index directly is fine.
                 Thread worker = new Thread(LoadNamesWithParamThreadStart);
                 worker.Name = i.ToString(); // Thread index
+                worker.IsBackground = true;
                 workers.Add(worker);
 
                 // Package arguments for the thread

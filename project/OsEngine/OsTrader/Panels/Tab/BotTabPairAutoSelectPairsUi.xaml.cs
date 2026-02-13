@@ -365,7 +365,7 @@ namespace OsEngine.OsTrader.Panels.Tab
 
                 if (!ComboBoxClass.CheckAccess())
                 {
-                    ComboBoxClass.Dispatcher.Invoke(LoadPortfolioOnBox);
+                    ComboBoxClass.Dispatcher.InvokeAsync(LoadPortfolioOnBox);
                     return;
                 }
 
@@ -444,7 +444,7 @@ namespace OsEngine.OsTrader.Panels.Tab
             {
                 if (!ComboBoxClass.Dispatcher.CheckAccess())
                 {
-                    ComboBoxClass.Dispatcher.Invoke(LoadClassOnBox);
+                    ComboBoxClass.Dispatcher.InvokeAsync(LoadClassOnBox);
                     return;
                 }
                 List<IServer> serversAll = ServerMaster.GetServers();

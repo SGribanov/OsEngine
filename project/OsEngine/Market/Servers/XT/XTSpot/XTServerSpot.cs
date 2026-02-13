@@ -847,7 +847,7 @@ namespace OsEngine.Market.Servers.XT.XTSpot
                 }
             }
 
-            private string _socketActivateLocker = "socketAcvateLocker";
+            private readonly Lock _socketActivateLocker = new();
 
             private void CheckSocketsActivate()
             {

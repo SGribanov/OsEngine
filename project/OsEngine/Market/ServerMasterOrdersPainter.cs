@@ -12,6 +12,7 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Forms;
@@ -103,7 +104,7 @@ namespace OsEngine.Market
             {
                 if (_hostActiveOrders.Dispatcher.CheckAccess() == false)
                 {
-                    _hostActiveOrders.Dispatcher.Invoke(new Action(StartPaint));
+                    _hostActiveOrders.Dispatcher.InvokeAsync(new Action(StartPaint));
                     return;
                 }
 
@@ -159,19 +160,10 @@ namespace OsEngine.Market
 
                 if (hostActiveOrders.Dispatcher.CheckAccess() == false)
                 {
-                    hostActiveOrders.Dispatcher.Invoke(
-                        new Action<WindowsFormsHost,
-                        WindowsFormsHost,
-                        StartUiToPainter,
-                        System.Windows.Controls.ComboBox,
-                        System.Windows.Controls.Button,
-                        System.Windows.Controls.Button,
-                        System.Windows.Controls.ComboBox,
-                        System.Windows.Controls.Button,
-                        System.Windows.Controls.Button>(SetHostTable),
-                        hostActiveOrders, hostHistoricalOrders, startFourProgram,
+                    hostActiveOrders.Dispatcher.InvokeAsync(new Action(() =>
+                        SetHostTable(hostActiveOrders, hostHistoricalOrders, startFourProgram,
                         comboBoxActiveOrders, buttonLeftActiveOrders, buttonRightActiveOrders,
-                        comboBoxHistoryOrders,buttonLeftHistoryOrders, buttonRightHistoryOrders);
+                        comboBoxHistoryOrders, buttonLeftHistoryOrders, buttonRightHistoryOrders)));
  
                     return;
                 }
@@ -748,7 +740,7 @@ namespace OsEngine.Market
 
         private WindowsFormsHost _hostHistoricalOrders;
 
-        private object _lockerOrders = new Object();
+        private readonly Lock _lockerOrders = new();
 
         private void server_NewOrderIncomeEvent(Order order)
         {
@@ -876,7 +868,7 @@ namespace OsEngine.Market
             _needToPaintOrders = true;
         }
 
-        private object _lockerTrades = new Object();
+        private readonly Lock _lockerTrades = new();
 
         private void server_NewMyTradeEvent(MyTrade trade)
         {
@@ -933,9 +925,8 @@ namespace OsEngine.Market
 
                 if (host.Dispatcher.CheckAccess() == false)
                 {
-                    host.Dispatcher.Invoke(
-                        new Action<List<Order>, DataGridView, WindowsFormsHost, int, int>(PaintOrders),
-                        ordersToPaint, gridToPaint, host, pageNumber, pageSize);
+                    host.Dispatcher.InvokeAsync(new Action(() =>
+                        PaintOrders(ordersToPaint, gridToPaint, host, pageNumber, pageSize)));
 
                     return;
                 }

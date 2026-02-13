@@ -12,6 +12,7 @@ using OsEngine.Market.Servers;
 using OsEngine.Robots.Engines;
 using System;
 using System.Collections.Generic;
+using System.Threading;
 using System.Drawing;
 using System.IO;
 using System.Linq;
@@ -42,7 +43,7 @@ namespace OsEngine.OsTrader.Panels.Tab
         private bool _isDisposed;
         private BotTabOptionsUi _ui;
         private System.Threading.Timer _updateTimer;
-        private readonly object _locker = new object();
+        private readonly Lock _locker = new();
         private GlobalPositionViewer _positionViewer;
         private IServer _server;
 

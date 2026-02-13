@@ -160,7 +160,7 @@ namespace OsEngine.OsTrader.Grids
                         {
                             if (uiGrid.Dispatcher.CheckAccess() == false)
                             {
-                                uiGrid.Dispatcher.Invoke(new Action<int, bool>(DeleteAtNum), num, isAuto);
+                                uiGrid.Dispatcher.InvokeAsync(new Action(() => DeleteAtNum(num, isAuto)));
                                 return;
                             }
                             uiGrid.Close();

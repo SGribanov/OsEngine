@@ -2040,7 +2040,7 @@ namespace OsEngine.Charts.CandleChart
 
             if (!_label.Dispatcher.CheckAccess())
             {
-                _label.Dispatcher.Invoke(PaintLabelOnSlavePanel);
+                _label.Dispatcher.InvokeAsync(PaintLabelOnSlavePanel);
                 return;
             }
 

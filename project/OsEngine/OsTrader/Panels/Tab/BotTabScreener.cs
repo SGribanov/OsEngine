@@ -44,6 +44,7 @@ namespace OsEngine.OsTrader.Panels.Tab
                 }
 
                 _staticThread = new Thread(StaticThreadArea);
+                _staticThread.IsBackground = true;
                 _staticThread.Start();
             }
         }
@@ -53,7 +54,7 @@ namespace OsEngine.OsTrader.Panels.Tab
         /// </summary>
         private static List<BotTabScreener> _screeners = new List<BotTabScreener>();
 
-        private static string _screenersListLocker = "scrLocker";
+        private static readonly Lock _screenersListLocker = new();
 
         /// <summary>
         /// Add a new tracking tab
@@ -89,7 +90,7 @@ namespace OsEngine.OsTrader.Panels.Tab
         /// <summary>
         /// Blocker of multi-threaded access to the activation of the rendering of screeners
         /// </summary>
-        private static object _staticThreadLocker = new object();
+        private static readonly Lock _staticThreadLocker = new();
 
         /// <summary>
         /// Thread rendering screeners
@@ -1511,7 +1512,7 @@ namespace OsEngine.OsTrader.Panels.Tab
 
                 if (_host.Dispatcher.CheckAccess() == false)
                 {
-                    _host.Dispatcher.Invoke(new Action(StopPaint));
+                    _host.Dispatcher.InvokeAsync(new Action(StopPaint));
                     return;
                 }
 
@@ -1727,7 +1728,7 @@ namespace OsEngine.OsTrader.Panels.Tab
 
                 if (_host.Dispatcher.CheckAccess() == false)
                 {
-                    _host.Dispatcher.Invoke(new Action(RePaintSecuritiesGrid));
+                    _host.Dispatcher.InvokeAsync(new Action(RePaintSecuritiesGrid));
                     return;
                 }
 
@@ -1772,7 +1773,7 @@ namespace OsEngine.OsTrader.Panels.Tab
 
                 if (_host.Dispatcher.CheckAccess() == false)
                 {
-                    _host.Dispatcher.Invoke(new Action(PaintNewRow));
+                    _host.Dispatcher.InvokeAsync(new Action(PaintNewRow));
                     return;
                 }
 

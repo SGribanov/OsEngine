@@ -72,50 +72,62 @@ namespace OsEngine.Market.Servers.Bybit
 
             Thread threadPrivateMessageReader = new Thread(ThreadPrivateMessageReader);
             threadPrivateMessageReader.Name = "ThreadBybitPrivateMessageReader";
+            threadPrivateMessageReader.IsBackground = true;
             threadPrivateMessageReader.Start();
 
             Thread threadPublicMessageReader = new Thread(ThreadPublicMessageReader);
             threadPublicMessageReader.Name = "ThreadBybitPublicMessageReader";
+            threadPublicMessageReader.IsBackground = true;
             threadPublicMessageReader.Start();
 
             Thread threadMessageReaderOrderBookSpot = new Thread(ThreadMessageReaderOrderBookSpot);
             threadMessageReaderOrderBookSpot.Name = "ThreadBybitMessageReaderOrderBookSpot";
+            threadMessageReaderOrderBookSpot.IsBackground = true;
             threadMessageReaderOrderBookSpot.Start();
 
             Thread threadMessageReaderOrderBookLinear = new Thread(ThreadMessageReaderOrderBookLinear);
             threadMessageReaderOrderBookLinear.Name = "ThreadBybitMessageReaderOrderBookLinear";
+            threadMessageReaderOrderBookLinear.IsBackground = true;
             threadMessageReaderOrderBookLinear.Start();
 
             Thread threadMessageReaderTradesSpot = new Thread(ThreadMessageReaderTradesSpot);
             threadMessageReaderTradesSpot.Name = "ThreadBybitMessageReaderTradesSpot";
+            threadMessageReaderTradesSpot.IsBackground = true;
             threadMessageReaderTradesSpot.Start();
 
             Thread threadMessageReaderTradesLinear = new Thread(ThreadMessageReaderTradesLinear);
             threadMessageReaderTradesLinear.Name = "ThreadBybitMessageReaderTradesLinear";
+            threadMessageReaderTradesLinear.IsBackground = true;
             threadMessageReaderTradesLinear.Start();
 
             Thread threadGetPortfolios = new Thread(ThreadGetPortfolios);
             threadGetPortfolios.Name = "ThreadBybitGetPortfolios";
+            threadGetPortfolios.IsBackground = true;
             threadGetPortfolios.Start();
 
             Thread threadCheckAlivePublicWebSocket = new Thread(ThreadCheckAliveWebSocketThread);
             threadCheckAlivePublicWebSocket.Name = "ThreadBybitCheckAliveWebSocketThread";
+            threadCheckAlivePublicWebSocket.IsBackground = true;
             threadCheckAlivePublicWebSocket.Start();
 
             Thread threadMessageReaderOrderBookInverse = new Thread(ThreadMessageReaderOrderBookInverse);
             threadMessageReaderOrderBookInverse.Name = "ThreadBybitMessageReaderOrderBookInverse";
+            threadMessageReaderOrderBookInverse.IsBackground = true;
             threadMessageReaderOrderBookInverse.Start();
 
             Thread threadMessageReaderTradesInverse = new Thread(ThreadMessageReaderTradesInverse);
             threadMessageReaderTradesInverse.Name = "ThreadBybitMessageReaderTradesInverse";
+            threadMessageReaderTradesInverse.IsBackground = true;
             threadMessageReaderTradesInverse.Start();
 
             Thread threadMessageReaderTradesOption = new Thread(ThreadMessageReaderTradesOption);
             threadMessageReaderTradesOption.Name = "ThreadBybitMessageReaderTradesOption";
+            threadMessageReaderTradesOption.IsBackground = true;
             threadMessageReaderTradesOption.Start();
 
             Thread threadMessageReaderOrderBookOption = new Thread(ThreadMessageReaderOrderBookOption);
             threadMessageReaderOrderBookOption.Name = "ThreadBybitMessageReaderOrderBookOption";
+            threadMessageReaderOrderBookOption.IsBackground = true;
             threadMessageReaderOrderBookOption.Start();
         }
 
@@ -1269,7 +1281,7 @@ namespace OsEngine.Market.Servers.Bybit
 
         private RateGate _rateGateGetCandleHistory = new RateGate(1, TimeSpan.FromMilliseconds(50));
 
-        private string _rateGateGetCandleHistoryLocker = "_rateGateGetCandleHistoryLocker";
+        private readonly Lock _rateGateGetCandleHistoryLocker = new();
 
         public List<Candle> GetLastCandleHistory(Security security, TimeFrameBuilder timeFrameBuilder, int candleCount)
         {
@@ -4419,7 +4431,7 @@ namespace OsEngine.Market.Servers.Bybit
 
         private RateGate _rateGate = new RateGate(1, TimeSpan.FromMilliseconds(15));
 
-        private string _httpClientLocker = "httpClientLocker";
+        private readonly Lock _httpClientLocker = new();
 
         public bool CheckApiKeyInformation(string ApiKey)
         {
@@ -4618,7 +4630,7 @@ namespace OsEngine.Market.Servers.Bybit
             return res;
         }
 
-        private string _lockerServerTime = "lockerServerTime";
+        private readonly Lock _lockerServerTime = new();
 
         public string GetServerTime()
         {

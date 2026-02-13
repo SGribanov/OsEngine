@@ -10,6 +10,7 @@ using System.ComponentModel;
 using System.Globalization;
 using System.IO;
 using System.Media;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Windows.Forms.Integration;
@@ -50,7 +51,7 @@ namespace OsEngine.Logging
         /// </summary>
         public static readonly List<Log> LogsToCheck = new List<Log>();
 
-        private static object _activatorLocker = new object();
+        private static readonly Lock _activatorLocker = new();
 
         /// <summary>
         /// activate thread for saving
@@ -108,7 +109,7 @@ namespace OsEngine.Logging
         // object of log
         // объект лога
 
-        private string _starterLocker = "logStarterLocker";
+        private readonly Lock _starterLocker = new();
 
         /// <summary>
         /// constructor
@@ -421,7 +422,7 @@ namespace OsEngine.Logging
             _serversToListen = null;
         }
 
-        private static readonly object LogLocker = new object();
+        private static readonly Lock LogLocker = new();
 
         private static void AddToLogsToCheck(Log log)
         {
@@ -959,7 +960,7 @@ namespace OsEngine.Logging
             _host = host;
             if (!_host.CheckAccess())
             {
-                _host.Dispatcher.Invoke(new Action<WindowsFormsHost>(StartPaint), host);
+                _host.Dispatcher.InvokeAsync(() => StartPaint(host));
                 return;
             }
 
@@ -978,7 +979,7 @@ namespace OsEngine.Logging
             }
             if (!_host.CheckAccess())
             {
-                _host.Dispatcher.Invoke(StopPaint);
+                _host.Dispatcher.InvokeAsync(StopPaint);
                 return;
             }
             if (_host != null)
@@ -1069,7 +1070,7 @@ namespace OsEngine.Logging
             {
                 if (!MainWindow.GetDispatcher.CheckAccess())
                 {
-                    MainWindow.GetDispatcher.Invoke(new Action<LogMessage>(SetNewErrorMessage), message);
+                    MainWindow.GetDispatcher.InvokeAsync(() => SetNewErrorMessage(message));
                     return;
                 }
 
@@ -1128,7 +1129,7 @@ namespace OsEngine.Logging
             {
                 if (!MainWindow.GetDispatcher.CheckAccess())
                 {
-                    MainWindow.GetDispatcher.Invoke(new Action(ClearErrorLog));
+                    MainWindow.GetDispatcher.InvokeAsync(ClearErrorLog);
                     return;
                 }
 
@@ -1149,7 +1150,7 @@ namespace OsEngine.Logging
             {
                 if (!MainWindow.GetDispatcher.CheckAccess())
                 {
-                    MainWindow.GetDispatcher.Invoke(new Action(ShowErrorLogUi));
+                    MainWindow.GetDispatcher.InvokeAsync(ShowErrorLogUi);
                     return;
                 }
                 else

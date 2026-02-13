@@ -328,7 +328,7 @@ namespace OsEngine.Robots.Trend
             decimal takeDistance = _kTake.ValueDecimal * stopDistance;
 
             // Commission filter: take must cover commission
-            if (takeDistance < lastClose * _kComiss.ValueDecimal * _comiss.ValueDecimal)
+            if (takeDistance < lastClose * _kComiss.ValueDecimal * _comiss.ValueDecimal / 100)
             {
                 return;
             }
@@ -364,7 +364,7 @@ namespace OsEngine.Robots.Trend
             decimal takeDistance = _kTake.ValueDecimal * stopDistance;
 
             // Commission filter: take must cover commission
-            if (takeDistance < lastClose * _kComiss.ValueDecimal * _comiss.ValueDecimal)
+            if (takeDistance < lastClose * _kComiss.ValueDecimal * _comiss.ValueDecimal / 100)
             {
                 return;
             }

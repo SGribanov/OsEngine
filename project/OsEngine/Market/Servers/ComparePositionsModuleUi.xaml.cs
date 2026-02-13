@@ -74,6 +74,7 @@ namespace OsEngine.Market.Servers
             RePaintGrids();
 
             Thread worker = new Thread(RePainterThread);
+            worker.IsBackground = true;
             worker.Start();
         }
 
@@ -323,7 +324,7 @@ namespace OsEngine.Market.Servers
             {
                 if (!Host.CheckAccess())
                 {
-                    Host.Dispatcher.Invoke(RePaintGrids);
+                    Host.Dispatcher.InvokeAsync(RePaintGrids);
                     return;
                 }
 

@@ -1218,59 +1218,64 @@ namespace OsEngine.Market.Servers.GateIoData
                 string line;
                 int linesProcessed = 0;
 
-                while ((line = reader.ReadLine()) != null)
+                try
                 {
-                    if (string.IsNullOrEmpty(line) || char.IsLetter(line[0]))
-                        continue;
-
-                    string[] tradeParts = line.Split(',', StringSplitOptions.RemoveEmptyEntries);
-
-                    if (tradeParts.Length < 1) continue;
-
-                    string[] timeData = tradeParts[0].Split('.');
-
-                    DateTime time = TimeManager.GetDateTimeFromTimeStampSeconds(long.Parse(timeData[0]));
-
-                    DateTime date = time.Date;
-
-                    // Если день сменился - закрываем предыдущий файл и открываем новый
-                    if (currentDayWriter == null || date != currentDay)
+                    while ((line = reader.ReadLine()) != null)
                     {
-                        // Закрываем предыдущий файл
-                        if (currentDayWriter != null)
+                        if (string.IsNullOrEmpty(line) || char.IsLetter(line[0]))
+                            continue;
+
+                        string[] tradeParts = line.Split(',', StringSplitOptions.RemoveEmptyEntries);
+
+                        if (tradeParts.Length < 1) continue;
+
+                        string[] timeData = tradeParts[0].Split('.');
+
+                        DateTime time = TimeManager.GetDateTimeFromTimeStampSeconds(long.Parse(timeData[0]));
+
+                        DateTime date = time.Date;
+
+                        // Если день сменился - закрываем предыдущий файл и открываем новый
+                        if (currentDayWriter == null || date != currentDay)
                         {
-                            currentDayWriter.Flush();
-                            currentDayWriter.Close();
-                            currentDayWriter.Dispose();
+                            // Закрываем предыдущий файл
+                            if (currentDayWriter != null)
+                            {
+                                currentDayWriter.Flush();
+                                currentDayWriter.Close();
+                                currentDayWriter.Dispose();
+                            }
+
+                            // Открываем новый файл
+                            string fileName = $"{security.Name}{date:yyyyMMdd}.csv";
+                            string filePath = Path.Combine(_tempDirectory, fileName);
+
+                            currentDayWriter = new StreamWriter(filePath, append: false, Encoding.UTF8, 1024 * 1024); // 1MB буфер записи
+                            currentDay = date;
+                            createdFiles.Add(filePath);
+                            linesProcessed = 0;
                         }
 
-                        // Открываем новый файл
-                        string fileName = $"{security.Name}{date:yyyyMMdd}.csv";
-                        string filePath = Path.Combine(_tempDirectory, fileName);
+                        // Пишем строку в текущий файл
+                        currentDayWriter.WriteLine(line);
+                        linesProcessed++;
 
-                        currentDayWriter = new StreamWriter(filePath, append: false, Encoding.UTF8, 1024 * 1024); // 1MB буфер записи
-                        currentDay = date;
-                        createdFiles.Add(filePath);
-                        linesProcessed = 0;
-                    }
-
-                    // Пишем строку в текущий файл
-                    currentDayWriter.WriteLine(line);
-                    linesProcessed++;
-
-                    // Периодически сбрасываем буфер на диск
-                    if (linesProcessed % 10000 == 0)
-                    {
-                        currentDayWriter.Flush();
+                        // Периодически сбрасываем буфер на диск
+                        if (linesProcessed % 10000 == 0)
+                        {
+                            currentDayWriter.Flush();
+                        }
                     }
                 }
-
-                // Закрываем последний файл
-                if (currentDayWriter != null)
+                finally
                 {
-                    currentDayWriter.Flush();
-                    currentDayWriter.Close();
-                    currentDayWriter.Dispose();
+                    // Закрываем последний файл
+                    if (currentDayWriter != null)
+                    {
+                        currentDayWriter.Flush();
+                        currentDayWriter.Close();
+                        currentDayWriter.Dispose();
+                    }
                 }
             }
 

@@ -58,6 +58,7 @@ namespace OsEngine.Market.Servers.Atp
         {
             ServerStatus = ServerConnectStatus.Disconnect;
             Thread worker = new Thread(SecurityLoader);
+            worker.IsBackground = true;
             worker.Start();
 
             Thread worker2 = new Thread(WorkerPlaceMarketData);
@@ -69,6 +70,7 @@ namespace OsEngine.Market.Servers.Atp
             worker3.Start();
 
             Thread worker4 = new Thread(CheckSocketThreadsStatus);
+            worker4.IsBackground = true;
             worker4.Start();
         }
 

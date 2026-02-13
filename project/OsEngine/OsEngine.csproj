@@ -1,6 +1,9 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFramework>net9.0-windows</TargetFramework>
+    <TargetFramework>net10.0-windows</TargetFramework>
+    <LangVersion>14</LangVersion>
+    <Nullable>disable</Nullable>
+    <NoWarn>NU1510</NoWarn>
     <OutputType>WinExe</OutputType>
     <ExpressionBlendVersion>12.0.41002.1</ExpressionBlendVersion>
     <IsWebBootstrapper>false</IsWebBootstrapper>
@@ -41,8 +44,8 @@
    <OutputPath>bin\Release\</OutputPath>
    <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
    <AppendRuntimeIdentifierToOutputPath>false</AppendRuntimeIdentifierToOutputPath>
-   <DebugType>full</DebugType>
-   <Optimize>False</Optimize>
+   <DebugType>portable</DebugType>
+   <Optimize>True</Optimize>
    <GenerateAssemblyInfo>True</GenerateAssemblyInfo>
   </PropertyGroup>
   <Target Name="RemoveSatelliteAssemblies" AfterTargets="ResolveAssemblyReferences">
@@ -112,36 +115,27 @@
     <Reference Include="RestSharp">
       <HintPath>bin\Debug\RestSharp.dll</HintPath>
     </Reference>
-    <Reference Include="SuperSocket.ClientEngine">
-      <HintPath>bin\Debug\SuperSocket.ClientEngine.dll</HintPath>
-    </Reference>
     <Reference Include="TInvestApi">
       <HintPath>bin\Debug\TInvestApi.dll</HintPath>
-    </Reference>
-    <Reference Include="WebSocket4Net">
-      <HintPath>bin\Debug\WebSocket4Net.dll</HintPath>
     </Reference>
     <Reference Update="System.Runtime.Serialization">
       <Private>True</Private>
     </Reference>
-    <PackageReference Include="Google.Api.CommonProtos" Version="2.16.0" />
-    <PackageReference Include="Grpc.Net.Client" Version="2.71.0" />
-    <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="4.13.0" />
-    <PackageReference Include="Microsoft.CSharp" Version="4.7.0" />
-    <PackageReference Include="Google.Protobuf" Version="3.31.0" />
-    <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
-    <PackageReference Include="System.Runtime.CompilerServices.Unsafe" Version="6.1.2" />
-    <PackageReference Include="System.ServiceModel.Syndication" Version="9.0.5" />
-    <PackageReference Include="System.Text.Encoding.CodePages" Version="9.0.5" />
-    <PackageReference Include="System.Threading.Channels" Version="9.0.5" />
-    <PackageReference Include="System.ServiceModel.Primitives" Version="8.1.2" />
-    <PackageReference Include="System.ServiceModel.Http" Version="8.1.2" />
+    <PackageReference Include="Google.Api.CommonProtos" Version="2.17.0" />
+    <PackageReference Include="Grpc.Net.Client" Version="2.76.0" />
+    <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="5.0.0" />
+    <PackageReference Include="Google.Protobuf" Version="3.33.5" />
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.4" />
+    <PackageReference Include="System.ServiceModel.Syndication" Version="10.0.3" />
+    <PackageReference Include="System.Text.Encoding.CodePages" Version="10.0.3" />
+    <PackageReference Include="System.ServiceModel.Primitives" Version="10.0.652802" />
+    <PackageReference Include="System.ServiceModel.Http" Version="10.0.652802" />
     <PackageReference Include="System.ServiceModel.Duplex" Version="6.0.0" />
-    <PackageReference Include="System.ServiceModel.NetTcp" Version="8.1.2" />
+    <PackageReference Include="System.ServiceModel.NetTcp" Version="10.0.652802" />
     <PackageReference Include="System.ServiceModel.Security" Version="6.0.0" />
-    <PackageReference Include="System.ServiceModel.Federation" Version="8.1.2" />
+    <PackageReference Include="System.ServiceModel.Federation" Version="10.0.652802" />
     <PackageReference Include="WinForms.DataVisualization" Version="1.10.0" />
-    <PackageReference Include="WTelegramClient" Version="4.3.4" />
+    <PackageReference Include="WTelegramClient" Version="4.4.1" />
   </ItemGroup>
   <ItemGroup Condition=" '$(Platform)' == 'AnyCPU' ">
     <Content Include="bin\$(Configuration)\libcrypto-3-x64.dll">
@@ -179,23 +173,6 @@
     <Resource Include="Images\MainWIndow\flag_eng.png" />
     <Resource Include="Images\MainWIndow\flag_ru.png" />
     <Resource Include="Images\OsLogo.ico" />
-  </ItemGroup>
-  <ItemGroup>
-    <BootstrapperPackage Include=".NETFramework,Version=v4.5">
-      <Visible>False</Visible>
-      <ProductName>Microsoft .NET Framework 4.5 %28x86 и x64%29</ProductName>
-      <Install>true</Install>
-    </BootstrapperPackage>
-    <BootstrapperPackage Include="Microsoft.Net.Client.3.5">
-      <Visible>False</Visible>
-      <ProductName>Клиентский профиль .NET Framework 3.5 с пакетом обновления 1 %28SP1%29</ProductName>
-      <Install>false</Install>
-    </BootstrapperPackage>
-    <BootstrapperPackage Include="Microsoft.Net.Framework.3.5.SP1">
-      <Visible>False</Visible>
-      <ProductName>.NET Framework 3.5 SP1</ProductName>
-      <Install>false</Install>
-    </BootstrapperPackage>
   </ItemGroup>
   <ItemGroup>
     <Resource Include="Images\MainWIndow\test.png" />

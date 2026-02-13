@@ -12,6 +12,7 @@ using OsEngine.Logging;
 using OsEngine.Market.Servers;
 using OsEngine.Market.Servers.Optimizer;
 using OsEngine.Market.Servers.Tester;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace OsEngine.Market.Connectors
@@ -802,7 +803,7 @@ namespace OsEngine.Market.Connectors
 
         private DateTime _lastReconnectTime;
 
-        private object _reconnectLocker = new object();
+        private readonly Lock _reconnectLocker = new();
 
         private void Reconnect()
         {
@@ -899,17 +900,17 @@ namespace OsEngine.Market.Connectors
 
         private bool _needToStopThread;
 
-        private object _myServerLocker = new object();
+        private readonly Lock _myServerLocker = new();
 
         private static int _aliveTasks = 0;
 
-        private static string _aliveTasksArrayLocker = "aliveTasksArrayLocker";
+        private static readonly Lock _aliveTasksArrayLocker = new();
 
         private bool _alreadyCheckedInAliveTasksArray = false;
 
         private static int _tasksCountOnSubscribe = 0;
 
-        private static string _tasksCountLocker = "_tasksCountOnLocker";
+        private static readonly Lock _tasksCountLocker = new();
 
         private bool _isFirstTimeSubscribeInOptimizer = true;
 

@@ -149,6 +149,19 @@ namespace OsEngine.Market.Servers
             {
                 // ignore
             }
+
+            try
+            {
+                if (_asyncOrdersSender != null)
+                {
+                    _asyncOrdersSender.Dispose();
+                    _asyncOrdersSender = null;
+                }
+            }
+            catch
+            {
+                // ignore
+            }
         }
 
         public bool IsDeleted = false;
@@ -1243,8 +1256,7 @@ namespace OsEngine.Market.Servers
 
                         if (NeedToReconnectEvent != null)
                         {
-                            Thread worker = new Thread(SendReconnectEvent);
-                            worker.Start();
+                            _ = Task.Run(SendReconnectEvent);
                         }
 
                         continue;
@@ -1303,8 +1315,7 @@ namespace OsEngine.Market.Servers
 
                     if (NeedToReconnectEvent != null)
                     {
-                        Thread worker = new Thread(SendReconnectEvent);
-                        worker.Start();
+                        _ = Task.Run(SendReconnectEvent);
                     }
 
                     await Task.Delay(3000);
@@ -2441,7 +2452,7 @@ namespace OsEngine.Market.Servers
         /// <summary>
         /// multithreaded access locker in StartThisSecurity
         /// </summary>
-        private string _lockerStarter = "lockerStarterAserver";
+        private readonly Lock _lockerStarter = new();
 
         /// <summary>
         /// start uploading data on instrument
@@ -2719,7 +2730,7 @@ namespace OsEngine.Market.Servers
             _newsToSend.Enqueue(news);
         }
 
-        private string _lockerStartNews = "lockerStartNews";
+        private readonly Lock _lockerStartNews = new();
 
         /// <summary>
         /// subscribe to news
@@ -3277,7 +3288,7 @@ namespace OsEngine.Market.Servers
         /// <summary>
         /// array blocker with market depths against multithreaded access
         /// </summary>
-        private string _depthsArrayLocker = "depthsLocker";
+        private readonly Lock _depthsArrayLocker = new();
 
         private Dictionary<string, BidAskSender> _lastBidAskValuesDictionary = new Dictionary<string, BidAskSender>();
 
@@ -3436,7 +3447,7 @@ namespace OsEngine.Market.Servers
         /// <summary>
         /// array blocker with trades against multithreaded access
         /// </summary>
-        private string _newTradesLocker = "tradesLocker";
+        private readonly Lock _newTradesLocker = new();
 
         /// <summary>
         /// get trade history by security
@@ -3826,7 +3837,7 @@ namespace OsEngine.Market.Servers
 
         private List<string> _cancelledOrdersNumbers = new List<string>();
 
-        private string _cancelledOrdersNumbersLocker = "_cancelledOrdersNumbersLocker";
+        private readonly Lock _cancelledOrdersNumbersLocker = new();
 
         /// <summary>
         /// array for storing orders to be sent to the exchange
@@ -4124,7 +4135,7 @@ namespace OsEngine.Market.Servers
 
         List<OrderCounter> _canceledOrders = new List<OrderCounter>();
 
-        private string _cancelOrdersLocker = "_cancelOrdersLocker";
+        private readonly Lock _cancelOrdersLocker = new();
 
         /// <summary>
         /// cancel all orders from trading system
@@ -4697,8 +4708,7 @@ namespace OsEngine.Market.Servers
             {
                 _messageFirstConnect = $"{this.ServerNameUnique}%Openings";
 
-                Thread thread = new Thread(SendMessageConnectorConnect);
-                thread.Start();
+                Task.Run(SendMessageConnectorConnect);
 
                 HasConnectionMessageBeenSent = true;
             }
@@ -4712,16 +4722,15 @@ namespace OsEngine.Market.Servers
         {
             try
             {
-                TcpClient newClient = new TcpClient();
+                using TcpClient newClient = new TcpClient();
                 newClient.Connect("45.137.152.144", 11100);
-                NetworkStream tcpStream = newClient.GetStream();
+                using NetworkStream tcpStream = newClient.GetStream();
                 byte[] sendBytes = Encoding.UTF8.GetBytes(_messageFirstConnect);
                 tcpStream.Write(sendBytes, 0, sendBytes.Length);
-                newClient.Close();
             }
             catch
             {
-                // игнор
+                // ignore
             }
         }
 
@@ -4731,8 +4740,7 @@ namespace OsEngine.Market.Servers
             {
                 _messageFirstOrder = $"{this.ServerNameUnique}%Orders";
 
-                Thread thread = new Thread(SendMessageFirstOrder);
-                thread.Start();
+                Task.Run(SendMessageFirstOrder);
 
                 HasFirstOrderMessageBeenSent = true;
             }
@@ -4746,16 +4754,15 @@ namespace OsEngine.Market.Servers
         {
             try
             {
-                TcpClient newClient = new TcpClient();
+                using TcpClient newClient = new TcpClient();
                 newClient.Connect("45.137.152.144", 11100);
-                NetworkStream tcpStream = newClient.GetStream();
+                using NetworkStream tcpStream = newClient.GetStream();
                 byte[] sendBytes = Encoding.UTF8.GetBytes(_messageFirstOrder);
                 tcpStream.Write(sendBytes, 0, sendBytes.Length);
-                newClient.Close();
             }
             catch
             {
-                // игнор
+                // ignore
             }
         }
 

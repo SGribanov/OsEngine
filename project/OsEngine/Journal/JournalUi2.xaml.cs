@@ -129,6 +129,7 @@ namespace OsEngine.Journal
             PaintBotsGrid();
 
             Thread task2 = new Thread(LeftBotsPanelPainterThread);
+            task2.IsBackground = true;
             task2.Start();
 
             CreateSlidersShowPositions();
@@ -411,7 +412,7 @@ namespace OsEngine.Journal
 
                 if (!TabControlPrime.CheckAccess())
                 {
-                    TabControlPrime.Dispatcher.Invoke(RePaint);
+                    TabControlPrime.Dispatcher.InvokeAsync(RePaint);
                     return;
                 }
 
@@ -1022,8 +1023,8 @@ namespace OsEngine.Journal
             {
                 if (!GridTabPrime.Dispatcher.CheckAccess())
                 {
-                    GridTabPrime.Dispatcher.Invoke(
-                        new Action<List<Position>>(PaintProfitOnChart), positionsAll);
+                    GridTabPrime.Dispatcher.InvokeAsync(
+                        new Action(() => PaintProfitOnChart(positionsAll)));
                     return;
                 }
 
@@ -1317,7 +1318,7 @@ namespace OsEngine.Journal
                     _checkBenchmarkData = true;
                     _countLoadBenchmark++;
 
-                    _benchmark.GetData(series);
+                    _ = _benchmark.GetData(series);
                 }
                 else
                 {
@@ -1625,8 +1626,8 @@ namespace OsEngine.Journal
             {
                 if (!GridTabPrime.Dispatcher.CheckAccess())
                 {
-                    GridTabPrime.Dispatcher.Invoke(
-                        new Action<List<Position>>(UpdateVolumeShowNumbers), positionsAll);
+                    GridTabPrime.Dispatcher.InvokeAsync(
+                        new Action(() => UpdateVolumeShowNumbers(positionsAll)));
                     return;
                 }
 
@@ -1706,8 +1707,8 @@ namespace OsEngine.Journal
 
                 if (!GridTabPrime.Dispatcher.CheckAccess())
                 {
-                    GridTabPrime.Dispatcher.Invoke(
-                        new Action<List<Position>>(PaintVolumeOnChart), positionsAll);
+                    GridTabPrime.Dispatcher.InvokeAsync(
+                        new Action(() => PaintVolumeOnChart(positionsAll)));
                     return;
                 }
 
@@ -2298,8 +2299,8 @@ namespace OsEngine.Journal
             {
                 if (!GridTabPrime.Dispatcher.CheckAccess())
                 {
-                    GridTabPrime.Dispatcher.Invoke(
-                        new Action<List<Position>>(PaintPortfolioOnChart), positionsAll);
+                    GridTabPrime.Dispatcher.InvokeAsync(
+                        new Action(() => PaintPortfolioOnChart(positionsAll)));
                     return;
                 }
 
@@ -2584,8 +2585,8 @@ namespace OsEngine.Journal
             {
                 if (!GridTabPrime.Dispatcher.CheckAccess())
                 {
-                    GridTabPrime.Dispatcher.Invoke(
-                        new Action<SortedDictionary<decimal, TimeSpan>>(AddDataToGridLeverage), leverageList);
+                    GridTabPrime.Dispatcher.InvokeAsync(
+                        new Action(() => AddDataToGridLeverage(leverageList)));
                     return;
                 }
 
@@ -3335,9 +3336,8 @@ namespace OsEngine.Journal
                     fileName = fileName + ".txt";
                 }
 
-                StreamWriter writer = new StreamWriter(fileName);
+                using StreamWriter writer = new StreamWriter(fileName);
                 writer.Write(workSheet);
-                writer.Close();
             }
             catch (Exception error)
             {
@@ -3878,9 +3878,8 @@ namespace OsEngine.Journal
                     fileName = fileName + ".txt";
                 }
 
-                StreamWriter writer = new StreamWriter(fileName);
+                using StreamWriter writer = new StreamWriter(fileName);
                 writer.Write(workSheet);
-                writer.Close();
             }
             catch (Exception error)
             {
@@ -4150,7 +4149,7 @@ namespace OsEngine.Journal
             {
                 if (!TabControlPrime.CheckAccess())
                 {
-                    TabControlPrime.Dispatcher.Invoke(PaintBotsGrid);
+                    TabControlPrime.Dispatcher.InvokeAsync(PaintBotsGrid);
                     return;
                 }
 
@@ -4613,7 +4612,7 @@ namespace OsEngine.Journal
             {
                 if (TextBoxFrom.Dispatcher.CheckAccess() == false)
                 {
-                    TextBoxFrom.Dispatcher.Invoke(new Action<int>(ChangeOnOff), rowIndx);
+                    TextBoxFrom.Dispatcher.InvokeAsync(new Action(() => ChangeOnOff(rowIndx)));
                     return;
                 }
 
@@ -4904,7 +4903,7 @@ namespace OsEngine.Journal
             {
                 if (!TabControlPrime.CheckAccess())
                 {
-                    TabControlPrime.Dispatcher.Invoke(PaintSecuritiesFilterGrid);
+                    TabControlPrime.Dispatcher.InvokeAsync(PaintSecuritiesFilterGrid);
                     return;
                 }
 
@@ -4987,7 +4986,7 @@ namespace OsEngine.Journal
                 if (TextBoxFrom.Dispatcher.CheckAccess() == false)
                 {
                     Thread.Sleep(500);
-                    TextBoxFrom.Dispatcher.Invoke(new Action(ChangeSecuritiesOnOff));
+                    TextBoxFrom.Dispatcher.InvokeAsync(new Action(ChangeSecuritiesOnOff));
                     return;
                 }
 
@@ -5422,7 +5421,7 @@ namespace OsEngine.Journal
             {
                 if (TextBoxFrom.Dispatcher.CheckAccess() == false)
                 {
-                    TextBoxFrom.Dispatcher.Invoke(new Action(CreateSlidersShowPositions));
+                    TextBoxFrom.Dispatcher.InvokeAsync(new Action(CreateSlidersShowPositions));
                     return;
                 }
 

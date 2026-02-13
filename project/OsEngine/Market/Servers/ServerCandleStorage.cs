@@ -187,7 +187,7 @@ namespace OsEngine.Market.Servers
         /// <summary>
         /// blocker of multithreaded access to specifications of data stored by the object
         /// </summary>
-        private object _lockerSpec = new object();
+        private readonly Lock _lockerSpec = new();
 
         /// <summary>
         /// request an object that stores information on the data to be saved

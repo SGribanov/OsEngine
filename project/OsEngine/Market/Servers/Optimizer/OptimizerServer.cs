@@ -1821,7 +1821,7 @@ namespace OsEngine.Market.Servers.Optimizer
 
         private CandleManager _candleManager;
 
-        private object _starterLocker = new object();
+        private readonly Lock _starterLocker = new();
 
         public CandleSeries StartThisSecurity(string securityName, TimeFrameBuilder timeFrameBuilder, string securityClass)
         {

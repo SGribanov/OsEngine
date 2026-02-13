@@ -10,6 +10,7 @@ using System.IO.Compression;
 using System.Net;
 using System.Net.Http;
 using System.Text.RegularExpressions;
+using System.Threading;
 
 
 namespace OsEngine.Market.Servers.BybitData
@@ -691,7 +692,7 @@ namespace OsEngine.Market.Servers.BybitData
 
         private string _restUrl = "https://api.bybit.com";
 
-        private string _httpClientLocker = "httpClientLocker";
+        private readonly Lock _httpClientLocker = new();
 
         private string CreatePublicQuery(Dictionary<string, object> parameters, HttpMethod httpMethod, string uri)
         {

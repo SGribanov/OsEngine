@@ -17,6 +17,7 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.Globalization;
 using System.Threading;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Forms;
@@ -270,7 +271,7 @@ namespace OsEngine.Market.Connectors
             {
                 if (CheckBoxSaveTradeArrayInCandle.Dispatcher.CheckAccess() == false)
                 {
-                    CheckBoxSaveTradeArrayInCandle.Dispatcher.Invoke(new Action<bool>(IsCanChangeSaveTradesInCandles), canChangeSettingsSaveCandlesIn);
+                    CheckBoxSaveTradeArrayInCandle.Dispatcher.InvokeAsync(new Action(() => IsCanChangeSaveTradesInCandles(canChangeSettingsSaveCandlesIn)));
                     return;
                 }
 
@@ -300,8 +301,7 @@ namespace OsEngine.Market.Connectors
                     if (_gridSecurities.Rows != null
                         && _gridSecurities.Rows.Count > 0)
                     {
-                        Thread worker = new Thread(LightToSecurityGrid);
-                        worker.Start();
+                        Task.Run(LightToSecurityGrid);
                     }
 
                     return;
@@ -612,7 +612,7 @@ namespace OsEngine.Market.Connectors
 
                 if (!ComboBoxClass.CheckAccess())
                 {
-                    ComboBoxClass.Dispatcher.Invoke(new Action<bool>(LoadPortfolioOnBox), hard);
+                    ComboBoxClass.Dispatcher.InvokeAsync(new Action(() => LoadPortfolioOnBox(hard)));
                     return;
                 }
 
@@ -724,7 +724,7 @@ namespace OsEngine.Market.Connectors
             {
                 if (!ComboBoxClass.Dispatcher.CheckAccess())
                 {
-                    ComboBoxClass.Dispatcher.Invoke(LoadClassOnBox);
+                    ComboBoxClass.Dispatcher.InvokeAsync(LoadClassOnBox);
                     return;
                 }
                 List<IServer> serversAll = ServerMaster.GetServers();
@@ -1306,7 +1306,7 @@ namespace OsEngine.Market.Connectors
             {
                 if (!ComboBoxClass.CheckAccess())
                 {
-                    ComboBoxClass.Dispatcher.Invoke(SetColorOnRow, row, color);
+                    ComboBoxClass.Dispatcher.InvokeAsync(new Action(() => SetColorOnRow(row, color)));
                     return;
                 }
 
