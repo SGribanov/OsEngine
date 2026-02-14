@@ -995,6 +995,7 @@ namespace OsEngine.OsOptimizer
                 SendLogMessage(
                     OsLocalization.Optimizer.Message10,
                     LogMessageType.Error);
+                awaitObj.Dispose();
                 return null;
             }
 
