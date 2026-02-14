@@ -512,6 +512,10 @@ namespace OsEngine.OsOptimizer
             lock (_serverRemoveLocker)
             {
                 _countAllServersEndTest += count;
+                if (_countAllServersEndTest > _countAllServersMax)
+                {
+                    _countAllServersEndTest = _countAllServersMax;
+                }
             }
 
             PrimeProgressChangeEvent?.Invoke(_countAllServersEndTest, _countAllServersMax);
