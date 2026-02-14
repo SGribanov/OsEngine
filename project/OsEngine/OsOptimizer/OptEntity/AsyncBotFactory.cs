@@ -3,8 +3,10 @@
  * Ваши права на использование кода регулируются данной лицензией http://o-s-a.net/doc/license_simple_engine.pdf
 */
 
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Threading;
+using System.Threading.Tasks;
 using OsEngine.Entity;
 using OsEngine.OsTrader.Panels;
 using OsEngine.Robots;
@@ -19,129 +21,115 @@ namespace OsEngine.OsOptimizer.OptimizerEntity
         {
             for (int i = 0; i < 10; i++)
             {
-                _botsToStart.Add(new List<string>());
-                Thread worker = new Thread(WorkerArea);
-                worker.Name = i.ToString();
-                worker.IsBackground = true;
-                worker.Start();
+                Task.Factory.StartNew(
+                    WorkerArea,
+                    _stopFactory.Token,
+                    TaskCreationOptions.LongRunning,
+                    TaskScheduler.Default);
             }
         }
 
-        private readonly Lock _botLocker = new();
+        private readonly CancellationTokenSource _stopFactory = new();
+
+        private readonly ConcurrentQueue<BotCreateRequest> _botQueue = new();
+
+        private readonly SemaphoreSlim _queueSignal = new(0);
+
+        private readonly ConcurrentDictionary<string, TaskCompletionSource<BotPanel>> _botWaiters = new();
 
         public BotPanel GetBot(string botType, string botName)
         {
-            BotPanel bot = null;
+            string key = GetKey(botType, botName);
+            TaskCompletionSource<BotPanel> waiter = _botWaiters.GetOrAdd(key, _ =>
+                new TaskCompletionSource<BotPanel>(TaskCreationOptions.RunContinuationsAsynchronously));
 
-            while (true)
+            try
             {
-                for (int i = 0; i < _bots.Count; i++)
-                {
-                    if (_bots[i] == null)
-                    {
-                        continue;
-                    }
-
-                    if (_bots[i].NameStrategyUniq == botName &&
-                        _bots[i].GetNameStrategyType() == botType)
-                    {
-                        lock (_botLocker)
-                        {
-                            bot = _bots[i];
-                            _bots.RemoveAt(i);
-                        }
-
-                        return bot;
-                    }
-                }
-                Thread.Sleep(1);
+                return waiter.Task.GetAwaiter().GetResult();
+            }
+            finally
+            {
+                _botWaiters.TryRemove(key, out _);
             }
         }
 
         public void CreateNewBots(List<string> botsName, string botType, bool isScript, StartProgram startProgram)
         {
-            _botType = botType;
-            _isActivate = false;
-            for (int i = 0; i < _botsToStart.Count; i++)
+            for (int i = 0; i < botsName.Count; i++)
             {
-                List<string> names = _botsToStart[i];
+                string botName = botsName[i];
+                string key = GetKey(botType, botName);
 
-                for (int i2 = i; i2 < botsName.Count; i2 += _botsToStart.Count)
+                TaskCompletionSource<BotPanel> freshWaiter =
+                    new TaskCompletionSource<BotPanel>(TaskCreationOptions.RunContinuationsAsynchronously);
+
+                _botWaiters.AddOrUpdate(key,
+                    _ => freshWaiter,
+                    (_, old) =>
+                    {
+                        old.TrySetCanceled();
+                        return freshWaiter;
+                    });
+
+                _botQueue.Enqueue(new BotCreateRequest
                 {
-                    names.Add(botsName[i2]);
-                }
+                    BotType = botType,
+                    BotName = botName,
+                    IsScript = isScript,
+                    StartProgram = startProgram,
+                    Key = key
+                });
+
+                _queueSignal.Release();
             }
-
-            _isScript = isScript;
-            _startProgram = startProgram;
-            _isActivate = true;
         }
-
-        private bool _isActivate;
-
-        private List<List<string>> _botsToStart = new List<List<string>>();
-
-        public List<BotPanel> _bots = new List<BotPanel>();
-
-        private string _botType;
-
-        private bool _isScript;
-
-        private StartProgram _startProgram;
 
         private void WorkerArea()
         {
-            int num = Convert.ToInt32(Thread.CurrentThread.Name);
-
-            while (true)
+            while (!_stopFactory.Token.IsCancellationRequested)
             {
                 try
                 {
-                    Thread.Sleep(10);
-                    if (MainWindow.ProccesIsWorked == false)
+                    if (!_queueSignal.Wait(100, _stopFactory.Token))
                     {
-                        return;
+                        if (MainWindow.ProccesIsWorked == false)
+                        {
+                            return;
+                        }
+
+                        continue;
                     }
 
-                    if (_isActivate == false)
+                    if (!_botQueue.TryDequeue(out BotCreateRequest request))
                     {
                         continue;
                     }
 
-                    if (_botsToStart[num].Count != 0)
+                    BotPanel bot = BotFactory.GetStrategyForName(
+                        request.BotType,
+                        request.BotName,
+                        request.StartProgram,
+                        request.IsScript);
+
+                    if (_botWaiters.TryGetValue(request.Key, out TaskCompletionSource<BotPanel> waiter))
                     {
-                        Load(_botsToStart[num]);
+                        waiter.TrySetResult(bot);
                     }
+                }
+                catch (OperationCanceledException)
+                {
+                    return;
                 }
                 catch (Exception e)
                 {
                     SendLogMessage("Optimizer critical error. \n Can`t create bot. Error: " + e.ToString(), LogMessageType.Error);
-                    Thread.Sleep(1000);
                 }
             }
         }
 
-        private void Load(List<string> names)
+        private string GetKey(string botType, string botName)
         {
-            while (names.Count != 0)
-            {
-
-                BotPanel bot = BotFactory.GetStrategyForName(_botType, names[0], _startProgram, _isScript);
-
-                try
-                {
-                    names.RemoveAt(0);
-                }
-                catch
-                {
-                    // ignore
-                }
-
-                lock (_botLocker)
-                {
-                    _bots.Add(bot);
-                }
-            }
+            return botType + "||" + botName;
         }
 
         public void SendLogMessage(string message, LogMessageType type)
@@ -153,5 +141,14 @@ namespace OsEngine.OsOptimizer.OptimizerEntity
         }
 
         public event Action<string, LogMessageType> LogMessageEvent;
+
+        private class BotCreateRequest
+        {
+            public string BotType;
+            public string BotName;
+            public bool IsScript;
+            public StartProgram StartProgram;
+            public string Key;
+        }
     }
 }

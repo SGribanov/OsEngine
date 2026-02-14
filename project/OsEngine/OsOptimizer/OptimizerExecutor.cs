@@ -43,6 +43,10 @@ namespace OsEngine.OsOptimizer
 
         private readonly BotConfigurator _botConfigurator;
 
+        private SemaphoreSlim _serverSlots;
+
+        private CountdownEvent _phaseCompletion;
+
         public bool Start(List<bool> parametersOn, List<IIStrategyParameter> parameters)
         {
             if (_primeThreadWorker != null)
@@ -61,6 +65,7 @@ namespace OsEngine.OsOptimizer
             _countAllServersEndTest = 0;
             _serverNum = 1;
             _testBotsTime.Clear();
+            _serverSlots = new SemaphoreSlim(Math.Max(1, _master.ThreadsCount), Math.Max(1, _master.ThreadsCount));
 
             _primeThreadWorker = new Thread(PrimeThreadWorkerPlace);
             _primeThreadWorker.Name = "OptimizerExecutorThread";
@@ -197,6 +202,7 @@ namespace OsEngine.OsOptimizer
             List<IIStrategyParameter> allParameters, List<bool> parametersToOptimization, int inSampleBotsCount)
         {
             ReloadAllParam(allParameters);
+            _phaseCompletion = new CountdownEvent(inSampleBotsCount);
 
             if (inSampleBotsCount > 0)
             {
@@ -222,31 +228,12 @@ namespace OsEngine.OsOptimizer
 
             foreach (List<IIStrategyParameter> optimizeParamCurrent in _parameterIterator.EnumerateCombinations(optimizedParametersStart))
             {
-                while (_servers.Count >= _master.ThreadsCount)
+                if (!TryAcquireServerSlot())
                 {
-                    Thread.Sleep(1);
-                }
-
-                if (_needToStop)
-                {
-                    while (true)
-                    {
-                        Thread.Sleep(1);
-
-                        if (_servers.Count == 0)
-                        {
-                            break;
-                        }
-                    }
-
+                    WaitCurrentPhaseToComplete();
                     TestReadyEvent?.Invoke(ReportsToFazes);
                     _primeThreadWorker = null;
                     return;
-                }
-
-                while (_botsInTest.Count >= _master.ThreadsCount)
-                {
-                    Thread.Sleep(1);
                 }
 
                 //SendLogMessage("BotInSample" ,LogMessageType.System);
@@ -254,14 +241,7 @@ namespace OsEngine.OsOptimizer
                 StartNewBot(_parameters, optimizeParamCurrent, report, " OpT InSample");
             }
 
-            while (true)
-            {
-                Thread.Sleep(50);
-                if (_servers.Count == 0)
-                {
-                    break;
-                }
-            }
+            WaitCurrentPhaseToComplete();
 
             SendLogMessage(OsLocalization.Optimizer.Message5, LogMessageType.System);
         }
@@ -271,6 +251,8 @@ namespace OsEngine.OsOptimizer
             SendLogMessage(OsLocalization.Optimizer.Message6, LogMessageType.System);
 
             int outOfSampleBotsCount = reportInSample?.Reports?.Count ?? 0;
+            _phaseCompletion = new CountdownEvent(outOfSampleBotsCount);
+
             if (outOfSampleBotsCount > 0)
             {
                 lock (_serverRemoveLocker)
@@ -283,47 +265,20 @@ namespace OsEngine.OsOptimizer
 
             for (int i = 0; i < reportInSample.Reports.Count; i++)
             {
-                while (_servers.Count >= _master.ThreadsCount)
+                if (!TryAcquireServerSlot())
                 {
-                    Thread.Sleep(1);
-                }
-
-                if (_needToStop)
-                {
-                    while (true)
-                    {
-                        Thread.Sleep(1);
-                        if (_servers.Count == 0)
-                        {
-                            break;
-                        }
-                    }
-
-                    if (TestReadyEvent != null)
-                    {
-                        TestReadyEvent(ReportsToFazes);
-                    }
+                    WaitCurrentPhaseToComplete();
+                    TestReadyEvent?.Invoke(ReportsToFazes);
                     _primeThreadWorker = null;
                     return;
                 }
 
-                while (_botsInTest.Count >= _master.ThreadsCount)
-                {
-                    Thread.Sleep(1);
-                }
                 // SendLogMessage("Bot Out of Sample", LogMessageType.System);
                 StartNewBot(reportInSample.Reports[i].GetParameters(), null, report,
                     reportInSample.Reports[i].BotName.Replace(" InSample", "") + " OutOfSample");
             }
 
-            while (true)
-            {
-                Thread.Sleep(1);
-                if (_servers.Count == 0)// && _botsInTest.Count == 0)
-                {
-                    break;
-                }
-            }
+            WaitCurrentPhaseToComplete();
         }
 
         private List<bool> _parametersOn;
@@ -405,26 +360,21 @@ namespace OsEngine.OsOptimizer
             if (bot == null)
             {
                 SendLogMessage("Critical Optimizer Error. Robot cannot be created", LogMessageType.Error);
+                FinalizeNotStartedBot(server, null);
                 return;
             }
 
             // wait for the robot to connect to its data server
             // ждём пока робот подключиться к своему серверу данных
 
-            DateTime timeStartWaiting = DateTime.Now;
-
-            while (bot.IsConnected == false)
+            bool isConnected = SpinWait.SpinUntil(() => bot.IsConnected || _needToStop, TimeSpan.FromSeconds(2000));
+            if (!isConnected || _needToStop)
             {
-                Thread.Sleep(1);
-
-                if (timeStartWaiting.AddSeconds(2000) < DateTime.Now)
-                {
-
-                    SendLogMessage(
-                        OsLocalization.Optimizer.Message10,
-                        LogMessageType.Error);
-                    return;
-                }
+                SendLogMessage(
+                    OsLocalization.Optimizer.Message10,
+                    LogMessageType.Error);
+                FinalizeNotStartedBot(server, bot);
+                return;
             }
 
             lock (_serverRemoveLocker)
@@ -433,6 +383,78 @@ namespace OsEngine.OsOptimizer
             }
 
             server.TestingStart();
+        }
+
+        private bool TryAcquireServerSlot()
+        {
+            while (!_needToStop)
+            {
+                if (_serverSlots == null)
+                {
+                    return false;
+                }
+
+                if (_serverSlots.Wait(100))
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        private void WaitCurrentPhaseToComplete()
+        {
+            while (_phaseCompletion != null && !_phaseCompletion.IsSet)
+            {
+                _phaseCompletion.Wait(100);
+            }
+        }
+
+        private void FinalizeNotStartedBot(OptimizerServer server, BotPanel bot)
+        {
+            try
+            {
+                if (bot != null)
+                {
+                    bot.Clear();
+                    bot.Delete();
+                }
+            }
+            catch (Exception ex)
+            {
+                SendLogMessage(ex.ToString(), LogMessageType.Error);
+            }
+
+            lock (_serverRemoveLocker)
+            {
+                for (int i = 0; i < _servers.Count; i++)
+                {
+                    if (_servers[i].NumberServer == server.NumberServer)
+                    {
+                        _servers[i].TestingEndEvent -= server_TestingEndEvent;
+                        _servers[i].TestingProgressChangeEvent -= server_TestingProgressChangeEvent;
+                        _servers.RemoveAt(i);
+                        break;
+                    }
+                }
+            }
+
+            ServerMaster.RemoveOptimizerServer(server);
+
+            if (_phaseCompletion != null && !_phaseCompletion.IsSet)
+            {
+                _phaseCompletion.Signal();
+            }
+
+            try
+            {
+                _serverSlots?.Release();
+            }
+            catch
+            {
+                // ignored
+            }
         }
 
         private List<BotPanel> _botsInTest = new List<BotPanel>();
@@ -555,20 +577,13 @@ namespace OsEngine.OsOptimizer
                 return null;
             }
 
-            DateTime timeStartWaiting = DateTime.Now;
-
-            while (bot.IsConnected == false)
+            bool isConnected = SpinWait.SpinUntil(() => bot.IsConnected, TimeSpan.FromSeconds(20));
+            if (!isConnected)
             {
-                Thread.Sleep(10);
-
-                if (timeStartWaiting.AddSeconds(20) < DateTime.Now)
-                {
-
-                    SendLogMessage(
-                        OsLocalization.Optimizer.Message10,
-                        LogMessageType.Error);
-                    return null;
-                }
+                SendLogMessage(
+                    OsLocalization.Optimizer.Message10,
+                    LogMessageType.Error);
+                return null;
             }
 
             server.TestingStart();
@@ -576,7 +591,7 @@ namespace OsEngine.OsOptimizer
             int countSameTime = 0;
             DateTime timeServerLast = DateTime.MinValue;
 
-            timeStartWaiting = DateTime.Now;
+            DateTime timeStartWaiting = DateTime.Now;
 
             while (bot.TimeServer < reportFaze.Faze.TimeEnd)
             {
@@ -726,6 +741,20 @@ namespace OsEngine.OsOptimizer
             if (server != null)
             {
                 ServerMaster.RemoveOptimizerServer(server);
+            }
+
+            if (_phaseCompletion != null && !_phaseCompletion.IsSet)
+            {
+                _phaseCompletion.Signal();
+            }
+
+            try
+            {
+                _serverSlots?.Release();
+            }
+            catch
+            {
+                // ignored
             }
         }
 
