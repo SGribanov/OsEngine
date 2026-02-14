@@ -571,6 +571,12 @@ namespace OsEngine.OsOptimizer
             OptimizerFazeReport report, string botName, TaskCompletionSource<OptimizerReport> completionSource)
         {
             OptimizerServer server = CreateNewServer(report, true);
+            if (server == null)
+            {
+                SendLogMessage("StartNewBot skipped: optimizer server was not created.", LogMessageType.Error);
+                SafeTrySetCanceled(completionSource);
+                return;
+            }
 
             if (completionSource != null)
             {

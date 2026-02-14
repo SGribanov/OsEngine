@@ -2075,3 +2075,20 @@ After each optimizer-related change, update this file with:
 ### Risks / notes
 - No normal-path behavior change; prevents potential null-reference crash during single-bot setup.
 
+
+## Stabilization Update (2026-02-14) - Guard Null Server In StartNewBot
+### What changed
+- Updated `StartNewBot(...)` in `OptimizerExecutor`.
+- Added early guard when `CreateNewServer(...)` returns `null`.
+- Method now logs a clear error, safely cancels optional completion source, and returns before using `server.NumberServer`.
+
+### Files touched
+- `project/OsEngine/OsOptimizer/OptimizerExecutor.cs`
+
+### Validation
+- `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --configuration Debug`
+- Result: Passed 70 / Failed 0
+
+### Risks / notes
+- Prevents null-reference crash in optimizer/evaluation startup path when server creation fails.
+
