@@ -1627,3 +1627,22 @@ After each optimizer-related change, update this file with:
 
 ### Risks / notes
 - No behavior change; improves log consistency for alerting/filtering.
+
+## Stabilization Update (2026-02-14) - Null Server Guard In FinalizeNotStartedBot
+### What changed
+- Added early null-server guard in `FinalizeNotStartedBot(...)`.
+- If `server == null`, method now:
+  - logs diagnostic error;
+  - compensates phase completion via safe signal helper;
+  - releases server slot via safe release helper;
+  - returns without touching server-indexed structures.
+
+### Files touched
+- `project/OsEngine/OsOptimizer/OptimizerExecutor.cs`
+
+### Validation
+- `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --configuration Debug`
+- Result: Passed 70 / Failed 0
+
+### Risks / notes
+- Prevents potential null dereference on `server.NumberServer` in rare not-started bot edge paths.

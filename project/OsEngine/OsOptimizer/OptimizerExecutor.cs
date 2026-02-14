@@ -761,6 +761,15 @@ namespace OsEngine.OsOptimizer
         {
             SafeDisposeBotPanel(bot);
 
+            if (server == null)
+            {
+                SendLogMessage("FinalizeNotStartedBot skipped server cleanup: server is null.", LogMessageType.Error);
+                CountdownEvent nullServerPhase = _phaseCompletion;
+                SafeTrySignalPhase(nullServerPhase);
+                SafeReleaseServerSlot();
+                return;
+            }
+
             lock (_serverRemoveLocker)
             {
                 for (int i = 0; i < _servers.Count; i++)
