@@ -4704,3 +4704,21 @@ After each optimizer-related change, update this file with:
 
 ### Risks / notes
 - No runtime behavior change expected; reduces duplication and keeps text-validation semantics aligned across start/runtime/test paths.
+
+
+## Stabilization Update (2026-02-14) - Snapshot Strategy Settings In Factory Setup Path
+### What changed
+- Updated `GetInSampleOptimizationStrategy(...)` in `OptimizerExecutor`:
+  - strategy-related `_master` settings are now snapshot to local variables before validation/factory call;
+  - enum validation and `CreateInSampleStrategy(...)` argument passing now use these snapshots.
+- This removes mixed live reads of mutable `_master` fields inside strategy setup path.
+
+### Files touched
+- `project/OsEngine/OsOptimizer/OptimizerExecutor.cs`
+
+### Validation
+- `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --configuration Debug`
+- Result: Passed 70 / Failed 0
+
+### Risks / notes
+- No intended behavior change in stable configuration; improves consistency if settings are mutated concurrently during strategy initialization.

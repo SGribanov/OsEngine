@@ -941,10 +941,21 @@ namespace OsEngine.OsOptimizer
                 return null;
             }
 
-            if (!IsDefinedEnum(_master.OptimizationMethod)
-                || !IsDefinedEnum(_master.ObjectiveMetric)
-                || !IsDefinedEnum(_master.ObjectiveDirection)
-                || !IsDefinedEnum(_master.BayesianAcquisitionMode))
+            OptimizationMethodType optimizationMethod = _master.OptimizationMethod;
+            SortBotsType objectiveMetric = _master.ObjectiveMetric;
+            ObjectiveDirectionType objectiveDirection = _master.ObjectiveDirection;
+            BayesianAcquisitionModeType bayesianAcquisitionMode = _master.BayesianAcquisitionMode;
+            int bayesianInitialSamples = _master.BayesianInitialSamples;
+            int bayesianMaxIterations = _master.BayesianMaxIterations;
+            int bayesianBatchSize = _master.BayesianBatchSize;
+            decimal bayesianAcquisitionKappa = _master.BayesianAcquisitionKappa;
+            bool bayesianUseTailPass = _master.BayesianUseTailPass;
+            int bayesianTailSharePercent = _master.BayesianTailSharePercent;
+
+            if (!IsDefinedEnum(optimizationMethod)
+                || !IsDefinedEnum(objectiveMetric)
+                || !IsDefinedEnum(objectiveDirection)
+                || !IsDefinedEnum(bayesianAcquisitionMode))
             {
                 SendLogMessage("Optimizer strategy creation skipped: runtime strategy settings are invalid.", LogMessageType.Error);
                 return null;
@@ -966,19 +977,19 @@ namespace OsEngine.OsOptimizer
             try
             {
                 strategy = OptimizationStrategyFactory.CreateInSampleStrategy(
-                    _master.OptimizationMethod,
+                    optimizationMethod,
                     _parameterIterator,
                     evaluator,
                     parallel,
-                    _master.ObjectiveMetric,
-                    _master.ObjectiveDirection,
-                    _master.BayesianInitialSamples,
-                    _master.BayesianMaxIterations,
-                    _master.BayesianBatchSize,
-                    _master.BayesianAcquisitionMode,
-                    _master.BayesianAcquisitionKappa,
-                    _master.BayesianUseTailPass,
-                    _master.BayesianTailSharePercent,
+                    objectiveMetric,
+                    objectiveDirection,
+                    bayesianInitialSamples,
+                    bayesianMaxIterations,
+                    bayesianBatchSize,
+                    bayesianAcquisitionMode,
+                    bayesianAcquisitionKappa,
+                    bayesianUseTailPass,
+                    bayesianTailSharePercent,
                     out infoMessage);
             }
             catch (Exception ex)
