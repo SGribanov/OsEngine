@@ -73,6 +73,7 @@ Implemented and committed:
 64. Stabilization: added regression coverage for `BotConfigurator.CreateAndConfigureBot` null-factory-result path to ensure safe null return without exception.
 65. Stabilization: added early input guards in `BotConfigurator.CreateAndConfigureBot` for empty `botName` and `null parameters`.
 66. Stabilization: added regression coverage for `BotConfigurator.CreateAndConfigureBot` empty-botName guard.
+67. Stabilization: hardened `AsyncBotFactory.WorkerArea` error path to cancel pending waiter for failed request, preventing indefinite `GetBot` waits after bot-creation exceptions.
 
 ## Commits
 - `b1e5eabe3` — `Optimizer: persist Phase1 extraction and wiring state`

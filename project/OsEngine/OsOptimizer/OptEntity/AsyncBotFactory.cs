@@ -116,6 +116,7 @@ namespace OsEngine.OsOptimizer.OptimizerEntity
         {
             while (!_stopFactory.Token.IsCancellationRequested)
             {
+                BotCreateRequest request = null;
                 try
                 {
                     if (!_queueSignal.Wait(100, _stopFactory.Token))
@@ -128,7 +129,7 @@ namespace OsEngine.OsOptimizer.OptimizerEntity
                         continue;
                     }
 
-                    if (!_botQueue.TryDequeue(out BotCreateRequest request))
+                    if (!_botQueue.TryDequeue(out request))
                     {
                         continue;
                     }
@@ -150,6 +151,12 @@ namespace OsEngine.OsOptimizer.OptimizerEntity
                 }
                 catch (Exception e)
                 {
+                    if (request != null
+                        && _botWaiters.TryGetValue(request.Key, out TaskCompletionSource<BotPanel> waiter))
+                    {
+                        waiter.TrySetCanceled();
+                    }
+
                     SendLogMessage("Optimizer critical error. \n Can`t create bot. Error: " + e.ToString(), LogMessageType.Error);
                 }
             }
