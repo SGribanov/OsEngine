@@ -820,7 +820,7 @@ namespace OsEngine.OsOptimizer
 
             if (_pendingEvaluationByServer.TryRemove(server.NumberServer, out TaskCompletionSource<OptimizerReport> completion))
             {
-                completion.TrySetCanceled();
+                SafeTrySetCanceled(completion);
             }
 
             CountdownEvent phase = _phaseCompletion;
@@ -1199,6 +1199,18 @@ namespace OsEngine.OsOptimizer
             catch (Exception ex)
             {
                 SendLogMessage("Single-bot test optimizer server cleanup failed: " + ex, LogMessageType.Error);
+            }
+        }
+
+        private void SafeTrySetCanceled(TaskCompletionSource<OptimizerReport> completion)
+        {
+            try
+            {
+                completion?.TrySetCanceled();
+            }
+            catch (Exception ex)
+            {
+                SendLogMessage("Optimizer evaluation completion cancel failed: " + ex, LogMessageType.Error);
             }
         }
 

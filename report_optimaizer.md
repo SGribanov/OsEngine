@@ -1341,3 +1341,19 @@ After each optimizer-related change, update this file with:
 
 ### Risks / notes
 - Prevents cleanup exceptions in shared executor event/finalization paths from breaking optimization lifecycle flow.
+
+## Stabilization Update (2026-02-14) - Safe Completion Cancellation Helper In Executor Finalization
+### What changed
+- Added `SafeTrySetCanceled(TaskCompletionSource<OptimizerReport> completion)` helper in `OptimizerExecutor`.
+- Replaced direct `completion.TrySetCanceled()` in `FinalizeNotStartedBot(...)` with safe helper.
+- Helper catches and logs cancellation completion exceptions to keep finalization flow resilient.
+
+### Files touched
+- `project/OsEngine/OsOptimizer/OptimizerExecutor.cs`
+
+### Validation
+- `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --configuration Debug`
+- Result: Passed 70 / Failed 0
+
+### Risks / notes
+- Prevents rare task-completion cancellation exceptions from interrupting not-started bot finalization.
