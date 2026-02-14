@@ -800,18 +800,7 @@ namespace OsEngine.OsOptimizer
 
         private void FinalizeNotStartedBot(OptimizerServer server, BotPanel bot)
         {
-            try
-            {
-                if (bot != null)
-                {
-                    bot.Clear();
-                    bot.Delete();
-                }
-            }
-            catch (Exception ex)
-            {
-                SendLogMessage(ex.ToString(), LogMessageType.Error);
-            }
+            SafeDisposeBotPanel(bot);
 
             lock (_serverRemoveLocker)
             {
@@ -827,7 +816,7 @@ namespace OsEngine.OsOptimizer
                 }
             }
 
-            ServerMaster.RemoveOptimizerServer(server);
+            SafeRemoveOptimizerServer(server);
 
             if (_pendingEvaluationByServer.TryRemove(server.NumberServer, out TaskCompletionSource<OptimizerReport> completion))
             {
@@ -1194,7 +1183,7 @@ namespace OsEngine.OsOptimizer
             }
             catch (Exception ex)
             {
-                SendLogMessage("Single-bot test bot cleanup failed: " + ex, LogMessageType.Error);
+                SendLogMessage("Optimizer bot cleanup failed: " + ex, LogMessageType.Error);
             }
         }
 
@@ -1339,13 +1328,12 @@ namespace OsEngine.OsOptimizer
             if (bot != null)
             {
                 // уничтожаем робота
-                bot.Clear();
-                bot.Delete();
+                SafeDisposeBotPanel(bot);
             }
 
             if (server != null)
             {
-                ServerMaster.RemoveOptimizerServer(server);
+                SafeRemoveOptimizerServer(server);
             }
 
             CountdownEvent phase = _phaseCompletion;

@@ -1324,3 +1324,20 @@ After each optimizer-related change, update this file with:
 
 ### Risks / notes
 - Keeps bot cleanup logic centralized and resilient under error-path exceptions.
+
+## Stabilization Update (2026-02-14) - Reuse Safe Bot/Server Cleanup In Shared Executor Paths
+### What changed
+- Extended cleanup hardening beyond single-bot branch:
+  - `FinalizeNotStartedBot(...)` now uses `SafeDisposeBotPanel(...)` and `SafeRemoveOptimizerServer(...)`;
+  - `server_TestingEndEvent(...)` now uses same safe helpers for bot/server cleanup.
+- Updated bot cleanup diagnostic text to generic executor scope (`Optimizer bot cleanup failed`).
+
+### Files touched
+- `project/OsEngine/OsOptimizer/OptimizerExecutor.cs`
+
+### Validation
+- `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --configuration Debug`
+- Result: Passed 70 / Failed 0
+
+### Risks / notes
+- Prevents cleanup exceptions in shared executor event/finalization paths from breaking optimization lifecycle flow.
