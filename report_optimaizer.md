@@ -88,6 +88,7 @@ Implemented and committed:
 79. Stabilization: added guard for null out-of-sample target report container in `StartOptimizeFazeOutOfSample` with explicit error log and safe early return.
 80. Stabilization: hardened out-of-sample loop against null parameter payload from source report (`GetParameters()`), with safe skip + slot/countdown compensation + diagnostic log.
 81. Operability: added explicit diagnostic log for null out-of-sample source container (`reportInSample == null`) to clarify phase-skip reason.
+82. Stabilization: added guard for null target faze payload (`report.Faze == null`) in out-of-sample phase with explicit error log and safe early return.
 
 ## Commits
 - `b1e5eabe3` — `Optimizer: persist Phase1 extraction and wiring state`

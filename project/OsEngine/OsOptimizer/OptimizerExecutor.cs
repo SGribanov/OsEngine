@@ -289,6 +289,12 @@ namespace OsEngine.OsOptimizer
                 return;
             }
 
+            if (report.Faze == null)
+            {
+                SendLogMessage("OutOfSample phase skipped: target report faze is null.", LogMessageType.Error);
+                return;
+            }
+
             if (reportInSample == null)
             {
                 SendLogMessage("OutOfSample phase skipped: source in-sample report is null.", LogMessageType.System);
