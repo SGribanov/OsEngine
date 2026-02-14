@@ -2892,3 +2892,19 @@ After each optimizer-related change, update this file with:
 ### Risks / notes
 - No control-flow change; improves post-mortem context when async factory startup fails.
 
+
+## Stabilization Update (2026-02-14) - Include Script Mode In Async Factory Failure Diagnostics
+### What changed
+- Updated async factory failure logs in `OptimizerExecutor` (InSample and OutOfSample paths).
+- Added `isScript` flag to diagnostic payload for startup failures.
+
+### Files touched
+- `project/OsEngine/OsOptimizer/OptimizerExecutor.cs`
+
+### Validation
+- `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --configuration Debug`
+- Result: Passed 70 / Failed 0
+
+### Risks / notes
+- No behavior change; improves observability by separating script/non-script failure contexts.
+

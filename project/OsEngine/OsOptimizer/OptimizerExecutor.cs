@@ -224,7 +224,8 @@ namespace OsEngine.OsOptimizer
             {
                 SendLogMessage(
                     "Async bot factory start failed (InSample, count " + botNames.Count +
-                    ", bot type '" + normalizedBotType + "', faze '" + normalizedFaze + "'): " + ex,
+                    ", bot type '" + normalizedBotType + "', faze '" + normalizedFaze +
+                    "', isScript " + isScript + "): " + ex,
                     LogMessageType.Error);
                 throw;
             }
@@ -308,7 +309,8 @@ namespace OsEngine.OsOptimizer
             {
                 SendLogMessage(
                     "Async bot factory start failed (OutOfSample, count " + botNames.Count +
-                    ", bot type '" + normalizedBotType + "', faze '" + normalizedFaze + "'): " + ex,
+                    ", bot type '" + normalizedBotType + "', faze '" + normalizedFaze +
+                    "', isScript " + isScript + "): " + ex,
                     LogMessageType.Error);
                 throw;
             }
