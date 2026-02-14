@@ -686,7 +686,24 @@ namespace OsEngine.OsOptimizer
                 return completion.Task;
             }
 
-            StartNewBot(parameters, parametersOptimized, report, botName, completion);
+            try
+            {
+                StartNewBot(parameters, parametersOptimized, report, botName, completion);
+            }
+            catch (Exception ex)
+            {
+                completion.TrySetException(ex);
+                SendLogMessage("Optimizer evaluation start failed. " + ex, LogMessageType.Error);
+                try
+                {
+                    _serverSlots?.Release();
+                }
+                catch
+                {
+                    // ignored
+                }
+            }
+
             return completion.Task;
         }
 

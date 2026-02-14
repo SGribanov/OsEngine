@@ -495,3 +495,21 @@ After each optimizer-related change, update this file with:
 
 ### Risks / notes
 - Prevents unnecessary server/bot allocation on canceled evaluations and avoids temporary slot starvation in cancellation races.
+
+## Stabilization Update (2026-02-14) - Exception-Safe Evaluation Start After Slot Wait
+### What changed
+- Wrapped `StartNewBot(...)` call in `StartNewBotForEvaluationAsync` with `try/catch`.
+- On exception during evaluation start:
+  - set exception on evaluation completion (`completion.TrySetException(ex)`);
+  - emit error log with exception details;
+  - release previously acquired `_serverSlots` permit.
+
+### Files touched
+- `project/OsEngine/OsOptimizer/OptimizerExecutor.cs`
+
+### Validation
+- `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --configuration Debug`
+- Result: Passed 70 / Failed 0
+
+### Risks / notes
+- Prevents slot leaks when startup path throws unexpectedly; keeps async caller informed via faulted task.
