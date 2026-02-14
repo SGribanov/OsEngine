@@ -573,6 +573,12 @@ namespace OsEngine.OsOptimizer
         public int BotCountOneFaze(List<IIStrategyParameter> parameters, List<bool> parametersOn)
         {
             IOptimizationStrategy strategy = GetInSampleOptimizationStrategy(null);
+            if (strategy == null)
+            {
+                SendLogMessage("Optimizer bot-count estimate fallback: strategy is unavailable.", LogMessageType.Error);
+                return 0;
+            }
+
             return strategy.EstimateBotCount(parameters, parametersOn);
         }
 
