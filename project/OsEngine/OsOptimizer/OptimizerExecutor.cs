@@ -328,6 +328,13 @@ namespace OsEngine.OsOptimizer
                 List<bool> parametersOnSnapshot = _parametersOn == null ? null : new List<bool>(_parametersOn);
                 List<IIStrategyParameter> parametersSnapshot = _parameters == null ? null : new List<IIStrategyParameter>(_parameters);
 
+                if (string.IsNullOrWhiteSpace(strategyName))
+                {
+                    SendLogMessage("Optimizer prime worker skipped: strategy name is unavailable at runtime.", LogMessageType.Error);
+                    SafeInvokeTestReady(GetReportsSnapshotForPublish());
+                    return;
+                }
+
                 if (parametersOnSnapshot == null || parametersSnapshot == null)
                 {
                     SendLogMessage("Optimizer prime worker skipped: parameters snapshot is unavailable at runtime.", LogMessageType.Error);

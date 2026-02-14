@@ -4156,3 +4156,22 @@ After each optimizer-related change, update this file with:
 
 ### Risks / notes
 - No intended behavior change for valid inputs; hardens against late null injection into publicly exposed parameter collection.
+
+
+## Stabilization Update (2026-02-14) - Guard Runtime Strategy Name Availability In Worker
+### What changed
+- Added runtime guard in `PrimeThreadWorkerPlace()` for `strategyName` snapshot.
+- If strategy name is null/whitespace at worker runtime, execution is aborted safely:
+  - diagnostic log emitted;
+  - `TestReady` published with current snapshot;
+  - worker exits without entering phase execution.
+
+### Files touched
+- `project/OsEngine/OsOptimizer/OptimizerExecutor.cs`
+
+### Validation
+- `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --configuration Debug`
+- Result: Passed 70 / Failed 0
+
+### Risks / notes
+- No intended behavior change for normal flows; reduces risk from late external mutation of strategy identity while run is starting.
