@@ -3679,3 +3679,21 @@ After each optimizer-related change, update this file with:
 
 ### Risks / notes
 - Intentional robustness change: malformed phase arrays with null entries no longer crash run flow and are handled as skip-with-log.
+
+
+## Stabilization Update (2026-02-14) - Resolve OOS Source Selection To Latest InSample Report
+### What changed
+- Updated `PrimeThreadWorkerPlace()` phase execution logic:
+  - `StartOptimizeFazeInSample(...)` now uses run snapshot `currentFaze` (instead of direct `_master.Fazes[i]` read).
+  - OutOfSample branch now resolves source report via new helper `GetLatestInSampleReport()` (searches backward for last valid InSample faze report), instead of assuming the last report is always InSample.
+- Existing skip-with-log behavior is preserved when no prior InSample source is available.
+
+### Files touched
+- `project/OsEngine/OsOptimizer/OptimizerExecutor.cs`
+
+### Validation
+- `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --configuration Debug`
+- Result: Passed 70 / Failed 0
+
+### Risks / notes
+- Intentional robustness/logic correctness improvement for phase sequences containing consecutive OutOfSample entries or mixed ordering.

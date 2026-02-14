@@ -292,19 +292,19 @@ namespace OsEngine.OsOptimizer
 
                         StartAsuncBotFactoryInSample(countBots, strategyName, isScript, "InSample");
 
-                        StartOptimizeFazeInSample(_master.Fazes[i], report, _parameters, _parametersOn, countBots);
+                        StartOptimizeFazeInSample(currentFaze, report, _parameters, _parametersOn, countBots);
 
                         EndOfFazeFiltration(ReportsToFazes[ReportsToFazes.Count - 1]);
                     }
                     else
                     {
-                        if (ReportsToFazes.Count == 0)
+                        OptimizerFazeReport inSampleReport = GetLatestInSampleReport();
+                        if (inSampleReport == null)
                         {
                             SendLogMessage("OutOfSample phase skipped: no previous in-sample phase reports are available.", LogMessageType.Error);
                             continue;
                         }
 
-                        OptimizerFazeReport inSampleReport = ReportsToFazes[ReportsToFazes.Count - 1];
                         int inSampleCount = inSampleReport?.Reports?.Count ?? 0;
                         SendLogMessage("ReportsCount " + inSampleCount.ToString(), LogMessageType.System);
 
@@ -338,6 +338,26 @@ namespace OsEngine.OsOptimizer
                 Interlocked.Exchange(ref _primeThreadWorker, null);
                 DisposeRunSynchronization();
             }
+        }
+
+        private OptimizerFazeReport GetLatestInSampleReport()
+        {
+            if (ReportsToFazes == null || ReportsToFazes.Count == 0)
+            {
+                return null;
+            }
+
+            for (int i = ReportsToFazes.Count - 1; i >= 0; i--)
+            {
+                OptimizerFazeReport report = ReportsToFazes[i];
+                if (report?.Faze != null
+                    && report.Faze.TypeFaze == OptimizerFazeType.InSample)
+                {
+                    return report;
+                }
+            }
+
+            return null;
         }
 
         private void StartAsuncBotFactoryInSample(int botCount, string botType, bool isScript, string faze)
