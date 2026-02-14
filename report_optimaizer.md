@@ -2408,3 +2408,21 @@ After each optimizer-related change, update this file with:
 - No normal-path behavior change; prevents progress subscriber faults from aborting completion cleanup logic.
 
 
+
+## Stabilization Update (2026-02-14) - Guard Streaming Testing Progress Event Dispatch
+### What changed
+- Updated `server_TestingProgressChangeEvent(...)` in `OptimizerExecutor`.
+- Added explicit `null` early return for `TestingProgressChangeEvent`.
+- Wrapped subscriber invocation in `try/catch` with diagnostic logging on failure.
+
+### Files touched
+- `project/OsEngine/OsOptimizer/OptimizerExecutor.cs`
+
+### Validation
+- `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --configuration Debug`
+- Result: Passed 70 / Failed 0
+
+### Risks / notes
+- No normal-path behavior change; prevents progress subscriber exceptions from interrupting streaming progress updates.
+
+

@@ -1851,9 +1851,18 @@ namespace OsEngine.OsOptimizer
 
         private void server_TestingProgressChangeEvent(int curVal, int maxVal, int numServer)
         {
-            if (TestingProgressChangeEvent != null)
+            if (TestingProgressChangeEvent == null)
+            {
+                return;
+            }
+
+            try
             {
                 TestingProgressChangeEvent(curVal, maxVal, numServer);
+            }
+            catch (Exception ex)
+            {
+                SendLogMessage("Optimizer testing progress stream dispatch failed: " + ex, LogMessageType.Error);
             }
         }
 
