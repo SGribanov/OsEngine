@@ -28,6 +28,7 @@ Implemented and committed:
 19. Phase 5 tuning: fixed `ExpectedImprovement` acquisition to use optimistic mean (`mean + kappa * uncertainty`) before improvement calculation.
 20. Stabilization: added strict clamping for Bayesian method settings in `OptimizerSettings` (positive ints, non-negative kappa, tail share range).
 21. Stabilization: added file-level load clamp coverage for invalid Bayesian values in persisted settings.
+22. Stabilization: added strategy-level tail configuration edge-case coverage (tail-pass disabled and tail-share constructor clamping).
 
 ## Commits
 - `b1e5eabe3` — `Optimizer: persist Phase1 extraction and wiring state`
@@ -128,6 +129,8 @@ Added tests:
   - `BayesianAcquisitionPolicy_ExpectedImprovement_ShouldUseOptimisticMean`
   - `OptimizerSettings_MethodFields_ShouldClampInvalidValues`
   - `OptimizerSettings_LoadFromFile_WithInvalidBayesianValues_ShouldClampOnLoad`
+  - `BayesianOptimizationStrategy_TailPassDisabled_ShouldPlanZeroTailBudget`
+  - `BayesianOptimizationStrategy_TailSharePercent_ShouldClampToRange`
   - `OptimizerSettings_SaveLoad_ShouldPersistOptimizationMethodFields`
   - `OptimizerSettings_LoadLegacyWithoutV2Fields_ShouldKeepDefaultsForMethodSettings`
 
@@ -135,7 +138,7 @@ Command:
 - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --configuration Debug`
 
 Result:
-- Passed: 28
+- Passed: 30
 - Failed: 0
 
 ### Stabilization fixes from new tests

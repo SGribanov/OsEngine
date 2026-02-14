@@ -582,6 +582,60 @@ public class OptimizerRefactorTests
     }
 
     [Fact]
+    public async Task BayesianOptimizationStrategy_TailPassDisabled_ShouldPlanZeroTailBudget()
+    {
+        ParameterIterator iterator = new ParameterIterator();
+        IBotEvaluator evaluator = new BotEvaluator((all, optimized, ct) =>
+            Task.FromResult(new OptimizerReport(new List<IIStrategyParameter>())));
+
+        BayesianOptimizationStrategy strategy = new BayesianOptimizationStrategy(
+            iterator, evaluator, 2, SortBotsType.TotalProfit, ObjectiveDirectionType.Maximize,
+            initialSamples: 2, maxIterations: 20, batchSize: 10,
+            acquisitionMode: BayesianAcquisitionModeType.Ucb, acquisitionKappa: 0.25m,
+            useExploitationTailPass: false, tailSharePercent: 40);
+
+        List<IIStrategyParameter> allParameters = new List<IIStrategyParameter>
+        {
+            new StrategyParameterInt("A", 1, 1, 4, 1),
+            new StrategyParameterInt("B", 1, 1, 4, 1)
+        };
+        List<bool> parametersToOptimization = new List<bool> { true, true };
+
+        await strategy.OptimizeInSampleAsync(allParameters, parametersToOptimization, CancellationToken.None);
+
+        Assert.Equal(0, strategy.LastTailBudgetPlanned);
+    }
+
+    [Fact]
+    public void BayesianOptimizationStrategy_TailSharePercent_ShouldClampToRange()
+    {
+        ParameterIterator iterator = new ParameterIterator();
+
+        BayesianOptimizationStrategy low = new BayesianOptimizationStrategy(
+            iterator, botEvaluator: null, maxParallel: 1,
+            objectiveMetric: SortBotsType.TotalProfit,
+            objectiveDirection: ObjectiveDirectionType.Maximize,
+            initialSamples: 1, maxIterations: 5, batchSize: 1,
+            acquisitionMode: BayesianAcquisitionModeType.Ucb,
+            acquisitionKappa: 0.1m,
+            useExploitationTailPass: true,
+            tailSharePercent: 0);
+
+        BayesianOptimizationStrategy high = new BayesianOptimizationStrategy(
+            iterator, botEvaluator: null, maxParallel: 1,
+            objectiveMetric: SortBotsType.TotalProfit,
+            objectiveDirection: ObjectiveDirectionType.Maximize,
+            initialSamples: 1, maxIterations: 5, batchSize: 1,
+            acquisitionMode: BayesianAcquisitionModeType.Ucb,
+            acquisitionKappa: 0.1m,
+            useExploitationTailPass: true,
+            tailSharePercent: 999);
+
+        Assert.Equal(1, low.TailSharePercent);
+        Assert.Equal(50, high.TailSharePercent);
+    }
+
+    [Fact]
     public void BayesianCandidateSelector_SelectInitialBatch_ShouldSpreadAndFill()
     {
         BayesianCandidateSelector selector = new BayesianCandidateSelector(defaultBatchSize: 3);
