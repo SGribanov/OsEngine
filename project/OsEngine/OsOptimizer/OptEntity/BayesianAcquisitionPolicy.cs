@@ -31,6 +31,8 @@ namespace OsEngine.OsOptimizer.OptEntity
             BayesianAcquisitionModeType mode,
             decimal kappa)
         {
+            decimal effectiveKappa = kappa < 0 ? 0 : kappa;
+
             if (batchSize <= 0 || totalCount <= 0)
             {
                 return new List<int>();
@@ -85,12 +87,12 @@ namespace OsEngine.OsOptimizer.OptEntity
                 }
                 else if (mode == BayesianAcquisitionModeType.ExpectedImprovement)
                 {
-                    decimal optimisticMean = mean + (kappa * uncertainty);
+                    decimal optimisticMean = mean + (effectiveKappa * uncertainty);
                     acquisition = Math.Max(0m, optimisticMean - bestMean);
                 }
                 else
                 {
-                    acquisition = mean + (kappa * uncertainty);
+                    acquisition = mean + (effectiveKappa * uncertainty);
                 }
 
                 ranked.Add(new CandidateAcquisition

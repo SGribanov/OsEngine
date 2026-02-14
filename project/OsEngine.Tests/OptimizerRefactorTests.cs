@@ -62,6 +62,23 @@ public class OptimizerRefactorTests
     }
 
     [Fact]
+    public void BruteForceStrategy_EstimateBotCount_WithMismatchedFlags_ShouldThrowArgumentException()
+    {
+        ParameterIterator iterator = new ParameterIterator();
+        BruteForceStrategy strategy = new BruteForceStrategy(iterator);
+
+        List<IIStrategyParameter> allParameters = new List<IIStrategyParameter>
+        {
+            new StrategyParameterInt("A", 1, 1, 2, 1),
+            new StrategyParameterInt("B", 1, 1, 2, 1)
+        };
+        List<bool> parametersToOptimization = new List<bool> { true };
+
+        Assert.Throws<ArgumentException>(() =>
+            strategy.EstimateBotCount(allParameters, parametersToOptimization));
+    }
+
+    [Fact]
     public async Task BruteForceStrategy_OptimizeInSampleAsync_ShouldEvaluateAllCombinations()
     {
         ParameterIterator iterator = new ParameterIterator();
@@ -456,6 +473,31 @@ public class OptimizerRefactorTests
 
         Assert.Equal(4, calls);
         Assert.Equal(4, reports.Count);
+    }
+
+    [Fact]
+    public void BayesianOptimizationStrategy_EstimateBotCount_WithMismatchedFlags_ShouldThrowArgumentException()
+    {
+        ParameterIterator iterator = new ParameterIterator();
+        BayesianOptimizationStrategy strategy = new BayesianOptimizationStrategy(
+            iterator, botEvaluator: null, maxParallel: 1,
+            objectiveMetric: SortBotsType.TotalProfit,
+            objectiveDirection: ObjectiveDirectionType.Maximize,
+            initialSamples: 1, maxIterations: 5, batchSize: 1,
+            acquisitionMode: BayesianAcquisitionModeType.Ucb,
+            acquisitionKappa: 0.1m,
+            useExploitationTailPass: true,
+            tailSharePercent: 20);
+
+        List<IIStrategyParameter> allParameters = new List<IIStrategyParameter>
+        {
+            new StrategyParameterInt("A", 1, 1, 2, 1),
+            new StrategyParameterInt("B", 1, 1, 2, 1)
+        };
+        List<bool> parametersToOptimization = new List<bool> { true };
+
+        Assert.Throws<ArgumentException>(() =>
+            strategy.EstimateBotCount(allParameters, parametersToOptimization));
     }
 
     [Fact]
@@ -884,6 +926,44 @@ public class OptimizerRefactorTests
 
         Assert.Single(ei);
         Assert.Equal(9, ei[0]);
+    }
+
+    [Fact]
+    public void BayesianAcquisitionPolicy_NegativeKappa_ShouldBeTreatedAsZero()
+    {
+        BayesianCandidateSelector selector = new BayesianCandidateSelector(defaultBatchSize: 1);
+        BayesianAcquisitionPolicy policy = new BayesianAcquisitionPolicy();
+        HashSet<int> evaluated = new HashSet<int> { 0, 2 };
+        List<BayesianCandidateSelector.CandidateScore> scored = new List<BayesianCandidateSelector.CandidateScore>
+        {
+            new BayesianCandidateSelector.CandidateScore { Index = 0, Score = 10m },
+            new BayesianCandidateSelector.CandidateScore { Index = 2, Score = 0m }
+        };
+        List<List<IIStrategyParameter>> candidates = BuildIntCandidates(10, "X", 1, 10, 1);
+
+        List<int> ucbNegative = policy.SelectNextBatch(
+            totalCount: 10,
+            evaluated,
+            scored,
+            batchSize: 1,
+            fallbackSelector: selector,
+            candidates: candidates,
+            mode: BayesianAcquisitionModeType.Ucb,
+            kappa: -100m);
+
+        List<int> greedy = policy.SelectNextBatch(
+            totalCount: 10,
+            evaluated,
+            scored,
+            batchSize: 1,
+            fallbackSelector: selector,
+            candidates: candidates,
+            mode: BayesianAcquisitionModeType.Greedy,
+            kappa: 0m);
+
+        Assert.Single(ucbNegative);
+        Assert.Single(greedy);
+        Assert.Equal(greedy[0], ucbNegative[0]);
     }
 
     [Fact]
