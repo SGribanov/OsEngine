@@ -411,7 +411,7 @@ namespace OsEngine.OsOptimizer
             // wait for the robot to connect to its data server
             // ждём пока робот подключиться к своему серверу данных
 
-            bool isConnected = SpinWait.SpinUntil(() => bot.IsConnected || IsStopRequested, TimeSpan.FromSeconds(2000));
+            bool isConnected = SpinWait.SpinUntil(() => bot.IsConnected || IsStopRequested, TimeSpan.FromSeconds(20));
             if (!isConnected || IsStopRequested)
             {
                 SendLogMessage(
