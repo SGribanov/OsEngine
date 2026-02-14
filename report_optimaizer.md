@@ -78,6 +78,7 @@ Implemented and committed:
 69. Stabilization: improved `AsyncBotFactory.CancelAllWaiters` to cancel and remove waiter entries, preventing stale waiter accumulation after shutdown/error paths.
 70. Stabilization: added pre-canceled-token fast path in `AsyncBotFactory.GetBot` to avoid unnecessary waiter registration/work during stop-cancel flow.
 71. Stabilization: added explicit coverage for `BayesianOptimizationStrategy.EstimateBotCount` with no optimized parameters (`all flags false`) to lock current zero-candidate contract.
+72. Stabilization: made `AsyncBotFactory.GetBot` waiter cleanup race-safe by removing dictionary entry only when it still references the same waiter instance.
 
 ## Commits
 - `b1e5eabe3` — `Optimizer: persist Phase1 extraction and wiring state`

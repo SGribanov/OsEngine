@@ -70,7 +70,11 @@ namespace OsEngine.OsOptimizer.OptimizerEntity
             }
             finally
             {
-                _botWaiters.TryRemove(key, out _);
+                if (_botWaiters.TryGetValue(key, out TaskCompletionSource<BotPanel> current)
+                    && ReferenceEquals(current, waiter))
+                {
+                    _botWaiters.TryRemove(key, out _);
+                }
             }
         }
 
