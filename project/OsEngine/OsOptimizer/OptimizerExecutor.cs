@@ -1138,7 +1138,7 @@ namespace OsEngine.OsOptimizer
                     break;
                 }
 
-                if (token.WaitHandle.WaitOne(1000))
+                if (SafeWaitCancellationToken(token, TimeSpan.FromMilliseconds(1000)))
                 {
                     break;
                 }
@@ -1169,7 +1169,7 @@ namespace OsEngine.OsOptimizer
             if (elapsed < minRuntime)
             {
                 TimeSpan remaining = minRuntime - elapsed;
-                token.WaitHandle.WaitOne(remaining);
+                SafeWaitCancellationToken(token, remaining);
             }
 
             SafeDisposeAwaitObject(awaitObj);
@@ -1186,6 +1186,18 @@ namespace OsEngine.OsOptimizer
             catch (Exception ex)
             {
                 SendLogMessage("Single-bot test await object dispose failed: " + ex, LogMessageType.Error);
+            }
+        }
+
+        private bool SafeWaitCancellationToken(CancellationToken token, TimeSpan timeout)
+        {
+            try
+            {
+                return token.WaitHandle.WaitOne(timeout);
+            }
+            catch (ObjectDisposedException)
+            {
+                return true;
             }
         }
 

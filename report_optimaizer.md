@@ -1292,3 +1292,19 @@ After each optimizer-related change, update this file with:
 
 ### Risks / notes
 - Prevents unexpected wait exceptions from breaking single-bot control flow without recovery.
+
+## Stabilization Update (2026-02-14) - Safe Cancellation Token Wait Helper In Executor TestBot
+### What changed
+- Added `SafeWaitCancellationToken(CancellationToken token, TimeSpan timeout)` helper in `OptimizerExecutor`.
+- Replaced direct `token.WaitHandle.WaitOne(...)` calls in `TestBot(...)` with safe helper usage.
+- Helper handles `ObjectDisposedException` by returning `true` (treat as stop signal), preserving deterministic loop exit.
+
+### Files touched
+- `project/OsEngine/OsOptimizer/OptimizerExecutor.cs`
+
+### Validation
+- `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --configuration Debug`
+- Result: Passed 70 / Failed 0
+
+### Risks / notes
+- Prevents token wait-handle disposal race from crashing single-bot wait loop.
