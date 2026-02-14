@@ -501,6 +501,33 @@ public class OptimizerRefactorTests
     }
 
     [Fact]
+    public void BayesianOptimizationStrategy_EstimateBotCount_ShouldRespectBudgetCap()
+    {
+        ParameterIterator iterator = new ParameterIterator();
+        BayesianOptimizationStrategy strategy = new BayesianOptimizationStrategy(
+            iterator, botEvaluator: null, maxParallel: 1,
+            objectiveMetric: SortBotsType.TotalProfit,
+            objectiveDirection: ObjectiveDirectionType.Maximize,
+            initialSamples: 2, maxIterations: 3, batchSize: 2,
+            acquisitionMode: BayesianAcquisitionModeType.Ucb,
+            acquisitionKappa: 0.25m,
+            useExploitationTailPass: true,
+            tailSharePercent: 20);
+
+        List<IIStrategyParameter> allParameters = new List<IIStrategyParameter>
+        {
+            new StrategyParameterInt("A", 1, 1, 4, 1),
+            new StrategyParameterInt("B", 1, 1, 4, 1)
+        };
+        List<bool> parametersToOptimization = new List<bool> { true, true };
+
+        int estimated = strategy.EstimateBotCount(allParameters, parametersToOptimization);
+
+        // Grid has 16 combinations, budget is 2 + 3 = 5.
+        Assert.Equal(5, estimated);
+    }
+
+    [Fact]
     public async Task BayesianOptimizationStrategy_OptimizeInSampleAsync_WithNullFlags_ShouldThrowArgumentNullException()
     {
         ParameterIterator iterator = new ParameterIterator();

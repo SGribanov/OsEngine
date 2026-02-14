@@ -81,7 +81,14 @@ namespace OsEngine.OsOptimizer.OptEntity
         public int EstimateBotCount(List<IIStrategyParameter> allParameters, List<bool> parametersToOptimization)
         {
             ValidateInputs(allParameters, parametersToOptimization);
-            return _fallbackBackend.EstimateBotCount(allParameters, parametersToOptimization);
+            int totalCombinations = _parameterIterator.CountCombinations(allParameters, parametersToOptimization);
+            int plannedBudget = InitialSamples + MaxIterations;
+            if (plannedBudget < 1)
+            {
+                plannedBudget = 1;
+            }
+
+            return Math.Min(totalCombinations, plannedBudget);
         }
 
         public Task<List<OptimizerReport>> OptimizeInSampleAsync(

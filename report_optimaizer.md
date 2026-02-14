@@ -61,6 +61,7 @@ Implemented and committed:
 52. Stabilization: added load-path coverage for invalid bool in V2 settings (`BayesianUseTailPass`) to ensure parser keeps prior value and continues reading trailing fields.
 53. Stabilization: added explicit exception handling/logging in single-bot background runner (`RunAloneBotTestAsync`) to avoid silent fire-and-forget task failures.
 54. Stabilization: hardened `AsyncBotFactory.CreateNewBots` against null/empty input and empty bot names to avoid queueing invalid creation requests.
+55. Stabilization/behavior fix: corrected `BayesianOptimizationStrategy.EstimateBotCount` to return budget-capped estimate (`min(totalCombinations, InitialSamples + MaxIterations)`) instead of full grid count.
 
 ## Commits
 - `b1e5eabe3` — `Optimizer: persist Phase1 extraction and wiring state`
@@ -175,6 +176,7 @@ Added tests:
   - `BayesianOptimizationStrategy_OptimizeInSampleAsync_WithNullFlags_ShouldThrowArgumentNullException`
   - `BruteForceStrategy_EstimateBotCount_WithMismatchedFlags_ShouldThrowArgumentException`
   - `BayesianOptimizationStrategy_EstimateBotCount_WithMismatchedFlags_ShouldThrowArgumentException`
+  - `BayesianOptimizationStrategy_EstimateBotCount_ShouldRespectBudgetCap`
   - `BayesianAcquisitionPolicy_NegativeKappa_ShouldBeTreatedAsZero`
   - `BayesianAcquisitionPolicy_InvalidCandidates_ShouldFallbackToSelectorPath`
   - `BayesianAcquisitionPolicy_NullEvaluated_ShouldTreatAsEmptySet`
@@ -195,7 +197,7 @@ Command:
 - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --configuration Debug`
 
 Result:
-- Passed: 55
+- Passed: 56
 - Failed: 0
 
 ### Stabilization fixes from new tests
