@@ -427,21 +427,9 @@ namespace OsEngine.OsOptimizer
         {
             bool signaled = false;
             CountdownEvent phase = _phaseCompletion;
-            if (phase != null && !phase.IsSet)
+            if (SafeTrySignalPhase(phase))
             {
-                try
-                {
-                    phase.Signal();
-                    signaled = true;
-                }
-                catch (ObjectDisposedException)
-                {
-                    // ignored
-                }
-                catch (InvalidOperationException)
-                {
-                    // ignored
-                }
+                signaled = true;
             }
 
             if (signaled)
@@ -472,21 +460,13 @@ namespace OsEngine.OsOptimizer
 
             int signaledCount = 0;
 
-            while (unscheduledCount > 0 && !phase.IsSet)
+            while (unscheduledCount > 0)
             {
-                try
-                {
-                    phase.Signal();
-                    signaledCount++;
-                }
-                catch (ObjectDisposedException)
+                if (!SafeTrySignalPhase(phase))
                 {
                     break;
                 }
-                catch (InvalidOperationException)
-                {
-                    break;
-                }
+                signaledCount++;
                 unscheduledCount--;
             }
 
@@ -803,21 +783,7 @@ namespace OsEngine.OsOptimizer
             }
 
             CountdownEvent phase = _phaseCompletion;
-            if (phase != null && !phase.IsSet)
-            {
-                try
-                {
-                    phase.Signal();
-                }
-                catch (ObjectDisposedException)
-                {
-                    // ignored
-                }
-                catch (InvalidOperationException)
-                {
-                    // ignored
-                }
-            }
+            SafeTrySignalPhase(phase);
 
             SafeReleaseServerSlot();
         }
@@ -1222,6 +1188,28 @@ namespace OsEngine.OsOptimizer
             }
         }
 
+        private bool SafeTrySignalPhase(CountdownEvent phase)
+        {
+            if (phase == null || phase.IsSet)
+            {
+                return false;
+            }
+
+            try
+            {
+                phase.Signal();
+                return true;
+            }
+            catch (ObjectDisposedException)
+            {
+                return false;
+            }
+            catch (InvalidOperationException)
+            {
+                return false;
+            }
+        }
+
         private void SafeReleaseServerSlot()
         {
             try
@@ -1369,21 +1357,7 @@ namespace OsEngine.OsOptimizer
             }
 
             CountdownEvent phase = _phaseCompletion;
-            if (phase != null && !phase.IsSet)
-            {
-                try
-                {
-                    phase.Signal();
-                }
-                catch (ObjectDisposedException)
-                {
-                    // ignored
-                }
-                catch (InvalidOperationException)
-                {
-                    // ignored
-                }
-            }
+            SafeTrySignalPhase(phase);
 
             SafeReleaseServerSlot();
         }

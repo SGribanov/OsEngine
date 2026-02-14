@@ -1427,3 +1427,23 @@ After each optimizer-related change, update this file with:
 
 ### Risks / notes
 - Keeps server-slot release behavior centralized and consistent across cleanup branches.
+
+## Stabilization Update (2026-02-14) - Safe Phase Signal Helper In Executor Paths
+### What changed
+- Added `SafeTrySignalPhase(CountdownEvent phase)` helper in `OptimizerExecutor`.
+- Replaced repeated guarded `phase.Signal()` blocks with helper usage in:
+  - out-of-sample skip compensation;
+  - out-of-sample unscheduled compensation loop;
+  - not-started bot finalization;
+  - server testing-end cleanup.
+- Helper returns `bool` to preserve compensation accounting semantics.
+
+### Files touched
+- `project/OsEngine/OsOptimizer/OptimizerExecutor.cs`
+
+### Validation
+- `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --configuration Debug`
+- Result: Passed 70 / Failed 0
+
+### Risks / notes
+- Keeps phase-signal race handling centralized and reduces duplication in cleanup/compensation flow.
