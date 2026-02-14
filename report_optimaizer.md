@@ -4578,3 +4578,20 @@ After each optimizer-related change, update this file with:
 
 ### Risks / notes
 - No runtime behavior change expected; reduces duplication and keeps bot-tab validity semantics consistent across start/runtime paths.
+
+
+## Stabilization Update (2026-02-14) - Validate Non-Null Faze Content Before Start
+### What changed
+- Extended `Start(...)` faze readiness validation in `OptimizerExecutor`:
+  - after non-empty list check, validates that faze collection contains at least one non-null entry.
+- Added helper `HasAnyNonNullFaze(List<OptimizerFaze> fazes)` for this check.
+
+### Files touched
+- `project/OsEngine/OsOptimizer/OptimizerExecutor.cs`
+
+### Validation
+- `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --configuration Debug`
+- Result: Passed 70 / Failed 0
+
+### Risks / notes
+- Intentional robustness change: prevents launching optimizer with structurally empty (all-null) phase slots.

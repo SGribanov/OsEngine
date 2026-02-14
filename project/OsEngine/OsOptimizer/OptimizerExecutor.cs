@@ -77,6 +77,12 @@ namespace OsEngine.OsOptimizer
                 return false;
             }
 
+            if (!HasAnyNonNullFaze(_master.Fazes))
+            {
+                SendLogMessage("Optimizer start skipped: faze configuration contains only null entries.", LogMessageType.Error);
+                return false;
+            }
+
             if (_master.Storage == null)
             {
                 SendLogMessage("Optimizer start skipped: storage context is null.", LogMessageType.Error);
@@ -333,6 +339,24 @@ namespace OsEngine.OsOptimizer
             for (int i = 0; i < tabs.Count; i++)
             {
                 if (tabs[i] != null)
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        private static bool HasAnyNonNullFaze(List<OptimizerFaze> fazes)
+        {
+            if (fazes == null || fazes.Count == 0)
+            {
+                return false;
+            }
+
+            for (int i = 0; i < fazes.Count; i++)
+            {
+                if (fazes[i] != null)
                 {
                     return true;
                 }
