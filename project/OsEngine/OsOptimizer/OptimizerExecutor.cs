@@ -1437,6 +1437,13 @@ namespace OsEngine.OsOptimizer
         {
             if (server == null || security == null)
             {
+                string tabPart = tabIndex >= 0 ? (", tab index " + tabIndex) : string.Empty;
+                string serverPart = server == null ? "server is null" : "server is set";
+                string securityPart = security == null ? "security is null" : "security is set";
+                SendLogMessage(
+                    "CreateNewServer security bind skipped (" + sourceKind + ", source index " + sourceIndex + tabPart +
+                    "): " + serverPart + ", " + securityPart + ".",
+                    LogMessageType.Error);
                 return;
             }
 
