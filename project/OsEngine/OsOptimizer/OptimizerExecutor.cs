@@ -125,6 +125,14 @@ namespace OsEngine.OsOptimizer
                 return false;
             }
 
+            if (!Enum.IsDefined(typeof(SortBotsType), _master.ObjectiveMetric))
+            {
+                SendLogMessage(
+                    "Optimizer start skipped: objective metric is invalid (value " + _master.ObjectiveMetric + ").",
+                    LogMessageType.Error);
+                return false;
+            }
+
             if (!Enum.IsDefined(typeof(ObjectiveDirectionType), _master.ObjectiveDirection))
             {
                 SendLogMessage(
