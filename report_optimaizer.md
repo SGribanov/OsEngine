@@ -4413,3 +4413,23 @@ After each optimizer-related change, update this file with:
 
 ### Risks / notes
 - No runtime behavior change expected; reduces duplication and keeps event publication path consistent.
+
+
+## Stabilization Update (2026-02-14) - Centralize Prime-Worker Abort Path
+### What changed
+- Added `AbortPrimeWorker(string message, LogMessageType type = LogMessageType.Error)` in `OptimizerExecutor`.
+- Replaced repeated early-exit sequences in `PrimeThreadWorkerPlace()`:
+  - `SendLogMessage(...)`
+  - `PublishTestReadySnapshot()`
+  - `return`
+  with calls to the new helper.
+
+### Files touched
+- `project/OsEngine/OsOptimizer/OptimizerExecutor.cs`
+
+### Validation
+- `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --configuration Debug`
+- Result: Passed 70 / Failed 0
+
+### Risks / notes
+- No runtime behavior change expected; improves maintainability and keeps worker abort semantics consistent.

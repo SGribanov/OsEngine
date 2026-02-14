@@ -327,8 +327,7 @@ namespace OsEngine.OsOptimizer
             {
                 if (_master == null)
                 {
-                    SendLogMessage("Optimizer prime worker skipped: master context is null at runtime.", LogMessageType.Error);
-                    PublishTestReadySnapshot();
+                    AbortPrimeWorker("Optimizer prime worker skipped: master context is null at runtime.");
                     return;
                 }
 
@@ -339,16 +338,14 @@ namespace OsEngine.OsOptimizer
                 List<OptimizerFaze> fazesSource = _master.Fazes;
                 if (fazesSource == null || fazesSource.Count == 0)
                 {
-                    SendLogMessage("Optimizer prime worker skipped: faze configuration is unavailable at runtime.", LogMessageType.Error);
-                    PublishTestReadySnapshot();
+                    AbortPrimeWorker("Optimizer prime worker skipped: faze configuration is unavailable at runtime.");
                     return;
                 }
 
                 List<OptimizerFaze> fazesSnapshot = new List<OptimizerFaze>(fazesSource);
                 if (fazesSnapshot.Count == 0)
                 {
-                    SendLogMessage("Optimizer prime worker skipped: faze snapshot is empty at runtime.", LogMessageType.Error);
-                    PublishTestReadySnapshot();
+                    AbortPrimeWorker("Optimizer prime worker skipped: faze snapshot is empty at runtime.");
                     return;
                 }
 
@@ -366,79 +363,70 @@ namespace OsEngine.OsOptimizer
 
                 if (string.IsNullOrWhiteSpace(strategyName))
                 {
-                    SendLogMessage("Optimizer prime worker skipped: strategy name is unavailable at runtime.", LogMessageType.Error);
-                    PublishTestReadySnapshot();
+                    AbortPrimeWorker("Optimizer prime worker skipped: strategy name is unavailable at runtime.");
                     return;
                 }
 
                 if (parametersOnSnapshot == null || parametersSnapshot == null)
                 {
-                    SendLogMessage("Optimizer prime worker skipped: parameters snapshot is unavailable at runtime.", LogMessageType.Error);
-                    PublishTestReadySnapshot();
+                    AbortPrimeWorker("Optimizer prime worker skipped: parameters snapshot is unavailable at runtime.");
                     return;
                 }
 
                 if (iterationCount < 0)
                 {
-                    SendLogMessage(
+                    AbortPrimeWorker(
                         "Optimizer prime worker skipped: iteration count is invalid at runtime (value " + iterationCount + ").",
                         LogMessageType.Error);
-                    PublishTestReadySnapshot();
                     return;
                 }
 
                 if (threadsCount <= 0)
                 {
-                    SendLogMessage(
+                    AbortPrimeWorker(
                         "Optimizer prime worker skipped: threads count is invalid at runtime (value " + threadsCount + ").",
                         LogMessageType.Error);
-                    PublishTestReadySnapshot();
                     return;
                 }
 
                 if (!Enum.IsDefined(typeof(OptimizationMethodType), optimizationMethod))
                 {
-                    SendLogMessage(
+                    AbortPrimeWorker(
                         "Optimizer prime worker skipped: optimization method is invalid at runtime (value " + optimizationMethod + ").",
                         LogMessageType.Error);
-                    PublishTestReadySnapshot();
                     return;
                 }
 
                 if (!Enum.IsDefined(typeof(SortBotsType), objectiveMetric))
                 {
-                    SendLogMessage(
+                    AbortPrimeWorker(
                         "Optimizer prime worker skipped: objective metric is invalid at runtime (value " + objectiveMetric + ").",
                         LogMessageType.Error);
-                    PublishTestReadySnapshot();
                     return;
                 }
 
                 if (!Enum.IsDefined(typeof(ObjectiveDirectionType), objectiveDirection))
                 {
-                    SendLogMessage(
+                    AbortPrimeWorker(
                         "Optimizer prime worker skipped: objective direction is invalid at runtime (value " + objectiveDirection + ").",
                         LogMessageType.Error);
-                    PublishTestReadySnapshot();
                     return;
                 }
 
                 if (!Enum.IsDefined(typeof(BayesianAcquisitionModeType), bayesianAcquisitionMode))
                 {
-                    SendLogMessage(
+                    AbortPrimeWorker(
                         "Optimizer prime worker skipped: bayesian acquisition mode is invalid at runtime (value " + bayesianAcquisitionMode + ").",
                         LogMessageType.Error);
-                    PublishTestReadySnapshot();
                     return;
                 }
 
                 if (parametersOnSnapshot.Count != parametersSnapshot.Count)
                 {
-                    SendLogMessage(
+                    AbortPrimeWorker(
                         "Optimizer prime worker skipped: parameters snapshot count mismatch (flags " + parametersOnSnapshot.Count +
                         ", params " + parametersSnapshot.Count + ").",
                         LogMessageType.Error);
-                    PublishTestReadySnapshot();
                     return;
                 }
 
@@ -446,10 +434,9 @@ namespace OsEngine.OsOptimizer
                 {
                     if (parametersSnapshot[i] == null)
                     {
-                        SendLogMessage(
+                        AbortPrimeWorker(
                             "Optimizer prime worker skipped: parameter snapshot contains null at index " + i + ".",
                             LogMessageType.Error);
-                        PublishTestReadySnapshot();
                         return;
                     }
                 }
@@ -2570,6 +2557,12 @@ namespace OsEngine.OsOptimizer
         public event Action<TimeSpan> TimeToEndChangeEvent;
 
         public event Action<List<OptimizerFazeReport>> TestReadyEvent;
+
+        private void AbortPrimeWorker(string message, LogMessageType type = LogMessageType.Error)
+        {
+            SendLogMessage(message, type);
+            PublishTestReadySnapshot();
+        }
 
         private void PublishTestReadySnapshot()
         {
