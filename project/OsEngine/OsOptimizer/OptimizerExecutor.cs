@@ -95,6 +95,23 @@ namespace OsEngine.OsOptimizer
                 return false;
             }
 
+            List<IIBotTab> botTabs = null;
+            try
+            {
+                botTabs = _master.BotToTest.GetTabs();
+            }
+            catch (Exception ex)
+            {
+                SendLogMessage("Optimizer start skipped: bot tabs retrieval failed. " + ex, LogMessageType.Error);
+                return false;
+            }
+
+            if (botTabs == null || botTabs.Count == 0)
+            {
+                SendLogMessage("Optimizer start skipped: bot tabs collection is empty.", LogMessageType.Error);
+                return false;
+            }
+
             if (string.IsNullOrWhiteSpace(_master.StrategyName))
             {
                 SendLogMessage("Optimizer start skipped: strategy name is empty.", LogMessageType.Error);

@@ -4378,3 +4378,21 @@ After each optimizer-related change, update this file with:
 
 ### Risks / notes
 - No intended behavior change for valid flows; strengthens type-integrity assumptions for OOS source report handoff.
+
+
+## Stabilization Update (2026-02-14) - Validate Bot Tabs Availability Before Start
+### What changed
+- Added early `Start(...)` bot-tab readiness checks in `OptimizerExecutor`:
+  - attempts `_master.BotToTest.GetTabs()` with guarded exception handling;
+  - requires non-null and non-empty tabs collection.
+- Invalid bot-tab context now fails fast before worker thread startup.
+
+### Files touched
+- `project/OsEngine/OsOptimizer/OptimizerExecutor.cs`
+
+### Validation
+- `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --configuration Debug`
+- Result: Passed 70 / Failed 0
+
+### Risks / notes
+- Intentional robustness change: blocks runs that would otherwise fail later in server/tab binding path.
