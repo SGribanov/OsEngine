@@ -4118,3 +4118,24 @@ After each optimizer-related change, update this file with:
 
 ### Risks / notes
 - No intended behavior change in normal flow; hardens against late runtime faze-list invalidation between start validation and worker execution.
+
+
+## Stabilization Update (2026-02-14) - Snapshot Runtime Parameter Collections In Prime Worker
+### What changed
+- Updated `PrimeThreadWorkerPlace()` to create run-local snapshots of optimization inputs:
+  - `parametersOnSnapshot` from `_parametersOn`;
+  - `parametersSnapshot` from `_parameters`.
+- Added runtime guards before processing:
+  - both snapshots must be available;
+  - snapshot counts must match.
+- Bot-count estimation and in-sample optimization execution now use these snapshots.
+
+### Files touched
+- `project/OsEngine/OsOptimizer/OptimizerExecutor.cs`
+
+### Validation
+- `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --configuration Debug`
+- Result: Passed 70 / Failed 0
+
+### Risks / notes
+- No intended behavior change for valid flows; reduces sensitivity to external mutation of public parameter fields during active run.

@@ -325,8 +325,27 @@ namespace OsEngine.OsOptimizer
                 bool isScript = _master.IsScript;
                 int iterationCount = _master.IterationCount;
                 bool lastInSample = _master.LastInSample;
+                List<bool> parametersOnSnapshot = _parametersOn == null ? null : new List<bool>(_parametersOn);
+                List<IIStrategyParameter> parametersSnapshot = _parameters == null ? null : new List<IIStrategyParameter>(_parameters);
 
-                int countBotsRaw = BotCountOneFaze(_parameters, _parametersOn);
+                if (parametersOnSnapshot == null || parametersSnapshot == null)
+                {
+                    SendLogMessage("Optimizer prime worker skipped: parameters snapshot is unavailable at runtime.", LogMessageType.Error);
+                    SafeInvokeTestReady(GetReportsSnapshotForPublish());
+                    return;
+                }
+
+                if (parametersOnSnapshot.Count != parametersSnapshot.Count)
+                {
+                    SendLogMessage(
+                        "Optimizer prime worker skipped: parameters snapshot count mismatch (flags " + parametersOnSnapshot.Count +
+                        ", params " + parametersSnapshot.Count + ").",
+                        LogMessageType.Error);
+                    SafeInvokeTestReady(GetReportsSnapshotForPublish());
+                    return;
+                }
+
+                int countBotsRaw = BotCountOneFaze(parametersSnapshot, parametersOnSnapshot);
                 int countBots = Math.Max(0, countBotsRaw);
                 if (countBotsRaw < 0)
                 {
@@ -376,7 +395,7 @@ namespace OsEngine.OsOptimizer
 
                         StartAsuncBotFactoryInSample(countBots, strategyName, isScript, "InSample");
 
-                        StartOptimizeFazeInSample(report, _parameters, _parametersOn, countBots);
+                        StartOptimizeFazeInSample(report, parametersSnapshot, parametersOnSnapshot, countBots);
 
                         EndOfFazeFiltration(report);
                         latestInSampleReport = report;
