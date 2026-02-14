@@ -2505,3 +2505,23 @@ After each optimizer-related change, update this file with:
 ### Risks / notes
 - No normal-path behavior change; isolates external log sink failures from optimizer runtime.
 
+
+## Stabilization Update (2026-02-14) - Add Prime Worker Exception Fallback Publish
+### What changed
+- Updated `PrimeThreadWorkerPlace()` in `OptimizerExecutor`.
+- Added `catch (Exception ex)` around main worker body.
+- On unexpected failure, worker now:
+  - logs detailed error;
+  - triggers `SafeInvokeTestReady(ReportsToFazes)` to publish completion/fallback state.
+- Existing `finally` cleanup (`_primeThreadWorker = null`, `DisposeRunSynchronization()`) remains unchanged.
+
+### Files touched
+- `project/OsEngine/OsOptimizer/OptimizerExecutor.cs`
+
+### Validation
+- `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --configuration Debug`
+- Result: Passed 70 / Failed 0
+
+### Risks / notes
+- Behavior change on exception path only; improves failure signaling consistency to subscribers/UI when prime worker aborts unexpectedly.
+

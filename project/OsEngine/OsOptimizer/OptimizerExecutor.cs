@@ -161,6 +161,11 @@ namespace OsEngine.OsOptimizer
 
                 SafeInvokeTestReady(ReportsToFazes);
             }
+            catch (Exception ex)
+            {
+                SendLogMessage("Optimizer prime worker failed: " + ex, LogMessageType.Error);
+                SafeInvokeTestReady(ReportsToFazes);
+            }
             finally
             {
                 _primeThreadWorker = null;
