@@ -3213,3 +3213,20 @@ After each optimizer-related change, update this file with:
 ### Risks / notes
 - No behavior change; improves diagnostic parity and triage depth for invalid OOS source entries.
 
+
+## Stabilization Update (2026-02-14) - Use Delegate Snapshots For Event Dispatch Stability
+### What changed
+- Updated event dispatch in `OptimizerExecutor` to use local delegate snapshots before invocation:
+  - `SafeInvokeTestingProgress(...)` now snapshots `TestingProgressChangeEvent`.
+  - `SendLogMessage(...)` now snapshots `LogMessageEvent`.
+- This removes a small race window between null-check and invoke under concurrent subscribe/unsubscribe.
+
+### Files touched
+- `project/OsEngine/OsOptimizer/OptimizerExecutor.cs`
+
+### Validation
+- `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --configuration Debug`
+- Result: Passed 70 / Failed 0
+
+### Risks / notes
+- No behavior change expected; improves thread-safety robustness of event dispatch paths.

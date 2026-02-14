@@ -2029,14 +2029,16 @@ namespace OsEngine.OsOptimizer
 
         private void SafeInvokeTestingProgress(int curVal, int maxVal, int numServer)
         {
-            if (TestingProgressChangeEvent == null)
+            Action<int, int, int> handler = TestingProgressChangeEvent;
+
+            if (handler == null)
             {
                 return;
             }
 
             try
             {
-                TestingProgressChangeEvent(curVal, maxVal, numServer);
+                handler(curVal, maxVal, numServer);
             }
             catch (Exception ex)
             {
@@ -2050,14 +2052,16 @@ namespace OsEngine.OsOptimizer
 
         private void SendLogMessage(string message, LogMessageType type)
         {
-            if (LogMessageEvent == null)
+            Action<string, LogMessageType> handler = LogMessageEvent;
+
+            if (handler == null)
             {
                 return;
             }
 
             try
             {
-                LogMessageEvent(message, type);
+                handler(message, type);
             }
             catch
             {
