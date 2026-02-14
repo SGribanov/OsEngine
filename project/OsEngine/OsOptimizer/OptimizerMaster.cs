@@ -1137,6 +1137,7 @@ namespace OsEngine.OsOptimizer
             _resultBotAloneTest = null;
 
             _aloneTestIsOver = false;
+            _aloneTestDoneSignal.Reset();
 
             _fazeToTestAloneTest = faze;
             _reportToTestAloneTest = report;
@@ -1147,7 +1148,7 @@ namespace OsEngine.OsOptimizer
             AwaitUi ui = new AwaitUi(_awaitUiMasterAloneTest);
             ui.ShowDialog();
 
-            Thread.Sleep(500);
+            _aloneTestDoneSignal.Wait(5000);
 
             return _resultBotAloneTest;
         }
@@ -1162,14 +1163,22 @@ namespace OsEngine.OsOptimizer
 
         private bool _aloneTestIsOver = true;
 
+        private readonly ManualResetEventSlim _aloneTestDoneSignal = new ManualResetEventSlim(true);
+
         private async void RunAloneBotTest()
         {
-            await Task.Delay(2000);
-            _resultBotAloneTest =
-                _optimizerExecutor.TestBot(_fazeToTestAloneTest, _reportToTestAloneTest,
-                StartProgram.IsTester, _awaitUiMasterAloneTest);
-
-            _aloneTestIsOver = true;
+            try
+            {
+                await Task.Delay(2000);
+                _resultBotAloneTest =
+                    _optimizerExecutor.TestBot(_fazeToTestAloneTest, _reportToTestAloneTest,
+                    StartProgram.IsTester, _awaitUiMasterAloneTest);
+            }
+            finally
+            {
+                _aloneTestIsOver = true;
+                _aloneTestDoneSignal.Set();
+            }
         }
 
         #endregion
