@@ -3014,3 +3014,23 @@ After each optimizer-related change, update this file with:
 ### Risks / notes
 - No behavior change; improves context quality for skip diagnostics.
 
+
+## Stabilization Update (2026-02-14) - Enrich InSample Skip Diagnostics With Type/Faze Context
+### What changed
+- Updated in-sample async factory skip logs in `OptimizerExecutor`.
+- Enriched diagnostics for:
+  - non-positive bot count skip;
+  - empty generated-name batch skip.
+- Messages now include `botType` and `faze` context (and `count` where relevant).
+
+### Files touched
+- `project/OsEngine/OsOptimizer/OptimizerExecutor.cs`
+
+### Validation
+- `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --configuration Debug`
+- Result: Passed 70 / Failed 0
+
+### Risks / notes
+- No behavior change; improves contextual diagnostics for in-sample startup skips.
+
+

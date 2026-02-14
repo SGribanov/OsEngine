@@ -180,7 +180,10 @@ namespace OsEngine.OsOptimizer
 
             if (botCount <= 0)
             {
-                SendLogMessage("Async bot factory start skipped (InSample): bot count is non-positive.", LogMessageType.System);
+                SendLogMessage(
+                    "Async bot factory start skipped (InSample): bot count is non-positive (count " + botCount +
+                    ", bot type '" + normalizedBotType + "', faze '" + normalizedFaze + "').",
+                    LogMessageType.System);
                 return;
             }
 
@@ -213,7 +216,10 @@ namespace OsEngine.OsOptimizer
 
             if (botNames.Count == 0)
             {
-                SendLogMessage("Async bot factory start skipped (InSample): no bot names generated.", LogMessageType.System);
+                SendLogMessage(
+                    "Async bot factory start skipped (InSample): no bot names generated (bot type '" +
+                    normalizedBotType + "', faze '" + normalizedFaze + "').",
+                    LogMessageType.System);
                 return;
             }
 
