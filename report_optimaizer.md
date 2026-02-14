@@ -428,3 +428,20 @@ After each optimizer-related change, update this file with:
 
 ### Risks / notes
 - `PrimeProgressChangeEvent` remains outside lock to avoid re-entrancy/deadlock risk in subscribers.
+
+## Stabilization Update (2026-02-14) - Safe Phase Signal On Not-Started Bot Finalization
+### What changed
+- Hardened `FinalizeNotStartedBot` phase completion signaling against shutdown races.
+- Replaced direct `_phaseCompletion.Signal()` with local snapshot and guarded call:
+  - catches `ObjectDisposedException`;
+  - catches `InvalidOperationException` (already-set/over-signaled race).
+
+### Files touched
+- `project/OsEngine/OsOptimizer/OptimizerExecutor.cs`
+
+### Validation
+- `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --configuration Debug`
+- Result: Passed 70 / Failed 0
+
+### Risks / notes
+- Behavior is unchanged on normal path; only race-failure mode is neutralized.
