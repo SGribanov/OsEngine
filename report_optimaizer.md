@@ -4450,3 +4450,20 @@ After each optimizer-related change, update this file with:
 
 ### Risks / notes
 - Intentional robustness change: blocks structurally invalid tab collections before runtime server/tab binding flow.
+
+
+## Stabilization Update (2026-02-14) - Guard Runtime Storage/Bot Context In Prime Worker
+### What changed
+- Added early runtime context guard in `PrimeThreadWorkerPlace()`:
+  - validates `_master.Storage` and `_master.BotToTest` before phase processing.
+- On missing runtime context, worker aborts via unified `AbortPrimeWorker(...)` path.
+
+### Files touched
+- `project/OsEngine/OsOptimizer/OptimizerExecutor.cs`
+
+### Validation
+- `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --configuration Debug`
+- Result: Passed 70 / Failed 0
+
+### Risks / notes
+- No intended behavior change in valid lifecycle flow; hardens against late external invalidation of core runtime dependencies.

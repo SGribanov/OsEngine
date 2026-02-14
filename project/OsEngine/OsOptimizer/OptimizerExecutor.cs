@@ -347,6 +347,12 @@ namespace OsEngine.OsOptimizer
                     return;
                 }
 
+                if (_master.Storage == null || _master.BotToTest == null)
+                {
+                    AbortPrimeWorker("Optimizer prime worker skipped: runtime storage/bot context is unavailable.");
+                    return;
+                }
+
                 lock (_reportsSync)
                 {
                     ReportsToFazes = new List<OptimizerFazeReport>();
