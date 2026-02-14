@@ -1208,7 +1208,7 @@ namespace OsEngine.OsOptimizer
                 if (executor == null)
                 {
                     SendLogMessage("Single-bot test canceled: optimizer executor became unavailable.", LogMessageType.Error);
-                    if (runId == Volatile.Read(ref _aloneTestRunId))
+                    if (IsCurrentSingleBotRun(runId))
                     {
                         _resultBotAloneTest = null;
                     }
@@ -1218,7 +1218,7 @@ namespace OsEngine.OsOptimizer
                 if (awaitUi == null)
                 {
                     SendLogMessage("Single-bot test canceled: await object is unavailable.", LogMessageType.Error);
-                    if (runId == Volatile.Read(ref _aloneTestRunId))
+                    if (IsCurrentSingleBotRun(runId))
                     {
                         _resultBotAloneTest = null;
                     }
@@ -1228,7 +1228,7 @@ namespace OsEngine.OsOptimizer
                 BotPanel result =
                     executor.TestBot(fazeToTest, reportToTest, StartProgram.IsTester, awaitUi);
 
-                if (runId == Volatile.Read(ref _aloneTestRunId))
+                if (IsCurrentSingleBotRun(runId))
                 {
                     _resultBotAloneTest = result;
                 }
@@ -1236,14 +1236,14 @@ namespace OsEngine.OsOptimizer
             catch (Exception ex)
             {
                 SendLogMessage("Single-bot test failed: " + ex, LogMessageType.Error);
-                if (runId == Volatile.Read(ref _aloneTestRunId))
+                if (IsCurrentSingleBotRun(runId))
                 {
                     _resultBotAloneTest = null;
                 }
             }
             finally
             {
-                if (runId == Volatile.Read(ref _aloneTestRunId))
+                if (IsCurrentSingleBotRun(runId))
                 {
                     Volatile.Write(ref _aloneTestIsOver, true);
                     SafeSignalAloneTestDone();
@@ -1272,6 +1272,11 @@ namespace OsEngine.OsOptimizer
 
             Volatile.Write(ref _aloneTestIsOver, true);
             SafeSignalAloneTestDone();
+        }
+
+        private bool IsCurrentSingleBotRun(int runId)
+        {
+            return runId == Volatile.Read(ref _aloneTestRunId);
         }
 
         #endregion

@@ -1224,3 +1224,22 @@ After each optimizer-related change, update this file with:
 
 ### Risks / notes
 - Reduces divergence risk between failure branches and keeps single-bot recovery behavior consistent.
+
+## Stabilization Update (2026-02-14) - Unified Current-Run Check Helper In Async Single-Bot Runner
+### What changed
+- Added `IsCurrentSingleBotRun(int runId)` helper in `OptimizerMaster`.
+- Replaced duplicated `runId == Volatile.Read(ref _aloneTestRunId)` checks in `RunAloneBotTestAsync(...)` with helper calls across:
+  - cancel branches;
+  - result publish path;
+  - exception fallback path;
+  - finalization path.
+
+### Files touched
+- `project/OsEngine/OsOptimizer/OptimizerMaster.cs`
+
+### Validation
+- `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --configuration Debug`
+- Result: Passed 70 / Failed 0
+
+### Risks / notes
+- Keeps current-run gating logic centralized and reduces accidental divergence in future edits.
