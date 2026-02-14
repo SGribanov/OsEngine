@@ -39,6 +39,7 @@ Implemented and committed:
 30. Stabilization: hardened acquisition null-handling (`evaluated/scored/fallbackSelector`) and added tests for safe defaults and explicit error path.
 31. Stabilization: added acquisition edge tests for non-positive `batchSize`/`totalCount` to lock empty-result contract.
 32. Stabilization: added acquisition edge test for fully-evaluated candidate universe (must return empty selection).
+33. Stabilization: added acquisition handling for invalid scored indices (filter valid range, fallback when all scored indices are invalid).
 
 ## Commits
 - `b1e5eabe3` — `Optimizer: persist Phase1 extraction and wiring state`
@@ -152,6 +153,7 @@ Added tests:
   - `BayesianAcquisitionPolicy_NullFallback_WhenFallbackPathNeeded_ShouldThrowArgumentNullException`
   - `BayesianAcquisitionPolicy_NonPositiveBudgetOrUniverse_ShouldReturnEmpty`
   - `BayesianAcquisitionPolicy_AllCandidatesEvaluated_ShouldReturnEmpty`
+  - `BayesianAcquisitionPolicy_InvalidScoredIndices_ShouldFallbackToSelectorPath`
   - `BayesianOptimizationStrategy_TailPassDisabled_ShouldPlanZeroTailBudget`
   - `BayesianOptimizationStrategy_TailSharePercent_ShouldClampToRange`
   - `OptimizerSettings_SaveLoad_ShouldPersistOptimizationMethodFields`
@@ -161,7 +163,7 @@ Command:
 - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --configuration Debug`
 
 Result:
-- Passed: 43
+- Passed: 44
 - Failed: 0
 
 ### Stabilization fixes from new tests

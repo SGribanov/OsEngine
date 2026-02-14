@@ -51,6 +51,20 @@ namespace OsEngine.OsOptimizer.OptEntity
                 return fallbackSelector.SelectInitialBatch(totalCount, evaluatedSafe, batchSize);
             }
 
+            List<BayesianCandidateSelector.CandidateScore> validScored = scoredSafe
+                .Where(s => s.Index >= 0 && s.Index < totalCount)
+                .ToList();
+
+            if (validScored.Count == 0)
+            {
+                if (fallbackSelector == null)
+                {
+                    throw new ArgumentNullException(nameof(fallbackSelector));
+                }
+
+                return fallbackSelector.SelectNextBatch(totalCount, evaluatedSafe, scoredSafe, batchSize);
+            }
+
             if (candidates == null || candidates.Count != totalCount)
             {
                 if (fallbackSelector == null)
@@ -62,7 +76,7 @@ namespace OsEngine.OsOptimizer.OptEntity
             }
 
             List<CandidateAcquisition> ranked = new List<CandidateAcquisition>();
-            decimal bestMean = scoredSafe.Max(s => s.Score);
+            decimal bestMean = validScored.Max(s => s.Score);
 
             for (int i = 0; i < totalCount; i++)
             {
@@ -74,19 +88,15 @@ namespace OsEngine.OsOptimizer.OptEntity
                 BayesianCandidateSelector.CandidateScore nearest = null;
                 decimal minDistance = decimal.MaxValue;
 
-                for (int j = 0; j < scoredSafe.Count; j++)
+                for (int j = 0; j < validScored.Count; j++)
                 {
-                    int scoredIndex = scoredSafe[j].Index;
-                    if (scoredIndex < 0 || scoredIndex >= totalCount)
-                    {
-                        continue;
-                    }
+                    int scoredIndex = validScored[j].Index;
 
                     decimal dist = CalculateParameterDistance(candidates[i], candidates[scoredIndex]);
                     if (dist < minDistance)
                     {
                         minDistance = dist;
-                        nearest = scoredSafe[j];
+                        nearest = validScored[j];
                     }
                 }
 
