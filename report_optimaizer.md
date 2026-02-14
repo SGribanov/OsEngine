@@ -4433,3 +4433,20 @@ After each optimizer-related change, update this file with:
 
 ### Risks / notes
 - No runtime behavior change expected; improves maintainability and keeps worker abort semantics consistent.
+
+
+## Stabilization Update (2026-02-14) - Validate Non-Null Bot Tabs Content Before Start
+### What changed
+- Extended `Start(...)` bot-tab readiness validation in `OptimizerExecutor`:
+  - after successful `GetTabs()`, verifies collection contains at least one non-null tab entry.
+- If all entries are null, start is rejected early with explicit diagnostic log.
+
+### Files touched
+- `project/OsEngine/OsOptimizer/OptimizerExecutor.cs`
+
+### Validation
+- `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --configuration Debug`
+- Result: Passed 70 / Failed 0
+
+### Risks / notes
+- Intentional robustness change: blocks structurally invalid tab collections before runtime server/tab binding flow.

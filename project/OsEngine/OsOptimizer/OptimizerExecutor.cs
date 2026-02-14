@@ -112,6 +112,22 @@ namespace OsEngine.OsOptimizer
                 return false;
             }
 
+            bool hasNonNullTab = false;
+            for (int i = 0; i < botTabs.Count; i++)
+            {
+                if (botTabs[i] != null)
+                {
+                    hasNonNullTab = true;
+                    break;
+                }
+            }
+
+            if (!hasNonNullTab)
+            {
+                SendLogMessage("Optimizer start skipped: bot tabs collection contains only null entries.", LogMessageType.Error);
+                return false;
+            }
+
             if (string.IsNullOrWhiteSpace(_master.StrategyName))
             {
                 SendLogMessage("Optimizer start skipped: strategy name is empty.", LogMessageType.Error);
