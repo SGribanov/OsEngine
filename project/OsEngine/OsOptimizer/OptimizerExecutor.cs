@@ -1058,7 +1058,7 @@ namespace OsEngine.OsOptimizer
             catch (Exception ex)
             {
                 SendLogMessage("Single-bot test skipped due to parameter extraction error: " + ex, LogMessageType.Error);
-                ServerMaster.RemoveOptimizerServer(server);
+                SafeRemoveOptimizerServer(server);
                 SafeDisposeAwaitObject(awaitObj);
                 return null;
             }
@@ -1066,7 +1066,7 @@ namespace OsEngine.OsOptimizer
             if (parametrs == null)
             {
                 SendLogMessage("Single-bot test skipped due to null parameter set.", LogMessageType.Error);
-                ServerMaster.RemoveOptimizerServer(server);
+                SafeRemoveOptimizerServer(server);
                 SafeDisposeAwaitObject(awaitObj);
                 return null;
             }
@@ -1080,7 +1080,7 @@ namespace OsEngine.OsOptimizer
                 SafeDisposeAwaitObject(awaitObj);
                 if (server != null)
                 {
-                    ServerMaster.RemoveOptimizerServer(server);
+                    SafeRemoveOptimizerServer(server);
                 }
                 return null;
             }
@@ -1100,7 +1100,7 @@ namespace OsEngine.OsOptimizer
                 {
                     // ignored
                 }
-                ServerMaster.RemoveOptimizerServer(server);
+                SafeRemoveOptimizerServer(server);
                 SafeDisposeAwaitObject(awaitObj);
                 return null;
             }
@@ -1121,7 +1121,7 @@ namespace OsEngine.OsOptimizer
                 {
                     // ignored
                 }
-                ServerMaster.RemoveOptimizerServer(server);
+                SafeRemoveOptimizerServer(server);
                 SafeDisposeAwaitObject(awaitObj);
                 return null;
             }
@@ -1186,6 +1186,21 @@ namespace OsEngine.OsOptimizer
             catch (Exception ex)
             {
                 SendLogMessage("Single-bot test await object dispose failed: " + ex, LogMessageType.Error);
+            }
+        }
+
+        private void SafeRemoveOptimizerServer(OptimizerServer server)
+        {
+            try
+            {
+                if (server != null)
+                {
+                    ServerMaster.RemoveOptimizerServer(server);
+                }
+            }
+            catch (Exception ex)
+            {
+                SendLogMessage("Single-bot test optimizer server cleanup failed: " + ex, LogMessageType.Error);
             }
         }
 

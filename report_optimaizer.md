@@ -1169,3 +1169,19 @@ After each optimizer-related change, update this file with:
 
 ### Risks / notes
 - Removes repeated nested phase reads and keeps validation/loop limits consistent for full method execution.
+
+## Stabilization Update (2026-02-14) - Safe Optimizer Server Removal Helper In Executor TestBot
+### What changed
+- Added `SafeRemoveOptimizerServer(OptimizerServer server)` helper in `OptimizerExecutor`.
+- Replaced direct `ServerMaster.RemoveOptimizerServer(server)` calls in `TestBot(...)` failure paths with safe helper usage.
+- Helper catches cleanup exceptions and logs diagnostics instead of breaking error-handling flow.
+
+### Files touched
+- `project/OsEngine/OsOptimizer/OptimizerExecutor.cs`
+
+### Validation
+- `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --configuration Debug`
+- Result: Passed 70 / Failed 0
+
+### Risks / notes
+- Improves resilience of cleanup branches when server removal itself fails.
