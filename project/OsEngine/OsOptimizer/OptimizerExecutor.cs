@@ -774,6 +774,7 @@ namespace OsEngine.OsOptimizer
 
         private void FinalizeNotStartedBot(OptimizerServer server, BotPanel bot)
         {
+            SafeRemoveBotFromInTest(bot);
             SafeDisposeBotPanel(bot);
 
             if (server == null)
@@ -1338,6 +1339,26 @@ namespace OsEngine.OsOptimizer
             catch (Exception ex)
             {
                 SendLogMessage("Optimizer bot cleanup failed: " + ex, LogMessageType.Error);
+            }
+        }
+
+        private void SafeRemoveBotFromInTest(BotPanel bot)
+        {
+            if (bot == null)
+            {
+                return;
+            }
+
+            try
+            {
+                lock (_serverRemoveLocker)
+                {
+                    _botsInTest.Remove(bot);
+                }
+            }
+            catch (Exception ex)
+            {
+                SendLogMessage("Optimizer bot list cleanup failed: " + ex, LogMessageType.Error);
             }
         }
 

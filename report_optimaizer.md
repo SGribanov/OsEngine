@@ -2148,3 +2148,19 @@ After each optimizer-related change, update this file with:
 ### Risks / notes
 - No normal-path behavior change; removes silent exception path and makes fallback deterministic and observable.
 
+
+## Stabilization Update (2026-02-14) - Remove Stale Bot Entries During Early Finalization
+### What changed
+- Updated `FinalizeNotStartedBot(...)` in `OptimizerExecutor` to remove bot from `_botsInTest` before bot disposal/server cleanup.
+- Added `SafeRemoveBotFromInTest(...)` helper with lock-based removal and guarded diagnostics.
+
+### Files touched
+- `project/OsEngine/OsOptimizer/OptimizerExecutor.cs`
+
+### Validation
+- `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --configuration Debug`
+- Result: Passed 70 / Failed 0
+
+### Risks / notes
+- Prevents stale/disposed bot references from remaining in in-test collection after early-start failure paths.
+
