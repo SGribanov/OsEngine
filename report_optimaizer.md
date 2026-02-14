@@ -3478,3 +3478,24 @@ After each optimizer-related change, update this file with:
 
 ### Risks / notes
 - No intended behavior change; reduces chance of `ObjectDisposedException` races during concurrent stop/cleanup timing.
+
+
+## Stabilization Update (2026-02-14) - Serialize `Start()` Critical Section
+### What changed
+- Added dedicated `_startSync` lock in `OptimizerExecutor`.
+- Wrapped `Start(...)` lifecycle-critical sequence in this lock:
+  - active worker check;
+  - run-state reinitialization;
+  - sync object replacement/disposal;
+  - prime worker thread creation and start.
+- This prevents concurrent `Start()` calls from interleaving partial state reset/start operations.
+
+### Files touched
+- `project/OsEngine/OsOptimizer/OptimizerExecutor.cs`
+
+### Validation
+- `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --configuration Debug`
+- Result: Passed 70 / Failed 0
+
+### Risks / notes
+- No functional behavior change expected for normal single-caller usage; improves correctness under accidental concurrent start requests.

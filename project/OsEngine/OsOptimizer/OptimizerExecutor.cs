@@ -55,69 +55,74 @@ namespace OsEngine.OsOptimizer
             new ConcurrentDictionary<int, TaskCompletionSource<OptimizerReport>>();
 
         private readonly object _testBotsTimeSync = new object();
+        private readonly object _startSync = new object();
 
         public bool Start(List<bool> parametersOn, List<IIStrategyParameter> parameters)
         {
-            if (_primeThreadWorker != null)
+            lock (_startSync)
             {
-                SendLogMessage(OsLocalization.Optimizer.Message1, LogMessageType.System);
-                return false;
-            }
-            _parametersOn = parametersOn;
-            _parameters = parameters;
+                if (_primeThreadWorker != null)
+                {
+                    SendLogMessage(OsLocalization.Optimizer.Message1, LogMessageType.System);
+                    return false;
+                }
 
-            SendLogMessage(OsLocalization.Optimizer.Message2, LogMessageType.System);
+                _parametersOn = parametersOn;
+                _parameters = parameters;
 
-            CancellationTokenSource previousStopCts = Interlocked.Exchange(ref _stopCts, new CancellationTokenSource());
-            try
-            {
-                previousStopCts?.Dispose();
-            }
-            catch (Exception ex)
-            {
-                SendLogMessage("Optimizer start cleanup failed: previous stop token dispose. " + ex, LogMessageType.Error);
-            }
+                SendLogMessage(OsLocalization.Optimizer.Message2, LogMessageType.System);
 
-            CountdownEvent previousPhase = Interlocked.Exchange(ref _phaseCompletion, null);
-            try
-            {
-                previousPhase?.Dispose();
-            }
-            catch (Exception ex)
-            {
-                SendLogMessage("Optimizer start cleanup failed: previous phase completion dispose. " + ex, LogMessageType.Error);
-            }
+                CancellationTokenSource previousStopCts = Interlocked.Exchange(ref _stopCts, new CancellationTokenSource());
+                try
+                {
+                    previousStopCts?.Dispose();
+                }
+                catch (Exception ex)
+                {
+                    SendLogMessage("Optimizer start cleanup failed: previous stop token dispose. " + ex, LogMessageType.Error);
+                }
 
-            lock (_serverRemoveLocker)
-            {
-                _servers = new List<OptimizerServer>();
-                _countAllServersMax = 0;
-                _countAllServersEndTest = 0;
-                _serverNum = 1;
-            }
-            lock (_testBotsTimeSync)
-            {
-                _testBotsTime.Clear();
-            }
-            SemaphoreSlim previousServerSlots = Interlocked.Exchange(
-                ref _serverSlots,
-                new SemaphoreSlim(Math.Max(1, _master.ThreadsCount), Math.Max(1, _master.ThreadsCount)));
+                CountdownEvent previousPhase = Interlocked.Exchange(ref _phaseCompletion, null);
+                try
+                {
+                    previousPhase?.Dispose();
+                }
+                catch (Exception ex)
+                {
+                    SendLogMessage("Optimizer start cleanup failed: previous phase completion dispose. " + ex, LogMessageType.Error);
+                }
 
-            try
-            {
-                previousServerSlots?.Dispose();
-            }
-            catch (Exception ex)
-            {
-                SendLogMessage("Optimizer start cleanup failed: previous server slots dispose. " + ex, LogMessageType.Error);
-            }
+                lock (_serverRemoveLocker)
+                {
+                    _servers = new List<OptimizerServer>();
+                    _countAllServersMax = 0;
+                    _countAllServersEndTest = 0;
+                    _serverNum = 1;
+                }
+                lock (_testBotsTimeSync)
+                {
+                    _testBotsTime.Clear();
+                }
+                SemaphoreSlim previousServerSlots = Interlocked.Exchange(
+                    ref _serverSlots,
+                    new SemaphoreSlim(Math.Max(1, _master.ThreadsCount), Math.Max(1, _master.ThreadsCount)));
 
-            _primeThreadWorker = new Thread(PrimeThreadWorkerPlace);
-            _primeThreadWorker.Name = "OptimizerExecutorThread";
-            _primeThreadWorker.IsBackground = true;
-            _primeThreadWorker.Start();
+                try
+                {
+                    previousServerSlots?.Dispose();
+                }
+                catch (Exception ex)
+                {
+                    SendLogMessage("Optimizer start cleanup failed: previous server slots dispose. " + ex, LogMessageType.Error);
+                }
 
-            return true;
+                _primeThreadWorker = new Thread(PrimeThreadWorkerPlace);
+                _primeThreadWorker.Name = "OptimizerExecutorThread";
+                _primeThreadWorker.IsBackground = true;
+                _primeThreadWorker.Start();
+
+                return true;
+            }
         }
 
         public void Stop()
