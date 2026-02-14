@@ -1481,3 +1481,21 @@ After each optimizer-related change, update this file with:
 
 ### Risks / notes
 - Prevents end-of-test processing from failing on transient/edge faze collection state.
+
+## Stabilization Update (2026-02-14) - Safe Report Build Helper In Server End Completion Path
+### What changed
+- Added `TryBuildOptimizerReportFromBot(BotPanel bot, out OptimizerReport report)` helper in `OptimizerExecutor`.
+- In `server_TestingEndEvent(...)`, replaced direct report construction/load with helper:
+  - on success -> `SafeTrySetResult(...)`;
+  - on failure -> `SafeTrySetCanceled(...)` fallback.
+- Helper catches and logs report-build failures.
+
+### Files touched
+- `project/OsEngine/OsOptimizer/OptimizerExecutor.cs`
+
+### Validation
+- `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --configuration Debug`
+- Result: Passed 70 / Failed 0
+
+### Risks / notes
+- Prevents malformed bot-state payload from breaking evaluation completion publication path.

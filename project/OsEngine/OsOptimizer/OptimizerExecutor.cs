@@ -1269,6 +1269,27 @@ namespace OsEngine.OsOptimizer
             }
         }
 
+        private bool TryBuildOptimizerReportFromBot(BotPanel bot, out OptimizerReport report)
+        {
+            report = null;
+            if (bot == null)
+            {
+                return false;
+            }
+
+            try
+            {
+                report = new OptimizerReport(bot.Parameters);
+                report.LoadState(bot);
+                return true;
+            }
+            catch (Exception ex)
+            {
+                SendLogMessage("Optimizer report build from bot failed: " + ex, LogMessageType.Error);
+                return false;
+            }
+        }
+
         #endregion
 
         #region Server performing optimization
@@ -1334,9 +1355,14 @@ namespace OsEngine.OsOptimizer
                 {
                     if (_pendingEvaluationByServer.TryRemove(serverNum, out TaskCompletionSource<OptimizerReport> completion))
                     {
-                        OptimizerReport report = new OptimizerReport(bot.Parameters);
-                        report.LoadState(bot);
-                        SafeTrySetResult(completion, report);
+                        if (TryBuildOptimizerReportFromBot(bot, out OptimizerReport report))
+                        {
+                            SafeTrySetResult(completion, report);
+                        }
+                        else
+                        {
+                            SafeTrySetCanceled(completion);
+                        }
                     }
                     else
                     {
