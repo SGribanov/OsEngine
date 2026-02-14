@@ -331,6 +331,39 @@ public class OptimizerRefactorTests
         Assert.Equal(System.Windows.Forms.CheckState.Checked, ((StrategyParameterDecimalCheckBox)allParameters[1]).CheckState);
     }
 
+    [Fact]
+    public void OptimizationStrategyFactory_BruteForce_ShouldReturnBruteForceWithoutMessage()
+    {
+        ParameterIterator iterator = new ParameterIterator();
+
+        IOptimizationStrategy strategy = OptimizationStrategyFactory.CreateInSampleStrategy(
+            OptimizationMethodType.BruteForce,
+            iterator,
+            evaluator: null,
+            maxParallel: 1,
+            out string infoMessage);
+
+        Assert.IsType<BruteForceStrategy>(strategy);
+        Assert.True(string.IsNullOrEmpty(infoMessage));
+    }
+
+    [Fact]
+    public void OptimizationStrategyFactory_Bayesian_ShouldFallbackToBruteForceWithMessage()
+    {
+        ParameterIterator iterator = new ParameterIterator();
+
+        IOptimizationStrategy strategy = OptimizationStrategyFactory.CreateInSampleStrategy(
+            OptimizationMethodType.Bayesian,
+            iterator,
+            evaluator: null,
+            maxParallel: 2,
+            out string infoMessage);
+
+        Assert.IsType<BruteForceStrategy>(strategy);
+        Assert.False(string.IsNullOrEmpty(infoMessage));
+        Assert.Contains("Fallback to BruteForce", infoMessage);
+    }
+
     private static OptimizerReport BuildSampleReport()
     {
         OptimizerReport report = new OptimizerReport(new List<IIStrategyParameter>

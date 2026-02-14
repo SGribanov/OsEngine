@@ -214,12 +214,19 @@ namespace OsEngine.OsOptimizer
         {
             int parallel = Math.Max(1, _master.ThreadsCount);
 
-            if (_master.OptimizationMethod == OptimizationMethodType.Bayesian)
+            IOptimizationStrategy strategy = OptimizationStrategyFactory.CreateInSampleStrategy(
+                _master.OptimizationMethod,
+                _parameterIterator,
+                evaluator,
+                parallel,
+                out string infoMessage);
+
+            if (!string.IsNullOrEmpty(infoMessage))
             {
-                SendLogMessage("Bayesian strategy is not integrated yet. Fallback to BruteForce.", LogMessageType.System);
+                SendLogMessage(infoMessage, LogMessageType.System);
             }
 
-            return new BruteForceStrategy(_parameterIterator, evaluator, parallel);
+            return strategy;
         }
 
         public List<OptimizerFazeReport> ReportsToFazes = new List<OptimizerFazeReport>();

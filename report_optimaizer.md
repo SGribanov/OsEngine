@@ -97,12 +97,14 @@ Added tests:
   - `BruteForceStrategy_OptimizeInSampleAsync_EvaluatorMutationsMustNotCorruptEnumeration`
   - `OptimizerReportTab_LoadFromSaveString_LegacyWithoutSharpRatio_ShouldLoad`
   - `BruteForceStrategy_OptimizeInSampleAsync_ShouldPreserveDecimalCheckBoxSnapshot`
+  - `OptimizationStrategyFactory_BruteForce_ShouldReturnBruteForceWithoutMessage`
+  - `OptimizationStrategyFactory_Bayesian_ShouldFallbackToBruteForceWithMessage`
 
 Command:
 - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --configuration Debug`
 
 Result:
-- Passed: 11
+- Passed: 13
 - Failed: 0
 
 ### Stabilization fixes from new tests
@@ -115,7 +117,7 @@ Result:
 - Phase 1: largely integrated (core extraction + wiring done).
 - Phase 2: in progress (major busy-wait removal done; cancellation propagation now wired through `OptimizerExecutor -> BotConfigurator -> AsyncBotFactory`, remaining cleanup still pending).
 - Phase 3: started (serializer extracted; legacy fallback preserved; further cleanup and adoption still pending).
-- Phase 4: started (core abstraction contracts and brute-force scaffold added; executor not yet switched to strategy orchestration).
+- Phase 4: in progress (core abstraction contracts added; executor switched to strategy-based in-sample pipeline with brute-force and method-selection fallback).
 - Phase 5 (Bayesian optimization + UI controls): not started in this branch segment.
 
 ## Phase 4 Changes (Started)
@@ -124,6 +126,7 @@ Result:
 - `project/OsEngine/OsOptimizer/OptEntity/IBotEvaluator.cs`
 - `project/OsEngine/OsOptimizer/OptEntity/BotEvaluator.cs`
 - `project/OsEngine/OsOptimizer/OptEntity/BruteForceStrategy.cs`
+- `project/OsEngine/OsOptimizer/OptEntity/OptimizationStrategyFactory.cs`
 
 ### Notes
 - Interfaces are introduced with async contracts.
@@ -140,6 +143,7 @@ Result:
   - `BayesianBatchSize`
 - Method-selection hook added in `OptimizerExecutor` for in-sample strategy resolution:
   - currently `Bayesian` logs fallback and uses `BruteForceStrategy`.
+  - selection is centralized via `OptimizationStrategyFactory`.
 
 ## Phase 3 Changes (Started)
 ### New file
