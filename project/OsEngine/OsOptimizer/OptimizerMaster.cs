@@ -1,4 +1,4 @@
-﻿/*
+/*
  * Your rights to use code governed by this license https://github.com/AlexWan/OsEngine/blob/master/LICENSE
  * Ваши права на использование кода регулируются данной лицензией http://o-s-a.net/doc/license_simple_engine.pdf
 */
@@ -20,6 +20,7 @@ using System.Threading;
 using System.Globalization;
 using OsEngine.OsTrader.Panels.Tab;
 using OsEngine.Market;
+using OsEngine.OsOptimizer.OptEntity;
 
 namespace OsEngine.OsOptimizer
 {
@@ -32,27 +33,20 @@ namespace OsEngine.OsOptimizer
             _log = new Log("OptimizerLog", StartProgram.IsTester);
             _log.Listen(this);
 
-            _threadsCount = 1;
-            _startDeposit = 100000;
+            Settings = new OptimizerSettings();
+            Settings.LogMessageEvent += SendLogMessage;
+            Settings.CommissionChanged += UpdateBotManualControlSettings;
+            Settings.DateTimeStartEndChange += OnDateTimeStartEndChange;
+
+            _filterManager = new OptimizerFilterManager(Settings);
+            _filterManager.LogMessageEvent += SendLogMessage;
+
+            _phaseCalculator = new PhaseCalculator();
+            _phaseCalculator.LogMessageEvent += SendLogMessage;
 
             Storage = new OptimizerDataStorage("Prime", true);
             Storage.SecuritiesChangeEvent += _storage_SecuritiesChangeEvent;
             Storage.TimeChangeEvent += _storage_TimeChangeEvent;
-
-            _filterProfitValue = 10;
-            _filterProfitIsOn = false;
-            _filterMaxDrawDownValue = -10;
-            _filterMaxDrawDownIsOn = false;
-            _filterMiddleProfitValue = 0.001m;
-            _filterMiddleProfitIsOn = false;
-            _filterProfitFactorValue = 1;
-            _filterProfitFactorIsOn = false;
-
-            _percentOnFiltration = 30;
-
-            Load();
-            LoadClearingInfo();
-            LoadNonTradePeriods();
 
             ManualControl = new BotManualControl("OptimizerManualControl", null, StartProgram.IsOsTrader);
 
@@ -69,6 +63,12 @@ namespace OsEngine.OsOptimizer
             PrimeProgressBarStatus = new ProgressBarStatus();
         }
 
+        public readonly OptimizerSettings Settings;
+
+        private readonly OptimizerFilterManager _filterManager;
+
+        private readonly PhaseCalculator _phaseCalculator;
+
         public int GetMaxBotsCount()
         {
             if (_parameters == null ||
@@ -77,9 +77,9 @@ namespace OsEngine.OsOptimizer
                 return 0;
             }
 
-            int value = _optimizerExecutor.BotCountOneFaze(_parameters, _parametersOn) * IterationCount * 2;
+            int value = _optimizerExecutor.BotCountOneFaze(_parameters, _parametersOn) * Settings.IterationCount * 2;
 
-            if (LastInSample)
+            if (Settings.LastInSample)
             {
                 value = value - _optimizerExecutor.BotCountOneFaze(_parameters, _parametersOn);
             }
@@ -87,93 +87,172 @@ namespace OsEngine.OsOptimizer
             return value;
         }
 
-        private void Save()
+        #endregion
+
+        #region Forwarding properties for UI compatibility
+
+        // These properties delegate to Settings to maintain backward compatibility
+        // with OptimizerUi and other consumers.
+
+        public int ThreadsCount
         {
-            try
-            {
-                using (StreamWriter writer = new StreamWriter(@"Engine\OptimizerSettings.txt", false)
-                    )
-                {
-                    writer.WriteLine(ThreadsCount);
-                    writer.WriteLine(StrategyName);
-                    writer.WriteLine(_startDeposit);
-
-                    writer.WriteLine(_filterProfitValue);
-                    writer.WriteLine(_filterProfitIsOn);
-                    writer.WriteLine(_filterMaxDrawDownValue);
-                    writer.WriteLine(_filterMaxDrawDownIsOn);
-                    writer.WriteLine(_filterMiddleProfitValue);
-                    writer.WriteLine(_filterMiddleProfitIsOn);
-                    writer.WriteLine(_filterProfitFactorValue);
-                    writer.WriteLine(_filterProfitFactorIsOn);
-
-                    writer.WriteLine(_timeStart.ToString(CultureInfo.InvariantCulture));
-                    writer.WriteLine(_timeEnd.ToString(CultureInfo.InvariantCulture));
-                    writer.WriteLine(_percentOnFiltration);
-
-                    writer.WriteLine(_filterDealsCountValue);
-                    writer.WriteLine(_filterDealsCountIsOn);
-                    writer.WriteLine(_isScript);
-                    writer.WriteLine(_iterationCount);
-                    writer.WriteLine(_commissionType);
-                    writer.WriteLine(_commissionValue);
-                    writer.WriteLine(_lastInSample);
-                    writer.WriteLine(_orderExecutionType);
-                    writer.WriteLine(_slippageToSimpleOrder);
-                    writer.WriteLine(_slippageToStopOrder);
-                }
-            }
-            catch (Exception error)
-            {
-                SendLogMessage(error.ToString(), LogMessageType.Error);
-            }
+            get => Settings.ThreadsCount;
+            set => Settings.ThreadsCount = value;
         }
 
-        private void Load()
+        public string StrategyName
         {
-            if (!File.Exists(@"Engine\OptimizerSettings.txt"))
-            {
-                return;
-            }
-            try
-            {
-                using (StreamReader reader = new StreamReader(@"Engine\OptimizerSettings.txt"))
-                {
-                    _threadsCount = Convert.ToInt32(reader.ReadLine());
-                    _strategyName = reader.ReadLine();
-                    _startDeposit = reader.ReadLine().ToDecimal();
-                    _filterProfitValue = reader.ReadLine().ToDecimal();
-                    _filterProfitIsOn = Convert.ToBoolean(reader.ReadLine());
-                    _filterMaxDrawDownValue = reader.ReadLine().ToDecimal();
-                    _filterMaxDrawDownIsOn = Convert.ToBoolean(reader.ReadLine());
-                    _filterMiddleProfitValue = reader.ReadLine().ToDecimal();
-                    _filterMiddleProfitIsOn = Convert.ToBoolean(reader.ReadLine());
-                    _filterProfitFactorValue = reader.ReadLine().ToDecimal();
-                    _filterProfitFactorIsOn = Convert.ToBoolean(reader.ReadLine());
-
-                    _timeStart = Convert.ToDateTime(reader.ReadLine(), CultureInfo.InvariantCulture);
-                    _timeEnd = Convert.ToDateTime(reader.ReadLine(), CultureInfo.InvariantCulture);
-                    _percentOnFiltration = reader.ReadLine().ToDecimal();
-
-                    _filterDealsCountValue = Convert.ToInt32(reader.ReadLine());
-                    _filterDealsCountIsOn = Convert.ToBoolean(reader.ReadLine());
-                    _isScript = Convert.ToBoolean(reader.ReadLine());
-                    _iterationCount = Convert.ToInt32(reader.ReadLine());
-                    _commissionType = (CommissionType)Enum.Parse(typeof(CommissionType),
-                        reader.ReadLine() ?? CommissionType.None.ToString());
-                    _commissionValue = reader.ReadLine().ToDecimal();
-                    _lastInSample = Convert.ToBoolean(reader.ReadLine());
-
-                    Enum.TryParse(reader.ReadLine(), out _orderExecutionType);
-                    _slippageToSimpleOrder = Convert.ToInt32(reader.ReadLine());
-                    _slippageToStopOrder = Convert.ToInt32(reader.ReadLine());
-                }
-            }
-            catch
-            {
-                // ignore
-            }
+            get => Settings.StrategyName;
+            set => Settings.StrategyName = value;
         }
+
+        public bool IsScript
+        {
+            get => Settings.IsScript;
+            set => Settings.IsScript = value;
+        }
+
+        public decimal StartDeposit
+        {
+            get => Settings.StartDeposit;
+            set => Settings.StartDeposit = value;
+        }
+
+        public OrderExecutionType OrderExecutionType
+        {
+            get => Settings.OrderExecutionType;
+            set => Settings.OrderExecutionType = value;
+        }
+
+        public int SlippageToSimpleOrder
+        {
+            get => Settings.SlippageToSimpleOrder;
+            set => Settings.SlippageToSimpleOrder = value;
+        }
+
+        public int SlippageToStopOrder
+        {
+            get => Settings.SlippageToStopOrder;
+            set => Settings.SlippageToStopOrder = value;
+        }
+
+        public CommissionType CommissionType
+        {
+            get => Settings.CommissionType;
+            set => Settings.CommissionType = value;
+        }
+
+        public decimal CommissionValue
+        {
+            get => Settings.CommissionValue;
+            set => Settings.CommissionValue = value;
+        }
+
+        public decimal FilterProfitValue
+        {
+            get => Settings.FilterProfitValue;
+            set => Settings.FilterProfitValue = value;
+        }
+
+        public bool FilterProfitIsOn
+        {
+            get => Settings.FilterProfitIsOn;
+            set => Settings.FilterProfitIsOn = value;
+        }
+
+        public decimal FilterMaxDrawDownValue
+        {
+            get => Settings.FilterMaxDrawDownValue;
+            set => Settings.FilterMaxDrawDownValue = value;
+        }
+
+        public bool FilterMaxDrawDownIsOn
+        {
+            get => Settings.FilterMaxDrawDownIsOn;
+            set => Settings.FilterMaxDrawDownIsOn = value;
+        }
+
+        public decimal FilterMiddleProfitValue
+        {
+            get => Settings.FilterMiddleProfitValue;
+            set => Settings.FilterMiddleProfitValue = value;
+        }
+
+        public bool FilterMiddleProfitIsOn
+        {
+            get => Settings.FilterMiddleProfitIsOn;
+            set => Settings.FilterMiddleProfitIsOn = value;
+        }
+
+        public decimal FilterProfitFactorValue
+        {
+            get => Settings.FilterProfitFactorValue;
+            set => Settings.FilterProfitFactorValue = value;
+        }
+
+        public bool FilterProfitFactorIsOn
+        {
+            get => Settings.FilterProfitFactorIsOn;
+            set => Settings.FilterProfitFactorIsOn = value;
+        }
+
+        public int FilterDealsCountValue
+        {
+            get => Settings.FilterDealsCountValue;
+            set => Settings.FilterDealsCountValue = value;
+        }
+
+        public bool FilterDealsCountIsOn
+        {
+            get => Settings.FilterDealsCountIsOn;
+            set => Settings.FilterDealsCountIsOn = value;
+        }
+
+        public DateTime TimeStart
+        {
+            get => Settings.TimeStart;
+            set => Settings.TimeStart = value;
+        }
+
+        public DateTime TimeEnd
+        {
+            get => Settings.TimeEnd;
+            set => Settings.TimeEnd = value;
+        }
+
+        public decimal PercentOnFiltration
+        {
+            get => Settings.PercentOnFiltration;
+            set => Settings.PercentOnFiltration = value;
+        }
+
+        public int IterationCount
+        {
+            get => Settings.IterationCount;
+            set => Settings.IterationCount = value;
+        }
+
+        public bool LastInSample
+        {
+            get => Settings.LastInSample;
+            set => Settings.LastInSample = value;
+        }
+
+        public List<OrderClearing> ClearingTimes => Settings.ClearingTimes;
+
+        public List<NonTradePeriod> NonTradePeriods => Settings.NonTradePeriods;
+
+        public void SaveClearingInfo() => Settings.SaveClearingInfo();
+
+        public void CreateNewClearing() => Settings.CreateNewClearing();
+
+        public void RemoveClearing(int num) => Settings.RemoveClearing(num);
+
+        public void SaveNonTradePeriods() => Settings.SaveNonTradePeriods();
+
+        public void CreateNewNonTradePeriod() => Settings.CreateNewNonTradePeriod();
+
+        public void RemoveNonTradePeriod(int num) => Settings.RemoveNonTradePeriod(num);
 
         #endregion
 
@@ -199,18 +278,12 @@ namespace OsEngine.OsOptimizer
                 PrimeProgressBarStatus.CurrentValue = PrimeProgressBarStatus.MaxValue;
             }
 
-            if (TestReadyEvent != null)
-            {
-                TestReadyEvent(reports);
-            }
+            TestReadyEvent?.Invoke(reports);
         }
 
         private void _optimizerExecutor_TimeToEndChangeEvent(TimeSpan timeToEnd)
         {
-            if (TimeToEndChangeEvent != null)
-            {
-                TimeToEndChangeEvent(timeToEnd);
-            }
+            TimeToEndChangeEvent?.Invoke(timeToEnd);
         }
 
         public event Action<TimeSpan> TimeToEndChangeEvent;
@@ -278,10 +351,7 @@ namespace OsEngine.OsOptimizer
 
         private void _storage_SecuritiesChangeEvent(List<Security> securities)
         {
-            if (NewSecurityEvent != null)
-            {
-                NewSecurityEvent(securities);
-            }
+            NewSecurityEvent?.Invoke(securities);
 
             TimeStart = Storage.TimeStart;
             TimeEnd = Storage.TimeEnd;
@@ -292,39 +362,6 @@ namespace OsEngine.OsOptimizer
         #endregion
 
         #region Management
-
-        public int ThreadsCount
-        {
-            get { return _threadsCount; }
-            set
-            {
-                _threadsCount = value;
-                Save();
-            }
-        }
-        private int _threadsCount;
-
-        public string StrategyName
-        {
-            get { return _strategyName; }
-            set
-            {
-                _strategyName = value;
-                Save();
-            }
-        }
-        private string _strategyName;
-
-        public bool IsScript
-        {
-            get { return _isScript; }
-            set
-            {
-                _isScript = value;
-                Save();
-            }
-        }
-        private bool _isScript;
 
         public List<SecurityTester> SecurityTester
         {
@@ -344,16 +381,16 @@ namespace OsEngine.OsOptimizer
 
         public void UpdateBotManualControlSettings()
         {
-            if (string.IsNullOrEmpty(_strategyName))
+            if (string.IsNullOrEmpty(Settings.StrategyName))
             {
                 return;
             }
 
             if (BotToTest == null)
             {
-                string botName = "OptimizerBot" + _strategyName.RemoveExcessFromSecurityName();
+                string botName = "OptimizerBot" + Settings.StrategyName.RemoveExcessFromSecurityName();
 
-                BotToTest = BotFactory.GetStrategyForName(_strategyName, botName, StartProgram.IsTester, _isScript);
+                BotToTest = BotFactory.GetStrategyForName(Settings.StrategyName, botName, StartProgram.IsTester, Settings.IsScript);
             }
 
             List<IIBotTab> sources = BotToTest.GetTabs();
@@ -367,8 +404,8 @@ namespace OsEngine.OsOptimizer
                     BotTabSimple simpleTab = (BotTabSimple)curTab;
                     simpleTab.Connector.ServerType = Market.ServerType.Optimizer;
                     simpleTab.Connector.ServerUid = -1;
-                    simpleTab.CommissionType = CommissionType;
-                    simpleTab.CommissionValue = CommissionValue;
+                    simpleTab.CommissionType = Settings.CommissionType;
+                    simpleTab.CommissionValue = Settings.CommissionValue;
 
                     CopyManualSupportSettings(simpleTab.ManualPositionSupport);
                 }
@@ -377,8 +414,8 @@ namespace OsEngine.OsOptimizer
                     BotTabScreener screenerTab = (BotTabScreener)curTab;
                     screenerTab.ServerType = Market.ServerType.Optimizer;
                     screenerTab.ServerUid = -1;
-                    screenerTab.CommissionType = CommissionType;
-                    screenerTab.CommissionValue = CommissionValue;
+                    screenerTab.CommissionType = Settings.CommissionType;
+                    screenerTab.CommissionValue = Settings.CommissionValue;
                 }
             }
 
@@ -389,22 +426,12 @@ namespace OsEngine.OsOptimizer
         {
             try
             {
-                if (string.IsNullOrEmpty(_strategyName))
+                if (string.IsNullOrEmpty(Settings.StrategyName))
                 {
                     return;
                 }
 
-                /* string storageName = "";
-
-                 if(Storage.SourceDataType == TesterSourceDataType.Set)
-                 {
-                     if (string.IsNullOrEmpty(Storage.ActiveSet) == false)
-                     {
-                         storageName = Storage.ActiveSet;
-                     }
-                 }*/
-
-                string botName = "OptimizerBot" + _strategyName.RemoveExcessFromSecurityName();
+                string botName = "OptimizerBot" + Settings.StrategyName.RemoveExcessFromSecurityName();
 
                 if (Storage.SourceDataType == TesterSourceDataType.Set
                     && string.IsNullOrEmpty(Storage.ActiveSet) == false)
@@ -414,7 +441,7 @@ namespace OsEngine.OsOptimizer
                     botName += setNameArray[setNameArray.Length - 1];
                 }
 
-                BotToTest = BotFactory.GetStrategyForName(_strategyName, botName, StartProgram.IsTester, _isScript);
+                BotToTest = BotFactory.GetStrategyForName(Settings.StrategyName, botName, StartProgram.IsTester, Settings.IsScript);
 
                 if(BotToTest == null)
                 {
@@ -432,8 +459,8 @@ namespace OsEngine.OsOptimizer
                         BotTabSimple simpleTab = (BotTabSimple)curTab;
                         simpleTab.Connector.ServerType = Market.ServerType.Optimizer;
                         simpleTab.Connector.ServerUid = -1;
-                        simpleTab.CommissionType = CommissionType;
-                        simpleTab.CommissionValue = CommissionValue;
+                        simpleTab.CommissionType = Settings.CommissionType;
+                        simpleTab.CommissionValue = Settings.CommissionValue;
 
                         CopyManualSupportSettings(simpleTab.ManualPositionSupport);
                     }
@@ -442,8 +469,8 @@ namespace OsEngine.OsOptimizer
                         BotTabScreener screenerTab = (BotTabScreener)curTab;
                         screenerTab.ServerType = Market.ServerType.Optimizer;
                         screenerTab.ServerUid = -1;
-                        screenerTab.CommissionType = CommissionType;
-                        screenerTab.CommissionValue = CommissionValue;
+                        screenerTab.CommissionType = Settings.CommissionType;
+                        screenerTab.CommissionValue = Settings.CommissionValue;
                         screenerTab.ManualPositionSupportFromOptimizer = ManualControl;
                         screenerTab.TryLoadTabs();
                         screenerTab.NeedToReloadTabs = true;
@@ -455,7 +482,7 @@ namespace OsEngine.OsOptimizer
             }
             catch (Exception ex)
             {
-                SendLogMessage("Can`t create bot " + _strategyName + " Exception: " + ex.ToString(), LogMessageType.Error);
+                SendLogMessage("Can`t create bot " + Settings.StrategyName + " Exception: " + ex.ToString(), LogMessageType.Error);
             }
         }
 
@@ -509,615 +536,28 @@ namespace OsEngine.OsOptimizer
 
         #endregion
 
-        #region Trade servers settings
-
-        public OrderExecutionType OrderExecutionType
-        {
-            get { return _orderExecutionType; }
-            set
-            {
-                _orderExecutionType = value;
-                Save();
-            }
-        }
-        private OrderExecutionType _orderExecutionType;
-
-        public int SlippageToSimpleOrder
-        {
-            get { return _slippageToSimpleOrder; }
-            set
-            {
-                if (_slippageToSimpleOrder == value)
-                {
-                    return;
-                }
-
-                _slippageToSimpleOrder = value;
-                Save();
-            }
-        }
-        private int _slippageToSimpleOrder;
-
-        public int SlippageToStopOrder
-        {
-            get { return _slippageToStopOrder; }
-            set
-            {
-                if (_slippageToStopOrder == value)
-                {
-                    return;
-                }
-
-                _slippageToStopOrder = value;
-                Save();
-            }
-        }
-        private int _slippageToStopOrder;
-
-        public decimal StartDeposit
-        {
-            get { return _startDeposit; }
-            set
-            {
-                _startDeposit = value;
-                Save();
-            }
-        }
-        private decimal _startDeposit;
-
-        public CommissionType CommissionType
-        {
-            get => _commissionType;
-            set
-            {
-                if (_commissionType == value)
-                {
-                    return;
-                }
-
-                _commissionType = value;
-                Save();
-                UpdateBotManualControlSettings();
-            }
-        }
-        private CommissionType _commissionType;
-
-        public decimal CommissionValue
-        {
-            get => _commissionValue;
-            set
-            {
-                if (_commissionValue == value)
-                {
-                    return;
-                }
-
-                _commissionValue = value;
-                Save();
-                UpdateBotManualControlSettings();
-            }
-        }
-        private decimal _commissionValue;
-
-        #endregion
-
-        #region Clearing system 
-
-        public List<OrderClearing> ClearingTimes = new List<OrderClearing>();
-
-        public void SaveClearingInfo()
-        {
-            try
-            {
-                using (StreamWriter writer = new StreamWriter(@"Engine\" + @"OptimizerMasterClearings.txt", false))
-                {
-                    for (int i = 0; i < ClearingTimes.Count; i++)
-                    {
-                        writer.WriteLine(ClearingTimes[i].GetSaveString());
-                    }
-                }
-            }
-            catch (Exception)
-            {
-                // ignored
-            }
-        }
-
-        private void LoadClearingInfo()
-        {
-            if (!File.Exists(@"Engine\" + @"OptimizerMasterClearings.txt"))
-            {
-                return;
-            }
-
-            try
-            {
-                using (StreamReader reader = new StreamReader(@"Engine\" + @"OptimizerMasterClearings.txt"))
-                {
-                    while (reader.EndOfStream == false)
-                    {
-                        string str = reader.ReadLine();
-
-                        if (str != "")
-                        {
-                            OrderClearing clearings = new OrderClearing();
-                            clearings.SetFromString(str);
-                            ClearingTimes.Add(clearings);
-                        }
-                    }
-                }
-            }
-            catch (Exception)
-            {
-                // ignored
-            }
-        }
-
-        public void CreateNewClearing()
-        {
-            OrderClearing newClearing = new OrderClearing();
-
-            newClearing.Time = new DateTime(2000, 1, 1, 19, 0, 0);
-            ClearingTimes.Add(newClearing);
-            SaveClearingInfo();
-        }
-
-        public void RemoveClearing(int num)
-        {
-            if (num > ClearingTimes.Count)
-            {
-                return;
-            }
-
-            ClearingTimes.RemoveAt(num);
-            SaveClearingInfo();
-        }
-
-        #endregion
-
-        #region Non-trade periods
-
-        public List<NonTradePeriod> NonTradePeriods = new List<NonTradePeriod>();
-
-        public void SaveNonTradePeriods()
-        {
-            try
-            {
-                using (StreamWriter writer = new StreamWriter(@"Engine\" + @"OptimizerMasterNonTradePeriods.txt", false))
-                {
-                    for (int i = 0; i < NonTradePeriods.Count; i++)
-                    {
-                        writer.WriteLine(NonTradePeriods[i].GetSaveString());
-                    }
-                }
-            }
-            catch (Exception)
-            {
-                // ignored
-            }
-        }
-
-        private void LoadNonTradePeriods()
-        {
-            if (!File.Exists(@"Engine\" + @"OptimizerMasterNonTradePeriods.txt"))
-            {
-                return;
-            }
-
-            try
-            {
-                using (StreamReader reader = new StreamReader(@"Engine\" + @"OptimizerMasterNonTradePeriods.txt"))
-                {
-                    while (reader.EndOfStream == false)
-                    {
-                        string str = reader.ReadLine();
-
-                        if (str != "")
-                        {
-                            NonTradePeriod period = new NonTradePeriod();
-                            period.SetFromString(str);
-                            NonTradePeriods.Add(period);
-                        }
-                    }
-                }
-            }
-            catch (Exception)
-            {
-                // ignored
-            }
-        }
-
-        public void CreateNewNonTradePeriod()
-        {
-            NonTradePeriod newClearing = new NonTradePeriod();
-
-            NonTradePeriods.Add(newClearing);
-            SaveNonTradePeriods();
-        }
-
-        public void RemoveNonTradePeriod(int num)
-        {
-            if (num > NonTradePeriods.Count)
-            {
-                return;
-            }
-
-            NonTradePeriods.RemoveAt(num);
-            SaveNonTradePeriods();
-        }
-
-        #endregion
-
-        #region Filters
-
-        public decimal FilterProfitValue
-        {
-            get { return _filterProfitValue; }
-            set
-            {
-                _filterProfitValue = value;
-                Save();
-            }
-        }
-        private decimal _filterProfitValue;
-
-        public bool FilterProfitIsOn
-        {
-            get { return _filterProfitIsOn; }
-            set
-            {
-                _filterProfitIsOn = value;
-                Save();
-            }
-        }
-        private bool _filterProfitIsOn;
-
-        public decimal FilterMaxDrawDownValue
-        {
-            get { return _filterMaxDrawDownValue; }
-            set
-            {
-                _filterMaxDrawDownValue = value;
-                Save();
-            }
-        }
-        private decimal _filterMaxDrawDownValue;
-
-        public bool FilterMaxDrawDownIsOn
-        {
-            get { return _filterMaxDrawDownIsOn; }
-            set
-            {
-                _filterMaxDrawDownIsOn = value;
-                Save();
-            }
-        }
-        private bool _filterMaxDrawDownIsOn;
-
-        public decimal FilterMiddleProfitValue
-        {
-            get { return _filterMiddleProfitValue; }
-            set
-            {
-                _filterMiddleProfitValue = value;
-                Save();
-            }
-        }
-        private decimal _filterMiddleProfitValue;
-
-        public bool FilterMiddleProfitIsOn
-        {
-            get { return _filterMiddleProfitIsOn; }
-            set
-            {
-                _filterMiddleProfitIsOn = value;
-                Save();
-            }
-        }
-        private bool _filterMiddleProfitIsOn;
-
-        public decimal FilterProfitFactorValue
-        {
-            get { return _filterProfitFactorValue; }
-            set
-            {
-                _filterProfitFactorValue = value;
-                Save();
-            }
-        }
-        private decimal _filterProfitFactorValue;
-
-        public bool FilterProfitFactorIsOn
-        {
-            get { return _filterProfitFactorIsOn; }
-            set
-            {
-                _filterProfitFactorIsOn = value;
-                Save();
-            }
-        }
-        private bool _filterProfitFactorIsOn;
-
-        public int FilterDealsCountValue
-        {
-            get { return _filterDealsCountValue; }
-            set
-            {
-                _filterDealsCountValue = value;
-                Save();
-            }
-        }
-        private int _filterDealsCountValue;
-
-        public bool FilterDealsCountIsOn
-        {
-            get { return _filterDealsCountIsOn; }
-            set
-            {
-                _filterDealsCountIsOn = value;
-                Save();
-            }
-        }
-        private bool _filterDealsCountIsOn;
-
-        #endregion
-
         #region Optimization phases
 
         public bool IsAcceptedByFilter(OptimizerReport report)
         {
-            if (report == null)
-            {
-                return false;
-            }
-
-            if (FilterMiddleProfitIsOn && report.AverageProfitPercentOneContract < FilterMiddleProfitValue)
-            {
-                return false;
-            }
-
-            if (FilterProfitIsOn && report.TotalProfit < FilterProfitValue)
-            {
-                return false;
-            }
-
-            if (FilterMaxDrawDownIsOn && report.MaxDrawDawn < FilterMaxDrawDownValue)
-            {
-                return false;
-            }
-
-            if (FilterProfitFactorIsOn && report.ProfitFactor < FilterProfitFactorValue)
-            {
-                return false;
-            }
-
-            if (FilterDealsCountIsOn && report.PositionsCount < FilterDealsCountValue)
-            {
-                return false;
-            }
-
-            return true;
+            return _filterManager.IsAcceptedByFilter(report);
         }
 
         public List<OptimizerFaze> Fazes;
 
-        public DateTime TimeStart
+        private void OnDateTimeStartEndChange()
         {
-            get { return _timeStart; }
-            set
-            {
-                _timeStart = value;
-                Save();
-
-                if (DateTimeStartEndChange != null)
-                {
-                    DateTimeStartEndChange();
-                }
-            }
-        }
-        private DateTime _timeStart;
-
-        public DateTime TimeEnd
-        {
-            get { return _timeEnd; }
-            set
-            {
-                _timeEnd = value;
-                Save();
-                if (DateTimeStartEndChange != null)
-                {
-                    DateTimeStartEndChange();
-                }
-            }
-        }
-        private DateTime _timeEnd;
-
-        public decimal PercentOnFiltration
-        {
-            get { return _percentOnFiltration; }
-            set
-            {
-                _percentOnFiltration = value;
-                Save();
-            }
-        }
-        private decimal _percentOnFiltration;
-
-        public int IterationCount
-        {
-            get { return _iterationCount; }
-            set
-            {
-                _iterationCount = value;
-                Save();
-            }
-        }
-
-        private int _iterationCount = 1;
-
-        public bool LastInSample
-        {
-            get
-            {
-                return _lastInSample;
-            }
-            set
-            {
-                _lastInSample = value;
-                Save();
-            }
-        }
-
-        private bool _lastInSample;
-
-        private decimal GetInSampleRecurs(decimal curLengthInSample, int fazeCount, bool lastInSample, int allDays)
-        {
-            // х = Y + Y/P * С;
-            // x - общая длинна в днях. Уже известна
-            // Y - длинна InSample
-            // P - процент OutOfSample от InSample
-            // C - количество отрезков
-
-            decimal outOfSampleLength = curLengthInSample * (_percentOnFiltration / 100);
-
-            int count = fazeCount;
-
-            if (lastInSample)
-            {
-                count--;
-            }
-
-            int allLength = Convert.ToInt32(curLengthInSample + outOfSampleLength * count);
-
-            if (allLength > allDays)
-            {
-                if (Convert.ToDecimal(allLength) / allDays > 1.2m)
-                {
-                    if (curLengthInSample > 1000)
-                    {
-                        curLengthInSample -= 10;
-                    }
-                    else
-                    {
-                        curLengthInSample -= 5;
-                    }
-                }
-
-                curLengthInSample--;
-                return GetInSampleRecurs(curLengthInSample, fazeCount, lastInSample, allDays);
-            }
-            else
-            {
-                return curLengthInSample;
-            }
+            DateTimeStartEndChange?.Invoke();
         }
 
         public void ReloadFazes()
         {
-            int fazeCount = IterationCount;
-
-            if (fazeCount < 1)
-            {
-                fazeCount = 1;
-            }
-
-            if (TimeEnd == DateTime.MinValue ||
-                TimeStart == DateTime.MinValue)
-            {
-                SendLogMessage(OsLocalization.Optimizer.Message12, LogMessageType.System);
-                return;
-            }
-
-            int dayAll = Convert.ToInt32((TimeEnd - TimeStart).TotalDays);
-
-            if (dayAll < 2)
-            {
-                SendLogMessage(OsLocalization.Optimizer.Message12, LogMessageType.System);
-                return;
-            }
-
-            int daysOnInSample = (int)GetInSampleRecurs(dayAll, fazeCount, _lastInSample, dayAll);
-
-            int daysOnForward = Convert.ToInt32(daysOnInSample * (_percentOnFiltration / 100));
-
-            Fazes = new List<OptimizerFaze>();
-
-            DateTime time = _timeStart;
-
-            for (int i = 0; i < fazeCount; i++)
-            {
-                OptimizerFaze newFaze = new OptimizerFaze();
-                newFaze.TypeFaze = OptimizerFazeType.InSample;
-                newFaze.TimeStart = time;
-                newFaze.TimeEnd = time.AddDays(daysOnInSample);
-                time = time.AddDays(daysOnForward);
-                newFaze.Days = daysOnInSample;
-                Fazes.Add(newFaze);
-
-                if (_lastInSample
-                    && i + 1 == fazeCount)
-                {
-                    newFaze.Days = daysOnInSample;
-                    break;
-                }
-
-                OptimizerFaze newFazeOut = new OptimizerFaze();
-                newFazeOut.TypeFaze = OptimizerFazeType.OutOfSample;
-                newFazeOut.TimeStart = newFaze.TimeStart.AddDays(daysOnInSample);
-                newFazeOut.TimeEnd = newFazeOut.TimeStart.AddDays(daysOnForward);
-                newFazeOut.TimeStart = newFazeOut.TimeStart.AddDays(1);
-                newFazeOut.Days = daysOnForward;
-                Fazes.Add(newFazeOut);
-            }
-
-            for (int i = 0; i < Fazes.Count; i++)
-            {
-                if (Fazes[i].Days <= 0)
-                {
-                    SendLogMessage(OsLocalization.Optimizer.Label50, LogMessageType.Error);
-                    Fazes = new List<OptimizerFaze>();
-                    return;
-                }
-            }
-
-
-            /*while (DaysInFazes(Fazes) != dayAll)
-            {
-                int daysGone = DaysInFazes(Fazes) - dayAll;
-
-                for (int i = 0; i < Fazes.Count && daysGone != 0; i++)
-                {
-
-                    if (daysGone > 0)
-                    {
-                        Fazes[i].Days--;
-                        if (Fazes[i].TypeFaze == OptimizerFazeType.InSample &&
-                            i + 1 != Fazes.Count)
-                        {
-                            Fazes[i + 1].TimeStart = Fazes[i + 1].TimeStart.AddDays(-1);
-                        }
-                        else
-                        {
-                            Fazes[i].TimeStart = Fazes[i].TimeStart.AddDays(-1);
-                        }
-                        daysGone--;
-                    }
-                    else if (daysGone < 0)
-                    {
-                        Fazes[i].Days++;
-                        if (Fazes[i].TypeFaze == OptimizerFazeType.InSample && 
-                            i + 1 != Fazes.Count)
-                        {
-                            Fazes[i + 1].TimeStart = Fazes[i + 1].TimeStart.AddDays(+1);
-                        }
-                        else
-                        {
-                            Fazes[i].TimeStart = Fazes[i].TimeStart.AddDays(+1);
-                        }
-                        daysGone++;
-                    }
-                }
-            }*/
+            Fazes = _phaseCalculator.CalculatePhases(
+                Settings.TimeStart,
+                Settings.TimeEnd,
+                Settings.IterationCount,
+                Settings.PercentOnFiltration,
+                Settings.LastInSample);
         }
 
         public event Action DateTimeStartEndChange;
@@ -1130,12 +570,12 @@ namespace OsEngine.OsOptimizer
         {
             get
             {
-                if (string.IsNullOrEmpty(_strategyName))
+                if (string.IsNullOrEmpty(Settings.StrategyName))
                 {
                     return null;
                 }
 
-                BotPanel bot = BotFactory.GetStrategyForName(_strategyName, "", StartProgram.IsOsOptimizer, _isScript);
+                BotPanel bot = BotFactory.GetStrategyForName(Settings.StrategyName, "", StartProgram.IsOsOptimizer, Settings.IsScript);
 
                 if (bot == null)
                 {
@@ -1176,12 +616,12 @@ namespace OsEngine.OsOptimizer
         {
             get
             {
-                if (string.IsNullOrEmpty(_strategyName))
+                if (string.IsNullOrEmpty(Settings.StrategyName))
                 {
                     return null;
                 }
 
-                BotPanel bot = BotFactory.GetStrategyForName(_strategyName, "", StartProgram.IsOsOptimizer, _isScript);
+                BotPanel bot = BotFactory.GetStrategyForName(Settings.StrategyName, "", StartProgram.IsOsOptimizer, Settings.IsScript);
 
                 if (bot == null)
                 {
@@ -1215,13 +655,13 @@ namespace OsEngine.OsOptimizer
 
         private void GetValueParameterSaveByUser(IIStrategyParameter parameter)
         {
-            if (!File.Exists(@"Engine\" + _strategyName + @"_StandartOptimizerParameters.txt"))
+            if (!File.Exists(@"Engine\" + Settings.StrategyName + @"_StandartOptimizerParameters.txt"))
             {
                 return;
             }
             try
             {
-                using (StreamReader reader = new StreamReader(@"Engine\" + _strategyName + @"_StandartOptimizerParameters.txt"))
+                using (StreamReader reader = new StreamReader(@"Engine\" + Settings.StrategyName + @"_StandartOptimizerParameters.txt"))
                 {
                     while (!reader.EndOfStream)
                     {
@@ -1250,7 +690,7 @@ namespace OsEngine.OsOptimizer
 
             try
             {
-                using (StreamWriter writer = new StreamWriter(@"Engine\" + _strategyName + @"_StandartOptimizerParameters.txt", false)
+                using (StreamWriter writer = new StreamWriter(@"Engine\" + Settings.StrategyName + @"_StandartOptimizerParameters.txt", false)
                     )
                 {
                     for (int i = 0; i < _parameters.Count; i++)
@@ -1295,13 +735,13 @@ namespace OsEngine.OsOptimizer
         {
             List<bool> result = new List<bool>();
 
-            if (!File.Exists(@"Engine\" + _strategyName + @"_StandartOptimizerParametersOnOff.txt"))
+            if (!File.Exists(@"Engine\" + Settings.StrategyName + @"_StandartOptimizerParametersOnOff.txt"))
             {
                 return result;
             }
             try
             {
-                using (StreamReader reader = new StreamReader(@"Engine\" + _strategyName + @"_StandartOptimizerParametersOnOff.txt"))
+                using (StreamReader reader = new StreamReader(@"Engine\" + Settings.StrategyName + @"_StandartOptimizerParametersOnOff.txt"))
                 {
                     while (!reader.EndOfStream)
                     {
@@ -1327,7 +767,7 @@ namespace OsEngine.OsOptimizer
 
             try
             {
-                using (StreamWriter writer = new StreamWriter(@"Engine\" + _strategyName + @"_StandartOptimizerParametersOnOff.txt", false)
+                using (StreamWriter writer = new StreamWriter(@"Engine\" + Settings.StrategyName + @"_StandartOptimizerParametersOnOff.txt", false)
                     )
                 {
                     for (int i = 0; i < _parametersOn.Count; i++)
@@ -1500,7 +940,7 @@ namespace OsEngine.OsOptimizer
                 return false;
             }
 
-            if (string.IsNullOrEmpty(_strategyName))
+            if (string.IsNullOrEmpty(Settings.StrategyName))
             {
                 CustomMessageBoxUi ui = new CustomMessageBoxUi(OsLocalization.Optimizer.Message17);
                 ui.ShowDialog();
@@ -1544,7 +984,7 @@ namespace OsEngine.OsOptimizer
             }
 
 
-            // проверка наличия и состояния параметра Regime 
+            // проверка наличия и состояния параметра Regime
             bool onRgimeOff = false;
 
             for (int i = 0; i < _parameters.Count; i++)
@@ -1618,10 +1058,7 @@ namespace OsEngine.OsOptimizer
 
         private void _optimizerExecutor_NeedToMoveUiToEvent(NeedToMoveUiTo moveUiTo)
         {
-            if (NeedToMoveUiToEvent != null)
-            {
-                NeedToMoveUiToEvent(moveUiTo);
-            }
+            NeedToMoveUiToEvent?.Invoke(moveUiTo);
         }
 
         public event Action<NeedToMoveUiTo> NeedToMoveUiToEvent;
@@ -1688,10 +1125,7 @@ namespace OsEngine.OsOptimizer
 
         public void SendLogMessage(string message, LogMessageType type)
         {
-            if (LogMessageEvent != null)
-            {
-                LogMessageEvent(message, type);
-            }
+            LogMessageEvent?.Invoke(message, type);
         }
 
         public event Action<string, LogMessageType> LogMessageEvent;

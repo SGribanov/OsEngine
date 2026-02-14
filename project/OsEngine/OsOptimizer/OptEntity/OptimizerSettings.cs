@@ -1,0 +1,573 @@
+/*
+ * Your rights to use code governed by this license https://github.com/AlexWan/OsEngine/blob/master/LICENSE
+ * Ваши права на использование кода регулируются данной лицензией http://o-s-a.net/doc/license_simple_engine.pdf
+*/
+
+using System;
+using System.Collections.Generic;
+using System.Globalization;
+using System.IO;
+using OsEngine.Entity;
+using OsEngine.Logging;
+using OsEngine.Market.Servers.Tester;
+using OsEngine.OsOptimizer;
+
+namespace OsEngine.OsOptimizer.OptEntity
+{
+    /// <summary>
+    /// Persistent optimizer configuration: filters, trade settings, phase config,
+    /// clearing times, non-trade periods. Load/Save.
+    /// Постоянная конфигурация оптимизатора: фильтры, настройки торговли, фазы,
+    /// клиринги, неторговые периоды.
+    /// </summary>
+    public class OptimizerSettings
+    {
+        public OptimizerSettings()
+        {
+            _threadsCount = 1;
+            _startDeposit = 100000;
+            _filterProfitValue = 10;
+            _filterProfitIsOn = false;
+            _filterMaxDrawDownValue = -10;
+            _filterMaxDrawDownIsOn = false;
+            _filterMiddleProfitValue = 0.001m;
+            _filterMiddleProfitIsOn = false;
+            _filterProfitFactorValue = 1;
+            _filterProfitFactorIsOn = false;
+            _percentOnFiltration = 30;
+            _iterationCount = 1;
+
+            Load();
+            LoadClearingInfo();
+            LoadNonTradePeriods();
+        }
+
+        #region Main settings
+
+        public int ThreadsCount
+        {
+            get => _threadsCount;
+            set { _threadsCount = value; Save(); }
+        }
+        private int _threadsCount;
+
+        public string StrategyName
+        {
+            get => _strategyName;
+            set { _strategyName = value; Save(); }
+        }
+        private string _strategyName;
+
+        public bool IsScript
+        {
+            get => _isScript;
+            set { _isScript = value; Save(); }
+        }
+        private bool _isScript;
+
+        public decimal StartDeposit
+        {
+            get => _startDeposit;
+            set { _startDeposit = value; Save(); }
+        }
+        private decimal _startDeposit;
+
+        #endregion
+
+        #region Trade server settings
+
+        public OrderExecutionType OrderExecutionType
+        {
+            get => _orderExecutionType;
+            set { _orderExecutionType = value; Save(); }
+        }
+        private OrderExecutionType _orderExecutionType;
+
+        public int SlippageToSimpleOrder
+        {
+            get => _slippageToSimpleOrder;
+            set
+            {
+                if (_slippageToSimpleOrder == value) return;
+                _slippageToSimpleOrder = value;
+                Save();
+            }
+        }
+        private int _slippageToSimpleOrder;
+
+        public int SlippageToStopOrder
+        {
+            get => _slippageToStopOrder;
+            set
+            {
+                if (_slippageToStopOrder == value) return;
+                _slippageToStopOrder = value;
+                Save();
+            }
+        }
+        private int _slippageToStopOrder;
+
+        public CommissionType CommissionType
+        {
+            get => _commissionType;
+            set
+            {
+                if (_commissionType == value) return;
+                _commissionType = value;
+                Save();
+                CommissionChanged?.Invoke();
+            }
+        }
+        private CommissionType _commissionType;
+
+        public decimal CommissionValue
+        {
+            get => _commissionValue;
+            set
+            {
+                if (_commissionValue == value) return;
+                _commissionValue = value;
+                Save();
+                CommissionChanged?.Invoke();
+            }
+        }
+        private decimal _commissionValue;
+
+        /// <summary>
+        /// Fired when CommissionType or CommissionValue changes.
+        /// </summary>
+        public event Action CommissionChanged;
+
+        #endregion
+
+        #region Filters
+
+        public decimal FilterProfitValue
+        {
+            get => _filterProfitValue;
+            set { _filterProfitValue = value; Save(); }
+        }
+        private decimal _filterProfitValue;
+
+        public bool FilterProfitIsOn
+        {
+            get => _filterProfitIsOn;
+            set { _filterProfitIsOn = value; Save(); }
+        }
+        private bool _filterProfitIsOn;
+
+        public decimal FilterMaxDrawDownValue
+        {
+            get => _filterMaxDrawDownValue;
+            set { _filterMaxDrawDownValue = value; Save(); }
+        }
+        private decimal _filterMaxDrawDownValue;
+
+        public bool FilterMaxDrawDownIsOn
+        {
+            get => _filterMaxDrawDownIsOn;
+            set { _filterMaxDrawDownIsOn = value; Save(); }
+        }
+        private bool _filterMaxDrawDownIsOn;
+
+        public decimal FilterMiddleProfitValue
+        {
+            get => _filterMiddleProfitValue;
+            set { _filterMiddleProfitValue = value; Save(); }
+        }
+        private decimal _filterMiddleProfitValue;
+
+        public bool FilterMiddleProfitIsOn
+        {
+            get => _filterMiddleProfitIsOn;
+            set { _filterMiddleProfitIsOn = value; Save(); }
+        }
+        private bool _filterMiddleProfitIsOn;
+
+        public decimal FilterProfitFactorValue
+        {
+            get => _filterProfitFactorValue;
+            set { _filterProfitFactorValue = value; Save(); }
+        }
+        private decimal _filterProfitFactorValue;
+
+        public bool FilterProfitFactorIsOn
+        {
+            get => _filterProfitFactorIsOn;
+            set { _filterProfitFactorIsOn = value; Save(); }
+        }
+        private bool _filterProfitFactorIsOn;
+
+        public int FilterDealsCountValue
+        {
+            get => _filterDealsCountValue;
+            set { _filterDealsCountValue = value; Save(); }
+        }
+        private int _filterDealsCountValue;
+
+        public bool FilterDealsCountIsOn
+        {
+            get => _filterDealsCountIsOn;
+            set { _filterDealsCountIsOn = value; Save(); }
+        }
+        private bool _filterDealsCountIsOn;
+
+        #endregion
+
+        #region Phase settings
+
+        public DateTime TimeStart
+        {
+            get => _timeStart;
+            set
+            {
+                _timeStart = value;
+                Save();
+                DateTimeStartEndChange?.Invoke();
+            }
+        }
+        private DateTime _timeStart;
+
+        public DateTime TimeEnd
+        {
+            get => _timeEnd;
+            set
+            {
+                _timeEnd = value;
+                Save();
+                DateTimeStartEndChange?.Invoke();
+            }
+        }
+        private DateTime _timeEnd;
+
+        public decimal PercentOnFiltration
+        {
+            get => _percentOnFiltration;
+            set { _percentOnFiltration = value; Save(); }
+        }
+        private decimal _percentOnFiltration;
+
+        public int IterationCount
+        {
+            get => _iterationCount;
+            set { _iterationCount = value; Save(); }
+        }
+        private int _iterationCount;
+
+        public bool LastInSample
+        {
+            get => _lastInSample;
+            set { _lastInSample = value; Save(); }
+        }
+        private bool _lastInSample;
+
+        public event Action DateTimeStartEndChange;
+
+        #endregion
+
+        #region Clearing system
+
+        public List<OrderClearing> ClearingTimes = new List<OrderClearing>();
+
+        public void SaveClearingInfo()
+        {
+            try
+            {
+                using (StreamWriter writer = new StreamWriter(@"Engine\" + @"OptimizerMasterClearings.txt", false))
+                {
+                    for (int i = 0; i < ClearingTimes.Count; i++)
+                    {
+                        writer.WriteLine(ClearingTimes[i].GetSaveString());
+                    }
+                }
+            }
+            catch (Exception)
+            {
+                // ignored
+            }
+        }
+
+        private void LoadClearingInfo()
+        {
+            if (!File.Exists(@"Engine\" + @"OptimizerMasterClearings.txt"))
+            {
+                return;
+            }
+
+            try
+            {
+                using (StreamReader reader = new StreamReader(@"Engine\" + @"OptimizerMasterClearings.txt"))
+                {
+                    while (reader.EndOfStream == false)
+                    {
+                        string str = reader.ReadLine();
+
+                        if (str != "")
+                        {
+                            OrderClearing clearings = new OrderClearing();
+                            clearings.SetFromString(str);
+                            ClearingTimes.Add(clearings);
+                        }
+                    }
+                }
+            }
+            catch (Exception)
+            {
+                // ignored
+            }
+        }
+
+        public void CreateNewClearing()
+        {
+            OrderClearing newClearing = new OrderClearing();
+            newClearing.Time = new DateTime(2000, 1, 1, 19, 0, 0);
+            ClearingTimes.Add(newClearing);
+            SaveClearingInfo();
+        }
+
+        public void RemoveClearing(int num)
+        {
+            if (num > ClearingTimes.Count)
+            {
+                return;
+            }
+
+            ClearingTimes.RemoveAt(num);
+            SaveClearingInfo();
+        }
+
+        #endregion
+
+        #region Non-trade periods
+
+        public List<NonTradePeriod> NonTradePeriods = new List<NonTradePeriod>();
+
+        public void SaveNonTradePeriods()
+        {
+            try
+            {
+                using (StreamWriter writer = new StreamWriter(@"Engine\" + @"OptimizerMasterNonTradePeriods.txt", false))
+                {
+                    for (int i = 0; i < NonTradePeriods.Count; i++)
+                    {
+                        writer.WriteLine(NonTradePeriods[i].GetSaveString());
+                    }
+                }
+            }
+            catch (Exception)
+            {
+                // ignored
+            }
+        }
+
+        private void LoadNonTradePeriods()
+        {
+            if (!File.Exists(@"Engine\" + @"OptimizerMasterNonTradePeriods.txt"))
+            {
+                return;
+            }
+
+            try
+            {
+                using (StreamReader reader = new StreamReader(@"Engine\" + @"OptimizerMasterNonTradePeriods.txt"))
+                {
+                    while (reader.EndOfStream == false)
+                    {
+                        string str = reader.ReadLine();
+
+                        if (str != "")
+                        {
+                            NonTradePeriod period = new NonTradePeriod();
+                            period.SetFromString(str);
+                            NonTradePeriods.Add(period);
+                        }
+                    }
+                }
+            }
+            catch (Exception)
+            {
+                // ignored
+            }
+        }
+
+        public void CreateNewNonTradePeriod()
+        {
+            NonTradePeriod newClearing = new NonTradePeriod();
+            NonTradePeriods.Add(newClearing);
+            SaveNonTradePeriods();
+        }
+
+        public void RemoveNonTradePeriod(int num)
+        {
+            if (num > NonTradePeriods.Count)
+            {
+                return;
+            }
+
+            NonTradePeriods.RemoveAt(num);
+            SaveNonTradePeriods();
+        }
+
+        #endregion
+
+        #region Optimization method settings
+
+        public OptimizationMethodType OptimizationMethod
+        {
+            get => _optimizationMethod;
+            set { _optimizationMethod = value; Save(); }
+        }
+        private OptimizationMethodType _optimizationMethod = OptimizationMethodType.BruteForce;
+
+        public SortBotsType ObjectiveMetric
+        {
+            get => _objectiveMetric;
+            set { _objectiveMetric = value; Save(); }
+        }
+        private SortBotsType _objectiveMetric = SortBotsType.TotalProfit;
+
+        public int BayesianInitialSamples
+        {
+            get => _bayesianInitialSamples;
+            set { _bayesianInitialSamples = value; Save(); }
+        }
+        private int _bayesianInitialSamples = 20;
+
+        public int BayesianMaxIterations
+        {
+            get => _bayesianMaxIterations;
+            set { _bayesianMaxIterations = value; Save(); }
+        }
+        private int _bayesianMaxIterations = 100;
+
+        public int BayesianBatchSize
+        {
+            get => _bayesianBatchSize;
+            set { _bayesianBatchSize = value; Save(); }
+        }
+        private int _bayesianBatchSize = 5;
+
+        #endregion
+
+        #region Save / Load
+
+        private void Save()
+        {
+            try
+            {
+                using (StreamWriter writer = new StreamWriter(@"Engine\OptimizerSettings.txt", false))
+                {
+                    writer.WriteLine(_threadsCount);
+                    writer.WriteLine(_strategyName);
+                    writer.WriteLine(_startDeposit);
+
+                    writer.WriteLine(_filterProfitValue);
+                    writer.WriteLine(_filterProfitIsOn);
+                    writer.WriteLine(_filterMaxDrawDownValue);
+                    writer.WriteLine(_filterMaxDrawDownIsOn);
+                    writer.WriteLine(_filterMiddleProfitValue);
+                    writer.WriteLine(_filterMiddleProfitIsOn);
+                    writer.WriteLine(_filterProfitFactorValue);
+                    writer.WriteLine(_filterProfitFactorIsOn);
+
+                    writer.WriteLine(_timeStart.ToString(CultureInfo.InvariantCulture));
+                    writer.WriteLine(_timeEnd.ToString(CultureInfo.InvariantCulture));
+                    writer.WriteLine(_percentOnFiltration);
+
+                    writer.WriteLine(_filterDealsCountValue);
+                    writer.WriteLine(_filterDealsCountIsOn);
+                    writer.WriteLine(_isScript);
+                    writer.WriteLine(_iterationCount);
+                    writer.WriteLine(_commissionType);
+                    writer.WriteLine(_commissionValue);
+                    writer.WriteLine(_lastInSample);
+                    writer.WriteLine(_orderExecutionType);
+                    writer.WriteLine(_slippageToSimpleOrder);
+                    writer.WriteLine(_slippageToStopOrder);
+
+                    // V2 fields
+                    writer.WriteLine(_optimizationMethod);
+                    writer.WriteLine(_objectiveMetric);
+                    writer.WriteLine(_bayesianInitialSamples);
+                    writer.WriteLine(_bayesianMaxIterations);
+                    writer.WriteLine(_bayesianBatchSize);
+                }
+            }
+            catch (Exception error)
+            {
+                LogMessageEvent?.Invoke(error.ToString(), LogMessageType.Error);
+            }
+        }
+
+        private void Load()
+        {
+            if (!File.Exists(@"Engine\OptimizerSettings.txt"))
+            {
+                return;
+            }
+            try
+            {
+                using (StreamReader reader = new StreamReader(@"Engine\OptimizerSettings.txt"))
+                {
+                    _threadsCount = Convert.ToInt32(reader.ReadLine());
+                    _strategyName = reader.ReadLine();
+                    _startDeposit = reader.ReadLine().ToDecimal();
+                    _filterProfitValue = reader.ReadLine().ToDecimal();
+                    _filterProfitIsOn = Convert.ToBoolean(reader.ReadLine());
+                    _filterMaxDrawDownValue = reader.ReadLine().ToDecimal();
+                    _filterMaxDrawDownIsOn = Convert.ToBoolean(reader.ReadLine());
+                    _filterMiddleProfitValue = reader.ReadLine().ToDecimal();
+                    _filterMiddleProfitIsOn = Convert.ToBoolean(reader.ReadLine());
+                    _filterProfitFactorValue = reader.ReadLine().ToDecimal();
+                    _filterProfitFactorIsOn = Convert.ToBoolean(reader.ReadLine());
+
+                    _timeStart = Convert.ToDateTime(reader.ReadLine(), CultureInfo.InvariantCulture);
+                    _timeEnd = Convert.ToDateTime(reader.ReadLine(), CultureInfo.InvariantCulture);
+                    _percentOnFiltration = reader.ReadLine().ToDecimal();
+
+                    _filterDealsCountValue = Convert.ToInt32(reader.ReadLine());
+                    _filterDealsCountIsOn = Convert.ToBoolean(reader.ReadLine());
+                    _isScript = Convert.ToBoolean(reader.ReadLine());
+                    _iterationCount = Convert.ToInt32(reader.ReadLine());
+                    _commissionType = (CommissionType)Enum.Parse(typeof(CommissionType),
+                        reader.ReadLine() ?? CommissionType.None.ToString());
+                    _commissionValue = reader.ReadLine().ToDecimal();
+                    _lastInSample = Convert.ToBoolean(reader.ReadLine());
+
+                    Enum.TryParse(reader.ReadLine(), out _orderExecutionType);
+                    _slippageToSimpleOrder = Convert.ToInt32(reader.ReadLine());
+                    _slippageToStopOrder = Convert.ToInt32(reader.ReadLine());
+
+                    // V2 fields - optional for backward compatibility
+                    string line = reader.ReadLine();
+                    if (line != null)
+                    {
+                        Enum.TryParse(line, out _optimizationMethod);
+                        line = reader.ReadLine();
+                        if (line != null) Enum.TryParse(line, out _objectiveMetric);
+                        line = reader.ReadLine();
+                        if (line != null) _bayesianInitialSamples = Convert.ToInt32(line);
+                        line = reader.ReadLine();
+                        if (line != null) _bayesianMaxIterations = Convert.ToInt32(line);
+                        line = reader.ReadLine();
+                        if (line != null) _bayesianBatchSize = Convert.ToInt32(line);
+                    }
+                }
+            }
+            catch
+            {
+                // ignore - backward compatibility with old settings files
+            }
+        }
+
+        public event Action<string, LogMessageType> LogMessageEvent;
+
+        #endregion
+    }
+
+    public enum OptimizationMethodType
+    {
+        BruteForce,
+        Bayesian
+    }
+}

@@ -14,8 +14,8 @@ using OsEngine.Market.Servers.Optimizer;
 using OsEngine.Market.Servers.Tester;
 using OsEngine.OsTrader.Panels;
 using OsEngine.OsOptimizer.OptimizerEntity;
+using OsEngine.OsOptimizer.OptEntity;
 using OsEngine.OsTrader.Panels.Tab;
-using OsEngine.Market.Connectors;
 
 namespace OsEngine.OsOptimizer
 {
@@ -29,11 +29,19 @@ namespace OsEngine.OsOptimizer
 
             _asyncBotFactory = new AsyncBotFactory();
             _asyncBotFactory.LogMessageEvent += SendLogMessage;
+            _parameterIterator = new ParameterIterator();
+            _parameterIterator.LogMessageEvent += SendLogMessage;
+            _botConfigurator = new BotConfigurator(_master.Settings, _asyncBotFactory, _master.ManualControl);
+            _botConfigurator.LogMessageEvent += SendLogMessage;
         }
 
         private OptimizerMaster _master;
 
         private AsyncBotFactory _asyncBotFactory;
+
+        private readonly ParameterIterator _parameterIterator;
+
+        private readonly BotConfigurator _botConfigurator;
 
         public bool Start(List<bool> parametersOn, List<IIStrategyParameter> parameters)
         {
@@ -180,149 +188,7 @@ namespace OsEngine.OsOptimizer
 
         public int BotCountOneFaze(List<IIStrategyParameter> parameters, List<bool> parametersOn)
         {
-            List<IIStrategyParameter> allParam = parameters;
-
-            for (int i = 0; i < allParam.Count; i++)
-            {
-                if (allParam[i].Type == StrategyParameterType.Int)
-                {
-                    ((StrategyParameterInt)allParam[i]).ValueInt = ((StrategyParameterInt)allParam[i]).ValueIntStart;
-                }
-                if (allParam[i].Type == StrategyParameterType.Decimal)
-                {
-                    ((StrategyParameterDecimal)allParam[i]).ValueDecimal = ((StrategyParameterDecimal)allParam[i]).ValueDecimalStart;
-                }
-                if (allParam[i].Type == StrategyParameterType.DecimalCheckBox)
-                {
-                    ((StrategyParameterDecimalCheckBox)allParam[i]).ValueDecimal = ((StrategyParameterDecimalCheckBox)allParam[i]).ValueDecimalStart;
-                }
-            }
-
-            List<bool> allOptimezedParam = parametersOn;
-
-
-            // 1 consider how many passes we need to do in the first phase/
-            // 1 считаем сколько проходов нам нужно сделать в первой фазе
-
-            List<IIStrategyParameter> optimizedParamToCheckCount = new List<IIStrategyParameter>();
-
-            for (int i = 0; i < allParam.Count; i++)
-            {
-                if (allOptimezedParam[i])
-                {
-                    optimizedParamToCheckCount.Add(allParam[i]);
-                    ReloadParam(allParam[i]);
-                }
-            }
-
-            optimizedParamToCheckCount = CopyParameters(optimizedParamToCheckCount);
-
-            int countBots = 0;
-
-            bool isStart = true;
-
-            while (true)
-            {
-                if (countBots > 5000000)
-                {
-                    SendLogMessage("Iteration count > 5000000. Warning!!!", LogMessageType.Error);
-                    return countBots;
-                }
-
-                bool isAndOfFaze = false; // all parameters passed/все параметры пройдены
-
-                for (int i2 = 0; i2 < optimizedParamToCheckCount.Count + 1; i2++)
-                {
-                    if (i2 == optimizedParamToCheckCount.Count)
-                    {
-                        isAndOfFaze = true;
-                        break;
-                    }
-
-                    if (isStart)
-                    {
-                        countBots++;
-                        isStart = false;
-                        break;
-                    }
-
-                    if (optimizedParamToCheckCount[i2].Type == StrategyParameterType.Int)
-                    {
-                        StrategyParameterInt parameter = (StrategyParameterInt)optimizedParamToCheckCount[i2];
-
-                        if (parameter.ValueInt < parameter.ValueIntStop)
-                        {
-                            // the current index can increment the value
-                            // по текущему индексу можно приращивать значение
-                            parameter.ValueInt = parameter.ValueInt + parameter.ValueIntStep;
-                            if (i2 > 0)
-                            {
-                                for (int i3 = 0; i3 < i2; i3++)
-                                {
-                                    // reset all previous parameters to zero
-                                    // сбрасываем все предыдущие параметры в ноль
-                                    ReloadParam(optimizedParamToCheckCount[i3]);
-                                }
-                            }
-                            countBots++;
-                            break;
-                        }
-                    }
-                    else if (optimizedParamToCheckCount[i2].Type == StrategyParameterType.Decimal
-                        )
-                    {
-                        StrategyParameterDecimal parameter = (StrategyParameterDecimal)optimizedParamToCheckCount[i2];
-
-                        if (parameter.ValueDecimal < parameter.ValueDecimalStop)
-                        {
-                            // at the current index you can increment the value
-                            // по текущему индексу можно приращивать значение
-                            parameter.ValueDecimal = parameter.ValueDecimal + parameter.ValueDecimalStep;
-                            if (i2 > 0)
-                            {
-                                for (int i3 = 0; i3 < i2; i3++)
-                                {
-                                    // reset all previous parameters to zero
-                                    // сбрасываем все предыдущие параметры в ноль
-                                    ReloadParam(optimizedParamToCheckCount[i3]);
-                                }
-                            }
-                            countBots++;
-                            break;
-                        }
-                    }
-                    else if (optimizedParamToCheckCount[i2].Type == StrategyParameterType.DecimalCheckBox
-                        )
-                    {
-                        StrategyParameterDecimalCheckBox parameter = (StrategyParameterDecimalCheckBox)optimizedParamToCheckCount[i2];
-
-                        if (parameter.ValueDecimal < parameter.ValueDecimalStop)
-                        {
-                            // at the current index you can increment the value
-                            // по текущему индексу можно приращивать значение
-                            parameter.ValueDecimal = parameter.ValueDecimal + parameter.ValueDecimalStep;
-                            if (i2 > 0)
-                            {
-                                for (int i3 = 0; i3 < i2; i3++)
-                                {
-                                    // reset all previous parameters to zero
-                                    // сбрасываем все предыдущие параметры в ноль
-                                    ReloadParam(optimizedParamToCheckCount[i3]);
-                                }
-                            }
-                            countBots++;
-                            break;
-                        }
-                    }
-                }
-
-                if (isAndOfFaze)
-                {
-                    break;
-                }
-            }
-
-            return countBots;
+            return _parameterIterator.CountCombinations(parameters, parametersOn);
         }
 
         public List<OptimizerFazeReport> ReportsToFazes = new List<OptimizerFazeReport>();
@@ -354,103 +220,8 @@ namespace OsEngine.OsOptimizer
                 }
             }
 
-            List<IIStrategyParameter> optimizeParamCurrent = CopyParameters(optimizedParametersStart);
-
-            ReloadAllParam(optimizeParamCurrent);
-
-            bool isStart = true;
-
-            while (true)
+            foreach (List<IIStrategyParameter> optimizeParamCurrent in _parameterIterator.EnumerateCombinations(optimizedParametersStart))
             {
-                bool isAndOfFaze = false; // all parameters passed/все параметры пройдены
-
-                for (int i2 = 0; i2 < optimizeParamCurrent.Count + 1; i2++)
-                {
-                    if (i2 == optimizeParamCurrent.Count)
-                    {
-                        isAndOfFaze = true;
-                        break;
-                    }
-
-                    if (isStart)
-                    {
-                        isStart = false;
-                        break;
-                    }
-
-                    if (optimizeParamCurrent[i2].Type == StrategyParameterType.Int)
-                    {
-                        StrategyParameterInt parameter = (StrategyParameterInt)optimizeParamCurrent[i2];
-
-                        if (parameter.ValueInt < parameter.ValueIntStop)
-                        {
-                            // at the current index you can increment the value
-                            // по текущему индексу можно приращивать значение
-                            parameter.ValueInt = parameter.ValueInt + parameter.ValueIntStep;
-                            if (i2 > 0)
-                            {
-                                for (int i3 = 0; i3 < i2; i3++)
-                                {
-                                    // reset all previous parameters to zero
-                                    // сбрасываем все предыдущие параметры в ноль
-                                    ReloadParam(optimizeParamCurrent[i3]);
-                                }
-                            }
-
-                            break;
-                        }
-                    }
-                    else if (optimizeParamCurrent[i2].Type == StrategyParameterType.Decimal
-                        )
-                    {
-                        StrategyParameterDecimal parameter = (StrategyParameterDecimal)optimizeParamCurrent[i2];
-
-                        if (parameter.ValueDecimal < parameter.ValueDecimalStop)
-                        {
-                            // at the current index you can increment the value
-                            // по текущему индексу можно приращивать значение
-                            parameter.ValueDecimal = parameter.ValueDecimal + parameter.ValueDecimalStep;
-                            if (i2 > 0)
-                            {
-                                for (int i3 = 0; i3 < i2; i3++)
-                                {
-                                    // reset all previous parameters to zero
-                                    // сбрасываем все предыдущие параметры в ноль
-                                    ReloadParam(optimizeParamCurrent[i3]);
-                                }
-                            }
-                            break;
-                        }
-                    }
-                    else if (optimizeParamCurrent[i2].Type == StrategyParameterType.DecimalCheckBox
-                        )
-                    {
-                        StrategyParameterDecimalCheckBox parameter = (StrategyParameterDecimalCheckBox)optimizeParamCurrent[i2];
-
-                        if (parameter.ValueDecimal < parameter.ValueDecimalStop)
-                        {
-                            // at the current index you can increment the value
-                            // по текущему индексу можно приращивать значение
-                            parameter.ValueDecimal = parameter.ValueDecimal + parameter.ValueDecimalStep;
-                            if (i2 > 0)
-                            {
-                                for (int i3 = 0; i3 < i2; i3++)
-                                {
-                                    // reset all previous parameters to zero
-                                    // сбрасываем все предыдущие параметры в ноль
-                                    ReloadParam(optimizeParamCurrent[i3]);
-                                }
-                            }
-                            break;
-                        }
-                    }
-                }
-
-                if (isAndOfFaze)
-                {
-                    break;
-                }
-
                 while (_servers.Count >= _master.ThreadsCount)
                 {
                     Thread.Sleep(1);
@@ -561,80 +332,17 @@ namespace OsEngine.OsOptimizer
 
         private void ReloadAllParam(List<IIStrategyParameter> parameters)
         {
-            for (int i = 0; i < parameters.Count; i++)
-            {
-                ReloadParam(parameters[i]);
-            }
+            _parameterIterator.ReloadAllParam(parameters);
         }
 
         private void ReloadParam(IIStrategyParameter parameters)
         {
-            if (parameters.Type == StrategyParameterType.Int)
-            {
-                ((StrategyParameterInt)parameters).ValueInt = ((StrategyParameterInt)parameters).ValueIntStart;
-            }
-
-            if (parameters.Type == StrategyParameterType.Decimal)
-            {
-                ((StrategyParameterDecimal)parameters).ValueDecimal = ((StrategyParameterDecimal)parameters).ValueDecimalStart;
-            }
-
-            if (parameters.Type == StrategyParameterType.DecimalCheckBox)
-            {
-                ((StrategyParameterDecimalCheckBox)parameters).ValueDecimal = ((StrategyParameterDecimalCheckBox)parameters).ValueDecimalStart;
-            }
+            _parameterIterator.ReloadParam(parameters);
         }
 
         private List<IIStrategyParameter> CopyParameters(List<IIStrategyParameter> parametersToCopy)
         {
-            List<IIStrategyParameter> newParameters = new List<IIStrategyParameter>();
-
-            for (int i = 0; i < parametersToCopy.Count; i++)
-            {
-                IIStrategyParameter newParam = null;
-
-                if (parametersToCopy[i].Type == StrategyParameterType.Bool)
-                {
-                    newParam = new StrategyParameterBool(parametersToCopy[i].Name, ((StrategyParameterBool)parametersToCopy[i]).ValueBool);
-                }
-                else if (parametersToCopy[i].Type == StrategyParameterType.String)
-                {
-                    newParam = new StrategyParameterString(parametersToCopy[i].Name, ((StrategyParameterString)parametersToCopy[i]).ValueString,
-                        ((StrategyParameterString)parametersToCopy[i]).ValuesString);
-                }
-                else if (parametersToCopy[i].Type == StrategyParameterType.Int)
-                {
-                    newParam = new StrategyParameterInt(parametersToCopy[i].Name,
-                        ((StrategyParameterInt)parametersToCopy[i]).ValueIntDefolt,
-                        ((StrategyParameterInt)parametersToCopy[i]).ValueIntStart,
-                        ((StrategyParameterInt)parametersToCopy[i]).ValueIntStop,
-                        ((StrategyParameterInt)parametersToCopy[i]).ValueIntStep);
-                    ((StrategyParameterInt)newParam).ValueInt = ((StrategyParameterInt)parametersToCopy[i]).ValueIntStart;
-                }
-                else if (parametersToCopy[i].Type == StrategyParameterType.Decimal)
-                {
-                    newParam = new StrategyParameterDecimal(parametersToCopy[i].Name,
-                        ((StrategyParameterDecimal)parametersToCopy[i]).ValueDecimalDefolt,
-                        ((StrategyParameterDecimal)parametersToCopy[i]).ValueDecimalStart,
-                        ((StrategyParameterDecimal)parametersToCopy[i]).ValueDecimalStop,
-                        ((StrategyParameterDecimal)parametersToCopy[i]).ValueDecimalStep);
-                    ((StrategyParameterDecimal)newParam).ValueDecimal = ((StrategyParameterDecimal)parametersToCopy[i]).ValueDecimalStart;
-                }
-                else if (parametersToCopy[i].Type == StrategyParameterType.DecimalCheckBox)
-                {
-                    newParam = new StrategyParameterDecimalCheckBox(parametersToCopy[i].Name,
-                        ((StrategyParameterDecimalCheckBox)parametersToCopy[i]).ValueDecimalDefolt,
-                        ((StrategyParameterDecimalCheckBox)parametersToCopy[i]).ValueDecimalStart,
-                        ((StrategyParameterDecimalCheckBox)parametersToCopy[i]).ValueDecimalStop,
-                        ((StrategyParameterDecimalCheckBox)parametersToCopy[i]).ValueDecimalStep,
-                        Convert.ToBoolean(((StrategyParameterDecimalCheckBox)parametersToCopy[i]).CheckState));
-                    ((StrategyParameterDecimalCheckBox)newParam).ValueDecimal = ((StrategyParameterDecimalCheckBox)parametersToCopy[i]).ValueDecimalStart;
-                }
-
-                newParameters.Add(newParam);
-
-            }
-            return newParameters;
+            return _parameterIterator.CopyParameters(parametersToCopy);
         }
 
         private void EndOfFazeFiltration(OptimizerFazeReport bots)
@@ -806,274 +514,8 @@ namespace OsEngine.OsOptimizer
             List<IIStrategyParameter> parametersOptimized,
             OptimizerServer server, StartProgram regime)
         {
-            BotPanel bot = null;
-
-            try
-            {
-                bot = _asyncBotFactory.GetBot(_master.StrategyName, botName);
-
-                if (bot.Parameters.Count != parameters.Count)
-                {
-                    return null;
-                }
-            }
-            catch (Exception ex)
-            {
-                SendLogMessage(ex.ToString(), LogMessageType.Error);
-                return null;
-            }
-
-            try
-            {
-                for (int i = 0; i < parameters.Count; i++)
-                {
-                    IIStrategyParameter par = null;
-
-                    if (parametersOptimized != null)
-                    {
-                        par = parametersOptimized.Find(p => p.Name == parameters[i].Name);
-                    }
-                    bool isInOptimizeParameters = true;
-
-                    if (par == null)
-                    {
-                        isInOptimizeParameters = false;
-                        par = parameters[i];
-                    }
-
-                    if (par == null)
-                    {
-                        continue;
-                    }
-
-                    if (par.Type == StrategyParameterType.Bool)
-                    {
-                        ((StrategyParameterBool)bot.Parameters[i]).ValueBool = ((StrategyParameterBool)par).ValueBool;
-                    }
-                    else if (par.Type == StrategyParameterType.String)
-                    {
-                        ((StrategyParameterString)bot.Parameters[i]).ValueString = ((StrategyParameterString)par).ValueString;
-                    }
-                    else if (par.Type == StrategyParameterType.TimeOfDay)
-                    {
-                        ((StrategyParameterTimeOfDay)bot.Parameters[i]).Value = ((StrategyParameterTimeOfDay)par).Value;
-                    }
-                    else if (par.Type == StrategyParameterType.CheckBox)
-                    {
-                        ((StrategyParameterCheckBox)bot.Parameters[i]).CheckState = ((StrategyParameterCheckBox)par).CheckState;
-                    }
-
-                    if (isInOptimizeParameters == true
-                        || parametersOptimized == null)
-                    {
-                        if (par.Type == StrategyParameterType.Int)
-                        {
-                            ((StrategyParameterInt)bot.Parameters[i]).ValueInt = ((StrategyParameterInt)par).ValueInt;
-                        }
-                        else if (par.Type == StrategyParameterType.Decimal)
-                        {
-                            ((StrategyParameterDecimal)bot.Parameters[i]).ValueDecimal = ((StrategyParameterDecimal)par).ValueDecimal;
-                        }
-                        else if (par.Type == StrategyParameterType.DecimalCheckBox)
-                        {
-                            ((StrategyParameterDecimalCheckBox)bot.Parameters[i]).ValueDecimal = ((StrategyParameterDecimalCheckBox)par).ValueDecimal;
-                            ((StrategyParameterDecimalCheckBox)bot.Parameters[i]).CheckState = ((StrategyParameterDecimalCheckBox)par).CheckState;
-                        }
-                    }
-                    else //if (isInOptimizeParameters == false)
-                    {
-                        if (par.Type == StrategyParameterType.Int)
-                        {
-                            ((StrategyParameterInt)bot.Parameters[i]).ValueInt = ((StrategyParameterInt)par).ValueIntDefolt;
-                        }
-                        else if (par.Type == StrategyParameterType.Decimal)
-                        {
-                            ((StrategyParameterDecimal)bot.Parameters[i]).ValueDecimal = ((StrategyParameterDecimal)par).ValueDecimalDefolt;
-                        }
-                        else if (par.Type == StrategyParameterType.DecimalCheckBox)
-                        {
-                            ((StrategyParameterDecimalCheckBox)bot.Parameters[i]).ValueDecimal = ((StrategyParameterDecimalCheckBox)par).ValueDecimalDefolt;
-                            ((StrategyParameterDecimalCheckBox)bot.Parameters[i]).CheckState = ((StrategyParameterDecimalCheckBox)par).CheckState;
-                        }
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                SendLogMessage(ex.ToString(), LogMessageType.Error);
-                return null;
-            }
-
-            try
-            {
-                // настраиваем источники
-
-                List<IIBotTab> sourcesFrom = _master.BotToTest.GetTabs();
-                List<IIBotTab> sourcesTo = bot.GetTabs();
-
-                for (int i = 0; i < sourcesFrom.Count; i++)
-                {
-                    if (sourcesFrom[i].TabType == BotTabType.Simple)
-                    {// BotTabSimple
-                        BotTabSimple simpleFrom = (BotTabSimple)sourcesFrom[i];
-                        BotTabSimple simpleTo = (BotTabSimple)sourcesTo[i];
-                        CopySettingsInBotTabSimpleSource(simpleFrom, simpleTo, server);
-                    }
-                    else if (sourcesFrom[i].TabType == BotTabType.Index)
-                    {// BotTabIndex
-                        BotTabIndex indexFrom = (BotTabIndex)sourcesFrom[i];
-                        BotTabIndex indexTo = (BotTabIndex)sourcesTo[i];
-
-                        for (int i2 = 0; i2 < indexFrom.Tabs.Count; i2++)
-                        {
-                            indexTo.CreateNewSecurityConnector();
-
-                            ConnectorCandles indexConnectorFrom = indexFrom.Tabs[i2];
-                            ConnectorCandles indexConnectorTo = indexTo.Tabs[i2];
-
-                            CopySettingsInConnectorCandlesSource(indexConnectorFrom, indexConnectorTo, server);
-                        }
-
-                        indexTo.AutoFormulaBuilder.DayOfWeekToRebuildIndex = indexFrom.AutoFormulaBuilder.DayOfWeekToRebuildIndex;
-                        indexTo.AutoFormulaBuilder.DaysLookBackInBuilding = indexFrom.AutoFormulaBuilder.DaysLookBackInBuilding;
-                        indexTo.AutoFormulaBuilder.HourInDayToRebuildIndex = indexFrom.AutoFormulaBuilder.HourInDayToRebuildIndex;
-                        indexTo.AutoFormulaBuilder.IndexMultType = indexFrom.AutoFormulaBuilder.IndexMultType;
-                        indexTo.AutoFormulaBuilder.IndexSecCount = indexFrom.AutoFormulaBuilder.IndexSecCount;
-                        indexTo.AutoFormulaBuilder.IndexSortType = indexFrom.AutoFormulaBuilder.IndexSortType;
-                        indexTo.AutoFormulaBuilder.Regime = indexFrom.AutoFormulaBuilder.Regime;
-                        indexTo.AutoFormulaBuilder.WriteLogMessageOnRebuild = false;
-                        indexTo.UserFormula = indexFrom.UserFormula;
-                    }
-                    else if (sourcesFrom[i].TabType == BotTabType.Screener)
-                    {// BotTabScreener
-                        BotTabScreener screenerFrom = (BotTabScreener)sourcesFrom[i];
-                        BotTabScreener screenerTo = (BotTabScreener)sourcesTo[i];
-
-                        CopySettingsInScreenerSource(screenerFrom, screenerTo, server);
-                        screenerTo.TryLoadTabs();
-                        screenerTo.NeedToReloadTabs = true;
-                        screenerTo.TryReLoadTabs();
-                        screenerTo.ReloadIndicatorsOnTabs();
-
-
-                    }
-                }
-
-                return bot;
-            }
-            catch (Exception ex)
-            {
-                SendLogMessage(ex.ToString(), LogMessageType.Error);
-                return null;
-            }
-        }
-
-        private void CopySettingsInScreenerSource(BotTabScreener from, BotTabScreener to, OptimizerServer server)
-        {
-            to.ServerType = ServerType.Optimizer;
-            to.PortfolioName = server.Portfolios[0].Number;
-            to.TimeFrame = from.TimeFrame;
-            to.ServerUid = server.NumberServer;
-
-            to.SecuritiesClass = from.SecuritiesClass;
-            to.CandleCreateMethodType = from.CandleCreateMethodType;
-            to.CandleMarketDataType = from.CandleMarketDataType;
-            to.CommissionType = _master.CommissionType;
-            to.CommissionValue = _master.CommissionValue;
-            to.SaveTradesInCandles = from.SaveTradesInCandles;
-            to.CandleSeriesRealization.SetSaveString(from.CandleSeriesRealization.GetSaveString());
-
-            for (int i = 0; i < from.SecuritiesNames.Count; i++)
-            {
-                ActivatedSecurity sec = from.SecuritiesNames[i];
-                to.SecuritiesNames.Add(sec);
-            }
-        }
-
-        private void CopySettingsInConnectorCandlesSource(ConnectorCandles from, ConnectorCandles to, OptimizerServer server)
-        {
-            to.ServerType = ServerType.Optimizer;
-            to.PortfolioName = server.Portfolios[0].Number;
-            to.SecurityName = from.SecurityName;
-            to.SecurityClass = from.SecurityClass;
-            to.ServerUid = server.NumberServer;
-            to.CandleCreateMethodType = from.CandleCreateMethodType;
-            to.TimeFrame = from.TimeFrame;
-
-            to.TimeFrameBuilder.CandleSeriesRealization.SetSaveString(
-                 from.TimeFrameBuilder.CandleSeriesRealization.GetSaveString());
-
-            if (server.TypeTesterData == TesterDataType.Candle)
-            {
-                to.CandleMarketDataType = CandleMarketDataType.Tick;
-            }
-            else if (server.TypeTesterData == TesterDataType.MarketDepthAllCandleState ||
-                     server.TypeTesterData == TesterDataType.MarketDepthOnlyReadyCandle)
-            {
-                to.CandleMarketDataType = CandleMarketDataType.MarketDepth;
-            }
-        }
-
-        private void CopySettingsInBotTabSimpleSource(BotTabSimple from, BotTabSimple to, OptimizerServer server)
-        {
-            to.Connector.ServerType = ServerType.Optimizer;
-            to.Connector.PortfolioName = server.Portfolios[0].Number;
-            to.Connector.SecurityName = from.Connector.SecurityName;
-            to.Connector.TimeFrame = from.Connector.TimeFrame;
-
-            to.Connector.CandleCreateMethodType = from.Connector.CandleCreateMethodType;
-
-            to.Connector.TimeFrameBuilder.CandleSeriesRealization.SetSaveString(
-                from.Connector.TimeFrameBuilder.CandleSeriesRealization.GetSaveString());
-
-            to.Connector.ServerUid = server.NumberServer;
-            to.CommissionType = _master.CommissionType;
-            to.CommissionValue = _master.CommissionValue;
-
-            if (server.TypeTesterData == TesterDataType.Candle
-                || server.TypeTesterData == TesterDataType.TickAllCandleState
-                || server.TypeTesterData == TesterDataType.TickOnlyReadyCandle)
-            {
-                to.Connector.CandleMarketDataType = CandleMarketDataType.Tick;
-            }
-            else if (server.TypeTesterData == TesterDataType.MarketDepthAllCandleState ||
-                     server.TypeTesterData == TesterDataType.MarketDepthOnlyReadyCandle)
-            {
-                to.Connector.CandleMarketDataType =
-                    CandleMarketDataType.MarketDepth;
-            }
-
-            to.ManualPositionSupport.DoubleExitIsOn = _master.ManualControl.DoubleExitIsOn;
-            to.ManualPositionSupport.DoubleExitSlippage = _master.ManualControl.DoubleExitSlippage;
-
-            to.ManualPositionSupport.ProfitDistance = _master.ManualControl.ProfitDistance;
-            to.ManualPositionSupport.ProfitIsOn = _master.ManualControl.ProfitIsOn;
-            to.ManualPositionSupport.ProfitSlippage = _master.ManualControl.ProfitSlippage;
-
-            to.ManualPositionSupport.SecondToCloseIsOn = _master.ManualControl.SecondToCloseIsOn;
-            to.ManualPositionSupport.SecondToClose = _master.ManualControl.SecondToClose;
-
-            to.ManualPositionSupport.SecondToOpenIsOn = _master.ManualControl.SecondToOpenIsOn;
-            to.ManualPositionSupport.SecondToOpen = _master.ManualControl.SecondToOpen;
-
-            to.ManualPositionSupport.SetbackToCloseIsOn = _master.ManualControl.SetbackToCloseIsOn;
-            to.ManualPositionSupport.SetbackToClosePosition = _master.ManualControl.SetbackToClosePosition;
-
-            to.ManualPositionSupport.SetbackToOpenIsOn = _master.ManualControl.SetbackToOpenIsOn;
-            to.ManualPositionSupport.SetbackToOpenPosition = _master.ManualControl.SetbackToOpenPosition;
-
-            to.ManualPositionSupport.StopDistance = _master.ManualControl.StopDistance;
-            to.ManualPositionSupport.StopIsOn = _master.ManualControl.StopIsOn;
-            to.ManualPositionSupport.StopSlippage = _master.ManualControl.StopSlippage;
-
-            to.ManualPositionSupport.ProfitDistance = _master.ManualControl.ProfitDistance;
-            to.ManualPositionSupport.ProfitIsOn = _master.ManualControl.ProfitIsOn;
-            to.ManualPositionSupport.ProfitSlippage = _master.ManualControl.ProfitSlippage;
-
-            to.ManualPositionSupport.TypeDoubleExitOrder = _master.ManualControl.TypeDoubleExitOrder;
-            to.ManualPositionSupport.ValuesType = _master.ManualControl.ValuesType;
-
-            to.ManualPositionSupport.OrderTypeTime = _master.ManualControl.OrderTypeTime;
+            _botConfigurator.BotToTest = _master.BotToTest;
+            return _botConfigurator.CreateAndConfigureBot(botName, parameters, parametersOptimized, server, regime);
         }
 
         public event Action<int, int> PrimeProgressChangeEvent;

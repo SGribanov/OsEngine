@@ -3653,27 +3653,4 @@ namespace OsEngine.OsOptimizer
         #endregion
 
     }
-
-    public enum SortBotsType
-    {
-        TotalProfit,
-
-        BotName,
-
-        PositionCount,
-
-        MaxDrawDawn,
-
-        AverageProfit,
-
-        AverageProfitPercent,
-
-        ProfitFactor,
-
-        PayOffRatio,
-
-        Recovery,
-
-        SharpRatio
-    }
 }
