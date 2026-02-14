@@ -321,7 +321,10 @@ namespace OsEngine.OsOptimizer
                     : transformedBotName + fazeSuffix;
                 if (!uniqueBotNames.Add(botName))
                 {
-                    SendLogMessage("Async bot factory start skipped duplicate bot name (OutOfSample): " + botName + ".", LogMessageType.Error);
+                    SendLogMessage(
+                        "Async bot factory start skipped duplicate bot name (OutOfSample): " + botName +
+                        " at index " + i + " of " + reportsCount + ".",
+                        LogMessageType.Error);
                     continue;
                 }
 
