@@ -1152,13 +1152,12 @@ namespace OsEngine.OsOptimizer
             _aloneTestIsOver = false;
             _aloneTestDoneSignal.Reset();
 
-            _fazeToTestAloneTest = faze;
-            _reportToTestAloneTest = report;
-            _awaitUiMasterAloneTest = new AwaitObject(OsLocalization.Optimizer.Label52, 100, 0, true);
+            AwaitObject awaitUi = new AwaitObject(OsLocalization.Optimizer.Label52, 100, 0, true);
+            _awaitUiMasterAloneTest = awaitUi;
 
-            Task.Run(RunAloneBotTestAsync);
+            Task.Run(() => RunAloneBotTestAsync(faze, report, awaitUi));
 
-            AwaitUi ui = new AwaitUi(_awaitUiMasterAloneTest);
+            AwaitUi ui = new AwaitUi(awaitUi);
             ui.ShowDialog();
 
             if (!_aloneTestDoneSignal.Wait(TimeSpan.FromSeconds(30)))
@@ -1171,10 +1170,6 @@ namespace OsEngine.OsOptimizer
             return _resultBotAloneTest;
         }
 
-        private OptimizerFazeReport _fazeToTestAloneTest;
-
-        private OptimizerReport _reportToTestAloneTest;
-
         private AwaitObject _awaitUiMasterAloneTest;
 
         private BotPanel _resultBotAloneTest;
@@ -1183,7 +1178,10 @@ namespace OsEngine.OsOptimizer
 
         private readonly ManualResetEventSlim _aloneTestDoneSignal = new ManualResetEventSlim(true);
 
-        private async Task RunAloneBotTestAsync()
+        private async Task RunAloneBotTestAsync(
+            OptimizerFazeReport fazeToTest,
+            OptimizerReport reportToTest,
+            AwaitObject awaitUi)
         {
             try
             {
@@ -1196,7 +1194,6 @@ namespace OsEngine.OsOptimizer
                     return;
                 }
 
-                AwaitObject awaitUi = _awaitUiMasterAloneTest;
                 if (awaitUi == null)
                 {
                     SendLogMessage("Single-bot test canceled: await object is unavailable.", LogMessageType.Error);
@@ -1205,7 +1202,7 @@ namespace OsEngine.OsOptimizer
                 }
 
                 _resultBotAloneTest =
-                    executor.TestBot(_fazeToTestAloneTest, _reportToTestAloneTest,
+                    executor.TestBot(fazeToTest, reportToTest,
                     StartProgram.IsTester, awaitUi);
             }
             catch (Exception ex)

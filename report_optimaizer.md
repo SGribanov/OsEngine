@@ -890,3 +890,21 @@ After each optimizer-related change, update this file with:
 
 ### Risks / notes
 - Prevents edge-case null await-object propagation into executor single-test path.
+
+## Stabilization Update (2026-02-14) - Snapshot Inputs For Async Single-Bot Runner
+### What changed
+- Removed mutable field dependency for single-bot async runner inputs.
+- `RunAloneBotTestAsync(...)` now accepts `faze/report/awaitUi` as explicit parameters.
+- `TestBot(...)` schedules async run with captured snapshots:
+  - `Task.Run(() => RunAloneBotTestAsync(faze, report, awaitUi));`
+- This prevents late async execution from reading overwritten request fields after timeout/retry scenarios.
+
+### Files touched
+- `project/OsEngine/OsOptimizer/OptimizerMaster.cs`
+
+### Validation
+- `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --configuration Debug`
+- Result: Passed 70 / Failed 0
+
+### Risks / notes
+- Reduces cross-request data races in overlapped single-bot test flows.
