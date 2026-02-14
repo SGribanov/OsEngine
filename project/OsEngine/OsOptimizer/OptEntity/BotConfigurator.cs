@@ -54,6 +54,18 @@ namespace OsEngine.OsOptimizer.OptEntity
                 return null;
             }
 
+            if (server == null)
+            {
+                SendLogMessage("CreateAndConfigureBot skipped: server is null.", LogMessageType.Error);
+                return null;
+            }
+
+            if (BotToTest == null)
+            {
+                SendLogMessage("CreateAndConfigureBot skipped: BotToTest is null.", LogMessageType.Error);
+                return null;
+            }
+
             BotPanel bot = null;
 
             try

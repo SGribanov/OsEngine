@@ -99,6 +99,7 @@ Implemented and committed:
 90. Stabilization: added defensive `BotName` guard in out-of-sample scheduling loop before name transformation (`Replace`) to prevent runtime null/whitespace edge-case failures.
 91. Stabilization: fixed out-of-sample `BotName`-skip path to signal `CountdownEvent` for skipped items, preventing phase-wait skew/hang when runtime data mutates after initial sanitization.
 92. Maintainability: unified out-of-sample skip compensation paths via parameterized helper (`CompensateSkippedOutOfSampleSlot(releaseServerSlot)`), reducing duplication and keeping slot/countdown semantics consistent.
+93. Stabilization: added explicit precondition guards in `BotConfigurator.CreateAndConfigureBot` for `server == null` and `BotToTest == null` with clear error diagnostics and safe early return.
 
 ## Commits
 - `b1e5eabe3` — `Optimizer: persist Phase1 extraction and wiring state`
