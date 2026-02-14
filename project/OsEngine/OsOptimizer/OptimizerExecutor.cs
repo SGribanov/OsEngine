@@ -972,6 +972,12 @@ namespace OsEngine.OsOptimizer
                             report.Faze.TimeEnd, "screener", i, i2);
                     }
                 }
+                else
+                {
+                    SendLogMessage(
+                        "CreateNewServer skipped unsupported tab type at source index " + i + ": " + sources[i].TabType + ".",
+                        LogMessageType.Error);
+                }
             }
 
             return server;

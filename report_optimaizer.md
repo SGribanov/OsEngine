@@ -1976,3 +1976,19 @@ After each optimizer-related change, update this file with:
 
 ### Risks / notes
 - No normal-path behavior change; prevents unhandled tab-source exceptions from escaping server initialization.
+
+## Stabilization Update (2026-02-14) - Log Unsupported Bot Tab Types In CreateNewServer
+### What changed
+- Updated `CreateNewServer(...)` in `OptimizerExecutor`.
+- Added fallback branch to log unsupported `BotTabType` values encountered in bot tab sources.
+- Log includes source index and concrete tab type value.
+
+### Files touched
+- `project/OsEngine/OsOptimizer/OptimizerExecutor.cs`
+
+### Validation
+- `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --configuration Debug`
+- Result: Passed 70 / Failed 0
+
+### Risks / notes
+- No normal-path behavior change; improves diagnostics when new/unknown tab types appear without bind handling.
