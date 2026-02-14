@@ -64,6 +64,18 @@ namespace OsEngine.OsOptimizer
 
         public bool Start(List<bool> parametersOn, List<IIStrategyParameter> parameters)
         {
+            if (_master == null)
+            {
+                SendLogMessage("Optimizer start skipped: master context is null.", LogMessageType.Error);
+                return false;
+            }
+
+            if (_master.Fazes == null || _master.Fazes.Count == 0)
+            {
+                SendLogMessage("Optimizer start skipped: faze configuration is empty.", LogMessageType.Error);
+                return false;
+            }
+
             if (parametersOn == null)
             {
                 SendLogMessage("Optimizer start skipped: parametersOn is null.", LogMessageType.Error);
