@@ -445,3 +445,20 @@ After each optimizer-related change, update this file with:
 
 ### Risks / notes
 - Behavior is unchanged on normal path; only race-failure mode is neutralized.
+
+## Stabilization Update (2026-02-14) - Safe Phase Signal On Testing-End Cleanup
+### What changed
+- Hardened final phase signal in `server_TestingEndEvent` against disposal/over-signal races.
+- Replaced direct `_phaseCompletion.Signal()` with guarded snapshot-based call and exception-safe handling for:
+  - `ObjectDisposedException`;
+  - `InvalidOperationException`.
+
+### Files touched
+- `project/OsEngine/OsOptimizer/OptimizerExecutor.cs`
+
+### Validation
+- `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --configuration Debug`
+- Result: Passed 70 / Failed 0
+
+### Risks / notes
+- No functional change in successful path; only shutdown race resilience improved.

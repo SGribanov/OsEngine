@@ -1146,9 +1146,21 @@ namespace OsEngine.OsOptimizer
                 ServerMaster.RemoveOptimizerServer(server);
             }
 
-            if (_phaseCompletion != null && !_phaseCompletion.IsSet)
+            CountdownEvent phase = _phaseCompletion;
+            if (phase != null && !phase.IsSet)
             {
-                _phaseCompletion.Signal();
+                try
+                {
+                    phase.Signal();
+                }
+                catch (ObjectDisposedException)
+                {
+                    // ignored
+                }
+                catch (InvalidOperationException)
+                {
+                    // ignored
+                }
             }
 
             try
