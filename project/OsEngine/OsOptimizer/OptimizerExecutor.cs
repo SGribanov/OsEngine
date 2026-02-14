@@ -449,6 +449,24 @@ namespace OsEngine.OsOptimizer
                     return;
                 }
 
+                if (optimizationMethod == OptimizationMethodType.Bayesian)
+                {
+                    if (_master.BayesianInitialSamples <= 0
+                        || _master.BayesianMaxIterations <= 0
+                        || _master.BayesianBatchSize <= 0
+                        || _master.BayesianAcquisitionKappa < 0)
+                    {
+                        AbortPrimeWorker(
+                            "Optimizer prime worker skipped: bayesian settings are invalid at runtime " +
+                            "(initialSamples " + _master.BayesianInitialSamples +
+                            ", maxIterations " + _master.BayesianMaxIterations +
+                            ", batchSize " + _master.BayesianBatchSize +
+                            ", kappa " + _master.BayesianAcquisitionKappa + ").",
+                            LogMessageType.Error);
+                        return;
+                    }
+                }
+
                 if (parametersOnSnapshot.Count != parametersSnapshot.Count)
                 {
                     AbortPrimeWorker(

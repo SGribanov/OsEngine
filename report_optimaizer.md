@@ -4483,3 +4483,24 @@ After each optimizer-related change, update this file with:
 
 ### Risks / notes
 - No intended behavior change in valid flow; adds symmetry with other runtime context guards for late state invalidation.
+
+
+## Stabilization Update (2026-02-14) - Validate Bayesian Runtime Settings In Worker
+### What changed
+- Added Bayesian-specific runtime guard in `PrimeThreadWorkerPlace()`:
+  - when `optimizationMethod == Bayesian`, validates:
+    - `BayesianInitialSamples > 0`
+    - `BayesianMaxIterations > 0`
+    - `BayesianBatchSize > 0`
+    - `BayesianAcquisitionKappa >= 0`
+- Invalid runtime Bayesian settings now trigger unified worker abort with full setting diagnostics.
+
+### Files touched
+- `project/OsEngine/OsOptimizer/OptimizerExecutor.cs`
+
+### Validation
+- `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --configuration Debug`
+- Result: Passed 70 / Failed 0
+
+### Risks / notes
+- No intended behavior change for valid Bayesian configuration; improves fail-fast clarity on late invalid parameter mutation.
