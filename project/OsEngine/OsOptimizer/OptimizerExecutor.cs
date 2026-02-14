@@ -1,4 +1,4 @@
-﻿/*
+/*
  * Your rights to use code governed by this license https://github.com/AlexWan/OsEngine/blob/master/LICENSE
  * Ваши права на использование кода регулируются данной лицензией http://o-s-a.net/doc/license_simple_engine.pdf
 */
@@ -328,7 +328,7 @@ namespace OsEngine.OsOptimizer
                 if (_master == null)
                 {
                     SendLogMessage("Optimizer prime worker skipped: master context is null at runtime.", LogMessageType.Error);
-                    SafeInvokeTestReady(GetReportsSnapshotForPublish());
+                    PublishTestReadySnapshot();
                     return;
                 }
 
@@ -340,7 +340,7 @@ namespace OsEngine.OsOptimizer
                 if (fazesSource == null || fazesSource.Count == 0)
                 {
                     SendLogMessage("Optimizer prime worker skipped: faze configuration is unavailable at runtime.", LogMessageType.Error);
-                    SafeInvokeTestReady(GetReportsSnapshotForPublish());
+                    PublishTestReadySnapshot();
                     return;
                 }
 
@@ -348,7 +348,7 @@ namespace OsEngine.OsOptimizer
                 if (fazesSnapshot.Count == 0)
                 {
                     SendLogMessage("Optimizer prime worker skipped: faze snapshot is empty at runtime.", LogMessageType.Error);
-                    SafeInvokeTestReady(GetReportsSnapshotForPublish());
+                    PublishTestReadySnapshot();
                     return;
                 }
 
@@ -367,14 +367,14 @@ namespace OsEngine.OsOptimizer
                 if (string.IsNullOrWhiteSpace(strategyName))
                 {
                     SendLogMessage("Optimizer prime worker skipped: strategy name is unavailable at runtime.", LogMessageType.Error);
-                    SafeInvokeTestReady(GetReportsSnapshotForPublish());
+                    PublishTestReadySnapshot();
                     return;
                 }
 
                 if (parametersOnSnapshot == null || parametersSnapshot == null)
                 {
                     SendLogMessage("Optimizer prime worker skipped: parameters snapshot is unavailable at runtime.", LogMessageType.Error);
-                    SafeInvokeTestReady(GetReportsSnapshotForPublish());
+                    PublishTestReadySnapshot();
                     return;
                 }
 
@@ -383,7 +383,7 @@ namespace OsEngine.OsOptimizer
                     SendLogMessage(
                         "Optimizer prime worker skipped: iteration count is invalid at runtime (value " + iterationCount + ").",
                         LogMessageType.Error);
-                    SafeInvokeTestReady(GetReportsSnapshotForPublish());
+                    PublishTestReadySnapshot();
                     return;
                 }
 
@@ -392,7 +392,7 @@ namespace OsEngine.OsOptimizer
                     SendLogMessage(
                         "Optimizer prime worker skipped: threads count is invalid at runtime (value " + threadsCount + ").",
                         LogMessageType.Error);
-                    SafeInvokeTestReady(GetReportsSnapshotForPublish());
+                    PublishTestReadySnapshot();
                     return;
                 }
 
@@ -401,7 +401,7 @@ namespace OsEngine.OsOptimizer
                     SendLogMessage(
                         "Optimizer prime worker skipped: optimization method is invalid at runtime (value " + optimizationMethod + ").",
                         LogMessageType.Error);
-                    SafeInvokeTestReady(GetReportsSnapshotForPublish());
+                    PublishTestReadySnapshot();
                     return;
                 }
 
@@ -410,7 +410,7 @@ namespace OsEngine.OsOptimizer
                     SendLogMessage(
                         "Optimizer prime worker skipped: objective metric is invalid at runtime (value " + objectiveMetric + ").",
                         LogMessageType.Error);
-                    SafeInvokeTestReady(GetReportsSnapshotForPublish());
+                    PublishTestReadySnapshot();
                     return;
                 }
 
@@ -419,7 +419,7 @@ namespace OsEngine.OsOptimizer
                     SendLogMessage(
                         "Optimizer prime worker skipped: objective direction is invalid at runtime (value " + objectiveDirection + ").",
                         LogMessageType.Error);
-                    SafeInvokeTestReady(GetReportsSnapshotForPublish());
+                    PublishTestReadySnapshot();
                     return;
                 }
 
@@ -428,7 +428,7 @@ namespace OsEngine.OsOptimizer
                     SendLogMessage(
                         "Optimizer prime worker skipped: bayesian acquisition mode is invalid at runtime (value " + bayesianAcquisitionMode + ").",
                         LogMessageType.Error);
-                    SafeInvokeTestReady(GetReportsSnapshotForPublish());
+                    PublishTestReadySnapshot();
                     return;
                 }
 
@@ -438,7 +438,7 @@ namespace OsEngine.OsOptimizer
                         "Optimizer prime worker skipped: parameters snapshot count mismatch (flags " + parametersOnSnapshot.Count +
                         ", params " + parametersSnapshot.Count + ").",
                         LogMessageType.Error);
-                    SafeInvokeTestReady(GetReportsSnapshotForPublish());
+                    PublishTestReadySnapshot();
                     return;
                 }
 
@@ -449,7 +449,7 @@ namespace OsEngine.OsOptimizer
                         SendLogMessage(
                             "Optimizer prime worker skipped: parameter snapshot contains null at index " + i + ".",
                             LogMessageType.Error);
-                        SafeInvokeTestReady(GetReportsSnapshotForPublish());
+                        PublishTestReadySnapshot();
                         return;
                     }
                 }
@@ -481,7 +481,7 @@ namespace OsEngine.OsOptimizer
                 {
                     if (IsStopRequested)
                     {
-                        SafeInvokeTestReady(GetReportsSnapshotForPublish());
+                        PublishTestReadySnapshot();
                         return;
                     }
 
@@ -571,12 +571,12 @@ namespace OsEngine.OsOptimizer
                 SendLogMessage(OsLocalization.Optimizer.Message7, LogMessageType.System);
                 SendLogMessage("Total test time = " + time.ToString(), LogMessageType.System);
 
-                SafeInvokeTestReady(GetReportsSnapshotForPublish());
+                PublishTestReadySnapshot();
             }
             catch (Exception ex)
             {
                 SendLogMessage("Optimizer prime worker failed: " + ex, LogMessageType.Error);
-                SafeInvokeTestReady(GetReportsSnapshotForPublish());
+                PublishTestReadySnapshot();
             }
             finally
             {
@@ -1034,7 +1034,7 @@ namespace OsEngine.OsOptimizer
                         SendLogMessage("OutOfSample compensated unscheduled tail: " + unscheduled, LogMessageType.System);
                     }
                     WaitCurrentPhaseToComplete();
-                    SafeInvokeTestReady(GetReportsSnapshotForPublish());
+                    PublishTestReadySnapshot();
                     return;
                 }
 
@@ -2570,6 +2570,11 @@ namespace OsEngine.OsOptimizer
         public event Action<TimeSpan> TimeToEndChangeEvent;
 
         public event Action<List<OptimizerFazeReport>> TestReadyEvent;
+
+        private void PublishTestReadySnapshot()
+        {
+            SafeInvokeTestReady(GetReportsSnapshotForPublish());
+        }
 
         private List<OptimizerFazeReport> GetReportsSnapshotForPublish()
         {

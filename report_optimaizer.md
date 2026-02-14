@@ -4396,3 +4396,20 @@ After each optimizer-related change, update this file with:
 
 ### Risks / notes
 - Intentional robustness change: blocks runs that would otherwise fail later in server/tab binding path.
+
+
+## Stabilization Update (2026-02-14) - Centralize Test-Ready Snapshot Publication Helper
+### What changed
+- Added `PublishTestReadySnapshot()` in `OptimizerExecutor` to encapsulate:
+  - `SafeInvokeTestReady(GetReportsSnapshotForPublish())`.
+- Replaced duplicated call pattern across worker early-exit and completion paths with the new helper.
+
+### Files touched
+- `project/OsEngine/OsOptimizer/OptimizerExecutor.cs`
+
+### Validation
+- `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --configuration Debug`
+- Result: Passed 70 / Failed 0
+
+### Risks / notes
+- No runtime behavior change expected; reduces duplication and keeps event publication path consistent.
