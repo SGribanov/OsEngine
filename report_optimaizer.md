@@ -2025,3 +2025,19 @@ After each optimizer-related change, update this file with:
 
 ### Risks / notes
 - No normal-path behavior change; prevents `InvalidCastException` from malformed tab source entries.
+
+## Stabilization Update (2026-02-14) - Validate Faze Time Range In CreateNewServer
+### What changed
+- Updated `CreateNewServer(...)` in `OptimizerExecutor`.
+- Added early guard for invalid phase time range (`TimeEnd <= TimeStart`).
+- Method now logs and returns `null` before server creation when phase range is invalid.
+
+### Files touched
+- `project/OsEngine/OsOptimizer/OptimizerExecutor.cs`
+
+### Validation
+- `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --configuration Debug`
+- Result: Passed 70 / Failed 0
+
+### Risks / notes
+- Behavior change only for invalid input; prevents unnecessary server allocation and downstream bind/start failures.

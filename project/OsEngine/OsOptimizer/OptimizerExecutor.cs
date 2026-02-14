@@ -806,6 +806,12 @@ namespace OsEngine.OsOptimizer
                 return null;
             }
 
+            if (report.Faze.TimeEnd <= report.Faze.TimeStart)
+            {
+                SendLogMessage("CreateNewServer skipped: invalid faze time range.", LogMessageType.Error);
+                return null;
+            }
+
             if (_master == null || _master.Storage == null || _master.BotToTest == null)
             {
                 SendLogMessage("CreateNewServer skipped: optimizer master context is not initialized.", LogMessageType.Error);
