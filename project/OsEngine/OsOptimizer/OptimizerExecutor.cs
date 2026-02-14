@@ -1007,7 +1007,16 @@ namespace OsEngine.OsOptimizer
             }
 
             List<string> names = new List<string> { botName };
-            _asyncBotFactory.CreateNewBots(names, _master.StrategyName, _master.IsScript, startProgram);
+            try
+            {
+                _asyncBotFactory.CreateNewBots(names, _master.StrategyName, _master.IsScript, startProgram);
+            }
+            catch (Exception ex)
+            {
+                SendLogMessage("Single-bot test skipped due to async bot queue error: " + ex, LogMessageType.Error);
+                awaitObj.Dispose();
+                return null;
+            }
 
             OptimizerServer server = CreateNewServer(reportFaze, false);
             if (server == null)

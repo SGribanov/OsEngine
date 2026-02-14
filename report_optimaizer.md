@@ -1067,3 +1067,21 @@ After each optimizer-related change, update this file with:
 
 ### Risks / notes
 - Prevents invalid bot-creation request construction in rare number-generation edge cases.
+
+## Stabilization Update (2026-02-14) - Exception Guard For Async Bot Queue In Executor TestBot
+### What changed
+- Wrapped `_asyncBotFactory.CreateNewBots(...)` in `OptimizerExecutor.TestBot(...)` with `try/catch`.
+- On queueing exception, method now:
+  - logs error with exception details;
+  - disposes await object;
+  - exits early with `null`.
+
+### Files touched
+- `project/OsEngine/OsOptimizer/OptimizerExecutor.cs`
+
+### Validation
+- `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --configuration Debug`
+- Result: Passed 70 / Failed 0
+
+### Risks / notes
+- Prevents single-bot test UI wait path from hanging on unexpected async bot factory queue failures.
