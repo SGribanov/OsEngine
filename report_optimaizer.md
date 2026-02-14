@@ -4230,3 +4230,22 @@ After each optimizer-related change, update this file with:
 
 ### Risks / notes
 - No intended behavior change in valid flows; prevents silent runtime coercion of invalid thread configuration in strategy setup path.
+
+
+## Stabilization Update (2026-02-14) - Guard Runtime Iteration Count In Prime Worker
+### What changed
+- Added runtime guard in `PrimeThreadWorkerPlace()` for `iterationCount` snapshot.
+- If iteration count is negative at worker runtime:
+  - emits explicit diagnostic;
+  - publishes `TestReady` snapshot;
+  - exits worker safely before phase processing.
+
+### Files touched
+- `project/OsEngine/OsOptimizer/OptimizerExecutor.cs`
+
+### Validation
+- `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --configuration Debug`
+- Result: Passed 70 / Failed 0
+
+### Risks / notes
+- No intended behavior change in normal flow; hardens against late invalidation of iteration settings between start validation and worker execution.

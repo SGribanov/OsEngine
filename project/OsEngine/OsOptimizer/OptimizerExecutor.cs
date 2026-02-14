@@ -349,6 +349,15 @@ namespace OsEngine.OsOptimizer
                     return;
                 }
 
+                if (iterationCount < 0)
+                {
+                    SendLogMessage(
+                        "Optimizer prime worker skipped: iteration count is invalid at runtime (value " + iterationCount + ").",
+                        LogMessageType.Error);
+                    SafeInvokeTestReady(GetReportsSnapshotForPublish());
+                    return;
+                }
+
                 if (parametersOnSnapshot.Count != parametersSnapshot.Count)
                 {
                     SendLogMessage(
