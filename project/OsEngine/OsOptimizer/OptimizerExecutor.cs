@@ -239,6 +239,7 @@ namespace OsEngine.OsOptimizer
             try
             {
                 ReportsToFazes = new List<OptimizerFazeReport>();
+                List<OptimizerFaze> fazesSnapshot = new List<OptimizerFaze>(_master.Fazes);
 
                 int countBots = BotCountOneFaze(_parameters, _parametersOn);
 
@@ -253,7 +254,7 @@ namespace OsEngine.OsOptimizer
 
                 DateTime timeStart = DateTime.Now;
 
-                for (int i = 0; i < _master.Fazes.Count; i++)
+                for (int i = 0; i < fazesSnapshot.Count; i++)
                 {
                     if (IsStopRequested)
                     {
@@ -261,10 +262,10 @@ namespace OsEngine.OsOptimizer
                         return;
                     }
 
-                    if (_master.Fazes[i].TypeFaze == OptimizerFazeType.InSample)
+                    if (fazesSnapshot[i].TypeFaze == OptimizerFazeType.InSample)
                     {
                         OptimizerFazeReport report = new OptimizerFazeReport();
-                        report.Faze = _master.Fazes[i];
+                        report.Faze = fazesSnapshot[i];
 
                         ReportsToFazes.Add(report);
 
@@ -287,7 +288,7 @@ namespace OsEngine.OsOptimizer
                         SendLogMessage("ReportsCount " + inSampleCount.ToString(), LogMessageType.System);
 
                         OptimizerFazeReport report = new OptimizerFazeReport();
-                        report.Faze = _master.Fazes[i];
+                        report.Faze = fazesSnapshot[i];
 
                         ReportsToFazes.Add(report);
 

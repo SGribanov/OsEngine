@@ -3608,3 +3608,20 @@ After each optimizer-related change, update this file with:
 
 ### Risks / notes
 - No expected behavior change for healthy flow; improves run-boundary hygiene by preventing pending-evaluation leakage across restarts.
+
+
+## Stabilization Update (2026-02-14) - Snapshot Faze Sequence In Prime Worker
+### What changed
+- Updated `PrimeThreadWorkerPlace()` in `OptimizerExecutor` to create local phase snapshot:
+  - `List<OptimizerFaze> fazesSnapshot = new List<OptimizerFaze>(_master.Fazes);`
+- Main faze loop now iterates over `fazesSnapshot` and uses snapshot items for phase report assignment and type branching.
+
+### Files touched
+- `project/OsEngine/OsOptimizer/OptimizerExecutor.cs`
+
+### Validation
+- `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --configuration Debug`
+- Result: Passed 70 / Failed 0
+
+### Risks / notes
+- No intended behavior change for normal flow; reduces race sensitivity if phase collection is mutated externally while optimization is running.
