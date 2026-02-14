@@ -15,6 +15,7 @@ Implemented and committed:
 6. Phase 5 started: bayesian strategy skeleton added and wired via factory with safe brute-force backend delegation.
 7. Phase 5 continued: bayesian staged candidate loop implemented (`initial sampling + iterative batches`) with limits by `InitialSamples/MaxIterations/BatchSize`.
 8. Phase 5 continued: optimizer UI now exposes and persists optimization method/objective/bayesian numeric settings.
+9. Stabilization continued: added persistence tests for optimizer method settings (`OptimizationMethod`, `ObjectiveMetric`, `Bayesian*`) including legacy file compatibility.
 
 ## Commits
 - `b1e5eabe3` — `Optimizer: persist Phase1 extraction and wiring state`
@@ -104,12 +105,14 @@ Added tests:
   - `OptimizationStrategyFactory_Bayesian_ShouldReturnBayesianSkeletonWithMessage`
   - `BayesianOptimizationStrategy_OptimizeInSampleAsync_ShouldUseCurrentBruteForceBackend`
   - `BayesianOptimizationStrategy_OptimizeInSampleAsync_ShouldRespectIterationBudget`
+  - `OptimizerSettings_SaveLoad_ShouldPersistOptimizationMethodFields`
+  - `OptimizerSettings_LoadLegacyWithoutV2Fields_ShouldKeepDefaultsForMethodSettings`
 
 Command:
 - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --configuration Debug`
 
 Result:
-- Passed: 15
+- Passed: 17
 - Failed: 0
 
 ### Stabilization fixes from new tests
@@ -177,6 +180,16 @@ Result:
 - Added dynamic enable/disable:
   - bayesian numeric fields are enabled only when `OptimizationMethod = Bayesian`;
   - disabled during optimization run and restored after completion.
+
+## Stabilization Tests (Settings Persistence)
+### Updated files
+- `project/OsEngine.Tests/OptimizerRefactorTests.cs`
+
+### Notes
+- Added safe test fixture scope `SettingsFileScope` with backup/restore for `Engine/OptimizerSettings.txt`.
+- New tests verify:
+  - full save/load roundtrip for method settings;
+  - legacy settings file (without last 5 V2 lines) keeps method defaults and does not break load.
 
 ## Phase 3 Changes (Started)
 ### New file

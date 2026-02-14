@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.Collections.Concurrent;
+using System.IO;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -12,6 +13,8 @@ namespace OsEngine.Tests;
 
 public class OptimizerRefactorTests
 {
+    private static readonly object SettingsFileLock = new object();
+
     [Fact]
     public void OptimizerReportSerializer_V2AndLegacyRoundTrip_ShouldPreserveData()
     {
@@ -451,6 +454,131 @@ public class OptimizerRefactorTests
         // 9 grid points total, but staged budget is 2 initial + 3 iterative = 5 evaluations.
         Assert.Equal(5, calls);
         Assert.Equal(5, reports.Count);
+    }
+
+    [Fact]
+    public void OptimizerSettings_SaveLoad_ShouldPersistOptimizationMethodFields()
+    {
+        lock (SettingsFileLock)
+        {
+            using SettingsFileScope _ = new SettingsFileScope();
+
+            OptimizerSettings writer = new OptimizerSettings
+            {
+                OptimizationMethod = OptimizationMethodType.Bayesian,
+                ObjectiveMetric = SortBotsType.SharpRatio,
+                BayesianInitialSamples = 33,
+                BayesianMaxIterations = 77,
+                BayesianBatchSize = 4
+            };
+
+            OptimizerSettings reader = new OptimizerSettings();
+
+            Assert.Equal(OptimizationMethodType.Bayesian, reader.OptimizationMethod);
+            Assert.Equal(SortBotsType.SharpRatio, reader.ObjectiveMetric);
+            Assert.Equal(33, reader.BayesianInitialSamples);
+            Assert.Equal(77, reader.BayesianMaxIterations);
+            Assert.Equal(4, reader.BayesianBatchSize);
+        }
+    }
+
+    [Fact]
+    public void OptimizerSettings_LoadLegacyWithoutV2Fields_ShouldKeepDefaultsForMethodSettings()
+    {
+        lock (SettingsFileLock)
+        {
+            using SettingsFileScope scope = new SettingsFileScope();
+
+            // Create a full modern settings file first.
+            _ = new OptimizerSettings
+            {
+                OptimizationMethod = OptimizationMethodType.Bayesian,
+                ObjectiveMetric = SortBotsType.Recovery,
+                BayesianInitialSamples = 99,
+                BayesianMaxIterations = 199,
+                BayesianBatchSize = 7
+            };
+
+            string[] fullLines = File.ReadAllLines(scope.SettingsPath);
+            Assert.True(fullLines.Length >= 5);
+
+            // Simulate legacy file by removing V2 method lines from the tail.
+            string[] legacyLines = fullLines.Take(fullLines.Length - 5).ToArray();
+            File.WriteAllLines(scope.SettingsPath, legacyLines);
+
+            OptimizerSettings reader = new OptimizerSettings();
+
+            Assert.Equal(OptimizationMethodType.BruteForce, reader.OptimizationMethod);
+            Assert.Equal(SortBotsType.TotalProfit, reader.ObjectiveMetric);
+            Assert.Equal(20, reader.BayesianInitialSamples);
+            Assert.Equal(100, reader.BayesianMaxIterations);
+            Assert.Equal(5, reader.BayesianBatchSize);
+        }
+    }
+
+    private sealed class SettingsFileScope : IDisposable
+    {
+        private readonly string _engineDirPath;
+        private readonly bool _engineDirExisted;
+        private readonly bool _settingsFileExisted;
+        private readonly string _settingsBackup;
+
+        public SettingsFileScope()
+        {
+            _engineDirPath = Path.GetFullPath("Engine");
+            SettingsPath = Path.Combine(_engineDirPath, "OptimizerSettings.txt");
+            _settingsBackup = Path.Combine(_engineDirPath, "OptimizerSettings.txt.codex.bak");
+
+            _engineDirExisted = Directory.Exists(_engineDirPath);
+            if (!_engineDirExisted)
+            {
+                Directory.CreateDirectory(_engineDirPath);
+            }
+
+            _settingsFileExisted = File.Exists(SettingsPath);
+            if (_settingsFileExisted)
+            {
+                File.Copy(SettingsPath, _settingsBackup, overwrite: true);
+            }
+            else if (File.Exists(_settingsBackup))
+            {
+                File.Delete(_settingsBackup);
+            }
+        }
+
+        public string SettingsPath { get; }
+
+        public void Dispose()
+        {
+            if (_settingsFileExisted)
+            {
+                if (File.Exists(_settingsBackup))
+                {
+                    File.Copy(_settingsBackup, SettingsPath, overwrite: true);
+                    File.Delete(_settingsBackup);
+                }
+            }
+            else
+            {
+                if (File.Exists(SettingsPath))
+                {
+                    File.Delete(SettingsPath);
+                }
+
+                if (File.Exists(_settingsBackup))
+                {
+                    File.Delete(_settingsBackup);
+                }
+            }
+
+            if (!_engineDirExisted && Directory.Exists(_engineDirPath))
+            {
+                if (!Directory.EnumerateFileSystemEntries(_engineDirPath).Any())
+                {
+                    Directory.Delete(_engineDirPath);
+                }
+            }
+        }
     }
 
     private static OptimizerReport BuildSampleReport()
