@@ -932,6 +932,28 @@ public class OptimizerRefactorTests
         }
     }
 
+    [Fact]
+    public void OptimizerSettings_SaveLoad_TailSharePercentBoundaries_ShouldRoundTrip()
+    {
+        lock (SettingsFileLock)
+        {
+            using SettingsFileScope _ = new SettingsFileScope();
+
+            OptimizerSettings writer = new OptimizerSettings
+            {
+                BayesianTailSharePercent = 1
+            };
+
+            OptimizerSettings readerLow = new OptimizerSettings();
+            Assert.Equal(1, readerLow.BayesianTailSharePercent);
+
+            writer.BayesianTailSharePercent = 50;
+
+            OptimizerSettings readerHigh = new OptimizerSettings();
+            Assert.Equal(50, readerHigh.BayesianTailSharePercent);
+        }
+    }
+
     private sealed class SettingsFileScope : IDisposable
     {
         private readonly string _engineDirPath;

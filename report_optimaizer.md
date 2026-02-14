@@ -31,6 +31,7 @@ Implemented and committed:
 22. Stabilization: added strategy-level tail configuration edge-case coverage (tail-pass disabled and tail-share constructor clamping).
 23. Operability: expanded Bayesian factory info message with full effective strategy configuration snapshot.
 24. Stabilization: added test assertions for key diagnostics fields in Bayesian factory info message.
+25. Stabilization: added dedicated settings roundtrip test for `BayesianTailSharePercent` boundary values (`1` and `50`).
 
 ## Commits
 - `b1e5eabe3` — `Optimizer: persist Phase1 extraction and wiring state`
@@ -131,6 +132,7 @@ Added tests:
   - `BayesianAcquisitionPolicy_ExpectedImprovement_ShouldUseOptimisticMean`
   - `OptimizerSettings_MethodFields_ShouldClampInvalidValues`
   - `OptimizerSettings_LoadFromFile_WithInvalidBayesianValues_ShouldClampOnLoad`
+  - `OptimizerSettings_SaveLoad_TailSharePercentBoundaries_ShouldRoundTrip`
   - `BayesianOptimizationStrategy_TailPassDisabled_ShouldPlanZeroTailBudget`
   - `BayesianOptimizationStrategy_TailSharePercent_ShouldClampToRange`
   - `OptimizerSettings_SaveLoad_ShouldPersistOptimizationMethodFields`
@@ -140,7 +142,7 @@ Command:
 - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --configuration Debug`
 
 Result:
-- Passed: 30
+- Passed: 31
 - Failed: 0
 
 ### Stabilization fixes from new tests
