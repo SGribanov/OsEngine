@@ -815,6 +815,17 @@ public class OptimizerRefactorTests
     }
 
     [Fact]
+    public void BayesianCandidateSelector_SelectNextBatch_WithNullScored_ShouldFallbackToSequentialFill()
+    {
+        BayesianCandidateSelector selector = new BayesianCandidateSelector(defaultBatchSize: 3);
+        HashSet<int> evaluated = new HashSet<int> { 0, 1 };
+
+        List<int> batch = selector.SelectNextBatch(totalCount: 6, evaluated, scored: null, batchSize: 3);
+
+        Assert.Equal(new[] { 2, 3, 4 }, batch);
+    }
+
+    [Fact]
     public void BayesianAcquisitionPolicy_SelectNextBatch_WithoutScores_ShouldFallbackToSelector()
     {
         BayesianCandidateSelector selector = new BayesianCandidateSelector(defaultBatchSize: 3);

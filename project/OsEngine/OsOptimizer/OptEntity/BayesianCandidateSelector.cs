@@ -78,7 +78,10 @@ namespace OsEngine.OsOptimizer.OptEntity
                 return result;
             }
 
-            List<CandidateScore> top = scored
+            List<CandidateScore> scoredSafe = scored ?? new List<CandidateScore>();
+
+            List<CandidateScore> top = scoredSafe
+                .Where(s => s != null)
                 .OrderByDescending(s => s.Score)
                 .Take(Math.Max(1, Math.Min(10, _defaultBatchSize * 2)))
                 .ToList();

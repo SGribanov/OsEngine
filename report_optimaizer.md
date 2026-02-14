@@ -43,6 +43,7 @@ Implemented and committed:
 34. Stabilization: added mixed scored-indices coverage to ensure invalid scored entries do not affect selection when valid entries are present.
 35. Stabilization: added direct-acquisition null-fallback coverage to ensure `fallbackSelector` may be `null` when fallback path is not required.
 36. Stabilization: hardened acquisition against `null` entries inside `scored` list (ignore invalid entries) with dedicated coverage.
+37. Stabilization: hardened `BayesianCandidateSelector.SelectNextBatch` for `null scored` and `null` scored entries with safe sequential fallback behavior.
 
 ## Commits
 - `b1e5eabe3` — `Optimizer: persist Phase1 extraction and wiring state`
@@ -134,6 +135,7 @@ Added tests:
   - `BayesianOptimizationStrategy_OptimizeInSampleAsync_ShouldRespectIterationBudget`
   - `BayesianCandidateSelector_SelectInitialBatch_ShouldSpreadAndFill`
   - `BayesianCandidateSelector_SelectNextBatch_ShouldPreferNeighborsOfTopScores`
+  - `BayesianCandidateSelector_SelectNextBatch_WithNullScored_ShouldFallbackToSequentialFill`
   - `BayesianAcquisitionPolicy_SelectNextBatch_WithoutScores_ShouldFallbackToSelector`
   - `BayesianAcquisitionPolicy_SelectNextBatch_WithEqualMeans_ShouldPreferHigherUncertainty`
   - `BayesianAcquisitionPolicy_Modes_ShouldChangeExplorationBehavior`
@@ -169,7 +171,7 @@ Command:
 - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --configuration Debug`
 
 Result:
-- Passed: 47
+- Passed: 48
 - Failed: 0
 
 ### Stabilization fixes from new tests
