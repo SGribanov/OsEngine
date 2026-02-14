@@ -289,6 +289,11 @@ namespace OsEngine.OsOptimizer
                 return;
             }
 
+            if (reportInSample == null)
+            {
+                SendLogMessage("OutOfSample phase skipped: source in-sample report is null.", LogMessageType.System);
+            }
+
             List<OptimizerReport> inSampleReports = reportInSample?.Reports;
             int sourceCount = inSampleReports?.Count ?? 0;
             if (inSampleReports != null)
