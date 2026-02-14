@@ -1646,3 +1646,18 @@ After each optimizer-related change, update this file with:
 
 ### Risks / notes
 - Prevents potential null dereference on `server.NumberServer` in rare not-started bot edge paths.
+
+## Stabilization Update (2026-02-14) - Input Guard In CreateNewServer
+### What changed
+- Added early input validation in `CreateNewServer(OptimizerFazeReport report, bool needToDelete)`.
+- If `report == null` or `report.Faze == null`, method now logs error and returns `null`.
+
+### Files touched
+- `project/OsEngine/OsOptimizer/OptimizerExecutor.cs`
+
+### Validation
+- `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --configuration Debug`
+- Result: Passed 70 / Failed 0
+
+### Risks / notes
+- Prevents null dereference in server bootstrap path when phase/report context is incomplete.

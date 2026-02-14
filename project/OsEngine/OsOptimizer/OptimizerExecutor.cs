@@ -800,6 +800,12 @@ namespace OsEngine.OsOptimizer
 
         private OptimizerServer CreateNewServer(OptimizerFazeReport report, bool needToDelete)
         {
+            if (report == null || report.Faze == null)
+            {
+                SendLogMessage("CreateNewServer skipped: report or faze is null.", LogMessageType.Error);
+                return null;
+            }
+
             // 1. Create a new server for optimization. And one thread respectively
             // 1. создаём новый сервер для оптимизации. И один поток соответственно
             OptimizerServer server = ServerMaster.CreateNextOptimizerServer(_master.Storage, _serverNum,
