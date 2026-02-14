@@ -2711,3 +2711,22 @@ After each optimizer-related change, update this file with:
 ### Risks / notes
 - No functional behavior change expected; makes string comparison intent explicit and stable.
 
+
+## Stabilization Update (2026-02-14) - Stabilize OutOfSample Name Extraction With Local Snapshot
+### What changed
+- Updated loop in `StartAsuncBotFactoryOutOfSample(...)` in `OptimizerExecutor`.
+- Added local snapshot variables per iteration:
+  - `sourceReport` for report entry;
+  - `sourceBotName` for source bot name.
+- Subsequent validation and transform now use snapshot values instead of repeated indexed property access.
+
+### Files touched
+- `project/OsEngine/OsOptimizer/OptimizerExecutor.cs`
+
+### Validation
+- `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --configuration Debug`
+- Result: Passed 70 / Failed 0
+
+### Risks / notes
+- No behavior change expected; improves readability and reduces repeated dereference/race surface in source name transformation path.
+

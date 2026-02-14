@@ -245,19 +245,21 @@ namespace OsEngine.OsOptimizer
 
             for (int i = 0; i < reportFiltered.Reports.Count; i++)
             {
-                if (reportFiltered.Reports[i] == null)
+                OptimizerReport sourceReport = reportFiltered.Reports[i];
+                if (sourceReport == null)
                 {
                     SendLogMessage("Async bot factory start skipped (OutOfSample): source report is null at index " + i + ".", LogMessageType.Error);
                     continue;
                 }
 
-                if (string.IsNullOrWhiteSpace(reportFiltered.Reports[i].BotName))
+                string sourceBotName = sourceReport.BotName;
+                if (string.IsNullOrWhiteSpace(sourceBotName))
                 {
                     SendLogMessage("Async bot factory start skipped (OutOfSample): source report bot name is empty at index " + i + ".", LogMessageType.Error);
                     continue;
                 }
 
-                string transformedBotName = reportFiltered.Reports[i].BotName.Replace(" InSample", "").Trim();
+                string transformedBotName = sourceBotName.Replace(" InSample", "").Trim();
                 if (string.IsNullOrWhiteSpace(transformedBotName))
                 {
                     SendLogMessage("Async bot factory start skipped (OutOfSample): transformed bot name is empty at index " + i + ".", LogMessageType.Error);
