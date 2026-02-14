@@ -1470,9 +1470,15 @@ namespace OsEngine.OsOptimizer
         private bool TryFindSecurityByName(string securityName, out Security security)
         {
             security = null;
-            if (string.IsNullOrWhiteSpace(securityName)
-                || _master?.Storage?.Securities == null)
+            if (string.IsNullOrWhiteSpace(securityName))
             {
+                SendLogMessage("CreateNewServer security lookup skipped: security name is empty.", LogMessageType.Error);
+                return false;
+            }
+
+            if (_master?.Storage?.Securities == null)
+            {
+                SendLogMessage("CreateNewServer security lookup skipped: securities collection is unavailable.", LogMessageType.Error);
                 return false;
             }
 

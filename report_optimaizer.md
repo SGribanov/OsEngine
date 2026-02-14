@@ -1880,3 +1880,19 @@ After each optimizer-related change, update this file with:
 
 ### Risks / notes
 - No functional change; reduces branching noise and keeps lookup flow easier to maintain.
+
+## Stabilization Update (2026-02-14) - Security Lookup Diagnostics For Empty Input And Missing Storage
+### What changed
+- Updated `TryFindSecurityByName(...)` in `OptimizerExecutor` to split early-return guard conditions.
+- Added explicit diagnostic log when lookup is skipped because `securityName` is empty.
+- Added explicit diagnostic log when lookup is skipped because `_master.Storage.Securities` is unavailable.
+
+### Files touched
+- `project/OsEngine/OsOptimizer/OptimizerExecutor.cs`
+
+### Validation
+- `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --configuration Debug`
+- Result: Passed 70 / Failed 0
+
+### Risks / notes
+- No behavior change in control flow; improves root-cause visibility for skipped lookup cases.
