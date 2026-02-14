@@ -266,7 +266,7 @@ namespace OsEngine.OsOptimizer
                     continue;
                 }
 
-                string transformedBotName = sourceBotName;
+                string transformedBotName = sourceBotName.Trim();
                 if (transformedBotName.EndsWith(inSampleSuffix, StringComparison.Ordinal))
                 {
                     transformedBotName = transformedBotName.Substring(0, transformedBotName.Length - inSampleSuffix.Length);

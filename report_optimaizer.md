@@ -2855,3 +2855,20 @@ After each optimizer-related change, update this file with:
 ### Risks / notes
 - No functional behavior change; minor allocation/readability optimization consistent with in-sample branch.
 
+
+## Stabilization Update (2026-02-14) - Trim Source Name Before InSample Suffix Detection In OOS Transform
+### What changed
+- Updated out-of-sample source name transform in `StartAsuncBotFactoryOutOfSample(...)`.
+- Source bot name is now trimmed before terminal `" InSample"` suffix detection.
+- This ensures suffix stripping works correctly even when source names contain trailing spaces.
+
+### Files touched
+- `project/OsEngine/OsOptimizer/OptimizerExecutor.cs`
+
+### Validation
+- `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --configuration Debug`
+- Result: Passed 70 / Failed 0
+
+### Risks / notes
+- Behavior change only for whitespace-padded source names; improves deterministic OOS name normalization.
+
