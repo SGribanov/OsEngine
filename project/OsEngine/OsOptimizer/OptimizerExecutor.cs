@@ -190,6 +190,12 @@ namespace OsEngine.OsOptimizer
                 return false;
             }
 
+            if (parameters.Count == 0)
+            {
+                SendLogMessage("Optimizer start skipped: parameters collection is empty.", LogMessageType.Error);
+                return false;
+            }
+
             if (parametersOn.Count != parameters.Count)
             {
                 SendLogMessage(

@@ -4631,3 +4631,20 @@ After each optimizer-related change, update this file with:
 
 ### Risks / notes
 - No intended behavior change for non-empty runs; adds observability for edge-case completion with zero reports.
+
+
+## Stabilization Update (2026-02-14) - Reject Empty Parameter Collection At Start
+### What changed
+- Added early `Start(...)` guard in `OptimizerExecutor`:
+  - `parameters.Count` must be greater than zero.
+- Empty parameter collection now fails fast with explicit diagnostic log.
+
+### Files touched
+- `project/OsEngine/OsOptimizer/OptimizerExecutor.cs`
+
+### Validation
+- `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --configuration Debug`
+- Result: Passed 70 / Failed 0
+
+### Risks / notes
+- Intentional robustness change: blocks meaningless empty-parameter run startup before worker lifecycle allocation.
