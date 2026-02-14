@@ -1795,3 +1795,20 @@ After each optimizer-related change, update this file with:
 
 ### Risks / notes
 - Prevents invalid security lookup attempts with blank identifiers in server data-binding phase.
+
+## Stabilization Update (2026-02-14) - Server Factory Exception/Null Guards In CreateNewServer
+### What changed
+- Hardened server factory call in `CreateNewServer(...)`:
+  - wrapped `ServerMaster.CreateNextOptimizerServer(...)` in `try/catch`;
+  - added explicit `null` result guard.
+- On failure paths method now logs detailed diagnostics and returns `null` early.
+
+### Files touched
+- `project/OsEngine/OsOptimizer/OptimizerExecutor.cs`
+
+### Validation
+- `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --configuration Debug`
+- Result: Passed 70 / Failed 0
+
+### Risks / notes
+- Prevents server bootstrap path from continuing with invalid server instance when factory fails.

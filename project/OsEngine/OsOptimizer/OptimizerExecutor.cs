@@ -820,8 +820,23 @@ namespace OsEngine.OsOptimizer
 
             // 1. Create a new server for optimization. And one thread respectively
             // 1. создаём новый сервер для оптимизации. И один поток соответственно
-            OptimizerServer server = ServerMaster.CreateNextOptimizerServer(_master.Storage, _serverNum,
-                _master.StartDeposit);
+            OptimizerServer server = null;
+            try
+            {
+                server = ServerMaster.CreateNextOptimizerServer(_master.Storage, _serverNum,
+                    _master.StartDeposit);
+            }
+            catch (Exception ex)
+            {
+                SendLogMessage("CreateNewServer failed: server factory threw exception. " + ex, LogMessageType.Error);
+                return null;
+            }
+
+            if (server == null)
+            {
+                SendLogMessage("CreateNewServer failed: server factory returned null.", LogMessageType.Error);
+                return null;
+            }
 
             server.OrderExecutionType = _master.OrderExecutionType;
             server.SlippageToSimpleOrder = _master.SlippageToSimpleOrder;
