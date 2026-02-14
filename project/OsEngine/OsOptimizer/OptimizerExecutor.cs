@@ -844,6 +844,12 @@ namespace OsEngine.OsOptimizer
             server.TestingProgressChangeEvent += server_TestingProgressChangeEvent;
 
             List<IIBotTab> sources = _master.BotToTest.GetTabs();
+            if (sources == null)
+            {
+                SendLogMessage("CreateNewServer skipped: bot tabs collection is null.", LogMessageType.Error);
+                SafeRemoveOptimizerServer(server);
+                return null;
+            }
 
             for (int i = 0; i < sources.Count; i++)
             {
