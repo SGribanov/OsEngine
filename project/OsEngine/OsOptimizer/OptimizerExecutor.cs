@@ -302,16 +302,44 @@ namespace OsEngine.OsOptimizer
 
             List<OptimizerReport> inSampleReports = reportInSample?.Reports;
             int sourceCount = inSampleReports?.Count ?? 0;
+            int droppedNullReports = 0;
+            int droppedEmptyNames = 0;
             if (inSampleReports != null)
             {
-                inSampleReports = inSampleReports
-                    .FindAll(r => r != null && !string.IsNullOrWhiteSpace(r.BotName));
+                List<OptimizerReport> filtered = new List<OptimizerReport>(inSampleReports.Count);
+                for (int i = 0; i < inSampleReports.Count; i++)
+                {
+                    OptimizerReport sourceReport = inSampleReports[i];
+                    if (sourceReport == null)
+                    {
+                        droppedNullReports++;
+                        continue;
+                    }
+
+                    if (string.IsNullOrWhiteSpace(sourceReport.BotName))
+                    {
+                        droppedEmptyNames++;
+                        continue;
+                    }
+
+                    filtered.Add(sourceReport);
+                }
+
+                inSampleReports = filtered;
             }
 
             int droppedInvalid = sourceCount - (inSampleReports?.Count ?? 0);
             if (droppedInvalid > 0)
             {
                 SendLogMessage("OutOfSample skipped invalid source reports: " + droppedInvalid, LogMessageType.System);
+                if (droppedNullReports > 0)
+                {
+                    SendLogMessage("OutOfSample skipped null source reports: " + droppedNullReports, LogMessageType.System);
+                }
+                if (droppedEmptyNames > 0)
+                {
+                    SendLogMessage("OutOfSample skipped source reports with empty BotName: " + droppedEmptyNames, LogMessageType.System);
+                }
             }
 
             int outOfSampleBotsCount = inSampleReports?.Count ?? 0;

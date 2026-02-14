@@ -90,6 +90,7 @@ Implemented and committed:
 81. Operability: added explicit diagnostic log for null out-of-sample source container (`reportInSample == null`) to clarify phase-skip reason.
 82. Stabilization: added guard for null target faze payload (`report.Faze == null`) in out-of-sample phase with explicit error log and safe early return.
 83. Stabilization: hardened out-of-sample loop against exceptions from source `GetParameters()` with safe skip, slot/countdown compensation, and error diagnostics.
+84. Operability: refined out-of-sample sanitization diagnostics by separating skip reasons (`null report` vs `empty BotName`) in logs.
 
 ## Commits
 - `b1e5eabe3` — `Optimizer: persist Phase1 extraction and wiring state`
