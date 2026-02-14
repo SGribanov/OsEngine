@@ -364,7 +364,15 @@ namespace OsEngine.OsOptimizer
 
             for (int i = 0; i < inSampleReports.Count; i++)
             {
-                string sourceBotName = inSampleReports[i].BotName;
+                OptimizerReport sourceReport = inSampleReports[i];
+                if (sourceReport == null)
+                {
+                    SendLogMessage("OutOfSample skipped null source report during scheduling.", LogMessageType.System);
+                    CompensateSkippedOutOfSampleSlot(releaseServerSlot: false);
+                    continue;
+                }
+
+                string sourceBotName = sourceReport.BotName;
                 if (string.IsNullOrWhiteSpace(sourceBotName))
                 {
                     SendLogMessage("OutOfSample skipped source report with empty BotName during scheduling.", LogMessageType.System);
@@ -390,19 +398,19 @@ namespace OsEngine.OsOptimizer
                 List<IIStrategyParameter> parameters = null;
                 try
                 {
-                    parameters = inSampleReports[i].GetParameters();
+                    parameters = sourceReport.GetParameters();
                 }
                 catch (Exception ex)
                 {
                     SendLogMessage("OutOfSample skipped source report due to parameter extraction error: "
-                        + inSampleReports[i].BotName + ". " + ex, LogMessageType.Error);
+                        + sourceBotName + ". " + ex, LogMessageType.Error);
                     CompensateSkippedOutOfSampleSlot(releaseServerSlot: true);
                     continue;
                 }
 
                 if (parameters == null)
                 {
-                    SendLogMessage("OutOfSample skipped source report with null parameters: " + inSampleReports[i].BotName, LogMessageType.System);
+                    SendLogMessage("OutOfSample skipped source report with null parameters: " + sourceBotName, LogMessageType.System);
                     CompensateSkippedOutOfSampleSlot(releaseServerSlot: true);
                     continue;
                 }

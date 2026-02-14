@@ -103,6 +103,7 @@ Implemented and committed:
 94. Stabilization: added regression coverage for `BotConfigurator` precondition guards (`server == null`, `BotToTest == null`).
 95. Stabilization: added compensation for unscheduled out-of-sample tail when slot acquisition fails mid-loop, preventing leftover `CountdownEvent` debt for not-started items.
 96. Operability: added diagnostic log for out-of-sample tail compensation count when slot acquisition fails (`compensated unscheduled tail: N`).
+97. Stabilization: added defensive null-source-report guard inside out-of-sample scheduling loop (post-sanitization mutation safety) with proper compensation and diagnostics.
 
 ## Commits
 - `b1e5eabe3` — `Optimizer: persist Phase1 extraction and wiring state`
