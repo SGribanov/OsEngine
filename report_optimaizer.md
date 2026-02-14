@@ -4524,3 +4524,22 @@ After each optimizer-related change, update this file with:
 
 ### Risks / notes
 - No intended behavior change; improves per-run consistency and reduces sensitivity to concurrent settings mutation during guard evaluation.
+
+
+## Stabilization Update (2026-02-14) - Validate Runtime Bot Tabs In Prime Worker
+### What changed
+- Added runtime bot-tab readiness guard in `PrimeThreadWorkerPlace()`:
+  - guarded call to `_master.BotToTest.GetTabs()` with abort on exception;
+  - requires non-null and non-empty runtime tabs collection;
+  - requires at least one non-null tab entry.
+- All failures use unified `AbortPrimeWorker(...)` path.
+
+### Files touched
+- `project/OsEngine/OsOptimizer/OptimizerExecutor.cs`
+
+### Validation
+- `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --configuration Debug`
+- Result: Passed 70 / Failed 0
+
+### Risks / notes
+- No intended behavior change for stable runtime context; improves resilience when bot tab topology is invalidated after start boundary.

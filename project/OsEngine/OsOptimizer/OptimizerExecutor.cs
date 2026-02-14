@@ -359,6 +359,39 @@ namespace OsEngine.OsOptimizer
                     return;
                 }
 
+                List<IIBotTab> runtimeBotTabs = null;
+                try
+                {
+                    runtimeBotTabs = _master.BotToTest.GetTabs();
+                }
+                catch (Exception ex)
+                {
+                    AbortPrimeWorker("Optimizer prime worker skipped: runtime bot tabs retrieval failed. " + ex);
+                    return;
+                }
+
+                if (runtimeBotTabs == null || runtimeBotTabs.Count == 0)
+                {
+                    AbortPrimeWorker("Optimizer prime worker skipped: runtime bot tabs collection is empty.");
+                    return;
+                }
+
+                bool hasNonNullRuntimeTab = false;
+                for (int i = 0; i < runtimeBotTabs.Count; i++)
+                {
+                    if (runtimeBotTabs[i] != null)
+                    {
+                        hasNonNullRuntimeTab = true;
+                        break;
+                    }
+                }
+
+                if (!hasNonNullRuntimeTab)
+                {
+                    AbortPrimeWorker("Optimizer prime worker skipped: runtime bot tabs contain only null entries.");
+                    return;
+                }
+
                 lock (_reportsSync)
                 {
                     ReportsToFazes = new List<OptimizerFazeReport>();
