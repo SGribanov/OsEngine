@@ -21,6 +21,7 @@ Implemented and committed:
 12. Phase 5 continued: acquisition surrogate upgraded from index-distance to parameter-space distance across strategy parameters.
 13. Phase 5 continued: added objective-direction and acquisition-mode settings (`Ucb/EI/Greedy`, `kappa`) with wiring through settings, UI, factory and strategy.
 14. Phase 5 continued: added score normalization and metric-aware kappa scaling before acquisition.
+15. Phase 5 continued: added exploitation tail-pass (reserved budget slice from `MaxIterations`) with greedy acquisition at the end of staged run.
 
 ## Commits
 - `b1e5eabe3` — `Optimizer: persist Phase1 extraction and wiring state`
@@ -181,6 +182,7 @@ Result:
     - acquisition mode is configurable: `Ucb`, `ExpectedImprovement`, `Greedy`;
     - objective-direction is configurable (`Maximize` / `Minimize`) and is applied in strategy score orientation before acquisition.
   - strategy now normalizes observed objective scores (`min-max`) before acquisition and applies metric-specific kappa scaling to stabilize exploration pressure across heterogeneous metrics.
+  - strategy now reserves small exploitation budget and runs final greedy candidate pass after exploration loop.
 
 ## Phase 5 UI Wiring (Continued)
 ### Updated files
@@ -234,7 +236,7 @@ Result:
    - full replacement of remaining polling in single-bot test flow where appropriate.
 2. Start Phase 3 (`OptimizerReport` serializer extraction with legacy fallback).
 3. Start Phase 4 strategy abstraction (`IOptimizationStrategy`, `IBotEvaluator`, brute-force extraction).
-4. Continue Phase 5 by adding candidate dedup across iterations and optional top-N exploitation tail pass.
+4. Continue Phase 5 by tuning tail-budget heuristics and adding config toggle in settings/UI if needed.
 
 ## Update Rule
 After each optimizer-related change, update this file with:

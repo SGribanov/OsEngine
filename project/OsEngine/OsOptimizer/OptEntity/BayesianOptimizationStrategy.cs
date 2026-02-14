@@ -117,7 +117,8 @@ namespace OsEngine.OsOptimizer.OptEntity
             List<int> initialBatch = _candidateSelector.SelectInitialBatch(candidates.Count, evaluated, InitialSamples);
             await EvaluateBatchAsync(initialBatch, allParameters, candidates, cancellationToken, evaluated, scored, reports).ConfigureAwait(false);
 
-            int iterationsLeft = MaxIterations;
+            int tailBudget = GetExploitationTailBudget();
+            int iterationsLeft = MaxIterations - tailBudget;
 
             while (!cancellationToken.IsCancellationRequested && iterationsLeft > 0 && evaluated.Count < candidates.Count)
             {
@@ -142,6 +143,28 @@ namespace OsEngine.OsOptimizer.OptEntity
 
                 await EvaluateBatchAsync(nextBatch, allParameters, candidates, cancellationToken, evaluated, scored, reports).ConfigureAwait(false);
                 iterationsLeft -= nextBatch.Count;
+            }
+
+            if (!cancellationToken.IsCancellationRequested
+                && tailBudget > 0
+                && evaluated.Count < candidates.Count
+                && scored.Count > 0)
+            {
+                List<BayesianCandidateSelector.CandidateScore> scoredForTail = BuildNormalizedScores(scored);
+                List<int> tailBatch = _acquisitionPolicy.SelectNextBatch(
+                    candidates.Count,
+                    evaluated,
+                    scoredForTail,
+                    Math.Min(tailBudget, candidates.Count - evaluated.Count),
+                    _candidateSelector,
+                    candidates,
+                    BayesianAcquisitionModeType.Greedy,
+                    0m);
+
+                if (tailBatch.Count > 0)
+                {
+                    await EvaluateBatchAsync(tailBatch, allParameters, candidates, cancellationToken, evaluated, scored, reports).ConfigureAwait(false);
+                }
             }
 
             return reports;
@@ -197,6 +220,18 @@ namespace OsEngine.OsOptimizer.OptEntity
 
             decimal adjusted = AcquisitionKappa * scale;
             return adjusted < 0 ? 0 : adjusted;
+        }
+
+        private int GetExploitationTailBudget()
+        {
+            if (MaxIterations < 4)
+            {
+                return 0;
+            }
+
+            int byShare = Math.Max(1, MaxIterations / 5);
+            int byBatch = Math.Max(1, BatchSize);
+            return Math.Min(MaxIterations - 1, Math.Min(byShare, byBatch));
         }
 
         private List<List<IIStrategyParameter>> BuildCandidatePool(
