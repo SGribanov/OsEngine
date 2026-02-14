@@ -52,6 +52,7 @@ namespace OsEngine.OsOptimizer.OptEntity
             }
 
             List<BayesianCandidateSelector.CandidateScore> validScored = scoredSafe
+                .Where(s => s != null)
                 .Where(s => s.Index >= 0 && s.Index < totalCount)
                 .ToList();
 

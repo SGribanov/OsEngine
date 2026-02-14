@@ -42,6 +42,7 @@ Implemented and committed:
 33. Stabilization: added acquisition handling for invalid scored indices (filter valid range, fallback when all scored indices are invalid).
 34. Stabilization: added mixed scored-indices coverage to ensure invalid scored entries do not affect selection when valid entries are present.
 35. Stabilization: added direct-acquisition null-fallback coverage to ensure `fallbackSelector` may be `null` when fallback path is not required.
+36. Stabilization: hardened acquisition against `null` entries inside `scored` list (ignore invalid entries) with dedicated coverage.
 
 ## Commits
 - `b1e5eabe3` — `Optimizer: persist Phase1 extraction and wiring state`
@@ -158,6 +159,7 @@ Added tests:
   - `BayesianAcquisitionPolicy_InvalidScoredIndices_ShouldFallbackToSelectorPath`
   - `BayesianAcquisitionPolicy_MixedScoredIndices_ShouldIgnoreInvalidAndUseValid`
   - `BayesianAcquisitionPolicy_NullFallback_OnDirectAcquisitionPath_ShouldNotThrow`
+  - `BayesianAcquisitionPolicy_ScoredContainsNullEntries_ShouldIgnoreNulls`
   - `BayesianOptimizationStrategy_TailPassDisabled_ShouldPlanZeroTailBudget`
   - `BayesianOptimizationStrategy_TailSharePercent_ShouldClampToRange`
   - `OptimizerSettings_SaveLoad_ShouldPersistOptimizationMethodFields`
@@ -167,7 +169,7 @@ Command:
 - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --configuration Debug`
 
 Result:
-- Passed: 46
+- Passed: 47
 - Failed: 0
 
 ### Stabilization fixes from new tests
