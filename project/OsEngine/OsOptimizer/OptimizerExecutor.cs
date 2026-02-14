@@ -196,6 +196,12 @@ namespace OsEngine.OsOptimizer
                 botNames.Add(botName);
             }
 
+            if (botNames.Count == 0)
+            {
+                SendLogMessage("Async bot factory start skipped (InSample): no bot names generated.", LogMessageType.System);
+                return;
+            }
+
             try
             {
                 _asyncBotFactory.CreateNewBots(botNames, botType, isScript, StartProgram.IsOsOptimizer);
@@ -234,6 +240,12 @@ namespace OsEngine.OsOptimizer
 
                 string botName = reportFiltered.Reports[i].BotName.Replace(" InSample", "") + " OutOfSample";
                 botNames.Add(botName);
+            }
+
+            if (botNames.Count == 0)
+            {
+                SendLogMessage("Async bot factory start skipped (OutOfSample): no bot names generated.", LogMessageType.System);
+                return;
             }
 
             try

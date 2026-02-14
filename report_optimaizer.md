@@ -2564,3 +2564,22 @@ After each optimizer-related change, update this file with:
 ### Risks / notes
 - Behavior change only on invalid input paths; prevents avoidable null/argument failures during async bot factory bootstrap.
 
+
+## Stabilization Update (2026-02-14) - Skip Async Bot Factory Calls On Empty Name Batches
+### What changed
+- Updated `StartAsuncBotFactoryInSample(...)` in `OptimizerExecutor`:
+  - added guard to skip factory call when generated `botNames` list is empty.
+- Updated `StartAsuncBotFactoryOutOfSample(...)` similarly:
+  - skip factory call when filtered/generated bot name batch is empty.
+- Both paths now emit explicit system diagnostics for empty batch skip.
+
+### Files touched
+- `project/OsEngine/OsOptimizer/OptimizerExecutor.cs`
+
+### Validation
+- `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --configuration Debug`
+- Result: Passed 70 / Failed 0
+
+### Risks / notes
+- Behavior change only on empty-batch paths; avoids unnecessary factory invocations and clarifies why no async bot creation was started.
+
