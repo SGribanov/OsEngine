@@ -374,7 +374,12 @@ namespace OsEngine.OsOptimizer
 
                 if (!TryAcquireServerSlot())
                 {
-                    CompensateUnscheduledOutOfSampleItems(inSampleReports.Count - i);
+                    int unscheduled = inSampleReports.Count - i;
+                    CompensateUnscheduledOutOfSampleItems(unscheduled);
+                    if (unscheduled > 0)
+                    {
+                        SendLogMessage("OutOfSample compensated unscheduled tail: " + unscheduled, LogMessageType.System);
+                    }
                     WaitCurrentPhaseToComplete();
                     TestReadyEvent?.Invoke(ReportsToFazes);
                     _primeThreadWorker = null;
