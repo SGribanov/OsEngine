@@ -462,3 +462,18 @@ After each optimizer-related change, update this file with:
 
 ### Risks / notes
 - No functional change in successful path; only shutdown race resilience improved.
+
+## Stabilization Update (2026-02-14) - Atomic Progress Snapshot In Compensation Path
+### What changed
+- Updated `AddCompensatedOutOfSampleProgress` to publish `PrimeProgressChangeEvent` from lock-captured snapshots.
+- Event now uses local `progressEnd/progressMax` values captured under `_serverRemoveLocker`, avoiding unsynchronized field reads.
+
+### Files touched
+- `project/OsEngine/OsOptimizer/OptimizerExecutor.cs`
+
+### Validation
+- `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --configuration Debug`
+- Result: Passed 70 / Failed 0
+
+### Risks / notes
+- No behavioral change expected; this is consistency hardening for concurrent observers.

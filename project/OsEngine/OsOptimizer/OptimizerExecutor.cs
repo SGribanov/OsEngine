@@ -509,6 +509,9 @@ namespace OsEngine.OsOptimizer
                 return;
             }
 
+            int progressEnd;
+            int progressMax;
+
             lock (_serverRemoveLocker)
             {
                 _countAllServersEndTest += count;
@@ -516,9 +519,12 @@ namespace OsEngine.OsOptimizer
                 {
                     _countAllServersEndTest = _countAllServersMax;
                 }
+
+                progressEnd = _countAllServersEndTest;
+                progressMax = _countAllServersMax;
             }
 
-            PrimeProgressChangeEvent?.Invoke(_countAllServersEndTest, _countAllServersMax);
+            PrimeProgressChangeEvent?.Invoke(progressEnd, progressMax);
         }
 
         private List<bool> _parametersOn;
