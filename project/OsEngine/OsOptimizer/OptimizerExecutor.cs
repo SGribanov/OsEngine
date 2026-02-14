@@ -495,31 +495,12 @@ namespace OsEngine.OsOptimizer
                     return;
                 }
 
-                if (!IsDefinedEnum(optimizationMethod))
+                if (!ValidatePrimeWorkerEnumSettings(
+                    optimizationMethod,
+                    objectiveMetric,
+                    objectiveDirection,
+                    bayesianAcquisitionMode))
                 {
-                    AbortPrimeWorker(
-                        "Optimizer prime worker skipped: optimization method is invalid at runtime (value " + optimizationMethod + ").");
-                    return;
-                }
-
-                if (!IsDefinedEnum(objectiveMetric))
-                {
-                    AbortPrimeWorker(
-                        "Optimizer prime worker skipped: objective metric is invalid at runtime (value " + objectiveMetric + ").");
-                    return;
-                }
-
-                if (!IsDefinedEnum(objectiveDirection))
-                {
-                    AbortPrimeWorker(
-                        "Optimizer prime worker skipped: objective direction is invalid at runtime (value " + objectiveDirection + ").");
-                    return;
-                }
-
-                if (!IsDefinedEnum(bayesianAcquisitionMode))
-                {
-                    AbortPrimeWorker(
-                        "Optimizer prime worker skipped: bayesian acquisition mode is invalid at runtime (value " + bayesianAcquisitionMode + ").");
                     return;
                 }
 
@@ -743,6 +724,43 @@ namespace OsEngine.OsOptimizer
             if (!TryGetFazesSnapshot(out fazesSnapshot, out string fazesError))
             {
                 AbortPrimeWorker("Optimizer prime worker skipped: runtime " + fazesError);
+                return false;
+            }
+
+            return true;
+        }
+
+        private bool ValidatePrimeWorkerEnumSettings(
+            OptimizationMethodType optimizationMethod,
+            SortBotsType objectiveMetric,
+            ObjectiveDirectionType objectiveDirection,
+            BayesianAcquisitionModeType bayesianAcquisitionMode)
+        {
+            if (!IsDefinedEnum(optimizationMethod))
+            {
+                AbortPrimeWorker(
+                    "Optimizer prime worker skipped: optimization method is invalid at runtime (value " + optimizationMethod + ").");
+                return false;
+            }
+
+            if (!IsDefinedEnum(objectiveMetric))
+            {
+                AbortPrimeWorker(
+                    "Optimizer prime worker skipped: objective metric is invalid at runtime (value " + objectiveMetric + ").");
+                return false;
+            }
+
+            if (!IsDefinedEnum(objectiveDirection))
+            {
+                AbortPrimeWorker(
+                    "Optimizer prime worker skipped: objective direction is invalid at runtime (value " + objectiveDirection + ").");
+                return false;
+            }
+
+            if (!IsDefinedEnum(bayesianAcquisitionMode))
+            {
+                AbortPrimeWorker(
+                    "Optimizer prime worker skipped: bayesian acquisition mode is invalid at runtime (value " + bayesianAcquisitionMode + ").");
                 return false;
             }
 

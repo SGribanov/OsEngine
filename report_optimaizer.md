@@ -4888,3 +4888,24 @@ After each optimizer-related change, update this file with:
 
 ### Risks / notes
 - No intended behavior change; unifies faze validation semantics between start/runtime checks and reduces drift risk.
+
+## Stabilization Update (2026-02-14) - Extract Prime Worker Enum Runtime Validation Helper
+### What changed
+- Added helper `ValidatePrimeWorkerEnumSettings(...)` in `OptimizerExecutor`.
+- Moved duplicated runtime enum guards from `PrimeThreadWorkerPlace()` into helper for:
+  - `OptimizationMethodType`
+  - `SortBotsType`
+  - `ObjectiveDirectionType`
+  - `BayesianAcquisitionModeType`
+- Preserved existing diagnostics and abort behavior (`AbortPrimeWorker(...)`).
+
+### Files touched
+- `project/OsEngine/OsOptimizer/OptimizerExecutor.cs`
+- `report_optimaizer.md`
+
+### Validation
+- `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --configuration Debug`
+- Result: Passed 70 / Failed 0
+
+### Risks / notes
+- No intended behavior change; reduces duplicated validation branches and keeps runtime enum checks centralized.
