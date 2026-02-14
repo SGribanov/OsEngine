@@ -992,6 +992,13 @@ namespace OsEngine.OsOptimizer
             DateTime startTime = DateTime.Now;
 
             string botName = NumberGen.GetNumberDeal(StartProgram.IsOsOptimizer).ToString();
+            if (string.IsNullOrWhiteSpace(botName))
+            {
+                SendLogMessage("Single-bot test skipped: generated bot name is empty.", LogMessageType.Error);
+                awaitObj.Dispose();
+                return null;
+            }
+
             if (string.IsNullOrWhiteSpace(_master.StrategyName))
             {
                 SendLogMessage("Single-bot test skipped: strategy name is not set.", LogMessageType.Error);
