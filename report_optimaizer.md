@@ -1676,3 +1676,18 @@ After each optimizer-related change, update this file with:
 
 ### Risks / notes
 - Prevents bootstrap-time null dereferences when optimizer master dependencies are unavailable.
+
+## Stabilization Update (2026-02-14) - Storage Securities Guard In CreateNewServer
+### What changed
+- Added explicit guard in `CreateNewServer(...)` for `_master.Storage.Securities == null`.
+- Method now logs and returns `null` before tab/security binding logic when securities collection is unavailable.
+
+### Files touched
+- `project/OsEngine/OsOptimizer/OptimizerExecutor.cs`
+
+### Validation
+- `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --configuration Debug`
+- Result: Passed 70 / Failed 0
+
+### Risks / notes
+- Prevents null dereference in security lookup (`Find(...)`) during server bootstrap.

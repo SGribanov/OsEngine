@@ -812,6 +812,12 @@ namespace OsEngine.OsOptimizer
                 return null;
             }
 
+            if (_master.Storage.Securities == null)
+            {
+                SendLogMessage("CreateNewServer skipped: storage securities collection is null.", LogMessageType.Error);
+                return null;
+            }
+
             // 1. Create a new server for optimization. And one thread respectively
             // 1. создаём новый сервер для оптимизации. И один поток соответственно
             OptimizerServer server = ServerMaster.CreateNextOptimizerServer(_master.Storage, _serverNum,
