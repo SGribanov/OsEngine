@@ -100,6 +100,7 @@ Implemented and committed:
 91. Stabilization: fixed out-of-sample `BotName`-skip path to signal `CountdownEvent` for skipped items, preventing phase-wait skew/hang when runtime data mutates after initial sanitization.
 92. Maintainability: unified out-of-sample skip compensation paths via parameterized helper (`CompensateSkippedOutOfSampleSlot(releaseServerSlot)`), reducing duplication and keeping slot/countdown semantics consistent.
 93. Stabilization: added explicit precondition guards in `BotConfigurator.CreateAndConfigureBot` for `server == null` and `BotToTest == null` with clear error diagnostics and safe early return.
+94. Stabilization: added regression coverage for `BotConfigurator` precondition guards (`server == null`, `BotToTest == null`).
 
 ## Commits
 - `b1e5eabe3` — `Optimizer: persist Phase1 extraction and wiring state`
@@ -218,6 +219,8 @@ Added tests:
   - `BotConfigurator_CreateAndConfigureBot_WithNullParameters_ShouldReturnNull`
   - `BotConfigurator_CreateAndConfigureBot_WithEmptyBotName_ShouldReturnNull`
   - `BotConfigurator_CreateAndConfigureBot_WithNullBotName_ShouldReturnNull`
+  - `BotConfigurator_CreateAndConfigureBot_WithNullServer_ShouldReturnNull`
+  - `BotConfigurator_CreateAndConfigureBot_WithNullBotToTest_ShouldReturnNull`
   - `BayesianOptimizationStrategy_WithTailPass_ShouldRespectTotalEvaluationBudget`
   - `BayesianOptimizationStrategy_ShouldNotEvaluateDuplicateCandidates`
   - `BruteForceStrategy_OptimizeInSampleAsync_WithMismatchedFlags_ShouldThrowArgumentException`
@@ -247,7 +250,7 @@ Command:
 - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --configuration Debug`
 
 Result:
-- Passed: 68
+- Passed: 70
 - Failed: 0
 
 ### Stabilization fixes from new tests

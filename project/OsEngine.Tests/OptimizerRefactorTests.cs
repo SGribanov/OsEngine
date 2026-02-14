@@ -2,9 +2,11 @@ using System.Collections.Generic;
 using System.Collections.Concurrent;
 using System.IO;
 using System.Linq;
+using System.Runtime.Serialization;
 using System.Threading;
 using System.Threading.Tasks;
 using OsEngine.Entity;
+using OsEngine.Market.Servers.Optimizer;
 using OsEngine.OsOptimizer;
 using OsEngine.OsOptimizer.OptimizerEntity;
 using OsEngine.OsOptimizer.OptEntity;
@@ -1967,6 +1969,68 @@ public class OptimizerRefactorTests
                 parameters: new List<IIStrategyParameter>(),
                 parametersOptimized: null,
                 server: null,
+                regime: StartProgram.IsOsOptimizer,
+                cancellationToken: CancellationToken.None);
+
+            Assert.Null(bot);
+        }
+    }
+
+    [Fact]
+    public void BotConfigurator_CreateAndConfigureBot_WithNullServer_ShouldReturnNull()
+    {
+        lock (SettingsFileLock)
+        {
+            using SettingsFileScope _ = new SettingsFileScope();
+
+            OptimizerSettings settings = new OptimizerSettings
+            {
+                StrategyName = string.Empty
+            };
+            AsyncBotFactory factory = new AsyncBotFactory();
+            BotManualControl manualControl = new BotManualControl("test_manual5", null, StartProgram.IsOsOptimizer);
+            BotConfigurator configurator = new BotConfigurator(settings, factory, manualControl)
+            {
+                BotToTest = null
+            };
+
+            var bot = configurator.CreateAndConfigureBot(
+                botName: "bot",
+                parameters: new List<IIStrategyParameter>(),
+                parametersOptimized: null,
+                server: null,
+                regime: StartProgram.IsOsOptimizer,
+                cancellationToken: CancellationToken.None);
+
+            Assert.Null(bot);
+        }
+    }
+
+    [Fact]
+    public void BotConfigurator_CreateAndConfigureBot_WithNullBotToTest_ShouldReturnNull()
+    {
+        lock (SettingsFileLock)
+        {
+            using SettingsFileScope _ = new SettingsFileScope();
+
+            OptimizerSettings settings = new OptimizerSettings
+            {
+                StrategyName = string.Empty
+            };
+            AsyncBotFactory factory = new AsyncBotFactory();
+            BotManualControl manualControl = new BotManualControl("test_manual6", null, StartProgram.IsOsOptimizer);
+            BotConfigurator configurator = new BotConfigurator(settings, factory, manualControl)
+            {
+                BotToTest = null
+            };
+
+            var bot = configurator.CreateAndConfigureBot(
+                botName: "bot",
+                parameters: new List<IIStrategyParameter>(),
+                parametersOptimized: null,
+#pragma warning disable SYSLIB0050
+                server: (OptimizerServer)FormatterServices.GetUninitializedObject(typeof(OptimizerServer)),
+#pragma warning restore SYSLIB0050
                 regime: StartProgram.IsOsOptimizer,
                 cancellationToken: CancellationToken.None);
 
