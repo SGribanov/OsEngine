@@ -1301,6 +1301,12 @@ namespace OsEngine.OsOptimizer
                 return false;
             }
 
+            if (bot.Parameters == null)
+            {
+                SendLogMessage("Optimizer report build skipped: bot parameters are null.", LogMessageType.Error);
+                return false;
+            }
+
             try
             {
                 report = new OptimizerReport(bot.Parameters);

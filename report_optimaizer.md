@@ -1595,3 +1595,18 @@ After each optimizer-related change, update this file with:
 
 ### Risks / notes
 - Prevents last-faze load attempts on clearly incomplete bot state payload.
+
+## Stabilization Update (2026-02-14) - Bot Parameters Guard In Safe Report-Build Helper
+### What changed
+- Added pre-check in `TryBuildOptimizerReportFromBot(...)`:
+  - if `bot.Parameters == null`, report build is skipped with error log and `false` return.
+
+### Files touched
+- `project/OsEngine/OsOptimizer/OptimizerExecutor.cs`
+
+### Validation
+- `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --configuration Debug`
+- Result: Passed 70 / Failed 0
+
+### Risks / notes
+- Aligns completion-report build path with existing last-faze load guard for null bot parameters.
