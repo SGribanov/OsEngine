@@ -2185,3 +2185,21 @@ After each optimizer-related change, update this file with:
 ### Risks / notes
 - Behavior change only for invalid duplicate-registration state; prevents silent completion-source replacement and potential dangling waiters.
 
+
+## Stabilization Update (2026-02-14) - Centralize Null-Server StartNewBot Finalization
+### What changed
+- Updated `StartNewBot(...)` in `OptimizerExecutor` for `CreateNewServer(...) == null` path.
+- After canceling optional completion source, method now calls `FinalizeNotStartedBot(null, null)` before return.
+- This reuses centralized phase signaling and server-slot release logic for early startup failure.
+
+### Files touched
+- `project/OsEngine/OsOptimizer/OptimizerExecutor.cs`
+
+### Validation
+- `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --configuration Debug`
+- Result: Passed 70 / Failed 0
+
+### Risks / notes
+- Behavior change on error path only; prevents possible phase wait imbalance / slot leakage when server creation fails before registration.
+
+

@@ -575,6 +575,7 @@ namespace OsEngine.OsOptimizer
             {
                 SendLogMessage("StartNewBot skipped: optimizer server was not created.", LogMessageType.Error);
                 SafeTrySetCanceled(completionSource);
+                FinalizeNotStartedBot(null, null);
                 return;
             }
 
