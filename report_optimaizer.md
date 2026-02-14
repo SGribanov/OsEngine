@@ -19,6 +19,7 @@ Implemented and committed:
 10. Phase 5 continued: candidate selection policy extracted from strategy runtime into dedicated `BayesianCandidateSelector`.
 11. Phase 5 continued: added dedicated acquisition policy (`BayesianAcquisitionPolicy`) with lightweight surrogate scoring and integrated it into bayesian iteration loop.
 12. Phase 5 continued: acquisition surrogate upgraded from index-distance to parameter-space distance across strategy parameters.
+13. Phase 5 continued: added objective-direction and acquisition-mode settings (`Ucb/EI/Greedy`, `kappa`) with wiring through settings, UI, factory and strategy.
 
 ## Commits
 - `b1e5eabe3` — `Optimizer: persist Phase1 extraction and wiring state`
@@ -157,9 +158,12 @@ Result:
 - `OptimizerMaster` now forwards strategy-related settings from `OptimizerSettings`:
   - `OptimizationMethod`
   - `ObjectiveMetric`
+  - `ObjectiveDirection`
   - `BayesianInitialSamples`
   - `BayesianMaxIterations`
   - `BayesianBatchSize`
+  - `BayesianAcquisitionMode`
+  - `BayesianAcquisitionKappa`
 - Method-selection hook added in `OptimizerExecutor` for in-sample strategy resolution:
   - `Bayesian` now resolves to `BayesianOptimizationStrategy` skeleton.
   - bayesian strategy now performs staged search on grid candidates:
@@ -172,7 +176,8 @@ Result:
   - iterative batch selection now uses `BayesianAcquisitionPolicy` with UCB-like score:
     - local surrogate mean from nearest evaluated candidate score;
     - uncertainty proxy from normalized parameter-space distance (supports `Int`, `Decimal`, `DecimalCheckBox`, `Bool`, `CheckBox`, `String`, `TimeOfDay`);
-    - acquisition = `mean + kappa * uncertainty`.
+    - acquisition mode is configurable: `Ucb`, `ExpectedImprovement`, `Greedy`;
+    - objective-direction is configurable (`Maximize` / `Minimize`) and is applied in strategy score orientation before acquisition.
 
 ## Phase 5 UI Wiring (Continued)
 ### Updated files
@@ -183,14 +188,18 @@ Result:
 - Added method/objective selectors:
   - `ComboBoxOptimizationMethod`
   - `ComboBoxObjectiveMetric`
+  - `ComboBoxObjectiveDirection`
+- Added acquisition selectors:
+  - `ComboBoxBayesianAcquisitionMode`
+  - `TextBoxBayesianAcquisitionKappa`
 - Added bayesian numeric settings editors:
   - `TextBoxBayesianInitialSamples`
   - `TextBoxBayesianMaxIterations`
   - `TextBoxBayesianBatchSize`
 - Added binding and validation in UI code-behind:
   - values are loaded from `OptimizerMaster` at startup;
-  - edits are persisted back to `OptimizerMaster` (`OptimizationMethod`, `ObjectiveMetric`, `BayesianInitialSamples`, `BayesianMaxIterations`, `BayesianBatchSize`);
-  - bayesian numeric fields require positive integers.
+  - edits are persisted back to `OptimizerMaster` (`OptimizationMethod`, `ObjectiveMetric`, `ObjectiveDirection`, `BayesianInitialSamples`, `BayesianMaxIterations`, `BayesianBatchSize`, `BayesianAcquisitionMode`, `BayesianAcquisitionKappa`);
+  - bayesian integer fields require positive integers; `kappa` requires non-negative decimal.
 - Added dynamic enable/disable:
   - bayesian numeric fields are enabled only when `OptimizationMethod = Bayesian`;
   - disabled during optimization run and restored after completion.
@@ -202,8 +211,8 @@ Result:
 ### Notes
 - Added safe test fixture scope `SettingsFileScope` with backup/restore for `Engine/OptimizerSettings.txt`.
 - New tests verify:
-  - full save/load roundtrip for method settings;
-  - legacy settings file (without last 5 V2 lines) keeps method defaults and does not break load.
+  - full save/load roundtrip for method settings, including direction and acquisition settings;
+  - legacy settings file (without appended method-setting lines) keeps defaults and does not break load.
 
 ## Phase 3 Changes (Started)
 ### New file
@@ -222,7 +231,7 @@ Result:
    - full replacement of remaining polling in single-bot test flow where appropriate.
 2. Start Phase 3 (`OptimizerReport` serializer extraction with legacy fallback).
 3. Start Phase 4 strategy abstraction (`IOptimizationStrategy`, `IBotEvaluator`, brute-force extraction).
-4. Continue Phase 5 by adding objective-direction handling and richer acquisition options (EI/UCB modes with configurable kappa).
+4. Continue Phase 5 by adding objective-specific normalization and confidence scaling per metric family.
 
 ## Update Rule
 After each optimizer-related change, update this file with:

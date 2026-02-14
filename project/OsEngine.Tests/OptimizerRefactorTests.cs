@@ -345,9 +345,12 @@ public class OptimizerRefactorTests
             evaluator: null,
             maxParallel: 1,
             objectiveMetric: SortBotsType.TotalProfit,
+            objectiveDirection: ObjectiveDirectionType.Maximize,
             bayesianInitialSamples: 10,
             bayesianMaxIterations: 50,
             bayesianBatchSize: 2,
+            bayesianAcquisitionMode: BayesianAcquisitionModeType.Ucb,
+            bayesianAcquisitionKappa: 0.25m,
             out string infoMessage);
 
         Assert.IsType<BruteForceStrategy>(strategy);
@@ -365,16 +368,22 @@ public class OptimizerRefactorTests
             evaluator: null,
             maxParallel: 2,
             objectiveMetric: SortBotsType.SharpRatio,
+            objectiveDirection: ObjectiveDirectionType.Maximize,
             bayesianInitialSamples: 12,
             bayesianMaxIterations: 77,
             bayesianBatchSize: 3,
+            bayesianAcquisitionMode: BayesianAcquisitionModeType.Ucb,
+            bayesianAcquisitionKappa: 0.5m,
             out string infoMessage);
 
         BayesianOptimizationStrategy bayesian = Assert.IsType<BayesianOptimizationStrategy>(strategy);
         Assert.Equal(SortBotsType.SharpRatio, bayesian.ObjectiveMetric);
+        Assert.Equal(ObjectiveDirectionType.Maximize, bayesian.ObjectiveDirection);
         Assert.Equal(12, bayesian.InitialSamples);
         Assert.Equal(77, bayesian.MaxIterations);
         Assert.Equal(3, bayesian.BatchSize);
+        Assert.Equal(BayesianAcquisitionModeType.Ucb, bayesian.AcquisitionMode);
+        Assert.Equal(0.5m, bayesian.AcquisitionKappa);
         Assert.False(string.IsNullOrEmpty(infoMessage));
         Assert.Contains("skeleton", infoMessage);
     }
@@ -399,9 +408,12 @@ public class OptimizerRefactorTests
             evaluator,
             maxParallel: 2,
             objectiveMetric: SortBotsType.TotalProfit,
+            objectiveDirection: ObjectiveDirectionType.Maximize,
             initialSamples: 5,
             maxIterations: 20,
-            batchSize: 2);
+            batchSize: 2,
+            acquisitionMode: BayesianAcquisitionModeType.Ucb,
+            acquisitionKappa: 0.25m);
 
         List<IIStrategyParameter> allParameters = new List<IIStrategyParameter>
         {
@@ -437,9 +449,12 @@ public class OptimizerRefactorTests
             evaluator,
             maxParallel: 2,
             objectiveMetric: SortBotsType.TotalProfit,
+            objectiveDirection: ObjectiveDirectionType.Maximize,
             initialSamples: 2,
             maxIterations: 3,
-            batchSize: 2);
+            batchSize: 2,
+            acquisitionMode: BayesianAcquisitionModeType.Ucb,
+            acquisitionKappa: 0.25m);
 
         List<IIStrategyParameter> allParameters = new List<IIStrategyParameter>
         {
@@ -500,7 +515,9 @@ public class OptimizerRefactorTests
             scored: new List<BayesianCandidateSelector.CandidateScore>(),
             batchSize: 3,
             fallbackSelector: selector,
-            candidates: BuildIntCandidates(10, "X", 1, 10, 1));
+            candidates: BuildIntCandidates(10, "X", 1, 10, 1),
+            mode: BayesianAcquisitionModeType.Ucb,
+            kappa: 0.25m);
 
         Assert.Equal(3, batch.Count);
         Assert.DoesNotContain(0, batch);
@@ -524,7 +541,9 @@ public class OptimizerRefactorTests
             scored,
             batchSize: 1,
             fallbackSelector: selector,
-            candidates: BuildIntCandidates(8, "X", 1, 8, 1));
+            candidates: BuildIntCandidates(8, "X", 1, 8, 1),
+            mode: BayesianAcquisitionModeType.Ucb,
+            kappa: 1m);
 
         // With equal means, farthest candidate in parameter-space gets max uncertainty.
         Assert.Single(batch);
@@ -544,7 +563,10 @@ public class OptimizerRefactorTests
                 ObjectiveMetric = SortBotsType.SharpRatio,
                 BayesianInitialSamples = 33,
                 BayesianMaxIterations = 77,
-                BayesianBatchSize = 4
+                BayesianBatchSize = 4,
+                ObjectiveDirection = ObjectiveDirectionType.Minimize,
+                BayesianAcquisitionMode = BayesianAcquisitionModeType.ExpectedImprovement,
+                BayesianAcquisitionKappa = 0.9m
             };
 
             OptimizerSettings reader = new OptimizerSettings();
@@ -554,6 +576,9 @@ public class OptimizerRefactorTests
             Assert.Equal(33, reader.BayesianInitialSamples);
             Assert.Equal(77, reader.BayesianMaxIterations);
             Assert.Equal(4, reader.BayesianBatchSize);
+            Assert.Equal(ObjectiveDirectionType.Minimize, reader.ObjectiveDirection);
+            Assert.Equal(BayesianAcquisitionModeType.ExpectedImprovement, reader.BayesianAcquisitionMode);
+            Assert.Equal(0.9m, reader.BayesianAcquisitionKappa);
         }
     }
 
@@ -571,14 +596,17 @@ public class OptimizerRefactorTests
                 ObjectiveMetric = SortBotsType.Recovery,
                 BayesianInitialSamples = 99,
                 BayesianMaxIterations = 199,
-                BayesianBatchSize = 7
+                BayesianBatchSize = 7,
+                ObjectiveDirection = ObjectiveDirectionType.Minimize,
+                BayesianAcquisitionMode = BayesianAcquisitionModeType.Greedy,
+                BayesianAcquisitionKappa = 0.77m
             };
 
             string[] fullLines = File.ReadAllLines(scope.SettingsPath);
             Assert.True(fullLines.Length >= 5);
 
-            // Simulate legacy file by removing V2 method lines from the tail.
-            string[] legacyLines = fullLines.Take(fullLines.Length - 5).ToArray();
+            // Simulate legacy file by removing V2/V3 method lines from the tail.
+            string[] legacyLines = fullLines.Take(fullLines.Length - 8).ToArray();
             File.WriteAllLines(scope.SettingsPath, legacyLines);
 
             OptimizerSettings reader = new OptimizerSettings();
@@ -588,6 +616,9 @@ public class OptimizerRefactorTests
             Assert.Equal(20, reader.BayesianInitialSamples);
             Assert.Equal(100, reader.BayesianMaxIterations);
             Assert.Equal(5, reader.BayesianBatchSize);
+            Assert.Equal(ObjectiveDirectionType.Maximize, reader.ObjectiveDirection);
+            Assert.Equal(BayesianAcquisitionModeType.Ucb, reader.BayesianAcquisitionMode);
+            Assert.Equal(0.25m, reader.BayesianAcquisitionKappa);
         }
     }
 

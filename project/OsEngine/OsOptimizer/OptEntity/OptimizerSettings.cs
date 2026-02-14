@@ -447,6 +447,27 @@ namespace OsEngine.OsOptimizer.OptEntity
         }
         private int _bayesianBatchSize = 5;
 
+        public ObjectiveDirectionType ObjectiveDirection
+        {
+            get => _objectiveDirection;
+            set { _objectiveDirection = value; Save(); }
+        }
+        private ObjectiveDirectionType _objectiveDirection = ObjectiveDirectionType.Maximize;
+
+        public BayesianAcquisitionModeType BayesianAcquisitionMode
+        {
+            get => _bayesianAcquisitionMode;
+            set { _bayesianAcquisitionMode = value; Save(); }
+        }
+        private BayesianAcquisitionModeType _bayesianAcquisitionMode = BayesianAcquisitionModeType.Ucb;
+
+        public decimal BayesianAcquisitionKappa
+        {
+            get => _bayesianAcquisitionKappa;
+            set { _bayesianAcquisitionKappa = value; Save(); }
+        }
+        private decimal _bayesianAcquisitionKappa = 0.25m;
+
         #endregion
 
         #region Save / Load
@@ -491,6 +512,9 @@ namespace OsEngine.OsOptimizer.OptEntity
                     writer.WriteLine(_bayesianInitialSamples);
                     writer.WriteLine(_bayesianMaxIterations);
                     writer.WriteLine(_bayesianBatchSize);
+                    writer.WriteLine(_objectiveDirection);
+                    writer.WriteLine(_bayesianAcquisitionMode);
+                    writer.WriteLine(_bayesianAcquisitionKappa);
                 }
             }
             catch (Exception error)
@@ -551,6 +575,12 @@ namespace OsEngine.OsOptimizer.OptEntity
                         if (line != null) _bayesianMaxIterations = Convert.ToInt32(line);
                         line = reader.ReadLine();
                         if (line != null) _bayesianBatchSize = Convert.ToInt32(line);
+                        line = reader.ReadLine();
+                        if (line != null) Enum.TryParse(line, out _objectiveDirection);
+                        line = reader.ReadLine();
+                        if (line != null) Enum.TryParse(line, out _bayesianAcquisitionMode);
+                        line = reader.ReadLine();
+                        if (line != null) _bayesianAcquisitionKappa = line.ToDecimal();
                     }
                 }
             }
@@ -569,5 +599,18 @@ namespace OsEngine.OsOptimizer.OptEntity
     {
         BruteForce,
         Bayesian
+    }
+
+    public enum ObjectiveDirectionType
+    {
+        Maximize,
+        Minimize
+    }
+
+    public enum BayesianAcquisitionModeType
+    {
+        Ucb,
+        ExpectedImprovement,
+        Greedy
     }
 }

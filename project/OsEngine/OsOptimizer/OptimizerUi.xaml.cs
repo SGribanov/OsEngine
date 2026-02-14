@@ -154,12 +154,30 @@ namespace OsEngine.OsOptimizer
             ComboBoxObjectiveMetric.SelectedItem = _master.ObjectiveMetric.ToString();
             ComboBoxObjectiveMetric.SelectionChanged += ComboBoxObjectiveMetric_SelectionChanged;
 
+            ComboBoxObjectiveDirection.Items.Clear();
+            foreach (ObjectiveDirectionType direction in Enum.GetValues(typeof(ObjectiveDirectionType)))
+            {
+                ComboBoxObjectiveDirection.Items.Add(direction.ToString());
+            }
+            ComboBoxObjectiveDirection.SelectedItem = _master.ObjectiveDirection.ToString();
+            ComboBoxObjectiveDirection.SelectionChanged += ComboBoxObjectiveDirection_SelectionChanged;
+
+            ComboBoxBayesianAcquisitionMode.Items.Clear();
+            foreach (BayesianAcquisitionModeType mode in Enum.GetValues(typeof(BayesianAcquisitionModeType)))
+            {
+                ComboBoxBayesianAcquisitionMode.Items.Add(mode.ToString());
+            }
+            ComboBoxBayesianAcquisitionMode.SelectedItem = _master.BayesianAcquisitionMode.ToString();
+            ComboBoxBayesianAcquisitionMode.SelectionChanged += ComboBoxBayesianAcquisitionMode_SelectionChanged;
+
             TextBoxBayesianInitialSamples.Text = _master.BayesianInitialSamples.ToString();
             TextBoxBayesianMaxIterations.Text = _master.BayesianMaxIterations.ToString();
             TextBoxBayesianBatchSize.Text = _master.BayesianBatchSize.ToString();
+            TextBoxBayesianAcquisitionKappa.Text = _master.BayesianAcquisitionKappa.ToString(CultureInfo.InvariantCulture);
             TextBoxBayesianInitialSamples.TextChanged += TextBoxBayesianSettings_TextChanged;
             TextBoxBayesianMaxIterations.TextChanged += TextBoxBayesianSettings_TextChanged;
             TextBoxBayesianBatchSize.TextChanged += TextBoxBayesianSettings_TextChanged;
+            TextBoxBayesianAcquisitionKappa.TextChanged += TextBoxBayesianAcquisitionKappa_TextChanged;
             SyncOptimizationMethodControlsState();
 
             _master.NeedToMoveUiToEvent += _master_NeedToMoveUiToEvent;
@@ -198,6 +216,8 @@ namespace OsEngine.OsOptimizer
             Label23.Content = OsLocalization.Optimizer.Label36;
             LabelOptimizationMethod.Content = "Optimization method";
             LabelObjectiveMetric.Content = "Objective metric";
+            LabelObjectiveDirection.Content = "Objective direction";
+            LabelBayesianAcquisitionMode.Content = "Acquisition mode";
             ButtonPositionSupport.Content = OsLocalization.Trader.Label47;
             ButtonStrategyReload.Content = OsLocalization.Optimizer.Label48;
             TabControlResultsSeries.Header = OsLocalization.Optimizer.Label37;
@@ -273,9 +293,12 @@ namespace OsEngine.OsOptimizer
                 TextBoxPercentFiltration.TextChanged -= TextBoxPercentFiltration_TextChanged;
                 ComboBoxOptimizationMethod.SelectionChanged -= ComboBoxOptimizationMethod_SelectionChanged;
                 ComboBoxObjectiveMetric.SelectionChanged -= ComboBoxObjectiveMetric_SelectionChanged;
+                ComboBoxObjectiveDirection.SelectionChanged -= ComboBoxObjectiveDirection_SelectionChanged;
+                ComboBoxBayesianAcquisitionMode.SelectionChanged -= ComboBoxBayesianAcquisitionMode_SelectionChanged;
                 TextBoxBayesianInitialSamples.TextChanged -= TextBoxBayesianSettings_TextChanged;
                 TextBoxBayesianMaxIterations.TextChanged -= TextBoxBayesianSettings_TextChanged;
                 TextBoxBayesianBatchSize.TextChanged -= TextBoxBayesianSettings_TextChanged;
+                TextBoxBayesianAcquisitionKappa.TextChanged -= TextBoxBayesianAcquisitionKappa_TextChanged;
 
                 _master.NewSecurityEvent -= _master_NewSecurityEvent;
                 _master.DateTimeStartEndChange -= _master_DateTimeStartEndChange;
@@ -383,9 +406,12 @@ namespace OsEngine.OsOptimizer
             ButtonStrategyReload.IsEnabled = false;
             ComboBoxOptimizationMethod.IsEnabled = false;
             ComboBoxObjectiveMetric.IsEnabled = false;
+            ComboBoxObjectiveDirection.IsEnabled = false;
+            ComboBoxBayesianAcquisitionMode.IsEnabled = false;
             TextBoxBayesianInitialSamples.IsEnabled = false;
             TextBoxBayesianMaxIterations.IsEnabled = false;
             TextBoxBayesianBatchSize.IsEnabled = false;
+            TextBoxBayesianAcquisitionKappa.IsEnabled = false;
         }
 
         private void StartUserActivity()
@@ -417,6 +443,7 @@ namespace OsEngine.OsOptimizer
             ButtonStrategyReload.IsEnabled = true;
             ComboBoxOptimizationMethod.IsEnabled = true;
             ComboBoxObjectiveMetric.IsEnabled = true;
+            ComboBoxObjectiveDirection.IsEnabled = true;
             SyncOptimizationMethodControlsState();
         }
 
@@ -1081,6 +1108,48 @@ namespace OsEngine.OsOptimizer
             }
         }
 
+        private void ComboBoxObjectiveDirection_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            try
+            {
+                if (ComboBoxObjectiveDirection.SelectedItem == null)
+                {
+                    return;
+                }
+
+                if (Enum.TryParse(ComboBoxObjectiveDirection.SelectedItem.ToString(), out ObjectiveDirectionType direction))
+                {
+                    _master.ObjectiveDirection = direction;
+                }
+            }
+            catch (Exception ex)
+            {
+                _master?.SendLogMessage(ex.ToString(), LogMessageType.Error);
+                ComboBoxObjectiveDirection.SelectedItem = _master.ObjectiveDirection.ToString();
+            }
+        }
+
+        private void ComboBoxBayesianAcquisitionMode_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            try
+            {
+                if (ComboBoxBayesianAcquisitionMode.SelectedItem == null)
+                {
+                    return;
+                }
+
+                if (Enum.TryParse(ComboBoxBayesianAcquisitionMode.SelectedItem.ToString(), out BayesianAcquisitionModeType mode))
+                {
+                    _master.BayesianAcquisitionMode = mode;
+                }
+            }
+            catch (Exception ex)
+            {
+                _master?.SendLogMessage(ex.ToString(), LogMessageType.Error);
+                ComboBoxBayesianAcquisitionMode.SelectedItem = _master.BayesianAcquisitionMode.ToString();
+            }
+        }
+
         private void TextBoxBayesianSettings_TextChanged(object sender, TextChangedEventArgs e)
         {
             try
@@ -1106,6 +1175,24 @@ namespace OsEngine.OsOptimizer
             }
         }
 
+        private void TextBoxBayesianAcquisitionKappa_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            try
+            {
+                decimal kappa = Convert.ToDecimal(TextBoxBayesianAcquisitionKappa.Text, CultureInfo.InvariantCulture);
+                if (kappa < 0)
+                {
+                    throw new Exception("Kappa must be non-negative.");
+                }
+
+                _master.BayesianAcquisitionKappa = kappa;
+            }
+            catch
+            {
+                TextBoxBayesianAcquisitionKappa.Text = _master.BayesianAcquisitionKappa.ToString(CultureInfo.InvariantCulture);
+            }
+        }
+
         private void SyncOptimizationMethodControlsState()
         {
             bool isBayesian = _master != null && _master.OptimizationMethod == OptimizationMethodType.Bayesian;
@@ -1113,6 +1200,8 @@ namespace OsEngine.OsOptimizer
             TextBoxBayesianInitialSamples.IsEnabled = isBayesian;
             TextBoxBayesianMaxIterations.IsEnabled = isBayesian;
             TextBoxBayesianBatchSize.IsEnabled = isBayesian;
+            ComboBoxBayesianAcquisitionMode.IsEnabled = isBayesian;
+            TextBoxBayesianAcquisitionKappa.IsEnabled = isBayesian;
         }
 
         private void ButtonResults_Click(object sender, RoutedEventArgs e)

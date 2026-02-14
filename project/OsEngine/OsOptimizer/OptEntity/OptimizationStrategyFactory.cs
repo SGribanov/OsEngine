@@ -13,9 +13,12 @@ namespace OsEngine.OsOptimizer.OptEntity
             IBotEvaluator evaluator,
             int maxParallel,
             SortBotsType objectiveMetric,
+            ObjectiveDirectionType objectiveDirection,
             int bayesianInitialSamples,
             int bayesianMaxIterations,
             int bayesianBatchSize,
+            BayesianAcquisitionModeType bayesianAcquisitionMode,
+            decimal bayesianAcquisitionKappa,
             out string infoMessage)
         {
             if (method == OptimizationMethodType.Bayesian)
@@ -26,9 +29,12 @@ namespace OsEngine.OsOptimizer.OptEntity
                     evaluator,
                     maxParallel,
                     objectiveMetric,
+                    objectiveDirection,
                     bayesianInitialSamples,
                     bayesianMaxIterations,
-                    bayesianBatchSize);
+                    bayesianBatchSize,
+                    bayesianAcquisitionMode,
+                    bayesianAcquisitionKappa);
             }
 
             infoMessage = null;

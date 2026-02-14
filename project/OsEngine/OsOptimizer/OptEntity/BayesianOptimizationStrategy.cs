@@ -32,17 +32,23 @@ namespace OsEngine.OsOptimizer.OptEntity
             IBotEvaluator botEvaluator,
             int maxParallel,
             SortBotsType objectiveMetric,
+            ObjectiveDirectionType objectiveDirection,
             int initialSamples,
             int maxIterations,
-            int batchSize)
+            int batchSize,
+            BayesianAcquisitionModeType acquisitionMode,
+            decimal acquisitionKappa)
         {
             _parameterIterator = parameterIterator;
             _botEvaluator = botEvaluator;
             _maxParallel = maxParallel < 1 ? 1 : maxParallel;
             ObjectiveMetric = objectiveMetric;
+            ObjectiveDirection = objectiveDirection;
             InitialSamples = initialSamples < 1 ? 1 : initialSamples;
             MaxIterations = maxIterations < 1 ? 1 : maxIterations;
             BatchSize = batchSize < 1 ? 1 : batchSize;
+            AcquisitionMode = acquisitionMode;
+            AcquisitionKappa = acquisitionKappa < 0 ? 0 : acquisitionKappa;
             _fallbackBackend = new BruteForceStrategy(parameterIterator, botEvaluator, _maxParallel);
             _candidateSelector = new BayesianCandidateSelector(BatchSize);
             _acquisitionPolicy = new BayesianAcquisitionPolicy();
@@ -55,6 +61,12 @@ namespace OsEngine.OsOptimizer.OptEntity
         public int MaxIterations { get; }
 
         public int BatchSize { get; }
+
+        public ObjectiveDirectionType ObjectiveDirection { get; }
+
+        public BayesianAcquisitionModeType AcquisitionMode { get; }
+
+        public decimal AcquisitionKappa { get; }
 
         public int EstimateBotCount(List<IIStrategyParameter> allParameters, List<bool> parametersToOptimization)
         {
@@ -120,7 +132,9 @@ namespace OsEngine.OsOptimizer.OptEntity
                     scoredForSelector,
                     targetBatchSize,
                     _candidateSelector,
-                    candidates);
+                    candidates,
+                    AcquisitionMode,
+                    AcquisitionKappa);
 
                 if (nextBatch.Count == 0)
                 {
@@ -250,26 +264,31 @@ namespace OsEngine.OsOptimizer.OptEntity
             switch (ObjectiveMetric)
             {
                 case SortBotsType.TotalProfit:
-                    return report.TotalProfit;
+                    return Orient(report.TotalProfit);
                 case SortBotsType.PositionCount:
-                    return report.PositionsCount;
+                    return Orient(report.PositionsCount);
                 case SortBotsType.MaxDrawDawn:
-                    return report.MaxDrawDawn;
+                    return Orient(report.MaxDrawDawn);
                 case SortBotsType.AverageProfit:
-                    return report.AverageProfit;
+                    return Orient(report.AverageProfit);
                 case SortBotsType.AverageProfitPercent:
-                    return report.AverageProfitPercentOneContract;
+                    return Orient(report.AverageProfitPercentOneContract);
                 case SortBotsType.ProfitFactor:
-                    return report.ProfitFactor;
+                    return Orient(report.ProfitFactor);
                 case SortBotsType.PayOffRatio:
-                    return report.PayOffRatio;
+                    return Orient(report.PayOffRatio);
                 case SortBotsType.Recovery:
-                    return report.Recovery;
+                    return Orient(report.Recovery);
                 case SortBotsType.SharpRatio:
-                    return report.SharpRatio;
+                    return Orient(report.SharpRatio);
                 default:
-                    return report.TotalProfit;
+                    return Orient(report.TotalProfit);
             }
+        }
+
+        private decimal Orient(decimal value)
+        {
+            return ObjectiveDirection == ObjectiveDirectionType.Minimize ? -value : value;
         }
 
         private List<IIStrategyParameter> CloneCombinationSnapshot(List<IIStrategyParameter> optimizedParameters)

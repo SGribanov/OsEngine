@@ -16,11 +16,9 @@ namespace OsEngine.OsOptimizer.OptEntity
     /// </summary>
     public class BayesianAcquisitionPolicy
     {
-        private readonly decimal _kappa;
-
         public BayesianAcquisitionPolicy(decimal kappa = 0.25m)
         {
-            _kappa = kappa < 0 ? 0 : kappa;
+            _ = kappa;
         }
 
         public List<int> SelectNextBatch(
@@ -29,7 +27,9 @@ namespace OsEngine.OsOptimizer.OptEntity
             List<BayesianCandidateSelector.CandidateScore> scored,
             int batchSize,
             BayesianCandidateSelector fallbackSelector,
-            List<List<IIStrategyParameter>> candidates)
+            List<List<IIStrategyParameter>> candidates,
+            BayesianAcquisitionModeType mode,
+            decimal kappa)
         {
             if (batchSize <= 0 || totalCount <= 0)
             {
@@ -47,6 +47,7 @@ namespace OsEngine.OsOptimizer.OptEntity
             }
 
             List<CandidateAcquisition> ranked = new List<CandidateAcquisition>();
+            decimal bestMean = scored.Max(s => s.Score);
 
             for (int i = 0; i < totalCount; i++)
             {
@@ -76,7 +77,21 @@ namespace OsEngine.OsOptimizer.OptEntity
 
                 decimal mean = nearest == null ? 0m : nearest.Score;
                 decimal uncertainty = minDistance == decimal.MaxValue ? 1m : Math.Min(1m, minDistance);
-                decimal acquisition = mean + (_kappa * uncertainty);
+                decimal acquisition;
+
+                if (mode == BayesianAcquisitionModeType.Greedy)
+                {
+                    acquisition = mean;
+                }
+                else if (mode == BayesianAcquisitionModeType.ExpectedImprovement)
+                {
+                    decimal improvement = Math.Max(0m, mean - bestMean);
+                    acquisition = improvement + (kappa * uncertainty);
+                }
+                else
+                {
+                    acquisition = mean + (kappa * uncertainty);
+                }
 
                 ranked.Add(new CandidateAcquisition
                 {

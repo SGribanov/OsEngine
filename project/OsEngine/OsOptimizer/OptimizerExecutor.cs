@@ -220,9 +220,12 @@ namespace OsEngine.OsOptimizer
                 evaluator,
                 parallel,
                 _master.ObjectiveMetric,
+                _master.ObjectiveDirection,
                 _master.BayesianInitialSamples,
                 _master.BayesianMaxIterations,
                 _master.BayesianBatchSize,
+                _master.BayesianAcquisitionMode,
+                _master.BayesianAcquisitionKappa,
                 out string infoMessage);
 
             if (!string.IsNullOrEmpty(infoMessage))

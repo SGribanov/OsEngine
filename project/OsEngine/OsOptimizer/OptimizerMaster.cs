@@ -268,6 +268,24 @@ namespace OsEngine.OsOptimizer
             set => Settings.BayesianBatchSize = value;
         }
 
+        public ObjectiveDirectionType ObjectiveDirection
+        {
+            get => Settings.ObjectiveDirection;
+            set => Settings.ObjectiveDirection = value;
+        }
+
+        public BayesianAcquisitionModeType BayesianAcquisitionMode
+        {
+            get => Settings.BayesianAcquisitionMode;
+            set => Settings.BayesianAcquisitionMode = value;
+        }
+
+        public decimal BayesianAcquisitionKappa
+        {
+            get => Settings.BayesianAcquisitionKappa;
+            set => Settings.BayesianAcquisitionKappa = value;
+        }
+
         public List<OrderClearing> ClearingTimes => Settings.ClearingTimes;
 
         public List<NonTradePeriod> NonTradePeriods => Settings.NonTradePeriods;
