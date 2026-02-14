@@ -1157,8 +1157,19 @@ namespace OsEngine.OsOptimizer
 
             Task.Run(() => RunAloneBotTestAsync(faze, report, awaitUi, runId));
 
-            AwaitUi ui = new AwaitUi(awaitUi);
-            ui.ShowDialog();
+            try
+            {
+                AwaitUi ui = new AwaitUi(awaitUi);
+                ui.ShowDialog();
+            }
+            catch (Exception ex)
+            {
+                SendLogMessage("Single-bot test UI wait failed: " + ex, LogMessageType.Error);
+                Interlocked.Increment(ref _aloneTestRunId);
+                Volatile.Write(ref _aloneTestIsOver, true);
+                _aloneTestDoneSignal.Set();
+                return null;
+            }
 
             if (!_aloneTestDoneSignal.Wait(TimeSpan.FromSeconds(30)))
             {

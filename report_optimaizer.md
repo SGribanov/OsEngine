@@ -1011,3 +1011,23 @@ After each optimizer-related change, update this file with:
 
 ### Risks / notes
 - Improves cross-thread visibility of single-bot run-state flag between UI path and async runner.
+
+## Stabilization Update (2026-02-14) - Exception Guard Around AwaitUi In Master TestBot
+### What changed
+- Wrapped `AwaitUi` creation/show path in `OptimizerMaster.TestBot(...)` with `try/catch`.
+- On UI wait failure, method now:
+  - logs error with exception;
+  - invalidates active run id (`Interlocked.Increment`);
+  - restores running flag (`Volatile.Write(..., true)`);
+  - signals completion event (`_aloneTestDoneSignal.Set()`);
+  - returns `null`.
+
+### Files touched
+- `project/OsEngine/OsOptimizer/OptimizerMaster.cs`
+
+### Validation
+- `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --configuration Debug`
+- Result: Passed 70 / Failed 0
+
+### Risks / notes
+- Prevents stuck single-bot state when UI wait window cannot be created/displayed.
