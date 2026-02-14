@@ -1472,6 +1472,53 @@ public class OptimizerRefactorTests
     }
 
     [Fact]
+    public void OptimizerSettings_LoadFromFile_WithPartiallyInvalidV2Numbers_ShouldLoadRemainingFields()
+    {
+        lock (SettingsFileLock)
+        {
+            using SettingsFileScope scope = new SettingsFileScope();
+
+            _ = new OptimizerSettings
+            {
+                OptimizationMethod = OptimizationMethodType.Bayesian,
+                ObjectiveMetric = SortBotsType.TotalProfit,
+                BayesianInitialSamples = 10,
+                BayesianMaxIterations = 20,
+                BayesianBatchSize = 3,
+                ObjectiveDirection = ObjectiveDirectionType.Maximize,
+                BayesianAcquisitionMode = BayesianAcquisitionModeType.Ucb,
+                BayesianAcquisitionKappa = 0.5m,
+                BayesianUseTailPass = true,
+                BayesianTailSharePercent = 20
+            };
+
+            string[] lines = File.ReadAllLines(scope.SettingsPath);
+            Assert.True(lines.Length >= 10);
+
+            lines[^8] = "broken-int"; // BayesianInitialSamples
+            lines[^7] = "33";         // BayesianMaxIterations
+            lines[^6] = "4";          // BayesianBatchSize
+            lines[^5] = "Minimize";   // ObjectiveDirection
+            lines[^4] = "Greedy";     // BayesianAcquisitionMode
+            lines[^3] = "0.9";        // BayesianAcquisitionKappa
+            lines[^2] = "False";      // BayesianUseTailPass
+            lines[^1] = "17";         // BayesianTailSharePercent
+            File.WriteAllLines(scope.SettingsPath, lines);
+
+            OptimizerSettings reader = new OptimizerSettings();
+
+            Assert.Equal(20, reader.BayesianInitialSamples);
+            Assert.Equal(33, reader.BayesianMaxIterations);
+            Assert.Equal(4, reader.BayesianBatchSize);
+            Assert.Equal(ObjectiveDirectionType.Minimize, reader.ObjectiveDirection);
+            Assert.Equal(BayesianAcquisitionModeType.Greedy, reader.BayesianAcquisitionMode);
+            Assert.Equal(0.9m, reader.BayesianAcquisitionKappa);
+            Assert.False(reader.BayesianUseTailPass);
+            Assert.Equal(17, reader.BayesianTailSharePercent);
+        }
+    }
+
+    [Fact]
     public void OptimizerSettings_SaveLoad_TailSharePercentBoundaries_ShouldRoundTrip()
     {
         lock (SettingsFileLock)

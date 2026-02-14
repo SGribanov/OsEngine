@@ -616,11 +616,20 @@ namespace OsEngine.OsOptimizer.OptEntity
                             _objectiveMetric = objectiveMetric;
                         }
                         line = reader.ReadLine();
-                        if (line != null) _bayesianInitialSamples = ClampPositiveInt(Convert.ToInt32(line));
+                        if (TryParseInt(line, out int bayesianInitialSamples))
+                        {
+                            _bayesianInitialSamples = ClampPositiveInt(bayesianInitialSamples);
+                        }
                         line = reader.ReadLine();
-                        if (line != null) _bayesianMaxIterations = ClampPositiveInt(Convert.ToInt32(line));
+                        if (TryParseInt(line, out int bayesianMaxIterations))
+                        {
+                            _bayesianMaxIterations = ClampPositiveInt(bayesianMaxIterations);
+                        }
                         line = reader.ReadLine();
-                        if (line != null) _bayesianBatchSize = ClampPositiveInt(Convert.ToInt32(line));
+                        if (TryParseInt(line, out int bayesianBatchSize))
+                        {
+                            _bayesianBatchSize = ClampPositiveInt(bayesianBatchSize);
+                        }
                         line = reader.ReadLine();
                         if (line != null && TryParseDefinedEnum(line, out ObjectiveDirectionType objectiveDirection))
                         {
@@ -632,11 +641,20 @@ namespace OsEngine.OsOptimizer.OptEntity
                             _bayesianAcquisitionMode = bayesianAcquisitionMode;
                         }
                         line = reader.ReadLine();
-                        if (line != null) _bayesianAcquisitionKappa = ClampNonNegativeDecimal(line.ToDecimal());
+                        if (TryParseDecimal(line, out decimal bayesianAcquisitionKappa))
+                        {
+                            _bayesianAcquisitionKappa = ClampNonNegativeDecimal(bayesianAcquisitionKappa);
+                        }
                         line = reader.ReadLine();
-                        if (line != null) _bayesianUseTailPass = Convert.ToBoolean(line);
+                        if (TryParseBool(line, out bool bayesianUseTailPass))
+                        {
+                            _bayesianUseTailPass = bayesianUseTailPass;
+                        }
                         line = reader.ReadLine();
-                        if (line != null) _bayesianTailSharePercent = ClampTailSharePercent(Convert.ToInt32(line));
+                        if (TryParseInt(line, out int bayesianTailSharePercent))
+                        {
+                            _bayesianTailSharePercent = ClampTailSharePercent(bayesianTailSharePercent);
+                        }
                     }
                 }
             }
@@ -683,6 +701,36 @@ namespace OsEngine.OsOptimizer.OptEntity
 
             result = default;
             return false;
+        }
+
+        private static bool TryParseInt(string value, out int result)
+        {
+            return int.TryParse(value, out result);
+        }
+
+        private static bool TryParseBool(string value, out bool result)
+        {
+            return bool.TryParse(value, out result);
+        }
+
+        private static bool TryParseDecimal(string value, out decimal result)
+        {
+            if (string.IsNullOrWhiteSpace(value))
+            {
+                result = 0;
+                return false;
+            }
+
+            return decimal.TryParse(
+                value,
+                NumberStyles.Number,
+                CultureInfo.CurrentCulture,
+                out result)
+                || decimal.TryParse(
+                    value,
+                    NumberStyles.Number,
+                    CultureInfo.InvariantCulture,
+                    out result);
         }
 
         #endregion

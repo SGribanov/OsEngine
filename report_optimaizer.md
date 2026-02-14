@@ -52,6 +52,7 @@ Implemented and committed:
 43. Stabilization: reduced optimizer bot-connect timeout in in-sample flow from 2000s to 20s to prevent prolonged stalls on failed connection.
 44. Stabilization: fixed cancellation-registration lifecycle in evaluator path (`StartNewBotForEvaluationAsync`) by disposing token registration on task completion.
 45. Stabilization: made optimizer UI progress painter thread stop-signal driven (`ManualResetEvent`) to avoid fixed-sleep shutdown lag in `PainterProgressArea`.
+46. Stabilization: hardened V2 numeric/bool parsing in `OptimizerSettings.Load()` so partially broken values do not abort loading of remaining fields.
 
 ## Commits
 - `b1e5eabe3` — `Optimizer: persist Phase1 extraction and wiring state`
@@ -156,6 +157,7 @@ Added tests:
   - `OptimizerSettings_MethodFields_ShouldClampInvalidValues`
   - `OptimizerSettings_LoadFromFile_WithInvalidBayesianValues_ShouldClampOnLoad`
   - `OptimizerSettings_LoadFromFile_WithInvalidEnumNumbers_ShouldKeepDefaults`
+  - `OptimizerSettings_LoadFromFile_WithPartiallyInvalidV2Numbers_ShouldLoadRemainingFields`
   - `OptimizerSettings_SaveLoad_TailSharePercentBoundaries_ShouldRoundTrip`
   - `BayesianOptimizationStrategy_WithTailPass_ShouldRespectTotalEvaluationBudget`
   - `BayesianOptimizationStrategy_ShouldNotEvaluateDuplicateCandidates`
@@ -183,7 +185,7 @@ Command:
 - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --configuration Debug`
 
 Result:
-- Passed: 52
+- Passed: 53
 - Failed: 0
 
 ### Stabilization fixes from new tests
