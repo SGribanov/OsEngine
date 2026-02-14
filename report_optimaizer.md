@@ -874,3 +874,19 @@ After each optimizer-related change, update this file with:
 
 ### Risks / notes
 - Prevents single-bot flow from crashing on malformed report payloads and keeps resource cleanup consistent.
+
+## Stabilization Update (2026-02-14) - Await Object Guard In Async Single-Bot Runner
+### What changed
+- Added `await` object availability check in `RunAloneBotTestAsync()`.
+- After executor snapshot validation, method now verifies `_awaitUiMasterAloneTest` is not null before calling `executor.TestBot(...)`.
+- On missing await object, logs diagnostic message and exits safely.
+
+### Files touched
+- `project/OsEngine/OsOptimizer/OptimizerMaster.cs`
+
+### Validation
+- `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --configuration Debug`
+- Result: Passed 70 / Failed 0
+
+### Risks / notes
+- Prevents edge-case null await-object propagation into executor single-test path.

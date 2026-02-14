@@ -1196,9 +1196,17 @@ namespace OsEngine.OsOptimizer
                     return;
                 }
 
+                AwaitObject awaitUi = _awaitUiMasterAloneTest;
+                if (awaitUi == null)
+                {
+                    SendLogMessage("Single-bot test canceled: await object is unavailable.", LogMessageType.Error);
+                    _resultBotAloneTest = null;
+                    return;
+                }
+
                 _resultBotAloneTest =
                     executor.TestBot(_fazeToTestAloneTest, _reportToTestAloneTest,
-                    StartProgram.IsTester, _awaitUiMasterAloneTest);
+                    StartProgram.IsTester, awaitUi);
             }
             catch (Exception ex)
             {
