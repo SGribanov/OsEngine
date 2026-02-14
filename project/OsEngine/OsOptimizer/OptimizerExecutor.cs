@@ -190,8 +190,9 @@ namespace OsEngine.OsOptimizer
                 return;
             }
 
-            List<string> botNames = new List<string>(botCount);
-            HashSet<string> uniqueBotNames = new HashSet<string>(botCount, StringComparer.Ordinal);
+            int expectedNamesCount = Math.Max(0, botCount);
+            List<string> botNames = new List<string>(expectedNamesCount);
+            HashSet<string> uniqueBotNames = new HashSet<string>(expectedNamesCount, StringComparer.Ordinal);
             int startServerIndex = _serverNum;
             string fazeSuffix = " " + normalizedFaze;
 
@@ -249,8 +250,9 @@ namespace OsEngine.OsOptimizer
             }
 
             List<OptimizerReport> reports = reportFiltered.Reports;
-            List<string> botNames = new List<string>(reports.Count);
-            HashSet<string> uniqueBotNames = new HashSet<string>(reports.Count, StringComparer.Ordinal);
+            int expectedNamesCount = Math.Max(0, reports.Count);
+            List<string> botNames = new List<string>(expectedNamesCount);
+            HashSet<string> uniqueBotNames = new HashSet<string>(expectedNamesCount, StringComparer.Ordinal);
             const string inSampleSuffix = " InSample";
             string fazeSuffix = " " + normalizedFaze;
 
