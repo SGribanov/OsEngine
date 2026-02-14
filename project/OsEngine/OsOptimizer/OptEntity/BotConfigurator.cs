@@ -55,6 +55,11 @@ namespace OsEngine.OsOptimizer.OptEntity
             {
                 bot = _asyncBotFactory.GetBot(_settings.StrategyName, botName, cancellationToken);
 
+                if (bot == null)
+                {
+                    return null;
+                }
+
                 if (bot.Parameters.Count != parameters.Count)
                 {
                     return null;
