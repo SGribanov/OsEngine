@@ -3423,6 +3423,10 @@ namespace OsEngine.OsOptimizer
             }
 
             BotPanelChartUi ui = bot.ShowChartDialog();
+            if (ui == null)
+            {
+                return;
+            }
 
             ui.Closed += (sender, e) =>
             {

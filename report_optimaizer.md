@@ -708,3 +708,19 @@ After each optimizer-related change, update this file with:
 
 ### Risks / notes
 - Prevents null dereference on stale/partially initialized phase report data.
+
+## Stabilization Update (2026-02-14) - UI Null Guard For Chart Dialog Instance
+### What changed
+- Added defensive check after `bot.ShowChartDialog()` in optimizer UIs.
+- If `ui == null`, handler now exits without subscribing to `ui.Closed`.
+
+### Files touched
+- `project/OsEngine/OsOptimizer/OptimizerUi.xaml.cs`
+- `project/OsEngine/OsOptimizer/OptimizerReportUi.xaml.cs`
+
+### Validation
+- `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --configuration Debug`
+- Result: Passed 70 / Failed 0
+
+### Risks / notes
+- Prevents null-reference crashes if chart dialog creation fails or returns null under edge conditions.
