@@ -970,20 +970,20 @@ namespace OsEngine.OsOptimizer
             if (reportFaze.Faze == null)
             {
                 SendLogMessage("Single-bot test skipped due to null phase configuration.", LogMessageType.Error);
-                awaitObj.Dispose();
+                SafeDisposeAwaitObject(awaitObj);
                 return null;
             }
 
             if (reportFaze.Faze.TimeEnd <= reportFaze.Faze.TimeStart)
             {
                 SendLogMessage("Single-bot test skipped due to invalid phase time range.", LogMessageType.Error);
-                awaitObj.Dispose();
+                SafeDisposeAwaitObject(awaitObj);
                 return null;
             }
 
             if (_primeThreadWorker != null)
             {
-                awaitObj?.Dispose();
+                SafeDisposeAwaitObject(awaitObj);
                 return null;
             }
 
@@ -999,21 +999,21 @@ namespace OsEngine.OsOptimizer
             catch (Exception ex)
             {
                 SendLogMessage("Single-bot test skipped due to bot name generation error: " + ex, LogMessageType.Error);
-                awaitObj.Dispose();
+                SafeDisposeAwaitObject(awaitObj);
                 return null;
             }
 
             if (string.IsNullOrWhiteSpace(botName))
             {
                 SendLogMessage("Single-bot test skipped: generated bot name is empty.", LogMessageType.Error);
-                awaitObj.Dispose();
+                SafeDisposeAwaitObject(awaitObj);
                 return null;
             }
 
             if (string.IsNullOrWhiteSpace(_master.StrategyName))
             {
                 SendLogMessage("Single-bot test skipped: strategy name is not set.", LogMessageType.Error);
-                awaitObj.Dispose();
+                SafeDisposeAwaitObject(awaitObj);
                 return null;
             }
 
@@ -1025,7 +1025,7 @@ namespace OsEngine.OsOptimizer
             catch (Exception ex)
             {
                 SendLogMessage("Single-bot test skipped due to async bot queue error: " + ex, LogMessageType.Error);
-                awaitObj.Dispose();
+                SafeDisposeAwaitObject(awaitObj);
                 return null;
             }
 
@@ -1037,14 +1037,14 @@ namespace OsEngine.OsOptimizer
             catch (Exception ex)
             {
                 SendLogMessage("Single-bot test skipped due to server creation error: " + ex, LogMessageType.Error);
-                awaitObj.Dispose();
+                SafeDisposeAwaitObject(awaitObj);
                 return null;
             }
 
             if (server == null)
             {
                 SendLogMessage("Single-bot test skipped: optimizer server was not created.", LogMessageType.Error);
-                awaitObj.Dispose();
+                SafeDisposeAwaitObject(awaitObj);
                 return null;
             }
 
@@ -1057,7 +1057,7 @@ namespace OsEngine.OsOptimizer
             {
                 SendLogMessage("Single-bot test skipped due to parameter extraction error: " + ex, LogMessageType.Error);
                 ServerMaster.RemoveOptimizerServer(server);
-                awaitObj.Dispose();
+                SafeDisposeAwaitObject(awaitObj);
                 return null;
             }
 
@@ -1065,7 +1065,7 @@ namespace OsEngine.OsOptimizer
             {
                 SendLogMessage("Single-bot test skipped due to null parameter set.", LogMessageType.Error);
                 ServerMaster.RemoveOptimizerServer(server);
-                awaitObj.Dispose();
+                SafeDisposeAwaitObject(awaitObj);
                 return null;
             }
 
@@ -1075,7 +1075,7 @@ namespace OsEngine.OsOptimizer
             if (bot == null)
             {
                 SendLogMessage("Test over with error. A different robot is selected in the optimizer", LogMessageType.Error);
-                awaitObj.Dispose();
+                SafeDisposeAwaitObject(awaitObj);
                 if (server != null)
                 {
                     ServerMaster.RemoveOptimizerServer(server);
@@ -1099,7 +1099,7 @@ namespace OsEngine.OsOptimizer
                     // ignored
                 }
                 ServerMaster.RemoveOptimizerServer(server);
-                awaitObj.Dispose();
+                SafeDisposeAwaitObject(awaitObj);
                 return null;
             }
 
@@ -1120,7 +1120,7 @@ namespace OsEngine.OsOptimizer
                     // ignored
                 }
                 ServerMaster.RemoveOptimizerServer(server);
-                awaitObj.Dispose();
+                SafeDisposeAwaitObject(awaitObj);
                 return null;
             }
 
@@ -1170,9 +1170,21 @@ namespace OsEngine.OsOptimizer
                 token.WaitHandle.WaitOne(remaining);
             }
 
-            awaitObj.Dispose();
+            SafeDisposeAwaitObject(awaitObj);
 
             return bot;
+        }
+
+        private void SafeDisposeAwaitObject(AwaitObject awaitObj)
+        {
+            try
+            {
+                awaitObj?.Dispose();
+            }
+            catch (Exception ex)
+            {
+                SendLogMessage("Single-bot test await object dispose failed: " + ex, LogMessageType.Error);
+            }
         }
 
         #endregion

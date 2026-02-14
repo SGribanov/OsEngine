@@ -1121,3 +1121,19 @@ After each optimizer-related change, update this file with:
 
 ### Risks / notes
 - Prevents rare number-generator failures from breaking single-bot test UI flow.
+
+## Stabilization Update (2026-02-14) - Safe AwaitObject Disposal Helper In Executor TestBot
+### What changed
+- Introduced `SafeDisposeAwaitObject(AwaitObject awaitObj)` helper in `OptimizerExecutor`.
+- Replaced direct `awaitObj.Dispose()` calls in `TestBot(...)` with safe helper usage.
+- Helper catches disposal exceptions and logs diagnostic message instead of allowing cleanup path failure.
+
+### Files touched
+- `project/OsEngine/OsOptimizer/OptimizerExecutor.cs`
+
+### Validation
+- `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --configuration Debug`
+- Result: Passed 70 / Failed 0
+
+### Risks / notes
+- Improves robustness of error/early-return branches by preventing secondary exceptions during await object cleanup.
