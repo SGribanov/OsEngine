@@ -368,10 +368,7 @@ namespace OsEngine.OsOptimizer
                 if (string.IsNullOrWhiteSpace(sourceBotName))
                 {
                     SendLogMessage("OutOfSample skipped source report with empty BotName during scheduling.", LogMessageType.System);
-                    if (_phaseCompletion != null && !_phaseCompletion.IsSet)
-                    {
-                        _phaseCompletion.Signal();
-                    }
+                    CompensateSkippedOutOfSampleSlot(releaseServerSlot: false);
                     continue;
                 }
 
@@ -393,14 +390,14 @@ namespace OsEngine.OsOptimizer
                 {
                     SendLogMessage("OutOfSample skipped source report due to parameter extraction error: "
                         + inSampleReports[i].BotName + ". " + ex, LogMessageType.Error);
-                    CompensateSkippedOutOfSampleSlot();
+                    CompensateSkippedOutOfSampleSlot(releaseServerSlot: true);
                     continue;
                 }
 
                 if (parameters == null)
                 {
                     SendLogMessage("OutOfSample skipped source report with null parameters: " + inSampleReports[i].BotName, LogMessageType.System);
-                    CompensateSkippedOutOfSampleSlot();
+                    CompensateSkippedOutOfSampleSlot(releaseServerSlot: true);
                     continue;
                 }
 
@@ -411,11 +408,16 @@ namespace OsEngine.OsOptimizer
             WaitCurrentPhaseToComplete();
         }
 
-        private void CompensateSkippedOutOfSampleSlot()
+        private void CompensateSkippedOutOfSampleSlot(bool releaseServerSlot)
         {
             if (_phaseCompletion != null && !_phaseCompletion.IsSet)
             {
                 _phaseCompletion.Signal();
+            }
+
+            if (!releaseServerSlot)
+            {
+                return;
             }
 
             try
