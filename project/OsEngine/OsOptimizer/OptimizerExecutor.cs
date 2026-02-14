@@ -176,6 +176,7 @@ namespace OsEngine.OsOptimizer
         private void StartAsuncBotFactoryInSample(int botCount, string botType, bool isScript, string faze)
         {
             string normalizedFaze = string.IsNullOrWhiteSpace(faze) ? "InSample" : faze.Trim();
+            string normalizedBotType = string.IsNullOrWhiteSpace(botType) ? null : botType.Trim();
 
             if (botCount <= 0)
             {
@@ -183,7 +184,7 @@ namespace OsEngine.OsOptimizer
                 return;
             }
 
-            if (string.IsNullOrWhiteSpace(botType))
+            if (string.IsNullOrWhiteSpace(normalizedBotType))
             {
                 SendLogMessage("Async bot factory start skipped (InSample): bot type is empty.", LogMessageType.Error);
                 return;
@@ -213,7 +214,7 @@ namespace OsEngine.OsOptimizer
 
             try
             {
-                _asyncBotFactory.CreateNewBots(botNames, botType, isScript, StartProgram.IsOsOptimizer);
+                _asyncBotFactory.CreateNewBots(botNames, normalizedBotType, isScript, StartProgram.IsOsOptimizer);
             }
             catch (Exception ex)
             {
@@ -225,8 +226,9 @@ namespace OsEngine.OsOptimizer
         private void StartAsuncBotFactoryOutOfSample(OptimizerFazeReport reportFiltered, string botType, bool isScript, string faze)
         {
             string normalizedFaze = string.IsNullOrWhiteSpace(faze) ? "OutOfSample" : faze.Trim();
+            string normalizedBotType = string.IsNullOrWhiteSpace(botType) ? null : botType.Trim();
 
-            if (string.IsNullOrWhiteSpace(botType))
+            if (string.IsNullOrWhiteSpace(normalizedBotType))
             {
                 SendLogMessage("Async bot factory start skipped (OutOfSample): bot type is empty.", LogMessageType.Error);
                 return;
@@ -280,7 +282,7 @@ namespace OsEngine.OsOptimizer
 
             try
             {
-                _asyncBotFactory.CreateNewBots(botNames, botType, isScript, StartProgram.IsOsOptimizer);
+                _asyncBotFactory.CreateNewBots(botNames, normalizedBotType, isScript, StartProgram.IsOsOptimizer);
             }
             catch (Exception ex)
             {

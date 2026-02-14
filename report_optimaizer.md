@@ -2676,3 +2676,20 @@ After each optimizer-related change, update this file with:
 ### Risks / notes
 - Behavior change only when duplicate names are produced; avoids redundant/ambiguous async bot creation requests.
 
+
+## Stabilization Update (2026-02-14) - Normalize Bot Type Input For Async Bot Factory Startup
+### What changed
+- Updated `StartAsuncBotFactoryInSample(...)` and `StartAsuncBotFactoryOutOfSample(...)` in `OptimizerExecutor`.
+- Added normalized bot type (`normalizedBotType = botType?.Trim()`) with existing empty-value guards.
+- Async factory calls now use normalized bot type value.
+
+### Files touched
+- `project/OsEngine/OsOptimizer/OptimizerExecutor.cs`
+
+### Validation
+- `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --configuration Debug`
+- Result: Passed 70 / Failed 0
+
+### Risks / notes
+- No normal-path behavior change for valid input; reduces failures from accidental leading/trailing whitespace in strategy type names.
+
