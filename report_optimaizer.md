@@ -1205,3 +1205,22 @@ After each optimizer-related change, update this file with:
 
 ### Risks / notes
 - Prevents cleanup/finalization branch failures if done-signal set operation throws unexpectedly.
+
+## Stabilization Update (2026-02-14) - Unified Recovery Helper In Master Single-Bot Fail Paths
+### What changed
+- Added `RecoverSingleBotStateAfterFailure(bool invalidateRunId)` helper in `OptimizerMaster`.
+- Replaced duplicated recovery logic in setup/UI/timeout fail branches with unified helper call.
+- Helper responsibilities:
+  - optional run-id invalidation (`Interlocked.Increment`);
+  - restore running flag (`Volatile.Write(..., true)`);
+  - safe done-signal emit via `SafeSignalAloneTestDone()`.
+
+### Files touched
+- `project/OsEngine/OsOptimizer/OptimizerMaster.cs`
+
+### Validation
+- `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --configuration Debug`
+- Result: Passed 70 / Failed 0
+
+### Risks / notes
+- Reduces divergence risk between failure branches and keeps single-bot recovery behavior consistent.

@@ -1162,9 +1162,7 @@ namespace OsEngine.OsOptimizer
             catch (Exception ex)
             {
                 SendLogMessage("Single-bot test setup failed: " + ex, LogMessageType.Error);
-                Interlocked.Increment(ref _aloneTestRunId);
-                Volatile.Write(ref _aloneTestIsOver, true);
-                SafeSignalAloneTestDone();
+                RecoverSingleBotStateAfterFailure(invalidateRunId: true);
                 return null;
             }
 
@@ -1176,18 +1174,14 @@ namespace OsEngine.OsOptimizer
             catch (Exception ex)
             {
                 SendLogMessage("Single-bot test UI wait failed: " + ex, LogMessageType.Error);
-                Interlocked.Increment(ref _aloneTestRunId);
-                Volatile.Write(ref _aloneTestIsOver, true);
-                SafeSignalAloneTestDone();
+                RecoverSingleBotStateAfterFailure(invalidateRunId: true);
                 return null;
             }
 
             if (!_aloneTestDoneSignal.Wait(TimeSpan.FromSeconds(30)))
             {
                 SendLogMessage("Single-bot test completion wait timed out.", LogMessageType.Error);
-                Interlocked.Increment(ref _aloneTestRunId);
-                Volatile.Write(ref _aloneTestIsOver, true);
-                SafeSignalAloneTestDone();
+                RecoverSingleBotStateAfterFailure(invalidateRunId: true);
             }
 
             return _resultBotAloneTest;
@@ -1267,6 +1261,17 @@ namespace OsEngine.OsOptimizer
             {
                 SendLogMessage("Single-bot test done-signal set failed: " + ex, LogMessageType.Error);
             }
+        }
+
+        private void RecoverSingleBotStateAfterFailure(bool invalidateRunId)
+        {
+            if (invalidateRunId)
+            {
+                Interlocked.Increment(ref _aloneTestRunId);
+            }
+
+            Volatile.Write(ref _aloneTestIsOver, true);
+            SafeSignalAloneTestDone();
         }
 
         #endregion
