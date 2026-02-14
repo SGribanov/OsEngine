@@ -2636,3 +2636,23 @@ After each optimizer-related change, update this file with:
 ### Risks / notes
 - Behavior change only on invalid naming edge-cases; prevents malformed out-of-sample bot names from reaching async factory startup.
 
+
+## Stabilization Update (2026-02-14) - Normalize Faze Labels In Async Bot Factory Naming
+### What changed
+- Updated `StartAsuncBotFactoryInSample(...)` in `OptimizerExecutor`:
+  - added normalized phase label (`normalizedFaze`) with fallback to `"InSample"` for empty input;
+  - bot names now use normalized phase label.
+- Updated `StartAsuncBotFactoryOutOfSample(...)` similarly:
+  - added normalized phase label fallback to `"OutOfSample"`;
+  - generated bot names now append normalized phase label instead of hardcoded suffix.
+
+### Files touched
+- `project/OsEngine/OsOptimizer/OptimizerExecutor.cs`
+
+### Validation
+- `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --configuration Debug`
+- Result: Passed 70 / Failed 0
+
+### Risks / notes
+- No normal-path behavior change for existing call sites; improves resilience and naming consistency when phase label input is empty or whitespace.
+

@@ -175,6 +175,8 @@ namespace OsEngine.OsOptimizer
 
         private void StartAsuncBotFactoryInSample(int botCount, string botType, bool isScript, string faze)
         {
+            string normalizedFaze = string.IsNullOrWhiteSpace(faze) ? "InSample" : faze.Trim();
+
             if (botCount <= 0)
             {
                 SendLogMessage("Async bot factory start skipped (InSample): bot count is non-positive.", LogMessageType.System);
@@ -192,7 +194,7 @@ namespace OsEngine.OsOptimizer
 
             for (int i = 0; i < botCount; i++)
             {
-                string botName = (startServerIndex + i) + " OpT " + faze;
+                string botName = (startServerIndex + i) + " OpT " + normalizedFaze;
                 botNames.Add(botName);
             }
 
@@ -215,6 +217,8 @@ namespace OsEngine.OsOptimizer
 
         private void StartAsuncBotFactoryOutOfSample(OptimizerFazeReport reportFiltered, string botType, bool isScript, string faze)
         {
+            string normalizedFaze = string.IsNullOrWhiteSpace(faze) ? "OutOfSample" : faze.Trim();
+
             if (string.IsNullOrWhiteSpace(botType))
             {
                 SendLogMessage("Async bot factory start skipped (OutOfSample): bot type is empty.", LogMessageType.Error);
@@ -250,7 +254,7 @@ namespace OsEngine.OsOptimizer
                     continue;
                 }
 
-                string botName = transformedBotName + " OutOfSample";
+                string botName = transformedBotName + " " + normalizedFaze;
                 botNames.Add(botName);
             }
 
