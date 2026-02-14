@@ -101,26 +101,9 @@ namespace OsEngine.OsOptimizer
                 return false;
             }
 
-            List<IIBotTab> botTabs = null;
-            try
+            if (!TryGetBotTabsSnapshot(out List<IIBotTab> botTabs, out string botTabsError))
             {
-                botTabs = _master.BotToTest.GetTabs();
-            }
-            catch (Exception ex)
-            {
-                SendLogMessage("Optimizer start skipped: bot tabs retrieval failed. " + ex, LogMessageType.Error);
-                return false;
-            }
-
-            if (botTabs == null || botTabs.Count == 0)
-            {
-                SendLogMessage("Optimizer start skipped: bot tabs collection is empty.", LogMessageType.Error);
-                return false;
-            }
-
-            if (!HasAnyNonNullTab(botTabs))
-            {
-                SendLogMessage("Optimizer start skipped: bot tabs collection contains only null entries.", LogMessageType.Error);
+                SendLogMessage("Optimizer start skipped: " + botTabsError, LogMessageType.Error);
                 return false;
             }
 
@@ -366,6 +349,42 @@ namespace OsEngine.OsOptimizer
             }
 
             return false;
+        }
+
+        private bool TryGetBotTabsSnapshot(out List<IIBotTab> tabs, out string error)
+        {
+            tabs = null;
+            error = null;
+
+            if (_master?.BotToTest == null)
+            {
+                error = "bot-to-test context is null.";
+                return false;
+            }
+
+            try
+            {
+                tabs = _master.BotToTest.GetTabs();
+            }
+            catch (Exception ex)
+            {
+                error = "bot tabs retrieval failed. " + ex;
+                return false;
+            }
+
+            if (tabs == null || tabs.Count == 0)
+            {
+                error = "bot tabs collection is empty.";
+                return false;
+            }
+
+            if (!HasAnyNonNullTab(tabs))
+            {
+                error = "bot tabs collection contains only null entries.";
+                return false;
+            }
+
+            return true;
         }
 
         private static bool TryFindNullParameterIndex(List<IIStrategyParameter> parameters, out int index)
@@ -689,26 +708,9 @@ namespace OsEngine.OsOptimizer
                 return false;
             }
 
-            List<IIBotTab> runtimeBotTabs;
-            try
+            if (!TryGetBotTabsSnapshot(out List<IIBotTab> runtimeBotTabs, out string botTabsError))
             {
-                runtimeBotTabs = _master.BotToTest.GetTabs();
-            }
-            catch (Exception ex)
-            {
-                AbortPrimeWorker("Optimizer prime worker skipped: runtime bot tabs retrieval failed. " + ex);
-                return false;
-            }
-
-            if (runtimeBotTabs == null || runtimeBotTabs.Count == 0)
-            {
-                AbortPrimeWorker("Optimizer prime worker skipped: runtime bot tabs collection is empty.");
-                return false;
-            }
-
-            if (!HasAnyNonNullTab(runtimeBotTabs))
-            {
-                AbortPrimeWorker("Optimizer prime worker skipped: runtime bot tabs contain only null entries.");
+                AbortPrimeWorker("Optimizer prime worker skipped: runtime " + botTabsError);
                 return false;
             }
 

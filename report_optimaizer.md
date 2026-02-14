@@ -4795,3 +4795,22 @@ After each optimizer-related change, update this file with:
 
 ### Risks / notes
 - No intended behavior change; improves maintainability and keeps runtime guard flow centralized.
+
+
+## Stabilization Update (2026-02-14) - Reuse Shared Bot-Tabs Snapshot Validation Helper
+### What changed
+- Added helper `TryGetBotTabsSnapshot(out List<IIBotTab> tabs, out string error)` in `OptimizerExecutor`.
+- Replaced duplicated bot-tabs retrieval/validation logic with helper in:
+  - `Start(...)`
+  - `ValidatePrimeWorkerRuntimePrerequisites(...)`.
+- Caller-specific diagnostics are preserved via context prefix (`start` vs `runtime worker`).
+
+### Files touched
+- `project/OsEngine/OsOptimizer/OptimizerExecutor.cs`
+
+### Validation
+- `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --configuration Debug`
+- Result: Passed 70 / Failed 0
+
+### Risks / notes
+- No runtime behavior change expected; improves consistency of bot-tabs readiness checks across start/runtime paths.
