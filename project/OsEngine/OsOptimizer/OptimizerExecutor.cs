@@ -454,14 +454,7 @@ namespace OsEngine.OsOptimizer
                 return;
             }
 
-            try
-            {
-                _serverSlots?.Release();
-            }
-            catch
-            {
-                // ignored
-            }
+            SafeReleaseServerSlot();
         }
 
         private void CompensateUnscheduledOutOfSampleItems(int unscheduledCount)
@@ -675,14 +668,7 @@ namespace OsEngine.OsOptimizer
 
             if (cancellationToken.IsCancellationRequested)
             {
-                try
-                {
-                    _serverSlots?.Release();
-                }
-                catch
-                {
-                    // ignored
-                }
+                SafeReleaseServerSlot();
 
                 return completion.Task;
             }
@@ -695,14 +681,7 @@ namespace OsEngine.OsOptimizer
             {
                 SafeTrySetException(completion, ex);
                 SendLogMessage("Optimizer evaluation start failed. " + ex, LogMessageType.Error);
-                try
-                {
-                    _serverSlots?.Release();
-                }
-                catch
-                {
-                    // ignored
-                }
+                SafeReleaseServerSlot();
             }
 
             return completion.Task;
@@ -840,14 +819,7 @@ namespace OsEngine.OsOptimizer
                 }
             }
 
-            try
-            {
-                _serverSlots?.Release();
-            }
-            catch
-            {
-                // ignored
-            }
+            SafeReleaseServerSlot();
         }
 
         private List<BotPanel> _botsInTest = new List<BotPanel>();
@@ -1250,6 +1222,18 @@ namespace OsEngine.OsOptimizer
             }
         }
 
+        private void SafeReleaseServerSlot()
+        {
+            try
+            {
+                _serverSlots?.Release();
+            }
+            catch
+            {
+                // ignored
+            }
+        }
+
         #endregion
 
         #region Server performing optimization
@@ -1401,14 +1385,7 @@ namespace OsEngine.OsOptimizer
                 }
             }
 
-            try
-            {
-                _serverSlots?.Release();
-            }
-            catch
-            {
-                // ignored
-            }
+            SafeReleaseServerSlot();
         }
 
         public event Action<TimeSpan> TimeToEndChangeEvent;

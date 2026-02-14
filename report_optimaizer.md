@@ -1407,3 +1407,23 @@ After each optimizer-related change, update this file with:
 
 ### Risks / notes
 - Prevents rare exception-publication failures from disrupting evaluation startup error handling.
+
+## Stabilization Update (2026-02-14) - Safe Server Slot Release Helper In Executor Paths
+### What changed
+- Added `SafeReleaseServerSlot()` helper in `OptimizerExecutor`.
+- Replaced duplicated `_serverSlots?.Release()` try-catch blocks with helper usage in:
+  - out-of-sample slot compensation;
+  - evaluation startup canceled-before-start path;
+  - evaluation startup exception path;
+  - not-started bot finalization;
+  - server testing-end cleanup.
+
+### Files touched
+- `project/OsEngine/OsOptimizer/OptimizerExecutor.cs`
+
+### Validation
+- `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --configuration Debug`
+- Result: Passed 70 / Failed 0
+
+### Risks / notes
+- Keeps server-slot release behavior centralized and consistent across cleanup branches.
