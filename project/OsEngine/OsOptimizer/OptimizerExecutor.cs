@@ -125,6 +125,22 @@ namespace OsEngine.OsOptimizer
                 return false;
             }
 
+            if (!Enum.IsDefined(typeof(ObjectiveDirectionType), _master.ObjectiveDirection))
+            {
+                SendLogMessage(
+                    "Optimizer start skipped: objective direction is invalid (value " + _master.ObjectiveDirection + ").",
+                    LogMessageType.Error);
+                return false;
+            }
+
+            if (!Enum.IsDefined(typeof(BayesianAcquisitionModeType), _master.BayesianAcquisitionMode))
+            {
+                SendLogMessage(
+                    "Optimizer start skipped: bayesian acquisition mode is invalid (value " + _master.BayesianAcquisitionMode + ").",
+                    LogMessageType.Error);
+                return false;
+            }
+
             if (parametersOn == null)
             {
                 SendLogMessage("Optimizer start skipped: parametersOn is null.", LogMessageType.Error);

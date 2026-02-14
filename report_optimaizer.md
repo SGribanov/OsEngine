@@ -4033,3 +4033,21 @@ After each optimizer-related change, update this file with:
 
 ### Risks / notes
 - Intentional robustness change: prevents invalid optimizer-method config from reaching strategy factory path.
+
+
+## Stabilization Update (2026-02-14) - Validate Objective Enum Settings Before Start
+### What changed
+- Extended early `Start(...)` enum validation in `OptimizerExecutor`:
+  - `_master.ObjectiveDirection` must be a defined `ObjectiveDirectionType`;
+  - `_master.BayesianAcquisitionMode` must be a defined `BayesianAcquisitionModeType`.
+- Out-of-range casted enum payloads now fail fast with explicit diagnostics.
+
+### Files touched
+- `project/OsEngine/OsOptimizer/OptimizerExecutor.cs`
+
+### Validation
+- `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --configuration Debug`
+- Result: Passed 70 / Failed 0
+
+### Risks / notes
+- Intentional robustness change: blocks invalid objective/acquisition enum configuration from entering strategy initialization flow.
