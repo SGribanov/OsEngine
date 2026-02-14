@@ -966,6 +966,8 @@ namespace OsEngine.OsOptimizer
                 return null;
             }
 
+            CancellationToken token = _stopCts?.Token ?? CancellationToken.None;
+
             DateTime startTime = DateTime.Now;
 
             string botName = NumberGen.GetNumberDeal(StartProgram.IsOsOptimizer).ToString();
@@ -1010,7 +1012,7 @@ namespace OsEngine.OsOptimizer
                     break;
                 }
 
-                if ((_stopCts?.Token ?? CancellationToken.None).WaitHandle.WaitOne(1000))
+                if (token.WaitHandle.WaitOne(1000))
                 {
                     break;
                 }
@@ -1041,7 +1043,7 @@ namespace OsEngine.OsOptimizer
             if (elapsed < minRuntime)
             {
                 TimeSpan remaining = minRuntime - elapsed;
-                (_stopCts?.Token ?? CancellationToken.None).WaitHandle.WaitOne(remaining);
+                token.WaitHandle.WaitOne(remaining);
             }
 
             awaitObj.Dispose();

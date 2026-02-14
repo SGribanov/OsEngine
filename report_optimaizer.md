@@ -528,3 +528,19 @@ After each optimizer-related change, update this file with:
 
 ### Risks / notes
 - Reduces race window where `_phaseCompletion` could become `null` between condition check and `Signal()` call during concurrent cleanup.
+
+## Stabilization Update (2026-02-14) - Token Snapshot Consistency In Single-Bot Test Loop
+### What changed
+- In `TestBot(...)`, introduced local cancellation token snapshot:
+  - `CancellationToken token = _stopCts?.Token ?? CancellationToken.None;`
+- Replaced direct `_stopCts` token reads in `WaitHandle.WaitOne(...)` calls with `token.WaitHandle`.
+
+### Files touched
+- `project/OsEngine/OsOptimizer/OptimizerExecutor.cs`
+
+### Validation
+- `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --configuration Debug`
+- Result: Passed 70 / Failed 0
+
+### Risks / notes
+- No behavior change expected; improves consistency of cancellation observation within single `TestBot` execution.
