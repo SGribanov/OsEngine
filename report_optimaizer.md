@@ -2468,3 +2468,22 @@ After each optimizer-related change, update this file with:
 ### Risks / notes
 - No normal-path behavior change; standardizes subscriber-fault isolation for all prime progress notifications.
 
+
+## Stabilization Update (2026-02-14) - Centralize Safe Testing Progress Event Dispatch
+### What changed
+- Added `SafeInvokeTestingProgress(int curVal, int maxVal, int numServer)` helper in `OptimizerExecutor`.
+- Replaced direct testing-progress dispatch calls with helper usage in:
+  - `server_TestingEndEvent(...)` initial 100/100 publish;
+  - `server_TestingProgressChangeEvent(...)` streaming progress publish.
+- Unified failure logging for progress-event subscriber exceptions.
+
+### Files touched
+- `project/OsEngine/OsOptimizer/OptimizerExecutor.cs`
+
+### Validation
+- `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --configuration Debug`
+- Result: Passed 70 / Failed 0
+
+### Risks / notes
+- No normal-path behavior change; standardizes subscriber-fault isolation for all testing-progress notifications.
+

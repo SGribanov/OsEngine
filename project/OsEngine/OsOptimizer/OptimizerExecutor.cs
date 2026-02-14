@@ -1683,14 +1683,7 @@ namespace OsEngine.OsOptimizer
 
         private void server_TestingEndEvent(int serverNum, TimeSpan testTime)
         {
-            try
-            {
-                TestingProgressChangeEvent?.Invoke(100, 100, serverNum);
-            }
-            catch (Exception ex)
-            {
-                SendLogMessage("Optimizer testing progress event dispatch failed: " + ex, LogMessageType.Error);
-            }
+            SafeInvokeTestingProgress(100, 100, serverNum);
 
             int progressEnd;
             int progressMax;
@@ -1868,6 +1861,13 @@ namespace OsEngine.OsOptimizer
 
         private void server_TestingProgressChangeEvent(int curVal, int maxVal, int numServer)
         {
+            SafeInvokeTestingProgress(curVal, maxVal, numServer);
+        }
+
+        public event Action<int, int, int> TestingProgressChangeEvent;
+
+        private void SafeInvokeTestingProgress(int curVal, int maxVal, int numServer)
+        {
             if (TestingProgressChangeEvent == null)
             {
                 return;
@@ -1879,11 +1879,9 @@ namespace OsEngine.OsOptimizer
             }
             catch (Exception ex)
             {
-                SendLogMessage("Optimizer testing progress stream dispatch failed: " + ex, LogMessageType.Error);
+                SendLogMessage("Optimizer testing progress event dispatch failed: " + ex, LogMessageType.Error);
             }
         }
-
-        public event Action<int, int, int> TestingProgressChangeEvent;
 
         #endregion
 
