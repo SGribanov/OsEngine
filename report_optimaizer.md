@@ -105,7 +105,7 @@ Result:
 ### Notes
 - Interfaces are introduced with async contracts.
 - `BruteForceStrategy` currently enumerates combinations via `ParameterIterator` and delegates bot evaluation through `IBotEvaluator`.
-- This is an additive scaffold step; `OptimizerExecutor` still uses existing orchestration path for runtime behavior.
+- This is an additive scaffold step; `OptimizerExecutor` now uses `IOptimizationStrategy` (`BruteForceStrategy`) for bot count estimation, while runtime test orchestration still uses existing execution flow.
 
 ## Phase 3 Changes (Started)
 ### New file

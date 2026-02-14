@@ -33,6 +33,7 @@ namespace OsEngine.OsOptimizer
             _parameterIterator.LogMessageEvent += SendLogMessage;
             _botConfigurator = new BotConfigurator(_master.Settings, _asyncBotFactory, _master.ManualControl);
             _botConfigurator.LogMessageEvent += SendLogMessage;
+            _countEstimationStrategy = new BruteForceStrategy(_parameterIterator);
         }
 
         private OptimizerMaster _master;
@@ -42,6 +43,8 @@ namespace OsEngine.OsOptimizer
         private readonly ParameterIterator _parameterIterator;
 
         private readonly BotConfigurator _botConfigurator;
+
+        private readonly IOptimizationStrategy _countEstimationStrategy;
 
         private SemaphoreSlim _serverSlots;
 
@@ -201,7 +204,7 @@ namespace OsEngine.OsOptimizer
 
         public int BotCountOneFaze(List<IIStrategyParameter> parameters, List<bool> parametersOn)
         {
-            return _parameterIterator.CountCombinations(parameters, parametersOn);
+            return _countEstimationStrategy.EstimateBotCount(parameters, parametersOn);
         }
 
         public List<OptimizerFazeReport> ReportsToFazes = new List<OptimizerFazeReport>();

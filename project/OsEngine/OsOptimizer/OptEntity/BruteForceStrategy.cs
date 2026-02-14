@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using OsEngine.Entity;
+using System;
 
 namespace OsEngine.OsOptimizer.OptEntity
 {
@@ -18,7 +19,7 @@ namespace OsEngine.OsOptimizer.OptEntity
         private readonly ParameterIterator _parameterIterator;
         private readonly IBotEvaluator _botEvaluator;
 
-        public BruteForceStrategy(ParameterIterator parameterIterator, IBotEvaluator botEvaluator)
+        public BruteForceStrategy(ParameterIterator parameterIterator, IBotEvaluator botEvaluator = null)
         {
             _parameterIterator = parameterIterator;
             _botEvaluator = botEvaluator;
@@ -34,6 +35,11 @@ namespace OsEngine.OsOptimizer.OptEntity
             List<bool> parametersToOptimization,
             CancellationToken cancellationToken = default)
         {
+            if (_botEvaluator == null)
+            {
+                throw new InvalidOperationException("Bot evaluator is not configured for BruteForceStrategy.");
+            }
+
             List<OptimizerReport> result = new List<OptimizerReport>();
 
             List<IIStrategyParameter> optimizedParametersStart = new List<IIStrategyParameter>();
