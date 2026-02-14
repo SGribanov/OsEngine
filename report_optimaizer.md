@@ -2164,3 +2164,24 @@ After each optimizer-related change, update this file with:
 ### Risks / notes
 - Prevents stale/disposed bot references from remaining in in-test collection after early-start failure paths.
 
+
+## Stabilization Update (2026-02-14) - Guard Pending Evaluation Map Collisions In StartNewBot
+### What changed
+- Updated `StartNewBot(...)` in `OptimizerExecutor` for evaluation path registration.
+- Replaced direct assignment into `_pendingEvaluationByServer` with `TryAdd(...)`.
+- On duplicate key collision for `server.NumberServer`, method now:
+  - logs explicit error;
+  - cancels provided completion source;
+  - finalizes not-started server via `FinalizeNotStartedBot(...)`;
+  - returns early.
+
+### Files touched
+- `project/OsEngine/OsOptimizer/OptimizerExecutor.cs`
+
+### Validation
+- `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --configuration Debug`
+- Result: Passed 70 / Failed 0
+
+### Risks / notes
+- Behavior change only for invalid duplicate-registration state; prevents silent completion-source replacement and potential dangling waiters.
+

@@ -580,7 +580,15 @@ namespace OsEngine.OsOptimizer
 
             if (completionSource != null)
             {
-                _pendingEvaluationByServer[server.NumberServer] = completionSource;
+                if (!_pendingEvaluationByServer.TryAdd(server.NumberServer, completionSource))
+                {
+                    SendLogMessage(
+                        "StartNewBot skipped: pending evaluation entry already exists for server " + server.NumberServer + ".",
+                        LogMessageType.Error);
+                    SafeTrySetCanceled(completionSource);
+                    FinalizeNotStartedBot(server, null);
+                    return;
+                }
             }
 
             if (string.IsNullOrWhiteSpace(botName))
