@@ -1500,6 +1500,7 @@ namespace OsEngine.OsOptimizer
                 SendLogMessage("CreateNewServer security lookup failed for '" + securityName + "': " + ex, LogMessageType.Error);
             }
 
+            SendLogMessage("CreateNewServer security lookup: security '" + securityName + "' was not found.", LogMessageType.Error);
             return false;
         }
 

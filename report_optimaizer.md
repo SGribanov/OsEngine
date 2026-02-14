@@ -1896,3 +1896,18 @@ After each optimizer-related change, update this file with:
 
 ### Risks / notes
 - No behavior change in control flow; improves root-cause visibility for skipped lookup cases.
+
+## Stabilization Update (2026-02-14) - Security Lookup Diagnostics For Not Found Cases
+### What changed
+- Updated `TryFindSecurityByName(...)` in `OptimizerExecutor`.
+- Added explicit diagnostic log when lookup completes without exceptions but security with requested name is not found.
+
+### Files touched
+- `project/OsEngine/OsOptimizer/OptimizerExecutor.cs`
+
+### Validation
+- `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --configuration Debug`
+- Result: Passed 70 / Failed 0
+
+### Risks / notes
+- No control-flow change; only improves post-mortem visibility when requested instrument is missing in storage.
