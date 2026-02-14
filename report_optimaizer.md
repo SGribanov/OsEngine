@@ -68,6 +68,7 @@ Implemented and committed:
 59. Stabilization: added regression coverage for `AsyncBotFactory.CreateNewBots` invalid input (`null`/empty list/whitespace names) to ensure no exceptions and safe no-op behavior.
 60. Stabilization: hardened `AsyncBotFactory.GetBot` cancellation/error path to return `null` on canceled/faulted waits and added regression coverage for pre-canceled token.
 61. Stabilization: hardened `AsyncBotFactory.CreateNewBots` with `botType` guard (`null/empty/whitespace`) to prevent invalid keying and queue churn.
+62. Stabilization: reset `BayesianOptimizationStrategy.LastTailBudgetPlanned` at start of each run to avoid stale diagnostics after early-return paths (e.g., pre-canceled token).
 
 ## Commits
 - `b1e5eabe3` — `Optimizer: persist Phase1 extraction and wiring state`
@@ -167,6 +168,7 @@ Added tests:
   - `BayesianAcquisitionPolicy_Modes_ShouldChangeExplorationBehavior`
   - `BayesianOptimizationStrategy_GreedyMode_ShouldPlanZeroTailBudget`
   - `BayesianOptimizationStrategy_UcbMode_ShouldPlanPositiveTailBudgetWhenEnabled`
+  - `BayesianOptimizationStrategy_CanceledRun_ShouldResetLastTailBudgetPlanned`
   - `BayesianOptimizationStrategy_TailSharePercent_ShouldAffectPlannedTailBudget`
   - `BayesianAcquisitionPolicy_ExpectedImprovement_ShouldUseOptimisticMean`
   - `OptimizerSettings_MethodFields_ShouldClampInvalidValues`
@@ -207,7 +209,7 @@ Command:
 - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --configuration Debug`
 
 Result:
-- Passed: 60
+- Passed: 61
 - Failed: 0
 
 ### Stabilization fixes from new tests

@@ -690,6 +690,44 @@ public class OptimizerRefactorTests
     }
 
     [Fact]
+    public async Task BayesianOptimizationStrategy_CanceledRun_ShouldResetLastTailBudgetPlanned()
+    {
+        ParameterIterator iterator = new ParameterIterator();
+        IBotEvaluator evaluator = new BotEvaluator((all, optimized, ct) =>
+            Task.FromResult(new OptimizerReport(new List<IIStrategyParameter>())));
+
+        BayesianOptimizationStrategy strategy = new BayesianOptimizationStrategy(
+            iterator,
+            evaluator,
+            maxParallel: 2,
+            objectiveMetric: SortBotsType.TotalProfit,
+            objectiveDirection: ObjectiveDirectionType.Maximize,
+            initialSamples: 2,
+            maxIterations: 12,
+            batchSize: 3,
+            acquisitionMode: BayesianAcquisitionModeType.Ucb,
+            acquisitionKappa: 0.25m,
+            useExploitationTailPass: true,
+            tailSharePercent: 20);
+
+        List<IIStrategyParameter> allParameters = new List<IIStrategyParameter>
+        {
+            new StrategyParameterInt("A", 1, 1, 4, 1),
+            new StrategyParameterInt("B", 1, 1, 4, 1)
+        };
+        List<bool> parametersToOptimization = new List<bool> { true, true };
+
+        await strategy.OptimizeInSampleAsync(allParameters, parametersToOptimization, CancellationToken.None);
+        Assert.True(strategy.LastTailBudgetPlanned > 0);
+
+        using CancellationTokenSource cts = new CancellationTokenSource();
+        cts.Cancel();
+        await strategy.OptimizeInSampleAsync(allParameters, parametersToOptimization, cts.Token);
+
+        Assert.Equal(0, strategy.LastTailBudgetPlanned);
+    }
+
+    [Fact]
     public async Task BayesianOptimizationStrategy_TailSharePercent_ShouldAffectPlannedTailBudget()
     {
         ParameterIterator iterator = new ParameterIterator();

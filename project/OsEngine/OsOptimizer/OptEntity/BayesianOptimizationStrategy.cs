@@ -105,6 +105,8 @@ namespace OsEngine.OsOptimizer.OptEntity
             List<bool> parametersToOptimization,
             CancellationToken cancellationToken)
         {
+            LastTailBudgetPlanned = 0;
+
             if (_botEvaluator == null)
             {
                 throw new InvalidOperationException("Bot evaluator is not configured for BayesianOptimizationStrategy.");
