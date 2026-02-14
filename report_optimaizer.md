@@ -4326,3 +4326,20 @@ After each optimizer-related change, update this file with:
 
 ### Risks / notes
 - No intended behavior change in normal flow; adds defensive coverage for rare runtime transitions between source validation and snapshot usage.
+
+
+## Stabilization Update (2026-02-14) - Skip Invalid Faze Time Ranges In Worker Loop
+### What changed
+- Added phase-level runtime guard in `PrimeThreadWorkerPlace()` loop:
+  - if `currentFaze.TimeEnd <= currentFaze.TimeStart`, phase is skipped immediately.
+- Skip path emits diagnostic log with phase index and actual start/end values.
+
+### Files touched
+- `project/OsEngine/OsOptimizer/OptimizerExecutor.cs`
+
+### Validation
+- `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --configuration Debug`
+- Result: Passed 70 / Failed 0
+
+### Risks / notes
+- No intended behavior change for valid configurations; improves early validation consistency and prevents downstream processing of invalid phase windows.

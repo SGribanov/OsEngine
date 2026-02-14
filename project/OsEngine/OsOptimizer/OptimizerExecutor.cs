@@ -475,6 +475,15 @@ namespace OsEngine.OsOptimizer
                         continue;
                     }
 
+                    if (currentFaze.TimeEnd <= currentFaze.TimeStart)
+                    {
+                        SendLogMessage(
+                            "Optimizer phase skipped: invalid faze time range at index " + i +
+                            " (start " + currentFaze.TimeStart + ", end " + currentFaze.TimeEnd + ").",
+                            LogMessageType.Error);
+                        continue;
+                    }
+
                     if (currentFaze.TypeFaze == OptimizerFazeType.InSample)
                     {
                         OptimizerFazeReport report = new OptimizerFazeReport();
