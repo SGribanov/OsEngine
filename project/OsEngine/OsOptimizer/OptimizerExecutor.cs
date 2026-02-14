@@ -882,6 +882,11 @@ namespace OsEngine.OsOptimizer
                 else if (sources[i].TabType == BotTabType.Index)
                 {// BotTabIndex
                     BotTabIndex index = (BotTabIndex)sources[i];
+                    if (index?.Tabs == null)
+                    {
+                        SendLogMessage("CreateNewServer skipped index bind: tabs collection is null at source index " + i + ".", LogMessageType.Error);
+                        continue;
+                    }
 
                     for (int i2 = 0; i2 < index.Tabs.Count; i2++)
                     {
@@ -906,6 +911,11 @@ namespace OsEngine.OsOptimizer
                 else if (sources[i].TabType == BotTabType.Screener)
                 {// BotTabScreener
                     BotTabScreener screener = (BotTabScreener)sources[i];
+                    if (screener?.Tabs == null)
+                    {
+                        SendLogMessage("CreateNewServer skipped screener bind: tabs collection is null at source index " + i + ".", LogMessageType.Error);
+                        continue;
+                    }
 
                     for (int i2 = 0; i2 < screener.Tabs.Count; i2++)
                     {
