@@ -10,6 +10,7 @@ Implemented and committed:
 1. Phase 1 foundation (SRP decomposition + wiring in master/executor).
 2. Phase 2 partial threading improvements (removed core busy-wait loops in optimizer execution and async bot factory path).
 3. Phase 2 continuation (in progress): stop/cancel path in `OptimizerExecutor` moved to `CancellationTokenSource`.
+4. Phase 3 started: `OptimizerReport` serialization extracted to dedicated serializer with version prefix and legacy fallback.
 
 ## Commits
 - `b1e5eabe3` — `Optimizer: persist Phase1 extraction and wiring state`
@@ -84,7 +85,19 @@ Result:
 ## Current Status
 - Phase 1: largely integrated (core extraction + wiring done).
 - Phase 2: in progress (major busy-wait removal done; cancellation propagation now wired through `OptimizerExecutor -> BotConfigurator -> AsyncBotFactory`, remaining cleanup still pending).
-- Phase 3+ (serialization strategy abstraction, Bayesian optimization, UI for method/objective): not started in this branch segment.
+- Phase 3: started (serializer extracted; legacy fallback preserved; further cleanup and adoption still pending).
+- Phase 4+ (strategy abstraction, Bayesian optimization, UI for method/objective): not started in this branch segment.
+
+## Phase 3 Changes (Started)
+### New file
+- `project/OsEngine/OsOptimizer/OptEntity/OptimizerReportSerializer.cs`
+
+### `OptimizerReport.cs`
+- `GetSaveString()` now delegates to `OptimizerReportSerializer.Serialize(this)`.
+- `LoadFromString()` now delegates to `OptimizerReportSerializer.Deserialize(this, saveStr)`.
+- New versioned format prefix: `V2|`.
+- Legacy format (without prefix) is still auto-detected and parsed.
+- `SortResults()` switched from bubble sort to `List.Sort()` with comparator preserving existing ordering rules.
 
 ## Next Recommended Steps
 1. Finish Phase 2 remaining items:

@@ -8,6 +8,7 @@ using System.Collections.Generic;
 using System.Text;
 using OsEngine.Entity;
 using OsEngine.Journal.Internal;
+using OsEngine.OsOptimizer.OptEntity;
 using OsEngine.OsTrader.Panels;
 using OsEngine.OsTrader.Panels.Tab;
 
@@ -58,18 +59,20 @@ namespace OsEngine.OsOptimizer
 
         public static void SortResults(List<OptimizerReport> reports, SortBotsType sortType)
         {
-            for (int i = 0; i < reports.Count; i++)
+            reports.Sort((rep1, rep2) =>
             {
-                for (int i2 = 0; i2 < reports.Count - 1; i2++)
+                if (FirstLessSecond(rep1, rep2, sortType))
                 {
-                    if (FirstLessSecond(reports[i2], reports[i2 + 1], sortType))
-                    {
-                        OptimizerReport glass = reports[i2];
-                        reports[i2] = reports[i2 + 1];
-                        reports[i2 + 1] = glass;
-                    }
+                    return 1;
                 }
-            }
+
+                if (FirstLessSecond(rep2, rep1, sortType))
+                {
+                    return -1;
+                }
+
+                return 0;
+            });
         }
 
         private static bool FirstLessSecond(OptimizerReport rep1, OptimizerReport rep2, SortBotsType sortType)
@@ -404,76 +407,12 @@ namespace OsEngine.OsOptimizer
 
         public StringBuilder GetSaveString()
         {
-            StringBuilder result = new StringBuilder();
-
-            // Сохраняем основное
-            result.Append(BotName + "@");
-            result.Append(PositionsCount + "@");
-            result.Append(TotalProfit + "@");
-            result.Append(MaxDrawDawn + "@");
-            result.Append(AverageProfit + "@");
-            result.Append(AverageProfitPercentOneContract + "@");
-            result.Append(ProfitFactor + "@");
-            result.Append(PayOffRatio + "@");
-            result.Append(Recovery + "@");
-            result.Append(TotalProfitPercent + "@");
-            result.Append(SharpRatio + "@");
-
-            // сохраняем параметры в строковом представлении
-            StringBuilder parameters = new StringBuilder();
-
-            for (int i = 0; i < StrategyParameters.Count; i++)
-            {
-                parameters.Append(StrategyParameters[i] + "&");
-            }
-
-            result.Append(parameters + "@");
-
-            // сохраняем отдельные репорты по вкладкам
-
-            StringBuilder reportTabs = new StringBuilder();
-
-            for (int i = 0; i < TabsReports.Count; i++)
-            {
-                reportTabs.Append(TabsReports[i].GetSaveString() + "&");
-            }
-
-            result.Append(reportTabs + "@");
-
-            return result;
+            return OptimizerReportSerializer.Serialize(this);
         }
 
         public void LoadFromString(string saveStr)
         {
-            string[] str = saveStr.Split('@');
-
-            BotName = str[0];
-            PositionsCount = Convert.ToInt32(str[1]);
-            TotalProfit = str[2].ToDecimal();
-            MaxDrawDawn = str[3].ToDecimal();
-            AverageProfit = str[4].ToDecimal();
-            AverageProfitPercentOneContract = str[5].ToDecimal();
-            ProfitFactor = str[6].ToDecimal();
-            PayOffRatio = str[7].ToDecimal();
-            Recovery = str[8].ToDecimal();
-            TotalProfitPercent = str[9].ToDecimal();
-            SharpRatio = str[10].ToDecimal();
-
-            string[] param = str[11].Split('&');
-
-            for (int i = 0; i < param.Length - 1; i++)
-            {
-                StrategyParameters.Add(param[i]);
-            }
-
-            string[] reportTabs = str[12].Split('&');
-
-            for (int i = 0; i < reportTabs.Length - 1; i++)
-            {
-                OptimizerReportTab faze = new OptimizerReportTab();
-                faze.LoadFromSaveString(reportTabs[i]);
-                TabsReports.Add(faze);
-            }
+            OptimizerReportSerializer.Deserialize(this, saveStr);
         }
     }
 
