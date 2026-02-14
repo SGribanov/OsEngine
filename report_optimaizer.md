@@ -4175,3 +4175,22 @@ After each optimizer-related change, update this file with:
 
 ### Risks / notes
 - No intended behavior change for normal flows; reduces risk from late external mutation of strategy identity while run is starting.
+
+
+## Stabilization Update (2026-02-14) - Guard Runtime Master Availability In Worker Entry
+### What changed
+- Added early runtime guard in `PrimeThreadWorkerPlace()` for `_master` reference.
+- If `_master` is null at worker entry:
+  - logs explicit diagnostic;
+  - publishes `TestReady` snapshot;
+  - exits worker safely before any dereference.
+
+### Files touched
+- `project/OsEngine/OsOptimizer/OptimizerExecutor.cs`
+
+### Validation
+- `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --configuration Debug`
+- Result: Passed 70 / Failed 0
+
+### Risks / notes
+- No intended behavior change in valid lifecycle flow; hardens against rare external state invalidation after start boundary.

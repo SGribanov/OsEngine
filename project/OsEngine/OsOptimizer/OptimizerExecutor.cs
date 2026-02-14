@@ -308,6 +308,13 @@ namespace OsEngine.OsOptimizer
         {
             try
             {
+                if (_master == null)
+                {
+                    SendLogMessage("Optimizer prime worker skipped: master context is null at runtime.", LogMessageType.Error);
+                    SafeInvokeTestReady(GetReportsSnapshotForPublish());
+                    return;
+                }
+
                 lock (_reportsSync)
                 {
                     ReportsToFazes = new List<OptimizerFazeReport>();
