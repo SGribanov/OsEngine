@@ -2926,3 +2926,21 @@ After each optimizer-related change, update this file with:
 ### Risks / notes
 - No functional behavior change; micro-optimization for batch construction paths.
 
+
+## Stabilization Update (2026-02-14) - Preallocate Async Name Dedup HashSet Capacity
+### What changed
+- Updated dedup hash set allocations in `OptimizerExecutor`:
+  - `StartAsuncBotFactoryInSample(...)`: `new HashSet<string>(botCount, StringComparer.Ordinal)`;
+  - `StartAsuncBotFactoryOutOfSample(...)`: `new HashSet<string>(reports.Count, StringComparer.Ordinal)`.
+- Keeps existing dedup logic unchanged while reducing potential hash-set growth reallocations.
+
+### Files touched
+- `project/OsEngine/OsOptimizer/OptimizerExecutor.cs`
+
+### Validation
+- `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --configuration Debug`
+- Result: Passed 70 / Failed 0
+
+### Risks / notes
+- No functional behavior change; micro-optimization for name dedup paths.
+
