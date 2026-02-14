@@ -1003,7 +1003,19 @@ namespace OsEngine.OsOptimizer
                 return null;
             }
 
-            List<IIStrategyParameter> parametrs = reportToBot.GetParameters();
+            List<IIStrategyParameter> parametrs = null;
+            try
+            {
+                parametrs = reportToBot.GetParameters();
+            }
+            catch (Exception ex)
+            {
+                SendLogMessage("Single-bot test skipped due to parameter extraction error: " + ex, LogMessageType.Error);
+                ServerMaster.RemoveOptimizerServer(server);
+                awaitObj.Dispose();
+                return null;
+            }
+
             if (parametrs == null)
             {
                 SendLogMessage("Single-bot test skipped due to null parameter set.", LogMessageType.Error);

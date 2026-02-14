@@ -855,3 +855,22 @@ After each optimizer-related change, update this file with:
 
 ### Risks / notes
 - Prevents delayed single-bot task from dereferencing disposed/unavailable executor after UI-triggered wait window.
+
+## Stabilization Update (2026-02-14) - Exception Guard For Parameter Extraction In Executor TestBot
+### What changed
+- Hardened `OptimizerExecutor.TestBot(...)` around `reportToBot.GetParameters()`.
+- Added `try/catch` for parameter extraction exceptions with deterministic cleanup:
+  - error log with exception;
+  - remove created optimizer server;
+  - dispose await object;
+  - return `null`.
+
+### Files touched
+- `project/OsEngine/OsOptimizer/OptimizerExecutor.cs`
+
+### Validation
+- `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --configuration Debug`
+- Result: Passed 70 / Failed 0
+
+### Risks / notes
+- Prevents single-bot flow from crashing on malformed report payloads and keeps resource cleanup consistent.
