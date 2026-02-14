@@ -469,33 +469,13 @@ namespace OsEngine.OsOptimizer
                 List<bool> parametersOnSnapshot = _parametersOn == null ? null : new List<bool>(_parametersOn);
                 List<IIStrategyParameter> parametersSnapshot = _parameters == null ? null : new List<IIStrategyParameter>(_parameters);
 
-                if (!HasText(strategyName))
-                {
-                    AbortPrimeWorker("Optimizer prime worker skipped: strategy name is unavailable at runtime.");
-                    return;
-                }
-
-                if (parametersOnSnapshot == null || parametersSnapshot == null)
-                {
-                    AbortPrimeWorker("Optimizer prime worker skipped: parameters snapshot is unavailable at runtime.");
-                    return;
-                }
-
-                if (iterationCount < 0)
-                {
-                    AbortPrimeWorker(
-                        "Optimizer prime worker skipped: iteration count is invalid at runtime (value " + iterationCount + ").");
-                    return;
-                }
-
-                if (threadsCount <= 0)
-                {
-                    AbortPrimeWorker(
-                        "Optimizer prime worker skipped: threads count is invalid at runtime (value " + threadsCount + ").");
-                    return;
-                }
-
-                if (!ValidatePrimeWorkerEnumSettings(
+                if (!ValidatePrimeWorkerStrategySnapshots(
+                    strategyName,
+                    iterationCount,
+                    threadsCount,
+                    parametersOnSnapshot,
+                    parametersSnapshot)
+                    || !ValidatePrimeWorkerEnumSettings(
                     optimizationMethod,
                     objectiveMetric,
                     objectiveDirection,
@@ -528,21 +508,6 @@ namespace OsEngine.OsOptimizer
                             "Strategy-level clamp will be applied.",
                             LogMessageType.System);
                     }
-                }
-
-                if (parametersOnSnapshot.Count != parametersSnapshot.Count)
-                {
-                    AbortPrimeWorker(
-                        "Optimizer prime worker skipped: parameters snapshot count mismatch (flags " + parametersOnSnapshot.Count +
-                        ", params " + parametersSnapshot.Count + ").");
-                    return;
-                }
-
-                if (TryFindNullParameterIndex(parametersSnapshot, out int runtimeNullIndex))
-                {
-                    AbortPrimeWorker(
-                        "Optimizer prime worker skipped: parameter snapshot contains null at index " + runtimeNullIndex + ".");
-                    return;
                 }
 
                 int countBotsRaw = BotCountOneFaze(parametersSnapshot, parametersOnSnapshot);
@@ -761,6 +726,57 @@ namespace OsEngine.OsOptimizer
             {
                 AbortPrimeWorker(
                     "Optimizer prime worker skipped: bayesian acquisition mode is invalid at runtime (value " + bayesianAcquisitionMode + ").");
+                return false;
+            }
+
+            return true;
+        }
+
+        private bool ValidatePrimeWorkerStrategySnapshots(
+            string strategyName,
+            int iterationCount,
+            int threadsCount,
+            List<bool> parametersOnSnapshot,
+            List<IIStrategyParameter> parametersSnapshot)
+        {
+            if (!HasText(strategyName))
+            {
+                AbortPrimeWorker("Optimizer prime worker skipped: strategy name is unavailable at runtime.");
+                return false;
+            }
+
+            if (parametersOnSnapshot == null || parametersSnapshot == null)
+            {
+                AbortPrimeWorker("Optimizer prime worker skipped: parameters snapshot is unavailable at runtime.");
+                return false;
+            }
+
+            if (iterationCount < 0)
+            {
+                AbortPrimeWorker(
+                    "Optimizer prime worker skipped: iteration count is invalid at runtime (value " + iterationCount + ").");
+                return false;
+            }
+
+            if (threadsCount <= 0)
+            {
+                AbortPrimeWorker(
+                    "Optimizer prime worker skipped: threads count is invalid at runtime (value " + threadsCount + ").");
+                return false;
+            }
+
+            if (parametersOnSnapshot.Count != parametersSnapshot.Count)
+            {
+                AbortPrimeWorker(
+                    "Optimizer prime worker skipped: parameters snapshot count mismatch (flags " + parametersOnSnapshot.Count +
+                    ", params " + parametersSnapshot.Count + ").");
+                return false;
+            }
+
+            if (TryFindNullParameterIndex(parametersSnapshot, out int runtimeNullIndex))
+            {
+                AbortPrimeWorker(
+                    "Optimizer prime worker skipped: parameter snapshot contains null at index " + runtimeNullIndex + ".");
                 return false;
             }
 
