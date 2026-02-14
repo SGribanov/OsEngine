@@ -713,6 +713,11 @@ namespace OsEngine.OsOptimizer
             {
                 return false;
             }
+            catch (Exception ex)
+            {
+                SendLogMessage("Optimizer server slot acquire failed: " + ex, LogMessageType.Error);
+                return false;
+            }
         }
 
         private void WaitCurrentPhaseToComplete()

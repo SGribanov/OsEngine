@@ -2287,3 +2287,21 @@ After each optimizer-related change, update this file with:
 ### Risks / notes
 - No control-flow change; improves observability of synchronization cleanup failures while preserving existing null-reset behavior.
 
+
+## Stabilization Update (2026-02-14) - Guard Unexpected Exceptions In Server Slot Acquire
+### What changed
+- Updated `TryAcquireServerSlot()` in `OptimizerExecutor`.
+- Added fallback `catch (Exception ex)` branch.
+- On unexpected acquire failure, method now logs details and returns `false`.
+
+### Files touched
+- `project/OsEngine/OsOptimizer/OptimizerExecutor.cs`
+
+### Validation
+- `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --configuration Debug`
+- Result: Passed 70 / Failed 0
+
+### Risks / notes
+- No normal-path behavior change; prevents optimizer worker crash on unforeseen semaphore/acquire exceptions.
+
+
