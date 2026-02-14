@@ -1742,3 +1742,21 @@ After each optimizer-related change, update this file with:
 
 ### Risks / notes
 - Prevents passing null security references into optimizer server data binding path.
+
+## Stabilization Update (2026-02-14) - Null Connector/Tab Guards In CreateNewServer Binding Loops
+### What changed
+- Added null guards for tab connector structures before security/timeframe access:
+  - `BotTabSimple`: `simple?.Connector != null`;
+  - `BotTabIndex`: `index.Tabs[i2] != null`;
+  - `BotTabScreener`: `screener.Tabs[i2]?.Connector != null`.
+- Null entries are skipped with detailed index-based diagnostics.
+
+### Files touched
+- `project/OsEngine/OsOptimizer/OptimizerExecutor.cs`
+
+### Validation
+- `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --configuration Debug`
+- Result: Passed 70 / Failed 0
+
+### Risks / notes
+- Prevents null dereference in tab-binding loops when connector/tab metadata is partially missing.

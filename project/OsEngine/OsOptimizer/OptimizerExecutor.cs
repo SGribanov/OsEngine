@@ -862,6 +862,11 @@ namespace OsEngine.OsOptimizer
                 if (sources[i].TabType == BotTabType.Simple)
                 {// BotTabSimple
                     BotTabSimple simple = (BotTabSimple)sources[i];
+                    if (simple?.Connector == null)
+                    {
+                        SendLogMessage("CreateNewServer skipped simple tab bind: connector is null at source index " + i + ".", LogMessageType.Error);
+                        continue;
+                    }
 
                     Security secToStart =
                     _master.Storage.Securities.Find(s => s.Name == simple.Connector.SecurityName);
@@ -880,6 +885,12 @@ namespace OsEngine.OsOptimizer
 
                     for (int i2 = 0; i2 < index.Tabs.Count; i2++)
                     {
+                        if (index.Tabs[i2] == null)
+                        {
+                            SendLogMessage("CreateNewServer skipped index tab bind: tab is null at source index " + i + ", tab index " + i2 + ".", LogMessageType.Error);
+                            continue;
+                        }
+
                         Security secToStart =
                           _master.Storage.Securities.Find(s => s.Name == index.Tabs[i2].SecurityName);
                         if (secToStart == null)
@@ -898,6 +909,12 @@ namespace OsEngine.OsOptimizer
 
                     for (int i2 = 0; i2 < screener.Tabs.Count; i2++)
                     {
+                        if (screener.Tabs[i2]?.Connector == null)
+                        {
+                            SendLogMessage("CreateNewServer skipped screener tab bind: connector is null at source index " + i + ", tab index " + i2 + ".", LogMessageType.Error);
+                            continue;
+                        }
+
                         Security secToStart =
                           _master.Storage.Securities.Find(s => s.Name == screener.Tabs[i2].Connector.SecurityName);
                         if (secToStart == null)
