@@ -51,7 +51,17 @@ namespace OsEngine.OsOptimizer.OptimizerEntity
             try
             {
                 waiter.Task.Wait(cancellationToken);
-                return waiter.Task.Result;
+                return waiter.Task.Status == TaskStatus.RanToCompletion
+                    ? waiter.Task.Result
+                    : null;
+            }
+            catch (OperationCanceledException)
+            {
+                return null;
+            }
+            catch (AggregateException)
+            {
+                return null;
             }
             finally
             {

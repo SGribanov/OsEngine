@@ -66,6 +66,7 @@ Implemented and committed:
 57. Stabilization: hardened `AsyncBotFactory.GetBot` against empty `botType`/`botName` by returning early instead of creating invalid wait keys.
 58. Stabilization: added regression test for `AsyncBotFactory.GetBot` invalid-key guard (`empty/whitespace` bot type/name returns `null`).
 59. Stabilization: added regression coverage for `AsyncBotFactory.CreateNewBots` invalid input (`null`/empty list/whitespace names) to ensure no exceptions and safe no-op behavior.
+60. Stabilization: hardened `AsyncBotFactory.GetBot` cancellation/error path to return `null` on canceled/faulted waits and added regression coverage for pre-canceled token.
 
 ## Commits
 - `b1e5eabe3` — `Optimizer: persist Phase1 extraction and wiring state`
@@ -176,6 +177,7 @@ Added tests:
   - `OptimizerSettings_SaveLoad_TailSharePercentBoundaries_ShouldRoundTrip`
   - `AsyncBotFactory_GetBot_WithInvalidKeys_ShouldReturnNull`
   - `AsyncBotFactory_CreateNewBots_WithInvalidInput_ShouldNotThrow`
+  - `AsyncBotFactory_GetBot_WithCanceledToken_ShouldReturnNull`
   - `BayesianOptimizationStrategy_WithTailPass_ShouldRespectTotalEvaluationBudget`
   - `BayesianOptimizationStrategy_ShouldNotEvaluateDuplicateCandidates`
   - `BruteForceStrategy_OptimizeInSampleAsync_WithMismatchedFlags_ShouldThrowArgumentException`
@@ -204,7 +206,7 @@ Command:
 - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --configuration Debug`
 
 Result:
-- Passed: 59
+- Passed: 60
 - Failed: 0
 
 ### Stabilization fixes from new tests

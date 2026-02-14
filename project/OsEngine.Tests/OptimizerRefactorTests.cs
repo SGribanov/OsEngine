@@ -1696,6 +1696,18 @@ public class OptimizerRefactorTests
         Assert.Null(ex);
     }
 
+    [Fact]
+    public void AsyncBotFactory_GetBot_WithCanceledToken_ShouldReturnNull()
+    {
+        AsyncBotFactory factory = new AsyncBotFactory();
+        CancellationTokenSource cts = new CancellationTokenSource();
+        cts.Cancel();
+
+        var bot = factory.GetBot("type", "bot", cts.Token);
+
+        Assert.Null(bot);
+    }
+
     private sealed class SettingsFileScope : IDisposable
     {
         private readonly string _engineDirPath;
