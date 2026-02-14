@@ -410,7 +410,7 @@ namespace OsEngine.OsOptimizer
             List<IIStrategyParameter> allParameters, List<bool> parametersToOptimization, int inSampleBotsCount)
         {
             ReloadAllParam(allParameters);
-            _phaseCompletion = new CountdownEvent(inSampleBotsCount);
+            ReplacePhaseCompletion(inSampleBotsCount);
 
             if (inSampleBotsCount > 0)
             {
@@ -514,7 +514,7 @@ namespace OsEngine.OsOptimizer
             }
 
             int outOfSampleBotsCount = inSampleReports?.Count ?? 0;
-            _phaseCompletion = new CountdownEvent(outOfSampleBotsCount);
+            ReplacePhaseCompletion(outOfSampleBotsCount);
 
             if (outOfSampleBotsCount > 0)
             {
@@ -932,6 +932,26 @@ namespace OsEngine.OsOptimizer
             {
                 SendLogMessage("Optimizer phase wait failed: " + ex, LogMessageType.Error);
                 return;
+            }
+        }
+
+        private void ReplacePhaseCompletion(int participantsCount)
+        {
+            CountdownEvent nextPhase = new CountdownEvent(participantsCount);
+            CountdownEvent previousPhase = Interlocked.Exchange(ref _phaseCompletion, nextPhase);
+
+            if (previousPhase == null)
+            {
+                return;
+            }
+
+            try
+            {
+                previousPhase.Dispose();
+            }
+            catch (Exception ex)
+            {
+                SendLogMessage("Optimizer phase replacement dispose failed: " + ex, LogMessageType.Error);
             }
         }
 

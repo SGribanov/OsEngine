@@ -3324,3 +3324,22 @@ After each optimizer-related change, update this file with:
 
 ### Risks / notes
 - No behavior change expected; reduces rare race windows where a newly assigned sync object could otherwise be affected by concurrent cleanup.
+
+
+## Stabilization Update (2026-02-14) - Dispose Previous Phase Latch On Phase Replacement
+### What changed
+- Added `ReplacePhaseCompletion(int participantsCount)` in `OptimizerExecutor`.
+- Phase startup paths now use replacement helper instead of direct assignment:
+  - `StartOptimizeFazeInSample(...)`
+  - `StartOptimizeFazeOutOfSample(...)`
+- Helper atomically swaps `_phaseCompletion` via `Interlocked.Exchange(...)` and safely disposes previous `CountdownEvent`.
+
+### Files touched
+- `project/OsEngine/OsOptimizer/OptimizerExecutor.cs`
+
+### Validation
+- `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --configuration Debug`
+- Result: Passed 70 / Failed 0
+
+### Risks / notes
+- No functional behavior change expected; improves resource hygiene and prevents phase latch accumulation across long multi-phase runs.
