@@ -4343,3 +4343,21 @@ After each optimizer-related change, update this file with:
 
 ### Risks / notes
 - No intended behavior change for valid configurations; improves early validation consistency and prevents downstream processing of invalid phase windows.
+
+
+## Stabilization Update (2026-02-14) - Validate InSample Report Container Before OOS Source Promotion
+### What changed
+- Updated InSample branch in `PrimeThreadWorkerPlace()` after `EndOfFazeFiltration(report)`:
+  - validates `report` and `report.Reports` before assigning `latestInSampleReport`;
+  - logs explicit diagnostics when in-sample output container/list is unexpectedly null;
+  - avoids promoting invalid in-sample source for subsequent OutOfSample phases.
+
+### Files touched
+- `project/OsEngine/OsOptimizer/OptimizerExecutor.cs`
+
+### Validation
+- `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --configuration Debug`
+- Result: Passed 70 / Failed 0
+
+### Risks / notes
+- No intended behavior change for valid flow; adds defensive integrity check at InSample->OutOfSample handoff boundary.

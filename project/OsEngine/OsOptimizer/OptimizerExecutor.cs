@@ -499,7 +499,20 @@ namespace OsEngine.OsOptimizer
                         StartOptimizeFazeInSample(report, parametersSnapshot, parametersOnSnapshot, countBots);
 
                         EndOfFazeFiltration(report);
-                        latestInSampleReport = report;
+                        if (report == null)
+                        {
+                            SendLogMessage("InSample phase produced null report container at index " + i + ".", LogMessageType.Error);
+                            latestInSampleReport = null;
+                        }
+                        else if (report.Reports == null)
+                        {
+                            SendLogMessage("InSample phase produced null report list at index " + i + ".", LogMessageType.Error);
+                            latestInSampleReport = null;
+                        }
+                        else
+                        {
+                            latestInSampleReport = report;
+                        }
                     }
                     else
                     {
