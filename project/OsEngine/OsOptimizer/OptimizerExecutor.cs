@@ -119,7 +119,7 @@ namespace OsEngine.OsOptimizer
                 {
                     if (IsStopRequested)
                     {
-                        TestReadyEvent?.Invoke(ReportsToFazes);
+                        SafeInvokeTestReady(ReportsToFazes);
                         return;
                     }
 
@@ -159,7 +159,7 @@ namespace OsEngine.OsOptimizer
                 SendLogMessage(OsLocalization.Optimizer.Message7, LogMessageType.System);
                 SendLogMessage("Total test time = " + time.ToString(), LogMessageType.System);
 
-                TestReadyEvent?.Invoke(ReportsToFazes);
+                SafeInvokeTestReady(ReportsToFazes);
             }
             finally
             {
@@ -390,7 +390,7 @@ namespace OsEngine.OsOptimizer
                         SendLogMessage("OutOfSample compensated unscheduled tail: " + unscheduled, LogMessageType.System);
                     }
                     WaitCurrentPhaseToComplete();
-                    TestReadyEvent?.Invoke(ReportsToFazes);
+                    SafeInvokeTestReady(ReportsToFazes);
                     _primeThreadWorker = null;
                     return;
                 }
@@ -1848,6 +1848,18 @@ namespace OsEngine.OsOptimizer
         public event Action<TimeSpan> TimeToEndChangeEvent;
 
         public event Action<List<OptimizerFazeReport>> TestReadyEvent;
+
+        private void SafeInvokeTestReady(List<OptimizerFazeReport> reports)
+        {
+            try
+            {
+                TestReadyEvent?.Invoke(reports);
+            }
+            catch (Exception ex)
+            {
+                SendLogMessage("Optimizer test-ready event dispatch failed: " + ex, LogMessageType.Error);
+            }
+        }
 
         private void server_TestingProgressChangeEvent(int curVal, int maxVal, int numServer)
         {

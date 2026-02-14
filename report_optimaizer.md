@@ -2426,3 +2426,23 @@ After each optimizer-related change, update this file with:
 - No normal-path behavior change; prevents progress subscriber exceptions from interrupting streaming progress updates.
 
 
+
+## Stabilization Update (2026-02-14) - Guard TestReady Event Dispatches With Safe Helper
+### What changed
+- Added `SafeInvokeTestReady(List<OptimizerFazeReport> reports)` helper in `OptimizerExecutor`.
+- Replaced direct `TestReadyEvent?.Invoke(...)` calls with safe helper in all current dispatch points:
+  - stop-request exit in prime worker;
+  - normal completion of prime worker;
+  - out-of-sample unscheduled-tail early return.
+- Helper catches subscriber exceptions, logs diagnostics, and preserves optimizer control flow.
+
+### Files touched
+- `project/OsEngine/OsOptimizer/OptimizerExecutor.cs`
+
+### Validation
+- `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --configuration Debug`
+- Result: Passed 70 / Failed 0
+
+### Risks / notes
+- No normal-path behavior change; prevents test-ready subscribers from aborting optimizer completion/early-exit paths.
+
