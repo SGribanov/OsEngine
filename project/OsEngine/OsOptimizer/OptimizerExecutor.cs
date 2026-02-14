@@ -175,6 +175,18 @@ namespace OsEngine.OsOptimizer
 
         private void StartAsuncBotFactoryInSample(int botCount, string botType, bool isScript, string faze)
         {
+            if (botCount <= 0)
+            {
+                SendLogMessage("Async bot factory start skipped (InSample): bot count is non-positive.", LogMessageType.System);
+                return;
+            }
+
+            if (string.IsNullOrWhiteSpace(botType))
+            {
+                SendLogMessage("Async bot factory start skipped (InSample): bot type is empty.", LogMessageType.Error);
+                return;
+            }
+
             List<string> botNames = new List<string>();
             int startServerIndex = _serverNum;
 
@@ -197,6 +209,18 @@ namespace OsEngine.OsOptimizer
 
         private void StartAsuncBotFactoryOutOfSample(OptimizerFazeReport reportFiltered, string botType, bool isScript, string faze)
         {
+            if (string.IsNullOrWhiteSpace(botType))
+            {
+                SendLogMessage("Async bot factory start skipped (OutOfSample): bot type is empty.", LogMessageType.Error);
+                return;
+            }
+
+            if (reportFiltered?.Reports == null)
+            {
+                SendLogMessage("Async bot factory start skipped (OutOfSample): source reports are unavailable.", LogMessageType.Error);
+                return;
+            }
+
             List<string> botNames = new List<string>();
 
             for (int i = 0; i < reportFiltered.Reports.Count; i++)

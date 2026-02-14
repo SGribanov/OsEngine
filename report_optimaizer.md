@@ -2544,3 +2544,23 @@ After each optimizer-related change, update this file with:
 ### Risks / notes
 - No normal-path behavior change; improves root-cause visibility for async bot factory startup failures while preserving existing error propagation semantics.
 
+
+## Stabilization Update (2026-02-14) - Add Input Guards For Async Bot Factory Startup Methods
+### What changed
+- Updated `StartAsuncBotFactoryInSample(...)` in `OptimizerExecutor`:
+  - added guard for non-positive `botCount` with informational skip log;
+  - added guard for empty `botType` with error log.
+- Updated `StartAsuncBotFactoryOutOfSample(...)`:
+  - added guard for empty `botType`;
+  - added guard for missing `reportFiltered.Reports` source collection.
+
+### Files touched
+- `project/OsEngine/OsOptimizer/OptimizerExecutor.cs`
+
+### Validation
+- `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --configuration Debug`
+- Result: Passed 70 / Failed 0
+
+### Risks / notes
+- Behavior change only on invalid input paths; prevents avoidable null/argument failures during async bot factory bootstrap.
+
