@@ -1153,9 +1153,20 @@ namespace OsEngine.OsOptimizer
             _aloneTestDoneSignal.Reset();
             int runId = Interlocked.Increment(ref _aloneTestRunId);
 
-            AwaitObject awaitUi = new AwaitObject(OsLocalization.Optimizer.Label52, 100, 0, true);
-
-            Task.Run(() => RunAloneBotTestAsync(faze, report, awaitUi, runId));
+            AwaitObject awaitUi;
+            try
+            {
+                awaitUi = new AwaitObject(OsLocalization.Optimizer.Label52, 100, 0, true);
+                Task.Run(() => RunAloneBotTestAsync(faze, report, awaitUi, runId));
+            }
+            catch (Exception ex)
+            {
+                SendLogMessage("Single-bot test setup failed: " + ex, LogMessageType.Error);
+                Interlocked.Increment(ref _aloneTestRunId);
+                Volatile.Write(ref _aloneTestIsOver, true);
+                _aloneTestDoneSignal.Set();
+                return null;
+            }
 
             try
             {

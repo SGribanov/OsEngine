@@ -1031,3 +1031,24 @@ After each optimizer-related change, update this file with:
 
 ### Risks / notes
 - Prevents stuck single-bot state when UI wait window cannot be created/displayed.
+
+## Stabilization Update (2026-02-14) - Exception Guard In Single-Bot Setup Stage
+### What changed
+- Hardened setup stage in `OptimizerMaster.TestBot(...)`:
+  - `AwaitObject` creation and `Task.Run(...)` launch are now wrapped in `try/catch`.
+- On setup failure, code now:
+  - logs setup error;
+  - invalidates active run id;
+  - restores running flag;
+  - signals `_aloneTestDoneSignal`;
+  - returns `null`.
+
+### Files touched
+- `project/OsEngine/OsOptimizer/OptimizerMaster.cs`
+
+### Validation
+- `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --configuration Debug`
+- Result: Passed 70 / Failed 0
+
+### Risks / notes
+- Prevents orphaned "running" state if single-bot test fails before UI wait dialog stage.
