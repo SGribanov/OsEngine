@@ -184,7 +184,15 @@ namespace OsEngine.OsOptimizer
                 botNames.Add(botName);
             }
 
-            _asyncBotFactory.CreateNewBots(botNames, botType, isScript, StartProgram.IsOsOptimizer);
+            try
+            {
+                _asyncBotFactory.CreateNewBots(botNames, botType, isScript, StartProgram.IsOsOptimizer);
+            }
+            catch (Exception ex)
+            {
+                SendLogMessage("Async bot factory start failed (InSample, count " + botNames.Count + "): " + ex, LogMessageType.Error);
+                throw;
+            }
         }
 
         private void StartAsuncBotFactoryOutOfSample(OptimizerFazeReport reportFiltered, string botType, bool isScript, string faze)
@@ -204,7 +212,15 @@ namespace OsEngine.OsOptimizer
                 botNames.Add(botName);
             }
 
-            _asyncBotFactory.CreateNewBots(botNames, botType, isScript, StartProgram.IsOsOptimizer);
+            try
+            {
+                _asyncBotFactory.CreateNewBots(botNames, botType, isScript, StartProgram.IsOsOptimizer);
+            }
+            catch (Exception ex)
+            {
+                SendLogMessage("Async bot factory start failed (OutOfSample, count " + botNames.Count + "): " + ex, LogMessageType.Error);
+                throw;
+            }
         }
 
         private Thread _primeThreadWorker;

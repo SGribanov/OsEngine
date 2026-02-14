@@ -2525,3 +2525,22 @@ After each optimizer-related change, update this file with:
 ### Risks / notes
 - Behavior change on exception path only; improves failure signaling consistency to subscribers/UI when prime worker aborts unexpectedly.
 
+
+## Stabilization Update (2026-02-14) - Add Context Diagnostics For Async Bot Factory Startup
+### What changed
+- Updated `StartAsuncBotFactoryInSample(...)` in `OptimizerExecutor`:
+  - wrapped `_asyncBotFactory.CreateNewBots(...)` in `try/catch`;
+  - on failure logs phase context and bot count, then rethrows.
+- Updated `StartAsuncBotFactoryOutOfSample(...)` similarly:
+  - logs out-of-sample context and bot count on failure, then rethrows.
+
+### Files touched
+- `project/OsEngine/OsOptimizer/OptimizerExecutor.cs`
+
+### Validation
+- `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --configuration Debug`
+- Result: Passed 70 / Failed 0
+
+### Risks / notes
+- No normal-path behavior change; improves root-cause visibility for async bot factory startup failures while preserving existing error propagation semantics.
+
