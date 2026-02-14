@@ -3643,3 +3643,21 @@ After each optimizer-related change, update this file with:
 
 ### Risks / notes
 - Intentional robustness change: prevents late create-server/create-bot failures by rejecting incomplete optimizer context at start boundary.
+
+
+## Stabilization Update (2026-02-14) - Snapshot Strategy Identity Per Prime Worker Run
+### What changed
+- Updated `PrimeThreadWorkerPlace()` to snapshot run-local strategy identity values:
+  - `strategyName = _master.StrategyName`
+  - `isScript = _master.IsScript`
+- InSample and OutOfSample async factory startup calls now use these run-local values.
+
+### Files touched
+- `project/OsEngine/OsOptimizer/OptimizerExecutor.cs`
+
+### Validation
+- `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --configuration Debug`
+- Result: Passed 70 / Failed 0
+
+### Risks / notes
+- No intended behavior change; improves per-run consistency if optimizer strategy metadata is edited externally during active execution.

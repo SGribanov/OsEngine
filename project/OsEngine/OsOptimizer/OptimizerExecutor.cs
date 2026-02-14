@@ -252,6 +252,8 @@ namespace OsEngine.OsOptimizer
             {
                 ReportsToFazes = new List<OptimizerFazeReport>();
                 List<OptimizerFaze> fazesSnapshot = new List<OptimizerFaze>(_master.Fazes);
+                string strategyName = _master.StrategyName;
+                bool isScript = _master.IsScript;
 
                 int countBots = BotCountOneFaze(_parameters, _parametersOn);
 
@@ -281,7 +283,7 @@ namespace OsEngine.OsOptimizer
 
                         ReportsToFazes.Add(report);
 
-                        StartAsuncBotFactoryInSample(countBots, _master.StrategyName, _master.IsScript, "InSample");
+                        StartAsuncBotFactoryInSample(countBots, strategyName, isScript, "InSample");
 
                         StartOptimizeFazeInSample(_master.Fazes[i], report, _parameters, _parametersOn, countBots);
 
@@ -304,7 +306,7 @@ namespace OsEngine.OsOptimizer
 
                         ReportsToFazes.Add(report);
 
-                        StartAsuncBotFactoryOutOfSample(inSampleReport, _master.StrategyName, _master.IsScript, "OutOfSample");
+                        StartAsuncBotFactoryOutOfSample(inSampleReport, strategyName, isScript, "OutOfSample");
 
                         StartOptimizeFazeOutOfSample(report, inSampleReport);
                     }
