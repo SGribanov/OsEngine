@@ -1177,6 +1177,11 @@ namespace OsEngine.OsOptimizer
                     _optimizerExecutor.TestBot(_fazeToTestAloneTest, _reportToTestAloneTest,
                     StartProgram.IsTester, _awaitUiMasterAloneTest);
             }
+            catch (Exception ex)
+            {
+                SendLogMessage("Single-bot test failed: " + ex, LogMessageType.Error);
+                _resultBotAloneTest = null;
+            }
             finally
             {
                 _aloneTestIsOver = true;
