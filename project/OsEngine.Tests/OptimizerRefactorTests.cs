@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Collections.Concurrent;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -192,6 +193,77 @@ public class OptimizerRefactorTests
 
         await Assert.ThrowsAsync<InvalidOperationException>(async () =>
             await strategy.OptimizeInSampleAsync(allParameters, parametersToOptimization, CancellationToken.None));
+    }
+
+    [Fact]
+    public void OptimizerFazeReport_SortResults_ShouldSortDescendingByMetric()
+    {
+        List<OptimizerReport> reports = new List<OptimizerReport>
+        {
+            new OptimizerReport { BotName = "1", TotalProfit = 10, PositionsCount = 2 },
+            new OptimizerReport { BotName = "2", TotalProfit = 30, PositionsCount = 1 },
+            new OptimizerReport { BotName = "3", TotalProfit = 20, PositionsCount = 3 }
+        };
+
+        OptimizerFazeReport.SortResults(reports, SortBotsType.TotalProfit);
+        Assert.Equal(new[] { "2", "3", "1" }, reports.Select(r => r.BotName).ToArray());
+
+        OptimizerFazeReport.SortResults(reports, SortBotsType.PositionCount);
+        Assert.Equal(new[] { "3", "1", "2" }, reports.Select(r => r.BotName).ToArray());
+    }
+
+    [Fact]
+    public void OptimizerReportSerializer_DeserializeMalformed_ShouldNotThrowAndKeepObjectUsable()
+    {
+        OptimizerReport report = new OptimizerReport();
+        Exception ex = Record.Exception(() => report.LoadFromString("V2|broken_payload"));
+        Assert.Null(ex);
+
+        // Object remains usable after malformed load attempt.
+        report.BotName = "ok";
+        string save = report.GetSaveString().ToString();
+        Assert.StartsWith("V2|", save);
+    }
+
+    [Fact]
+    public async Task BruteForceStrategy_OptimizeInSampleAsync_EvaluatorMutationsMustNotCorruptEnumeration()
+    {
+        ParameterIterator iterator = new ParameterIterator();
+        ConcurrentBag<string> seen = new ConcurrentBag<string>();
+
+        IBotEvaluator evaluator = new BotEvaluator((all, optimized, ct) =>
+        {
+            StrategyParameterInt p1 = (StrategyParameterInt)optimized[0];
+            StrategyParameterInt p2 = (StrategyParameterInt)optimized[1];
+            string originalPair = p1.ValueInt + "_" + p2.ValueInt;
+            seen.Add(originalPair);
+
+            // Mutate received parameter intentionally; strategy should pass snapshots.
+            p1.ValueInt = 999;
+
+            OptimizerReport report = new OptimizerReport(new List<IIStrategyParameter>())
+            {
+                BotName = originalPair
+            };
+            return Task.FromResult(report);
+        });
+
+        BruteForceStrategy strategy = new BruteForceStrategy(iterator, evaluator, maxParallel: 3);
+
+        List<IIStrategyParameter> allParameters = new List<IIStrategyParameter>
+        {
+            new StrategyParameterInt("X", 1, 1, 2, 1),
+            new StrategyParameterInt("Y", 1, 1, 2, 1)
+        };
+        List<bool> parametersToOptimization = new List<bool> { true, true };
+
+        List<OptimizerReport> reports =
+            await strategy.OptimizeInSampleAsync(allParameters, parametersToOptimization, CancellationToken.None);
+
+        Assert.Equal(4, reports.Count);
+        Assert.Equal(new[] { "1_1", "1_2", "2_1", "2_2" }, seen.Distinct().OrderBy(x => x).ToArray());
+        Assert.Equal(1, ((StrategyParameterInt)allParameters[0]).ValueInt);
+        Assert.Equal(1, ((StrategyParameterInt)allParameters[1]).ValueInt);
     }
 
     private static OptimizerReport BuildSampleReport()

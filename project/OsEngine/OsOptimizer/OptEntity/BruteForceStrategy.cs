@@ -63,7 +63,7 @@ namespace OsEngine.OsOptimizer.OptEntity
                     break;
                 }
 
-                List<IIStrategyParameter> comboSnapshot = _parameterIterator.CopyParameters(optimizedParameters);
+                List<IIStrategyParameter> comboSnapshot = CloneCombinationSnapshot(optimizedParameters);
                 Task<OptimizerReport> task = _botEvaluator.EvaluateAsync(allParameters, comboSnapshot, cancellationToken);
                 running.Add(task);
 
@@ -91,6 +91,33 @@ namespace OsEngine.OsOptimizer.OptEntity
             }
 
             return result;
+        }
+
+        private List<IIStrategyParameter> CloneCombinationSnapshot(List<IIStrategyParameter> optimizedParameters)
+        {
+            List<IIStrategyParameter> cloned = _parameterIterator.CopyParameters(optimizedParameters);
+
+            for (int i = 0; i < optimizedParameters.Count && i < cloned.Count; i++)
+            {
+                IIStrategyParameter src = optimizedParameters[i];
+                IIStrategyParameter dst = cloned[i];
+
+                if (src.Type == StrategyParameterType.Int)
+                {
+                    ((StrategyParameterInt)dst).ValueInt = ((StrategyParameterInt)src).ValueInt;
+                }
+                else if (src.Type == StrategyParameterType.Decimal)
+                {
+                    ((StrategyParameterDecimal)dst).ValueDecimal = ((StrategyParameterDecimal)src).ValueDecimal;
+                }
+                else if (src.Type == StrategyParameterType.DecimalCheckBox)
+                {
+                    ((StrategyParameterDecimalCheckBox)dst).ValueDecimal = ((StrategyParameterDecimalCheckBox)src).ValueDecimal;
+                    ((StrategyParameterDecimalCheckBox)dst).CheckState = ((StrategyParameterDecimalCheckBox)src).CheckState;
+                }
+            }
+
+            return cloned;
         }
     }
 }
