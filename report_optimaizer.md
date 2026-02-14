@@ -3034,3 +3034,19 @@ After each optimizer-related change, update this file with:
 - No behavior change; improves contextual diagnostics for in-sample startup skips.
 
 
+
+## Stabilization Update (2026-02-14) - Include Count In OOS Empty-Snapshot Skip Diagnostic
+### What changed
+- Updated early empty-snapshot skip log in `StartAsuncBotFactoryOutOfSample(...)`.
+- Diagnostic now also includes `count` field for snapshot size (in addition to `botType` and `faze`).
+
+### Files touched
+- `project/OsEngine/OsOptimizer/OptimizerExecutor.cs`
+
+### Validation
+- `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --configuration Debug`
+- Result: Passed 70 / Failed 0
+
+### Risks / notes
+- No behavior change; improves log schema consistency across in-sample/out-of-sample skip diagnostics.
+
