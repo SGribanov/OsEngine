@@ -1152,7 +1152,7 @@ namespace OsEngine.OsOptimizer
             }
             catch (Exception ex)
             {
-                SendLogMessage("Optimizer evaluation completion cancel failed: " + ex, LogMessageType.Error);
+                SendLogMessage("Optimizer eval completion cancel publish failed: " + ex, LogMessageType.Error);
             }
         }
 
@@ -1164,7 +1164,7 @@ namespace OsEngine.OsOptimizer
             }
             catch (Exception ex)
             {
-                SendLogMessage("Optimizer evaluation completion cancel(token) failed: " + ex, LogMessageType.Error);
+                SendLogMessage("Optimizer eval completion cancel(token) publish failed: " + ex, LogMessageType.Error);
             }
         }
 
@@ -1176,7 +1176,7 @@ namespace OsEngine.OsOptimizer
             }
             catch (Exception ex)
             {
-                SendLogMessage("Optimizer evaluation completion result publish failed: " + ex, LogMessageType.Error);
+                SendLogMessage("Optimizer eval completion result publish failed: " + ex, LogMessageType.Error);
             }
         }
 
@@ -1188,7 +1188,7 @@ namespace OsEngine.OsOptimizer
             }
             catch (Exception ex)
             {
-                SendLogMessage("Optimizer evaluation completion exception publish failed: " + ex, LogMessageType.Error);
+                SendLogMessage("Optimizer eval completion exception publish failed: " + ex, LogMessageType.Error);
             }
         }
 
