@@ -11,6 +11,7 @@ Implemented and committed:
 2. Phase 2 partial threading improvements (removed core busy-wait loops in optimizer execution and async bot factory path).
 3. Phase 2 continuation (in progress): stop/cancel path in `OptimizerExecutor` moved to `CancellationTokenSource`.
 4. Phase 3 started: `OptimizerReport` serialization extracted to dedicated serializer with version prefix and legacy fallback.
+5. Phase 4 started: optimization strategy abstraction interfaces and brute-force strategy scaffold added.
 
 ## Commits
 - `b1e5eabe3` — `Optimizer: persist Phase1 extraction and wiring state`
@@ -91,7 +92,20 @@ Result:
 - Phase 1: largely integrated (core extraction + wiring done).
 - Phase 2: in progress (major busy-wait removal done; cancellation propagation now wired through `OptimizerExecutor -> BotConfigurator -> AsyncBotFactory`, remaining cleanup still pending).
 - Phase 3: started (serializer extracted; legacy fallback preserved; further cleanup and adoption still pending).
-- Phase 4+ (strategy abstraction, Bayesian optimization, UI for method/objective): not started in this branch segment.
+- Phase 4: started (core abstraction contracts and brute-force scaffold added; executor not yet switched to strategy orchestration).
+- Phase 5 (Bayesian optimization + UI controls): not started in this branch segment.
+
+## Phase 4 Changes (Started)
+### New files
+- `project/OsEngine/OsOptimizer/OptEntity/IOptimizationStrategy.cs`
+- `project/OsEngine/OsOptimizer/OptEntity/IBotEvaluator.cs`
+- `project/OsEngine/OsOptimizer/OptEntity/BotEvaluator.cs`
+- `project/OsEngine/OsOptimizer/OptEntity/BruteForceStrategy.cs`
+
+### Notes
+- Interfaces are introduced with async contracts.
+- `BruteForceStrategy` currently enumerates combinations via `ParameterIterator` and delegates bot evaluation through `IBotEvaluator`.
+- This is an additive scaffold step; `OptimizerExecutor` still uses existing orchestration path for runtime behavior.
 
 ## Phase 3 Changes (Started)
 ### New file
