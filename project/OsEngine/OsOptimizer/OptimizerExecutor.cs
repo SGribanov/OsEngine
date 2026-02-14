@@ -974,14 +974,14 @@ namespace OsEngine.OsOptimizer
                 return null;
             }
 
-            if (reportFaze.Faze.TimeEnd <= reportFaze.Faze.TimeStart)
+            DateTime phaseTimeStart = reportFaze.Faze.TimeStart;
+            DateTime phaseTimeEnd = reportFaze.Faze.TimeEnd;
+            if (phaseTimeEnd <= phaseTimeStart)
             {
                 SendLogMessage("Single-bot test skipped due to invalid phase time range.", LogMessageType.Error);
                 SafeDisposeAwaitObject(awaitObj);
                 return null;
             }
-
-            DateTime phaseTimeEnd = reportFaze.Faze.TimeEnd;
 
             if (_primeThreadWorker != null)
             {

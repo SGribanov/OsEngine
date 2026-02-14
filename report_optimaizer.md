@@ -1152,3 +1152,20 @@ After each optimizer-related change, update this file with:
 
 ### Risks / notes
 - Reduces sensitivity to concurrent phase-object mutations during long-running single-bot test loop.
+
+## Stabilization Update (2026-02-14) - Full Phase Time Snapshot Validation In Executor TestBot
+### What changed
+- Extended single-bot phase-time snapshot approach in `OptimizerExecutor.TestBot(...)`:
+  - captures both `phaseTimeStart` and `phaseTimeEnd` once;
+  - validates range using snapshot values;
+  - keeps runtime loop bound to snapshot end time.
+
+### Files touched
+- `project/OsEngine/OsOptimizer/OptimizerExecutor.cs`
+
+### Validation
+- `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --configuration Debug`
+- Result: Passed 70 / Failed 0
+
+### Risks / notes
+- Removes repeated nested phase reads and keeps validation/loop limits consistent for full method execution.
