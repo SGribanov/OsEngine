@@ -252,7 +252,10 @@ namespace OsEngine.OsOptimizer
             List<OptimizerReport> reports = new List<OptimizerReport>(reportFiltered.Reports);
             if (reports.Count == 0)
             {
-                SendLogMessage("Async bot factory start skipped (OutOfSample): source reports snapshot is empty.", LogMessageType.System);
+                SendLogMessage(
+                    "Async bot factory start skipped (OutOfSample): source reports snapshot is empty (bot type '" +
+                    normalizedBotType + "', faze '" + normalizedFaze + "').",
+                    LogMessageType.System);
                 return;
             }
 
