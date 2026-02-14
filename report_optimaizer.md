@@ -3785,3 +3785,20 @@ After each optimizer-related change, update this file with:
 
 ### Risks / notes
 - Intentional robustness change: prevents invalid negative estimation values from propagating into phase-size and naming logic.
+
+
+## Stabilization Update (2026-02-14) - Publish Test-Ready Reports Via List Snapshot
+### What changed
+- Added `GetReportsSnapshotForPublish()` in `OptimizerExecutor`.
+- All `SafeInvokeTestReady(...)` call sites in run flow now publish a copied list snapshot instead of passing mutable internal `ReportsToFazes` directly.
+- This isolates internal execution state from potential subscriber-side list mutation.
+
+### Files touched
+- `project/OsEngine/OsOptimizer/OptimizerExecutor.cs`
+
+### Validation
+- `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --configuration Debug`
+- Result: Passed 70 / Failed 0
+
+### Risks / notes
+- No intended behavior change for consumers that only read event payloads; improves encapsulation and event-safety boundaries.

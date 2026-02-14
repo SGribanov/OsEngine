@@ -262,7 +262,7 @@ namespace OsEngine.OsOptimizer
                 {
                     if (IsStopRequested)
                     {
-                        SafeInvokeTestReady(ReportsToFazes);
+                        SafeInvokeTestReady(GetReportsSnapshotForPublish());
                         return;
                     }
 
@@ -316,12 +316,12 @@ namespace OsEngine.OsOptimizer
                 SendLogMessage(OsLocalization.Optimizer.Message7, LogMessageType.System);
                 SendLogMessage("Total test time = " + time.ToString(), LogMessageType.System);
 
-                SafeInvokeTestReady(ReportsToFazes);
+                SafeInvokeTestReady(GetReportsSnapshotForPublish());
             }
             catch (Exception ex)
             {
                 SendLogMessage("Optimizer prime worker failed: " + ex, LogMessageType.Error);
-                SafeInvokeTestReady(ReportsToFazes);
+                SafeInvokeTestReady(GetReportsSnapshotForPublish());
             }
             finally
             {
@@ -751,7 +751,7 @@ namespace OsEngine.OsOptimizer
                         SendLogMessage("OutOfSample compensated unscheduled tail: " + unscheduled, LogMessageType.System);
                     }
                     WaitCurrentPhaseToComplete();
-                    SafeInvokeTestReady(ReportsToFazes);
+                    SafeInvokeTestReady(GetReportsSnapshotForPublish());
                     return;
                 }
 
@@ -2250,6 +2250,17 @@ namespace OsEngine.OsOptimizer
         public event Action<TimeSpan> TimeToEndChangeEvent;
 
         public event Action<List<OptimizerFazeReport>> TestReadyEvent;
+
+        private List<OptimizerFazeReport> GetReportsSnapshotForPublish()
+        {
+            List<OptimizerFazeReport> reports = ReportsToFazes;
+            if (reports == null)
+            {
+                return new List<OptimizerFazeReport>();
+            }
+
+            return new List<OptimizerFazeReport>(reports);
+        }
 
         private void SafeInvokePrimeProgress(int progressEnd, int progressMax)
         {
