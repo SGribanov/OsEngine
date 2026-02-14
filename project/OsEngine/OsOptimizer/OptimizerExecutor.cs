@@ -675,7 +675,13 @@ namespace OsEngine.OsOptimizer
                 SendLogMessage(OsLocalization.Optimizer.Message7, LogMessageType.System);
                 SendLogMessage("Total test time = " + time.ToString(), LogMessageType.System);
 
-                PublishTestReadySnapshot();
+                List<OptimizerFazeReport> reportsSnapshot = GetReportsSnapshotForPublish();
+                if (reportsSnapshot.Count == 0)
+                {
+                    SendLogMessage("Optimizer prime worker finished with empty reports snapshot.", LogMessageType.System);
+                }
+
+                SafeInvokeTestReady(reportsSnapshot);
             }
             catch (Exception ex)
             {

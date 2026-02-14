@@ -4612,3 +4612,22 @@ After each optimizer-related change, update this file with:
 
 ### Risks / notes
 - No intended behavior change for valid runtime state; makes all-null faze snapshot failure explicit and deterministic.
+
+
+## Stabilization Update (2026-02-14) - Add Explicit Empty-Result Diagnostic On Worker Completion
+### What changed
+- Updated normal-completion tail in `PrimeThreadWorkerPlace()`:
+  - captures final reports snapshot once;
+  - logs explicit system diagnostic when snapshot is empty;
+  - publishes the captured snapshot directly via `SafeInvokeTestReady(...)`.
+- This avoids duplicate snapshot recomputation and improves visibility for all-skipped completion scenarios.
+
+### Files touched
+- `project/OsEngine/OsOptimizer/OptimizerExecutor.cs`
+
+### Validation
+- `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --configuration Debug`
+- Result: Passed 70 / Failed 0
+
+### Risks / notes
+- No intended behavior change for non-empty runs; adds observability for edge-case completion with zero reports.
