@@ -426,7 +426,14 @@ namespace OsEngine.OsOptimizer
         {
             if (_phaseCompletion != null && !_phaseCompletion.IsSet)
             {
-                _phaseCompletion.Signal();
+                try
+                {
+                    _phaseCompletion.Signal();
+                }
+                catch (ObjectDisposedException)
+                {
+                    // ignored
+                }
             }
 
             if (!releaseServerSlot)
