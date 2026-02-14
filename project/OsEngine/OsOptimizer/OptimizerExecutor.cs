@@ -1795,6 +1795,10 @@ namespace OsEngine.OsOptimizer
             {
                 SafeRemoveOptimizerServer(server);
             }
+            else
+            {
+                SendLogMessage("Optimizer end-event: server was not found in active list for server " + serverNum + ".", LogMessageType.Error);
+            }
 
             CountdownEvent phase = _phaseCompletion;
             SafeTrySignalPhase(phase);
