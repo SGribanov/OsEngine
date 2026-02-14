@@ -1927,3 +1927,20 @@ After each optimizer-related change, update this file with:
 
 ### Risks / notes
 - No functional behavior change; reduces log noise and avoids duplicate error lines for the same lookup miss.
+
+## Stabilization Update (2026-02-14) - Normalize Security Name Matching In Lookup Helper
+### What changed
+- Updated `TryFindSecurityByName(...)` in `OptimizerExecutor` to normalize input security names via `Trim()`.
+- Switched comparison to explicit `StringComparison.Ordinal` after trimming candidate names.
+- Added guard to skip null/whitespace candidate names during list iteration.
+- Updated diagnostics to log normalized lookup key.
+
+### Files touched
+- `project/OsEngine/OsOptimizer/OptimizerExecutor.cs`
+
+### Validation
+- `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --configuration Debug`
+- Result: Passed 70 / Failed 0
+
+### Risks / notes
+- Slight behavior tightening: avoids false misses caused by accidental leading/trailing spaces and culture-dependent comparison semantics.

@@ -1473,6 +1473,8 @@ namespace OsEngine.OsOptimizer
                 return false;
             }
 
+            string normalizedSecurityName = securityName.Trim();
+
             if (_master?.Storage?.Securities == null)
             {
                 SendLogMessage("CreateNewServer security lookup skipped: securities collection is unavailable.", LogMessageType.Error);
@@ -1485,7 +1487,9 @@ namespace OsEngine.OsOptimizer
                 for (int i = 0; i < all.Count; i++)
                 {
                     Security candidate = all[i];
-                    if (candidate != null && candidate.Name == securityName)
+                    if (candidate != null
+                        && !string.IsNullOrWhiteSpace(candidate.Name)
+                        && string.Equals(candidate.Name.Trim(), normalizedSecurityName, StringComparison.Ordinal))
                     {
                         security = candidate;
                         return true;
@@ -1494,10 +1498,10 @@ namespace OsEngine.OsOptimizer
             }
             catch (Exception ex)
             {
-                SendLogMessage("CreateNewServer security lookup failed for '" + securityName + "': " + ex, LogMessageType.Error);
+                SendLogMessage("CreateNewServer security lookup failed for '" + normalizedSecurityName + "': " + ex, LogMessageType.Error);
             }
 
-            SendLogMessage("CreateNewServer security lookup: security '" + securityName + "' was not found.", LogMessageType.Error);
+            SendLogMessage("CreateNewServer security lookup: security '" + normalizedSecurityName + "' was not found.", LogMessageType.Error);
             return false;
         }
 
