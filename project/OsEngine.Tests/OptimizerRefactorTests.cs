@@ -806,6 +806,33 @@ public class OptimizerRefactorTests
         }
     }
 
+    [Fact]
+    public void OptimizerSettings_MethodFields_ShouldClampInvalidValues()
+    {
+        lock (SettingsFileLock)
+        {
+            using SettingsFileScope _ = new SettingsFileScope();
+
+            OptimizerSettings settings = new OptimizerSettings
+            {
+                BayesianInitialSamples = 0,
+                BayesianMaxIterations = -5,
+                BayesianBatchSize = 0,
+                BayesianAcquisitionKappa = -10m,
+                BayesianTailSharePercent = 0
+            };
+
+            Assert.Equal(1, settings.BayesianInitialSamples);
+            Assert.Equal(1, settings.BayesianMaxIterations);
+            Assert.Equal(1, settings.BayesianBatchSize);
+            Assert.Equal(0m, settings.BayesianAcquisitionKappa);
+            Assert.Equal(1, settings.BayesianTailSharePercent);
+
+            settings.BayesianTailSharePercent = 999;
+            Assert.Equal(50, settings.BayesianTailSharePercent);
+        }
+    }
+
     private sealed class SettingsFileScope : IDisposable
     {
         private readonly string _engineDirPath;

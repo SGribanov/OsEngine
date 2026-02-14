@@ -429,21 +429,33 @@ namespace OsEngine.OsOptimizer.OptEntity
         public int BayesianInitialSamples
         {
             get => _bayesianInitialSamples;
-            set { _bayesianInitialSamples = value; Save(); }
+            set
+            {
+                _bayesianInitialSamples = ClampPositiveInt(value);
+                Save();
+            }
         }
         private int _bayesianInitialSamples = 20;
 
         public int BayesianMaxIterations
         {
             get => _bayesianMaxIterations;
-            set { _bayesianMaxIterations = value; Save(); }
+            set
+            {
+                _bayesianMaxIterations = ClampPositiveInt(value);
+                Save();
+            }
         }
         private int _bayesianMaxIterations = 100;
 
         public int BayesianBatchSize
         {
             get => _bayesianBatchSize;
-            set { _bayesianBatchSize = value; Save(); }
+            set
+            {
+                _bayesianBatchSize = ClampPositiveInt(value);
+                Save();
+            }
         }
         private int _bayesianBatchSize = 5;
 
@@ -464,7 +476,11 @@ namespace OsEngine.OsOptimizer.OptEntity
         public decimal BayesianAcquisitionKappa
         {
             get => _bayesianAcquisitionKappa;
-            set { _bayesianAcquisitionKappa = value; Save(); }
+            set
+            {
+                _bayesianAcquisitionKappa = ClampNonNegativeDecimal(value);
+                Save();
+            }
         }
         private decimal _bayesianAcquisitionKappa = 0.25m;
 
@@ -478,7 +494,11 @@ namespace OsEngine.OsOptimizer.OptEntity
         public int BayesianTailSharePercent
         {
             get => _bayesianTailSharePercent;
-            set { _bayesianTailSharePercent = value; Save(); }
+            set
+            {
+                _bayesianTailSharePercent = ClampTailSharePercent(value);
+                Save();
+            }
         }
         private int _bayesianTailSharePercent = 20;
 
@@ -586,21 +606,21 @@ namespace OsEngine.OsOptimizer.OptEntity
                         line = reader.ReadLine();
                         if (line != null) Enum.TryParse(line, out _objectiveMetric);
                         line = reader.ReadLine();
-                        if (line != null) _bayesianInitialSamples = Convert.ToInt32(line);
+                        if (line != null) _bayesianInitialSamples = ClampPositiveInt(Convert.ToInt32(line));
                         line = reader.ReadLine();
-                        if (line != null) _bayesianMaxIterations = Convert.ToInt32(line);
+                        if (line != null) _bayesianMaxIterations = ClampPositiveInt(Convert.ToInt32(line));
                         line = reader.ReadLine();
-                        if (line != null) _bayesianBatchSize = Convert.ToInt32(line);
+                        if (line != null) _bayesianBatchSize = ClampPositiveInt(Convert.ToInt32(line));
                         line = reader.ReadLine();
                         if (line != null) Enum.TryParse(line, out _objectiveDirection);
                         line = reader.ReadLine();
                         if (line != null) Enum.TryParse(line, out _bayesianAcquisitionMode);
                         line = reader.ReadLine();
-                        if (line != null) _bayesianAcquisitionKappa = line.ToDecimal();
+                        if (line != null) _bayesianAcquisitionKappa = ClampNonNegativeDecimal(line.ToDecimal());
                         line = reader.ReadLine();
                         if (line != null) _bayesianUseTailPass = Convert.ToBoolean(line);
                         line = reader.ReadLine();
-                        if (line != null) _bayesianTailSharePercent = Convert.ToInt32(line);
+                        if (line != null) _bayesianTailSharePercent = ClampTailSharePercent(Convert.ToInt32(line));
                     }
                 }
             }
@@ -611,6 +631,31 @@ namespace OsEngine.OsOptimizer.OptEntity
         }
 
         public event Action<string, LogMessageType> LogMessageEvent;
+
+        private static int ClampPositiveInt(int value)
+        {
+            return value < 1 ? 1 : value;
+        }
+
+        private static decimal ClampNonNegativeDecimal(decimal value)
+        {
+            return value < 0 ? 0 : value;
+        }
+
+        private static int ClampTailSharePercent(int value)
+        {
+            if (value < 1)
+            {
+                return 1;
+            }
+
+            if (value > 50)
+            {
+                return 50;
+            }
+
+            return value;
+        }
 
         #endregion
     }
