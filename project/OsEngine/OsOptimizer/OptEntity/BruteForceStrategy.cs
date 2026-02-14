@@ -30,6 +30,7 @@ namespace OsEngine.OsOptimizer.OptEntity
 
         public int EstimateBotCount(List<IIStrategyParameter> allParameters, List<bool> parametersToOptimization)
         {
+            ValidateInputs(allParameters, parametersToOptimization);
             return _parameterIterator.CountCombinations(allParameters, parametersToOptimization);
         }
 
@@ -38,6 +39,8 @@ namespace OsEngine.OsOptimizer.OptEntity
             List<bool> parametersToOptimization,
             CancellationToken cancellationToken = default)
         {
+            ValidateInputs(allParameters, parametersToOptimization);
+
             if (_botEvaluator == null)
             {
                 throw new InvalidOperationException("Bot evaluator is not configured for BruteForceStrategy.");
@@ -91,6 +94,24 @@ namespace OsEngine.OsOptimizer.OptEntity
             }
 
             return result;
+        }
+
+        private static void ValidateInputs(List<IIStrategyParameter> allParameters, List<bool> parametersToOptimization)
+        {
+            if (allParameters == null)
+            {
+                throw new ArgumentNullException(nameof(allParameters));
+            }
+
+            if (parametersToOptimization == null)
+            {
+                throw new ArgumentNullException(nameof(parametersToOptimization));
+            }
+
+            if (allParameters.Count != parametersToOptimization.Count)
+            {
+                throw new ArgumentException("allParameters and parametersToOptimization must have equal length.");
+            }
         }
 
         private List<IIStrategyParameter> CloneCombinationSnapshot(List<IIStrategyParameter> optimizedParameters)

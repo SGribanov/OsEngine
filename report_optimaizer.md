@@ -33,6 +33,7 @@ Implemented and committed:
 24. Stabilization: added test assertions for key diagnostics fields in Bayesian factory info message.
 25. Stabilization: added dedicated settings roundtrip test for `BayesianTailSharePercent` boundary values (`1` and `50`).
 26. Stabilization: added Bayesian strategy budget/uniqueness tests (tail-pass respects total eval budget; no duplicate candidate evaluations).
+27. Stabilization: added explicit input-shape guards (`null`/length mismatch) in brute-force and bayesian strategies with dedicated tests.
 
 ## Commits
 - `b1e5eabe3` — `Optimizer: persist Phase1 extraction and wiring state`
@@ -136,6 +137,8 @@ Added tests:
   - `OptimizerSettings_SaveLoad_TailSharePercentBoundaries_ShouldRoundTrip`
   - `BayesianOptimizationStrategy_WithTailPass_ShouldRespectTotalEvaluationBudget`
   - `BayesianOptimizationStrategy_ShouldNotEvaluateDuplicateCandidates`
+  - `BruteForceStrategy_OptimizeInSampleAsync_WithMismatchedFlags_ShouldThrowArgumentException`
+  - `BayesianOptimizationStrategy_OptimizeInSampleAsync_WithNullFlags_ShouldThrowArgumentNullException`
   - `BayesianOptimizationStrategy_TailPassDisabled_ShouldPlanZeroTailBudget`
   - `BayesianOptimizationStrategy_TailSharePercent_ShouldClampToRange`
   - `OptimizerSettings_SaveLoad_ShouldPersistOptimizationMethodFields`
@@ -145,7 +148,7 @@ Command:
 - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --configuration Debug`
 
 Result:
-- Passed: 33
+- Passed: 35
 - Failed: 0
 
 ### Stabilization fixes from new tests

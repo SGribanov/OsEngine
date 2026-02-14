@@ -199,6 +199,25 @@ public class OptimizerRefactorTests
     }
 
     [Fact]
+    public async Task BruteForceStrategy_OptimizeInSampleAsync_WithMismatchedFlags_ShouldThrowArgumentException()
+    {
+        ParameterIterator iterator = new ParameterIterator();
+        IBotEvaluator evaluator = new BotEvaluator((all, optimized, ct) =>
+            Task.FromResult(new OptimizerReport(new List<IIStrategyParameter>())));
+        BruteForceStrategy strategy = new BruteForceStrategy(iterator, evaluator);
+
+        List<IIStrategyParameter> allParameters = new List<IIStrategyParameter>
+        {
+            new StrategyParameterInt("A", 1, 1, 2, 1),
+            new StrategyParameterInt("B", 1, 1, 2, 1)
+        };
+        List<bool> parametersToOptimization = new List<bool> { true };
+
+        await Assert.ThrowsAsync<ArgumentException>(async () =>
+            await strategy.OptimizeInSampleAsync(allParameters, parametersToOptimization, CancellationToken.None));
+    }
+
+    [Fact]
     public void OptimizerFazeReport_SortResults_ShouldSortDescendingByMetric()
     {
         List<OptimizerReport> reports = new List<OptimizerReport>
@@ -437,6 +456,28 @@ public class OptimizerRefactorTests
 
         Assert.Equal(4, calls);
         Assert.Equal(4, reports.Count);
+    }
+
+    [Fact]
+    public async Task BayesianOptimizationStrategy_OptimizeInSampleAsync_WithNullFlags_ShouldThrowArgumentNullException()
+    {
+        ParameterIterator iterator = new ParameterIterator();
+        IBotEvaluator evaluator = new BotEvaluator((all, optimized, ct) =>
+            Task.FromResult(new OptimizerReport(new List<IIStrategyParameter>())));
+
+        BayesianOptimizationStrategy strategy = new BayesianOptimizationStrategy(
+            iterator, evaluator, 2, SortBotsType.TotalProfit, ObjectiveDirectionType.Maximize,
+            initialSamples: 2, maxIterations: 5, batchSize: 2,
+            acquisitionMode: BayesianAcquisitionModeType.Ucb, acquisitionKappa: 0.25m,
+            useExploitationTailPass: true, tailSharePercent: 20);
+
+        List<IIStrategyParameter> allParameters = new List<IIStrategyParameter>
+        {
+            new StrategyParameterInt("A", 1, 1, 2, 1)
+        };
+
+        await Assert.ThrowsAsync<ArgumentNullException>(async () =>
+            await strategy.OptimizeInSampleAsync(allParameters, null, CancellationToken.None));
     }
 
     [Fact]

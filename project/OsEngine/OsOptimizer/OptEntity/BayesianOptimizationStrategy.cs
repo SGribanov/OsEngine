@@ -80,6 +80,7 @@ namespace OsEngine.OsOptimizer.OptEntity
 
         public int EstimateBotCount(List<IIStrategyParameter> allParameters, List<bool> parametersToOptimization)
         {
+            ValidateInputs(allParameters, parametersToOptimization);
             return _fallbackBackend.EstimateBotCount(allParameters, parametersToOptimization);
         }
 
@@ -88,6 +89,7 @@ namespace OsEngine.OsOptimizer.OptEntity
             List<bool> parametersToOptimization,
             CancellationToken cancellationToken = default)
         {
+            ValidateInputs(allParameters, parametersToOptimization);
             return OptimizeStagedAsync(allParameters, parametersToOptimization, cancellationToken);
         }
 
@@ -436,6 +438,24 @@ namespace OsEngine.OsOptimizer.OptEntity
             public int Index;
             public OptimizerReport Report;
             public decimal Score;
+        }
+
+        private static void ValidateInputs(List<IIStrategyParameter> allParameters, List<bool> parametersToOptimization)
+        {
+            if (allParameters == null)
+            {
+                throw new ArgumentNullException(nameof(allParameters));
+            }
+
+            if (parametersToOptimization == null)
+            {
+                throw new ArgumentNullException(nameof(parametersToOptimization));
+            }
+
+            if (allParameters.Count != parametersToOptimization.Count)
+            {
+                throw new ArgumentException("allParameters and parametersToOptimization must have equal length.");
+            }
         }
     }
 }
