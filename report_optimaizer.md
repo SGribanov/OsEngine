@@ -3343,3 +3343,24 @@ After each optimizer-related change, update this file with:
 
 ### Risks / notes
 - No functional behavior change expected; improves resource hygiene and prevents phase latch accumulation across long multi-phase runs.
+
+
+## Stabilization Update (2026-02-14) - Harden Stop Cancellation And Slot Release Paths
+### What changed
+- Updated `Stop()` in `OptimizerExecutor`:
+  - uses local snapshot of `_stopCts`;
+  - wraps `Cancel()` in `try/catch` to safely handle concurrent disposal (`ObjectDisposedException`);
+  - logs unexpected cancellation errors.
+- Updated `SafeReleaseServerSlot()`:
+  - uses local snapshot of `_serverSlots` before release;
+  - keeps existing defensive exception handling for disposed/full semaphore cases.
+
+### Files touched
+- `project/OsEngine/OsOptimizer/OptimizerExecutor.cs`
+
+### Validation
+- `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --configuration Debug`
+- Result: Passed 70 / Failed 0
+
+### Risks / notes
+- No expected behavior change in normal flow; improves resilience during concurrent stop/cleanup timing races.

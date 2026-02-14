@@ -91,7 +91,23 @@ namespace OsEngine.OsOptimizer
 
         public void Stop()
         {
-            _stopCts?.Cancel();
+            CancellationTokenSource stopCts = _stopCts;
+            if (stopCts != null)
+            {
+                try
+                {
+                    stopCts.Cancel();
+                }
+                catch (ObjectDisposedException)
+                {
+                    // already disposed during concurrent cleanup
+                }
+                catch (Exception ex)
+                {
+                    SendLogMessage("Optimizer stop cancellation failed: " + ex, LogMessageType.Error);
+                }
+            }
+
             SendLogMessage(OsLocalization.Optimizer.Message3, LogMessageType.System);
         }
 
@@ -1699,9 +1715,15 @@ namespace OsEngine.OsOptimizer
 
         private void SafeReleaseServerSlot()
         {
+            SemaphoreSlim slots = _serverSlots;
+            if (slots == null)
+            {
+                return;
+            }
+
             try
             {
-                _serverSlots?.Release();
+                slots.Release();
             }
             catch (ObjectDisposedException)
             {
