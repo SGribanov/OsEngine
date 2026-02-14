@@ -64,6 +64,7 @@ Implemented and committed:
 55. Stabilization/behavior fix: corrected `BayesianOptimizationStrategy.EstimateBotCount` to return budget-capped estimate (`min(totalCombinations, InitialSamples + MaxIterations)`) instead of full grid count.
 56. Stabilization: extended `BayesianOptimizationStrategy.EstimateBotCount` coverage for over-budget scenario to ensure estimate does not exceed total grid size when budget is larger.
 57. Stabilization: hardened `AsyncBotFactory.GetBot` against empty `botType`/`botName` by returning early instead of creating invalid wait keys.
+58. Stabilization: added regression test for `AsyncBotFactory.GetBot` invalid-key guard (`empty/whitespace` bot type/name returns `null`).
 
 ## Commits
 - `b1e5eabe3` — `Optimizer: persist Phase1 extraction and wiring state`
@@ -172,6 +173,7 @@ Added tests:
   - `OptimizerSettings_LoadFromFile_WithCommaDecimalKappa_ShouldParseCorrectly`
   - `OptimizerSettings_LoadFromFile_WithInvalidBoolTailPass_ShouldKeepValueAndLoadFollowingFields`
   - `OptimizerSettings_SaveLoad_TailSharePercentBoundaries_ShouldRoundTrip`
+  - `AsyncBotFactory_GetBot_WithInvalidKeys_ShouldReturnNull`
   - `BayesianOptimizationStrategy_WithTailPass_ShouldRespectTotalEvaluationBudget`
   - `BayesianOptimizationStrategy_ShouldNotEvaluateDuplicateCandidates`
   - `BruteForceStrategy_OptimizeInSampleAsync_WithMismatchedFlags_ShouldThrowArgumentException`
@@ -200,7 +202,7 @@ Command:
 - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --configuration Debug`
 
 Result:
-- Passed: 57
+- Passed: 58
 - Failed: 0
 
 ### Stabilization fixes from new tests

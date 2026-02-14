@@ -6,6 +6,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using OsEngine.Entity;
 using OsEngine.OsOptimizer;
+using OsEngine.OsOptimizer.OptimizerEntity;
 using OsEngine.OsOptimizer.OptEntity;
 using Xunit;
 
@@ -1660,6 +1661,20 @@ public class OptimizerRefactorTests
             OptimizerSettings readerHigh = new OptimizerSettings();
             Assert.Equal(50, readerHigh.BayesianTailSharePercent);
         }
+    }
+
+    [Fact]
+    public void AsyncBotFactory_GetBot_WithInvalidKeys_ShouldReturnNull()
+    {
+        AsyncBotFactory factory = new AsyncBotFactory();
+
+        var byEmptyType = factory.GetBot("", "bot");
+        var byEmptyName = factory.GetBot("type", "");
+        var byWhitespace = factory.GetBot(" ", "   ");
+
+        Assert.Null(byEmptyType);
+        Assert.Null(byEmptyName);
+        Assert.Null(byWhitespace);
     }
 
     private sealed class SettingsFileScope : IDisposable
