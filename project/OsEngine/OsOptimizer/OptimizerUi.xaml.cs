@@ -36,7 +36,6 @@ namespace OsEngine.OsOptimizer
             InitializeComponent();
             _currentCulture = OsLocalization.CurCulture;
             OsEngine.Layout.StickyBorders.Listen(this);
-            Thread.Sleep(200);
 
             _master = new OptimizerMaster();
             _master.StartPaintLog(HostLog);
