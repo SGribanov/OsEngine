@@ -85,8 +85,8 @@ namespace OsEngine.OsOptimizer.OptEntity
                 }
                 else if (mode == BayesianAcquisitionModeType.ExpectedImprovement)
                 {
-                    decimal improvement = Math.Max(0m, mean - bestMean);
-                    acquisition = improvement + (kappa * uncertainty);
+                    decimal optimisticMean = mean + (kappa * uncertainty);
+                    acquisition = Math.Max(0m, optimisticMean - bestMean);
                 }
                 else
                 {

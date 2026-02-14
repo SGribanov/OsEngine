@@ -25,6 +25,7 @@ Implemented and committed:
 16. Phase 5 continued: added explicit `BayesianUseTailPass` toggle (settings + UI + strategy wiring) to enable/disable exploitation tail-pass without code changes.
 17. Phase 5 tuning: tail-budget heuristic is now mode-aware (`Greedy` disables tail reservation; `EI/Ucb` use different share denominator), plus strategy exposes planned tail budget for diagnostics/tests.
 18. Phase 5 tuning: added configurable `BayesianTailSharePercent` (settings + UI + strategy wiring) to control reserved tail budget share.
+19. Phase 5 tuning: fixed `ExpectedImprovement` acquisition to use optimistic mean (`mean + kappa * uncertainty`) before improvement calculation.
 
 ## Commits
 - `b1e5eabe3` — `Optimizer: persist Phase1 extraction and wiring state`
@@ -122,6 +123,7 @@ Added tests:
   - `BayesianOptimizationStrategy_GreedyMode_ShouldPlanZeroTailBudget`
   - `BayesianOptimizationStrategy_UcbMode_ShouldPlanPositiveTailBudgetWhenEnabled`
   - `BayesianOptimizationStrategy_TailSharePercent_ShouldAffectPlannedTailBudget`
+  - `BayesianAcquisitionPolicy_ExpectedImprovement_ShouldUseOptimisticMean`
   - `OptimizerSettings_SaveLoad_ShouldPersistOptimizationMethodFields`
   - `OptimizerSettings_LoadLegacyWithoutV2Fields_ShouldKeepDefaultsForMethodSettings`
 
@@ -129,7 +131,7 @@ Command:
 - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --configuration Debug`
 
 Result:
-- Passed: 25
+- Passed: 26
 - Failed: 0
 
 ### Stabilization fixes from new tests
@@ -184,10 +186,11 @@ Result:
   - safety fallback remains for very large candidate pools (delegates to brute-force backend).
   - selection is centralized via `OptimizationStrategyFactory`.
   - candidate selection logic (initial + iterative) is now isolated in `BayesianCandidateSelector`, reducing strategy complexity and preparing surrogate/acquisition swap-in.
-  - iterative batch selection now uses `BayesianAcquisitionPolicy` with UCB-like score:
+  - iterative batch selection now uses `BayesianAcquisitionPolicy` with configurable acquisition:
     - local surrogate mean from nearest evaluated candidate score;
     - uncertainty proxy from normalized parameter-space distance (supports `Int`, `Decimal`, `DecimalCheckBox`, `Bool`, `CheckBox`, `String`, `TimeOfDay`);
     - acquisition mode is configurable: `Ucb`, `ExpectedImprovement`, `Greedy`;
+    - `ExpectedImprovement` now computes improvement from optimistic mean (`mean + kappa * uncertainty`) vs current best surrogate mean.
     - objective-direction is configurable (`Maximize` / `Minimize`) and is applied in strategy score orientation before acquisition.
   - strategy now normalizes observed objective scores (`min-max`) before acquisition and applies metric-specific kappa scaling to stabilize exploration pressure across heterogeneous metrics.
   - strategy now reserves small exploitation budget and runs final greedy candidate pass after exploration loop.
