@@ -112,17 +112,7 @@ namespace OsEngine.OsOptimizer
                 return false;
             }
 
-            bool hasNonNullTab = false;
-            for (int i = 0; i < botTabs.Count; i++)
-            {
-                if (botTabs[i] != null)
-                {
-                    hasNonNullTab = true;
-                    break;
-                }
-            }
-
-            if (!hasNonNullTab)
+            if (!HasAnyNonNullTab(botTabs))
             {
                 SendLogMessage("Optimizer start skipped: bot tabs collection contains only null entries.", LogMessageType.Error);
                 return false;
@@ -333,6 +323,24 @@ namespace OsEngine.OsOptimizer
             }
         }
 
+        private static bool HasAnyNonNullTab(List<IIBotTab> tabs)
+        {
+            if (tabs == null || tabs.Count == 0)
+            {
+                return false;
+            }
+
+            for (int i = 0; i < tabs.Count; i++)
+            {
+                if (tabs[i] != null)
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
         #endregion
 
         #region Optimization algorithm
@@ -382,17 +390,7 @@ namespace OsEngine.OsOptimizer
                     return;
                 }
 
-                bool hasNonNullRuntimeTab = false;
-                for (int i = 0; i < runtimeBotTabs.Count; i++)
-                {
-                    if (runtimeBotTabs[i] != null)
-                    {
-                        hasNonNullRuntimeTab = true;
-                        break;
-                    }
-                }
-
-                if (!hasNonNullRuntimeTab)
+                if (!HasAnyNonNullTab(runtimeBotTabs))
                 {
                     AbortPrimeWorker("Optimizer prime worker skipped: runtime bot tabs contain only null entries.");
                     return;

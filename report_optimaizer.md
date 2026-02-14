@@ -4560,3 +4560,21 @@ After each optimizer-related change, update this file with:
 
 ### Risks / notes
 - No intended behavior change for valid runtime state; avoids repeated downstream server-creation failures when security storage is unavailable.
+
+
+## Stabilization Update (2026-02-14) - Reuse Shared Non-Null Bot Tab Predicate
+### What changed
+- Added helper `HasAnyNonNullTab(List<IIBotTab> tabs)` in `OptimizerExecutor`.
+- Replaced duplicated tab-content checks with helper in:
+  - `Start(...)`
+  - `PrimeThreadWorkerPlace()` runtime bot-tabs guard.
+
+### Files touched
+- `project/OsEngine/OsOptimizer/OptimizerExecutor.cs`
+
+### Validation
+- `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --configuration Debug`
+- Result: Passed 70 / Failed 0
+
+### Risks / notes
+- No runtime behavior change expected; reduces duplication and keeps bot-tab validity semantics consistent across start/runtime paths.
