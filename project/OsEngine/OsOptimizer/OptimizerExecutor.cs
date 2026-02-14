@@ -364,6 +364,13 @@ namespace OsEngine.OsOptimizer
 
             for (int i = 0; i < inSampleReports.Count; i++)
             {
+                string sourceBotName = inSampleReports[i].BotName;
+                if (string.IsNullOrWhiteSpace(sourceBotName))
+                {
+                    SendLogMessage("OutOfSample skipped source report with empty BotName during scheduling.", LogMessageType.System);
+                    continue;
+                }
+
                 if (!TryAcquireServerSlot())
                 {
                     WaitCurrentPhaseToComplete();
@@ -394,7 +401,7 @@ namespace OsEngine.OsOptimizer
                 }
 
                 StartNewBot(parameters, null, report,
-                    inSampleReports[i].BotName.Replace(" InSample", "") + " OutOfSample");
+                    sourceBotName.Replace(" InSample", "") + " OutOfSample");
             }
 
             WaitCurrentPhaseToComplete();
