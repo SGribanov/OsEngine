@@ -3751,3 +3751,19 @@ After each optimizer-related change, update this file with:
 
 ### Risks / notes
 - No functional logic change for normal ranges; improves diagnostic correctness under extreme parameter combinations.
+
+
+## Stabilization Update (2026-02-14) - Remove Unused InSample Faze Parameter
+### What changed
+- Simplified `StartOptimizeFazeInSample(...)` signature by removing unused `OptimizerFaze faze` argument.
+- Updated call site in `PrimeThreadWorkerPlace()` accordingly.
+
+### Files touched
+- `project/OsEngine/OsOptimizer/OptimizerExecutor.cs`
+
+### Validation
+- `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --configuration Debug`
+- Result: Passed 70 / Failed 0
+
+### Risks / notes
+- No runtime behavior change expected; reduces API noise and lowers risk of misleading future usage.

@@ -275,7 +275,7 @@ namespace OsEngine.OsOptimizer
 
                         StartAsuncBotFactoryInSample(countBots, strategyName, isScript, "InSample");
 
-                        StartOptimizeFazeInSample(currentFaze, report, _parameters, _parametersOn, countBots);
+                        StartOptimizeFazeInSample(report, _parameters, _parametersOn, countBots);
 
                         EndOfFazeFiltration(ReportsToFazes[ReportsToFazes.Count - 1]);
                     }
@@ -575,7 +575,7 @@ namespace OsEngine.OsOptimizer
 
         public List<OptimizerFazeReport> ReportsToFazes = new List<OptimizerFazeReport>();
 
-        private void StartOptimizeFazeInSample(OptimizerFaze faze, OptimizerFazeReport report,
+        private void StartOptimizeFazeInSample(OptimizerFazeReport report,
             List<IIStrategyParameter> allParameters, List<bool> parametersToOptimization, int inSampleBotsCount)
         {
             ReloadAllParam(allParameters);
