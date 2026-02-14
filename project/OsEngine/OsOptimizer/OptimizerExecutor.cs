@@ -344,7 +344,33 @@ namespace OsEngine.OsOptimizer
                 }
 
                 // SendLogMessage("Bot Out of Sample", LogMessageType.System);
-                List<IIStrategyParameter> parameters = inSampleReports[i].GetParameters();
+                List<IIStrategyParameter> parameters = null;
+                try
+                {
+                    parameters = inSampleReports[i].GetParameters();
+                }
+                catch (Exception ex)
+                {
+                    SendLogMessage("OutOfSample skipped source report due to parameter extraction error: "
+                        + inSampleReports[i].BotName + ". " + ex, LogMessageType.Error);
+
+                    if (_phaseCompletion != null && !_phaseCompletion.IsSet)
+                    {
+                        _phaseCompletion.Signal();
+                    }
+
+                    try
+                    {
+                        _serverSlots?.Release();
+                    }
+                    catch
+                    {
+                        // ignored
+                    }
+
+                    continue;
+                }
+
                 if (parameters == null)
                 {
                     SendLogMessage("OutOfSample skipped source report with null parameters: " + inSampleReports[i].BotName, LogMessageType.System);
