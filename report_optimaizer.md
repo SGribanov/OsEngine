@@ -773,3 +773,21 @@ After each optimizer-related change, update this file with:
 
 ### Risks / notes
 - Prevents null-server cascades and keeps single-bot test cleanup deterministic under server creation failures.
+
+## Stabilization Update (2026-02-14) - Strategy Name Guard In Executor TestBot
+### What changed
+- Added early validation for strategy identity in `OptimizerExecutor.TestBot(...)`.
+- If `_master.StrategyName` is null/empty/whitespace, method now:
+  - logs error;
+  - disposes await object;
+  - returns `null` before bot queue/server setup.
+
+### Files touched
+- `project/OsEngine/OsOptimizer/OptimizerExecutor.cs`
+
+### Validation
+- `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --configuration Debug`
+- Result: Passed 70 / Failed 0
+
+### Risks / notes
+- Prevents invalid async bot creation requests with empty strategy key in single-bot test path.
