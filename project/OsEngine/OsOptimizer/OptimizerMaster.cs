@@ -1129,6 +1129,12 @@ namespace OsEngine.OsOptimizer
 
         public BotPanel TestBot(OptimizerFazeReport faze, OptimizerReport report)
         {
+            if (faze == null || report == null)
+            {
+                SendLogMessage("Single-bot test skipped due to null faze/report input.", LogMessageType.Error);
+                return null;
+            }
+
             if (_aloneTestIsOver == false)
             {
                 return null;

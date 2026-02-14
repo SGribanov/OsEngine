@@ -627,3 +627,18 @@ After each optimizer-related change, update this file with:
 
 ### Risks / notes
 - Prevents rare null/out-of-range access on stale UI events when reports list is empty.
+
+## Stabilization Update (2026-02-14) - Input Guard In OptimizerMaster.TestBot
+### What changed
+- Added early input validation in `OptimizerMaster.TestBot(...)`.
+- If `faze` or `report` is `null`, method now logs an error and returns `null` without starting async single-bot test workflow.
+
+### Files touched
+- `project/OsEngine/OsOptimizer/OptimizerMaster.cs`
+
+### Validation
+- `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --configuration Debug`
+- Result: Passed 70 / Failed 0
+
+### Risks / notes
+- Avoids avoidable background task failures and UI wait lifecycle on invalid caller input.
