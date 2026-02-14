@@ -89,6 +89,12 @@ namespace OsEngine.OsOptimizer
                 return false;
             }
 
+            if (_master.Settings == null)
+            {
+                SendLogMessage("Optimizer start skipped: settings context is null.", LogMessageType.Error);
+                return false;
+            }
+
             if (string.IsNullOrWhiteSpace(_master.StrategyName))
             {
                 SendLogMessage("Optimizer start skipped: strategy name is empty.", LogMessageType.Error);
