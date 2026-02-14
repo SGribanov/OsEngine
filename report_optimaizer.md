@@ -791,3 +791,18 @@ After each optimizer-related change, update this file with:
 
 ### Risks / notes
 - Prevents invalid async bot creation requests with empty strategy key in single-bot test path.
+
+## Stabilization Update (2026-02-14) - Null Phase Guard In Executor TestBot
+### What changed
+- Added early validation in `OptimizerExecutor.TestBot(...)` for `reportFaze.Faze == null`.
+- On null phase configuration, method now logs error, disposes await object, and returns `null`.
+
+### Files touched
+- `project/OsEngine/OsOptimizer/OptimizerExecutor.cs`
+
+### Validation
+- `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --configuration Debug`
+- Result: Passed 70 / Failed 0
+
+### Risks / notes
+- Prevents null-phase dereference in single-bot test loop condition (`reportFaze.Faze.TimeEnd`).

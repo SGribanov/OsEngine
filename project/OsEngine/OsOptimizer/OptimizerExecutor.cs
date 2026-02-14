@@ -967,6 +967,13 @@ namespace OsEngine.OsOptimizer
                 return null;
             }
 
+            if (reportFaze.Faze == null)
+            {
+                SendLogMessage("Single-bot test skipped due to null phase configuration.", LogMessageType.Error);
+                awaitObj.Dispose();
+                return null;
+            }
+
             if (_primeThreadWorker != null)
             {
                 awaitObj?.Dispose();
