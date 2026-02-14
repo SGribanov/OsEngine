@@ -1264,6 +1264,12 @@ namespace OsEngine.OsOptimizer
                 return;
             }
 
+            if (bot.Parameters == null)
+            {
+                SendLogMessage("Optimizer report load skipped: bot parameters are null.", LogMessageType.Error);
+                return;
+            }
+
             try
             {
                 if (ReportsToFazes == null || ReportsToFazes.Count == 0)

@@ -1580,3 +1580,18 @@ After each optimizer-related change, update this file with:
 
 ### Risks / notes
 - No behavior change; improves operational readability of failure logs.
+
+## Stabilization Update (2026-02-14) - Bot Parameters Guard In Safe Load-To-Last-Faze Helper
+### What changed
+- Added pre-check in `SafeLoadBotToLastFaze(BotPanel bot)`:
+  - if `bot.Parameters == null`, load is skipped with error log.
+
+### Files touched
+- `project/OsEngine/OsOptimizer/OptimizerExecutor.cs`
+
+### Validation
+- `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --configuration Debug`
+- Result: Passed 70 / Failed 0
+
+### Risks / notes
+- Prevents last-faze load attempts on clearly incomplete bot state payload.
