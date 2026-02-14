@@ -3436,3 +3436,21 @@ After each optimizer-related change, update this file with:
 
 ### Risks / notes
 - Expected behavior is safer: avoids exposing false "idle" optimizer state while the prime thread is still unwinding.
+
+
+## Stabilization Update (2026-02-14) - Guard OutOfSample Phase Against Missing Prior InSample Reports
+### What changed
+- Added explicit guard in `PrimeThreadWorkerPlace()` before OutOfSample branch execution.
+- If no previous phase report exists, OutOfSample phase is skipped with error log instead of relying on index-based access.
+- Replaced repeated index-based access (`ReportsToFazes[... - 2]`) with local `inSampleReport` snapshot for clarity and safety.
+- `ReportsCount` log now uses null-safe count extraction.
+
+### Files touched
+- `project/OsEngine/OsOptimizer/OptimizerExecutor.cs`
+
+### Validation
+- `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --configuration Debug`
+- Result: Passed 70 / Failed 0
+
+### Risks / notes
+- Improves resilience for invalid phase sequencing configuration; prevents avoidable `IndexOutOfRange`-style failures in prime worker flow.

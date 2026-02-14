@@ -190,17 +190,24 @@ namespace OsEngine.OsOptimizer
                     }
                     else
                     {
+                        if (ReportsToFazes.Count == 0)
+                        {
+                            SendLogMessage("OutOfSample phase skipped: no previous in-sample phase reports are available.", LogMessageType.Error);
+                            continue;
+                        }
 
-                        SendLogMessage("ReportsCount " + ReportsToFazes[ReportsToFazes.Count - 1].Reports.Count.ToString(), LogMessageType.System);
+                        OptimizerFazeReport inSampleReport = ReportsToFazes[ReportsToFazes.Count - 1];
+                        int inSampleCount = inSampleReport?.Reports?.Count ?? 0;
+                        SendLogMessage("ReportsCount " + inSampleCount.ToString(), LogMessageType.System);
 
                         OptimizerFazeReport report = new OptimizerFazeReport();
                         report.Faze = _master.Fazes[i];
 
                         ReportsToFazes.Add(report);
 
-                        StartAsuncBotFactoryOutOfSample(ReportsToFazes[ReportsToFazes.Count - 2], _master.StrategyName, _master.IsScript, "OutOfSample");
+                        StartAsuncBotFactoryOutOfSample(inSampleReport, _master.StrategyName, _master.IsScript, "OutOfSample");
 
-                        StartOptimizeFazeOutOfSample(report, ReportsToFazes[ReportsToFazes.Count - 2]);
+                        StartOptimizeFazeOutOfSample(report, inSampleReport);
                     }
                 }
 
