@@ -35,6 +35,7 @@ Implemented and committed:
 26. Stabilization: added Bayesian strategy budget/uniqueness tests (tail-pass respects total eval budget; no duplicate candidate evaluations).
 27. Stabilization: added explicit input-shape guards (`null`/length mismatch) in brute-force and bayesian strategies with dedicated tests.
 28. Stabilization: hardened acquisition against negative `kappa` and extended guard coverage for `EstimateBotCount` path.
+29. Stabilization: added acquisition fallback coverage for invalid candidate payload (`null`/wrong size) to ensure safe selector path.
 
 ## Commits
 - `b1e5eabe3` — `Optimizer: persist Phase1 extraction and wiring state`
@@ -143,6 +144,7 @@ Added tests:
   - `BruteForceStrategy_EstimateBotCount_WithMismatchedFlags_ShouldThrowArgumentException`
   - `BayesianOptimizationStrategy_EstimateBotCount_WithMismatchedFlags_ShouldThrowArgumentException`
   - `BayesianAcquisitionPolicy_NegativeKappa_ShouldBeTreatedAsZero`
+  - `BayesianAcquisitionPolicy_InvalidCandidates_ShouldFallbackToSelectorPath`
   - `BayesianOptimizationStrategy_TailPassDisabled_ShouldPlanZeroTailBudget`
   - `BayesianOptimizationStrategy_TailSharePercent_ShouldClampToRange`
   - `OptimizerSettings_SaveLoad_ShouldPersistOptimizationMethodFields`
@@ -152,7 +154,7 @@ Command:
 - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --configuration Debug`
 
 Result:
-- Passed: 38
+- Passed: 39
 - Failed: 0
 
 ### Stabilization fixes from new tests

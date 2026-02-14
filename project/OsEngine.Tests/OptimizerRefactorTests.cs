@@ -967,6 +967,43 @@ public class OptimizerRefactorTests
     }
 
     [Fact]
+    public void BayesianAcquisitionPolicy_InvalidCandidates_ShouldFallbackToSelectorPath()
+    {
+        BayesianCandidateSelector selector = new BayesianCandidateSelector(defaultBatchSize: 2);
+        BayesianAcquisitionPolicy policy = new BayesianAcquisitionPolicy();
+        HashSet<int> evaluated = new HashSet<int> { 0 };
+        List<BayesianCandidateSelector.CandidateScore> scored = new List<BayesianCandidateSelector.CandidateScore>
+        {
+            new BayesianCandidateSelector.CandidateScore { Index = 0, Score = 1m }
+        };
+
+        List<int> fromNull = policy.SelectNextBatch(
+            totalCount: 6,
+            evaluated,
+            scored,
+            batchSize: 2,
+            fallbackSelector: selector,
+            candidates: null,
+            mode: BayesianAcquisitionModeType.Ucb,
+            kappa: 0.5m);
+
+        List<int> fromWrongSize = policy.SelectNextBatch(
+            totalCount: 6,
+            evaluated,
+            scored,
+            batchSize: 2,
+            fallbackSelector: selector,
+            candidates: BuildIntCandidates(5, "X", 1, 5, 1),
+            mode: BayesianAcquisitionModeType.Ucb,
+            kappa: 0.5m);
+
+        Assert.Equal(2, fromNull.Count);
+        Assert.Equal(2, fromWrongSize.Count);
+        Assert.Equal(fromNull, fromWrongSize);
+        Assert.DoesNotContain(0, fromNull);
+    }
+
+    [Fact]
     public void OptimizerSettings_SaveLoad_ShouldPersistOptimizationMethodFields()
     {
         lock (SettingsFileLock)
