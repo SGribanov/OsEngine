@@ -270,6 +270,7 @@ namespace OsEngine.OsOptimizer
                 }
 
                 _isClosed = true;
+                _progressPainterStop.Set();
 
                 ComboBoxThreadsCount.SelectionChanged -= ComboBoxThreadsCount_SelectionChanged;
 
@@ -390,6 +391,7 @@ namespace OsEngine.OsOptimizer
         private OptimizerMaster _master;
 
         private bool _isClosed;
+        private readonly ManualResetEvent _progressPainterStop = new ManualResetEvent(false);
 
         private void StopUserActivity()
         {
@@ -666,7 +668,10 @@ namespace OsEngine.OsOptimizer
         {
             while (true)
             {
-                Thread.Sleep(1500);
+                if (_progressPainterStop.WaitOne(1500))
+                {
+                    return;
+                }
 
                 if(_isClosed == true)
                 {
