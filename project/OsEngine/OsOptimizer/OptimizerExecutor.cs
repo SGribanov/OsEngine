@@ -509,48 +509,42 @@ namespace OsEngine.OsOptimizer
                 if (iterationCount < 0)
                 {
                     AbortPrimeWorker(
-                        "Optimizer prime worker skipped: iteration count is invalid at runtime (value " + iterationCount + ").",
-                        LogMessageType.Error);
+                        "Optimizer prime worker skipped: iteration count is invalid at runtime (value " + iterationCount + ").");
                     return;
                 }
 
                 if (threadsCount <= 0)
                 {
                     AbortPrimeWorker(
-                        "Optimizer prime worker skipped: threads count is invalid at runtime (value " + threadsCount + ").",
-                        LogMessageType.Error);
+                        "Optimizer prime worker skipped: threads count is invalid at runtime (value " + threadsCount + ").");
                     return;
                 }
 
                 if (!IsDefinedEnum(optimizationMethod))
                 {
                     AbortPrimeWorker(
-                        "Optimizer prime worker skipped: optimization method is invalid at runtime (value " + optimizationMethod + ").",
-                        LogMessageType.Error);
+                        "Optimizer prime worker skipped: optimization method is invalid at runtime (value " + optimizationMethod + ").");
                     return;
                 }
 
                 if (!IsDefinedEnum(objectiveMetric))
                 {
                     AbortPrimeWorker(
-                        "Optimizer prime worker skipped: objective metric is invalid at runtime (value " + objectiveMetric + ").",
-                        LogMessageType.Error);
+                        "Optimizer prime worker skipped: objective metric is invalid at runtime (value " + objectiveMetric + ").");
                     return;
                 }
 
                 if (!IsDefinedEnum(objectiveDirection))
                 {
                     AbortPrimeWorker(
-                        "Optimizer prime worker skipped: objective direction is invalid at runtime (value " + objectiveDirection + ").",
-                        LogMessageType.Error);
+                        "Optimizer prime worker skipped: objective direction is invalid at runtime (value " + objectiveDirection + ").");
                     return;
                 }
 
                 if (!IsDefinedEnum(bayesianAcquisitionMode))
                 {
                     AbortPrimeWorker(
-                        "Optimizer prime worker skipped: bayesian acquisition mode is invalid at runtime (value " + bayesianAcquisitionMode + ").",
-                        LogMessageType.Error);
+                        "Optimizer prime worker skipped: bayesian acquisition mode is invalid at runtime (value " + bayesianAcquisitionMode + ").");
                     return;
                 }
 
@@ -566,8 +560,7 @@ namespace OsEngine.OsOptimizer
                             "(initialSamples " + bayesianInitialSamples +
                             ", maxIterations " + bayesianMaxIterations +
                             ", batchSize " + bayesianBatchSize +
-                            ", kappa " + bayesianAcquisitionKappa + ").",
-                            LogMessageType.Error);
+                            ", kappa " + bayesianAcquisitionKappa + ").");
                         return;
                     }
 
@@ -585,16 +578,14 @@ namespace OsEngine.OsOptimizer
                 {
                     AbortPrimeWorker(
                         "Optimizer prime worker skipped: parameters snapshot count mismatch (flags " + parametersOnSnapshot.Count +
-                        ", params " + parametersSnapshot.Count + ").",
-                        LogMessageType.Error);
+                        ", params " + parametersSnapshot.Count + ").");
                     return;
                 }
 
                 if (TryFindNullParameterIndex(parametersSnapshot, out int runtimeNullIndex))
                 {
                     AbortPrimeWorker(
-                        "Optimizer prime worker skipped: parameter snapshot contains null at index " + runtimeNullIndex + ".",
-                        LogMessageType.Error);
+                        "Optimizer prime worker skipped: parameter snapshot contains null at index " + runtimeNullIndex + ".");
                     return;
                 }
 

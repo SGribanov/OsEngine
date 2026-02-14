@@ -4740,3 +4740,20 @@ After each optimizer-related change, update this file with:
 
 ### Risks / notes
 - No functional behavior change; improves observability of out-of-range Bayesian tail-share settings at runtime.
+
+
+## Stabilization Update (2026-02-14) - Remove Redundant Explicit Error Argument In Worker Abort Calls
+### What changed
+- Simplified `PrimeThreadWorkerPlace()` abort call sites:
+  - removed explicit `LogMessageType.Error` argument from `AbortPrimeWorker(...)` invocations.
+- Calls now rely on helper default log type (`Error`), preserving existing behavior.
+
+### Files touched
+- `project/OsEngine/OsOptimizer/OptimizerExecutor.cs`
+
+### Validation
+- `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --configuration Debug`
+- Result: Passed 70 / Failed 0
+
+### Risks / notes
+- No runtime behavior change expected; reduces repetitive noise in abort branches.
