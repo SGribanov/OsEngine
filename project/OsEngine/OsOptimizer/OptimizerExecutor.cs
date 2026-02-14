@@ -333,7 +333,29 @@ namespace OsEngine.OsOptimizer
                 }
 
                 // SendLogMessage("Bot Out of Sample", LogMessageType.System);
-                StartNewBot(inSampleReports[i].GetParameters(), null, report,
+                List<IIStrategyParameter> parameters = inSampleReports[i].GetParameters();
+                if (parameters == null)
+                {
+                    SendLogMessage("OutOfSample skipped source report with null parameters: " + inSampleReports[i].BotName, LogMessageType.System);
+
+                    if (_phaseCompletion != null && !_phaseCompletion.IsSet)
+                    {
+                        _phaseCompletion.Signal();
+                    }
+
+                    try
+                    {
+                        _serverSlots?.Release();
+                    }
+                    catch
+                    {
+                        // ignored
+                    }
+
+                    continue;
+                }
+
+                StartNewBot(parameters, null, report,
                     inSampleReports[i].BotName.Replace(" InSample", "") + " OutOfSample");
             }
 
