@@ -459,7 +459,14 @@ namespace OsEngine.OsOptimizer
 
             while (unscheduledCount > 0 && !phase.IsSet)
             {
-                phase.Signal();
+                try
+                {
+                    phase.Signal();
+                }
+                catch (ObjectDisposedException)
+                {
+                    break;
+                }
                 unscheduledCount--;
             }
         }
