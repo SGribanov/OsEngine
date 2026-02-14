@@ -2487,3 +2487,21 @@ After each optimizer-related change, update this file with:
 ### Risks / notes
 - No normal-path behavior change; standardizes subscriber-fault isolation for all testing-progress notifications.
 
+
+## Stabilization Update (2026-02-14) - Guard Log Event Dispatch In SendLogMessage
+### What changed
+- Updated `SendLogMessage(...)` in `OptimizerExecutor`.
+- Added explicit `null` early return for `LogMessageEvent`.
+- Wrapped event dispatch in `try/catch` to prevent subscriber exceptions from breaking optimizer control flow.
+- Catch block is intentionally non-logging to avoid recursive log-failure loops.
+
+### Files touched
+- `project/OsEngine/OsOptimizer/OptimizerExecutor.cs`
+
+### Validation
+- `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --configuration Debug`
+- Result: Passed 70 / Failed 0
+
+### Risks / notes
+- No normal-path behavior change; isolates external log sink failures from optimizer runtime.
+

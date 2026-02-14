@@ -1889,9 +1889,18 @@ namespace OsEngine.OsOptimizer
 
         private void SendLogMessage(string message, LogMessageType type)
         {
-            if (LogMessageEvent != null)
+            if (LogMessageEvent == null)
+            {
+                return;
+            }
+
+            try
             {
                 LogMessageEvent(message, type);
+            }
+            catch
+            {
+                // Avoid recursive logging failures from event subscribers.
             }
         }
 
