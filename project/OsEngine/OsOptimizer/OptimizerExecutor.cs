@@ -458,44 +458,48 @@ namespace OsEngine.OsOptimizer
         private bool TryAcquireServerSlot()
         {
             CancellationToken token = _stopCts?.Token ?? CancellationToken.None;
-
-            while (!token.IsCancellationRequested)
+            SemaphoreSlim slots = _serverSlots;
+            if (slots == null)
             {
-                if (_serverSlots == null)
-                {
-                    return false;
-                }
-
-                try
-                {
-                    if (_serverSlots.Wait(100, token))
-                    {
-                        return true;
-                    }
-                }
-                catch (OperationCanceledException)
-                {
-                    return false;
-                }
+                return false;
             }
 
-            return false;
+            try
+            {
+                slots.Wait(token);
+                return true;
+            }
+            catch (OperationCanceledException)
+            {
+                return false;
+            }
+            catch (ObjectDisposedException)
+            {
+                return false;
+            }
         }
 
         private void WaitCurrentPhaseToComplete()
         {
             CancellationToken token = _stopCts?.Token ?? CancellationToken.None;
+            CountdownEvent phaseCompletion = _phaseCompletion;
 
-            while (_phaseCompletion != null && !_phaseCompletion.IsSet)
+            if (phaseCompletion == null)
             {
-                try
-                {
-                    _phaseCompletion.Wait(100, token);
-                }
-                catch (OperationCanceledException)
-                {
-                    return;
-                }
+                return;
+            }
+
+            try
+            {
+                phaseCompletion.Wait(token);
+            }
+            catch (OperationCanceledException)
+            {
+                return;
+            }
+            catch (ObjectDisposedException)
+            {
+                return;
             }
         }
 

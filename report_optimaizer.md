@@ -48,6 +48,7 @@ Implemented and committed:
 39. Stabilization: hardened acquisition for duplicate scored indices by consolidating to max score per index before surrogate ranking.
 40. Stabilization: hardened `OptimizerSettings.Load()` enum parsing to reject undefined numeric enum values and keep safe defaults.
 41. Stabilization: removed remaining blocking sleep in single-bot test flow (`TestBot`) and made connection/min-runtime waits stop-aware through cancellation.
+42. Stabilization: replaced polling waits in `OptimizerExecutor` (`TryAcquireServerSlot`, `WaitCurrentPhaseToComplete`) with direct cancellation-aware synchronization waits.
 
 ## Commits
 - `b1e5eabe3` — `Optimizer: persist Phase1 extraction and wiring state`
