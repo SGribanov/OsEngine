@@ -1219,38 +1219,26 @@ namespace OsEngine.OsOptimizer
                 if (executor == null)
                 {
                     SendLogMessage("Single-bot test canceled: optimizer executor became unavailable.", LogMessageType.Error);
-                    if (IsCurrentSingleBotRun(runId))
-                    {
-                        _resultBotAloneTest = null;
-                    }
+                    TrySetSingleBotResult(runId, null);
                     return;
                 }
 
                 if (awaitUi == null)
                 {
                     SendLogMessage("Single-bot test canceled: await object is unavailable.", LogMessageType.Error);
-                    if (IsCurrentSingleBotRun(runId))
-                    {
-                        _resultBotAloneTest = null;
-                    }
+                    TrySetSingleBotResult(runId, null);
                     return;
                 }
 
                 BotPanel result =
                     executor.TestBot(fazeToTest, reportToTest, StartProgram.IsTester, awaitUi);
 
-                if (IsCurrentSingleBotRun(runId))
-                {
-                    _resultBotAloneTest = result;
-                }
+                TrySetSingleBotResult(runId, result);
             }
             catch (Exception ex)
             {
                 SendLogMessage("Single-bot test failed: " + ex, LogMessageType.Error);
-                if (IsCurrentSingleBotRun(runId))
-                {
-                    _resultBotAloneTest = null;
-                }
+                TrySetSingleBotResult(runId, null);
             }
             finally
             {
@@ -1288,6 +1276,14 @@ namespace OsEngine.OsOptimizer
         private bool IsCurrentSingleBotRun(int runId)
         {
             return runId == Volatile.Read(ref _aloneTestRunId);
+        }
+
+        private void TrySetSingleBotResult(int runId, BotPanel result)
+        {
+            if (IsCurrentSingleBotRun(runId))
+            {
+                _resultBotAloneTest = result;
+            }
         }
 
         #endregion

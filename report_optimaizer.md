@@ -1260,3 +1260,19 @@ After each optimizer-related change, update this file with:
 
 ### Risks / notes
 - Reduces redundant work and side-effect surface for already invalidated single-bot runs.
+
+## Stabilization Update (2026-02-14) - Unified Result Publish Helper For Async Single-Bot Runner
+### What changed
+- Added `TrySetSingleBotResult(int runId, BotPanel result)` helper in `OptimizerMaster`.
+- Replaced duplicated guarded assignments to `_resultBotAloneTest` in `RunAloneBotTestAsync(...)` with helper calls.
+- Helper enforces current-run check via `IsCurrentSingleBotRun(runId)` before writing shared result.
+
+### Files touched
+- `project/OsEngine/OsOptimizer/OptimizerMaster.cs`
+
+### Validation
+- `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --configuration Debug`
+- Result: Passed 70 / Failed 0
+
+### Risks / notes
+- Keeps async result publication logic centralized and consistent across success/error/cancel branches.
