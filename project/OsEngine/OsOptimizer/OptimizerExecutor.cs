@@ -270,8 +270,9 @@ namespace OsEngine.OsOptimizer
             HashSet<string> uniqueBotNames = new HashSet<string>(expectedNamesCount, StringComparer.Ordinal);
             const string inSampleSuffix = " InSample";
             string fazeSuffix = " " + normalizedFaze;
+            int reportsCount = reports.Count;
 
-            for (int i = 0; i < reports.Count; i++)
+            for (int i = 0; i < reportsCount; i++)
             {
                 OptimizerReport sourceReport = reports[i];
                 if (sourceReport == null)

@@ -3050,3 +3050,20 @@ After each optimizer-related change, update this file with:
 ### Risks / notes
 - No behavior change; improves log schema consistency across in-sample/out-of-sample skip diagnostics.
 
+
+## Stabilization Update (2026-02-14) - Use Stable Local Reports Count In OOS Factory Loop
+### What changed
+- Updated `StartAsuncBotFactoryOutOfSample(...)` in `OptimizerExecutor`.
+- Added local `reportsCount` snapshot and switched loop condition from `reports.Count` to `reportsCount`.
+- Keeps loop boundaries explicit and avoids repeated property access in iteration condition.
+
+### Files touched
+- `project/OsEngine/OsOptimizer/OptimizerExecutor.cs`
+
+### Validation
+- `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --configuration Debug`
+- Result: Passed 70 / Failed 0
+
+### Risks / notes
+- No functional behavior change; minor readability/consistency optimization.
+
