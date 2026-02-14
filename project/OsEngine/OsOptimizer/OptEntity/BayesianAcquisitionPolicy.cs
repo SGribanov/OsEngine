@@ -32,28 +32,41 @@ namespace OsEngine.OsOptimizer.OptEntity
             decimal kappa)
         {
             decimal effectiveKappa = kappa < 0 ? 0 : kappa;
+            HashSet<int> evaluatedSafe = evaluated ?? new HashSet<int>();
+            List<BayesianCandidateSelector.CandidateScore> scoredSafe =
+                scored ?? new List<BayesianCandidateSelector.CandidateScore>();
 
             if (batchSize <= 0 || totalCount <= 0)
             {
                 return new List<int>();
             }
 
-            if (scored == null || scored.Count == 0)
+            if (scoredSafe.Count == 0)
             {
-                return fallbackSelector.SelectInitialBatch(totalCount, evaluated, batchSize);
+                if (fallbackSelector == null)
+                {
+                    throw new ArgumentNullException(nameof(fallbackSelector));
+                }
+
+                return fallbackSelector.SelectInitialBatch(totalCount, evaluatedSafe, batchSize);
             }
 
             if (candidates == null || candidates.Count != totalCount)
             {
-                return fallbackSelector.SelectNextBatch(totalCount, evaluated, scored, batchSize);
+                if (fallbackSelector == null)
+                {
+                    throw new ArgumentNullException(nameof(fallbackSelector));
+                }
+
+                return fallbackSelector.SelectNextBatch(totalCount, evaluatedSafe, scoredSafe, batchSize);
             }
 
             List<CandidateAcquisition> ranked = new List<CandidateAcquisition>();
-            decimal bestMean = scored.Max(s => s.Score);
+            decimal bestMean = scoredSafe.Max(s => s.Score);
 
             for (int i = 0; i < totalCount; i++)
             {
-                if (evaluated.Contains(i))
+                if (evaluatedSafe.Contains(i))
                 {
                     continue;
                 }
@@ -61,9 +74,9 @@ namespace OsEngine.OsOptimizer.OptEntity
                 BayesianCandidateSelector.CandidateScore nearest = null;
                 decimal minDistance = decimal.MaxValue;
 
-                for (int j = 0; j < scored.Count; j++)
+                for (int j = 0; j < scoredSafe.Count; j++)
                 {
-                    int scoredIndex = scored[j].Index;
+                    int scoredIndex = scoredSafe[j].Index;
                     if (scoredIndex < 0 || scoredIndex >= totalCount)
                     {
                         continue;
@@ -73,7 +86,7 @@ namespace OsEngine.OsOptimizer.OptEntity
                     if (dist < minDistance)
                     {
                         minDistance = dist;
-                        nearest = scored[j];
+                        nearest = scoredSafe[j];
                     }
                 }
 

@@ -1004,6 +1004,46 @@ public class OptimizerRefactorTests
     }
 
     [Fact]
+    public void BayesianAcquisitionPolicy_NullEvaluated_ShouldTreatAsEmptySet()
+    {
+        BayesianCandidateSelector selector = new BayesianCandidateSelector(defaultBatchSize: 2);
+        BayesianAcquisitionPolicy policy = new BayesianAcquisitionPolicy();
+        List<BayesianCandidateSelector.CandidateScore> scored = new List<BayesianCandidateSelector.CandidateScore>
+        {
+            new BayesianCandidateSelector.CandidateScore { Index = 1, Score = 1m }
+        };
+
+        List<int> batch = policy.SelectNextBatch(
+            totalCount: 6,
+            evaluated: null,
+            scored: scored,
+            batchSize: 2,
+            fallbackSelector: selector,
+            candidates: BuildIntCandidates(6, "X", 1, 6, 1),
+            mode: BayesianAcquisitionModeType.Ucb,
+            kappa: 0.5m);
+
+        Assert.Equal(2, batch.Count);
+    }
+
+    [Fact]
+    public void BayesianAcquisitionPolicy_NullFallback_WhenFallbackPathNeeded_ShouldThrowArgumentNullException()
+    {
+        BayesianAcquisitionPolicy policy = new BayesianAcquisitionPolicy();
+
+        Assert.Throws<ArgumentNullException>(() =>
+            policy.SelectNextBatch(
+                totalCount: 5,
+                evaluated: null,
+                scored: null,
+                batchSize: 2,
+                fallbackSelector: null,
+                candidates: null,
+                mode: BayesianAcquisitionModeType.Ucb,
+                kappa: 0.25m));
+    }
+
+    [Fact]
     public void OptimizerSettings_SaveLoad_ShouldPersistOptimizationMethodFields()
     {
         lock (SettingsFileLock)
