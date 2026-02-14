@@ -4648,3 +4648,21 @@ After each optimizer-related change, update this file with:
 
 ### Risks / notes
 - Intentional robustness change: blocks meaningless empty-parameter run startup before worker lifecycle allocation.
+
+
+## Stabilization Update (2026-02-14) - Reuse Shared Null-Parameter Index Check
+### What changed
+- Added helper `TryFindNullParameterIndex(List<IIStrategyParameter> parameters, out int index)` in `OptimizerExecutor`.
+- Replaced duplicated null-parameter loops with helper in:
+  - `Start(...)` input validation;
+  - `PrimeThreadWorkerPlace()` runtime snapshot validation.
+
+### Files touched
+- `project/OsEngine/OsOptimizer/OptimizerExecutor.cs`
+
+### Validation
+- `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --configuration Debug`
+- Result: Passed 70 / Failed 0
+
+### Risks / notes
+- No runtime behavior change expected; reduces duplication and keeps null-parameter diagnostics consistent between start/runtime checks.

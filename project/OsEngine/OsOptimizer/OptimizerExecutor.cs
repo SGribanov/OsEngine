@@ -205,15 +205,12 @@ namespace OsEngine.OsOptimizer
                 return false;
             }
 
-            for (int i = 0; i < parameters.Count; i++)
+            if (TryFindNullParameterIndex(parameters, out int startNullIndex))
             {
-                if (parameters[i] == null)
-                {
-                    SendLogMessage(
-                        "Optimizer start skipped: parameter is null at index " + i + ".",
-                        LogMessageType.Error);
-                    return false;
-                }
+                SendLogMessage(
+                    "Optimizer start skipped: parameter is null at index " + startNullIndex + ".",
+                    LogMessageType.Error);
+                return false;
             }
 
             lock (_startSync)
@@ -364,6 +361,26 @@ namespace OsEngine.OsOptimizer
             {
                 if (fazes[i] != null)
                 {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        private static bool TryFindNullParameterIndex(List<IIStrategyParameter> parameters, out int index)
+        {
+            index = -1;
+            if (parameters == null)
+            {
+                return false;
+            }
+
+            for (int i = 0; i < parameters.Count; i++)
+            {
+                if (parameters[i] == null)
+                {
+                    index = i;
                     return true;
                 }
             }
@@ -553,15 +570,12 @@ namespace OsEngine.OsOptimizer
                     return;
                 }
 
-                for (int i = 0; i < parametersSnapshot.Count; i++)
+                if (TryFindNullParameterIndex(parametersSnapshot, out int runtimeNullIndex))
                 {
-                    if (parametersSnapshot[i] == null)
-                    {
-                        AbortPrimeWorker(
-                            "Optimizer prime worker skipped: parameter snapshot contains null at index " + i + ".",
-                            LogMessageType.Error);
-                        return;
-                    }
+                    AbortPrimeWorker(
+                        "Optimizer prime worker skipped: parameter snapshot contains null at index " + runtimeNullIndex + ".",
+                        LogMessageType.Error);
+                    return;
                 }
 
                 int countBotsRaw = BotCountOneFaze(parametersSnapshot, parametersOnSnapshot);
