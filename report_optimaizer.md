@@ -1276,3 +1276,19 @@ After each optimizer-related change, update this file with:
 
 ### Risks / notes
 - Keeps async result publication logic centralized and consistent across success/error/cancel branches.
+
+## Stabilization Update (2026-02-14) - Safe Done-Signal Wait Helper In Master Single-Bot Flow
+### What changed
+- Added `SafeWaitAloneTestDone(TimeSpan timeout)` helper in `OptimizerMaster`.
+- Replaced direct `_aloneTestDoneSignal.Wait(...)` call in `TestBot(...)` with safe helper usage.
+- Helper catches wait exceptions, logs diagnostics, and returns `false` to trigger standard timeout-style recovery path.
+
+### Files touched
+- `project/OsEngine/OsOptimizer/OptimizerMaster.cs`
+
+### Validation
+- `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --configuration Debug`
+- Result: Passed 70 / Failed 0
+
+### Risks / notes
+- Prevents unexpected wait exceptions from breaking single-bot control flow without recovery.

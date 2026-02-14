@@ -1178,7 +1178,7 @@ namespace OsEngine.OsOptimizer
                 return null;
             }
 
-            if (!_aloneTestDoneSignal.Wait(TimeSpan.FromSeconds(30)))
+            if (!SafeWaitAloneTestDone(TimeSpan.FromSeconds(30)))
             {
                 SendLogMessage("Single-bot test completion wait timed out.", LogMessageType.Error);
                 RecoverSingleBotStateAfterFailure(invalidateRunId: true);
@@ -1276,6 +1276,19 @@ namespace OsEngine.OsOptimizer
         private bool IsCurrentSingleBotRun(int runId)
         {
             return runId == Volatile.Read(ref _aloneTestRunId);
+        }
+
+        private bool SafeWaitAloneTestDone(TimeSpan timeout)
+        {
+            try
+            {
+                return _aloneTestDoneSignal.Wait(timeout);
+            }
+            catch (Exception ex)
+            {
+                SendLogMessage("Single-bot test done-signal wait failed: " + ex, LogMessageType.Error);
+                return false;
+            }
         }
 
         private void TrySetSingleBotResult(int runId, BotPanel result)
