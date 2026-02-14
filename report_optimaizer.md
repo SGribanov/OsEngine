@@ -691,3 +691,20 @@ After each optimizer-related change, update this file with:
 
 ### Risks / notes
 - Prevents dispatch attempts from DataGridView header/invalid column clicks.
+
+## Stabilization Update (2026-02-14) - UI Null Guard For Phase Reports Collection
+### What changed
+- Hardened result action handlers against `fazeReport.Reports == null`.
+- Updated row access checks in both dialogs and both handlers to:
+  - `if (fazeReport.Reports == null || e.RowIndex >= fazeReport.Reports.Count) return;`
+
+### Files touched
+- `project/OsEngine/OsOptimizer/OptimizerUi.xaml.cs`
+- `project/OsEngine/OsOptimizer/OptimizerReportUi.xaml.cs`
+
+### Validation
+- `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --configuration Debug`
+- Result: Passed 70 / Failed 0
+
+### Risks / notes
+- Prevents null dereference on stale/partially initialized phase report data.

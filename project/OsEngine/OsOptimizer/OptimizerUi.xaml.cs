@@ -3410,7 +3410,7 @@ namespace OsEngine.OsOptimizer
                 fazeReport = _reports[_gridFazesEnd.CurrentCell.RowIndex];
             }
 
-            if (e.RowIndex >= fazeReport.Reports.Count)
+            if (fazeReport.Reports == null || e.RowIndex >= fazeReport.Reports.Count)
             {
                 return;
             }
@@ -3466,7 +3466,7 @@ namespace OsEngine.OsOptimizer
                 fazeReport = _reports[_gridFazesEnd.CurrentCell.RowIndex];
             }
 
-            if (e.RowIndex >= fazeReport.Reports.Count)
+            if (fazeReport.Reports == null || e.RowIndex >= fazeReport.Reports.Count)
             {
                 return;
             }
