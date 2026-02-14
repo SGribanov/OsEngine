@@ -1225,6 +1225,11 @@ namespace OsEngine.OsOptimizer
             {
                 return false;
             }
+            catch (Exception ex)
+            {
+                SendLogMessage("Optimizer phase signal failed: " + ex, LogMessageType.Error);
+                return false;
+            }
         }
 
         private void SafeReleaseServerSlot()

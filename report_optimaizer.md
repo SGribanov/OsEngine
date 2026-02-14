@@ -1515,3 +1515,19 @@ After each optimizer-related change, update this file with:
 
 ### Risks / notes
 - Keeps common shutdown/over-release races quiet while improving diagnostics for non-expected release failures.
+
+## Stabilization Update (2026-02-14) - Refined Exception Handling In Safe Phase Signal
+### What changed
+- Improved `SafeTrySignalPhase(...)` in `OptimizerExecutor`:
+  - expected race exceptions (`ObjectDisposedException`, `InvalidOperationException`) remain silent with `false` result;
+  - added generic `catch (Exception ex)` with error log for non-expected failures.
+
+### Files touched
+- `project/OsEngine/OsOptimizer/OptimizerExecutor.cs`
+
+### Validation
+- `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --configuration Debug`
+- Result: Passed 70 / Failed 0
+
+### Risks / notes
+- Preserves race-safe behavior while improving visibility of unexpected phase-signaling failures.
