@@ -14,6 +14,7 @@ Implemented and committed:
 5. Phase 4 started: optimization strategy abstraction interfaces and brute-force strategy scaffold added.
 6. Phase 5 started: bayesian strategy skeleton added and wired via factory with safe brute-force backend delegation.
 7. Phase 5 continued: bayesian staged candidate loop implemented (`initial sampling + iterative batches`) with limits by `InitialSamples/MaxIterations/BatchSize`.
+8. Phase 5 continued: optimizer UI now exposes and persists optimization method/objective/bayesian numeric settings.
 
 ## Commits
 - `b1e5eabe3` — `Optimizer: persist Phase1 extraction and wiring state`
@@ -123,6 +124,7 @@ Result:
 - Phase 3: started (serializer extracted; legacy fallback preserved; further cleanup and adoption still pending).
 - Phase 4: in progress (core abstraction contracts added; executor switched to strategy-based in-sample pipeline).
 - Phase 5 (Bayesian optimization + UI controls): in progress (staged bayesian loop added; still grid-backed and not full probabilistic BO model).
+- Phase 5 (Bayesian optimization + UI controls): in progress (staged bayesian loop + UI wiring complete; probabilistic surrogate/acquisition not implemented yet).
 
 ## Phase 4 Changes (Started)
 ### New files
@@ -154,6 +156,27 @@ Result:
     - respects `InitialSamples`, `MaxIterations`, `BatchSize`, and cancellation token.
   - safety fallback remains for very large candidate pools (delegates to brute-force backend).
   - selection is centralized via `OptimizationStrategyFactory`.
+
+## Phase 5 UI Wiring (Continued)
+### Updated files
+- `project/OsEngine/OsOptimizer/OptimizerUi.xaml`
+- `project/OsEngine/OsOptimizer/OptimizerUi.xaml.cs`
+
+### Added controls and behavior
+- Added method/objective selectors:
+  - `ComboBoxOptimizationMethod`
+  - `ComboBoxObjectiveMetric`
+- Added bayesian numeric settings editors:
+  - `TextBoxBayesianInitialSamples`
+  - `TextBoxBayesianMaxIterations`
+  - `TextBoxBayesianBatchSize`
+- Added binding and validation in UI code-behind:
+  - values are loaded from `OptimizerMaster` at startup;
+  - edits are persisted back to `OptimizerMaster` (`OptimizationMethod`, `ObjectiveMetric`, `BayesianInitialSamples`, `BayesianMaxIterations`, `BayesianBatchSize`);
+  - bayesian numeric fields require positive integers.
+- Added dynamic enable/disable:
+  - bayesian numeric fields are enabled only when `OptimizationMethod = Bayesian`;
+  - disabled during optimization run and restored after completion.
 
 ## Phase 3 Changes (Started)
 ### New file

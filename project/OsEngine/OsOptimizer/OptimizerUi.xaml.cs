@@ -138,6 +138,30 @@ namespace OsEngine.OsOptimizer
 
             };
 
+            ComboBoxOptimizationMethod.Items.Clear();
+            foreach (OptimizationMethodType method in Enum.GetValues(typeof(OptimizationMethodType)))
+            {
+                ComboBoxOptimizationMethod.Items.Add(method.ToString());
+            }
+            ComboBoxOptimizationMethod.SelectedItem = _master.OptimizationMethod.ToString();
+            ComboBoxOptimizationMethod.SelectionChanged += ComboBoxOptimizationMethod_SelectionChanged;
+
+            ComboBoxObjectiveMetric.Items.Clear();
+            foreach (SortBotsType metric in Enum.GetValues(typeof(SortBotsType)))
+            {
+                ComboBoxObjectiveMetric.Items.Add(metric.ToString());
+            }
+            ComboBoxObjectiveMetric.SelectedItem = _master.ObjectiveMetric.ToString();
+            ComboBoxObjectiveMetric.SelectionChanged += ComboBoxObjectiveMetric_SelectionChanged;
+
+            TextBoxBayesianInitialSamples.Text = _master.BayesianInitialSamples.ToString();
+            TextBoxBayesianMaxIterations.Text = _master.BayesianMaxIterations.ToString();
+            TextBoxBayesianBatchSize.Text = _master.BayesianBatchSize.ToString();
+            TextBoxBayesianInitialSamples.TextChanged += TextBoxBayesianSettings_TextChanged;
+            TextBoxBayesianMaxIterations.TextChanged += TextBoxBayesianSettings_TextChanged;
+            TextBoxBayesianBatchSize.TextChanged += TextBoxBayesianSettings_TextChanged;
+            SyncOptimizationMethodControlsState();
+
             _master.NeedToMoveUiToEvent += _master_NeedToMoveUiToEvent;
             TextBoxStrategyName.Text = _master.StrategyName;
 
@@ -172,6 +196,8 @@ namespace OsEngine.OsOptimizer
             CheckBoxFilterDealsCount.Content = OsLocalization.Optimizer.Label34;
             ButtonStrategySelect.Content = OsLocalization.Optimizer.Label35;
             Label23.Content = OsLocalization.Optimizer.Label36;
+            LabelOptimizationMethod.Content = "Optimization method";
+            LabelObjectiveMetric.Content = "Objective metric";
             ButtonPositionSupport.Content = OsLocalization.Trader.Label47;
             ButtonStrategyReload.Content = OsLocalization.Optimizer.Label48;
             TabControlResultsSeries.Header = OsLocalization.Optimizer.Label37;
@@ -245,6 +271,11 @@ namespace OsEngine.OsOptimizer
                 DatePickerStart.SelectedDateChanged -= DatePickerStart_SelectedDateChanged;
                 DatePickerEnd.SelectedDateChanged -= DatePickerEnd_SelectedDateChanged;
                 TextBoxPercentFiltration.TextChanged -= TextBoxPercentFiltration_TextChanged;
+                ComboBoxOptimizationMethod.SelectionChanged -= ComboBoxOptimizationMethod_SelectionChanged;
+                ComboBoxObjectiveMetric.SelectionChanged -= ComboBoxObjectiveMetric_SelectionChanged;
+                TextBoxBayesianInitialSamples.TextChanged -= TextBoxBayesianSettings_TextChanged;
+                TextBoxBayesianMaxIterations.TextChanged -= TextBoxBayesianSettings_TextChanged;
+                TextBoxBayesianBatchSize.TextChanged -= TextBoxBayesianSettings_TextChanged;
 
                 _master.NewSecurityEvent -= _master_NewSecurityEvent;
                 _master.DateTimeStartEndChange -= _master_DateTimeStartEndChange;
@@ -350,6 +381,11 @@ namespace OsEngine.OsOptimizer
             CommissionValueTextBox.IsEnabled = false;
             TextBoxStrategyName.IsEnabled = false;
             ButtonStrategyReload.IsEnabled = false;
+            ComboBoxOptimizationMethod.IsEnabled = false;
+            ComboBoxObjectiveMetric.IsEnabled = false;
+            TextBoxBayesianInitialSamples.IsEnabled = false;
+            TextBoxBayesianMaxIterations.IsEnabled = false;
+            TextBoxBayesianBatchSize.IsEnabled = false;
         }
 
         private void StartUserActivity()
@@ -379,6 +415,9 @@ namespace OsEngine.OsOptimizer
             CommissionValueTextBox.IsEnabled = true;
             TextBoxStrategyName.IsEnabled = true;
             ButtonStrategyReload.IsEnabled = true;
+            ComboBoxOptimizationMethod.IsEnabled = true;
+            ComboBoxObjectiveMetric.IsEnabled = true;
+            SyncOptimizationMethodControlsState();
         }
 
         private DateTime _lastTestEndEventTime = DateTime.MinValue;
@@ -996,6 +1035,84 @@ namespace OsEngine.OsOptimizer
         private void CheckBoxLastInSample_Click(object sender, RoutedEventArgs e)
         {
             _master.LastInSample = CheckBoxLastInSample.IsChecked.Value;
+        }
+
+        private void ComboBoxOptimizationMethod_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            try
+            {
+                if (ComboBoxOptimizationMethod.SelectedItem == null)
+                {
+                    return;
+                }
+
+                if (Enum.TryParse(ComboBoxOptimizationMethod.SelectedItem.ToString(), out OptimizationMethodType method))
+                {
+                    _master.OptimizationMethod = method;
+                    SyncOptimizationMethodControlsState();
+                    Task.Run(PaintCountBotsInOptimization);
+                }
+            }
+            catch (Exception ex)
+            {
+                _master?.SendLogMessage(ex.ToString(), LogMessageType.Error);
+                ComboBoxOptimizationMethod.SelectedItem = _master.OptimizationMethod.ToString();
+            }
+        }
+
+        private void ComboBoxObjectiveMetric_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            try
+            {
+                if (ComboBoxObjectiveMetric.SelectedItem == null)
+                {
+                    return;
+                }
+
+                if (Enum.TryParse(ComboBoxObjectiveMetric.SelectedItem.ToString(), out SortBotsType metric))
+                {
+                    _master.ObjectiveMetric = metric;
+                }
+            }
+            catch (Exception ex)
+            {
+                _master?.SendLogMessage(ex.ToString(), LogMessageType.Error);
+                ComboBoxObjectiveMetric.SelectedItem = _master.ObjectiveMetric.ToString();
+            }
+        }
+
+        private void TextBoxBayesianSettings_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            try
+            {
+                int initialSamples = Convert.ToInt32(TextBoxBayesianInitialSamples.Text);
+                int maxIterations = Convert.ToInt32(TextBoxBayesianMaxIterations.Text);
+                int batchSize = Convert.ToInt32(TextBoxBayesianBatchSize.Text);
+
+                if (initialSamples < 1 || maxIterations < 1 || batchSize < 1)
+                {
+                    throw new Exception("Bayesian settings must be positive.");
+                }
+
+                _master.BayesianInitialSamples = initialSamples;
+                _master.BayesianMaxIterations = maxIterations;
+                _master.BayesianBatchSize = batchSize;
+            }
+            catch
+            {
+                TextBoxBayesianInitialSamples.Text = _master.BayesianInitialSamples.ToString();
+                TextBoxBayesianMaxIterations.Text = _master.BayesianMaxIterations.ToString();
+                TextBoxBayesianBatchSize.Text = _master.BayesianBatchSize.ToString();
+            }
+        }
+
+        private void SyncOptimizationMethodControlsState()
+        {
+            bool isBayesian = _master != null && _master.OptimizationMethod == OptimizationMethodType.Bayesian;
+
+            TextBoxBayesianInitialSamples.IsEnabled = isBayesian;
+            TextBoxBayesianMaxIterations.IsEnabled = isBayesian;
+            TextBoxBayesianBatchSize.IsEnabled = isBayesian;
         }
 
         private void ButtonResults_Click(object sender, RoutedEventArgs e)
