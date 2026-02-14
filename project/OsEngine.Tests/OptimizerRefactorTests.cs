@@ -833,6 +833,49 @@ public class OptimizerRefactorTests
         }
     }
 
+    [Fact]
+    public void OptimizerSettings_LoadFromFile_WithInvalidBayesianValues_ShouldClampOnLoad()
+    {
+        lock (SettingsFileLock)
+        {
+            using SettingsFileScope scope = new SettingsFileScope();
+
+            // Create baseline settings file with all modern fields.
+            _ = new OptimizerSettings
+            {
+                OptimizationMethod = OptimizationMethodType.Bayesian,
+                ObjectiveMetric = SortBotsType.TotalProfit,
+                BayesianInitialSamples = 10,
+                BayesianMaxIterations = 20,
+                BayesianBatchSize = 3,
+                ObjectiveDirection = ObjectiveDirectionType.Maximize,
+                BayesianAcquisitionMode = BayesianAcquisitionModeType.Ucb,
+                BayesianAcquisitionKappa = 0.5m,
+                BayesianUseTailPass = true,
+                BayesianTailSharePercent = 20
+            };
+
+            string[] lines = File.ReadAllLines(scope.SettingsPath);
+            Assert.True(lines.Length >= 10);
+
+            // Patch last settings block with invalid numeric values.
+            lines[^8] = "0";     // BayesianInitialSamples
+            lines[^7] = "-10";   // BayesianMaxIterations
+            lines[^6] = "0";     // BayesianBatchSize
+            lines[^3] = "-7.5";  // BayesianAcquisitionKappa
+            lines[^1] = "999";   // BayesianTailSharePercent
+            File.WriteAllLines(scope.SettingsPath, lines);
+
+            OptimizerSettings reader = new OptimizerSettings();
+
+            Assert.Equal(1, reader.BayesianInitialSamples);
+            Assert.Equal(1, reader.BayesianMaxIterations);
+            Assert.Equal(1, reader.BayesianBatchSize);
+            Assert.Equal(0m, reader.BayesianAcquisitionKappa);
+            Assert.Equal(50, reader.BayesianTailSharePercent);
+        }
+    }
+
     private sealed class SettingsFileScope : IDisposable
     {
         private readonly string _engineDirPath;

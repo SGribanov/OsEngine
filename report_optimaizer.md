@@ -27,6 +27,7 @@ Implemented and committed:
 18. Phase 5 tuning: added configurable `BayesianTailSharePercent` (settings + UI + strategy wiring) to control reserved tail budget share.
 19. Phase 5 tuning: fixed `ExpectedImprovement` acquisition to use optimistic mean (`mean + kappa * uncertainty`) before improvement calculation.
 20. Stabilization: added strict clamping for Bayesian method settings in `OptimizerSettings` (positive ints, non-negative kappa, tail share range).
+21. Stabilization: added file-level load clamp coverage for invalid Bayesian values in persisted settings.
 
 ## Commits
 - `b1e5eabe3` — `Optimizer: persist Phase1 extraction and wiring state`
@@ -126,6 +127,7 @@ Added tests:
   - `BayesianOptimizationStrategy_TailSharePercent_ShouldAffectPlannedTailBudget`
   - `BayesianAcquisitionPolicy_ExpectedImprovement_ShouldUseOptimisticMean`
   - `OptimizerSettings_MethodFields_ShouldClampInvalidValues`
+  - `OptimizerSettings_LoadFromFile_WithInvalidBayesianValues_ShouldClampOnLoad`
   - `OptimizerSettings_SaveLoad_ShouldPersistOptimizationMethodFields`
   - `OptimizerSettings_LoadLegacyWithoutV2Fields_ShouldKeepDefaultsForMethodSettings`
 
@@ -133,7 +135,7 @@ Command:
 - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --configuration Debug`
 
 Result:
-- Passed: 27
+- Passed: 28
 - Failed: 0
 
 ### Stabilization fixes from new tests
@@ -238,6 +240,7 @@ Result:
   - full save/load roundtrip for method settings, including direction/acquisition settings, tail-pass toggle, and tail-share percent;
   - legacy settings file (without appended method-setting lines) keeps defaults and does not break load.
   - invalid Bayesian setting values are clamped to safe bounds.
+  - invalid persisted Bayesian values are clamped on `Load()` path as well.
 
 ## Phase 3 Changes (Started)
 ### New file
