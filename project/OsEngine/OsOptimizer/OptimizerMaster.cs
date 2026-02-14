@@ -286,6 +286,12 @@ namespace OsEngine.OsOptimizer
             set => Settings.BayesianAcquisitionKappa = value;
         }
 
+        public bool BayesianUseTailPass
+        {
+            get => Settings.BayesianUseTailPass;
+            set => Settings.BayesianUseTailPass = value;
+        }
+
         public List<OrderClearing> ClearingTimes => Settings.ClearingTimes;
 
         public List<NonTradePeriod> NonTradePeriods => Settings.NonTradePeriods;

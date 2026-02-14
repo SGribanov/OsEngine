@@ -226,6 +226,7 @@ namespace OsEngine.OsOptimizer
                 _master.BayesianBatchSize,
                 _master.BayesianAcquisitionMode,
                 _master.BayesianAcquisitionKappa,
+                _master.BayesianUseTailPass,
                 out string infoMessage);
 
             if (!string.IsNullOrEmpty(infoMessage))

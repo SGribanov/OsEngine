@@ -22,6 +22,7 @@ Implemented and committed:
 13. Phase 5 continued: added objective-direction and acquisition-mode settings (`Ucb/EI/Greedy`, `kappa`) with wiring through settings, UI, factory and strategy.
 14. Phase 5 continued: added score normalization and metric-aware kappa scaling before acquisition.
 15. Phase 5 continued: added exploitation tail-pass (reserved budget slice from `MaxIterations`) with greedy acquisition at the end of staged run.
+16. Phase 5 continued: added explicit `BayesianUseTailPass` toggle (settings + UI + strategy wiring) to enable/disable exploitation tail-pass without code changes.
 
 ## Commits
 - `b1e5eabe3` — `Optimizer: persist Phase1 extraction and wiring state`
@@ -167,6 +168,7 @@ Result:
   - `BayesianBatchSize`
   - `BayesianAcquisitionMode`
   - `BayesianAcquisitionKappa`
+  - `BayesianUseTailPass`
 - Method-selection hook added in `OptimizerExecutor` for in-sample strategy resolution:
   - `Bayesian` now resolves to `BayesianOptimizationStrategy` skeleton.
   - bayesian strategy now performs staged search on grid candidates:
@@ -197,13 +199,14 @@ Result:
 - Added acquisition selectors:
   - `ComboBoxBayesianAcquisitionMode`
   - `TextBoxBayesianAcquisitionKappa`
+  - `CheckBoxBayesianTailPass`
 - Added bayesian numeric settings editors:
   - `TextBoxBayesianInitialSamples`
   - `TextBoxBayesianMaxIterations`
   - `TextBoxBayesianBatchSize`
 - Added binding and validation in UI code-behind:
   - values are loaded from `OptimizerMaster` at startup;
-  - edits are persisted back to `OptimizerMaster` (`OptimizationMethod`, `ObjectiveMetric`, `ObjectiveDirection`, `BayesianInitialSamples`, `BayesianMaxIterations`, `BayesianBatchSize`, `BayesianAcquisitionMode`, `BayesianAcquisitionKappa`);
+  - edits are persisted back to `OptimizerMaster` (`OptimizationMethod`, `ObjectiveMetric`, `ObjectiveDirection`, `BayesianInitialSamples`, `BayesianMaxIterations`, `BayesianBatchSize`, `BayesianAcquisitionMode`, `BayesianAcquisitionKappa`, `BayesianUseTailPass`);
   - bayesian integer fields require positive integers; `kappa` requires non-negative decimal.
 - Added dynamic enable/disable:
   - bayesian numeric fields are enabled only when `OptimizationMethod = Bayesian`;
@@ -216,7 +219,7 @@ Result:
 ### Notes
 - Added safe test fixture scope `SettingsFileScope` with backup/restore for `Engine/OptimizerSettings.txt`.
 - New tests verify:
-  - full save/load roundtrip for method settings, including direction and acquisition settings;
+  - full save/load roundtrip for method settings, including direction/acquisition settings and tail-pass toggle;
   - legacy settings file (without appended method-setting lines) keeps defaults and does not break load.
 
 ## Phase 3 Changes (Started)
@@ -236,7 +239,7 @@ Result:
    - full replacement of remaining polling in single-bot test flow where appropriate.
 2. Start Phase 3 (`OptimizerReport` serializer extraction with legacy fallback).
 3. Start Phase 4 strategy abstraction (`IOptimizationStrategy`, `IBotEvaluator`, brute-force extraction).
-4. Continue Phase 5 by tuning tail-budget heuristics and adding config toggle in settings/UI if needed.
+4. Continue Phase 5 by tuning tail-budget heuristics and validating effect on optimization quality metrics.
 
 ## Update Rule
 After each optimizer-related change, update this file with:

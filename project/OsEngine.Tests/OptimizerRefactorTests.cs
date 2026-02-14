@@ -351,6 +351,7 @@ public class OptimizerRefactorTests
             bayesianBatchSize: 2,
             bayesianAcquisitionMode: BayesianAcquisitionModeType.Ucb,
             bayesianAcquisitionKappa: 0.25m,
+            bayesianUseTailPass: true,
             out string infoMessage);
 
         Assert.IsType<BruteForceStrategy>(strategy);
@@ -374,6 +375,7 @@ public class OptimizerRefactorTests
             bayesianBatchSize: 3,
             bayesianAcquisitionMode: BayesianAcquisitionModeType.Ucb,
             bayesianAcquisitionKappa: 0.5m,
+            bayesianUseTailPass: true,
             out string infoMessage);
 
         BayesianOptimizationStrategy bayesian = Assert.IsType<BayesianOptimizationStrategy>(strategy);
@@ -384,6 +386,7 @@ public class OptimizerRefactorTests
         Assert.Equal(3, bayesian.BatchSize);
         Assert.Equal(BayesianAcquisitionModeType.Ucb, bayesian.AcquisitionMode);
         Assert.Equal(0.5m, bayesian.AcquisitionKappa);
+        Assert.True(bayesian.UseExploitationTailPass);
         Assert.False(string.IsNullOrEmpty(infoMessage));
         Assert.Contains("skeleton", infoMessage);
     }
@@ -413,7 +416,8 @@ public class OptimizerRefactorTests
             maxIterations: 20,
             batchSize: 2,
             acquisitionMode: BayesianAcquisitionModeType.Ucb,
-            acquisitionKappa: 0.25m);
+            acquisitionKappa: 0.25m,
+            useExploitationTailPass: true);
 
         List<IIStrategyParameter> allParameters = new List<IIStrategyParameter>
         {
@@ -454,7 +458,8 @@ public class OptimizerRefactorTests
             maxIterations: 3,
             batchSize: 2,
             acquisitionMode: BayesianAcquisitionModeType.Ucb,
-            acquisitionKappa: 0.25m);
+            acquisitionKappa: 0.25m,
+            useExploitationTailPass: true);
 
         List<IIStrategyParameter> allParameters = new List<IIStrategyParameter>
         {
@@ -605,7 +610,8 @@ public class OptimizerRefactorTests
                 BayesianBatchSize = 4,
                 ObjectiveDirection = ObjectiveDirectionType.Minimize,
                 BayesianAcquisitionMode = BayesianAcquisitionModeType.ExpectedImprovement,
-                BayesianAcquisitionKappa = 0.9m
+                BayesianAcquisitionKappa = 0.9m,
+                BayesianUseTailPass = false
             };
 
             OptimizerSettings reader = new OptimizerSettings();
@@ -618,6 +624,7 @@ public class OptimizerRefactorTests
             Assert.Equal(ObjectiveDirectionType.Minimize, reader.ObjectiveDirection);
             Assert.Equal(BayesianAcquisitionModeType.ExpectedImprovement, reader.BayesianAcquisitionMode);
             Assert.Equal(0.9m, reader.BayesianAcquisitionKappa);
+            Assert.False(reader.BayesianUseTailPass);
         }
     }
 
@@ -638,14 +645,15 @@ public class OptimizerRefactorTests
                 BayesianBatchSize = 7,
                 ObjectiveDirection = ObjectiveDirectionType.Minimize,
                 BayesianAcquisitionMode = BayesianAcquisitionModeType.Greedy,
-                BayesianAcquisitionKappa = 0.77m
+                BayesianAcquisitionKappa = 0.77m,
+                BayesianUseTailPass = false
             };
 
             string[] fullLines = File.ReadAllLines(scope.SettingsPath);
             Assert.True(fullLines.Length >= 5);
 
-            // Simulate legacy file by removing V2/V3 method lines from the tail.
-            string[] legacyLines = fullLines.Take(fullLines.Length - 8).ToArray();
+            // Simulate legacy file by removing appended method-setting lines from the tail.
+            string[] legacyLines = fullLines.Take(fullLines.Length - 9).ToArray();
             File.WriteAllLines(scope.SettingsPath, legacyLines);
 
             OptimizerSettings reader = new OptimizerSettings();
@@ -658,6 +666,7 @@ public class OptimizerRefactorTests
             Assert.Equal(ObjectiveDirectionType.Maximize, reader.ObjectiveDirection);
             Assert.Equal(BayesianAcquisitionModeType.Ucb, reader.BayesianAcquisitionMode);
             Assert.Equal(0.25m, reader.BayesianAcquisitionKappa);
+            Assert.True(reader.BayesianUseTailPass);
         }
     }
 

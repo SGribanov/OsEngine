@@ -468,6 +468,13 @@ namespace OsEngine.OsOptimizer.OptEntity
         }
         private decimal _bayesianAcquisitionKappa = 0.25m;
 
+        public bool BayesianUseTailPass
+        {
+            get => _bayesianUseTailPass;
+            set { _bayesianUseTailPass = value; Save(); }
+        }
+        private bool _bayesianUseTailPass = true;
+
         #endregion
 
         #region Save / Load
@@ -515,6 +522,7 @@ namespace OsEngine.OsOptimizer.OptEntity
                     writer.WriteLine(_objectiveDirection);
                     writer.WriteLine(_bayesianAcquisitionMode);
                     writer.WriteLine(_bayesianAcquisitionKappa);
+                    writer.WriteLine(_bayesianUseTailPass);
                 }
             }
             catch (Exception error)
@@ -581,6 +589,8 @@ namespace OsEngine.OsOptimizer.OptEntity
                         if (line != null) Enum.TryParse(line, out _bayesianAcquisitionMode);
                         line = reader.ReadLine();
                         if (line != null) _bayesianAcquisitionKappa = line.ToDecimal();
+                        line = reader.ReadLine();
+                        if (line != null) _bayesianUseTailPass = Convert.ToBoolean(line);
                     }
                 }
             }

@@ -37,7 +37,8 @@ namespace OsEngine.OsOptimizer.OptEntity
             int maxIterations,
             int batchSize,
             BayesianAcquisitionModeType acquisitionMode,
-            decimal acquisitionKappa)
+            decimal acquisitionKappa,
+            bool useExploitationTailPass)
         {
             _parameterIterator = parameterIterator;
             _botEvaluator = botEvaluator;
@@ -49,6 +50,7 @@ namespace OsEngine.OsOptimizer.OptEntity
             BatchSize = batchSize < 1 ? 1 : batchSize;
             AcquisitionMode = acquisitionMode;
             AcquisitionKappa = acquisitionKappa < 0 ? 0 : acquisitionKappa;
+            UseExploitationTailPass = useExploitationTailPass;
             _fallbackBackend = new BruteForceStrategy(parameterIterator, botEvaluator, _maxParallel);
             _candidateSelector = new BayesianCandidateSelector(BatchSize);
             _acquisitionPolicy = new BayesianAcquisitionPolicy();
@@ -67,6 +69,8 @@ namespace OsEngine.OsOptimizer.OptEntity
         public BayesianAcquisitionModeType AcquisitionMode { get; }
 
         public decimal AcquisitionKappa { get; }
+
+        public bool UseExploitationTailPass { get; }
 
         public int EstimateBotCount(List<IIStrategyParameter> allParameters, List<bool> parametersToOptimization)
         {
@@ -224,6 +228,11 @@ namespace OsEngine.OsOptimizer.OptEntity
 
         private int GetExploitationTailBudget()
         {
+            if (!UseExploitationTailPass)
+            {
+                return 0;
+            }
+
             if (MaxIterations < 4)
             {
                 return 0;

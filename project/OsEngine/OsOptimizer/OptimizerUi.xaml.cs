@@ -174,10 +174,12 @@ namespace OsEngine.OsOptimizer
             TextBoxBayesianMaxIterations.Text = _master.BayesianMaxIterations.ToString();
             TextBoxBayesianBatchSize.Text = _master.BayesianBatchSize.ToString();
             TextBoxBayesianAcquisitionKappa.Text = _master.BayesianAcquisitionKappa.ToString(CultureInfo.InvariantCulture);
+            CheckBoxBayesianTailPass.IsChecked = _master.BayesianUseTailPass;
             TextBoxBayesianInitialSamples.TextChanged += TextBoxBayesianSettings_TextChanged;
             TextBoxBayesianMaxIterations.TextChanged += TextBoxBayesianSettings_TextChanged;
             TextBoxBayesianBatchSize.TextChanged += TextBoxBayesianSettings_TextChanged;
             TextBoxBayesianAcquisitionKappa.TextChanged += TextBoxBayesianAcquisitionKappa_TextChanged;
+            CheckBoxBayesianTailPass.Click += CheckBoxBayesianTailPass_Click;
             SyncOptimizationMethodControlsState();
 
             _master.NeedToMoveUiToEvent += _master_NeedToMoveUiToEvent;
@@ -299,6 +301,7 @@ namespace OsEngine.OsOptimizer
                 TextBoxBayesianMaxIterations.TextChanged -= TextBoxBayesianSettings_TextChanged;
                 TextBoxBayesianBatchSize.TextChanged -= TextBoxBayesianSettings_TextChanged;
                 TextBoxBayesianAcquisitionKappa.TextChanged -= TextBoxBayesianAcquisitionKappa_TextChanged;
+                CheckBoxBayesianTailPass.Click -= CheckBoxBayesianTailPass_Click;
 
                 _master.NewSecurityEvent -= _master_NewSecurityEvent;
                 _master.DateTimeStartEndChange -= _master_DateTimeStartEndChange;
@@ -412,6 +415,7 @@ namespace OsEngine.OsOptimizer
             TextBoxBayesianMaxIterations.IsEnabled = false;
             TextBoxBayesianBatchSize.IsEnabled = false;
             TextBoxBayesianAcquisitionKappa.IsEnabled = false;
+            CheckBoxBayesianTailPass.IsEnabled = false;
         }
 
         private void StartUserActivity()
@@ -1202,6 +1206,12 @@ namespace OsEngine.OsOptimizer
             TextBoxBayesianBatchSize.IsEnabled = isBayesian;
             ComboBoxBayesianAcquisitionMode.IsEnabled = isBayesian;
             TextBoxBayesianAcquisitionKappa.IsEnabled = isBayesian;
+            CheckBoxBayesianTailPass.IsEnabled = isBayesian;
+        }
+
+        private void CheckBoxBayesianTailPass_Click(object sender, RoutedEventArgs e)
+        {
+            _master.BayesianUseTailPass = CheckBoxBayesianTailPass.IsChecked == true;
         }
 
         private void ButtonResults_Click(object sender, RoutedEventArgs e)
