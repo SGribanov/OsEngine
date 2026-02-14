@@ -1144,8 +1144,19 @@ namespace OsEngine.OsOptimizer
                 return null;
             }
 
-            BotPanel bot = CreateNewBot(botName,
-                parametrs, parametrs, server, startProgram);
+            BotPanel bot = null;
+            try
+            {
+                bot = CreateNewBot(botName,
+                    parametrs, parametrs, server, startProgram);
+            }
+            catch (Exception ex)
+            {
+                SendLogMessage("Single-bot test skipped due to bot creation error: " + ex, LogMessageType.Error);
+                SafeRemoveOptimizerServer(server);
+                SafeDisposeAwaitObject(awaitObj);
+                return null;
+            }
 
             if (bot == null)
             {
