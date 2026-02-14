@@ -2305,3 +2305,20 @@ After each optimizer-related change, update this file with:
 - No normal-path behavior change; prevents optimizer worker crash on unforeseen semaphore/acquire exceptions.
 
 
+
+## Stabilization Update (2026-02-14) - Guard Unexpected Exceptions In Phase Completion Wait
+### What changed
+- Updated `WaitCurrentPhaseToComplete()` in `OptimizerExecutor`.
+- Added fallback `catch (Exception ex)` branch.
+- On unexpected wait failure, method now logs details and returns safely.
+
+### Files touched
+- `project/OsEngine/OsOptimizer/OptimizerExecutor.cs`
+
+### Validation
+- `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --configuration Debug`
+- Result: Passed 70 / Failed 0
+
+### Risks / notes
+- No normal-path behavior change; prevents optimizer worker crash on unforeseen phase-wait exceptions.
+

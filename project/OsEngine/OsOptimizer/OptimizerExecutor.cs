@@ -742,6 +742,11 @@ namespace OsEngine.OsOptimizer
             {
                 return;
             }
+            catch (Exception ex)
+            {
+                SendLogMessage("Optimizer phase wait failed: " + ex, LogMessageType.Error);
+                return;
+            }
         }
 
         private void DisposeRunSynchronization()
