@@ -576,3 +576,18 @@ After each optimizer-related change, update this file with:
 
 ### Risks / notes
 - Reduces resource leaks (server/bot/await UI object) in single-bot test failure and cancellation paths.
+
+## Stabilization Update (2026-02-14) - UI Null Guard Before Chart Dialog
+### What changed
+- Added missing `null` guard in optimizer main UI before opening chart dialog from single-bot test result.
+- `OptimizerUi` now mirrors existing guard already present in `OptimizerReportUi`.
+
+### Files touched
+- `project/OsEngine/OsOptimizer/OptimizerUi.xaml.cs`
+
+### Validation
+- `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --configuration Debug`
+- Result: Passed 70 / Failed 0
+
+### Risks / notes
+- Prevents `NullReferenceException` when `TestBot(...)` returns `null` on early failure/cancel path.

@@ -3407,6 +3407,11 @@ namespace OsEngine.OsOptimizer
 
             BotPanel bot = _master.TestBot(fazeReport, fazeReport.Reports[e.RowIndex]);
 
+            if (bot == null)
+            {
+                return;
+            }
+
             BotPanelChartUi ui = bot.ShowChartDialog();
 
             ui.Closed += (sender, e) =>
