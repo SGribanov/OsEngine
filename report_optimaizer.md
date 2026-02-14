@@ -4757,3 +4757,25 @@ After each optimizer-related change, update this file with:
 
 ### Risks / notes
 - No runtime behavior change expected; reduces repetitive noise in abort branches.
+
+
+## Stabilization Update (2026-02-14) - Extract Prime-Worker Runtime Prerequisites Validation Helper
+### What changed
+- Refactored `PrimeThreadWorkerPlace()` by extracting early runtime guard chain into:
+  - `ValidatePrimeWorkerRuntimePrerequisites(out List<OptimizerFaze> fazesSnapshot)`.
+- New helper encapsulates prerequisite validation and initialization steps:
+  - runtime master/storage/settings/securities checks;
+  - runtime bot tabs retrieval and validity checks;
+  - reports collection reset;
+  - faze source/snapshot validity checks.
+- Main worker method now early-returns on helper failure and continues with validated `fazesSnapshot` on success.
+
+### Files touched
+- `project/OsEngine/OsOptimizer/OptimizerExecutor.cs`
+
+### Validation
+- `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --configuration Debug`
+- Result: Passed 70 / Failed 0
+
+### Risks / notes
+- No intended behavior change; improves maintainability and keeps runtime guard flow centralized.

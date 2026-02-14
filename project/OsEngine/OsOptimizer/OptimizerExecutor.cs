@@ -406,74 +406,8 @@ namespace OsEngine.OsOptimizer
         {
             try
             {
-                if (_master == null)
+                if (!ValidatePrimeWorkerRuntimePrerequisites(out List<OptimizerFaze> fazesSnapshot))
                 {
-                    AbortPrimeWorker("Optimizer prime worker skipped: master context is null at runtime.");
-                    return;
-                }
-
-                if (_master.Storage == null || _master.BotToTest == null)
-                {
-                    AbortPrimeWorker("Optimizer prime worker skipped: runtime storage/bot context is unavailable.");
-                    return;
-                }
-
-                if (_master.Settings == null)
-                {
-                    AbortPrimeWorker("Optimizer prime worker skipped: runtime settings context is unavailable.");
-                    return;
-                }
-
-                if (_master.Storage.Securities == null)
-                {
-                    AbortPrimeWorker("Optimizer prime worker skipped: runtime securities collection is unavailable.");
-                    return;
-                }
-
-                List<IIBotTab> runtimeBotTabs = null;
-                try
-                {
-                    runtimeBotTabs = _master.BotToTest.GetTabs();
-                }
-                catch (Exception ex)
-                {
-                    AbortPrimeWorker("Optimizer prime worker skipped: runtime bot tabs retrieval failed. " + ex);
-                    return;
-                }
-
-                if (runtimeBotTabs == null || runtimeBotTabs.Count == 0)
-                {
-                    AbortPrimeWorker("Optimizer prime worker skipped: runtime bot tabs collection is empty.");
-                    return;
-                }
-
-                if (!HasAnyNonNullTab(runtimeBotTabs))
-                {
-                    AbortPrimeWorker("Optimizer prime worker skipped: runtime bot tabs contain only null entries.");
-                    return;
-                }
-
-                lock (_reportsSync)
-                {
-                    ReportsToFazes = new List<OptimizerFazeReport>();
-                }
-                List<OptimizerFaze> fazesSource = _master.Fazes;
-                if (fazesSource == null || fazesSource.Count == 0)
-                {
-                    AbortPrimeWorker("Optimizer prime worker skipped: faze configuration is unavailable at runtime.");
-                    return;
-                }
-
-                List<OptimizerFaze> fazesSnapshot = new List<OptimizerFaze>(fazesSource);
-                if (fazesSnapshot.Count == 0)
-                {
-                    AbortPrimeWorker("Optimizer prime worker skipped: faze snapshot is empty at runtime.");
-                    return;
-                }
-
-                if (!HasAnyNonNullFaze(fazesSnapshot))
-                {
-                    AbortPrimeWorker("Optimizer prime worker skipped: faze snapshot contains only null entries.");
                     return;
                 }
 
@@ -724,6 +658,85 @@ namespace OsEngine.OsOptimizer
                 Interlocked.Exchange(ref _primeThreadWorker, null);
                 DisposeRunSynchronization();
             }
+        }
+
+        private bool ValidatePrimeWorkerRuntimePrerequisites(out List<OptimizerFaze> fazesSnapshot)
+        {
+            fazesSnapshot = null;
+
+            if (_master == null)
+            {
+                AbortPrimeWorker("Optimizer prime worker skipped: master context is null at runtime.");
+                return false;
+            }
+
+            if (_master.Storage == null || _master.BotToTest == null)
+            {
+                AbortPrimeWorker("Optimizer prime worker skipped: runtime storage/bot context is unavailable.");
+                return false;
+            }
+
+            if (_master.Settings == null)
+            {
+                AbortPrimeWorker("Optimizer prime worker skipped: runtime settings context is unavailable.");
+                return false;
+            }
+
+            if (_master.Storage.Securities == null)
+            {
+                AbortPrimeWorker("Optimizer prime worker skipped: runtime securities collection is unavailable.");
+                return false;
+            }
+
+            List<IIBotTab> runtimeBotTabs;
+            try
+            {
+                runtimeBotTabs = _master.BotToTest.GetTabs();
+            }
+            catch (Exception ex)
+            {
+                AbortPrimeWorker("Optimizer prime worker skipped: runtime bot tabs retrieval failed. " + ex);
+                return false;
+            }
+
+            if (runtimeBotTabs == null || runtimeBotTabs.Count == 0)
+            {
+                AbortPrimeWorker("Optimizer prime worker skipped: runtime bot tabs collection is empty.");
+                return false;
+            }
+
+            if (!HasAnyNonNullTab(runtimeBotTabs))
+            {
+                AbortPrimeWorker("Optimizer prime worker skipped: runtime bot tabs contain only null entries.");
+                return false;
+            }
+
+            lock (_reportsSync)
+            {
+                ReportsToFazes = new List<OptimizerFazeReport>();
+            }
+
+            List<OptimizerFaze> fazesSource = _master.Fazes;
+            if (fazesSource == null || fazesSource.Count == 0)
+            {
+                AbortPrimeWorker("Optimizer prime worker skipped: faze configuration is unavailable at runtime.");
+                return false;
+            }
+
+            fazesSnapshot = new List<OptimizerFaze>(fazesSource);
+            if (fazesSnapshot.Count == 0)
+            {
+                AbortPrimeWorker("Optimizer prime worker skipped: faze snapshot is empty at runtime.");
+                return false;
+            }
+
+            if (!HasAnyNonNullFaze(fazesSnapshot))
+            {
+                AbortPrimeWorker("Optimizer prime worker skipped: faze snapshot contains only null entries.");
+                return false;
+            }
+
+            return true;
         }
 
         private void StartAsuncBotFactoryInSample(int botCount, string botType, bool isScript, string faze)
