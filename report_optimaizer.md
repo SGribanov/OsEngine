@@ -84,6 +84,7 @@ Implemented and committed:
 75. Stabilization: added runtime coverage for Bayesian no-optimized-flags path to assert exactly one evaluation/report.
 76. Stabilization: hardened `StartOptimizeFazeOutOfSample` against null/empty `reportInSample.Reports` by introducing safe local snapshot and early-exit path without null dereference.
 77. Stabilization: added sanitization of out-of-sample source reports (`null` and empty `BotName` entries are filtered out before scheduling/countdown setup) to prevent null dereference and phase wait skew.
+78. Operability: added out-of-sample diagnostic log when invalid source reports are filtered out (`OutOfSample skipped invalid source reports: N`).
 
 ## Commits
 - `b1e5eabe3` — `Optimizer: persist Phase1 extraction and wiring state`

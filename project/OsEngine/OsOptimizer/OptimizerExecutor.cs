@@ -284,10 +284,17 @@ namespace OsEngine.OsOptimizer
             SendLogMessage(OsLocalization.Optimizer.Message6, LogMessageType.System);
 
             List<OptimizerReport> inSampleReports = reportInSample?.Reports;
+            int sourceCount = inSampleReports?.Count ?? 0;
             if (inSampleReports != null)
             {
                 inSampleReports = inSampleReports
                     .FindAll(r => r != null && !string.IsNullOrWhiteSpace(r.BotName));
+            }
+
+            int droppedInvalid = sourceCount - (inSampleReports?.Count ?? 0);
+            if (droppedInvalid > 0)
+            {
+                SendLogMessage("OutOfSample skipped invalid source reports: " + droppedInvalid, LogMessageType.System);
             }
 
             int outOfSampleBotsCount = inSampleReports?.Count ?? 0;
