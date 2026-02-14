@@ -4595,3 +4595,20 @@ After each optimizer-related change, update this file with:
 
 ### Risks / notes
 - Intentional robustness change: prevents launching optimizer with structurally empty (all-null) phase slots.
+
+
+## Stabilization Update (2026-02-14) - Guard All-Null Faze Snapshot In Prime Worker
+### What changed
+- Added runtime guard in `PrimeThreadWorkerPlace()` after faze snapshot copy:
+  - validates snapshot contains at least one non-null faze via shared helper `HasAnyNonNullFaze(...)`.
+- If snapshot is all-null, worker aborts through `AbortPrimeWorker(...)` path.
+
+### Files touched
+- `project/OsEngine/OsOptimizer/OptimizerExecutor.cs`
+
+### Validation
+- `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --configuration Debug`
+- Result: Passed 70 / Failed 0
+
+### Risks / notes
+- No intended behavior change for valid runtime state; makes all-null faze snapshot failure explicit and deterministic.

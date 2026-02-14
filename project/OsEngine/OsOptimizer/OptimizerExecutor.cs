@@ -438,6 +438,12 @@ namespace OsEngine.OsOptimizer
                     return;
                 }
 
+                if (!HasAnyNonNullFaze(fazesSnapshot))
+                {
+                    AbortPrimeWorker("Optimizer prime worker skipped: faze snapshot contains only null entries.");
+                    return;
+                }
+
                 string strategyName = _master.StrategyName;
                 bool isScript = _master.IsScript;
                 int iterationCount = _master.IterationCount;
