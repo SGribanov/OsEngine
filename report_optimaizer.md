@@ -675,3 +675,19 @@ After each optimizer-related change, update this file with:
 
 ### Risks / notes
 - Prevents negative-index access when DataGridView header/invalid rows trigger click events.
+
+## Stabilization Update (2026-02-14) - UI Negative ColumnIndex Guard In Result Click Dispatcher
+### What changed
+- Hardened result click dispatcher in both optimizer UI windows.
+- `_gridResults_CellMouseClick(...)` now returns early when `e.ColumnIndex < 0` (together with existing row guard).
+
+### Files touched
+- `project/OsEngine/OsOptimizer/OptimizerUi.xaml.cs`
+- `project/OsEngine/OsOptimizer/OptimizerReportUi.xaml.cs`
+
+### Validation
+- `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --configuration Debug`
+- Result: Passed 70 / Failed 0
+
+### Risks / notes
+- Prevents dispatch attempts from DataGridView header/invalid column clicks.
