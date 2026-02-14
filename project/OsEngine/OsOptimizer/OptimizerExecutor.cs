@@ -193,11 +193,11 @@ namespace OsEngine.OsOptimizer
             List<string> botNames = new List<string>();
             HashSet<string> uniqueBotNames = new HashSet<string>(StringComparer.Ordinal);
             int startServerIndex = _serverNum;
+            string fazeSuffix = " " + normalizedFaze;
 
             for (int i = 0; i < botCount; i++)
             {
                 string botNameBase = (startServerIndex + i) + " OpT";
-                string fazeSuffix = " " + normalizedFaze;
                 string botName = botNameBase.EndsWith(fazeSuffix, StringComparison.Ordinal)
                     ? botNameBase
                     : botNameBase + fazeSuffix;

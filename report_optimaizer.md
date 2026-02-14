@@ -2821,3 +2821,20 @@ After each optimizer-related change, update this file with:
 ### Risks / notes
 - No functional behavior change expected for current input shape; aligns naming logic and avoids accidental duplicate suffixes in edge extensions.
 
+
+## Stabilization Update (2026-02-14) - Hoist InSample Phase Suffix Outside Name Loop
+### What changed
+- Updated `StartAsuncBotFactoryInSample(...)` in `OptimizerExecutor`.
+- Moved `fazeSuffix` construction out of per-item loop to method-local precomputed variable.
+- Loop now reuses one suffix value when building bot names.
+
+### Files touched
+- `project/OsEngine/OsOptimizer/OptimizerExecutor.cs`
+
+### Validation
+- `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --configuration Debug`
+- Result: Passed 70 / Failed 0
+
+### Risks / notes
+- No functional behavior change; minor allocation/readability optimization.
+
