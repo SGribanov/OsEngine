@@ -887,7 +887,13 @@ namespace OsEngine.OsOptimizer
 
                 if (sources[i].TabType == BotTabType.Simple)
                 {// BotTabSimple
-                    BotTabSimple simple = (BotTabSimple)sources[i];
+                    BotTabSimple simple = sources[i] as BotTabSimple;
+                    if (simple == null)
+                    {
+                        SendLogMessage("CreateNewServer skipped simple tab bind: invalid tab instance at source index " + i + ".", LogMessageType.Error);
+                        continue;
+                    }
+
                     if (simple?.Connector == null)
                     {
                         SendLogMessage("CreateNewServer skipped simple tab bind: connector is null at source index " + i + ".", LogMessageType.Error);
@@ -910,7 +916,13 @@ namespace OsEngine.OsOptimizer
                 }
                 else if (sources[i].TabType == BotTabType.Index)
                 {// BotTabIndex
-                    BotTabIndex index = (BotTabIndex)sources[i];
+                    BotTabIndex index = sources[i] as BotTabIndex;
+                    if (index == null)
+                    {
+                        SendLogMessage("CreateNewServer skipped index bind: invalid tab instance at source index " + i + ".", LogMessageType.Error);
+                        continue;
+                    }
+
                     if (index?.Tabs == null)
                     {
                         SendLogMessage("CreateNewServer skipped index bind: tabs collection is null at source index " + i + ".", LogMessageType.Error);
@@ -942,7 +954,13 @@ namespace OsEngine.OsOptimizer
                 }
                 else if (sources[i].TabType == BotTabType.Screener)
                 {// BotTabScreener
-                    BotTabScreener screener = (BotTabScreener)sources[i];
+                    BotTabScreener screener = sources[i] as BotTabScreener;
+                    if (screener == null)
+                    {
+                        SendLogMessage("CreateNewServer skipped screener bind: invalid tab instance at source index " + i + ".", LogMessageType.Error);
+                        continue;
+                    }
+
                     if (screener?.Tabs == null)
                     {
                         SendLogMessage("CreateNewServer skipped screener bind: tabs collection is null at source index " + i + ".", LogMessageType.Error);
