@@ -1256,6 +1256,33 @@ public class OptimizerRefactorTests
     }
 
     [Fact]
+    public void BayesianAcquisitionPolicy_DuplicateScoredIndex_ShouldUseMaxScorePerIndex()
+    {
+        BayesianAcquisitionPolicy policy = new BayesianAcquisitionPolicy();
+        BayesianCandidateSelector selector = new BayesianCandidateSelector(defaultBatchSize: 1);
+        HashSet<int> evaluated = new HashSet<int> { 0, 9 };
+        List<BayesianCandidateSelector.CandidateScore> scored = new List<BayesianCandidateSelector.CandidateScore>
+        {
+            new BayesianCandidateSelector.CandidateScore { Index = 0, Score = 0m },
+            new BayesianCandidateSelector.CandidateScore { Index = 0, Score = 1m },
+            new BayesianCandidateSelector.CandidateScore { Index = 9, Score = 0.5m }
+        };
+
+        List<int> batch = policy.SelectNextBatch(
+            totalCount: 10,
+            evaluated,
+            scored,
+            batchSize: 1,
+            fallbackSelector: selector,
+            candidates: BuildIntCandidates(10, "X", 1, 10, 1),
+            mode: BayesianAcquisitionModeType.Greedy,
+            kappa: 0m);
+
+        Assert.Single(batch);
+        Assert.Equal(4, batch[0]);
+    }
+
+    [Fact]
     public void OptimizerSettings_SaveLoad_ShouldPersistOptimizationMethodFields()
     {
         lock (SettingsFileLock)

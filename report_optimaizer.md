@@ -45,6 +45,7 @@ Implemented and committed:
 36. Stabilization: hardened acquisition against `null` entries inside `scored` list (ignore invalid entries) with dedicated coverage.
 37. Stabilization: hardened `BayesianCandidateSelector.SelectNextBatch` for `null scored` and `null` scored entries with safe sequential fallback behavior.
 38. Stabilization: hardened `BayesianCandidateSelector` for `null evaluated` in both initial and iterative selection paths.
+39. Stabilization: hardened acquisition for duplicate scored indices by consolidating to max score per index before surrogate ranking.
 
 ## Commits
 - `b1e5eabe3` — `Optimizer: persist Phase1 extraction and wiring state`
@@ -165,6 +166,7 @@ Added tests:
   - `BayesianAcquisitionPolicy_MixedScoredIndices_ShouldIgnoreInvalidAndUseValid`
   - `BayesianAcquisitionPolicy_NullFallback_OnDirectAcquisitionPath_ShouldNotThrow`
   - `BayesianAcquisitionPolicy_ScoredContainsNullEntries_ShouldIgnoreNulls`
+  - `BayesianAcquisitionPolicy_DuplicateScoredIndex_ShouldUseMaxScorePerIndex`
   - `BayesianOptimizationStrategy_TailPassDisabled_ShouldPlanZeroTailBudget`
   - `BayesianOptimizationStrategy_TailSharePercent_ShouldClampToRange`
   - `OptimizerSettings_SaveLoad_ShouldPersistOptimizationMethodFields`
@@ -174,7 +176,7 @@ Command:
 - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --configuration Debug`
 
 Result:
-- Passed: 50
+- Passed: 51
 - Failed: 0
 
 ### Stabilization fixes from new tests
