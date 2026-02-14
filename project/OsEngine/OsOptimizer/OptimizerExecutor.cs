@@ -71,15 +71,9 @@ namespace OsEngine.OsOptimizer
                 return false;
             }
 
-            if (_master.Fazes == null || _master.Fazes.Count == 0)
+            if (!TryGetFazesSnapshot(out _, out string fazesError))
             {
-                SendLogMessage("Optimizer start skipped: faze configuration is empty.", LogMessageType.Error);
-                return false;
-            }
-
-            if (!HasAnyNonNullFaze(_master.Fazes))
-            {
-                SendLogMessage("Optimizer start skipped: faze configuration contains only null entries.", LogMessageType.Error);
+                SendLogMessage("Optimizer start skipped: " + fazesError, LogMessageType.Error);
                 return false;
             }
 
@@ -374,6 +368,40 @@ namespace OsEngine.OsOptimizer
             if (!HasAnyNonNullTab(tabs))
             {
                 error = "bot tabs collection contains only null entries.";
+                return false;
+            }
+
+            return true;
+        }
+
+        private bool TryGetFazesSnapshot(out List<OptimizerFaze> fazes, out string error)
+        {
+            fazes = null;
+            error = null;
+
+            if (_master == null)
+            {
+                error = "master context is null.";
+                return false;
+            }
+
+            List<OptimizerFaze> source = _master.Fazes;
+            if (source == null)
+            {
+                error = "faze configuration is unavailable.";
+                return false;
+            }
+
+            if (source.Count == 0)
+            {
+                error = "faze configuration is empty.";
+                return false;
+            }
+
+            fazes = new List<OptimizerFaze>(source);
+            if (!HasAnyNonNullFaze(fazes))
+            {
+                error = "faze configuration contains only null entries.";
                 return false;
             }
 
@@ -712,23 +740,9 @@ namespace OsEngine.OsOptimizer
                 ReportsToFazes = new List<OptimizerFazeReport>();
             }
 
-            List<OptimizerFaze> fazesSource = _master.Fazes;
-            if (fazesSource == null || fazesSource.Count == 0)
+            if (!TryGetFazesSnapshot(out fazesSnapshot, out string fazesError))
             {
-                AbortPrimeWorker("Optimizer prime worker skipped: faze configuration is unavailable at runtime.");
-                return false;
-            }
-
-            fazesSnapshot = new List<OptimizerFaze>(fazesSource);
-            if (fazesSnapshot.Count == 0)
-            {
-                AbortPrimeWorker("Optimizer prime worker skipped: faze snapshot is empty at runtime.");
-                return false;
-            }
-
-            if (!HasAnyNonNullFaze(fazesSnapshot))
-            {
-                AbortPrimeWorker("Optimizer prime worker skipped: faze snapshot contains only null entries.");
+                AbortPrimeWorker("Optimizer prime worker skipped: runtime " + fazesError);
                 return false;
             }
 

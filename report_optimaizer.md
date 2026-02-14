@@ -4870,3 +4870,21 @@ After each optimizer-related change, update this file with:
 
 ### Risks / notes
 - No runtime behavior change expected; reduces local-variable noise and clarifies intent (validation-only usage).
+
+## Stabilization Update (2026-02-14) - Reuse Shared Faze Snapshot Validation Helper
+### What changed
+- Added helper `TryGetFazesSnapshot(out List<OptimizerFaze> fazes, out string error)` in `OptimizerExecutor`.
+- Switched `Start(...)` faze checks to helper-based validation (`out _` at start path since only validation is required).
+- Switched `ValidatePrimeWorkerRuntimePrerequisites(...)` to reuse the same helper for runtime faze snapshot + non-null-content checks.
+- Removed duplicated faze snapshot/emptiness/non-null validation branches from prime worker prerequisite path.
+
+### Files touched
+- `project/OsEngine/OsOptimizer/OptimizerExecutor.cs`
+- `report_optimaizer.md`
+
+### Validation
+- `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --configuration Debug`
+- Result: Passed 70 / Failed 0
+
+### Risks / notes
+- No intended behavior change; unifies faze validation semantics between start/runtime checks and reduces drift risk.
