@@ -242,6 +242,7 @@ namespace OsEngine.OsOptimizer
 
             List<string> botNames = new List<string>();
             HashSet<string> uniqueBotNames = new HashSet<string>(StringComparer.Ordinal);
+            const string inSampleSuffix = " InSample";
 
             for (int i = 0; i < reportFiltered.Reports.Count; i++)
             {
@@ -260,7 +261,6 @@ namespace OsEngine.OsOptimizer
                 }
 
                 string transformedBotName = sourceBotName;
-                const string inSampleSuffix = " InSample";
                 if (transformedBotName.EndsWith(inSampleSuffix, StringComparison.Ordinal))
                 {
                     transformedBotName = transformedBotName.Substring(0, transformedBotName.Length - inSampleSuffix.Length);
