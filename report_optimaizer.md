@@ -3383,3 +3383,23 @@ After each optimizer-related change, update this file with:
 
 ### Risks / notes
 - No functional behavior change expected; improves resource hygiene and reduces stale state leakage across repeated start/stop cycles.
+
+
+## Stabilization Update (2026-02-14) - Lock Server-State Reset During Start Reinitialization
+### What changed
+- Updated `Start(...)` in `OptimizerExecutor` to reset server-tracking state under `_serverRemoveLocker`:
+  - `_servers`
+  - `_countAllServersMax`
+  - `_countAllServersEndTest`
+  - `_serverNum`
+- This aligns reset path with existing lock discipline used by server end-event and server list mutation flows.
+
+### Files touched
+- `project/OsEngine/OsOptimizer/OptimizerExecutor.cs`
+
+### Validation
+- `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --configuration Debug`
+- Result: Passed 70 / Failed 0
+
+### Risks / notes
+- No behavior change expected; reduces race windows during rapid stop/start cycles with late server callbacks.

@@ -88,10 +88,13 @@ namespace OsEngine.OsOptimizer
                 SendLogMessage("Optimizer start cleanup failed: previous phase completion dispose. " + ex, LogMessageType.Error);
             }
 
-            _servers = new List<OptimizerServer>();
-            _countAllServersMax = 0;
-            _countAllServersEndTest = 0;
-            _serverNum = 1;
+            lock (_serverRemoveLocker)
+            {
+                _servers = new List<OptimizerServer>();
+                _countAllServersMax = 0;
+                _countAllServersEndTest = 0;
+                _serverNum = 1;
+            }
             lock (_testBotsTimeSync)
             {
                 _testBotsTime.Clear();
