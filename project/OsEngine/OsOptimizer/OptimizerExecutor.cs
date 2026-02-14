@@ -312,7 +312,15 @@ namespace OsEngine.OsOptimizer
                 {
                     ReportsToFazes = new List<OptimizerFazeReport>();
                 }
-                List<OptimizerFaze> fazesSnapshot = new List<OptimizerFaze>(_master.Fazes);
+                List<OptimizerFaze> fazesSource = _master.Fazes;
+                if (fazesSource == null || fazesSource.Count == 0)
+                {
+                    SendLogMessage("Optimizer prime worker skipped: faze configuration is unavailable at runtime.", LogMessageType.Error);
+                    SafeInvokeTestReady(GetReportsSnapshotForPublish());
+                    return;
+                }
+
+                List<OptimizerFaze> fazesSnapshot = new List<OptimizerFaze>(fazesSource);
                 string strategyName = _master.StrategyName;
                 bool isScript = _master.IsScript;
                 int iterationCount = _master.IterationCount;
