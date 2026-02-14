@@ -3499,3 +3499,23 @@ After each optimizer-related change, update this file with:
 
 ### Risks / notes
 - No functional behavior change expected for normal single-caller usage; improves correctness under accidental concurrent start requests.
+
+
+## Stabilization Update (2026-02-14) - Atomic Prime-Worker State Read/Reset
+### What changed
+- Added `IsPrimeWorkerActive()` helper in `OptimizerExecutor` using `Volatile.Read(ref _primeThreadWorker)`.
+- Updated active-worker checks to use helper:
+  - `Start(...)`
+  - `TestBot(...)`
+- Updated worker teardown in `PrimeThreadWorkerPlace()` `finally` to atomic reset:
+  - `Interlocked.Exchange(ref _primeThreadWorker, null)`.
+
+### Files touched
+- `project/OsEngine/OsOptimizer/OptimizerExecutor.cs`
+
+### Validation
+- `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --configuration Debug`
+- Result: Passed 70 / Failed 0
+
+### Risks / notes
+- No functional behavior change expected; reduces residual data-race risk for prime-worker activity flag under concurrent reads/writes.

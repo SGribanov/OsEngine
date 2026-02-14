@@ -57,11 +57,16 @@ namespace OsEngine.OsOptimizer
         private readonly object _testBotsTimeSync = new object();
         private readonly object _startSync = new object();
 
+        private bool IsPrimeWorkerActive()
+        {
+            return Volatile.Read(ref _primeThreadWorker) != null;
+        }
+
         public bool Start(List<bool> parametersOn, List<IIStrategyParameter> parameters)
         {
             lock (_startSync)
             {
-                if (_primeThreadWorker != null)
+                if (IsPrimeWorkerActive())
                 {
                     SendLogMessage(OsLocalization.Optimizer.Message1, LogMessageType.System);
                     return false;
@@ -250,7 +255,7 @@ namespace OsEngine.OsOptimizer
             }
             finally
             {
-                _primeThreadWorker = null;
+                Interlocked.Exchange(ref _primeThreadWorker, null);
                 DisposeRunSynchronization();
             }
         }
@@ -1412,7 +1417,7 @@ namespace OsEngine.OsOptimizer
                 return null;
             }
 
-            if (_primeThreadWorker != null)
+            if (IsPrimeWorkerActive())
             {
                 SendLogMessage("Single-bot test request ignored: previous test worker is still active.", LogMessageType.System);
                 SafeDisposeAwaitObject(awaitObj);
