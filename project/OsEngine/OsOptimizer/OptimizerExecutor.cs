@@ -315,7 +315,10 @@ namespace OsEngine.OsOptimizer
 
             if (botNames.Count == 0)
             {
-                SendLogMessage("Async bot factory start skipped (OutOfSample): no bot names generated.", LogMessageType.System);
+                SendLogMessage(
+                    "Async bot factory start skipped (OutOfSample): no bot names generated (expected " +
+                    expectedNamesCount + ", bot type '" + normalizedBotType + "', faze '" + normalizedFaze + "').",
+                    LogMessageType.System);
                 return;
             }
 

@@ -3083,3 +3083,19 @@ After each optimizer-related change, update this file with:
 ### Risks / notes
 - No behavior change; improves troubleshooting context for empty in-sample name batches.
 
+
+## Stabilization Update (2026-02-14) - Add Expected Batch Size To OOS Empty-Names Diagnostic
+### What changed
+- Updated OutOfSample empty-batch skip log in `StartAsuncBotFactoryOutOfSample(...)`.
+- Diagnostic now includes `expectedNamesCount` plus existing bot type/faze context.
+
+### Files touched
+- `project/OsEngine/OsOptimizer/OptimizerExecutor.cs`
+
+### Validation
+- `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --configuration Debug`
+- Result: Passed 70 / Failed 0
+
+### Risks / notes
+- No behavior change; improves troubleshooting symmetry and context consistency between InSample/OOS name batch logs.
+
