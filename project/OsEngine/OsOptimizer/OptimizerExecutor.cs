@@ -1026,14 +1026,46 @@ namespace OsEngine.OsOptimizer
             List<IIStrategyParameter> parametersOptimized,
             OptimizerServer server, StartProgram regime)
         {
-            _botConfigurator.BotToTest = _master.BotToTest;
-            return _botConfigurator.CreateAndConfigureBot(
-                botName,
-                parameters,
-                parametersOptimized,
-                server,
-                regime,
-                _stopCts?.Token ?? CancellationToken.None);
+            if (_master == null || _master.BotToTest == null)
+            {
+                SendLogMessage("CreateNewBot skipped: optimizer master context is not initialized.", LogMessageType.Error);
+                return null;
+            }
+
+            if (server == null)
+            {
+                SendLogMessage("CreateNewBot skipped: optimizer server is null.", LogMessageType.Error);
+                return null;
+            }
+
+            if (string.IsNullOrWhiteSpace(botName))
+            {
+                SendLogMessage("CreateNewBot skipped: bot name is empty.", LogMessageType.Error);
+                return null;
+            }
+
+            if (parameters == null || parametersOptimized == null)
+            {
+                SendLogMessage("CreateNewBot skipped: bot parameter sets are null.", LogMessageType.Error);
+                return null;
+            }
+
+            try
+            {
+                _botConfigurator.BotToTest = _master.BotToTest;
+                return _botConfigurator.CreateAndConfigureBot(
+                    botName,
+                    parameters,
+                    parametersOptimized,
+                    server,
+                    regime,
+                    _stopCts?.Token ?? CancellationToken.None);
+            }
+            catch (Exception ex)
+            {
+                SendLogMessage("CreateNewBot failed: " + ex, LogMessageType.Error);
+                return null;
+            }
         }
 
         public event Action<int, int> PrimeProgressChangeEvent;

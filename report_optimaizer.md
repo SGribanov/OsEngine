@@ -2109,3 +2109,24 @@ After each optimizer-related change, update this file with:
 ### Risks / notes
 - No normal-path behavior change; prevents unhandled server start exceptions from escaping optimizer worker flow.
 
+
+## Stabilization Update (2026-02-14) - Harden CreateNewBot With Input/Context Guards
+### What changed
+- Updated `CreateNewBot(...)` in `OptimizerExecutor`.
+- Added explicit guards with diagnostics for:
+  - missing optimizer master/bot context;
+  - null optimizer server;
+  - empty bot name;
+  - null parameter collections.
+- Wrapped `_botConfigurator.CreateAndConfigureBot(...)` in `try/catch` and now return `null` on failure with error log.
+
+### Files touched
+- `project/OsEngine/OsOptimizer/OptimizerExecutor.cs`
+
+### Validation
+- `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --configuration Debug`
+- Result: Passed 70 / Failed 0
+
+### Risks / notes
+- No normal-path behavior change; centralizes bot creation failure handling and reduces exception leakage from factory/configurator path.
+
