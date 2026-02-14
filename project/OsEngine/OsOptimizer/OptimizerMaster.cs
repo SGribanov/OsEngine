@@ -1154,7 +1154,6 @@ namespace OsEngine.OsOptimizer
             int runId = Interlocked.Increment(ref _aloneTestRunId);
 
             AwaitObject awaitUi = new AwaitObject(OsLocalization.Optimizer.Label52, 100, 0, true);
-            _awaitUiMasterAloneTest = awaitUi;
 
             Task.Run(() => RunAloneBotTestAsync(faze, report, awaitUi, runId));
 
@@ -1170,8 +1169,6 @@ namespace OsEngine.OsOptimizer
 
             return _resultBotAloneTest;
         }
-
-        private AwaitObject _awaitUiMasterAloneTest;
 
         private BotPanel _resultBotAloneTest;
 

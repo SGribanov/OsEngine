@@ -928,3 +928,18 @@ After each optimizer-related change, update this file with:
 
 ### Risks / notes
 - Prevents late completion of stale async run from clobbering state/result of a newer single-bot request.
+
+## Stabilization Update (2026-02-14) - Remove Unused Shared Await Field
+### What changed
+- Removed obsolete shared field `_awaitUiMasterAloneTest` from `OptimizerMaster`.
+- After snapshot refactor, single-bot async path already passes `AwaitObject` explicitly, so shared field assignment was redundant.
+
+### Files touched
+- `project/OsEngine/OsOptimizer/OptimizerMaster.cs`
+
+### Validation
+- `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --configuration Debug`
+- Result: Passed 70 / Failed 0
+
+### Risks / notes
+- Reduces mutable shared state and future race surface in single-bot test lifecycle.
