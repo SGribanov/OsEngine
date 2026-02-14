@@ -28,13 +28,14 @@ namespace OsEngine.OsOptimizer.OptEntity
             {
                 return result;
             }
+            HashSet<int> evaluatedSafe = evaluated ?? new HashSet<int>();
 
             int target = Math.Min(totalCount, take);
             if (target == totalCount)
             {
                 for (int i = 0; i < totalCount; i++)
                 {
-                    if (!evaluated.Contains(i))
+                    if (!evaluatedSafe.Contains(i))
                     {
                         result.Add(i);
                     }
@@ -49,7 +50,7 @@ namespace OsEngine.OsOptimizer.OptEntity
                 if (idx < 0) idx = 0;
                 if (idx >= totalCount) idx = totalCount - 1;
 
-                if (!evaluated.Contains(idx) && !result.Contains(idx))
+                if (!evaluatedSafe.Contains(idx) && !result.Contains(idx))
                 {
                     result.Add(idx);
                 }
@@ -57,7 +58,7 @@ namespace OsEngine.OsOptimizer.OptEntity
 
             for (int i = 0; i < totalCount && result.Count < target; i++)
             {
-                if (!evaluated.Contains(i) && !result.Contains(i))
+                if (!evaluatedSafe.Contains(i) && !result.Contains(i))
                 {
                     result.Add(i);
                 }
@@ -77,6 +78,7 @@ namespace OsEngine.OsOptimizer.OptEntity
             {
                 return result;
             }
+            HashSet<int> evaluatedSafe = evaluated ?? new HashSet<int>();
 
             List<CandidateScore> scoredSafe = scored ?? new List<CandidateScore>();
 
@@ -94,10 +96,10 @@ namespace OsEngine.OsOptimizer.OptEntity
                     int left = top[i].Index - radius;
                     int right = top[i].Index + radius;
 
-                    TryAddIndex(left, totalCount, evaluated, result);
+                    TryAddIndex(left, totalCount, evaluatedSafe, result);
                     if (result.Count < batchSize)
                     {
-                        TryAddIndex(right, totalCount, evaluated, result);
+                        TryAddIndex(right, totalCount, evaluatedSafe, result);
                     }
                 }
 
@@ -106,7 +108,7 @@ namespace OsEngine.OsOptimizer.OptEntity
 
             for (int i = 0; i < totalCount && result.Count < batchSize; i++)
             {
-                if (!evaluated.Contains(i) && !result.Contains(i))
+                if (!evaluatedSafe.Contains(i) && !result.Contains(i))
                 {
                     result.Add(i);
                 }

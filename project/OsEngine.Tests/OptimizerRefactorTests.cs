@@ -797,6 +797,17 @@ public class OptimizerRefactorTests
     }
 
     [Fact]
+    public void BayesianCandidateSelector_SelectInitialBatch_WithNullEvaluated_ShouldTreatAsEmpty()
+    {
+        BayesianCandidateSelector selector = new BayesianCandidateSelector(defaultBatchSize: 3);
+
+        List<int> batch = selector.SelectInitialBatch(totalCount: 5, evaluated: null, take: 3);
+
+        Assert.Equal(3, batch.Count);
+        Assert.Equal(3, batch.Distinct().Count());
+    }
+
+    [Fact]
     public void BayesianCandidateSelector_SelectNextBatch_ShouldPreferNeighborsOfTopScores()
     {
         BayesianCandidateSelector selector = new BayesianCandidateSelector(defaultBatchSize: 3);
@@ -823,6 +834,22 @@ public class OptimizerRefactorTests
         List<int> batch = selector.SelectNextBatch(totalCount: 6, evaluated, scored: null, batchSize: 3);
 
         Assert.Equal(new[] { 2, 3, 4 }, batch);
+    }
+
+    [Fact]
+    public void BayesianCandidateSelector_SelectNextBatch_WithNullEvaluated_ShouldTreatAsEmpty()
+    {
+        BayesianCandidateSelector selector = new BayesianCandidateSelector(defaultBatchSize: 3);
+        List<BayesianCandidateSelector.CandidateScore> scored = new List<BayesianCandidateSelector.CandidateScore>
+        {
+            new BayesianCandidateSelector.CandidateScore { Index = 2, Score = 10m }
+        };
+
+        List<int> batch = selector.SelectNextBatch(totalCount: 6, evaluated: null, scored, batchSize: 2);
+
+        Assert.Equal(2, batch.Count);
+        Assert.Contains(1, batch);
+        Assert.Contains(3, batch);
     }
 
     [Fact]
