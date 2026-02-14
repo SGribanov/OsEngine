@@ -1233,9 +1233,17 @@ namespace OsEngine.OsOptimizer
             {
                 _serverSlots?.Release();
             }
-            catch
+            catch (ObjectDisposedException)
             {
                 // ignored
+            }
+            catch (SemaphoreFullException)
+            {
+                // ignored
+            }
+            catch
+            {
+                SendLogMessage("Optimizer server slot release failed.", LogMessageType.Error);
             }
         }
 

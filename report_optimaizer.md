@@ -1499,3 +1499,19 @@ After each optimizer-related change, update this file with:
 
 ### Risks / notes
 - Prevents malformed bot-state payload from breaking evaluation completion publication path.
+
+## Stabilization Update (2026-02-14) - Refined Exception Handling In Safe Server Slot Release
+### What changed
+- Improved `SafeReleaseServerSlot()` exception handling in `OptimizerExecutor`:
+  - explicitly ignores expected races (`ObjectDisposedException`, `SemaphoreFullException`);
+  - logs unexpected failures as error.
+
+### Files touched
+- `project/OsEngine/OsOptimizer/OptimizerExecutor.cs`
+
+### Validation
+- `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --configuration Debug`
+- Result: Passed 70 / Failed 0
+
+### Risks / notes
+- Keeps common shutdown/over-release races quiet while improving diagnostics for non-expected release failures.
