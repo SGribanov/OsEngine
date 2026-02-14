@@ -1143,12 +1143,15 @@ namespace OsEngine.OsOptimizer
             _reportToTestAloneTest = report;
             _awaitUiMasterAloneTest = new AwaitObject(OsLocalization.Optimizer.Label52, 100, 0, true);
 
-            Task.Run(RunAloneBotTest);
+            Task.Run(RunAloneBotTestAsync);
 
             AwaitUi ui = new AwaitUi(_awaitUiMasterAloneTest);
             ui.ShowDialog();
 
-            _aloneTestDoneSignal.Wait(5000);
+            if (!_aloneTestDoneSignal.Wait(TimeSpan.FromSeconds(30)))
+            {
+                SendLogMessage("Single-bot test completion wait timed out.", LogMessageType.Error);
+            }
 
             return _resultBotAloneTest;
         }
@@ -1165,7 +1168,7 @@ namespace OsEngine.OsOptimizer
 
         private readonly ManualResetEventSlim _aloneTestDoneSignal = new ManualResetEventSlim(true);
 
-        private async void RunAloneBotTest()
+        private async Task RunAloneBotTestAsync()
         {
             try
             {
