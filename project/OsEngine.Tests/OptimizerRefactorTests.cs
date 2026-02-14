@@ -457,6 +457,37 @@ public class OptimizerRefactorTests
     }
 
     [Fact]
+    public void BayesianCandidateSelector_SelectInitialBatch_ShouldSpreadAndFill()
+    {
+        BayesianCandidateSelector selector = new BayesianCandidateSelector(defaultBatchSize: 3);
+        HashSet<int> evaluated = new HashSet<int> { 0 };
+
+        List<int> batch = selector.SelectInitialBatch(totalCount: 10, evaluated, take: 4);
+
+        Assert.Equal(4, batch.Count);
+        Assert.DoesNotContain(0, batch);
+        Assert.Equal(4, batch.Distinct().Count());
+    }
+
+    [Fact]
+    public void BayesianCandidateSelector_SelectNextBatch_ShouldPreferNeighborsOfTopScores()
+    {
+        BayesianCandidateSelector selector = new BayesianCandidateSelector(defaultBatchSize: 3);
+        HashSet<int> evaluated = new HashSet<int> { 4 };
+        List<BayesianCandidateSelector.CandidateScore> scored = new List<BayesianCandidateSelector.CandidateScore>
+        {
+            new BayesianCandidateSelector.CandidateScore { Index = 4, Score = 100m }
+        };
+
+        List<int> batch = selector.SelectNextBatch(totalCount: 10, evaluated, scored, batchSize: 3);
+
+        Assert.Equal(3, batch.Count);
+        Assert.Contains(3, batch);
+        Assert.Contains(5, batch);
+        Assert.DoesNotContain(4, batch);
+    }
+
+    [Fact]
     public void OptimizerSettings_SaveLoad_ShouldPersistOptimizationMethodFields()
     {
         lock (SettingsFileLock)

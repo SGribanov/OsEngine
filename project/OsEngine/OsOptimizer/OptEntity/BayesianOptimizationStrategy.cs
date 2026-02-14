@@ -24,6 +24,7 @@ namespace OsEngine.OsOptimizer.OptEntity
         private readonly IBotEvaluator _botEvaluator;
         private readonly int _maxParallel;
         private readonly BruteForceStrategy _fallbackBackend;
+        private readonly BayesianCandidateSelector _candidateSelector;
 
         public BayesianOptimizationStrategy(
             ParameterIterator parameterIterator,
@@ -42,6 +43,7 @@ namespace OsEngine.OsOptimizer.OptEntity
             MaxIterations = maxIterations < 1 ? 1 : maxIterations;
             BatchSize = batchSize < 1 ? 1 : batchSize;
             _fallbackBackend = new BruteForceStrategy(parameterIterator, botEvaluator, _maxParallel);
+            _candidateSelector = new BayesianCandidateSelector(BatchSize);
         }
 
         public SortBotsType ObjectiveMetric { get; }
@@ -98,7 +100,7 @@ namespace OsEngine.OsOptimizer.OptEntity
             List<CandidateEvaluation> scored = new List<CandidateEvaluation>();
             List<OptimizerReport> reports = new List<OptimizerReport>();
 
-            List<int> initialBatch = SelectInitialBatch(candidates.Count, evaluated, InitialSamples);
+            List<int> initialBatch = _candidateSelector.SelectInitialBatch(candidates.Count, evaluated, InitialSamples);
             await EvaluateBatchAsync(initialBatch, allParameters, candidates, cancellationToken, evaluated, scored, reports).ConfigureAwait(false);
 
             int iterationsLeft = MaxIterations;
@@ -106,7 +108,11 @@ namespace OsEngine.OsOptimizer.OptEntity
             while (!cancellationToken.IsCancellationRequested && iterationsLeft > 0 && evaluated.Count < candidates.Count)
             {
                 int targetBatchSize = Math.Min(BatchSize, iterationsLeft);
-                List<int> nextBatch = SelectNextBatch(candidates.Count, evaluated, scored, targetBatchSize);
+                List<BayesianCandidateSelector.CandidateScore> scoredForSelector = scored
+                    .Select(s => new BayesianCandidateSelector.CandidateScore { Index = s.Index, Score = s.Score })
+                    .ToList();
+
+                List<int> nextBatch = _candidateSelector.SelectNextBatch(candidates.Count, evaluated, scoredForSelector, targetBatchSize);
 
                 if (nextBatch.Count == 0)
                 {
@@ -224,112 +230,6 @@ namespace OsEngine.OsOptimizer.OptEntity
                 Report = report,
                 Score = GetObjectiveScore(report)
             };
-        }
-
-        private List<int> SelectInitialBatch(int totalCount, HashSet<int> evaluated, int take)
-        {
-            List<int> result = new List<int>();
-            if (totalCount <= 0 || take <= 0)
-            {
-                return result;
-            }
-
-            int target = Math.Min(totalCount, take);
-            if (target == totalCount)
-            {
-                for (int i = 0; i < totalCount; i++)
-                {
-                    if (!evaluated.Contains(i))
-                    {
-                        result.Add(i);
-                    }
-                }
-                return result;
-            }
-
-            decimal step = (decimal)(totalCount - 1) / Math.Max(1, target - 1);
-            for (int i = 0; i < target; i++)
-            {
-                int idx = (int)Math.Round(step * i, MidpointRounding.AwayFromZero);
-                if (idx < 0) idx = 0;
-                if (idx >= totalCount) idx = totalCount - 1;
-
-                if (!evaluated.Contains(idx) && !result.Contains(idx))
-                {
-                    result.Add(idx);
-                }
-            }
-
-            for (int i = 0; i < totalCount && result.Count < target; i++)
-            {
-                if (!evaluated.Contains(i) && !result.Contains(i))
-                {
-                    result.Add(i);
-                }
-            }
-
-            return result;
-        }
-
-        private List<int> SelectNextBatch(
-            int totalCount,
-            HashSet<int> evaluated,
-            List<CandidateEvaluation> scored,
-            int batchSize)
-        {
-            List<int> result = new List<int>();
-            if (batchSize <= 0 || totalCount <= 0)
-            {
-                return result;
-            }
-
-            List<CandidateEvaluation> top = scored
-                .OrderByDescending(s => s.Score)
-                .Take(Math.Max(1, Math.Min(10, BatchSize * 2)))
-                .ToList();
-
-            int radius = 1;
-            while (result.Count < batchSize && radius <= 8 && top.Count > 0)
-            {
-                for (int i = 0; i < top.Count && result.Count < batchSize; i++)
-                {
-                    int left = top[i].Index - radius;
-                    int right = top[i].Index + radius;
-
-                    TryAddIndex(left, totalCount, evaluated, result);
-                    if (result.Count < batchSize)
-                    {
-                        TryAddIndex(right, totalCount, evaluated, result);
-                    }
-                }
-
-                radius++;
-            }
-
-            for (int i = 0; i < totalCount && result.Count < batchSize; i++)
-            {
-                if (!evaluated.Contains(i) && !result.Contains(i))
-                {
-                    result.Add(i);
-                }
-            }
-
-            return result;
-        }
-
-        private void TryAddIndex(int idx, int totalCount, HashSet<int> evaluated, List<int> result)
-        {
-            if (idx < 0 || idx >= totalCount)
-            {
-                return;
-            }
-
-            if (evaluated.Contains(idx) || result.Contains(idx))
-            {
-                return;
-            }
-
-            result.Add(idx);
         }
 
         private decimal GetObjectiveScore(OptimizerReport report)
