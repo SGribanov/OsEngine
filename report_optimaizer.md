@@ -4759,6 +4759,22 @@ After each optimizer-related change, update this file with:
 - No runtime behavior change expected; reduces repetitive noise in abort branches.
 
 
+## Stabilization Update (2026-02-14) - Extract Worker Strategy-Settings Snapshot Helper
+### What changed
+- Added helper `SnapshotPrimeWorkerStrategySettings(...)` in `OptimizerExecutor`.
+- `PrimeThreadWorkerPlace()` now obtains strategy/runtime settings snapshot through this helper instead of inline field-by-field reads.
+
+### Files touched
+- `project/OsEngine/OsOptimizer/OptimizerExecutor.cs`
+
+### Validation
+- `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --configuration Debug`
+- Result: Passed 70 / Failed 0
+
+### Risks / notes
+- No runtime behavior change expected; improves readability and centralizes worker settings snapshot contract.
+
+
 ## Stabilization Update (2026-02-14) - Extract Prime-Worker Runtime Prerequisites Validation Helper
 ### What changed
 - Refactored `PrimeThreadWorkerPlace()` by extracting early runtime guard chain into:

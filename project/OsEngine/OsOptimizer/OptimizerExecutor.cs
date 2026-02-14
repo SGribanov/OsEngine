@@ -411,20 +411,21 @@ namespace OsEngine.OsOptimizer
                     return;
                 }
 
-                string strategyName = _master.StrategyName;
-                bool isScript = _master.IsScript;
-                int iterationCount = _master.IterationCount;
-                int threadsCount = _master.ThreadsCount;
-                bool lastInSample = _master.LastInSample;
-                OptimizationMethodType optimizationMethod = _master.OptimizationMethod;
-                SortBotsType objectiveMetric = _master.ObjectiveMetric;
-                ObjectiveDirectionType objectiveDirection = _master.ObjectiveDirection;
-                BayesianAcquisitionModeType bayesianAcquisitionMode = _master.BayesianAcquisitionMode;
-                int bayesianInitialSamples = _master.BayesianInitialSamples;
-                int bayesianMaxIterations = _master.BayesianMaxIterations;
-                int bayesianBatchSize = _master.BayesianBatchSize;
-                decimal bayesianAcquisitionKappa = _master.BayesianAcquisitionKappa;
-                int bayesianTailSharePercent = _master.BayesianTailSharePercent;
+                SnapshotPrimeWorkerStrategySettings(
+                    out string strategyName,
+                    out bool isScript,
+                    out int iterationCount,
+                    out int threadsCount,
+                    out bool lastInSample,
+                    out OptimizationMethodType optimizationMethod,
+                    out SortBotsType objectiveMetric,
+                    out ObjectiveDirectionType objectiveDirection,
+                    out BayesianAcquisitionModeType bayesianAcquisitionMode,
+                    out int bayesianInitialSamples,
+                    out int bayesianMaxIterations,
+                    out int bayesianBatchSize,
+                    out decimal bayesianAcquisitionKappa,
+                    out int bayesianTailSharePercent);
                 List<bool> parametersOnSnapshot = _parametersOn == null ? null : new List<bool>(_parametersOn);
                 List<IIStrategyParameter> parametersSnapshot = _parameters == null ? null : new List<IIStrategyParameter>(_parameters);
 
@@ -737,6 +738,38 @@ namespace OsEngine.OsOptimizer
             }
 
             return true;
+        }
+
+        private void SnapshotPrimeWorkerStrategySettings(
+            out string strategyName,
+            out bool isScript,
+            out int iterationCount,
+            out int threadsCount,
+            out bool lastInSample,
+            out OptimizationMethodType optimizationMethod,
+            out SortBotsType objectiveMetric,
+            out ObjectiveDirectionType objectiveDirection,
+            out BayesianAcquisitionModeType bayesianAcquisitionMode,
+            out int bayesianInitialSamples,
+            out int bayesianMaxIterations,
+            out int bayesianBatchSize,
+            out decimal bayesianAcquisitionKappa,
+            out int bayesianTailSharePercent)
+        {
+            strategyName = _master.StrategyName;
+            isScript = _master.IsScript;
+            iterationCount = _master.IterationCount;
+            threadsCount = _master.ThreadsCount;
+            lastInSample = _master.LastInSample;
+            optimizationMethod = _master.OptimizationMethod;
+            objectiveMetric = _master.ObjectiveMetric;
+            objectiveDirection = _master.ObjectiveDirection;
+            bayesianAcquisitionMode = _master.BayesianAcquisitionMode;
+            bayesianInitialSamples = _master.BayesianInitialSamples;
+            bayesianMaxIterations = _master.BayesianMaxIterations;
+            bayesianBatchSize = _master.BayesianBatchSize;
+            bayesianAcquisitionKappa = _master.BayesianAcquisitionKappa;
+            bayesianTailSharePercent = _master.BayesianTailSharePercent;
         }
 
         private void StartAsuncBotFactoryInSample(int botCount, string botType, bool isScript, string faze)
