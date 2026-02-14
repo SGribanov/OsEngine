@@ -49,6 +49,11 @@ namespace OsEngine.OsOptimizer.OptEntity
             StartProgram regime,
             CancellationToken cancellationToken = default)
         {
+            if (string.IsNullOrWhiteSpace(botName) || parameters == null)
+            {
+                return null;
+            }
+
             BotPanel bot = null;
 
             try
