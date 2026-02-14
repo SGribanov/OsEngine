@@ -64,6 +64,18 @@ namespace OsEngine.OsOptimizer
 
         public bool Start(List<bool> parametersOn, List<IIStrategyParameter> parameters)
         {
+            if (parametersOn == null)
+            {
+                SendLogMessage("Optimizer start skipped: parametersOn is null.", LogMessageType.Error);
+                return false;
+            }
+
+            if (parameters == null)
+            {
+                SendLogMessage("Optimizer start skipped: parameters is null.", LogMessageType.Error);
+                return false;
+            }
+
             lock (_startSync)
             {
                 if (IsPrimeWorkerActive())
@@ -72,8 +84,8 @@ namespace OsEngine.OsOptimizer
                     return false;
                 }
 
-                _parametersOn = parametersOn;
-                _parameters = parameters;
+                _parametersOn = new List<bool>(parametersOn);
+                _parameters = new List<IIStrategyParameter>(parameters);
 
                 SendLogMessage(OsLocalization.Optimizer.Message2, LogMessageType.System);
 
