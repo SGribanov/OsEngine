@@ -3893,3 +3893,20 @@ After each optimizer-related change, update this file with:
 
 ### Risks / notes
 - Intentional robustness change: rejects invalid concurrency configuration at run boundary instead of silently coercing it.
+
+
+## Stabilization Update (2026-02-14) - Validate Non-Negative Iteration Count Before Start
+### What changed
+- Added early `Start(...)` guard in `OptimizerExecutor`:
+  - `_master.IterationCount` must be non-negative.
+- Negative value now fails fast with explicit diagnostic log containing the provided iteration count.
+
+### Files touched
+- `project/OsEngine/OsOptimizer/OptimizerExecutor.cs`
+
+### Validation
+- `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --configuration Debug`
+- Result: Passed 70 / Failed 0
+
+### Risks / notes
+- Intentional robustness change: blocks clearly invalid iteration configuration before optimization lifecycle starts.

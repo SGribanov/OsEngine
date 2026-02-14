@@ -103,6 +103,14 @@ namespace OsEngine.OsOptimizer
                 return false;
             }
 
+            if (_master.IterationCount < 0)
+            {
+                SendLogMessage(
+                    "Optimizer start skipped: iteration count cannot be negative (value " + _master.IterationCount + ").",
+                    LogMessageType.Error);
+                return false;
+            }
+
             if (parametersOn == null)
             {
                 SendLogMessage("Optimizer start skipped: parametersOn is null.", LogMessageType.Error);
