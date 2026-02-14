@@ -2219,3 +2219,19 @@ After each optimizer-related change, update this file with:
 ### Risks / notes
 - No behavior change; improves diagnostics for server/bot correlation drift during completion handling.
 
+
+## Stabilization Update (2026-02-14) - Cancel Pending Evaluation When End Event Has No Bot
+### What changed
+- Updated `server_TestingEndEvent(...)` in `OptimizerExecutor` for missing-bot path.
+- If bot is not found for `serverNum`, method now tries to remove pending completion from `_pendingEvaluationByServer` and safely cancels it.
+
+### Files touched
+- `project/OsEngine/OsOptimizer/OptimizerExecutor.cs`
+
+### Validation
+- `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --configuration Debug`
+- Result: Passed 70 / Failed 0
+
+### Risks / notes
+- Behavior change on mismatch path only; prevents dangling evaluation awaiters when server completion arrives without correlated bot.
+

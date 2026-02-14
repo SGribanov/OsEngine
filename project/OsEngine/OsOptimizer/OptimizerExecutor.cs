@@ -1731,6 +1731,11 @@ namespace OsEngine.OsOptimizer
                 else
                 {
                     SendLogMessage("Optimizer end-event: bot was not found for server " + serverNum + ".", LogMessageType.Error);
+
+                    if (_pendingEvaluationByServer.TryRemove(serverNum, out TaskCompletionSource<OptimizerReport> completion))
+                    {
+                        SafeTrySetCanceled(completion);
+                    }
                 }
 
                 for (int i = 0; i < _servers.Count; i++)
