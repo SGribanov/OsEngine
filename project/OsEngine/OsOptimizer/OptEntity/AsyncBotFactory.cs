@@ -71,7 +71,9 @@ namespace OsEngine.OsOptimizer.OptimizerEntity
 
         public void CreateNewBots(List<string> botsName, string botType, bool isScript, StartProgram startProgram)
         {
-            if (botsName == null || botsName.Count == 0)
+            if (botsName == null
+                || botsName.Count == 0
+                || string.IsNullOrWhiteSpace(botType))
             {
                 return;
             }
