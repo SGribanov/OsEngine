@@ -642,3 +642,18 @@ After each optimizer-related change, update this file with:
 
 ### Risks / notes
 - Avoids avoidable background task failures and UI wait lifecycle on invalid caller input.
+
+## Stabilization Update (2026-02-14) - Input Guard In OptimizerExecutor.TestBot
+### What changed
+- Added early validation in executor-level `TestBot(...)`.
+- If `reportFaze`, `reportToBot`, or `awaitObj` is `null`, method logs and returns `null` immediately.
+
+### Files touched
+- `project/OsEngine/OsOptimizer/OptimizerExecutor.cs`
+
+### Validation
+- `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --configuration Debug`
+- Result: Passed 70 / Failed 0
+
+### Risks / notes
+- Prevents null-driven failures in lower-level single-bot test path, complementing master-level guard.

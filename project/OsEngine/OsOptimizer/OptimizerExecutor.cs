@@ -961,6 +961,12 @@ namespace OsEngine.OsOptimizer
         public BotPanel TestBot(OptimizerFazeReport reportFaze,
             OptimizerReport reportToBot, StartProgram startProgram, AwaitObject awaitObj)
         {
+            if (reportFaze == null || reportToBot == null || awaitObj == null)
+            {
+                SendLogMessage("Single-bot test skipped due to invalid input.", LogMessageType.Error);
+                return null;
+            }
+
             if (_primeThreadWorker != null)
             {
                 awaitObj?.Dispose();
