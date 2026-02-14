@@ -345,6 +345,18 @@ namespace OsEngine.OsOptimizer
                     return;
                 }
 
+                for (int i = 0; i < parametersSnapshot.Count; i++)
+                {
+                    if (parametersSnapshot[i] == null)
+                    {
+                        SendLogMessage(
+                            "Optimizer prime worker skipped: parameter snapshot contains null at index " + i + ".",
+                            LogMessageType.Error);
+                        SafeInvokeTestReady(GetReportsSnapshotForPublish());
+                        return;
+                    }
+                }
+
                 int countBotsRaw = BotCountOneFaze(parametersSnapshot, parametersOnSnapshot);
                 int countBots = Math.Max(0, countBotsRaw);
                 if (countBotsRaw < 0)

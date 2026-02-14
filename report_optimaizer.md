@@ -4139,3 +4139,20 @@ After each optimizer-related change, update this file with:
 
 ### Risks / notes
 - No intended behavior change for valid flows; reduces sensitivity to external mutation of public parameter fields during active run.
+
+
+## Stabilization Update (2026-02-14) - Guard Null Parameter Entries In Runtime Snapshots
+### What changed
+- Extended runtime parameter snapshot validation in `PrimeThreadWorkerPlace()`:
+  - iterates `parametersSnapshot`;
+  - if any entry is `null`, logs index-specific diagnostic, publishes current `TestReady` snapshot, and exits worker safely.
+
+### Files touched
+- `project/OsEngine/OsOptimizer/OptimizerExecutor.cs`
+
+### Validation
+- `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --configuration Debug`
+- Result: Passed 70 / Failed 0
+
+### Risks / notes
+- No intended behavior change for valid inputs; hardens against late null injection into publicly exposed parameter collection.
