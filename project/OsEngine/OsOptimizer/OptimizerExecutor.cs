@@ -317,32 +317,24 @@ namespace OsEngine.OsOptimizer
 
         private static bool HasAnyNonNullTab(List<IIBotTab> tabs)
         {
-            if (tabs == null || tabs.Count == 0)
-            {
-                return false;
-            }
-
-            for (int i = 0; i < tabs.Count; i++)
-            {
-                if (tabs[i] != null)
-                {
-                    return true;
-                }
-            }
-
-            return false;
+            return HasAnyNonNullItem(tabs);
         }
 
         private static bool HasAnyNonNullFaze(List<OptimizerFaze> fazes)
         {
-            if (fazes == null || fazes.Count == 0)
+            return HasAnyNonNullItem(fazes);
+        }
+
+        private static bool HasAnyNonNullItem<T>(List<T> items) where T : class
+        {
+            if (items == null || items.Count == 0)
             {
                 return false;
             }
 
-            for (int i = 0; i < fazes.Count; i++)
+            for (int i = 0; i < items.Count; i++)
             {
-                if (fazes[i] != null)
+                if (items[i] != null)
                 {
                     return true;
                 }

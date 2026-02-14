@@ -4814,3 +4814,22 @@ After each optimizer-related change, update this file with:
 
 ### Risks / notes
 - No runtime behavior change expected; improves consistency of bot-tabs readiness checks across start/runtime paths.
+
+
+## Stabilization Update (2026-02-14) - Reuse Generic Non-Null List Predicate
+### What changed
+- Added generic helper `HasAnyNonNullItem<T>(List<T> items) where T : class` in `OptimizerExecutor`.
+- Refactored:
+  - `HasAnyNonNullTab(...)`
+  - `HasAnyNonNullFaze(...)`
+  to delegate to the generic helper instead of duplicating loop logic.
+
+### Files touched
+- `project/OsEngine/OsOptimizer/OptimizerExecutor.cs`
+
+### Validation
+- `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --configuration Debug`
+- Result: Passed 70 / Failed 0
+
+### Risks / notes
+- No runtime behavior change expected; reduces duplication and keeps non-null list validation behavior uniform.
