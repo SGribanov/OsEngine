@@ -983,6 +983,12 @@ namespace OsEngine.OsOptimizer
             _asyncBotFactory.CreateNewBots(names, _master.StrategyName, _master.IsScript, startProgram);
 
             OptimizerServer server = CreateNewServer(reportFaze, false);
+            if (server == null)
+            {
+                SendLogMessage("Single-bot test skipped: optimizer server was not created.", LogMessageType.Error);
+                awaitObj.Dispose();
+                return null;
+            }
 
             List<IIStrategyParameter> parametrs = reportToBot.GetParameters();
             if (parametrs == null)
@@ -1000,7 +1006,10 @@ namespace OsEngine.OsOptimizer
             {
                 SendLogMessage("Test over with error. A different robot is selected in the optimizer", LogMessageType.Error);
                 awaitObj.Dispose();
-                ServerMaster.RemoveOptimizerServer(server);
+                if (server != null)
+                {
+                    ServerMaster.RemoveOptimizerServer(server);
+                }
                 return null;
             }
 
