@@ -1610,3 +1610,20 @@ After each optimizer-related change, update this file with:
 
 ### Risks / notes
 - Aligns completion-report build path with existing last-faze load guard for null bot parameters.
+
+## Stabilization Update (2026-02-14) - Log Message Harmonization For Null Bot Parameters
+### What changed
+- Normalized diagnostic text for null `bot.Parameters` checks in both helpers:
+  - `SafeLoadBotToLastFaze(...)`
+  - `TryBuildOptimizerReportFromBot(...)`
+- Unified message: `Optimizer report build/load skipped: bot parameters are null.`
+
+### Files touched
+- `project/OsEngine/OsOptimizer/OptimizerExecutor.cs`
+
+### Validation
+- `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --configuration Debug`
+- Result: Passed 70 / Failed 0
+
+### Risks / notes
+- No behavior change; improves log consistency for alerting/filtering.

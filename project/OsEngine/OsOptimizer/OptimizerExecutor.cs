@@ -1266,7 +1266,7 @@ namespace OsEngine.OsOptimizer
 
             if (bot.Parameters == null)
             {
-                SendLogMessage("Optimizer report load skipped: bot parameters are null.", LogMessageType.Error);
+                SendLogMessage("Optimizer report build/load skipped: bot parameters are null.", LogMessageType.Error);
                 return;
             }
 
@@ -1303,7 +1303,7 @@ namespace OsEngine.OsOptimizer
 
             if (bot.Parameters == null)
             {
-                SendLogMessage("Optimizer report build skipped: bot parameters are null.", LogMessageType.Error);
+                SendLogMessage("Optimizer report build/load skipped: bot parameters are null.", LogMessageType.Error);
                 return false;
             }
 
