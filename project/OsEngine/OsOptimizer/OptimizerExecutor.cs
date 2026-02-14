@@ -1802,7 +1802,14 @@ namespace OsEngine.OsOptimizer
                     if (TimeToEndChangeEvent != null
                         && timeToEnd.TotalSeconds != 0)
                     {
-                        TimeToEndChangeEvent(timeToEnd);
+                        try
+                        {
+                            TimeToEndChangeEvent(timeToEnd);
+                        }
+                        catch (Exception ex)
+                        {
+                            SendLogMessage("Optimizer ETA event dispatch failed: " + ex, LogMessageType.Error);
+                        }
                     }
                 }
             }

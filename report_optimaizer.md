@@ -2373,3 +2373,20 @@ After each optimizer-related change, update this file with:
 ### Risks / notes
 - No normal-path behavior change; prevents event-subscriber failures from interrupting server/bot cleanup and synchronization release.
 
+
+## Stabilization Update (2026-02-14) - Guard ETA Event Dispatch In Server End Flow
+### What changed
+- Updated `server_TestingEndEvent(...)` in `OptimizerExecutor`.
+- Wrapped `TimeToEndChangeEvent(...)` invocation in `try/catch`.
+- On subscriber exception, method now logs error and continues completion handling.
+
+### Files touched
+- `project/OsEngine/OsOptimizer/OptimizerExecutor.cs`
+
+### Validation
+- `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --configuration Debug`
+- Result: Passed 70 / Failed 0
+
+### Risks / notes
+- No normal-path behavior change; prevents ETA subscriber faults from interrupting end-event workflow.
+
