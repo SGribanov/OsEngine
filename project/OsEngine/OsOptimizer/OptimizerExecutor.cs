@@ -368,6 +368,10 @@ namespace OsEngine.OsOptimizer
                 if (string.IsNullOrWhiteSpace(sourceBotName))
                 {
                     SendLogMessage("OutOfSample skipped source report with empty BotName during scheduling.", LogMessageType.System);
+                    if (_phaseCompletion != null && !_phaseCompletion.IsSet)
+                    {
+                        _phaseCompletion.Signal();
+                    }
                     continue;
                 }
 
