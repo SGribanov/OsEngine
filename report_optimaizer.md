@@ -1911,3 +1911,19 @@ After each optimizer-related change, update this file with:
 
 ### Risks / notes
 - No control-flow change; only improves post-mortem visibility when requested instrument is missing in storage.
+
+## Stabilization Update (2026-02-14) - Remove Duplicate Missing-Security Logs In CreateNewServer
+### What changed
+- Cleaned up `CreateNewServer(...)` security-lookup call sites for simple/index/screener tabs.
+- Removed duplicate `not found` logs after failed `TryFindSecurityByName(...)` calls.
+- Kept missing-security diagnostics centralized in `TryFindSecurityByName(...)`.
+
+### Files touched
+- `project/OsEngine/OsOptimizer/OptimizerExecutor.cs`
+
+### Validation
+- `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --configuration Debug`
+- Result: Passed 70 / Failed 0
+
+### Risks / notes
+- No functional behavior change; reduces log noise and avoids duplicate error lines for the same lookup miss.

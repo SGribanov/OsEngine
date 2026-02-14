@@ -891,7 +891,6 @@ namespace OsEngine.OsOptimizer
                     Security secToStart;
                     if (!TryFindSecurityByName(simple.Connector.SecurityName, out secToStart))
                     {
-                        SendLogMessage("CreateNewServer skipped security bind: not found '" + simple.Connector.SecurityName + "'.", LogMessageType.Error);
                         continue;
                     }
 
@@ -923,7 +922,6 @@ namespace OsEngine.OsOptimizer
                         Security secToStart;
                         if (!TryFindSecurityByName(index.Tabs[i2].SecurityName, out secToStart))
                         {
-                            SendLogMessage("CreateNewServer skipped security bind: not found '" + index.Tabs[i2].SecurityName + "'.", LogMessageType.Error);
                             continue;
                         }
 
@@ -956,7 +954,6 @@ namespace OsEngine.OsOptimizer
                         Security secToStart;
                         if (!TryFindSecurityByName(screener.Tabs[i2].Connector.SecurityName, out secToStart))
                         {
-                            SendLogMessage("CreateNewServer skipped security bind: not found '" + screener.Tabs[i2].Connector.SecurityName + "'.", LogMessageType.Error);
                             continue;
                         }
 
