@@ -3194,3 +3194,22 @@ After each optimizer-related change, update this file with:
 - No behavior change; improves consistency and troubleshooting depth for duplicate-name skip scenarios.
 
 
+
+## Stabilization Update (2026-02-14) - Add Full Context To OOS Per-Item Invalid-Entry Diagnostics
+### What changed
+- Updated OOS per-item skip logs in `StartAsuncBotFactoryOutOfSample(...)` for cases:
+  - null source report;
+  - empty source bot name;
+  - empty transformed bot name.
+- Each message now includes full context: `botType`, `faze`, `isScript` (in addition to index and batch size).
+
+### Files touched
+- `project/OsEngine/OsOptimizer/OptimizerExecutor.cs`
+
+### Validation
+- `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --configuration Debug`
+- Result: Passed 70 / Failed 0
+
+### Risks / notes
+- No behavior change; improves diagnostic parity and triage depth for invalid OOS source entries.
+

@@ -287,7 +287,8 @@ namespace OsEngine.OsOptimizer
                 {
                     SendLogMessage(
                         "Async bot factory start skipped (OutOfSample): source report is null at index " + i +
-                        " of " + reportsCount + ".",
+                        " of " + reportsCount + " (bot type '" + normalizedBotType +
+                        "', faze '" + normalizedFaze + "', isScript " + isScript + ").",
                         LogMessageType.Error);
                     continue;
                 }
@@ -297,7 +298,8 @@ namespace OsEngine.OsOptimizer
                 {
                     SendLogMessage(
                         "Async bot factory start skipped (OutOfSample): source report bot name is empty at index " + i +
-                        " of " + reportsCount + ".",
+                        " of " + reportsCount + " (bot type '" + normalizedBotType +
+                        "', faze '" + normalizedFaze + "', isScript " + isScript + ").",
                         LogMessageType.Error);
                     continue;
                 }
@@ -313,7 +315,8 @@ namespace OsEngine.OsOptimizer
                 {
                     SendLogMessage(
                         "Async bot factory start skipped (OutOfSample): transformed bot name is empty at index " + i +
-                        " of " + reportsCount + ".",
+                        " of " + reportsCount + " (bot type '" + normalizedBotType +
+                        "', faze '" + normalizedFaze + "', isScript " + isScript + ").",
                         LogMessageType.Error);
                     continue;
                 }
