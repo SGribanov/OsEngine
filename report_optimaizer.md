@@ -608,3 +608,22 @@ After each optimizer-related change, update this file with:
 
 ### Risks / notes
 - Prevents out-of-range access when selected row index equals report count boundary.
+
+## Stabilization Update (2026-02-14) - UI Empty Reports Guard In Dialog Actions
+### What changed
+- Added defensive guard in optimizer result dialog actions:
+  - return early when `_reports == null || _reports.Count == 0`.
+- Applied in both UI windows and both handlers:
+  - `ShowBotChartDialog(...)`
+  - `ShowParametersDialog(...)`
+
+### Files touched
+- `project/OsEngine/OsOptimizer/OptimizerUi.xaml.cs`
+- `project/OsEngine/OsOptimizer/OptimizerReportUi.xaml.cs`
+
+### Validation
+- `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --configuration Debug`
+- Result: Passed 70 / Failed 0
+
+### Risks / notes
+- Prevents rare null/out-of-range access on stale UI events when reports list is empty.

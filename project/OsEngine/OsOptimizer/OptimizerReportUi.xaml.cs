@@ -151,6 +151,11 @@ namespace OsEngine.OsOptimizer
 
         private void ShowBotChartDialog(DataGridViewCellMouseEventArgs e)
         {
+            if (_reports == null || _reports.Count == 0)
+            {
+                return;
+            }
+
             OptimizerFazeReport fazeReport;
 
             if (_gridFazesEnd.CurrentCell == null ||
@@ -197,6 +202,11 @@ namespace OsEngine.OsOptimizer
 
         private void ShowParametersDialog(DataGridViewCellMouseEventArgs e)
         {
+            if (_reports == null || _reports.Count == 0)
+            {
+                return;
+            }
+
             OptimizerFazeReport fazeReport;
 
             if (_gridFazesEnd.CurrentCell == null ||
