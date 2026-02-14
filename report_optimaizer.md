@@ -3697,3 +3697,20 @@ After each optimizer-related change, update this file with:
 
 ### Risks / notes
 - Intentional robustness/logic correctness improvement for phase sequences containing consecutive OutOfSample entries or mixed ordering.
+
+
+## Stabilization Update (2026-02-14) - Cancel Pending Evaluation Tasks During Run Cleanup
+### What changed
+- Added shared helper `CancelPendingEvaluations(string messagePrefix)` in `OptimizerExecutor`.
+- `DisposeRunSynchronization()` now proactively clears `_pendingEvaluationByServer` and safely cancels remaining pending evaluation tasks before disposing sync objects.
+- `Start(...)` was switched to use the same shared helper for stale pending evaluation cleanup (removing duplicate cleanup implementation).
+
+### Files touched
+- `project/OsEngine/OsOptimizer/OptimizerExecutor.cs`
+
+### Validation
+- `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --configuration Debug`
+- Result: Passed 70 / Failed 0
+
+### Risks / notes
+- No expected behavior change for successful flows; improves shutdown hygiene and reduces risk of leaked/never-completing evaluation tasks after abnormal termination.

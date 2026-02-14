@@ -154,7 +154,7 @@ namespace OsEngine.OsOptimizer
                     _testBotsTime.Clear();
                 }
 
-                CancelPendingEvaluationsForNewRun();
+                CancelPendingEvaluations("Optimizer start cleanup canceled stale pending evaluations: ");
 
                 SemaphoreSlim previousServerSlots = Interlocked.Exchange(
                     ref _serverSlots,
@@ -176,27 +176,6 @@ namespace OsEngine.OsOptimizer
                 primeWorker.Start();
 
                 return true;
-            }
-        }
-
-        private void CancelPendingEvaluationsForNewRun()
-        {
-            int canceled = 0;
-
-            foreach (KeyValuePair<int, TaskCompletionSource<OptimizerReport>> pending in _pendingEvaluationByServer)
-            {
-                if (_pendingEvaluationByServer.TryRemove(pending.Key, out TaskCompletionSource<OptimizerReport> completion))
-                {
-                    SafeTrySetCanceled(completion);
-                    canceled++;
-                }
-            }
-
-            if (canceled > 0)
-            {
-                SendLogMessage(
-                    "Optimizer start cleanup canceled stale pending evaluations: " + canceled + ".",
-                    LogMessageType.System);
             }
         }
 
@@ -1142,6 +1121,8 @@ namespace OsEngine.OsOptimizer
 
         private void DisposeRunSynchronization()
         {
+            CancelPendingEvaluations("Optimizer cleanup canceled pending evaluations: ");
+
             CountdownEvent phaseCompletion = Interlocked.Exchange(ref _phaseCompletion, null);
             try
             {
@@ -1170,6 +1151,25 @@ namespace OsEngine.OsOptimizer
             catch (Exception ex)
             {
                 SendLogMessage("Optimizer sync cleanup failed: stop token source dispose. " + ex, LogMessageType.Error);
+            }
+        }
+
+        private void CancelPendingEvaluations(string messagePrefix)
+        {
+            int canceled = 0;
+
+            foreach (KeyValuePair<int, TaskCompletionSource<OptimizerReport>> pending in _pendingEvaluationByServer)
+            {
+                if (_pendingEvaluationByServer.TryRemove(pending.Key, out TaskCompletionSource<OptimizerReport> completion))
+                {
+                    SafeTrySetCanceled(completion);
+                    canceled++;
+                }
+            }
+
+            if (canceled > 0)
+            {
+                SendLogMessage(messagePrefix + canceled + ".", LogMessageType.System);
             }
         }
 
