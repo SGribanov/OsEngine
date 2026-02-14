@@ -991,7 +991,18 @@ namespace OsEngine.OsOptimizer
 
             DateTime startTime = DateTime.Now;
 
-            string botName = NumberGen.GetNumberDeal(StartProgram.IsOsOptimizer).ToString();
+            string botName;
+            try
+            {
+                botName = NumberGen.GetNumberDeal(StartProgram.IsOsOptimizer).ToString();
+            }
+            catch (Exception ex)
+            {
+                SendLogMessage("Single-bot test skipped due to bot name generation error: " + ex, LogMessageType.Error);
+                awaitObj.Dispose();
+                return null;
+            }
+
             if (string.IsNullOrWhiteSpace(botName))
             {
                 SendLogMessage("Single-bot test skipped: generated bot name is empty.", LogMessageType.Error);

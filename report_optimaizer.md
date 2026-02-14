@@ -1103,3 +1103,21 @@ After each optimizer-related change, update this file with:
 
 ### Risks / notes
 - Prevents propagation of server-construction exceptions into upper single-bot UI flow.
+
+## Stabilization Update (2026-02-14) - Exception Guard For Bot Name Generation In Executor TestBot
+### What changed
+- Wrapped bot-name generation (`NumberGen.GetNumberDeal(...).ToString()`) in `OptimizerExecutor.TestBot(...)` with `try/catch`.
+- On generation exception, method now:
+  - logs error with exception details;
+  - disposes await object;
+  - exits early with `null`.
+
+### Files touched
+- `project/OsEngine/OsOptimizer/OptimizerExecutor.cs`
+
+### Validation
+- `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --configuration Debug`
+- Result: Passed 70 / Failed 0
+
+### Risks / notes
+- Prevents rare number-generator failures from breaking single-bot test UI flow.
