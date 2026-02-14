@@ -1728,6 +1728,10 @@ namespace OsEngine.OsOptimizer
                         SafeLoadBotToLastFaze(bot);
                     }
                 }
+                else
+                {
+                    SendLogMessage("Optimizer end-event: bot was not found for server " + serverNum + ".", LogMessageType.Error);
+                }
 
                 for (int i = 0; i < _servers.Count; i++)
                 {
