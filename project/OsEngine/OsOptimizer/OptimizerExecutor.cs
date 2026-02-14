@@ -257,6 +257,7 @@ namespace OsEngine.OsOptimizer
                 SendLogMessage(OsLocalization.Optimizer.Message4 + estimatedMaxTests, LogMessageType.System);
 
                 DateTime timeStart = DateTime.Now;
+                OptimizerFazeReport latestInSampleReport = null;
 
                 for (int i = 0; i < fazesSnapshot.Count; i++)
                 {
@@ -284,11 +285,12 @@ namespace OsEngine.OsOptimizer
 
                         StartOptimizeFazeInSample(report, _parameters, _parametersOn, countBots);
 
-                        EndOfFazeFiltration(ReportsToFazes[ReportsToFazes.Count - 1]);
+                        EndOfFazeFiltration(report);
+                        latestInSampleReport = report;
                     }
                     else
                     {
-                        OptimizerFazeReport inSampleReport = GetLatestInSampleReport();
+                        OptimizerFazeReport inSampleReport = latestInSampleReport;
                         if (inSampleReport == null)
                         {
                             SendLogMessage("OutOfSample phase skipped: no previous in-sample phase reports are available.", LogMessageType.Error);
@@ -328,26 +330,6 @@ namespace OsEngine.OsOptimizer
                 Interlocked.Exchange(ref _primeThreadWorker, null);
                 DisposeRunSynchronization();
             }
-        }
-
-        private OptimizerFazeReport GetLatestInSampleReport()
-        {
-            if (ReportsToFazes == null || ReportsToFazes.Count == 0)
-            {
-                return null;
-            }
-
-            for (int i = ReportsToFazes.Count - 1; i >= 0; i--)
-            {
-                OptimizerFazeReport report = ReportsToFazes[i];
-                if (report?.Faze != null
-                    && report.Faze.TypeFaze == OptimizerFazeType.InSample)
-                {
-                    return report;
-                }
-            }
-
-            return null;
         }
 
         private void StartAsuncBotFactoryInSample(int botCount, string botType, bool isScript, string faze)

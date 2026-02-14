@@ -3802,3 +3802,23 @@ After each optimizer-related change, update this file with:
 
 ### Risks / notes
 - No intended behavior change for consumers that only read event payloads; improves encapsulation and event-safety boundaries.
+
+
+## Stabilization Update (2026-02-14) - Use Run-Local InSample Source Pointer For OOS Phases
+### What changed
+- Updated `PrimeThreadWorkerPlace()` phase loop:
+  - introduced run-local `latestInSampleReport` pointer;
+  - set pointer after successful InSample phase processing;
+  - OutOfSample branch now uses this pointer instead of scanning public `ReportsToFazes`.
+- Removed now-unneeded helper that searched latest InSample from shared report list.
+- `EndOfFazeFiltration(...)` call now uses local `report` reference directly.
+
+### Files touched
+- `project/OsEngine/OsOptimizer/OptimizerExecutor.cs`
+
+### Validation
+- `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --configuration Debug`
+- Result: Passed 70 / Failed 0
+
+### Risks / notes
+- Behavior remains equivalent for valid phase sequences; reduces sensitivity to external mutations of public report collection during active run.
