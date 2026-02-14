@@ -3998,3 +3998,21 @@ After each optimizer-related change, update this file with:
 
 ### Risks / notes
 - Intentional correctness fix: avoids potential indefinite wait when strategy creation fails after phase counter initialization.
+
+
+## Stabilization Update (2026-02-14) - Generalize Compensated Progress Helper Naming
+### What changed
+- Renamed progress compensation helper in `OptimizerExecutor`:
+  - `AddCompensatedOutOfSampleProgress(...)` -> `AddCompensatedProgress(...)`.
+- Updated all internal call sites, including newly added in-sample compensation path.
+- Functional behavior is unchanged; this is a consistency/readability refactor aligned with current usage scope.
+
+### Files touched
+- `project/OsEngine/OsOptimizer/OptimizerExecutor.cs`
+
+### Validation
+- `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --configuration Debug`
+- Result: Passed 70 / Failed 0
+
+### Risks / notes
+- No runtime behavior change expected.

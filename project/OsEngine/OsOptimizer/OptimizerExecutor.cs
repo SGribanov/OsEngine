@@ -842,7 +842,7 @@ namespace OsEngine.OsOptimizer
 
             if (signaled)
             {
-                AddCompensatedOutOfSampleProgress(1);
+                AddCompensatedProgress(1);
             }
 
             if (!releaseServerSlot)
@@ -880,7 +880,7 @@ namespace OsEngine.OsOptimizer
 
             if (signaledCount > 0)
             {
-                AddCompensatedOutOfSampleProgress(signaledCount);
+                AddCompensatedProgress(signaledCount);
             }
         }
 
@@ -912,11 +912,11 @@ namespace OsEngine.OsOptimizer
 
             if (signaledCount > 0)
             {
-                AddCompensatedOutOfSampleProgress(signaledCount);
+                AddCompensatedProgress(signaledCount);
             }
         }
 
-        private void AddCompensatedOutOfSampleProgress(int count)
+        private void AddCompensatedProgress(int count)
         {
             if (count <= 0)
             {
