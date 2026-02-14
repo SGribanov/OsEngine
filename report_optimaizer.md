@@ -4685,3 +4685,22 @@ After each optimizer-related change, update this file with:
 
 ### Risks / notes
 - No runtime behavior change expected; improves readability and keeps enum-validation semantics consistent in all guard paths.
+
+
+## Stabilization Update (2026-02-14) - Reuse Shared Text-Presence Helper For Strategy Name Checks
+### What changed
+- Added helper `HasText(string value)` in `OptimizerExecutor`.
+- Replaced direct `string.IsNullOrWhiteSpace(...)` checks with helper in:
+  - `Start(...)` strategy-name validation;
+  - `PrimeThreadWorkerPlace()` runtime strategy-name guard;
+  - `TestBot(...)` strategy-name validation.
+
+### Files touched
+- `project/OsEngine/OsOptimizer/OptimizerExecutor.cs`
+
+### Validation
+- `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --configuration Debug`
+- Result: Passed 70 / Failed 0
+
+### Risks / notes
+- No runtime behavior change expected; reduces duplication and keeps text-validation semantics aligned across start/runtime/test paths.

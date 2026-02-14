@@ -124,7 +124,7 @@ namespace OsEngine.OsOptimizer
                 return false;
             }
 
-            if (string.IsNullOrWhiteSpace(_master.StrategyName))
+            if (!HasText(_master.StrategyName))
             {
                 SendLogMessage("Optimizer start skipped: strategy name is empty.", LogMessageType.Error);
                 return false;
@@ -388,6 +388,11 @@ namespace OsEngine.OsOptimizer
             return false;
         }
 
+        private static bool HasText(string value)
+        {
+            return !string.IsNullOrWhiteSpace(value);
+        }
+
         private static bool IsDefinedEnum<TEnum>(TEnum value) where TEnum : struct, Enum
         {
             return Enum.IsDefined(typeof(TEnum), value);
@@ -488,7 +493,7 @@ namespace OsEngine.OsOptimizer
                 List<bool> parametersOnSnapshot = _parametersOn == null ? null : new List<bool>(_parametersOn);
                 List<IIStrategyParameter> parametersSnapshot = _parameters == null ? null : new List<IIStrategyParameter>(_parameters);
 
-                if (string.IsNullOrWhiteSpace(strategyName))
+                if (!HasText(strategyName))
                 {
                     AbortPrimeWorker("Optimizer prime worker skipped: strategy name is unavailable at runtime.");
                     return;
@@ -2008,7 +2013,7 @@ namespace OsEngine.OsOptimizer
                 return null;
             }
 
-            if (string.IsNullOrWhiteSpace(_master.StrategyName))
+            if (!HasText(_master.StrategyName))
             {
                 SendLogMessage("Single-bot test skipped: strategy name is not set.", LogMessageType.Error);
                 SafeDisposeAwaitObject(awaitObj);
