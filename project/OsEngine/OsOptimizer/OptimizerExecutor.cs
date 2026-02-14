@@ -484,30 +484,15 @@ namespace OsEngine.OsOptimizer
                     return;
                 }
 
-                if (optimizationMethod == OptimizationMethodType.Bayesian)
+                if (!ValidatePrimeWorkerBayesianSettings(
+                    optimizationMethod,
+                    bayesianInitialSamples,
+                    bayesianMaxIterations,
+                    bayesianBatchSize,
+                    bayesianAcquisitionKappa,
+                    bayesianTailSharePercent))
                 {
-                    if (bayesianInitialSamples <= 0
-                        || bayesianMaxIterations <= 0
-                        || bayesianBatchSize <= 0
-                        || bayesianAcquisitionKappa < 0)
-                    {
-                        AbortPrimeWorker(
-                            "Optimizer prime worker skipped: bayesian settings are invalid at runtime " +
-                            "(initialSamples " + bayesianInitialSamples +
-                            ", maxIterations " + bayesianMaxIterations +
-                            ", batchSize " + bayesianBatchSize +
-                            ", kappa " + bayesianAcquisitionKappa + ").");
-                        return;
-                    }
-
-                    if (bayesianTailSharePercent < 1 || bayesianTailSharePercent > 50)
-                    {
-                        SendLogMessage(
-                            "Optimizer prime worker detected out-of-range bayesian tail share percent " +
-                            "(value " + bayesianTailSharePercent + ", expected 1..50). " +
-                            "Strategy-level clamp will be applied.",
-                            LogMessageType.System);
-                    }
+                    return;
                 }
 
                 int countBotsRaw = BotCountOneFaze(parametersSnapshot, parametersOnSnapshot);
@@ -778,6 +763,45 @@ namespace OsEngine.OsOptimizer
                 AbortPrimeWorker(
                     "Optimizer prime worker skipped: parameter snapshot contains null at index " + runtimeNullIndex + ".");
                 return false;
+            }
+
+            return true;
+        }
+
+        private bool ValidatePrimeWorkerBayesianSettings(
+            OptimizationMethodType optimizationMethod,
+            int bayesianInitialSamples,
+            int bayesianMaxIterations,
+            int bayesianBatchSize,
+            decimal bayesianAcquisitionKappa,
+            int bayesianTailSharePercent)
+        {
+            if (optimizationMethod != OptimizationMethodType.Bayesian)
+            {
+                return true;
+            }
+
+            if (bayesianInitialSamples <= 0
+                || bayesianMaxIterations <= 0
+                || bayesianBatchSize <= 0
+                || bayesianAcquisitionKappa < 0)
+            {
+                AbortPrimeWorker(
+                    "Optimizer prime worker skipped: bayesian settings are invalid at runtime " +
+                    "(initialSamples " + bayesianInitialSamples +
+                    ", maxIterations " + bayesianMaxIterations +
+                    ", batchSize " + bayesianBatchSize +
+                    ", kappa " + bayesianAcquisitionKappa + ").");
+                return false;
+            }
+
+            if (bayesianTailSharePercent < 1 || bayesianTailSharePercent > 50)
+            {
+                SendLogMessage(
+                    "Optimizer prime worker detected out-of-range bayesian tail share percent " +
+                    "(value " + bayesianTailSharePercent + ", expected 1..50). " +
+                    "Strategy-level clamp will be applied.",
+                    LogMessageType.System);
             }
 
             return true;

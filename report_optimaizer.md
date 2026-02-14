@@ -4958,3 +4958,25 @@ After each optimizer-related change, update this file with:
 ### Risks / notes
 - No intended behavior change; centralizes prime-worker snapshot guards and reduces validation drift.
 - One transient `CS2012` lock happened when build/test were launched in parallel; sequential rerun passed.
+
+## Stabilization Update (2026-02-14) - Extract Prime Worker Bayesian Runtime Validation Helper
+### What changed
+- Added helper `ValidatePrimeWorkerBayesianSettings(...)` in `OptimizerExecutor`.
+- Moved prime-worker Bayesian runtime checks from `PrimeThreadWorkerPlace()` into helper:
+  - positive `initialSamples/maxIterations/batchSize`;
+  - non-negative `kappa`;
+  - diagnostic for out-of-range `tailSharePercent` (1..50 expected).
+- Preserved existing abort and diagnostic messages/behavior.
+
+### Files touched
+- `project/OsEngine/OsOptimizer/OptimizerExecutor.cs`
+- `report_optimaizer.md`
+
+### Validation
+- `dotnet build project/OsEngine/OsEngine.csproj --configuration Debug`
+- Result: Build succeeded, warnings 0, errors 0
+- `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --configuration Debug`
+- Result: Passed 70 / Failed 0
+
+### Risks / notes
+- No intended behavior change; keeps Bayesian runtime guard logic localized and easier to audit.
