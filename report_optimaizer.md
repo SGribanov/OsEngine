@@ -98,6 +98,14 @@ Result:
 - Interfaces are introduced with async contracts.
 - `BruteForceStrategy` currently enumerates combinations via `ParameterIterator` and delegates bot evaluation through `IBotEvaluator`.
 - This is an additive scaffold step; `OptimizerExecutor` now uses `IOptimizationStrategy` (`BruteForceStrategy`) for bot count estimation, while runtime test orchestration still uses existing execution flow.
+- `OptimizerMaster` now forwards strategy-related settings from `OptimizerSettings`:
+  - `OptimizationMethod`
+  - `ObjectiveMetric`
+  - `BayesianInitialSamples`
+  - `BayesianMaxIterations`
+  - `BayesianBatchSize`
+- Method-selection hook added in `OptimizerExecutor` for in-sample strategy resolution:
+  - currently `Bayesian` logs fallback and uses `BruteForceStrategy`.
 
 ## Phase 3 Changes (Started)
 ### New file

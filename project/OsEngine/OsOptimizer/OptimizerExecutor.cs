@@ -33,7 +33,6 @@ namespace OsEngine.OsOptimizer
             _parameterIterator.LogMessageEvent += SendLogMessage;
             _botConfigurator = new BotConfigurator(_master.Settings, _asyncBotFactory, _master.ManualControl);
             _botConfigurator.LogMessageEvent += SendLogMessage;
-            _countEstimationStrategy = new BruteForceStrategy(_parameterIterator);
         }
 
         private OptimizerMaster _master;
@@ -43,8 +42,6 @@ namespace OsEngine.OsOptimizer
         private readonly ParameterIterator _parameterIterator;
 
         private readonly BotConfigurator _botConfigurator;
-
-        private readonly IOptimizationStrategy _countEstimationStrategy;
 
         private SemaphoreSlim _serverSlots;
 
@@ -204,7 +201,18 @@ namespace OsEngine.OsOptimizer
 
         public int BotCountOneFaze(List<IIStrategyParameter> parameters, List<bool> parametersOn)
         {
-            return _countEstimationStrategy.EstimateBotCount(parameters, parametersOn);
+            IOptimizationStrategy strategy = GetInSampleOptimizationStrategy();
+            return strategy.EstimateBotCount(parameters, parametersOn);
+        }
+
+        private IOptimizationStrategy GetInSampleOptimizationStrategy()
+        {
+            if (_master.OptimizationMethod == OptimizationMethodType.Bayesian)
+            {
+                SendLogMessage("Bayesian strategy is not integrated yet. Fallback to BruteForce.", LogMessageType.System);
+            }
+
+            return new BruteForceStrategy(_parameterIterator);
         }
 
         public List<OptimizerFazeReport> ReportsToFazes = new List<OptimizerFazeReport>();

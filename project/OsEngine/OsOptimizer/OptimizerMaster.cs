@@ -238,6 +238,36 @@ namespace OsEngine.OsOptimizer
             set => Settings.LastInSample = value;
         }
 
+        public OptimizationMethodType OptimizationMethod
+        {
+            get => Settings.OptimizationMethod;
+            set => Settings.OptimizationMethod = value;
+        }
+
+        public SortBotsType ObjectiveMetric
+        {
+            get => Settings.ObjectiveMetric;
+            set => Settings.ObjectiveMetric = value;
+        }
+
+        public int BayesianInitialSamples
+        {
+            get => Settings.BayesianInitialSamples;
+            set => Settings.BayesianInitialSamples = value;
+        }
+
+        public int BayesianMaxIterations
+        {
+            get => Settings.BayesianMaxIterations;
+            set => Settings.BayesianMaxIterations = value;
+        }
+
+        public int BayesianBatchSize
+        {
+            get => Settings.BayesianBatchSize;
+            set => Settings.BayesianBatchSize = value;
+        }
+
         public List<OrderClearing> ClearingTimes => Settings.ClearingTimes;
 
         public List<NonTradePeriod> NonTradePeriods => Settings.NonTradePeriods;
