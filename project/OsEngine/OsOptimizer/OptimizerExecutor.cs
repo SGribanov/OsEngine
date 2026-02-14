@@ -474,6 +474,10 @@ namespace OsEngine.OsOptimizer
                 {
                     break;
                 }
+                catch (InvalidOperationException)
+                {
+                    break;
+                }
                 unscheduledCount--;
             }
         }

@@ -107,6 +107,7 @@ Implemented and committed:
 98. Stabilization: hardened unscheduled-tail compensation against dispose races by guarding `CountdownEvent.Signal()` with `ObjectDisposedException` handling.
 99. Stabilization: hardened per-item out-of-sample skip compensation against dispose races by guarding `CountdownEvent.Signal()` in `CompensateSkippedOutOfSampleSlot(...)`.
 100. Stabilization: tightened async factory error cleanup by removing failed request waiter from map (`TryRemove`) before canceling, preventing stale waiter retention on creation exceptions.
+101. Stabilization: hardened out-of-sample unscheduled-tail countdown compensation against `InvalidOperationException` race (already-signaled path), making loop exit deterministic under contention.
 
 ## Commits
 - `b1e5eabe3` — `Optimizer: persist Phase1 extraction and wiring state`
