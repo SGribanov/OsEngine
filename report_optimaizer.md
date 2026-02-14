@@ -1185,3 +1185,23 @@ After each optimizer-related change, update this file with:
 
 ### Risks / notes
 - Improves resilience of cleanup branches when server removal itself fails.
+
+## Stabilization Update (2026-02-14) - Safe Done-Signal Helper In Master Single-Bot Flow
+### What changed
+- Added `SafeSignalAloneTestDone()` helper in `OptimizerMaster`.
+- Replaced direct `_aloneTestDoneSignal.Set()` calls in single-bot flow with safe helper usage:
+  - setup-failure branch;
+  - UI wait failure branch;
+  - timeout recovery branch;
+  - async runner finalization (current run only).
+- Helper catches signal exceptions and logs diagnostics.
+
+### Files touched
+- `project/OsEngine/OsOptimizer/OptimizerMaster.cs`
+
+### Validation
+- `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --configuration Debug`
+- Result: Passed 70 / Failed 0
+
+### Risks / notes
+- Prevents cleanup/finalization branch failures if done-signal set operation throws unexpectedly.
