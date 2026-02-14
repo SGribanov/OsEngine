@@ -4309,3 +4309,20 @@ After each optimizer-related change, update this file with:
 
 ### Risks / notes
 - No intended behavior change in valid flow; improves runtime fail-fast symmetry for objective/acquisition settings.
+
+
+## Stabilization Update (2026-02-14) - Guard Empty Faze Snapshot After Runtime Copy
+### What changed
+- Added extra runtime guard in `PrimeThreadWorkerPlace()`:
+  - validates `fazesSnapshot.Count > 0` immediately after snapshot creation.
+- If snapshot is empty, worker logs diagnostic, publishes `TestReady` snapshot, and exits safely.
+
+### Files touched
+- `project/OsEngine/OsOptimizer/OptimizerExecutor.cs`
+
+### Validation
+- `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --configuration Debug`
+- Result: Passed 70 / Failed 0
+
+### Risks / notes
+- No intended behavior change in normal flow; adds defensive coverage for rare runtime transitions between source validation and snapshot usage.

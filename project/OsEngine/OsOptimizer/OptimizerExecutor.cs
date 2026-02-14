@@ -328,6 +328,13 @@ namespace OsEngine.OsOptimizer
                 }
 
                 List<OptimizerFaze> fazesSnapshot = new List<OptimizerFaze>(fazesSource);
+                if (fazesSnapshot.Count == 0)
+                {
+                    SendLogMessage("Optimizer prime worker skipped: faze snapshot is empty at runtime.", LogMessageType.Error);
+                    SafeInvokeTestReady(GetReportsSnapshotForPublish());
+                    return;
+                }
+
                 string strategyName = _master.StrategyName;
                 bool isScript = _master.IsScript;
                 int iterationCount = _master.IterationCount;
