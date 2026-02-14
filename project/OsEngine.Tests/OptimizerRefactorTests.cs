@@ -477,6 +477,72 @@ public class OptimizerRefactorTests
     }
 
     [Fact]
+    public async Task BayesianOptimizationStrategy_GreedyMode_ShouldPlanZeroTailBudget()
+    {
+        ParameterIterator iterator = new ParameterIterator();
+
+        IBotEvaluator evaluator = new BotEvaluator((all, optimized, ct) =>
+            Task.FromResult(new OptimizerReport(new List<IIStrategyParameter>())));
+
+        BayesianOptimizationStrategy strategy = new BayesianOptimizationStrategy(
+            iterator,
+            evaluator,
+            maxParallel: 2,
+            objectiveMetric: SortBotsType.TotalProfit,
+            objectiveDirection: ObjectiveDirectionType.Maximize,
+            initialSamples: 2,
+            maxIterations: 12,
+            batchSize: 3,
+            acquisitionMode: BayesianAcquisitionModeType.Greedy,
+            acquisitionKappa: 0.25m,
+            useExploitationTailPass: true);
+
+        List<IIStrategyParameter> allParameters = new List<IIStrategyParameter>
+        {
+            new StrategyParameterInt("A", 1, 1, 4, 1),
+            new StrategyParameterInt("B", 1, 1, 4, 1)
+        };
+        List<bool> parametersToOptimization = new List<bool> { true, true };
+
+        await strategy.OptimizeInSampleAsync(allParameters, parametersToOptimization, CancellationToken.None);
+
+        Assert.Equal(0, strategy.LastTailBudgetPlanned);
+    }
+
+    [Fact]
+    public async Task BayesianOptimizationStrategy_UcbMode_ShouldPlanPositiveTailBudgetWhenEnabled()
+    {
+        ParameterIterator iterator = new ParameterIterator();
+
+        IBotEvaluator evaluator = new BotEvaluator((all, optimized, ct) =>
+            Task.FromResult(new OptimizerReport(new List<IIStrategyParameter>())));
+
+        BayesianOptimizationStrategy strategy = new BayesianOptimizationStrategy(
+            iterator,
+            evaluator,
+            maxParallel: 2,
+            objectiveMetric: SortBotsType.TotalProfit,
+            objectiveDirection: ObjectiveDirectionType.Maximize,
+            initialSamples: 2,
+            maxIterations: 12,
+            batchSize: 3,
+            acquisitionMode: BayesianAcquisitionModeType.Ucb,
+            acquisitionKappa: 0.25m,
+            useExploitationTailPass: true);
+
+        List<IIStrategyParameter> allParameters = new List<IIStrategyParameter>
+        {
+            new StrategyParameterInt("A", 1, 1, 4, 1),
+            new StrategyParameterInt("B", 1, 1, 4, 1)
+        };
+        List<bool> parametersToOptimization = new List<bool> { true, true };
+
+        await strategy.OptimizeInSampleAsync(allParameters, parametersToOptimization, CancellationToken.None);
+
+        Assert.True(strategy.LastTailBudgetPlanned > 0);
+    }
+
+    [Fact]
     public void BayesianCandidateSelector_SelectInitialBatch_ShouldSpreadAndFill()
     {
         BayesianCandidateSelector selector = new BayesianCandidateSelector(defaultBatchSize: 3);

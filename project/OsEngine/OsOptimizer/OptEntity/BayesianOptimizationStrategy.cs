@@ -72,6 +72,8 @@ namespace OsEngine.OsOptimizer.OptEntity
 
         public bool UseExploitationTailPass { get; }
 
+        public int LastTailBudgetPlanned { get; private set; }
+
         public int EstimateBotCount(List<IIStrategyParameter> allParameters, List<bool> parametersToOptimization)
         {
             return _fallbackBackend.EstimateBotCount(allParameters, parametersToOptimization);
@@ -122,6 +124,7 @@ namespace OsEngine.OsOptimizer.OptEntity
             await EvaluateBatchAsync(initialBatch, allParameters, candidates, cancellationToken, evaluated, scored, reports).ConfigureAwait(false);
 
             int tailBudget = GetExploitationTailBudget();
+            LastTailBudgetPlanned = tailBudget;
             int iterationsLeft = MaxIterations - tailBudget;
 
             while (!cancellationToken.IsCancellationRequested && iterationsLeft > 0 && evaluated.Count < candidates.Count)
@@ -233,12 +236,18 @@ namespace OsEngine.OsOptimizer.OptEntity
                 return 0;
             }
 
+            if (AcquisitionMode == BayesianAcquisitionModeType.Greedy)
+            {
+                return 0;
+            }
+
             if (MaxIterations < 4)
             {
                 return 0;
             }
 
-            int byShare = Math.Max(1, MaxIterations / 5);
+            int shareDenominator = AcquisitionMode == BayesianAcquisitionModeType.ExpectedImprovement ? 6 : 5;
+            int byShare = Math.Max(1, MaxIterations / shareDenominator);
             int byBatch = Math.Max(1, BatchSize);
             return Math.Min(MaxIterations - 1, Math.Min(byShare, byBatch));
         }

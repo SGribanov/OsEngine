@@ -23,6 +23,7 @@ Implemented and committed:
 14. Phase 5 continued: added score normalization and metric-aware kappa scaling before acquisition.
 15. Phase 5 continued: added exploitation tail-pass (reserved budget slice from `MaxIterations`) with greedy acquisition at the end of staged run.
 16. Phase 5 continued: added explicit `BayesianUseTailPass` toggle (settings + UI + strategy wiring) to enable/disable exploitation tail-pass without code changes.
+17. Phase 5 tuning: tail-budget heuristic is now mode-aware (`Greedy` disables tail reservation; `EI/Ucb` use different share denominator), plus strategy exposes planned tail budget for diagnostics/tests.
 
 ## Commits
 - `b1e5eabe3` — `Optimizer: persist Phase1 extraction and wiring state`
@@ -117,6 +118,8 @@ Added tests:
   - `BayesianAcquisitionPolicy_SelectNextBatch_WithoutScores_ShouldFallbackToSelector`
   - `BayesianAcquisitionPolicy_SelectNextBatch_WithEqualMeans_ShouldPreferHigherUncertainty`
   - `BayesianAcquisitionPolicy_Modes_ShouldChangeExplorationBehavior`
+  - `BayesianOptimizationStrategy_GreedyMode_ShouldPlanZeroTailBudget`
+  - `BayesianOptimizationStrategy_UcbMode_ShouldPlanPositiveTailBudgetWhenEnabled`
   - `OptimizerSettings_SaveLoad_ShouldPersistOptimizationMethodFields`
   - `OptimizerSettings_LoadLegacyWithoutV2Fields_ShouldKeepDefaultsForMethodSettings`
 
@@ -124,7 +127,7 @@ Command:
 - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --configuration Debug`
 
 Result:
-- Passed: 22
+- Passed: 24
 - Failed: 0
 
 ### Stabilization fixes from new tests
@@ -185,6 +188,10 @@ Result:
     - objective-direction is configurable (`Maximize` / `Minimize`) and is applied in strategy score orientation before acquisition.
   - strategy now normalizes observed objective scores (`min-max`) before acquisition and applies metric-specific kappa scaling to stabilize exploration pressure across heterogeneous metrics.
   - strategy now reserves small exploitation budget and runs final greedy candidate pass after exploration loop.
+  - tail-budget reservation is mode-aware:
+    - `Greedy`: no reserved tail budget,
+    - `ExpectedImprovement`: lower reserved share,
+    - `Ucb`: default reserved share.
 
 ## Phase 5 UI Wiring (Continued)
 ### Updated files
