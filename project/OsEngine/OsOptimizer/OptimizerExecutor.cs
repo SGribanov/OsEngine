@@ -745,9 +745,9 @@ namespace OsEngine.OsOptimizer
             {
                 _phaseCompletion?.Dispose();
             }
-            catch
+            catch (Exception ex)
             {
-                // ignored
+                SendLogMessage("Optimizer sync cleanup failed: phase completion dispose. " + ex, LogMessageType.Error);
             }
             finally
             {
@@ -758,9 +758,9 @@ namespace OsEngine.OsOptimizer
             {
                 _serverSlots?.Dispose();
             }
-            catch
+            catch (Exception ex)
             {
-                // ignored
+                SendLogMessage("Optimizer sync cleanup failed: server slots dispose. " + ex, LogMessageType.Error);
             }
             finally
             {
@@ -771,9 +771,9 @@ namespace OsEngine.OsOptimizer
             {
                 _stopCts?.Dispose();
             }
-            catch
+            catch (Exception ex)
             {
-                // ignored
+                SendLogMessage("Optimizer sync cleanup failed: stop token source dispose. " + ex, LogMessageType.Error);
             }
             finally
             {
