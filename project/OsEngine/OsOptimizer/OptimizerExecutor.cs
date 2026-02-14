@@ -276,10 +276,17 @@ namespace OsEngine.OsOptimizer
                         return;
                     }
 
-                    if (fazesSnapshot[i].TypeFaze == OptimizerFazeType.InSample)
+                    OptimizerFaze currentFaze = fazesSnapshot[i];
+                    if (currentFaze == null)
+                    {
+                        SendLogMessage("Optimizer phase skipped: faze entry is null at index " + i + ".", LogMessageType.Error);
+                        continue;
+                    }
+
+                    if (currentFaze.TypeFaze == OptimizerFazeType.InSample)
                     {
                         OptimizerFazeReport report = new OptimizerFazeReport();
-                        report.Faze = fazesSnapshot[i];
+                        report.Faze = currentFaze;
 
                         ReportsToFazes.Add(report);
 
@@ -302,7 +309,7 @@ namespace OsEngine.OsOptimizer
                         SendLogMessage("ReportsCount " + inSampleCount.ToString(), LogMessageType.System);
 
                         OptimizerFazeReport report = new OptimizerFazeReport();
-                        report.Faze = fazesSnapshot[i];
+                        report.Faze = currentFaze;
 
                         ReportsToFazes.Add(report);
 

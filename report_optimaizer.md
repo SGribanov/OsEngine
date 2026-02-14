@@ -3661,3 +3661,21 @@ After each optimizer-related change, update this file with:
 
 ### Risks / notes
 - No intended behavior change; improves per-run consistency if optimizer strategy metadata is edited externally during active execution.
+
+
+## Stabilization Update (2026-02-14) - Skip Null Faze Entries In Prime Worker Loop
+### What changed
+- Added null-entry guard in `PrimeThreadWorkerPlace()` faze iteration:
+  - each loop now snapshots `currentFaze`;
+  - null entries are skipped with explicit diagnostic log including index.
+- InSample/OutOfSample report assignment now uses `currentFaze` local variable.
+
+### Files touched
+- `project/OsEngine/OsOptimizer/OptimizerExecutor.cs`
+
+### Validation
+- `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --configuration Debug`
+- Result: Passed 70 / Failed 0
+
+### Risks / notes
+- Intentional robustness change: malformed phase arrays with null entries no longer crash run flow and are handled as skip-with-log.
