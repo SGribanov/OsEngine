@@ -24,6 +24,7 @@ Implemented and committed:
 15. Phase 5 continued: added exploitation tail-pass (reserved budget slice from `MaxIterations`) with greedy acquisition at the end of staged run.
 16. Phase 5 continued: added explicit `BayesianUseTailPass` toggle (settings + UI + strategy wiring) to enable/disable exploitation tail-pass without code changes.
 17. Phase 5 tuning: tail-budget heuristic is now mode-aware (`Greedy` disables tail reservation; `EI/Ucb` use different share denominator), plus strategy exposes planned tail budget for diagnostics/tests.
+18. Phase 5 tuning: added configurable `BayesianTailSharePercent` (settings + UI + strategy wiring) to control reserved tail budget share.
 
 ## Commits
 - `b1e5eabe3` — `Optimizer: persist Phase1 extraction and wiring state`
@@ -120,6 +121,7 @@ Added tests:
   - `BayesianAcquisitionPolicy_Modes_ShouldChangeExplorationBehavior`
   - `BayesianOptimizationStrategy_GreedyMode_ShouldPlanZeroTailBudget`
   - `BayesianOptimizationStrategy_UcbMode_ShouldPlanPositiveTailBudgetWhenEnabled`
+  - `BayesianOptimizationStrategy_TailSharePercent_ShouldAffectPlannedTailBudget`
   - `OptimizerSettings_SaveLoad_ShouldPersistOptimizationMethodFields`
   - `OptimizerSettings_LoadLegacyWithoutV2Fields_ShouldKeepDefaultsForMethodSettings`
 
@@ -127,7 +129,7 @@ Command:
 - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --configuration Debug`
 
 Result:
-- Passed: 24
+- Passed: 25
 - Failed: 0
 
 ### Stabilization fixes from new tests
@@ -172,6 +174,7 @@ Result:
   - `BayesianAcquisitionMode`
   - `BayesianAcquisitionKappa`
   - `BayesianUseTailPass`
+  - `BayesianTailSharePercent`
 - Method-selection hook added in `OptimizerExecutor` for in-sample strategy resolution:
   - `Bayesian` now resolves to `BayesianOptimizationStrategy` skeleton.
   - bayesian strategy now performs staged search on grid candidates:
@@ -207,14 +210,15 @@ Result:
   - `ComboBoxBayesianAcquisitionMode`
   - `TextBoxBayesianAcquisitionKappa`
   - `CheckBoxBayesianTailPass`
+  - `TextBoxBayesianTailSharePercent`
 - Added bayesian numeric settings editors:
   - `TextBoxBayesianInitialSamples`
   - `TextBoxBayesianMaxIterations`
   - `TextBoxBayesianBatchSize`
 - Added binding and validation in UI code-behind:
   - values are loaded from `OptimizerMaster` at startup;
-  - edits are persisted back to `OptimizerMaster` (`OptimizationMethod`, `ObjectiveMetric`, `ObjectiveDirection`, `BayesianInitialSamples`, `BayesianMaxIterations`, `BayesianBatchSize`, `BayesianAcquisitionMode`, `BayesianAcquisitionKappa`, `BayesianUseTailPass`);
-  - bayesian integer fields require positive integers; `kappa` requires non-negative decimal.
+  - edits are persisted back to `OptimizerMaster` (`OptimizationMethod`, `ObjectiveMetric`, `ObjectiveDirection`, `BayesianInitialSamples`, `BayesianMaxIterations`, `BayesianBatchSize`, `BayesianAcquisitionMode`, `BayesianAcquisitionKappa`, `BayesianUseTailPass`, `BayesianTailSharePercent`);
+  - bayesian integer fields require positive integers; `kappa` requires non-negative decimal; tail share requires range `1..50`.
 - Added dynamic enable/disable:
   - bayesian numeric fields are enabled only when `OptimizationMethod = Bayesian`;
   - disabled during optimization run and restored after completion.
@@ -226,7 +230,7 @@ Result:
 ### Notes
 - Added safe test fixture scope `SettingsFileScope` with backup/restore for `Engine/OptimizerSettings.txt`.
 - New tests verify:
-  - full save/load roundtrip for method settings, including direction/acquisition settings and tail-pass toggle;
+  - full save/load roundtrip for method settings, including direction/acquisition settings, tail-pass toggle, and tail-share percent;
   - legacy settings file (without appended method-setting lines) keeps defaults and does not break load.
 
 ## Phase 3 Changes (Started)

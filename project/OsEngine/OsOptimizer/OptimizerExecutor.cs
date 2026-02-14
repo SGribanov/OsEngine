@@ -227,6 +227,7 @@ namespace OsEngine.OsOptimizer
                 _master.BayesianAcquisitionMode,
                 _master.BayesianAcquisitionKappa,
                 _master.BayesianUseTailPass,
+                _master.BayesianTailSharePercent,
                 out string infoMessage);
 
             if (!string.IsNullOrEmpty(infoMessage))

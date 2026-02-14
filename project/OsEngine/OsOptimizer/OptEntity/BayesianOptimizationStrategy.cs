@@ -38,7 +38,8 @@ namespace OsEngine.OsOptimizer.OptEntity
             int batchSize,
             BayesianAcquisitionModeType acquisitionMode,
             decimal acquisitionKappa,
-            bool useExploitationTailPass)
+            bool useExploitationTailPass,
+            int tailSharePercent)
         {
             _parameterIterator = parameterIterator;
             _botEvaluator = botEvaluator;
@@ -51,6 +52,7 @@ namespace OsEngine.OsOptimizer.OptEntity
             AcquisitionMode = acquisitionMode;
             AcquisitionKappa = acquisitionKappa < 0 ? 0 : acquisitionKappa;
             UseExploitationTailPass = useExploitationTailPass;
+            TailSharePercent = tailSharePercent < 1 ? 1 : (tailSharePercent > 50 ? 50 : tailSharePercent);
             _fallbackBackend = new BruteForceStrategy(parameterIterator, botEvaluator, _maxParallel);
             _candidateSelector = new BayesianCandidateSelector(BatchSize);
             _acquisitionPolicy = new BayesianAcquisitionPolicy();
@@ -71,6 +73,8 @@ namespace OsEngine.OsOptimizer.OptEntity
         public decimal AcquisitionKappa { get; }
 
         public bool UseExploitationTailPass { get; }
+
+        public int TailSharePercent { get; }
 
         public int LastTailBudgetPlanned { get; private set; }
 
@@ -246,8 +250,13 @@ namespace OsEngine.OsOptimizer.OptEntity
                 return 0;
             }
 
-            int shareDenominator = AcquisitionMode == BayesianAcquisitionModeType.ExpectedImprovement ? 6 : 5;
-            int byShare = Math.Max(1, MaxIterations / shareDenominator);
+            int sharePercent = TailSharePercent;
+            if (AcquisitionMode == BayesianAcquisitionModeType.ExpectedImprovement)
+            {
+                sharePercent = Math.Max(1, TailSharePercent - 5);
+            }
+
+            int byShare = Math.Max(1, (int)Math.Round(MaxIterations * (sharePercent / 100m), MidpointRounding.AwayFromZero));
             int byBatch = Math.Max(1, BatchSize);
             return Math.Min(MaxIterations - 1, Math.Min(byShare, byBatch));
         }

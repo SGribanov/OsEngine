@@ -292,6 +292,12 @@ namespace OsEngine.OsOptimizer
             set => Settings.BayesianUseTailPass = value;
         }
 
+        public int BayesianTailSharePercent
+        {
+            get => Settings.BayesianTailSharePercent;
+            set => Settings.BayesianTailSharePercent = value;
+        }
+
         public List<OrderClearing> ClearingTimes => Settings.ClearingTimes;
 
         public List<NonTradePeriod> NonTradePeriods => Settings.NonTradePeriods;

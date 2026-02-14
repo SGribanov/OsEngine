@@ -74,7 +74,8 @@
                         <TextBox Name="TextBoxBayesianMaxIterations" Height="23" Margin="632,49,0,0" TextWrapping="Wrap" VerticalAlignment="Top" HorizontalAlignment="Left" Width="79"/>
                         <TextBox Name="TextBoxBayesianBatchSize" Height="23" Margin="716,49,0,0" TextWrapping="Wrap" VerticalAlignment="Top" HorizontalAlignment="Left" Width="79"/>
                         <TextBox Name="TextBoxBayesianAcquisitionKappa" Height="23" Margin="801,49,0,0" TextWrapping="Wrap" VerticalAlignment="Top" HorizontalAlignment="Left" Width="122"/>
-                        <CheckBox Name="CheckBoxBayesianTailPass" Content="Tail pass" HorizontalAlignment="Left" Margin="801,74,0,0" VerticalAlignment="Top"/>
+                        <TextBox Name="TextBoxBayesianTailSharePercent" Height="23" Margin="801,74,0,0" TextWrapping="Wrap" VerticalAlignment="Top" HorizontalAlignment="Left" Width="58"/>
+                        <CheckBox Name="CheckBoxBayesianTailPass" Content="Tail pass" HorizontalAlignment="Left" Margin="864,76,0,0" VerticalAlignment="Top"/>
                         <CheckBox Name="CheckBoxLastInSample" Content="Last inSample" HorizontalAlignment="Left" Margin="928,52,0,0" VerticalAlignment="Top"/>
                         <WindowsFormsHost Name="HostWalkForwardPeriods"  Foreground="Black" Margin="738,72,10,10"/>
                     </Grid>

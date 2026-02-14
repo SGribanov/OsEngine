@@ -352,6 +352,7 @@ public class OptimizerRefactorTests
             bayesianAcquisitionMode: BayesianAcquisitionModeType.Ucb,
             bayesianAcquisitionKappa: 0.25m,
             bayesianUseTailPass: true,
+            bayesianTailSharePercent: 20,
             out string infoMessage);
 
         Assert.IsType<BruteForceStrategy>(strategy);
@@ -376,6 +377,7 @@ public class OptimizerRefactorTests
             bayesianAcquisitionMode: BayesianAcquisitionModeType.Ucb,
             bayesianAcquisitionKappa: 0.5m,
             bayesianUseTailPass: true,
+            bayesianTailSharePercent: 15,
             out string infoMessage);
 
         BayesianOptimizationStrategy bayesian = Assert.IsType<BayesianOptimizationStrategy>(strategy);
@@ -387,6 +389,7 @@ public class OptimizerRefactorTests
         Assert.Equal(BayesianAcquisitionModeType.Ucb, bayesian.AcquisitionMode);
         Assert.Equal(0.5m, bayesian.AcquisitionKappa);
         Assert.True(bayesian.UseExploitationTailPass);
+        Assert.Equal(15, bayesian.TailSharePercent);
         Assert.False(string.IsNullOrEmpty(infoMessage));
         Assert.Contains("skeleton", infoMessage);
     }
@@ -417,7 +420,8 @@ public class OptimizerRefactorTests
             batchSize: 2,
             acquisitionMode: BayesianAcquisitionModeType.Ucb,
             acquisitionKappa: 0.25m,
-            useExploitationTailPass: true);
+            useExploitationTailPass: true,
+            tailSharePercent: 20);
 
         List<IIStrategyParameter> allParameters = new List<IIStrategyParameter>
         {
@@ -459,7 +463,8 @@ public class OptimizerRefactorTests
             batchSize: 2,
             acquisitionMode: BayesianAcquisitionModeType.Ucb,
             acquisitionKappa: 0.25m,
-            useExploitationTailPass: true);
+            useExploitationTailPass: true,
+            tailSharePercent: 20);
 
         List<IIStrategyParameter> allParameters = new List<IIStrategyParameter>
         {
@@ -495,7 +500,8 @@ public class OptimizerRefactorTests
             batchSize: 3,
             acquisitionMode: BayesianAcquisitionModeType.Greedy,
             acquisitionKappa: 0.25m,
-            useExploitationTailPass: true);
+            useExploitationTailPass: true,
+            tailSharePercent: 20);
 
         List<IIStrategyParameter> allParameters = new List<IIStrategyParameter>
         {
@@ -528,7 +534,8 @@ public class OptimizerRefactorTests
             batchSize: 3,
             acquisitionMode: BayesianAcquisitionModeType.Ucb,
             acquisitionKappa: 0.25m,
-            useExploitationTailPass: true);
+            useExploitationTailPass: true,
+            tailSharePercent: 20);
 
         List<IIStrategyParameter> allParameters = new List<IIStrategyParameter>
         {
@@ -540,6 +547,38 @@ public class OptimizerRefactorTests
         await strategy.OptimizeInSampleAsync(allParameters, parametersToOptimization, CancellationToken.None);
 
         Assert.True(strategy.LastTailBudgetPlanned > 0);
+    }
+
+    [Fact]
+    public async Task BayesianOptimizationStrategy_TailSharePercent_ShouldAffectPlannedTailBudget()
+    {
+        ParameterIterator iterator = new ParameterIterator();
+        IBotEvaluator evaluator = new BotEvaluator((all, optimized, ct) =>
+            Task.FromResult(new OptimizerReport(new List<IIStrategyParameter>())));
+
+        BayesianOptimizationStrategy lowShare = new BayesianOptimizationStrategy(
+            iterator, evaluator, 2, SortBotsType.TotalProfit, ObjectiveDirectionType.Maximize,
+            initialSamples: 2, maxIterations: 20, batchSize: 10,
+            acquisitionMode: BayesianAcquisitionModeType.Ucb, acquisitionKappa: 0.25m,
+            useExploitationTailPass: true, tailSharePercent: 5);
+
+        BayesianOptimizationStrategy highShare = new BayesianOptimizationStrategy(
+            iterator, evaluator, 2, SortBotsType.TotalProfit, ObjectiveDirectionType.Maximize,
+            initialSamples: 2, maxIterations: 20, batchSize: 10,
+            acquisitionMode: BayesianAcquisitionModeType.Ucb, acquisitionKappa: 0.25m,
+            useExploitationTailPass: true, tailSharePercent: 40);
+
+        List<IIStrategyParameter> allParameters = new List<IIStrategyParameter>
+        {
+            new StrategyParameterInt("A", 1, 1, 4, 1),
+            new StrategyParameterInt("B", 1, 1, 4, 1)
+        };
+        List<bool> parametersToOptimization = new List<bool> { true, true };
+
+        await lowShare.OptimizeInSampleAsync(allParameters, parametersToOptimization, CancellationToken.None);
+        await highShare.OptimizeInSampleAsync(allParameters, parametersToOptimization, CancellationToken.None);
+
+        Assert.True(highShare.LastTailBudgetPlanned > lowShare.LastTailBudgetPlanned);
     }
 
     [Fact]
@@ -677,7 +716,8 @@ public class OptimizerRefactorTests
                 ObjectiveDirection = ObjectiveDirectionType.Minimize,
                 BayesianAcquisitionMode = BayesianAcquisitionModeType.ExpectedImprovement,
                 BayesianAcquisitionKappa = 0.9m,
-                BayesianUseTailPass = false
+                BayesianUseTailPass = false,
+                BayesianTailSharePercent = 33
             };
 
             OptimizerSettings reader = new OptimizerSettings();
@@ -691,6 +731,7 @@ public class OptimizerRefactorTests
             Assert.Equal(BayesianAcquisitionModeType.ExpectedImprovement, reader.BayesianAcquisitionMode);
             Assert.Equal(0.9m, reader.BayesianAcquisitionKappa);
             Assert.False(reader.BayesianUseTailPass);
+            Assert.Equal(33, reader.BayesianTailSharePercent);
         }
     }
 
@@ -712,14 +753,15 @@ public class OptimizerRefactorTests
                 ObjectiveDirection = ObjectiveDirectionType.Minimize,
                 BayesianAcquisitionMode = BayesianAcquisitionModeType.Greedy,
                 BayesianAcquisitionKappa = 0.77m,
-                BayesianUseTailPass = false
+                BayesianUseTailPass = false,
+                BayesianTailSharePercent = 7
             };
 
             string[] fullLines = File.ReadAllLines(scope.SettingsPath);
             Assert.True(fullLines.Length >= 5);
 
             // Simulate legacy file by removing appended method-setting lines from the tail.
-            string[] legacyLines = fullLines.Take(fullLines.Length - 9).ToArray();
+            string[] legacyLines = fullLines.Take(fullLines.Length - 10).ToArray();
             File.WriteAllLines(scope.SettingsPath, legacyLines);
 
             OptimizerSettings reader = new OptimizerSettings();
@@ -733,6 +775,7 @@ public class OptimizerRefactorTests
             Assert.Equal(BayesianAcquisitionModeType.Ucb, reader.BayesianAcquisitionMode);
             Assert.Equal(0.25m, reader.BayesianAcquisitionKappa);
             Assert.True(reader.BayesianUseTailPass);
+            Assert.Equal(20, reader.BayesianTailSharePercent);
         }
     }
 

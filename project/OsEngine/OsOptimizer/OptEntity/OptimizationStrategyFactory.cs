@@ -20,6 +20,7 @@ namespace OsEngine.OsOptimizer.OptEntity
             BayesianAcquisitionModeType bayesianAcquisitionMode,
             decimal bayesianAcquisitionKappa,
             bool bayesianUseTailPass,
+            int bayesianTailSharePercent,
             out string infoMessage)
         {
             if (method == OptimizationMethodType.Bayesian)
@@ -36,7 +37,8 @@ namespace OsEngine.OsOptimizer.OptEntity
                     bayesianBatchSize,
                     bayesianAcquisitionMode,
                     bayesianAcquisitionKappa,
-                    bayesianUseTailPass);
+                    bayesianUseTailPass,
+                    bayesianTailSharePercent);
             }
 
             infoMessage = null;

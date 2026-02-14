@@ -475,6 +475,13 @@ namespace OsEngine.OsOptimizer.OptEntity
         }
         private bool _bayesianUseTailPass = true;
 
+        public int BayesianTailSharePercent
+        {
+            get => _bayesianTailSharePercent;
+            set { _bayesianTailSharePercent = value; Save(); }
+        }
+        private int _bayesianTailSharePercent = 20;
+
         #endregion
 
         #region Save / Load
@@ -523,6 +530,7 @@ namespace OsEngine.OsOptimizer.OptEntity
                     writer.WriteLine(_bayesianAcquisitionMode);
                     writer.WriteLine(_bayesianAcquisitionKappa);
                     writer.WriteLine(_bayesianUseTailPass);
+                    writer.WriteLine(_bayesianTailSharePercent);
                 }
             }
             catch (Exception error)
@@ -591,6 +599,8 @@ namespace OsEngine.OsOptimizer.OptEntity
                         if (line != null) _bayesianAcquisitionKappa = line.ToDecimal();
                         line = reader.ReadLine();
                         if (line != null) _bayesianUseTailPass = Convert.ToBoolean(line);
+                        line = reader.ReadLine();
+                        if (line != null) _bayesianTailSharePercent = Convert.ToInt32(line);
                     }
                 }
             }

@@ -174,11 +174,13 @@ namespace OsEngine.OsOptimizer
             TextBoxBayesianMaxIterations.Text = _master.BayesianMaxIterations.ToString();
             TextBoxBayesianBatchSize.Text = _master.BayesianBatchSize.ToString();
             TextBoxBayesianAcquisitionKappa.Text = _master.BayesianAcquisitionKappa.ToString(CultureInfo.InvariantCulture);
+            TextBoxBayesianTailSharePercent.Text = _master.BayesianTailSharePercent.ToString();
             CheckBoxBayesianTailPass.IsChecked = _master.BayesianUseTailPass;
             TextBoxBayesianInitialSamples.TextChanged += TextBoxBayesianSettings_TextChanged;
             TextBoxBayesianMaxIterations.TextChanged += TextBoxBayesianSettings_TextChanged;
             TextBoxBayesianBatchSize.TextChanged += TextBoxBayesianSettings_TextChanged;
             TextBoxBayesianAcquisitionKappa.TextChanged += TextBoxBayesianAcquisitionKappa_TextChanged;
+            TextBoxBayesianTailSharePercent.TextChanged += TextBoxBayesianTailSharePercent_TextChanged;
             CheckBoxBayesianTailPass.Click += CheckBoxBayesianTailPass_Click;
             SyncOptimizationMethodControlsState();
 
@@ -301,6 +303,7 @@ namespace OsEngine.OsOptimizer
                 TextBoxBayesianMaxIterations.TextChanged -= TextBoxBayesianSettings_TextChanged;
                 TextBoxBayesianBatchSize.TextChanged -= TextBoxBayesianSettings_TextChanged;
                 TextBoxBayesianAcquisitionKappa.TextChanged -= TextBoxBayesianAcquisitionKappa_TextChanged;
+                TextBoxBayesianTailSharePercent.TextChanged -= TextBoxBayesianTailSharePercent_TextChanged;
                 CheckBoxBayesianTailPass.Click -= CheckBoxBayesianTailPass_Click;
 
                 _master.NewSecurityEvent -= _master_NewSecurityEvent;
@@ -415,6 +418,7 @@ namespace OsEngine.OsOptimizer
             TextBoxBayesianMaxIterations.IsEnabled = false;
             TextBoxBayesianBatchSize.IsEnabled = false;
             TextBoxBayesianAcquisitionKappa.IsEnabled = false;
+            TextBoxBayesianTailSharePercent.IsEnabled = false;
             CheckBoxBayesianTailPass.IsEnabled = false;
         }
 
@@ -1206,7 +1210,26 @@ namespace OsEngine.OsOptimizer
             TextBoxBayesianBatchSize.IsEnabled = isBayesian;
             ComboBoxBayesianAcquisitionMode.IsEnabled = isBayesian;
             TextBoxBayesianAcquisitionKappa.IsEnabled = isBayesian;
+            TextBoxBayesianTailSharePercent.IsEnabled = isBayesian;
             CheckBoxBayesianTailPass.IsEnabled = isBayesian;
+        }
+
+        private void TextBoxBayesianTailSharePercent_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            try
+            {
+                int share = Convert.ToInt32(TextBoxBayesianTailSharePercent.Text);
+                if (share < 1 || share > 50)
+                {
+                    throw new Exception("Tail share must be in 1..50.");
+                }
+
+                _master.BayesianTailSharePercent = share;
+            }
+            catch
+            {
+                TextBoxBayesianTailSharePercent.Text = _master.BayesianTailSharePercent.ToString();
+            }
         }
 
         private void CheckBoxBayesianTailPass_Click(object sender, RoutedEventArgs e)
