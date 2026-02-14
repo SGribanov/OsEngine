@@ -331,6 +331,7 @@ namespace OsEngine.OsOptimizer
                 string strategyName = _master.StrategyName;
                 bool isScript = _master.IsScript;
                 int iterationCount = _master.IterationCount;
+                int threadsCount = _master.ThreadsCount;
                 bool lastInSample = _master.LastInSample;
                 List<bool> parametersOnSnapshot = _parametersOn == null ? null : new List<bool>(_parametersOn);
                 List<IIStrategyParameter> parametersSnapshot = _parameters == null ? null : new List<IIStrategyParameter>(_parameters);
@@ -353,6 +354,15 @@ namespace OsEngine.OsOptimizer
                 {
                     SendLogMessage(
                         "Optimizer prime worker skipped: iteration count is invalid at runtime (value " + iterationCount + ").",
+                        LogMessageType.Error);
+                    SafeInvokeTestReady(GetReportsSnapshotForPublish());
+                    return;
+                }
+
+                if (threadsCount <= 0)
+                {
+                    SendLogMessage(
+                        "Optimizer prime worker skipped: threads count is invalid at runtime (value " + threadsCount + ").",
                         LogMessageType.Error);
                     SafeInvokeTestReady(GetReportsSnapshotForPublish());
                     return;
