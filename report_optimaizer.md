@@ -2730,3 +2730,22 @@ After each optimizer-related change, update this file with:
 ### Risks / notes
 - No behavior change expected; improves readability and reduces repeated dereference/race surface in source name transformation path.
 
+
+## Stabilization Update (2026-02-14) - Strip Only Terminal InSample Suffix In OutOfSample Naming
+### What changed
+- Updated out-of-sample bot name transform in `StartAsuncBotFactoryOutOfSample(...)`.
+- Replaced global `Replace(" InSample", "")` with explicit terminal-suffix removal logic:
+  - remove `" InSample"` only when it is the final suffix (`EndsWith(..., Ordinal)`);
+  - keep internal occurrences untouched.
+- Kept post-transform trim and empty-name guard unchanged.
+
+### Files touched
+- `project/OsEngine/OsOptimizer/OptimizerExecutor.cs`
+
+### Validation
+- `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --configuration Debug`
+- Result: Passed 70 / Failed 0
+
+### Risks / notes
+- Behavior change for edge-case names containing `" InSample"` in the middle; avoids accidental over-normalization and preserves original name intent.
+
