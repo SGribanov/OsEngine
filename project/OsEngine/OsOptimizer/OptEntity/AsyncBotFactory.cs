@@ -163,7 +163,7 @@ namespace OsEngine.OsOptimizer.OptimizerEntity
                 catch (Exception e)
                 {
                     if (request != null
-                        && _botWaiters.TryGetValue(request.Key, out TaskCompletionSource<BotPanel> waiter))
+                        && _botWaiters.TryRemove(request.Key, out TaskCompletionSource<BotPanel> waiter))
                     {
                         waiter.TrySetCanceled();
                     }
