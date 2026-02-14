@@ -4833,3 +4833,21 @@ After each optimizer-related change, update this file with:
 
 ### Risks / notes
 - No runtime behavior change expected; reduces duplication and keeps non-null list validation behavior uniform.
+
+
+## Stabilization Update (2026-02-14) - Snapshot Validated Thread Count In Start Initialization
+### What changed
+- Updated `Start(...)` in `OptimizerExecutor`:
+  - captures validated `_master.ThreadsCount` into local `threadsCount`;
+  - uses this snapshot for `_serverSlots` initialization.
+- Removed redundant repeated reads of mutable `_master.ThreadsCount` in slot-semaphore setup path.
+
+### Files touched
+- `project/OsEngine/OsOptimizer/OptimizerExecutor.cs`
+
+### Validation
+- `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --configuration Debug`
+- Result: Passed 70 / Failed 0
+
+### Risks / notes
+- No runtime behavior change expected; improves initialization consistency and readability.

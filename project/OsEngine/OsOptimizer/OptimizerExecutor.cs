@@ -120,6 +120,7 @@ namespace OsEngine.OsOptimizer
                     LogMessageType.Error);
                 return false;
             }
+            int threadsCount = _master.ThreadsCount;
 
             if (_master.IterationCount < 0)
             {
@@ -249,7 +250,7 @@ namespace OsEngine.OsOptimizer
 
                 SemaphoreSlim previousServerSlots = Interlocked.Exchange(
                     ref _serverSlots,
-                    new SemaphoreSlim(Math.Max(1, _master.ThreadsCount), Math.Max(1, _master.ThreadsCount)));
+                    new SemaphoreSlim(threadsCount, threadsCount));
 
                 try
                 {
