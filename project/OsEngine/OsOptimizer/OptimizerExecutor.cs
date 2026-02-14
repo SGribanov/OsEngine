@@ -1033,6 +1033,7 @@ namespace OsEngine.OsOptimizer
 
             if (_primeThreadWorker != null)
             {
+                SendLogMessage("Single-bot test request ignored: previous test worker is still active.", LogMessageType.System);
                 SafeDisposeAwaitObject(awaitObj);
                 return null;
             }

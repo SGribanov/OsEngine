@@ -1992,3 +1992,18 @@ After each optimizer-related change, update this file with:
 
 ### Risks / notes
 - No normal-path behavior change; improves diagnostics when new/unknown tab types appear without bind handling.
+
+## Stabilization Update (2026-02-14) - Log Busy Worker Early Exit In Single-Bot Test
+### What changed
+- Updated `TestBot(...)` in `OptimizerExecutor`.
+- Added explicit system log when single-bot test request is ignored because previous `_primeThreadWorker` is still active.
+
+### Files touched
+- `project/OsEngine/OsOptimizer/OptimizerExecutor.cs`
+
+### Validation
+- `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --configuration Debug`
+- Result: Passed 70 / Failed 0
+
+### Risks / notes
+- No behavior change; improves observability of intentional request drops under concurrent test attempts.
