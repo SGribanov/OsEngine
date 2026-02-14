@@ -233,12 +233,14 @@ namespace OsEngine.OsOptimizer
                 List<OptimizerFaze> fazesSnapshot = new List<OptimizerFaze>(_master.Fazes);
                 string strategyName = _master.StrategyName;
                 bool isScript = _master.IsScript;
+                int iterationCount = _master.IterationCount;
+                bool lastInSample = _master.LastInSample;
 
                 int countBots = BotCountOneFaze(_parameters, _parametersOn);
 
-                int estimatedMaxTests = countBots * (_master.IterationCount * 2);
+                int estimatedMaxTests = countBots * (iterationCount * 2);
 
-                if (_master.LastInSample)
+                if (lastInSample)
                 {
                     estimatedMaxTests = estimatedMaxTests - countBots;
                 }

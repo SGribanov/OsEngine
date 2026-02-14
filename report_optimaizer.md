@@ -3714,3 +3714,21 @@ After each optimizer-related change, update this file with:
 
 ### Risks / notes
 - No expected behavior change for successful flows; improves shutdown hygiene and reduces risk of leaked/never-completing evaluation tasks after abnormal termination.
+
+
+## Stabilization Update (2026-02-14) - Snapshot Iteration Settings For Max-Test Estimation
+### What changed
+- Extended run-local snapshotting in `PrimeThreadWorkerPlace()`:
+  - `iterationCount = _master.IterationCount`
+  - `lastInSample = _master.LastInSample`
+- `estimatedMaxTests` computation now uses these snapshot values instead of repeated live reads from `_master`.
+
+### Files touched
+- `project/OsEngine/OsOptimizer/OptimizerExecutor.cs`
+
+### Validation
+- `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --configuration Debug`
+- Result: Passed 70 / Failed 0
+
+### Risks / notes
+- No intended behavior change; keeps per-run max-test estimation stable if optimizer settings are modified while a run is active.
