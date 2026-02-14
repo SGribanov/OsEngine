@@ -12,12 +12,23 @@ namespace OsEngine.OsOptimizer.OptEntity
             ParameterIterator parameterIterator,
             IBotEvaluator evaluator,
             int maxParallel,
+            SortBotsType objectiveMetric,
+            int bayesianInitialSamples,
+            int bayesianMaxIterations,
+            int bayesianBatchSize,
             out string infoMessage)
         {
             if (method == OptimizationMethodType.Bayesian)
             {
-                infoMessage = "Bayesian strategy is not integrated yet. Fallback to BruteForce.";
-                return new BruteForceStrategy(parameterIterator, evaluator, maxParallel);
+                infoMessage = "Bayesian strategy skeleton is active. Using brute-force backend for execution.";
+                return new BayesianOptimizationStrategy(
+                    parameterIterator,
+                    evaluator,
+                    maxParallel,
+                    objectiveMetric,
+                    bayesianInitialSamples,
+                    bayesianMaxIterations,
+                    bayesianBatchSize);
             }
 
             infoMessage = null;

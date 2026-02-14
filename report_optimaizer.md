@@ -12,6 +12,7 @@ Implemented and committed:
 3. Phase 2 continuation (in progress): stop/cancel path in `OptimizerExecutor` moved to `CancellationTokenSource`.
 4. Phase 3 started: `OptimizerReport` serialization extracted to dedicated serializer with version prefix and legacy fallback.
 5. Phase 4 started: optimization strategy abstraction interfaces and brute-force strategy scaffold added.
+6. Phase 5 started: bayesian strategy skeleton added and wired via factory with safe brute-force backend delegation.
 
 ## Commits
 - `b1e5eabe3` — `Optimizer: persist Phase1 extraction and wiring state`
@@ -98,13 +99,14 @@ Added tests:
   - `OptimizerReportTab_LoadFromSaveString_LegacyWithoutSharpRatio_ShouldLoad`
   - `BruteForceStrategy_OptimizeInSampleAsync_ShouldPreserveDecimalCheckBoxSnapshot`
   - `OptimizationStrategyFactory_BruteForce_ShouldReturnBruteForceWithoutMessage`
-  - `OptimizationStrategyFactory_Bayesian_ShouldFallbackToBruteForceWithMessage`
+  - `OptimizationStrategyFactory_Bayesian_ShouldReturnBayesianSkeletonWithMessage`
+  - `BayesianOptimizationStrategy_OptimizeInSampleAsync_ShouldUseCurrentBruteForceBackend`
 
 Command:
 - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --configuration Debug`
 
 Result:
-- Passed: 13
+- Passed: 14
 - Failed: 0
 
 ### Stabilization fixes from new tests
@@ -117,8 +119,8 @@ Result:
 - Phase 1: largely integrated (core extraction + wiring done).
 - Phase 2: in progress (major busy-wait removal done; cancellation propagation now wired through `OptimizerExecutor -> BotConfigurator -> AsyncBotFactory`, remaining cleanup still pending).
 - Phase 3: started (serializer extracted; legacy fallback preserved; further cleanup and adoption still pending).
-- Phase 4: in progress (core abstraction contracts added; executor switched to strategy-based in-sample pipeline with brute-force and method-selection fallback).
-- Phase 5 (Bayesian optimization + UI controls): not started in this branch segment.
+- Phase 4: in progress (core abstraction contracts added; executor switched to strategy-based in-sample pipeline).
+- Phase 5 (Bayesian optimization + UI controls): started (strategy skeleton + factory wiring; runtime backend still brute-force).
 
 ## Phase 4 Changes (Started)
 ### New files
@@ -126,6 +128,7 @@ Result:
 - `project/OsEngine/OsOptimizer/OptEntity/IBotEvaluator.cs`
 - `project/OsEngine/OsOptimizer/OptEntity/BotEvaluator.cs`
 - `project/OsEngine/OsOptimizer/OptEntity/BruteForceStrategy.cs`
+- `project/OsEngine/OsOptimizer/OptEntity/BayesianOptimizationStrategy.cs`
 - `project/OsEngine/OsOptimizer/OptEntity/OptimizationStrategyFactory.cs`
 
 ### Notes
@@ -142,7 +145,8 @@ Result:
   - `BayesianMaxIterations`
   - `BayesianBatchSize`
 - Method-selection hook added in `OptimizerExecutor` for in-sample strategy resolution:
-  - currently `Bayesian` logs fallback and uses `BruteForceStrategy`.
+  - `Bayesian` now resolves to `BayesianOptimizationStrategy` skeleton.
+  - skeleton logs integration message and uses brute-force backend internally (safe non-breaking stage).
   - selection is centralized via `OptimizationStrategyFactory`.
 
 ## Phase 3 Changes (Started)
@@ -162,7 +166,7 @@ Result:
    - full replacement of remaining polling in single-bot test flow where appropriate.
 2. Start Phase 3 (`OptimizerReport` serializer extraction with legacy fallback).
 3. Start Phase 4 strategy abstraction (`IOptimizationStrategy`, `IBotEvaluator`, brute-force extraction).
-4. Implement Phase 5 Bayesian strategy + UI settings binding.
+4. Continue Phase 5 by replacing brute-force delegation with staged Bayesian candidate loop and add UI bindings.
 
 ## Update Rule
 After each optimizer-related change, update this file with:

@@ -219,6 +219,10 @@ namespace OsEngine.OsOptimizer
                 _parameterIterator,
                 evaluator,
                 parallel,
+                _master.ObjectiveMetric,
+                _master.BayesianInitialSamples,
+                _master.BayesianMaxIterations,
+                _master.BayesianBatchSize,
                 out string infoMessage);
 
             if (!string.IsNullOrEmpty(infoMessage))

@@ -341,6 +341,10 @@ public class OptimizerRefactorTests
             iterator,
             evaluator: null,
             maxParallel: 1,
+            objectiveMetric: SortBotsType.TotalProfit,
+            bayesianInitialSamples: 10,
+            bayesianMaxIterations: 50,
+            bayesianBatchSize: 2,
             out string infoMessage);
 
         Assert.IsType<BruteForceStrategy>(strategy);
@@ -348,7 +352,7 @@ public class OptimizerRefactorTests
     }
 
     [Fact]
-    public void OptimizationStrategyFactory_Bayesian_ShouldFallbackToBruteForceWithMessage()
+    public void OptimizationStrategyFactory_Bayesian_ShouldReturnBayesianSkeletonWithMessage()
     {
         ParameterIterator iterator = new ParameterIterator();
 
@@ -357,11 +361,57 @@ public class OptimizerRefactorTests
             iterator,
             evaluator: null,
             maxParallel: 2,
+            objectiveMetric: SortBotsType.SharpRatio,
+            bayesianInitialSamples: 12,
+            bayesianMaxIterations: 77,
+            bayesianBatchSize: 3,
             out string infoMessage);
 
-        Assert.IsType<BruteForceStrategy>(strategy);
+        BayesianOptimizationStrategy bayesian = Assert.IsType<BayesianOptimizationStrategy>(strategy);
+        Assert.Equal(SortBotsType.SharpRatio, bayesian.ObjectiveMetric);
+        Assert.Equal(12, bayesian.InitialSamples);
+        Assert.Equal(77, bayesian.MaxIterations);
+        Assert.Equal(3, bayesian.BatchSize);
         Assert.False(string.IsNullOrEmpty(infoMessage));
-        Assert.Contains("Fallback to BruteForce", infoMessage);
+        Assert.Contains("skeleton", infoMessage);
+    }
+
+    [Fact]
+    public async Task BayesianOptimizationStrategy_OptimizeInSampleAsync_ShouldUseCurrentBruteForceBackend()
+    {
+        ParameterIterator iterator = new ParameterIterator();
+        int calls = 0;
+
+        IBotEvaluator evaluator = new BotEvaluator((all, optimized, ct) =>
+        {
+            Interlocked.Increment(ref calls);
+            return Task.FromResult(new OptimizerReport(new List<IIStrategyParameter>())
+            {
+                BotName = "bayes"
+            });
+        });
+
+        BayesianOptimizationStrategy strategy = new BayesianOptimizationStrategy(
+            iterator,
+            evaluator,
+            maxParallel: 2,
+            objectiveMetric: SortBotsType.TotalProfit,
+            initialSamples: 5,
+            maxIterations: 20,
+            batchSize: 2);
+
+        List<IIStrategyParameter> allParameters = new List<IIStrategyParameter>
+        {
+            new StrategyParameterInt("A", 1, 1, 2, 1),
+            new StrategyParameterInt("B", 1, 1, 2, 1)
+        };
+        List<bool> parametersToOptimization = new List<bool> { true, true };
+
+        List<OptimizerReport> reports =
+            await strategy.OptimizeInSampleAsync(allParameters, parametersToOptimization, CancellationToken.None);
+
+        Assert.Equal(4, calls);
+        Assert.Equal(4, reports.Count);
     }
 
     private static OptimizerReport BuildSampleReport()
