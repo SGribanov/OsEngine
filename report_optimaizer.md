@@ -4016,3 +4016,20 @@ After each optimizer-related change, update this file with:
 
 ### Risks / notes
 - No runtime behavior change expected.
+
+
+## Stabilization Update (2026-02-14) - Validate Optimization Method Enum Before Start
+### What changed
+- Added early `Start(...)` guard in `OptimizerExecutor`:
+  - `_master.OptimizationMethod` must be a defined `OptimizationMethodType` enum value.
+- Invalid enum payload (e.g., casted out-of-range value) now fails fast with explicit diagnostic log.
+
+### Files touched
+- `project/OsEngine/OsOptimizer/OptimizerExecutor.cs`
+
+### Validation
+- `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --configuration Debug`
+- Result: Passed 70 / Failed 0
+
+### Risks / notes
+- Intentional robustness change: prevents invalid optimizer-method config from reaching strategy factory path.

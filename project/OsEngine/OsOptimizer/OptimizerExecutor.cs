@@ -117,6 +117,14 @@ namespace OsEngine.OsOptimizer
                 return false;
             }
 
+            if (!Enum.IsDefined(typeof(OptimizationMethodType), _master.OptimizationMethod))
+            {
+                SendLogMessage(
+                    "Optimizer start skipped: optimization method is invalid (value " + _master.OptimizationMethod + ").",
+                    LogMessageType.Error);
+                return false;
+            }
+
             if (parametersOn == null)
             {
                 SendLogMessage("Optimizer start skipped: parametersOn is null.", LogMessageType.Error);
