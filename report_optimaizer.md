@@ -2390,3 +2390,21 @@ After each optimizer-related change, update this file with:
 ### Risks / notes
 - No normal-path behavior change; prevents ETA subscriber faults from interrupting end-event workflow.
 
+
+## Stabilization Update (2026-02-14) - Guard Initial Testing Progress Event In End Handler
+### What changed
+- Updated `server_TestingEndEvent(...)` in `OptimizerExecutor`.
+- Wrapped initial `TestingProgressChangeEvent?.Invoke(100, 100, serverNum)` in `try/catch`.
+- On subscriber exception, method now logs error and continues end-event cleanup flow.
+
+### Files touched
+- `project/OsEngine/OsOptimizer/OptimizerExecutor.cs`
+
+### Validation
+- `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --configuration Debug`
+- Result: Passed 70 / Failed 0
+
+### Risks / notes
+- No normal-path behavior change; prevents progress subscriber faults from aborting completion cleanup logic.
+
+

@@ -1690,7 +1690,15 @@ namespace OsEngine.OsOptimizer
 
         private void server_TestingEndEvent(int serverNum, TimeSpan testTime)
         {
-            TestingProgressChangeEvent?.Invoke(100, 100, serverNum);
+            try
+            {
+                TestingProgressChangeEvent?.Invoke(100, 100, serverNum);
+            }
+            catch (Exception ex)
+            {
+                SendLogMessage("Optimizer testing progress event dispatch failed: " + ex, LogMessageType.Error);
+            }
+
             int progressEnd;
             int progressMax;
 
