@@ -190,11 +190,18 @@ namespace OsEngine.OsOptimizer
             }
 
             List<string> botNames = new List<string>();
+            HashSet<string> uniqueBotNames = new HashSet<string>();
             int startServerIndex = _serverNum;
 
             for (int i = 0; i < botCount; i++)
             {
                 string botName = (startServerIndex + i) + " OpT " + normalizedFaze;
+                if (!uniqueBotNames.Add(botName))
+                {
+                    SendLogMessage("Async bot factory start skipped duplicate bot name (InSample): " + botName + ".", LogMessageType.Error);
+                    continue;
+                }
+
                 botNames.Add(botName);
             }
 
@@ -232,6 +239,7 @@ namespace OsEngine.OsOptimizer
             }
 
             List<string> botNames = new List<string>();
+            HashSet<string> uniqueBotNames = new HashSet<string>();
 
             for (int i = 0; i < reportFiltered.Reports.Count; i++)
             {
@@ -255,6 +263,12 @@ namespace OsEngine.OsOptimizer
                 }
 
                 string botName = transformedBotName + " " + normalizedFaze;
+                if (!uniqueBotNames.Add(botName))
+                {
+                    SendLogMessage("Async bot factory start skipped duplicate bot name (OutOfSample): " + botName + ".", LogMessageType.Error);
+                    continue;
+                }
+
                 botNames.Add(botName);
             }
 

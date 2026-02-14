@@ -2656,3 +2656,23 @@ After each optimizer-related change, update this file with:
 ### Risks / notes
 - No normal-path behavior change for existing call sites; improves resilience and naming consistency when phase label input is empty or whitespace.
 
+
+## Stabilization Update (2026-02-14) - Deduplicate Async Bot Factory Name Batches
+### What changed
+- Updated `StartAsuncBotFactoryInSample(...)` in `OptimizerExecutor`:
+  - added `HashSet<string>`-based duplicate filtering for generated bot names;
+  - duplicate names are skipped with diagnostics.
+- Updated `StartAsuncBotFactoryOutOfSample(...)` similarly:
+  - deduplicates transformed out-of-sample bot names before enqueue;
+  - duplicates are skipped with diagnostics.
+
+### Files touched
+- `project/OsEngine/OsOptimizer/OptimizerExecutor.cs`
+
+### Validation
+- `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --configuration Debug`
+- Result: Passed 70 / Failed 0
+
+### Risks / notes
+- Behavior change only when duplicate names are produced; avoids redundant/ambiguous async bot creation requests.
+
