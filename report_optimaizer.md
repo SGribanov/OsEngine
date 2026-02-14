@@ -1373,3 +1373,21 @@ After each optimizer-related change, update this file with:
 
 ### Risks / notes
 - Prevents rare task completion publication failures from breaking end-of-test processing path.
+
+## Stabilization Update (2026-02-14) - Safe Cancel-Callback Helper With Token In Evaluation Startup
+### What changed
+- Added overload `SafeTrySetCanceled(TaskCompletionSource<OptimizerReport>, CancellationToken)` in `OptimizerExecutor`.
+- Replaced direct cancel registration callback body in `StartNewBotForEvaluationAsync(...)`:
+  - from `completion.TrySetCanceled(cancellationToken)`
+  - to safe helper invocation.
+- Helper catches and logs cancellation publication exceptions.
+
+### Files touched
+- `project/OsEngine/OsOptimizer/OptimizerExecutor.cs`
+
+### Validation
+- `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --configuration Debug`
+- Result: Passed 70 / Failed 0
+
+### Risks / notes
+- Prevents callback-side exceptions during evaluation cancellation propagation from leaking into scheduler path.

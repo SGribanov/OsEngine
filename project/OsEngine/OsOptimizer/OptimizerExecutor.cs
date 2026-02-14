@@ -663,7 +663,7 @@ namespace OsEngine.OsOptimizer
             if (cancellationToken.CanBeCanceled)
             {
                 CancellationTokenRegistration registration =
-                    cancellationToken.Register(() => completion.TrySetCanceled(cancellationToken));
+                    cancellationToken.Register(() => SafeTrySetCanceled(completion, cancellationToken));
 
                 completion.Task.ContinueWith(
                     static (_, state) => ((CancellationTokenRegistration)state).Dispose(),
@@ -1211,6 +1211,18 @@ namespace OsEngine.OsOptimizer
             catch (Exception ex)
             {
                 SendLogMessage("Optimizer evaluation completion cancel failed: " + ex, LogMessageType.Error);
+            }
+        }
+
+        private void SafeTrySetCanceled(TaskCompletionSource<OptimizerReport> completion, CancellationToken cancellationToken)
+        {
+            try
+            {
+                completion?.TrySetCanceled(cancellationToken);
+            }
+            catch (Exception ex)
+            {
+                SendLogMessage("Optimizer evaluation completion cancel(token) failed: " + ex, LogMessageType.Error);
             }
         }
 
