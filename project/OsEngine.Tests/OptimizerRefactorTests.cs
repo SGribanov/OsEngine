@@ -1044,6 +1044,40 @@ public class OptimizerRefactorTests
     }
 
     [Fact]
+    public void BayesianAcquisitionPolicy_NonPositiveBudgetOrUniverse_ShouldReturnEmpty()
+    {
+        BayesianCandidateSelector selector = new BayesianCandidateSelector(defaultBatchSize: 2);
+        BayesianAcquisitionPolicy policy = new BayesianAcquisitionPolicy();
+        List<BayesianCandidateSelector.CandidateScore> scored = new List<BayesianCandidateSelector.CandidateScore>
+        {
+            new BayesianCandidateSelector.CandidateScore { Index = 0, Score = 1m }
+        };
+
+        List<int> emptyByBatch = policy.SelectNextBatch(
+            totalCount: 10,
+            evaluated: new HashSet<int>(),
+            scored: scored,
+            batchSize: 0,
+            fallbackSelector: selector,
+            candidates: BuildIntCandidates(10, "X", 1, 10, 1),
+            mode: BayesianAcquisitionModeType.Ucb,
+            kappa: 0.25m);
+
+        List<int> emptyByUniverse = policy.SelectNextBatch(
+            totalCount: 0,
+            evaluated: new HashSet<int>(),
+            scored: scored,
+            batchSize: 2,
+            fallbackSelector: selector,
+            candidates: new List<List<IIStrategyParameter>>(),
+            mode: BayesianAcquisitionModeType.Ucb,
+            kappa: 0.25m);
+
+        Assert.Empty(emptyByBatch);
+        Assert.Empty(emptyByUniverse);
+    }
+
+    [Fact]
     public void OptimizerSettings_SaveLoad_ShouldPersistOptimizationMethodFields()
     {
         lock (SettingsFileLock)
