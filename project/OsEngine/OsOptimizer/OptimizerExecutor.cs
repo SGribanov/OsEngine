@@ -95,6 +95,14 @@ namespace OsEngine.OsOptimizer
                 return false;
             }
 
+            if (_master.ThreadsCount <= 0)
+            {
+                SendLogMessage(
+                    "Optimizer start skipped: threads count must be positive (value " + _master.ThreadsCount + ").",
+                    LogMessageType.Error);
+                return false;
+            }
+
             if (parametersOn == null)
             {
                 SendLogMessage("Optimizer start skipped: parametersOn is null.", LogMessageType.Error);

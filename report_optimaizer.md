@@ -3876,3 +3876,20 @@ After each optimizer-related change, update this file with:
 
 ### Risks / notes
 - Intentional robustness change: prevents late async factory/startup failures caused by missing strategy identity.
+
+
+## Stabilization Update (2026-02-14) - Validate Positive Thread Count Before Start
+### What changed
+- Added early `Start(...)` guard in `OptimizerExecutor`:
+  - `_master.ThreadsCount` must be greater than zero.
+- Invalid values now fail fast with explicit diagnostic log containing the provided thread count.
+
+### Files touched
+- `project/OsEngine/OsOptimizer/OptimizerExecutor.cs`
+
+### Validation
+- `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --configuration Debug`
+- Result: Passed 70 / Failed 0
+
+### Risks / notes
+- Intentional robustness change: rejects invalid concurrency configuration at run boundary instead of silently coercing it.
