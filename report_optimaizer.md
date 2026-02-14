@@ -4504,3 +4504,23 @@ After each optimizer-related change, update this file with:
 
 ### Risks / notes
 - No intended behavior change for valid Bayesian configuration; improves fail-fast clarity on late invalid parameter mutation.
+
+
+## Stabilization Update (2026-02-14) - Snapshot Bayesian Runtime Settings Before Validation
+### What changed
+- Updated `PrimeThreadWorkerPlace()` to snapshot Bayesian settings into local variables:
+  - `bayesianInitialSamples`
+  - `bayesianMaxIterations`
+  - `bayesianBatchSize`
+  - `bayesianAcquisitionKappa`
+- Runtime Bayesian validation and diagnostics now use snapshot values instead of repeated direct `_master` reads.
+
+### Files touched
+- `project/OsEngine/OsOptimizer/OptimizerExecutor.cs`
+
+### Validation
+- `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --configuration Debug`
+- Result: Passed 70 / Failed 0
+
+### Risks / notes
+- No intended behavior change; improves per-run consistency and reduces sensitivity to concurrent settings mutation during guard evaluation.

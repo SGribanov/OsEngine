@@ -386,6 +386,10 @@ namespace OsEngine.OsOptimizer
                 SortBotsType objectiveMetric = _master.ObjectiveMetric;
                 ObjectiveDirectionType objectiveDirection = _master.ObjectiveDirection;
                 BayesianAcquisitionModeType bayesianAcquisitionMode = _master.BayesianAcquisitionMode;
+                int bayesianInitialSamples = _master.BayesianInitialSamples;
+                int bayesianMaxIterations = _master.BayesianMaxIterations;
+                int bayesianBatchSize = _master.BayesianBatchSize;
+                decimal bayesianAcquisitionKappa = _master.BayesianAcquisitionKappa;
                 List<bool> parametersOnSnapshot = _parametersOn == null ? null : new List<bool>(_parametersOn);
                 List<IIStrategyParameter> parametersSnapshot = _parameters == null ? null : new List<IIStrategyParameter>(_parameters);
 
@@ -451,17 +455,17 @@ namespace OsEngine.OsOptimizer
 
                 if (optimizationMethod == OptimizationMethodType.Bayesian)
                 {
-                    if (_master.BayesianInitialSamples <= 0
-                        || _master.BayesianMaxIterations <= 0
-                        || _master.BayesianBatchSize <= 0
-                        || _master.BayesianAcquisitionKappa < 0)
+                    if (bayesianInitialSamples <= 0
+                        || bayesianMaxIterations <= 0
+                        || bayesianBatchSize <= 0
+                        || bayesianAcquisitionKappa < 0)
                     {
                         AbortPrimeWorker(
                             "Optimizer prime worker skipped: bayesian settings are invalid at runtime " +
-                            "(initialSamples " + _master.BayesianInitialSamples +
-                            ", maxIterations " + _master.BayesianMaxIterations +
-                            ", batchSize " + _master.BayesianBatchSize +
-                            ", kappa " + _master.BayesianAcquisitionKappa + ").",
+                            "(initialSamples " + bayesianInitialSamples +
+                            ", maxIterations " + bayesianMaxIterations +
+                            ", batchSize " + bayesianBatchSize +
+                            ", kappa " + bayesianAcquisitionKappa + ").",
                             LogMessageType.Error);
                         return;
                     }
