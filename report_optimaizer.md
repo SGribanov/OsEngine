@@ -4270,3 +4270,23 @@ After each optimizer-related change, update this file with:
 
 ### Risks / notes
 - No intended behavior change in valid lifecycle flow; hardens against late thread-config invalidation after start boundary.
+
+
+## Stabilization Update (2026-02-14) - Guard Runtime Optimization Method In Prime Worker
+### What changed
+- Extended runtime settings snapshot validation in `PrimeThreadWorkerPlace()`:
+  - snapshots `optimizationMethod = _master.OptimizationMethod`;
+  - validates it with `Enum.IsDefined`.
+- Invalid runtime method value now causes controlled worker exit with:
+  - explicit diagnostic log;
+  - `TestReady` snapshot publication.
+
+### Files touched
+- `project/OsEngine/OsOptimizer/OptimizerExecutor.cs`
+
+### Validation
+- `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --configuration Debug`
+- Result: Passed 70 / Failed 0
+
+### Risks / notes
+- No intended behavior change in normal flow; adds runtime fail-fast parity with existing start-boundary enum validation.

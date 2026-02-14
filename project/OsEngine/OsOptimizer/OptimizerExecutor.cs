@@ -333,6 +333,7 @@ namespace OsEngine.OsOptimizer
                 int iterationCount = _master.IterationCount;
                 int threadsCount = _master.ThreadsCount;
                 bool lastInSample = _master.LastInSample;
+                OptimizationMethodType optimizationMethod = _master.OptimizationMethod;
                 List<bool> parametersOnSnapshot = _parametersOn == null ? null : new List<bool>(_parametersOn);
                 List<IIStrategyParameter> parametersSnapshot = _parameters == null ? null : new List<IIStrategyParameter>(_parameters);
 
@@ -363,6 +364,15 @@ namespace OsEngine.OsOptimizer
                 {
                     SendLogMessage(
                         "Optimizer prime worker skipped: threads count is invalid at runtime (value " + threadsCount + ").",
+                        LogMessageType.Error);
+                    SafeInvokeTestReady(GetReportsSnapshotForPublish());
+                    return;
+                }
+
+                if (!Enum.IsDefined(typeof(OptimizationMethodType), optimizationMethod))
+                {
+                    SendLogMessage(
+                        "Optimizer prime worker skipped: optimization method is invalid at runtime (value " + optimizationMethod + ").",
                         LogMessageType.Error);
                     SafeInvokeTestReady(GetReportsSnapshotForPublish());
                     return;
