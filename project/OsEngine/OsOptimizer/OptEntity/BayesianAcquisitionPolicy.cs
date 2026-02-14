@@ -62,7 +62,7 @@ namespace OsEngine.OsOptimizer.OptEntity
                     throw new ArgumentNullException(nameof(fallbackSelector));
                 }
 
-                return fallbackSelector.SelectNextBatch(totalCount, evaluatedSafe, scoredSafe, batchSize);
+                return fallbackSelector.SelectNextBatch(totalCount, evaluatedSafe, validScored, batchSize);
             }
 
             if (candidates == null || candidates.Count != totalCount)
@@ -72,7 +72,7 @@ namespace OsEngine.OsOptimizer.OptEntity
                     throw new ArgumentNullException(nameof(fallbackSelector));
                 }
 
-                return fallbackSelector.SelectNextBatch(totalCount, evaluatedSafe, scoredSafe, batchSize);
+                return fallbackSelector.SelectNextBatch(totalCount, evaluatedSafe, validScored, batchSize);
             }
 
             List<CandidateAcquisition> ranked = new List<CandidateAcquisition>();
