@@ -448,7 +448,15 @@ namespace OsEngine.OsOptimizer
 
             if (cancellationToken.CanBeCanceled)
             {
-                cancellationToken.Register(() => completion.TrySetCanceled(cancellationToken));
+                CancellationTokenRegistration registration =
+                    cancellationToken.Register(() => completion.TrySetCanceled(cancellationToken));
+
+                completion.Task.ContinueWith(
+                    static (_, state) => ((CancellationTokenRegistration)state).Dispose(),
+                    registration,
+                    CancellationToken.None,
+                    TaskContinuationOptions.ExecuteSynchronously,
+                    TaskScheduler.Default);
             }
 
             StartNewBot(parameters, parametersOptimized, report, botName, completion);
