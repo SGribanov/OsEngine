@@ -168,7 +168,10 @@ namespace OsEngine.OsOptimizer.OptimizerEntity
         {
             foreach (KeyValuePair<string, TaskCompletionSource<BotPanel>> waiter in _botWaiters)
             {
-                waiter.Value.TrySetCanceled();
+                if (_botWaiters.TryRemove(waiter.Key, out TaskCompletionSource<BotPanel> pending))
+                {
+                    pending.TrySetCanceled();
+                }
             }
         }
 
