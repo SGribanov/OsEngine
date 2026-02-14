@@ -81,6 +81,11 @@ namespace OsEngine.OsOptimizer.OptEntity
         public int EstimateBotCount(List<IIStrategyParameter> allParameters, List<bool> parametersToOptimization)
         {
             ValidateInputs(allParameters, parametersToOptimization);
+            if (!parametersToOptimization.Any(x => x))
+            {
+                return 1;
+            }
+
             int totalCombinations = _parameterIterator.CountCombinations(allParameters, parametersToOptimization);
             int plannedBudget = InitialSamples + MaxIterations;
             if (plannedBudget < 1)
@@ -285,6 +290,14 @@ namespace OsEngine.OsOptimizer.OptEntity
                 {
                     optimizedStart.Add(allParameters[i]);
                 }
+            }
+
+            if (optimizedStart.Count == 0)
+            {
+                return new List<List<IIStrategyParameter>>
+                {
+                    new List<IIStrategyParameter>()
+                };
             }
 
             List<List<IIStrategyParameter>> candidates = new List<List<IIStrategyParameter>>();

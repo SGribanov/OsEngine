@@ -557,7 +557,7 @@ public class OptimizerRefactorTests
     }
 
     [Fact]
-    public void BayesianOptimizationStrategy_EstimateBotCount_WithNoOptimizedFlags_ShouldReturnZero()
+    public void BayesianOptimizationStrategy_EstimateBotCount_WithNoOptimizedFlags_ShouldReturnOne()
     {
         ParameterIterator iterator = new ParameterIterator();
         BayesianOptimizationStrategy strategy = new BayesianOptimizationStrategy(
@@ -579,7 +579,7 @@ public class OptimizerRefactorTests
 
         int estimated = strategy.EstimateBotCount(allParameters, parametersToOptimization);
 
-        Assert.Equal(0, estimated);
+        Assert.Equal(1, estimated);
     }
 
     [Fact]
@@ -688,6 +688,45 @@ public class OptimizerRefactorTests
 
         Assert.Empty(reports);
         Assert.Equal(0, calls);
+    }
+
+    [Fact]
+    public async Task BayesianOptimizationStrategy_OptimizeInSampleAsync_WithNoOptimizedFlags_ShouldEvaluateOnce()
+    {
+        ParameterIterator iterator = new ParameterIterator();
+        int calls = 0;
+        IBotEvaluator evaluator = new BotEvaluator((all, optimized, ct) =>
+        {
+            Interlocked.Increment(ref calls);
+            return Task.FromResult(new OptimizerReport(new List<IIStrategyParameter>()));
+        });
+
+        BayesianOptimizationStrategy strategy = new BayesianOptimizationStrategy(
+            iterator,
+            evaluator,
+            maxParallel: 2,
+            objectiveMetric: SortBotsType.TotalProfit,
+            objectiveDirection: ObjectiveDirectionType.Maximize,
+            initialSamples: 2,
+            maxIterations: 10,
+            batchSize: 3,
+            acquisitionMode: BayesianAcquisitionModeType.Ucb,
+            acquisitionKappa: 0.25m,
+            useExploitationTailPass: true,
+            tailSharePercent: 20);
+
+        List<IIStrategyParameter> allParameters = new List<IIStrategyParameter>
+        {
+            new StrategyParameterInt("A", 1, 1, 4, 1),
+            new StrategyParameterInt("B", 1, 1, 4, 1)
+        };
+        List<bool> parametersToOptimization = new List<bool> { false, false };
+
+        List<OptimizerReport> reports =
+            await strategy.OptimizeInSampleAsync(allParameters, parametersToOptimization, CancellationToken.None);
+
+        Assert.Equal(1, calls);
+        Assert.Single(reports);
     }
 
     [Fact]

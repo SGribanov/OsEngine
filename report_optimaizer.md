@@ -77,10 +77,11 @@ Implemented and committed:
 68. Stabilization: hardened `AsyncBotFactory` shutdown paths (worker stop/process-off) by canceling all pending waiters before worker exit.
 69. Stabilization: improved `AsyncBotFactory.CancelAllWaiters` to cancel and remove waiter entries, preventing stale waiter accumulation after shutdown/error paths.
 70. Stabilization: added pre-canceled-token fast path in `AsyncBotFactory.GetBot` to avoid unnecessary waiter registration/work during stop-cancel flow.
-71. Stabilization: added explicit coverage for `BayesianOptimizationStrategy.EstimateBotCount` with no optimized parameters (`all flags false`) to lock current zero-candidate contract.
+71. Stabilization/behavior fix: aligned Bayesian no-optimized-flags path to evaluate baseline once (`EstimateBotCount = 1` and single empty-candidate runtime pass).
 72. Stabilization: made `AsyncBotFactory.GetBot` waiter cleanup race-safe by removing dictionary entry only when it still references the same waiter instance.
 73. Stabilization: added regression coverage for `BotConfigurator.CreateAndConfigureBot` null-botName guard.
 74. Stabilization: added pre-canceled-token coverage for `BayesianOptimizationStrategy.OptimizeInSampleAsync` to ensure zero evaluations and empty result on immediate cancellation.
+75. Stabilization: added runtime coverage for Bayesian no-optimized-flags path to assert exactly one evaluation/report.
 
 ## Commits
 - `b1e5eabe3` — `Optimizer: persist Phase1 extraction and wiring state`
@@ -171,6 +172,7 @@ Added tests:
   - `BayesianOptimizationStrategy_OptimizeInSampleAsync_ShouldUseCurrentBruteForceBackend`
   - `BayesianOptimizationStrategy_OptimizeInSampleAsync_ShouldRespectIterationBudget`
   - `BayesianOptimizationStrategy_OptimizeInSampleAsync_CanceledBeforeStart_ShouldReturnEmpty`
+  - `BayesianOptimizationStrategy_OptimizeInSampleAsync_WithNoOptimizedFlags_ShouldEvaluateOnce`
   - `BayesianCandidateSelector_SelectInitialBatch_ShouldSpreadAndFill`
   - `BayesianCandidateSelector_SelectInitialBatch_WithNullEvaluated_ShouldTreatAsEmpty`
   - `BayesianCandidateSelector_SelectNextBatch_ShouldPreferNeighborsOfTopScores`
@@ -206,7 +208,7 @@ Added tests:
   - `BayesianOptimizationStrategy_EstimateBotCount_WithMismatchedFlags_ShouldThrowArgumentException`
   - `BayesianOptimizationStrategy_EstimateBotCount_ShouldRespectBudgetCap`
   - `BayesianOptimizationStrategy_EstimateBotCount_WhenBudgetExceedsGrid_ShouldReturnGridSize`
-  - `BayesianOptimizationStrategy_EstimateBotCount_WithNoOptimizedFlags_ShouldReturnZero`
+  - `BayesianOptimizationStrategy_EstimateBotCount_WithNoOptimizedFlags_ShouldReturnOne`
   - `BayesianAcquisitionPolicy_NegativeKappa_ShouldBeTreatedAsZero`
   - `BayesianAcquisitionPolicy_InvalidCandidates_ShouldFallbackToSelectorPath`
   - `BayesianAcquisitionPolicy_NullEvaluated_ShouldTreatAsEmptySet`
@@ -227,7 +229,7 @@ Command:
 - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --configuration Debug`
 
 Result:
-- Passed: 67
+- Passed: 68
 - Failed: 0
 
 ### Stabilization fixes from new tests
