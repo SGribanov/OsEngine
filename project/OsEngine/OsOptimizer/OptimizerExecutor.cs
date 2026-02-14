@@ -76,6 +76,18 @@ namespace OsEngine.OsOptimizer
                 return false;
             }
 
+            if (_master.Storage == null)
+            {
+                SendLogMessage("Optimizer start skipped: storage context is null.", LogMessageType.Error);
+                return false;
+            }
+
+            if (_master.BotToTest == null)
+            {
+                SendLogMessage("Optimizer start skipped: bot-to-test context is null.", LogMessageType.Error);
+                return false;
+            }
+
             if (parametersOn == null)
             {
                 SendLogMessage("Optimizer start skipped: parametersOn is null.", LogMessageType.Error);

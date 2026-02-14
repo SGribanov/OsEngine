@@ -3625,3 +3625,21 @@ After each optimizer-related change, update this file with:
 
 ### Risks / notes
 - No intended behavior change for normal flow; reduces race sensitivity if phase collection is mutated externally while optimization is running.
+
+
+## Stabilization Update (2026-02-14) - Validate Storage And Bot Context Before Start
+### What changed
+- Extended early start validation in `OptimizerExecutor.Start(...)`:
+  - `_master.Storage` must be initialized;
+  - `_master.BotToTest` must be initialized.
+- Invalid context now aborts start before worker thread lifecycle begins, with explicit diagnostics.
+
+### Files touched
+- `project/OsEngine/OsOptimizer/OptimizerExecutor.cs`
+
+### Validation
+- `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --configuration Debug`
+- Result: Passed 70 / Failed 0
+
+### Risks / notes
+- Intentional robustness change: prevents late create-server/create-bot failures by rejecting incomplete optimizer context at start boundary.
