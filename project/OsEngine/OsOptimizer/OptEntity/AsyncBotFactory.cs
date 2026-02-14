@@ -56,9 +56,19 @@ namespace OsEngine.OsOptimizer.OptimizerEntity
 
         public void CreateNewBots(List<string> botsName, string botType, bool isScript, StartProgram startProgram)
         {
+            if (botsName == null || botsName.Count == 0)
+            {
+                return;
+            }
+
             for (int i = 0; i < botsName.Count; i++)
             {
                 string botName = botsName[i];
+                if (string.IsNullOrWhiteSpace(botName))
+                {
+                    continue;
+                }
+
                 string key = GetKey(botType, botName);
 
                 TaskCompletionSource<BotPanel> freshWaiter =
