@@ -381,42 +381,14 @@ namespace OsEngine.OsOptimizer
                 {
                     SendLogMessage("OutOfSample skipped source report due to parameter extraction error: "
                         + inSampleReports[i].BotName + ". " + ex, LogMessageType.Error);
-
-                    if (_phaseCompletion != null && !_phaseCompletion.IsSet)
-                    {
-                        _phaseCompletion.Signal();
-                    }
-
-                    try
-                    {
-                        _serverSlots?.Release();
-                    }
-                    catch
-                    {
-                        // ignored
-                    }
-
+                    CompensateSkippedOutOfSampleSlot();
                     continue;
                 }
 
                 if (parameters == null)
                 {
                     SendLogMessage("OutOfSample skipped source report with null parameters: " + inSampleReports[i].BotName, LogMessageType.System);
-
-                    if (_phaseCompletion != null && !_phaseCompletion.IsSet)
-                    {
-                        _phaseCompletion.Signal();
-                    }
-
-                    try
-                    {
-                        _serverSlots?.Release();
-                    }
-                    catch
-                    {
-                        // ignored
-                    }
-
+                    CompensateSkippedOutOfSampleSlot();
                     continue;
                 }
 
@@ -425,6 +397,23 @@ namespace OsEngine.OsOptimizer
             }
 
             WaitCurrentPhaseToComplete();
+        }
+
+        private void CompensateSkippedOutOfSampleSlot()
+        {
+            if (_phaseCompletion != null && !_phaseCompletion.IsSet)
+            {
+                _phaseCompletion.Signal();
+            }
+
+            try
+            {
+                _serverSlots?.Release();
+            }
+            catch
+            {
+                // ignored
+            }
         }
 
         private List<bool> _parametersOn;
