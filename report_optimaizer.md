@@ -2600,3 +2600,20 @@ After each optimizer-related change, update this file with:
 ### Risks / notes
 - Behavior change only for invalid source report names; improves robustness of out-of-sample async bot batch generation.
 
+
+## Stabilization Update (2026-02-14) - Avoid Source Report List Mutation In OutOfSample Factory Startup
+### What changed
+- Updated `StartAsuncBotFactoryOutOfSample(...)` in `OptimizerExecutor`.
+- Removed in-loop mutation of `reportFiltered.Reports` (`RemoveAt` + index rewind) for null entries.
+- Null source reports are now skipped with indexed diagnostic log, leaving input report collection unchanged.
+
+### Files touched
+- `project/OsEngine/OsOptimizer/OptimizerExecutor.cs`
+
+### Validation
+- `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --configuration Debug`
+- Result: Passed 70 / Failed 0
+
+### Risks / notes
+- No normal-path behavior change; reduces side effects and keeps source optimization report list stable for downstream consumers.
+

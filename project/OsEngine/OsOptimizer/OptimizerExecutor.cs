@@ -233,8 +233,7 @@ namespace OsEngine.OsOptimizer
             {
                 if (reportFiltered.Reports[i] == null)
                 {
-                    reportFiltered.Reports.RemoveAt(i);
-                    i--;
+                    SendLogMessage("Async bot factory start skipped (OutOfSample): source report is null at index " + i + ".", LogMessageType.Error);
                     continue;
                 }
 
