@@ -3383,6 +3383,11 @@ namespace OsEngine.OsOptimizer
 
         private void ShowBotChartDialog(DataGridViewCellMouseEventArgs e)
         {
+            if (e.RowIndex < 0)
+            {
+                return;
+            }
+
             if (_reports == null || _reports.Count == 0)
             {
                 return;
@@ -3434,6 +3439,11 @@ namespace OsEngine.OsOptimizer
 
         private void ShowParametersDialog(DataGridViewCellMouseEventArgs e)
         {
+            if (e.RowIndex < 0)
+            {
+                return;
+            }
+
             if (_reports == null || _reports.Count == 0)
             {
                 return;

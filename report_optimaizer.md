@@ -657,3 +657,21 @@ After each optimizer-related change, update this file with:
 
 ### Risks / notes
 - Prevents null-driven failures in lower-level single-bot test path, complementing master-level guard.
+
+## Stabilization Update (2026-02-14) - UI Negative RowIndex Guard In Result Actions
+### What changed
+- Added explicit `e.RowIndex < 0` guards to result action handlers in optimizer UIs.
+- Applied in both files and both handlers:
+  - `ShowBotChartDialog(...)`
+  - `ShowParametersDialog(...)`
+
+### Files touched
+- `project/OsEngine/OsOptimizer/OptimizerUi.xaml.cs`
+- `project/OsEngine/OsOptimizer/OptimizerReportUi.xaml.cs`
+
+### Validation
+- `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --configuration Debug`
+- Result: Passed 70 / Failed 0
+
+### Risks / notes
+- Prevents negative-index access when DataGridView header/invalid rows trigger click events.
