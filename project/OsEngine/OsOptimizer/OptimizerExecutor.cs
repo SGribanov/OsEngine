@@ -1055,6 +1055,13 @@ namespace OsEngine.OsOptimizer
                 return null;
             }
 
+            if (_master == null)
+            {
+                SendLogMessage("Single-bot test skipped: optimizer master context is not initialized.", LogMessageType.Error);
+                SafeDisposeAwaitObject(awaitObj);
+                return null;
+            }
+
             if (_primeThreadWorker != null)
             {
                 SendLogMessage("Single-bot test request ignored: previous test worker is still active.", LogMessageType.System);

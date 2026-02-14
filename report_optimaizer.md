@@ -2058,3 +2058,20 @@ After each optimizer-related change, update this file with:
 ### Risks / notes
 - No normal-path behavior change; prevents unhandled bot-factory exceptions from escaping single-bot execution flow.
 
+
+## Stabilization Update (2026-02-14) - Guard Master Context In Single-Bot Test
+### What changed
+- Updated `TestBot(...)` in `OptimizerExecutor`.
+- Added explicit `_master == null` guard before accessing optimizer master fields.
+- On missing master context, method now logs error, disposes await object, and returns `null`.
+
+### Files touched
+- `project/OsEngine/OsOptimizer/OptimizerExecutor.cs`
+
+### Validation
+- `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --configuration Debug`
+- Result: Passed 70 / Failed 0
+
+### Risks / notes
+- No normal-path behavior change; prevents potential null-reference crash during single-bot setup.
+
