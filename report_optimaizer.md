@@ -80,6 +80,7 @@ Implemented and committed:
 71. Stabilization: added explicit coverage for `BayesianOptimizationStrategy.EstimateBotCount` with no optimized parameters (`all flags false`) to lock current zero-candidate contract.
 72. Stabilization: made `AsyncBotFactory.GetBot` waiter cleanup race-safe by removing dictionary entry only when it still references the same waiter instance.
 73. Stabilization: added regression coverage for `BotConfigurator.CreateAndConfigureBot` null-botName guard.
+74. Stabilization: added pre-canceled-token coverage for `BayesianOptimizationStrategy.OptimizeInSampleAsync` to ensure zero evaluations and empty result on immediate cancellation.
 
 ## Commits
 - `b1e5eabe3` — `Optimizer: persist Phase1 extraction and wiring state`
@@ -169,6 +170,7 @@ Added tests:
   - `OptimizationStrategyFactory_Bayesian_ShouldReturnBayesianSkeletonWithMessage`
   - `BayesianOptimizationStrategy_OptimizeInSampleAsync_ShouldUseCurrentBruteForceBackend`
   - `BayesianOptimizationStrategy_OptimizeInSampleAsync_ShouldRespectIterationBudget`
+  - `BayesianOptimizationStrategy_OptimizeInSampleAsync_CanceledBeforeStart_ShouldReturnEmpty`
   - `BayesianCandidateSelector_SelectInitialBatch_ShouldSpreadAndFill`
   - `BayesianCandidateSelector_SelectInitialBatch_WithNullEvaluated_ShouldTreatAsEmpty`
   - `BayesianCandidateSelector_SelectNextBatch_ShouldPreferNeighborsOfTopScores`
@@ -225,7 +227,7 @@ Command:
 - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --configuration Debug`
 
 Result:
-- Passed: 66
+- Passed: 67
 - Failed: 0
 
 ### Stabilization fixes from new tests

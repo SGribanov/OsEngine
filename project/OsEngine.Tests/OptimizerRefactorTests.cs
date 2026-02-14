@@ -649,6 +649,48 @@ public class OptimizerRefactorTests
     }
 
     [Fact]
+    public async Task BayesianOptimizationStrategy_OptimizeInSampleAsync_CanceledBeforeStart_ShouldReturnEmpty()
+    {
+        ParameterIterator iterator = new ParameterIterator();
+        int calls = 0;
+        IBotEvaluator evaluator = new BotEvaluator((all, optimized, ct) =>
+        {
+            Interlocked.Increment(ref calls);
+            return Task.FromResult(new OptimizerReport(new List<IIStrategyParameter>()));
+        });
+
+        BayesianOptimizationStrategy strategy = new BayesianOptimizationStrategy(
+            iterator,
+            evaluator,
+            maxParallel: 2,
+            objectiveMetric: SortBotsType.TotalProfit,
+            objectiveDirection: ObjectiveDirectionType.Maximize,
+            initialSamples: 2,
+            maxIterations: 10,
+            batchSize: 3,
+            acquisitionMode: BayesianAcquisitionModeType.Ucb,
+            acquisitionKappa: 0.25m,
+            useExploitationTailPass: true,
+            tailSharePercent: 20);
+
+        List<IIStrategyParameter> allParameters = new List<IIStrategyParameter>
+        {
+            new StrategyParameterInt("A", 1, 1, 4, 1),
+            new StrategyParameterInt("B", 1, 1, 4, 1)
+        };
+        List<bool> parametersToOptimization = new List<bool> { true, true };
+
+        using CancellationTokenSource cts = new CancellationTokenSource();
+        cts.Cancel();
+
+        List<OptimizerReport> reports =
+            await strategy.OptimizeInSampleAsync(allParameters, parametersToOptimization, cts.Token);
+
+        Assert.Empty(reports);
+        Assert.Equal(0, calls);
+    }
+
+    [Fact]
     public async Task BayesianOptimizationStrategy_GreedyMode_ShouldPlanZeroTailBudget()
     {
         ParameterIterator iterator = new ParameterIterator();
