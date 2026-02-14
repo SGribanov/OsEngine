@@ -4085,3 +4085,19 @@ After each optimizer-related change, update this file with:
 
 ### Risks / notes
 - Intentional robustness change: prevents downstream null dereference in parameter iterator/bot configuration paths.
+
+
+## Stabilization Update (2026-02-14) - Serialize Stop Cancellation With Start Lifecycle Lock
+### What changed
+- Updated `Stop()` in `OptimizerExecutor` to execute cancellation path under existing `_startSync` lock.
+- This aligns `Stop()` with `Start()` critical section and reduces race windows during concurrent token replacement/disposal.
+
+### Files touched
+- `project/OsEngine/OsOptimizer/OptimizerExecutor.cs`
+
+### Validation
+- `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --configuration Debug`
+- Result: Passed 70 / Failed 0
+
+### Risks / notes
+- No functional behavior change expected; improves lifecycle synchronization under concurrent Start/Stop calls.

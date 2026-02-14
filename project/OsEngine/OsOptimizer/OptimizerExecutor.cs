@@ -257,20 +257,23 @@ namespace OsEngine.OsOptimizer
 
         public void Stop()
         {
-            CancellationTokenSource stopCts = _stopCts;
-            if (stopCts != null)
+            lock (_startSync)
             {
-                try
+                CancellationTokenSource stopCts = _stopCts;
+                if (stopCts != null)
                 {
-                    stopCts.Cancel();
-                }
-                catch (ObjectDisposedException)
-                {
-                    // already disposed during concurrent cleanup
-                }
-                catch (Exception ex)
-                {
-                    SendLogMessage("Optimizer stop cancellation failed: " + ex, LogMessageType.Error);
+                    try
+                    {
+                        stopCts.Cancel();
+                    }
+                    catch (ObjectDisposedException)
+                    {
+                        // already disposed during concurrent cleanup
+                    }
+                    catch (Exception ex)
+                    {
+                        SendLogMessage("Optimizer stop cancellation failed: " + ex, LogMessageType.Error);
+                    }
                 }
             }
 
