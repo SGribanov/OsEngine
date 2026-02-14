@@ -95,6 +95,105 @@ public class OptimizerRefactorTests
         Assert.All(reports, r => Assert.StartsWith("bot_", r.BotName));
     }
 
+    [Fact]
+    public async Task BruteForceStrategy_OptimizeInSampleAsync_ShouldRespectMaxParallel()
+    {
+        ParameterIterator iterator = new ParameterIterator();
+        int current = 0;
+        int maxObserved = 0;
+
+        IBotEvaluator evaluator = new BotEvaluator(async (all, optimized, ct) =>
+        {
+            int now = Interlocked.Increment(ref current);
+            while (true)
+            {
+                int snapshot = maxObserved;
+                if (now <= snapshot)
+                {
+                    break;
+                }
+                if (Interlocked.CompareExchange(ref maxObserved, now, snapshot) == snapshot)
+                {
+                    break;
+                }
+            }
+
+            try
+            {
+                await Task.Delay(30, ct);
+                OptimizerReport report = new OptimizerReport(new List<IIStrategyParameter>());
+                report.BotName = "parallel";
+                return report;
+            }
+            finally
+            {
+                Interlocked.Decrement(ref current);
+            }
+        });
+
+        BruteForceStrategy strategy = new BruteForceStrategy(iterator, evaluator, maxParallel: 2);
+
+        List<IIStrategyParameter> allParameters = new List<IIStrategyParameter>
+        {
+            new StrategyParameterInt("A", 1, 1, 3, 1),
+            new StrategyParameterInt("B", 1, 1, 3, 1)
+        };
+        List<bool> parametersToOptimization = new List<bool> { true, true };
+
+        List<OptimizerReport> reports =
+            await strategy.OptimizeInSampleAsync(allParameters, parametersToOptimization, CancellationToken.None);
+
+        Assert.Equal(9, reports.Count);
+        Assert.True(maxObserved <= 2, $"Observed parallelism {maxObserved} exceeds configured max 2");
+    }
+
+    [Fact]
+    public async Task BruteForceStrategy_OptimizeInSampleAsync_CanceledBeforeStart_ShouldReturnEmpty()
+    {
+        ParameterIterator iterator = new ParameterIterator();
+        int calls = 0;
+
+        IBotEvaluator evaluator = new BotEvaluator((all, optimized, ct) =>
+        {
+            Interlocked.Increment(ref calls);
+            return Task.FromResult(new OptimizerReport(new List<IIStrategyParameter>()));
+        });
+
+        BruteForceStrategy strategy = new BruteForceStrategy(iterator, evaluator, maxParallel: 2);
+
+        List<IIStrategyParameter> allParameters = new List<IIStrategyParameter>
+        {
+            new StrategyParameterInt("A", 1, 1, 2, 1),
+            new StrategyParameterInt("B", 1, 1, 2, 1)
+        };
+        List<bool> parametersToOptimization = new List<bool> { true, true };
+
+        CancellationTokenSource cts = new CancellationTokenSource();
+        cts.Cancel();
+
+        List<OptimizerReport> reports =
+            await strategy.OptimizeInSampleAsync(allParameters, parametersToOptimization, cts.Token);
+
+        Assert.Empty(reports);
+        Assert.Equal(0, calls);
+    }
+
+    [Fact]
+    public async Task BruteForceStrategy_OptimizeInSampleAsync_WithoutEvaluator_ShouldThrow()
+    {
+        ParameterIterator iterator = new ParameterIterator();
+        BruteForceStrategy strategy = new BruteForceStrategy(iterator);
+
+        List<IIStrategyParameter> allParameters = new List<IIStrategyParameter>
+        {
+            new StrategyParameterInt("A", 1, 1, 2, 1)
+        };
+        List<bool> parametersToOptimization = new List<bool> { true };
+
+        await Assert.ThrowsAsync<InvalidOperationException>(async () =>
+            await strategy.OptimizeInSampleAsync(allParameters, parametersToOptimization, CancellationToken.None));
+    }
+
     private static OptimizerReport BuildSampleReport()
     {
         OptimizerReport report = new OptimizerReport(new List<IIStrategyParameter>

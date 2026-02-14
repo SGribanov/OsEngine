@@ -89,12 +89,15 @@ Added tests:
   - `OptimizerReportSerializer_V2AndLegacyRoundTrip_ShouldPreserveData`
   - `BruteForceStrategy_EstimateBotCount_ShouldMatchGridSize`
   - `BruteForceStrategy_OptimizeInSampleAsync_ShouldEvaluateAllCombinations`
+  - `BruteForceStrategy_OptimizeInSampleAsync_ShouldRespectMaxParallel`
+  - `BruteForceStrategy_OptimizeInSampleAsync_CanceledBeforeStart_ShouldReturnEmpty`
+  - `BruteForceStrategy_OptimizeInSampleAsync_WithoutEvaluator_ShouldThrow`
 
 Command:
 - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --configuration Debug`
 
 Result:
-- Passed: 3
+- Passed: 6
 - Failed: 0
 
 ## Current Status
