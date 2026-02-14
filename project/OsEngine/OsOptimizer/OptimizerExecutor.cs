@@ -236,7 +236,14 @@ namespace OsEngine.OsOptimizer
                 int iterationCount = _master.IterationCount;
                 bool lastInSample = _master.LastInSample;
 
-                int countBots = BotCountOneFaze(_parameters, _parametersOn);
+                int countBotsRaw = BotCountOneFaze(_parameters, _parametersOn);
+                int countBots = Math.Max(0, countBotsRaw);
+                if (countBotsRaw < 0)
+                {
+                    SendLogMessage(
+                        "Optimizer bot count estimate was negative and was clamped to zero: " + countBotsRaw + ".",
+                        LogMessageType.Error);
+                }
 
                 long estimatedMaxTestsLong = (long)countBots * Math.Max(0, iterationCount) * 2L;
 

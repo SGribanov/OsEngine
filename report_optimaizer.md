@@ -3767,3 +3767,21 @@ After each optimizer-related change, update this file with:
 
 ### Risks / notes
 - No runtime behavior change expected; reduces API noise and lowers risk of misleading future usage.
+
+
+## Stabilization Update (2026-02-14) - Clamp Negative Bot Count Estimate To Zero
+### What changed
+- Hardened bot-count estimation handling in `PrimeThreadWorkerPlace()`:
+  - raw estimate from `BotCountOneFaze(...)` is normalized with `Math.Max(0, ...)`;
+  - when raw value is negative, explicit diagnostic log is emitted.
+- Downstream phase/factory scheduling now has guaranteed non-negative base count.
+
+### Files touched
+- `project/OsEngine/OsOptimizer/OptimizerExecutor.cs`
+
+### Validation
+- `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --configuration Debug`
+- Result: Passed 70 / Failed 0
+
+### Risks / notes
+- Intentional robustness change: prevents invalid negative estimation values from propagating into phase-size and naming logic.
