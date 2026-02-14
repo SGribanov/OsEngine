@@ -3230,3 +3230,22 @@ After each optimizer-related change, update this file with:
 
 ### Risks / notes
 - No behavior change expected; improves thread-safety robustness of event dispatch paths.
+
+
+## Stabilization Update (2026-02-14) - Align All Optimizer Event Dispatchers To Delegate Snapshot Pattern
+### What changed
+- Extended event dispatch stabilization in `OptimizerExecutor` to additional paths:
+  - ETA dispatch in optimizer end-event flow now snapshots `TimeToEndChangeEvent`.
+  - `SafeInvokePrimeProgress(...)` now snapshots `PrimeProgressChangeEvent`.
+  - `SafeInvokeTestReady(...)` now snapshots `TestReadyEvent`.
+- All updated paths now consistently use: local snapshot -> null guard -> try/catch invoke.
+
+### Files touched
+- `project/OsEngine/OsOptimizer/OptimizerExecutor.cs`
+
+### Validation
+- `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --configuration Debug`
+- Result: Passed 70 / Failed 0
+
+### Risks / notes
+- No functional behavior change expected; improves consistency and resilience under concurrent event subscription changes.

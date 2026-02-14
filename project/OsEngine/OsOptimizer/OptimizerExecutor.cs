@@ -1954,12 +1954,14 @@ namespace OsEngine.OsOptimizer
 
                     TimeSpan timeToEnd = TimeSpan.FromSeconds(Convert.ToInt32(secondsToEndDivideThreads));
 
-                    if (TimeToEndChangeEvent != null
+                    Action<TimeSpan> etaHandler = TimeToEndChangeEvent;
+
+                    if (etaHandler != null
                         && timeToEnd.TotalSeconds != 0)
                     {
                         try
                         {
-                            TimeToEndChangeEvent(timeToEnd);
+                            etaHandler(timeToEnd);
                         }
                         catch (Exception ex)
                         {
@@ -1998,9 +2000,16 @@ namespace OsEngine.OsOptimizer
 
         private void SafeInvokePrimeProgress(int progressEnd, int progressMax)
         {
+            Action<int, int> handler = PrimeProgressChangeEvent;
+
+            if (handler == null)
+            {
+                return;
+            }
+
             try
             {
-                PrimeProgressChangeEvent?.Invoke(progressEnd, progressMax);
+                handler(progressEnd, progressMax);
             }
             catch (Exception ex)
             {
@@ -2010,9 +2019,16 @@ namespace OsEngine.OsOptimizer
 
         private void SafeInvokeTestReady(List<OptimizerFazeReport> reports)
         {
+            Action<List<OptimizerFazeReport>> handler = TestReadyEvent;
+
+            if (handler == null)
+            {
+                return;
+            }
+
             try
             {
-                TestReadyEvent?.Invoke(reports);
+                handler(reports);
             }
             catch (Exception ex)
             {
