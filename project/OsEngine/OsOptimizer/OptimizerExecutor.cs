@@ -249,7 +249,7 @@ namespace OsEngine.OsOptimizer
                 return;
             }
 
-            List<OptimizerReport> reports = reportFiltered.Reports;
+            List<OptimizerReport> reports = new List<OptimizerReport>(reportFiltered.Reports);
             int expectedNamesCount = Math.Max(0, reports.Count);
             List<string> botNames = new List<string>(expectedNamesCount);
             HashSet<string> uniqueBotNames = new HashSet<string>(expectedNamesCount, StringComparer.Ordinal);

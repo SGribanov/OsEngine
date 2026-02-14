@@ -2963,3 +2963,21 @@ After each optimizer-related change, update this file with:
 ### Risks / notes
 - No normal-path behavior change; defensive guard against unexpected negative-capacity propagation.
 
+
+## Stabilization Update (2026-02-14) - Snapshot OutOfSample Reports Into Local Copy Before Iteration
+### What changed
+- Updated `StartAsuncBotFactoryOutOfSample(...)` in `OptimizerExecutor`.
+- Switched from direct reference to source list (`reportFiltered.Reports`) to local snapshot copy:
+  - `new List<OptimizerReport>(reportFiltered.Reports)`.
+- Iteration now uses stable local snapshot, reducing sensitivity to external list mutations during batch build.
+
+### Files touched
+- `project/OsEngine/OsOptimizer/OptimizerExecutor.cs`
+
+### Validation
+- `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --configuration Debug`
+- Result: Passed 70 / Failed 0
+
+### Risks / notes
+- No intended functional behavior change; improves robustness and determinism under concurrent/report-list mutation scenarios.
+
