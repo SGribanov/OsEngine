@@ -248,6 +248,7 @@ namespace OsEngine.OsOptimizer
             List<string> botNames = new List<string>();
             HashSet<string> uniqueBotNames = new HashSet<string>(StringComparer.Ordinal);
             const string inSampleSuffix = " InSample";
+            string fazeSuffix = " " + normalizedFaze;
 
             for (int i = 0; i < reports.Count; i++)
             {
@@ -278,7 +279,6 @@ namespace OsEngine.OsOptimizer
                     continue;
                 }
 
-                string fazeSuffix = " " + normalizedFaze;
                 string botName = transformedBotName.EndsWith(fazeSuffix, StringComparison.Ordinal)
                     ? transformedBotName
                     : transformedBotName + fazeSuffix;

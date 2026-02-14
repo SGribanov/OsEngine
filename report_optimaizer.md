@@ -2838,3 +2838,20 @@ After each optimizer-related change, update this file with:
 ### Risks / notes
 - No functional behavior change; minor allocation/readability optimization.
 
+
+## Stabilization Update (2026-02-14) - Hoist OutOfSample Phase Suffix Outside Name Loop
+### What changed
+- Updated `StartAsuncBotFactoryOutOfSample(...)` in `OptimizerExecutor`.
+- Moved `fazeSuffix` construction out of per-item loop to a method-local precomputed variable.
+- Loop now reuses one suffix value for guarded append logic.
+
+### Files touched
+- `project/OsEngine/OsOptimizer/OptimizerExecutor.cs`
+
+### Validation
+- `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --configuration Debug`
+- Result: Passed 70 / Failed 0
+
+### Risks / notes
+- No functional behavior change; minor allocation/readability optimization consistent with in-sample branch.
+
