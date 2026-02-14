@@ -434,6 +434,10 @@ namespace OsEngine.OsOptimizer
                 {
                     // ignored
                 }
+                catch (InvalidOperationException)
+                {
+                    // ignored
+                }
             }
 
             if (!releaseServerSlot)
