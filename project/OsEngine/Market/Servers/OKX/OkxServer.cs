@@ -3863,6 +3863,18 @@ namespace OsEngine.Market.Servers.OKX
 
         public void SetLeverage(Security security, decimal leverage) { }
 
+        public void SetLeverage(string securityName, string className, string leverage, string leverageLong, string leverageShort) { }
+
+        public void SetHedgeMode(string securityName, string className, string hedgeMode) { }
+
+        public void SetMarginMode(string securityName, string className, string marginMode) { }
+
+        public void SetCommonLeverage(string selectedClass, string leverage) { }
+
+        public void SetCommonHedgeMode(string selectedClass, string hedgeMode) { }
+
+        public void SetCommonMarginMode(string selectedClass, string marginMode) { }
+
         #endregion
 
         #region 13 Log

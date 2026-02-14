@@ -77,16 +77,8 @@ Command:
 - `dotnet build project/OsEngine.sln`
 
 Result:
-- Optimizer-related compile issues introduced by this work are resolved up to current optimizer changes.
-- Build currently fails on unrelated pre-existing errors in `OKX` implementation:
-  - `project/OsEngine/Market/Servers/OKX/OkxServer.cs`
-  - `OkxServerRealization` does not implement newly required `IServerRealization` members:
-    - `SetLeverage(string, string, string, string, string)`
-    - `SetHedgeMode(string, string, string)`
-    - `SetMarginMode(string, string, string)`
-    - `SetCommonLeverage(string, string)`
-    - `SetCommonHedgeMode(string, string)`
-    - `SetCommonMarginMode(string, string)`
+- Current `dotnet build project/OsEngine.sln` is successful.
+- Related external blocker in `OKX` server implementation was resolved by adding missing interface method stubs in `OkxServerRealization`.
 
 ## Current Status
 - Phase 1: largely integrated (core extraction + wiring done).
