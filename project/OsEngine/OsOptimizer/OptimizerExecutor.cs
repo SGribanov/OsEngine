@@ -583,11 +583,12 @@ namespace OsEngine.OsOptimizer
                 _pendingEvaluationByServer[server.NumberServer] = completionSource;
             }
 
-            try
+            if (string.IsNullOrWhiteSpace(botName))
             {
-                decimal num = Convert.ToDecimal(botName.Substring(0, 1));
+                SendLogMessage("StartNewBot skipped empty bot name prefix check: generated name is empty.", LogMessageType.Error);
+                botName = server.NumberServer.ToString();
             }
-            catch
+            else if (!char.IsDigit(botName[0]))
             {
                 botName = server.NumberServer + botName;
             }

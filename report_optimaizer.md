@@ -2130,3 +2130,21 @@ After each optimizer-related change, update this file with:
 ### Risks / notes
 - No normal-path behavior change; centralizes bot creation failure handling and reduces exception leakage from factory/configurator path.
 
+
+## Stabilization Update (2026-02-14) - Remove Silent Catch In StartNewBot Name Prefix Logic
+### What changed
+- Updated `StartNewBot(...)` bot name prefix logic in `OptimizerExecutor`.
+- Replaced exception-based prefix check (`Substring/Convert` + empty `catch`) with explicit validation:
+  - if `botName` is empty -> log and fallback to `server.NumberServer`;
+  - if first char is non-digit -> prefix `server.NumberServer` to bot name.
+
+### Files touched
+- `project/OsEngine/OsOptimizer/OptimizerExecutor.cs`
+
+### Validation
+- `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --configuration Debug`
+- Result: Passed 70 / Failed 0
+
+### Risks / notes
+- No normal-path behavior change; removes silent exception path and makes fallback deterministic and observable.
+
