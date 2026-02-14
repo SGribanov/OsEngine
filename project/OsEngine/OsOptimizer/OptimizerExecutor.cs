@@ -1026,12 +1026,19 @@ namespace OsEngine.OsOptimizer
                 return null;
             }
 
+            int serverNumber;
+            lock (_serverRemoveLocker)
+            {
+                serverNumber = _serverNum;
+                _serverNum++;
+            }
+
             // 1. Create a new server for optimization. And one thread respectively
             // 1. создаём новый сервер для оптимизации. И один поток соответственно
             OptimizerServer server = null;
             try
             {
-                server = ServerMaster.CreateNextOptimizerServer(_master.Storage, _serverNum,
+                server = ServerMaster.CreateNextOptimizerServer(_master.Storage, serverNumber,
                     _master.StartDeposit);
             }
             catch (Exception ex)
@@ -1054,7 +1061,6 @@ namespace OsEngine.OsOptimizer
 
             lock (_serverRemoveLocker)
             {
-                _serverNum++;
                 _servers.Add(server);
             }
 

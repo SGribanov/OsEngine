@@ -3267,3 +3267,22 @@ After each optimizer-related change, update this file with:
 
 ### Risks / notes
 - No functional behavior change expected; removes race conditions in concurrent end-event ETA aggregation.
+
+
+## Stabilization Update (2026-02-14) - Atomically Allocate Optimizer Server Numbers
+### What changed
+- Fixed race-prone `_serverNum` usage in `CreateNewServer(...)`.
+- Server number is now reserved under `_serverRemoveLocker` before server factory call:
+  - `serverNumber = _serverNum; _serverNum++;`
+  - factory uses reserved `serverNumber`.
+- `_servers.Add(server)` remains protected by the same lock.
+
+### Files touched
+- `project/OsEngine/OsOptimizer/OptimizerExecutor.cs`
+
+### Validation
+- `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --configuration Debug`
+- Result: Passed 70 / Failed 0
+
+### Risks / notes
+- Behavior is preserved; numbering may now contain gaps if creation fails, which is acceptable for unique ID allocation and safer under concurrency.
