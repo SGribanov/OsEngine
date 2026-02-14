@@ -981,6 +981,8 @@ namespace OsEngine.OsOptimizer
                 return null;
             }
 
+            DateTime phaseTimeEnd = reportFaze.Faze.TimeEnd;
+
             if (_primeThreadWorker != null)
             {
                 SafeDisposeAwaitObject(awaitObj);
@@ -1129,7 +1131,7 @@ namespace OsEngine.OsOptimizer
 
             DateTime timeStartWaiting = DateTime.Now;
 
-            while (bot.TimeServer < reportFaze.Faze.TimeEnd)
+            while (bot.TimeServer < phaseTimeEnd)
             {
                 if (IsStopRequested)
                 {

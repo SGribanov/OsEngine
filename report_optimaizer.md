@@ -1137,3 +1137,18 @@ After each optimizer-related change, update this file with:
 
 ### Risks / notes
 - Improves robustness of error/early-return branches by preventing secondary exceptions during await object cleanup.
+
+## Stabilization Update (2026-02-14) - Phase End Snapshot In Executor Single-Bot Loop
+### What changed
+- Captured `reportFaze.Faze.TimeEnd` into local snapshot (`phaseTimeEnd`) after validation in `OptimizerExecutor.TestBot(...)`.
+- Single-bot wait loop now compares `bot.TimeServer < phaseTimeEnd` instead of repeatedly reading nested phase field.
+
+### Files touched
+- `project/OsEngine/OsOptimizer/OptimizerExecutor.cs`
+
+### Validation
+- `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --configuration Debug`
+- Result: Passed 70 / Failed 0
+
+### Risks / notes
+- Reduces sensitivity to concurrent phase-object mutations during long-running single-bot test loop.
