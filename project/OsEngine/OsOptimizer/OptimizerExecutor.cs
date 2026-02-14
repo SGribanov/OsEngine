@@ -76,6 +76,15 @@ namespace OsEngine.OsOptimizer
                 return false;
             }
 
+            if (parametersOn.Count != parameters.Count)
+            {
+                SendLogMessage(
+                    "Optimizer start skipped: parametersOn count (" + parametersOn.Count +
+                    ") does not match parameters count (" + parameters.Count + ").",
+                    LogMessageType.Error);
+                return false;
+            }
+
             lock (_startSync)
             {
                 if (IsPrimeWorkerActive())

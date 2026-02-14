@@ -3555,3 +3555,20 @@ After each optimizer-related change, update this file with:
 
 ### Risks / notes
 - Intentional robustness change: optimizer now rejects null input lists early instead of failing later in worker flow.
+
+
+## Stabilization Update (2026-02-14) - Validate Start Input Count Consistency
+### What changed
+- Added input consistency guard in `Start(...)`:
+  - `parametersOn.Count` must equal `parameters.Count`.
+- On mismatch, optimizer start is rejected early with explicit diagnostic log including both counts.
+
+### Files touched
+- `project/OsEngine/OsOptimizer/OptimizerExecutor.cs`
+
+### Validation
+- `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --configuration Debug`
+- Result: Passed 70 / Failed 0
+
+### Risks / notes
+- Intentional robustness change: invalid start configurations are now rejected deterministically before launching worker lifecycle.
