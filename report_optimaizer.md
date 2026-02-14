@@ -1546,3 +1546,18 @@ After each optimizer-related change, update this file with:
 
 ### Risks / notes
 - No behavior change; improves post-mortem analysis when non-expected slot-release failures occur.
+
+## Stabilization Update (2026-02-14) - Unexpected Exception Logging In Safe Token Wait Helper
+### What changed
+- Extended `SafeWaitCancellationToken(...)` with generic exception handling.
+- Besides `ObjectDisposedException`, helper now logs any other wait failure and returns `true` (safe stop behavior).
+
+### Files touched
+- `project/OsEngine/OsOptimizer/OptimizerExecutor.cs`
+
+### Validation
+- `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --configuration Debug`
+- Result: Passed 70 / Failed 0
+
+### Risks / notes
+- Improves diagnostics for rare wait-handle failures while preserving conservative shutdown path semantics.

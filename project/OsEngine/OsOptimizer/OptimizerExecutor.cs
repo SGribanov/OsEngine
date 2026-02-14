@@ -1109,6 +1109,11 @@ namespace OsEngine.OsOptimizer
             {
                 return true;
             }
+            catch (Exception ex)
+            {
+                SendLogMessage("Optimizer cancellation token wait failed: " + ex, LogMessageType.Error);
+                return true;
+            }
         }
 
         private void SafeDisposeBotPanel(BotPanel bot)
