@@ -119,7 +119,8 @@ namespace OsEngine.OsOptimizer.OptEntity
                     evaluated,
                     scoredForSelector,
                     targetBatchSize,
-                    _candidateSelector);
+                    _candidateSelector,
+                    candidates);
 
                 if (nextBatch.Count == 0)
                 {

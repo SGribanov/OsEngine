@@ -18,6 +18,7 @@ Implemented and committed:
 9. Stabilization continued: added persistence tests for optimizer method settings (`OptimizationMethod`, `ObjectiveMetric`, `Bayesian*`) including legacy file compatibility.
 10. Phase 5 continued: candidate selection policy extracted from strategy runtime into dedicated `BayesianCandidateSelector`.
 11. Phase 5 continued: added dedicated acquisition policy (`BayesianAcquisitionPolicy`) with lightweight surrogate scoring and integrated it into bayesian iteration loop.
+12. Phase 5 continued: acquisition surrogate upgraded from index-distance to parameter-space distance across strategy parameters.
 
 ## Commits
 - `b1e5eabe3` — `Optimizer: persist Phase1 extraction and wiring state`
@@ -169,8 +170,8 @@ Result:
   - selection is centralized via `OptimizationStrategyFactory`.
   - candidate selection logic (initial + iterative) is now isolated in `BayesianCandidateSelector`, reducing strategy complexity and preparing surrogate/acquisition swap-in.
   - iterative batch selection now uses `BayesianAcquisitionPolicy` with UCB-like score:
-    - local surrogate mean from nearest evaluated index score;
-    - uncertainty proxy from index-space distance;
+    - local surrogate mean from nearest evaluated candidate score;
+    - uncertainty proxy from normalized parameter-space distance (supports `Int`, `Decimal`, `DecimalCheckBox`, `Bool`, `CheckBox`, `String`, `TimeOfDay`);
     - acquisition = `mean + kappa * uncertainty`.
 
 ## Phase 5 UI Wiring (Continued)
@@ -221,7 +222,7 @@ Result:
    - full replacement of remaining polling in single-bot test flow where appropriate.
 2. Start Phase 3 (`OptimizerReport` serializer extraction with legacy fallback).
 3. Start Phase 4 strategy abstraction (`IOptimizationStrategy`, `IBotEvaluator`, brute-force extraction).
-4. Continue Phase 5 by upgrading surrogate/acquisition from index-distance heuristic to parameter-space model (and add objective-direction handling).
+4. Continue Phase 5 by adding objective-direction handling and richer acquisition options (EI/UCB modes with configurable kappa).
 
 ## Update Rule
 After each optimizer-related change, update this file with:

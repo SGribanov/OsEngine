@@ -499,7 +499,8 @@ public class OptimizerRefactorTests
             evaluated,
             scored: new List<BayesianCandidateSelector.CandidateScore>(),
             batchSize: 3,
-            fallbackSelector: selector);
+            fallbackSelector: selector,
+            candidates: BuildIntCandidates(10, "X", 1, 10, 1));
 
         Assert.Equal(3, batch.Count);
         Assert.DoesNotContain(0, batch);
@@ -522,9 +523,10 @@ public class OptimizerRefactorTests
             evaluated,
             scored,
             batchSize: 1,
-            fallbackSelector: selector);
+            fallbackSelector: selector,
+            candidates: BuildIntCandidates(8, "X", 1, 8, 1));
 
-        // With equal means, farthest candidate in index-space gets max uncertainty.
+        // With equal means, farthest candidate in parameter-space gets max uncertainty.
         Assert.Single(batch);
         Assert.Equal(7, batch[0]);
     }
@@ -691,5 +693,27 @@ public class OptimizerRefactorTests
         });
 
         return report;
+    }
+
+    private static List<List<IIStrategyParameter>> BuildIntCandidates(
+        int count,
+        string name,
+        int start,
+        int stop,
+        int step)
+    {
+        List<List<IIStrategyParameter>> result = new List<List<IIStrategyParameter>>();
+
+        for (int i = 0; i < count; i++)
+        {
+            int value = start + i * step;
+            StrategyParameterInt p = new StrategyParameterInt(name, value, start, stop, step)
+            {
+                ValueInt = value
+            };
+            result.Add(new List<IIStrategyParameter> { p });
+        }
+
+        return result;
     }
 }
