@@ -3962,3 +3962,20 @@ After each optimizer-related change, update this file with:
 
 ### Risks / notes
 - Intentional robustness change: strategy factory faults are now converted to controlled error flow with diagnostics instead of immediate unhandled propagation.
+
+
+## Stabilization Update (2026-02-14) - Guard InSample Execution When Strategy Is Unavailable
+### What changed
+- Updated `StartOptimizeFazeInSample(...)` in `OptimizerExecutor`:
+  - added explicit `strategy == null` check after `GetInSampleOptimizationStrategy(...)`;
+  - on unavailable strategy, writes diagnostic log, waits for current phase completion, and exits method without calling optimizer API.
+
+### Files touched
+- `project/OsEngine/OsOptimizer/OptimizerExecutor.cs`
+
+### Validation
+- `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --configuration Debug`
+- Result: Passed 70 / Failed 0
+
+### Risks / notes
+- Intentional robustness change: prevents `NullReferenceException` and preserves controlled phase shutdown semantics when strategy creation failed earlier.

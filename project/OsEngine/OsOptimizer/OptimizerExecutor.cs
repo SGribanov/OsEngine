@@ -652,6 +652,13 @@ namespace OsEngine.OsOptimizer
             });
 
             IOptimizationStrategy strategy = GetInSampleOptimizationStrategy(evaluator);
+            if (strategy == null)
+            {
+                SendLogMessage("InSample phase skipped: optimization strategy is unavailable.", LogMessageType.Error);
+                WaitCurrentPhaseToComplete();
+                return;
+            }
+
             List<OptimizerReport> reports =
                 strategy.OptimizeInSampleAsync(allParameters, parametersToOptimization, GetStopTokenOrNone())
                     .GetAwaiter().GetResult();
