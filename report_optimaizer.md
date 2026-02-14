@@ -29,6 +29,7 @@ Implemented and committed:
 20. Stabilization: added strict clamping for Bayesian method settings in `OptimizerSettings` (positive ints, non-negative kappa, tail share range).
 21. Stabilization: added file-level load clamp coverage for invalid Bayesian values in persisted settings.
 22. Stabilization: added strategy-level tail configuration edge-case coverage (tail-pass disabled and tail-share constructor clamping).
+23. Operability: expanded Bayesian factory info message with full effective strategy configuration snapshot.
 
 ## Commits
 - `b1e5eabe3` — `Optimizer: persist Phase1 extraction and wiring state`
@@ -193,6 +194,7 @@ Result:
   - safety fallback remains for very large candidate pools (delegates to brute-force backend).
   - selection is centralized via `OptimizationStrategyFactory`.
   - candidate selection logic (initial + iterative) is now isolated in `BayesianCandidateSelector`, reducing strategy complexity and preparing surrogate/acquisition swap-in.
+  - bayesian strategy selection log now prints full effective configuration (objective, direction, samples, iterations, batch, acquisition mode/kappa, tail settings) for easier diagnostics.
   - iterative batch selection now uses `BayesianAcquisitionPolicy` with configurable acquisition:
     - local surrogate mean from nearest evaluated candidate score;
     - uncertainty proxy from normalized parameter-space distance (supports `Int`, `Decimal`, `DecimalCheckBox`, `Bool`, `CheckBox`, `String`, `TimeOfDay`);

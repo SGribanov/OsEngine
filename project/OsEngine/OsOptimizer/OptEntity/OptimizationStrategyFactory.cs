@@ -25,7 +25,18 @@ namespace OsEngine.OsOptimizer.OptEntity
         {
             if (method == OptimizationMethodType.Bayesian)
             {
-                infoMessage = "Bayesian strategy skeleton is active. Using brute-force backend for execution.";
+                infoMessage =
+                    "Bayesian strategy skeleton is active. " +
+                    "Method=Bayesian, " +
+                    "Objective=" + objectiveMetric + ", " +
+                    "Direction=" + objectiveDirection + ", " +
+                    "InitialSamples=" + bayesianInitialSamples + ", " +
+                    "MaxIterations=" + bayesianMaxIterations + ", " +
+                    "BatchSize=" + bayesianBatchSize + ", " +
+                    "AcquisitionMode=" + bayesianAcquisitionMode + ", " +
+                    "Kappa=" + bayesianAcquisitionKappa + ", " +
+                    "TailPass=" + bayesianUseTailPass + ", " +
+                    "TailSharePercent=" + bayesianTailSharePercent + ".";
                 return new BayesianOptimizationStrategy(
                     parameterIterator,
                     evaluator,
