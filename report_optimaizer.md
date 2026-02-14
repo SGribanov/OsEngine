@@ -1661,3 +1661,18 @@ After each optimizer-related change, update this file with:
 
 ### Risks / notes
 - Prevents null dereference in server bootstrap path when phase/report context is incomplete.
+
+## Stabilization Update (2026-02-14) - Master Context Guard In CreateNewServer
+### What changed
+- Extended `CreateNewServer(...)` preconditions with master-context checks.
+- Method now validates `_master`, `_master.Storage`, and `_master.BotToTest` before server creation; logs and returns `null` if context is incomplete.
+
+### Files touched
+- `project/OsEngine/OsOptimizer/OptimizerExecutor.cs`
+
+### Validation
+- `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --configuration Debug`
+- Result: Passed 70 / Failed 0
+
+### Risks / notes
+- Prevents bootstrap-time null dereferences when optimizer master dependencies are unavailable.

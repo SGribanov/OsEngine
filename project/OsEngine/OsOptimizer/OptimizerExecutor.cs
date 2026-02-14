@@ -806,6 +806,12 @@ namespace OsEngine.OsOptimizer
                 return null;
             }
 
+            if (_master == null || _master.Storage == null || _master.BotToTest == null)
+            {
+                SendLogMessage("CreateNewServer skipped: optimizer master context is not initialized.", LogMessageType.Error);
+                return null;
+            }
+
             // 1. Create a new server for optimization. And one thread respectively
             // 1. создаём новый сервер для оптимизации. И один поток соответственно
             OptimizerServer server = ServerMaster.CreateNextOptimizerServer(_master.Storage, _serverNum,
