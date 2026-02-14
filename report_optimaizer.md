@@ -2784,3 +2784,22 @@ After each optimizer-related change, update this file with:
 - No functional behavior change; small readability/maintenance improvement and reduced repeated dereference noise.
 
 
+
+## Stabilization Update (2026-02-14) - Prevent Duplicate Phase Suffix In OutOfSample Bot Names
+### What changed
+- Updated out-of-sample name construction in `StartAsuncBotFactoryOutOfSample(...)`.
+- Added phase-suffix check before append:
+  - if transformed name already ends with target phase suffix, keep it as-is;
+  - otherwise append suffix normally.
+- Prevents malformed names like duplicated phase suffixes in edge-case source data.
+
+### Files touched
+- `project/OsEngine/OsOptimizer/OptimizerExecutor.cs`
+
+### Validation
+- `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --configuration Debug`
+- Result: Passed 70 / Failed 0
+
+### Risks / notes
+- Behavior change only for malformed/edge-case inputs where source already includes target phase suffix; avoids duplicate suffix artifacts in queued bot names.
+

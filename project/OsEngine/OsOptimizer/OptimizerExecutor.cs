@@ -274,7 +274,10 @@ namespace OsEngine.OsOptimizer
                     continue;
                 }
 
-                string botName = transformedBotName + " " + normalizedFaze;
+                string fazeSuffix = " " + normalizedFaze;
+                string botName = transformedBotName.EndsWith(fazeSuffix, StringComparison.Ordinal)
+                    ? transformedBotName
+                    : transformedBotName + fazeSuffix;
                 if (!uniqueBotNames.Add(botName))
                 {
                     SendLogMessage("Async bot factory start skipped duplicate bot name (OutOfSample): " + botName + ".", LogMessageType.Error);
