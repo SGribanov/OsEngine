@@ -80,6 +80,23 @@ Result:
 - Current `dotnet build project/OsEngine.sln` is successful.
 - Related external blocker in `OKX` server implementation was resolved by adding missing interface method stubs in `OkxServerRealization`.
 
+### Tests
+Added dedicated unit-test project:
+- `project/OsEngine.Tests/OsEngine.Tests.csproj` (`xUnit`, `net10.0-windows`, reference to `OsEngine.csproj`)
+
+Added tests:
+- `project/OsEngine.Tests/OptimizerRefactorTests.cs`
+  - `OptimizerReportSerializer_V2AndLegacyRoundTrip_ShouldPreserveData`
+  - `BruteForceStrategy_EstimateBotCount_ShouldMatchGridSize`
+  - `BruteForceStrategy_OptimizeInSampleAsync_ShouldEvaluateAllCombinations`
+
+Command:
+- `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --configuration Debug`
+
+Result:
+- Passed: 3
+- Failed: 0
+
 ## Current Status
 - Phase 1: largely integrated (core extraction + wiring done).
 - Phase 2: in progress (major busy-wait removal done; cancellation propagation now wired through `OptimizerExecutor -> BotConfigurator -> AsyncBotFactory`, remaining cleanup still pending).
