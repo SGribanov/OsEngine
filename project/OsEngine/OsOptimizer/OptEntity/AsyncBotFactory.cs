@@ -44,6 +44,11 @@ namespace OsEngine.OsOptimizer.OptimizerEntity
                 return null;
             }
 
+            if (cancellationToken.IsCancellationRequested)
+            {
+                return null;
+            }
+
             string key = GetKey(botType, botName);
             TaskCompletionSource<BotPanel> waiter = _botWaiters.GetOrAdd(key, _ =>
                 new TaskCompletionSource<BotPanel>(TaskCreationOptions.RunContinuationsAsynchronously));
