@@ -1203,7 +1203,18 @@ namespace OsEngine.OsOptimizer
         {
             try
             {
+                if (!IsCurrentSingleBotRun(runId))
+                {
+                    return;
+                }
+
                 await Task.Delay(2000);
+
+                if (!IsCurrentSingleBotRun(runId))
+                {
+                    return;
+                }
+
                 OptimizerExecutor executor = _optimizerExecutor;
                 if (executor == null)
                 {

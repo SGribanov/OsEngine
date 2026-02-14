@@ -1243,3 +1243,20 @@ After each optimizer-related change, update this file with:
 
 ### Risks / notes
 - Keeps current-run gating logic centralized and reduces accidental divergence in future edits.
+
+## Stabilization Update (2026-02-14) - Early Stale-Run Exit In Async Single-Bot Runner
+### What changed
+- Added early `runId` staleness checks in `RunAloneBotTestAsync(...)`:
+  - before initial delay;
+  - immediately after delay.
+- If run is no longer current, async method exits before executor/state work.
+
+### Files touched
+- `project/OsEngine/OsOptimizer/OptimizerMaster.cs`
+
+### Validation
+- `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --configuration Debug`
+- Result: Passed 70 / Failed 0
+
+### Risks / notes
+- Reduces redundant work and side-effect surface for already invalidated single-bot runs.
