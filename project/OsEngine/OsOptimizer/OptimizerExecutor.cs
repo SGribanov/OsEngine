@@ -210,7 +210,9 @@ namespace OsEngine.OsOptimizer
                 {
                     SendLogMessage(
                         "Async bot factory start skipped duplicate bot name (InSample): " + botName +
-                        " at index " + i + " of " + expectedNamesCount + ".",
+                        " at index " + i + " of " + expectedNamesCount +
+                        " (bot type '" + normalizedBotType + "', faze '" + normalizedFaze +
+                        "', isScript " + isScript + ").",
                         LogMessageType.Error);
                     continue;
                 }
@@ -323,7 +325,9 @@ namespace OsEngine.OsOptimizer
                 {
                     SendLogMessage(
                         "Async bot factory start skipped duplicate bot name (OutOfSample): " + botName +
-                        " at index " + i + " of " + reportsCount + ".",
+                        " at index " + i + " of " + reportsCount +
+                        " (bot type '" + normalizedBotType + "', faze '" + normalizedFaze +
+                        "', isScript " + isScript + ").",
                         LogMessageType.Error);
                     continue;
                 }

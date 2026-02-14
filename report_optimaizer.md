@@ -3173,3 +3173,24 @@ After each optimizer-related change, update this file with:
 ### Risks / notes
 - No behavior change; improves parity and triage context for OOS duplicate-name skips.
 
+
+## Stabilization Update (2026-02-14) - Enrich Duplicate-Name Skip Diagnostics With Full Context
+### What changed
+- Updated duplicate-name skip logs in `OptimizerExecutor` for both InSample and OutOfSample async factory paths.
+- Diagnostics now include full context payload:
+  - item index and batch size;
+  - normalized bot type;
+  - normalized faze;
+  - `isScript` flag.
+
+### Files touched
+- `project/OsEngine/OsOptimizer/OptimizerExecutor.cs`
+
+### Validation
+- `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --configuration Debug`
+- Result: Passed 70 / Failed 0
+
+### Risks / notes
+- No behavior change; improves consistency and troubleshooting depth for duplicate-name skip scenarios.
+
+
