@@ -698,7 +698,16 @@ namespace OsEngine.OsOptimizer
                 return null;
             }
 
-            int parallel = Math.Max(1, _master.ThreadsCount);
+            if (_master.ThreadsCount <= 0)
+            {
+                SendLogMessage(
+                    "Optimizer strategy creation skipped: threads count is invalid at runtime (value " +
+                    _master.ThreadsCount + ").",
+                    LogMessageType.Error);
+                return null;
+            }
+
+            int parallel = _master.ThreadsCount;
 
             IOptimizationStrategy strategy = null;
             string infoMessage = null;
