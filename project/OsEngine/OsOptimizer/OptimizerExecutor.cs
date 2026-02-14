@@ -1018,7 +1018,18 @@ namespace OsEngine.OsOptimizer
                 return null;
             }
 
-            OptimizerServer server = CreateNewServer(reportFaze, false);
+            OptimizerServer server = null;
+            try
+            {
+                server = CreateNewServer(reportFaze, false);
+            }
+            catch (Exception ex)
+            {
+                SendLogMessage("Single-bot test skipped due to server creation error: " + ex, LogMessageType.Error);
+                awaitObj.Dispose();
+                return null;
+            }
+
             if (server == null)
             {
                 SendLogMessage("Single-bot test skipped: optimizer server was not created.", LogMessageType.Error);
