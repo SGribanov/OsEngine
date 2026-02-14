@@ -1137,6 +1137,7 @@ namespace OsEngine.OsOptimizer
 
             if (_aloneTestIsOver == false)
             {
+                SendLogMessage("Single-bot test request ignored: previous test is still running.", LogMessageType.System);
                 return null;
             }
 

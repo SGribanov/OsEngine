@@ -724,3 +724,17 @@ After each optimizer-related change, update this file with:
 
 ### Risks / notes
 - Prevents null-reference crashes if chart dialog creation fails or returns null under edge conditions.
+
+## Stabilization Update (2026-02-14) - Diagnostic Log On Concurrent Single-Bot Test Request
+### What changed
+- Added explicit diagnostic log when `OptimizerMaster.TestBot(...)` receives a request while previous single-bot test is still running (`_aloneTestIsOver == false`).
+
+### Files touched
+- `project/OsEngine/OsOptimizer/OptimizerMaster.cs`
+
+### Validation
+- `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --configuration Debug`
+- Result: Passed 70 / Failed 0
+
+### Risks / notes
+- No behavior change; improves operator visibility of ignored concurrent test requests.
