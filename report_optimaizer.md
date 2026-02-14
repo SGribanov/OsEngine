@@ -3590,3 +3590,21 @@ After each optimizer-related change, update this file with:
 
 ### Risks / notes
 - Intentional robustness change: prevents late-stage failures caused by empty/missing phase configuration.
+
+
+## Stabilization Update (2026-02-14) - Clear Stale Pending Evaluations On New Start
+### What changed
+- Added `CancelPendingEvaluationsForNewRun()` in `OptimizerExecutor`.
+- `Start(...)` now invokes this cleanup before new run synchronization objects are used.
+- Cleanup iterates `_pendingEvaluationByServer`, removes stale entries, and completes removed tasks as canceled via existing safe helper.
+- Added diagnostic log with canceled stale-entry count when any were found.
+
+### Files touched
+- `project/OsEngine/OsOptimizer/OptimizerExecutor.cs`
+
+### Validation
+- `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --configuration Debug`
+- Result: Passed 70 / Failed 0
+
+### Risks / notes
+- No expected behavior change for healthy flow; improves run-boundary hygiene by preventing pending-evaluation leakage across restarts.

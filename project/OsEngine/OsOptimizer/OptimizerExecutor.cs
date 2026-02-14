@@ -141,6 +141,9 @@ namespace OsEngine.OsOptimizer
                 {
                     _testBotsTime.Clear();
                 }
+
+                CancelPendingEvaluationsForNewRun();
+
                 SemaphoreSlim previousServerSlots = Interlocked.Exchange(
                     ref _serverSlots,
                     new SemaphoreSlim(Math.Max(1, _master.ThreadsCount), Math.Max(1, _master.ThreadsCount)));
@@ -161,6 +164,27 @@ namespace OsEngine.OsOptimizer
                 primeWorker.Start();
 
                 return true;
+            }
+        }
+
+        private void CancelPendingEvaluationsForNewRun()
+        {
+            int canceled = 0;
+
+            foreach (KeyValuePair<int, TaskCompletionSource<OptimizerReport>> pending in _pendingEvaluationByServer)
+            {
+                if (_pendingEvaluationByServer.TryRemove(pending.Key, out TaskCompletionSource<OptimizerReport> completion))
+                {
+                    SafeTrySetCanceled(completion);
+                    canceled++;
+                }
+            }
+
+            if (canceled > 0)
+            {
+                SendLogMessage(
+                    "Optimizer start cleanup canceled stale pending evaluations: " + canceled + ".",
+                    LogMessageType.System);
             }
         }
 
