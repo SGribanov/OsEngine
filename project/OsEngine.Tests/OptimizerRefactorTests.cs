@@ -1433,6 +1433,45 @@ public class OptimizerRefactorTests
     }
 
     [Fact]
+    public void OptimizerSettings_LoadFromFile_WithInvalidEnumNumbers_ShouldKeepDefaults()
+    {
+        lock (SettingsFileLock)
+        {
+            using SettingsFileScope scope = new SettingsFileScope();
+
+            _ = new OptimizerSettings
+            {
+                OptimizationMethod = OptimizationMethodType.Bayesian,
+                ObjectiveMetric = SortBotsType.SharpRatio,
+                BayesianInitialSamples = 10,
+                BayesianMaxIterations = 20,
+                BayesianBatchSize = 3,
+                ObjectiveDirection = ObjectiveDirectionType.Minimize,
+                BayesianAcquisitionMode = BayesianAcquisitionModeType.ExpectedImprovement,
+                BayesianAcquisitionKappa = 0.5m,
+                BayesianUseTailPass = true,
+                BayesianTailSharePercent = 20
+            };
+
+            string[] lines = File.ReadAllLines(scope.SettingsPath);
+            Assert.True(lines.Length >= 10);
+
+            lines[^10] = "999"; // OptimizationMethod
+            lines[^9] = "999";  // ObjectiveMetric
+            lines[^5] = "999";  // ObjectiveDirection
+            lines[^4] = "999";  // BayesianAcquisitionMode
+            File.WriteAllLines(scope.SettingsPath, lines);
+
+            OptimizerSettings reader = new OptimizerSettings();
+
+            Assert.Equal(OptimizationMethodType.BruteForce, reader.OptimizationMethod);
+            Assert.Equal(SortBotsType.TotalProfit, reader.ObjectiveMetric);
+            Assert.Equal(ObjectiveDirectionType.Maximize, reader.ObjectiveDirection);
+            Assert.Equal(BayesianAcquisitionModeType.Ucb, reader.BayesianAcquisitionMode);
+        }
+    }
+
+    [Fact]
     public void OptimizerSettings_SaveLoad_TailSharePercentBoundaries_ShouldRoundTrip()
     {
         lock (SettingsFileLock)

@@ -46,6 +46,7 @@ Implemented and committed:
 37. Stabilization: hardened `BayesianCandidateSelector.SelectNextBatch` for `null scored` and `null` scored entries with safe sequential fallback behavior.
 38. Stabilization: hardened `BayesianCandidateSelector` for `null evaluated` in both initial and iterative selection paths.
 39. Stabilization: hardened acquisition for duplicate scored indices by consolidating to max score per index before surrogate ranking.
+40. Stabilization: hardened `OptimizerSettings.Load()` enum parsing to reject undefined numeric enum values and keep safe defaults.
 
 ## Commits
 - `b1e5eabe3` — `Optimizer: persist Phase1 extraction and wiring state`
@@ -149,6 +150,7 @@ Added tests:
   - `BayesianAcquisitionPolicy_ExpectedImprovement_ShouldUseOptimisticMean`
   - `OptimizerSettings_MethodFields_ShouldClampInvalidValues`
   - `OptimizerSettings_LoadFromFile_WithInvalidBayesianValues_ShouldClampOnLoad`
+  - `OptimizerSettings_LoadFromFile_WithInvalidEnumNumbers_ShouldKeepDefaults`
   - `OptimizerSettings_SaveLoad_TailSharePercentBoundaries_ShouldRoundTrip`
   - `BayesianOptimizationStrategy_WithTailPass_ShouldRespectTotalEvaluationBudget`
   - `BayesianOptimizationStrategy_ShouldNotEvaluateDuplicateCandidates`
@@ -176,7 +178,7 @@ Command:
 - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --configuration Debug`
 
 Result:
-- Passed: 51
+- Passed: 52
 - Failed: 0
 
 ### Stabilization fixes from new tests

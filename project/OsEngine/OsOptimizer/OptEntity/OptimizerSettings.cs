@@ -594,7 +594,11 @@ namespace OsEngine.OsOptimizer.OptEntity
                     _commissionValue = reader.ReadLine().ToDecimal();
                     _lastInSample = Convert.ToBoolean(reader.ReadLine());
 
-                    Enum.TryParse(reader.ReadLine(), out _orderExecutionType);
+                    string orderExecutionLine = reader.ReadLine();
+                    if (TryParseDefinedEnum(orderExecutionLine, out OrderExecutionType orderExecutionType))
+                    {
+                        _orderExecutionType = orderExecutionType;
+                    }
                     _slippageToSimpleOrder = Convert.ToInt32(reader.ReadLine());
                     _slippageToStopOrder = Convert.ToInt32(reader.ReadLine());
 
@@ -602,9 +606,15 @@ namespace OsEngine.OsOptimizer.OptEntity
                     string line = reader.ReadLine();
                     if (line != null)
                     {
-                        Enum.TryParse(line, out _optimizationMethod);
+                        if (TryParseDefinedEnum(line, out OptimizationMethodType optimizationMethod))
+                        {
+                            _optimizationMethod = optimizationMethod;
+                        }
                         line = reader.ReadLine();
-                        if (line != null) Enum.TryParse(line, out _objectiveMetric);
+                        if (line != null && TryParseDefinedEnum(line, out SortBotsType objectiveMetric))
+                        {
+                            _objectiveMetric = objectiveMetric;
+                        }
                         line = reader.ReadLine();
                         if (line != null) _bayesianInitialSamples = ClampPositiveInt(Convert.ToInt32(line));
                         line = reader.ReadLine();
@@ -612,9 +622,15 @@ namespace OsEngine.OsOptimizer.OptEntity
                         line = reader.ReadLine();
                         if (line != null) _bayesianBatchSize = ClampPositiveInt(Convert.ToInt32(line));
                         line = reader.ReadLine();
-                        if (line != null) Enum.TryParse(line, out _objectiveDirection);
+                        if (line != null && TryParseDefinedEnum(line, out ObjectiveDirectionType objectiveDirection))
+                        {
+                            _objectiveDirection = objectiveDirection;
+                        }
                         line = reader.ReadLine();
-                        if (line != null) Enum.TryParse(line, out _bayesianAcquisitionMode);
+                        if (line != null && TryParseDefinedEnum(line, out BayesianAcquisitionModeType bayesianAcquisitionMode))
+                        {
+                            _bayesianAcquisitionMode = bayesianAcquisitionMode;
+                        }
                         line = reader.ReadLine();
                         if (line != null) _bayesianAcquisitionKappa = ClampNonNegativeDecimal(line.ToDecimal());
                         line = reader.ReadLine();
@@ -655,6 +671,18 @@ namespace OsEngine.OsOptimizer.OptEntity
             }
 
             return value;
+        }
+
+        private static bool TryParseDefinedEnum<TEnum>(string value, out TEnum result)
+            where TEnum : struct, Enum
+        {
+            if (Enum.TryParse(value, out result) && Enum.IsDefined(typeof(TEnum), result))
+            {
+                return true;
+            }
+
+            result = default;
+            return false;
         }
 
         #endregion
