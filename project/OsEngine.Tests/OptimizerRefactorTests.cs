@@ -1677,6 +1677,25 @@ public class OptimizerRefactorTests
         Assert.Null(byWhitespace);
     }
 
+    [Fact]
+    public void AsyncBotFactory_CreateNewBots_WithInvalidInput_ShouldNotThrow()
+    {
+        AsyncBotFactory factory = new AsyncBotFactory();
+
+        Exception ex = Record.Exception(() =>
+        {
+            factory.CreateNewBots(null, "type", isScript: false, StartProgram.IsOsOptimizer);
+            factory.CreateNewBots(new List<string>(), "type", isScript: false, StartProgram.IsOsOptimizer);
+            factory.CreateNewBots(
+                new List<string> { "", "   " },
+                "type",
+                isScript: false,
+                StartProgram.IsOsOptimizer);
+        });
+
+        Assert.Null(ex);
+    }
+
     private sealed class SettingsFileScope : IDisposable
     {
         private readonly string _engineDirPath;
