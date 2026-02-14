@@ -490,6 +490,7 @@ namespace OsEngine.OsOptimizer
                 int bayesianMaxIterations = _master.BayesianMaxIterations;
                 int bayesianBatchSize = _master.BayesianBatchSize;
                 decimal bayesianAcquisitionKappa = _master.BayesianAcquisitionKappa;
+                int bayesianTailSharePercent = _master.BayesianTailSharePercent;
                 List<bool> parametersOnSnapshot = _parametersOn == null ? null : new List<bool>(_parametersOn);
                 List<IIStrategyParameter> parametersSnapshot = _parameters == null ? null : new List<IIStrategyParameter>(_parameters);
 
@@ -568,6 +569,15 @@ namespace OsEngine.OsOptimizer
                             ", kappa " + bayesianAcquisitionKappa + ").",
                             LogMessageType.Error);
                         return;
+                    }
+
+                    if (bayesianTailSharePercent < 1 || bayesianTailSharePercent > 50)
+                    {
+                        SendLogMessage(
+                            "Optimizer prime worker detected out-of-range bayesian tail share percent " +
+                            "(value " + bayesianTailSharePercent + ", expected 1..50). " +
+                            "Strategy-level clamp will be applied.",
+                            LogMessageType.System);
                     }
                 }
 

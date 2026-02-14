@@ -4722,3 +4722,21 @@ After each optimizer-related change, update this file with:
 
 ### Risks / notes
 - No intended behavior change in stable configuration; improves consistency if settings are mutated concurrently during strategy initialization.
+
+
+## Stabilization Update (2026-02-14) - Add Bayesian Tail-Share Runtime Range Diagnostic
+### What changed
+- Extended Bayesian runtime validation block in `PrimeThreadWorkerPlace()`:
+  - snapshots `bayesianTailSharePercent`;
+  - logs explicit diagnostic when value is outside expected range `1..50`.
+- Behavior remains unchanged: no abort is performed; downstream strategy clamp continues to normalize the value.
+
+### Files touched
+- `project/OsEngine/OsOptimizer/OptimizerExecutor.cs`
+
+### Validation
+- `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --configuration Debug`
+- Result: Passed 70 / Failed 0
+
+### Risks / notes
+- No functional behavior change; improves observability of out-of-range Bayesian tail-share settings at runtime.
