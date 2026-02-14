@@ -238,6 +238,12 @@ namespace OsEngine.OsOptimizer
                     continue;
                 }
 
+                if (string.IsNullOrWhiteSpace(reportFiltered.Reports[i].BotName))
+                {
+                    SendLogMessage("Async bot factory start skipped (OutOfSample): source report bot name is empty at index " + i + ".", LogMessageType.Error);
+                    continue;
+                }
+
                 string botName = reportFiltered.Reports[i].BotName.Replace(" InSample", "") + " OutOfSample";
                 botNames.Add(botName);
             }

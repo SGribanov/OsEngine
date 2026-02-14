@@ -2583,3 +2583,20 @@ After each optimizer-related change, update this file with:
 ### Risks / notes
 - Behavior change only on empty-batch paths; avoids unnecessary factory invocations and clarifies why no async bot creation was started.
 
+
+## Stabilization Update (2026-02-14) - Guard Empty Source Bot Names In OutOfSample Factory Startup
+### What changed
+- Updated `StartAsuncBotFactoryOutOfSample(...)` in `OptimizerExecutor`.
+- Added guard for empty/null `sourceReport.BotName` before `.Replace(" InSample", "")` transformation.
+- Invalid entries are now skipped with indexed diagnostic log instead of risking null-reference failure.
+
+### Files touched
+- `project/OsEngine/OsOptimizer/OptimizerExecutor.cs`
+
+### Validation
+- `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --configuration Debug`
+- Result: Passed 70 / Failed 0
+
+### Risks / notes
+- Behavior change only for invalid source report names; improves robustness of out-of-sample async bot batch generation.
+
