@@ -30,6 +30,7 @@ Implemented and committed:
 21. Stabilization: added file-level load clamp coverage for invalid Bayesian values in persisted settings.
 22. Stabilization: added strategy-level tail configuration edge-case coverage (tail-pass disabled and tail-share constructor clamping).
 23. Operability: expanded Bayesian factory info message with full effective strategy configuration snapshot.
+24. Stabilization: added test assertions for key diagnostics fields in Bayesian factory info message.
 
 ## Commits
 - `b1e5eabe3` — `Optimizer: persist Phase1 extraction and wiring state`

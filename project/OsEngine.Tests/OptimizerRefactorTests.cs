@@ -392,6 +392,8 @@ public class OptimizerRefactorTests
         Assert.Equal(15, bayesian.TailSharePercent);
         Assert.False(string.IsNullOrEmpty(infoMessage));
         Assert.Contains("skeleton", infoMessage);
+        Assert.Contains("AcquisitionMode=Ucb", infoMessage);
+        Assert.Contains("TailSharePercent=15", infoMessage);
     }
 
     [Fact]
