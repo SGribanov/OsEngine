@@ -858,7 +858,18 @@ namespace OsEngine.OsOptimizer
             server.TypeTesterData = _master.Storage.TypeTesterData;
             server.TestingProgressChangeEvent += server_TestingProgressChangeEvent;
 
-            List<IIBotTab> sources = _master.BotToTest.GetTabs();
+            List<IIBotTab> sources = null;
+            try
+            {
+                sources = _master.BotToTest.GetTabs();
+            }
+            catch (Exception ex)
+            {
+                SendLogMessage("CreateNewServer skipped: bot tabs retrieval failed. " + ex, LogMessageType.Error);
+                SafeRemoveOptimizerServer(server);
+                return null;
+            }
+
             if (sources == null)
             {
                 SendLogMessage("CreateNewServer skipped: bot tabs collection is null.", LogMessageType.Error);
