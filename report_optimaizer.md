@@ -4290,3 +4290,22 @@ After each optimizer-related change, update this file with:
 
 ### Risks / notes
 - No intended behavior change in normal flow; adds runtime fail-fast parity with existing start-boundary enum validation.
+
+
+## Stabilization Update (2026-02-14) - Guard Runtime Objective Enum Settings In Prime Worker
+### What changed
+- Extended runtime settings snapshot validation in `PrimeThreadWorkerPlace()`:
+  - validates `objectiveMetric` against `SortBotsType`;
+  - validates `objectiveDirection` against `ObjectiveDirectionType`;
+  - validates `bayesianAcquisitionMode` against `BayesianAcquisitionModeType`.
+- Invalid enum values now cause controlled worker exit with diagnostics and `TestReady` snapshot publication.
+
+### Files touched
+- `project/OsEngine/OsOptimizer/OptimizerExecutor.cs`
+
+### Validation
+- `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --configuration Debug`
+- Result: Passed 70 / Failed 0
+
+### Risks / notes
+- No intended behavior change in valid flow; improves runtime fail-fast symmetry for objective/acquisition settings.

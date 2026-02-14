@@ -334,6 +334,9 @@ namespace OsEngine.OsOptimizer
                 int threadsCount = _master.ThreadsCount;
                 bool lastInSample = _master.LastInSample;
                 OptimizationMethodType optimizationMethod = _master.OptimizationMethod;
+                SortBotsType objectiveMetric = _master.ObjectiveMetric;
+                ObjectiveDirectionType objectiveDirection = _master.ObjectiveDirection;
+                BayesianAcquisitionModeType bayesianAcquisitionMode = _master.BayesianAcquisitionMode;
                 List<bool> parametersOnSnapshot = _parametersOn == null ? null : new List<bool>(_parametersOn);
                 List<IIStrategyParameter> parametersSnapshot = _parameters == null ? null : new List<IIStrategyParameter>(_parameters);
 
@@ -373,6 +376,33 @@ namespace OsEngine.OsOptimizer
                 {
                     SendLogMessage(
                         "Optimizer prime worker skipped: optimization method is invalid at runtime (value " + optimizationMethod + ").",
+                        LogMessageType.Error);
+                    SafeInvokeTestReady(GetReportsSnapshotForPublish());
+                    return;
+                }
+
+                if (!Enum.IsDefined(typeof(SortBotsType), objectiveMetric))
+                {
+                    SendLogMessage(
+                        "Optimizer prime worker skipped: objective metric is invalid at runtime (value " + objectiveMetric + ").",
+                        LogMessageType.Error);
+                    SafeInvokeTestReady(GetReportsSnapshotForPublish());
+                    return;
+                }
+
+                if (!Enum.IsDefined(typeof(ObjectiveDirectionType), objectiveDirection))
+                {
+                    SendLogMessage(
+                        "Optimizer prime worker skipped: objective direction is invalid at runtime (value " + objectiveDirection + ").",
+                        LogMessageType.Error);
+                    SafeInvokeTestReady(GetReportsSnapshotForPublish());
+                    return;
+                }
+
+                if (!Enum.IsDefined(typeof(BayesianAcquisitionModeType), bayesianAcquisitionMode))
+                {
+                    SendLogMessage(
+                        "Optimizer prime worker skipped: bayesian acquisition mode is invalid at runtime (value " + bayesianAcquisitionMode + ").",
                         LogMessageType.Error);
                     SafeInvokeTestReady(GetReportsSnapshotForPublish());
                     return;
