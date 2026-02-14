@@ -1860,6 +1860,33 @@ public class OptimizerRefactorTests
         }
     }
 
+    [Fact]
+    public void BotConfigurator_CreateAndConfigureBot_WithNullBotName_ShouldReturnNull()
+    {
+        lock (SettingsFileLock)
+        {
+            using SettingsFileScope _ = new SettingsFileScope();
+
+            OptimizerSettings settings = new OptimizerSettings
+            {
+                StrategyName = string.Empty
+            };
+            AsyncBotFactory factory = new AsyncBotFactory();
+            BotManualControl manualControl = new BotManualControl("test_manual4", null, StartProgram.IsOsOptimizer);
+            BotConfigurator configurator = new BotConfigurator(settings, factory, manualControl);
+
+            var bot = configurator.CreateAndConfigureBot(
+                botName: null,
+                parameters: new List<IIStrategyParameter>(),
+                parametersOptimized: null,
+                server: null,
+                regime: StartProgram.IsOsOptimizer,
+                cancellationToken: CancellationToken.None);
+
+            Assert.Null(bot);
+        }
+    }
+
     private sealed class SettingsFileScope : IDisposable
     {
         private readonly string _engineDirPath;
