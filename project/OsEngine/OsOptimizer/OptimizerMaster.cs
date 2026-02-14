@@ -1164,6 +1164,8 @@ namespace OsEngine.OsOptimizer
             if (!_aloneTestDoneSignal.Wait(TimeSpan.FromSeconds(30)))
             {
                 SendLogMessage("Single-bot test completion wait timed out.", LogMessageType.Error);
+                _aloneTestIsOver = true;
+                _aloneTestDoneSignal.Set();
             }
 
             return _resultBotAloneTest;

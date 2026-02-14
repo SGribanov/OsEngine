@@ -821,3 +821,21 @@ After each optimizer-related change, update this file with:
 
 ### Risks / notes
 - Prevents null-executor failures on edge lifecycle transitions (startup/disposal races).
+
+## Stabilization Update (2026-02-14) - Timeout Recovery In Master Single-Bot Wait
+### What changed
+- Hardened timeout branch in `OptimizerMaster.TestBot(...)`.
+- If wait for `_aloneTestDoneSignal` exceeds 30 seconds, code now:
+  - logs timeout;
+  - restores `_aloneTestIsOver = true`;
+  - sets `_aloneTestDoneSignal` to avoid stuck "test running" state.
+
+### Files touched
+- `project/OsEngine/OsOptimizer/OptimizerMaster.cs`
+
+### Validation
+- `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --configuration Debug`
+- Result: Passed 70 / Failed 0
+
+### Risks / notes
+- Improves recovery after rare completion-signal loss; may allow new test request while delayed background completion arrives later.
