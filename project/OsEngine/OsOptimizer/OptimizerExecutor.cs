@@ -498,7 +498,14 @@ namespace OsEngine.OsOptimizer
                 progressMax = _countAllServersMax;
             }
 
-            PrimeProgressChangeEvent?.Invoke(progressEnd, progressMax);
+            try
+            {
+                PrimeProgressChangeEvent?.Invoke(progressEnd, progressMax);
+            }
+            catch (Exception ex)
+            {
+                SendLogMessage("Optimizer prime progress event dispatch failed: " + ex, LogMessageType.Error);
+            }
         }
 
         private List<bool> _parametersOn;
