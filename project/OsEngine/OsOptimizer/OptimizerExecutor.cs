@@ -357,6 +357,7 @@ namespace OsEngine.OsOptimizer
 
             if (outOfSampleBotsCount == 0)
             {
+                SendLogMessage("OutOfSample has no valid source reports to process.", LogMessageType.System);
                 WaitCurrentPhaseToComplete();
                 return;
             }

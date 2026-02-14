@@ -95,6 +95,7 @@ Implemented and committed:
 86. Stabilization: extended `AsyncBotFactory.GetBot` invalid-key regression coverage to include `null` `botType`/`botName` cases.
 87. Stabilization: extended `AsyncBotFactory.CreateNewBots` invalid-input regression coverage to include `null botType`.
 88. Stabilization: extended `AsyncBotFactory.CreateNewBots` invalid-input regression coverage to include whitespace-only `botType`.
+89. Operability: added explicit out-of-sample info log when source report set is empty after sanitization (`no valid source reports to process`).
 
 ## Commits
 - `b1e5eabe3` — `Optimizer: persist Phase1 extraction and wiring state`
