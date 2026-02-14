@@ -978,3 +978,20 @@ After each optimizer-related change, update this file with:
 
 ### Risks / notes
 - Prevents invalid/degenerate single-bot phase windows from entering runtime loop.
+
+## Stabilization Update (2026-02-14) - Timeout Invalidates Active Single-Bot RunId
+### What changed
+- Hardened timeout branch in `OptimizerMaster.TestBot(...)` by invalidating active run id.
+- On `Wait(30s)` timeout, now executes:
+  - `Interlocked.Increment(ref _aloneTestRunId);`
+  - followed by existing state recovery (`_aloneTestIsOver = true`, `_aloneTestDoneSignal.Set()`).
+
+### Files touched
+- `project/OsEngine/OsOptimizer/OptimizerMaster.cs`
+
+### Validation
+- `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --configuration Debug`
+- Result: Passed 70 / Failed 0
+
+### Risks / notes
+- Prevents delayed completion of timed-out run from publishing stale result/state updates.
