@@ -39,6 +39,11 @@ namespace OsEngine.OsOptimizer.OptimizerEntity
 
         public BotPanel GetBot(string botType, string botName, CancellationToken cancellationToken = default)
         {
+            if (string.IsNullOrWhiteSpace(botType) || string.IsNullOrWhiteSpace(botName))
+            {
+                return null;
+            }
+
             string key = GetKey(botType, botName);
             TaskCompletionSource<BotPanel> waiter = _botWaiters.GetOrAdd(key, _ =>
                 new TaskCompletionSource<BotPanel>(TaskCreationOptions.RunContinuationsAsynchronously));
