@@ -1214,6 +1214,18 @@ namespace OsEngine.OsOptimizer
             }
         }
 
+        private void SafeTrySetResult(TaskCompletionSource<OptimizerReport> completion, OptimizerReport report)
+        {
+            try
+            {
+                completion?.TrySetResult(report);
+            }
+            catch (Exception ex)
+            {
+                SendLogMessage("Optimizer evaluation completion result publish failed: " + ex, LogMessageType.Error);
+            }
+        }
+
         #endregion
 
         #region Server performing optimization
@@ -1281,7 +1293,7 @@ namespace OsEngine.OsOptimizer
                     {
                         OptimizerReport report = new OptimizerReport(bot.Parameters);
                         report.LoadState(bot);
-                        completion.TrySetResult(report);
+                        SafeTrySetResult(completion, report);
                     }
                     else
                     {

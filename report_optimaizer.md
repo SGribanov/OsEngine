@@ -1357,3 +1357,19 @@ After each optimizer-related change, update this file with:
 
 ### Risks / notes
 - Prevents rare task-completion cancellation exceptions from interrupting not-started bot finalization.
+
+## Stabilization Update (2026-02-14) - Safe Completion Result Publish Helper In Server End Event
+### What changed
+- Added `SafeTrySetResult(TaskCompletionSource<OptimizerReport> completion, OptimizerReport report)` helper in `OptimizerExecutor`.
+- Replaced direct `completion.TrySetResult(report)` in `server_TestingEndEvent(...)` with safe helper usage.
+- Helper catches and logs result-publication exceptions to preserve server-end cleanup flow.
+
+### Files touched
+- `project/OsEngine/OsOptimizer/OptimizerExecutor.cs`
+
+### Validation
+- `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --configuration Debug`
+- Result: Passed 70 / Failed 0
+
+### Risks / notes
+- Prevents rare task completion publication failures from breaking end-of-test processing path.
