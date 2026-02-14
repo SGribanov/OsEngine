@@ -974,6 +974,13 @@ namespace OsEngine.OsOptimizer
                 return null;
             }
 
+            if (reportFaze.Faze.TimeEnd <= reportFaze.Faze.TimeStart)
+            {
+                SendLogMessage("Single-bot test skipped due to invalid phase time range.", LogMessageType.Error);
+                awaitObj.Dispose();
+                return null;
+            }
+
             if (_primeThreadWorker != null)
             {
                 awaitObj?.Dispose();

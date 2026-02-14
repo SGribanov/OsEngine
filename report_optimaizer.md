@@ -963,3 +963,18 @@ After each optimizer-related change, update this file with:
 
 ### Risks / notes
 - Prevents leaked single-bot test resources when server test start fails unexpectedly.
+
+## Stabilization Update (2026-02-14) - Phase Time Range Guard In Executor TestBot
+### What changed
+- Added early validation in `OptimizerExecutor.TestBot(...)` for phase time range integrity.
+- If `reportFaze.Faze.TimeEnd <= reportFaze.Faze.TimeStart`, method now logs error, disposes await object, and exits early.
+
+### Files touched
+- `project/OsEngine/OsOptimizer/OptimizerExecutor.cs`
+
+### Validation
+- `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --configuration Debug`
+- Result: Passed 70 / Failed 0
+
+### Risks / notes
+- Prevents invalid/degenerate single-bot phase windows from entering runtime loop.
