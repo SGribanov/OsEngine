@@ -3944,3 +3944,21 @@ After each optimizer-related change, update this file with:
 
 ### Risks / notes
 - Intentional robustness change: estimation path now fails soft (zero estimate) when strategy construction is unavailable.
+
+
+## Stabilization Update (2026-02-14) - Guard InSample Strategy Factory Exceptions
+### What changed
+- Updated `GetInSampleOptimizationStrategy(...)` in `OptimizerExecutor`:
+  - wrapped `OptimizationStrategyFactory.CreateInSampleStrategy(...)` in `try/catch`;
+  - on exception, logs explicit strategy-creation failure and returns `null`.
+- This aligns strategy initialization path with fail-soft behavior used by downstream estimation guards.
+
+### Files touched
+- `project/OsEngine/OsOptimizer/OptimizerExecutor.cs`
+
+### Validation
+- `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --configuration Debug`
+- Result: Passed 70 / Failed 0
+
+### Risks / notes
+- Intentional robustness change: strategy factory faults are now converted to controlled error flow with diagnostics instead of immediate unhandled propagation.

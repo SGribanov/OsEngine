@@ -586,21 +586,31 @@ namespace OsEngine.OsOptimizer
         {
             int parallel = Math.Max(1, _master.ThreadsCount);
 
-            IOptimizationStrategy strategy = OptimizationStrategyFactory.CreateInSampleStrategy(
-                _master.OptimizationMethod,
-                _parameterIterator,
-                evaluator,
-                parallel,
-                _master.ObjectiveMetric,
-                _master.ObjectiveDirection,
-                _master.BayesianInitialSamples,
-                _master.BayesianMaxIterations,
-                _master.BayesianBatchSize,
-                _master.BayesianAcquisitionMode,
-                _master.BayesianAcquisitionKappa,
-                _master.BayesianUseTailPass,
-                _master.BayesianTailSharePercent,
-                out string infoMessage);
+            IOptimizationStrategy strategy = null;
+            string infoMessage = null;
+            try
+            {
+                strategy = OptimizationStrategyFactory.CreateInSampleStrategy(
+                    _master.OptimizationMethod,
+                    _parameterIterator,
+                    evaluator,
+                    parallel,
+                    _master.ObjectiveMetric,
+                    _master.ObjectiveDirection,
+                    _master.BayesianInitialSamples,
+                    _master.BayesianMaxIterations,
+                    _master.BayesianBatchSize,
+                    _master.BayesianAcquisitionMode,
+                    _master.BayesianAcquisitionKappa,
+                    _master.BayesianUseTailPass,
+                    _master.BayesianTailSharePercent,
+                    out infoMessage);
+            }
+            catch (Exception ex)
+            {
+                SendLogMessage("Optimizer strategy creation failed: " + ex, LogMessageType.Error);
+                return null;
+            }
 
             if (!string.IsNullOrEmpty(infoMessage))
             {
