@@ -249,7 +249,11 @@ namespace OsEngine.OsOptimizer
             int expectedNamesCount = Math.Max(0, botCount);
             List<string> botNames = new List<string>(expectedNamesCount);
             HashSet<string> uniqueBotNames = new HashSet<string>(expectedNamesCount, StringComparer.Ordinal);
-            int startServerIndex = _serverNum;
+            int startServerIndex;
+            lock (_serverRemoveLocker)
+            {
+                startServerIndex = _serverNum;
+            }
             string fazeSuffix = " " + normalizedFaze;
 
             for (int i = 0; i < botCount; i++)
