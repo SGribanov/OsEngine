@@ -1831,3 +1831,18 @@ After each optimizer-related change, update this file with:
 
 ### Risks / notes
 - Prevents one failed security bind from aborting entire server bootstrap and preserves diagnostic traceability.
+
+## Stabilization Update (2026-02-14) - Empty Security Name Guard In SafeBindSecurityToServer
+### What changed
+- Added `security.Name` emptiness guard inside `SafeBindSecurityToServer(...)`.
+- If security name is empty, bind is skipped with detailed source-context log.
+
+### Files touched
+- `project/OsEngine/OsOptimizer/OptimizerExecutor.cs`
+
+### Validation
+- `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --configuration Debug`
+- Result: Passed 70 / Failed 0
+
+### Risks / notes
+- Prevents malformed security entities from reaching `GetDataToSecurity(...)` path and improves error context.

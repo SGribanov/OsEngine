@@ -1446,6 +1446,16 @@ namespace OsEngine.OsOptimizer
                 return;
             }
 
+            if (string.IsNullOrWhiteSpace(security.Name))
+            {
+                string tabPart = tabIndex >= 0 ? (", tab index " + tabIndex) : string.Empty;
+                SendLogMessage(
+                    "CreateNewServer security bind skipped (" + sourceKind + ", source index " + sourceIndex + tabPart +
+                    "): security name is empty.",
+                    LogMessageType.Error);
+                return;
+            }
+
             try
             {
                 server.GetDataToSecurity(security, timeFrame, timeStart, timeEnd);
