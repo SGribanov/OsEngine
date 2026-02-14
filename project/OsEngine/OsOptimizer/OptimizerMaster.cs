@@ -1141,7 +1141,7 @@ namespace OsEngine.OsOptimizer
                 return null;
             }
 
-            if (_aloneTestIsOver == false)
+            if (Volatile.Read(ref _aloneTestIsOver) == false)
             {
                 SendLogMessage("Single-bot test request ignored: previous test is still running.", LogMessageType.System);
                 return null;
@@ -1149,7 +1149,7 @@ namespace OsEngine.OsOptimizer
 
             _resultBotAloneTest = null;
 
-            _aloneTestIsOver = false;
+            Volatile.Write(ref _aloneTestIsOver, false);
             _aloneTestDoneSignal.Reset();
             int runId = Interlocked.Increment(ref _aloneTestRunId);
 
@@ -1164,7 +1164,7 @@ namespace OsEngine.OsOptimizer
             {
                 SendLogMessage("Single-bot test completion wait timed out.", LogMessageType.Error);
                 Interlocked.Increment(ref _aloneTestRunId);
-                _aloneTestIsOver = true;
+                Volatile.Write(ref _aloneTestIsOver, true);
                 _aloneTestDoneSignal.Set();
             }
 
@@ -1229,7 +1229,7 @@ namespace OsEngine.OsOptimizer
             {
                 if (runId == Volatile.Read(ref _aloneTestRunId))
                 {
-                    _aloneTestIsOver = true;
+                    Volatile.Write(ref _aloneTestIsOver, true);
                     _aloneTestDoneSignal.Set();
                 }
             }

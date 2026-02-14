@@ -995,3 +995,19 @@ After each optimizer-related change, update this file with:
 
 ### Risks / notes
 - Prevents delayed completion of timed-out run from publishing stale result/state updates.
+
+## Stabilization Update (2026-02-14) - Volatile Access For Single-Bot Running Flag
+### What changed
+- Switched `_aloneTestIsOver` access in `OptimizerMaster` to volatile operations:
+  - `Volatile.Read(ref _aloneTestIsOver)` in request gate;
+  - `Volatile.Write(ref _aloneTestIsOver, false/true)` on start/timeout/finalization transitions.
+
+### Files touched
+- `project/OsEngine/OsOptimizer/OptimizerMaster.cs`
+
+### Validation
+- `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --configuration Debug`
+- Result: Passed 70 / Failed 0
+
+### Risks / notes
+- Improves cross-thread visibility of single-bot run-state flag between UI path and async runner.
