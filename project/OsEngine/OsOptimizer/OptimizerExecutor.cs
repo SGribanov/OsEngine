@@ -853,6 +853,12 @@ namespace OsEngine.OsOptimizer
 
             for (int i = 0; i < sources.Count; i++)
             {
+                if (sources[i] == null)
+                {
+                    SendLogMessage("CreateNewServer skipped null bot tab source at index " + i + ".", LogMessageType.Error);
+                    continue;
+                }
+
                 if (sources[i].TabType == BotTabType.Simple)
                 {// BotTabSimple
                     BotTabSimple simple = (BotTabSimple)sources[i];
