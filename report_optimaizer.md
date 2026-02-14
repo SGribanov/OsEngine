@@ -412,3 +412,19 @@ After each optimizer-related change, update this file with:
 
 ### Risks / notes
 - Clamp is intentionally local to compensation path; normal per-bot completion accounting remains unchanged.
+
+## Stabilization Update (2026-02-14) - Thread-Safe Prime Progress Increment
+### What changed
+- In `server_TestingEndEvent`, moved `_countAllServersEndTest` increment into `_serverRemoveLocker` critical section.
+- Added upper-bound clamp there as well (`_countAllServersEndTest <= _countAllServersMax`).
+- Progress event payload is now captured from synchronized snapshots (`progressEnd`, `progressMax`) and emitted after lock release.
+
+### Files touched
+- `project/OsEngine/OsOptimizer/OptimizerExecutor.cs`
+
+### Validation
+- `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --configuration Debug`
+- Result: Passed 70 / Failed 0
+
+### Risks / notes
+- `PrimeProgressChangeEvent` remains outside lock to avoid re-entrancy/deadlock risk in subscribers.

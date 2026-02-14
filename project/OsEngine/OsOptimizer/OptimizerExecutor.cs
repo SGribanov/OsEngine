@@ -1018,14 +1018,23 @@ namespace OsEngine.OsOptimizer
         private void server_TestingEndEvent(int serverNum, TimeSpan testTime)
         {
             TestingProgressChangeEvent?.Invoke(100, 100, serverNum);
-            _countAllServersEndTest++;
-            PrimeProgressChangeEvent?.Invoke(_countAllServersEndTest, _countAllServersMax);
+            int progressEnd;
+            int progressMax;
 
             BotPanel bot = null;
             OptimizerServer server = null;
 
             lock (_serverRemoveLocker)
             {
+                _countAllServersEndTest++;
+                if (_countAllServersEndTest > _countAllServersMax)
+                {
+                    _countAllServersEndTest = _countAllServersMax;
+                }
+
+                progressEnd = _countAllServersEndTest;
+                progressMax = _countAllServersMax;
+
                 for (int i = 0; i < _botsInTest.Count; i++)
                 {
                     BotPanel curBot = _botsInTest[i];
@@ -1110,6 +1119,8 @@ namespace OsEngine.OsOptimizer
                     }
                 }
             }
+
+            PrimeProgressChangeEvent?.Invoke(progressEnd, progressMax);
 
             if (bot != null)
             {
