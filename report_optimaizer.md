@@ -4851,3 +4851,22 @@ After each optimizer-related change, update this file with:
 
 ### Risks / notes
 - No runtime behavior change expected; improves initialization consistency and readability.
+
+
+## Stabilization Update (2026-02-14) - Remove Unused Bot-Tabs Locals In Validation Call Sites
+### What changed
+- Minor cleanup in `OptimizerExecutor` call sites of `TryGetBotTabsSnapshot(...)`:
+  - switched to discard pattern `out _` where returned tabs list is not used after validation.
+- Applied in:
+  - `Start(...)`
+  - `ValidatePrimeWorkerRuntimePrerequisites(...)`
+
+### Files touched
+- `project/OsEngine/OsOptimizer/OptimizerExecutor.cs`
+
+### Validation
+- `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --configuration Debug`
+- Result: Passed 70 / Failed 0
+
+### Risks / notes
+- No runtime behavior change expected; reduces local-variable noise and clarifies intent (validation-only usage).

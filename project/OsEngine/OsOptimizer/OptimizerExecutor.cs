@@ -101,7 +101,7 @@ namespace OsEngine.OsOptimizer
                 return false;
             }
 
-            if (!TryGetBotTabsSnapshot(out List<IIBotTab> botTabs, out string botTabsError))
+            if (!TryGetBotTabsSnapshot(out _, out string botTabsError))
             {
                 SendLogMessage("Optimizer start skipped: " + botTabsError, LogMessageType.Error);
                 return false;
@@ -701,7 +701,7 @@ namespace OsEngine.OsOptimizer
                 return false;
             }
 
-            if (!TryGetBotTabsSnapshot(out List<IIBotTab> runtimeBotTabs, out string botTabsError))
+            if (!TryGetBotTabsSnapshot(out _, out string botTabsError))
             {
                 AbortPrimeWorker("Optimizer prime worker skipped: runtime " + botTabsError);
                 return false;
