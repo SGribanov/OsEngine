@@ -1447,3 +1447,21 @@ After each optimizer-related change, update this file with:
 
 ### Risks / notes
 - Keeps phase-signal race handling centralized and reduces duplication in cleanup/compensation flow.
+
+## Stabilization Update (2026-02-14) - Server Event Detach Helper In Executor Cleanup
+### What changed
+- Added `DetachServerEvents(OptimizerServer server)` helper in `OptimizerExecutor`.
+- Replaced duplicated event-unsubscribe code in:
+  - `FinalizeNotStartedBot(...)`;
+  - `server_TestingEndEvent(...)`.
+- Helper catches and logs detach exceptions.
+
+### Files touched
+- `project/OsEngine/OsOptimizer/OptimizerExecutor.cs`
+
+### Validation
+- `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --configuration Debug`
+- Result: Passed 70 / Failed 0
+
+### Risks / notes
+- Keeps server event-detach behavior centralized and reduces risk of inconsistent unsubscribe logic.

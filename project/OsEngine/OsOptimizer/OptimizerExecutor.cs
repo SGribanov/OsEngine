@@ -767,8 +767,7 @@ namespace OsEngine.OsOptimizer
                 {
                     if (_servers[i].NumberServer == server.NumberServer)
                     {
-                        _servers[i].TestingEndEvent -= server_TestingEndEvent;
-                        _servers[i].TestingProgressChangeEvent -= server_TestingProgressChangeEvent;
+                        DetachServerEvents(_servers[i]);
                         _servers.RemoveAt(i);
                         break;
                     }
@@ -1188,6 +1187,24 @@ namespace OsEngine.OsOptimizer
             }
         }
 
+        private void DetachServerEvents(OptimizerServer server)
+        {
+            if (server == null)
+            {
+                return;
+            }
+
+            try
+            {
+                server.TestingEndEvent -= server_TestingEndEvent;
+                server.TestingProgressChangeEvent -= server_TestingProgressChangeEvent;
+            }
+            catch (Exception ex)
+            {
+                SendLogMessage("Optimizer server event detach failed: " + ex, LogMessageType.Error);
+            }
+        }
+
         private bool SafeTrySignalPhase(CountdownEvent phase)
         {
             if (phase == null || phase.IsSet)
@@ -1301,8 +1318,7 @@ namespace OsEngine.OsOptimizer
                 {
                     if (_servers[i].NumberServer == serverNum)
                     {
-                        _servers[i].TestingEndEvent -= server_TestingEndEvent;
-                        _servers[i].TestingProgressChangeEvent -= server_TestingProgressChangeEvent;
+                        DetachServerEvents(_servers[i]);
                         server = _servers[i];
                         _servers.RemoveAt(i);
                         break;
