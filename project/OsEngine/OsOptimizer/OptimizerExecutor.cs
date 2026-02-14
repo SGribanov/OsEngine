@@ -280,14 +280,20 @@ namespace OsEngine.OsOptimizer
                 OptimizerReport sourceReport = reports[i];
                 if (sourceReport == null)
                 {
-                    SendLogMessage("Async bot factory start skipped (OutOfSample): source report is null at index " + i + ".", LogMessageType.Error);
+                    SendLogMessage(
+                        "Async bot factory start skipped (OutOfSample): source report is null at index " + i +
+                        " of " + reportsCount + ".",
+                        LogMessageType.Error);
                     continue;
                 }
 
                 string sourceBotName = sourceReport.BotName;
                 if (string.IsNullOrWhiteSpace(sourceBotName))
                 {
-                    SendLogMessage("Async bot factory start skipped (OutOfSample): source report bot name is empty at index " + i + ".", LogMessageType.Error);
+                    SendLogMessage(
+                        "Async bot factory start skipped (OutOfSample): source report bot name is empty at index " + i +
+                        " of " + reportsCount + ".",
+                        LogMessageType.Error);
                     continue;
                 }
 
@@ -300,7 +306,10 @@ namespace OsEngine.OsOptimizer
                 transformedBotName = transformedBotName.Trim();
                 if (string.IsNullOrWhiteSpace(transformedBotName))
                 {
-                    SendLogMessage("Async bot factory start skipped (OutOfSample): transformed bot name is empty at index " + i + ".", LogMessageType.Error);
+                    SendLogMessage(
+                        "Async bot factory start skipped (OutOfSample): transformed bot name is empty at index " + i +
+                        " of " + reportsCount + ".",
+                        LogMessageType.Error);
                     continue;
                 }
 

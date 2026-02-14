@@ -3119,3 +3119,21 @@ After each optimizer-related change, update this file with:
 ### Risks / notes
 - No behavior change; improves diagnostic consistency and faster triage across script/non-script paths.
 
+
+## Stabilization Update (2026-02-14) - Add Batch-Size Context To OOS Per-Item Skip Diagnostics
+### What changed
+- Updated per-item OutOfSample skip logs in `StartAsuncBotFactoryOutOfSample(...)`.
+- For null source report / empty source bot name / empty transformed bot name cases, diagnostics now include both:
+  - current item index;
+  - total snapshot size (`reportsCount`).
+
+### Files touched
+- `project/OsEngine/OsOptimizer/OptimizerExecutor.cs`
+
+### Validation
+- `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --configuration Debug`
+- Result: Passed 70 / Failed 0
+
+### Risks / notes
+- No behavior change; improves observability for batched OOS data-quality issues.
+
