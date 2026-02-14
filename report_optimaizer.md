@@ -477,3 +477,21 @@ After each optimizer-related change, update this file with:
 
 ### Risks / notes
 - No behavioral change expected; this is consistency hardening for concurrent observers.
+
+## Stabilization Update (2026-02-14) - Cancel-Aware Early Exit After Slot Acquisition
+### What changed
+- Added cancellation race guard in `StartNewBotForEvaluationAsync`.
+- If evaluation cancellation is already requested after slot acquisition but before `StartNewBot(...)`, method now:
+  - skips bot start;
+  - releases acquired `_serverSlots` permit;
+  - returns the already-canceled `completion.Task`.
+
+### Files touched
+- `project/OsEngine/OsOptimizer/OptimizerExecutor.cs`
+
+### Validation
+- `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --configuration Debug`
+- Result: Passed 70 / Failed 0
+
+### Risks / notes
+- Prevents unnecessary server/bot allocation on canceled evaluations and avoids temporary slot starvation in cancellation races.

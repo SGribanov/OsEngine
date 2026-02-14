@@ -672,6 +672,20 @@ namespace OsEngine.OsOptimizer
                     TaskScheduler.Default);
             }
 
+            if (cancellationToken.IsCancellationRequested)
+            {
+                try
+                {
+                    _serverSlots?.Release();
+                }
+                catch
+                {
+                    // ignored
+                }
+
+                return completion.Task;
+            }
+
             StartNewBot(parameters, parametersOptimized, report, botName, completion);
             return completion.Task;
         }
