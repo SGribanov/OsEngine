@@ -672,6 +672,7 @@ namespace OsEngine.OsOptimizer
 
             if (cancellationToken.IsCancellationRequested)
             {
+                SafeTrySetCanceled(completion, cancellationToken);
                 SafeReleaseServerSlot();
 
                 return completion.Task;
