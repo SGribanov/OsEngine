@@ -283,7 +283,8 @@ namespace OsEngine.OsOptimizer
         {
             SendLogMessage(OsLocalization.Optimizer.Message6, LogMessageType.System);
 
-            int outOfSampleBotsCount = reportInSample?.Reports?.Count ?? 0;
+            List<OptimizerReport> inSampleReports = reportInSample?.Reports;
+            int outOfSampleBotsCount = inSampleReports?.Count ?? 0;
             _phaseCompletion = new CountdownEvent(outOfSampleBotsCount);
 
             if (outOfSampleBotsCount > 0)
@@ -296,7 +297,13 @@ namespace OsEngine.OsOptimizer
                 PrimeProgressChangeEvent?.Invoke(_countAllServersEndTest, _countAllServersMax);
             }
 
-            for (int i = 0; i < reportInSample.Reports.Count; i++)
+            if (outOfSampleBotsCount == 0)
+            {
+                WaitCurrentPhaseToComplete();
+                return;
+            }
+
+            for (int i = 0; i < inSampleReports.Count; i++)
             {
                 if (!TryAcquireServerSlot())
                 {
@@ -307,8 +314,8 @@ namespace OsEngine.OsOptimizer
                 }
 
                 // SendLogMessage("Bot Out of Sample", LogMessageType.System);
-                StartNewBot(reportInSample.Reports[i].GetParameters(), null, report,
-                    reportInSample.Reports[i].BotName.Replace(" InSample", "") + " OutOfSample");
+                StartNewBot(inSampleReports[i].GetParameters(), null, report,
+                    inSampleReports[i].BotName.Replace(" InSample", "") + " OutOfSample");
             }
 
             WaitCurrentPhaseToComplete();

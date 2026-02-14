@@ -82,6 +82,7 @@ Implemented and committed:
 73. Stabilization: added regression coverage for `BotConfigurator.CreateAndConfigureBot` null-botName guard.
 74. Stabilization: added pre-canceled-token coverage for `BayesianOptimizationStrategy.OptimizeInSampleAsync` to ensure zero evaluations and empty result on immediate cancellation.
 75. Stabilization: added runtime coverage for Bayesian no-optimized-flags path to assert exactly one evaluation/report.
+76. Stabilization: hardened `StartOptimizeFazeOutOfSample` against null/empty `reportInSample.Reports` by introducing safe local snapshot and early-exit path without null dereference.
 
 ## Commits
 - `b1e5eabe3` — `Optimizer: persist Phase1 extraction and wiring state`
