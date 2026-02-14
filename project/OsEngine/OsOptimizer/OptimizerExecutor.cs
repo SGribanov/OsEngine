@@ -359,6 +359,12 @@ namespace OsEngine.OsOptimizer
                     return;
                 }
 
+                if (_master.Storage.Securities == null)
+                {
+                    AbortPrimeWorker("Optimizer prime worker skipped: runtime securities collection is unavailable.");
+                    return;
+                }
+
                 List<IIBotTab> runtimeBotTabs = null;
                 try
                 {

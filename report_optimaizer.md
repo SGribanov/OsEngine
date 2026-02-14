@@ -4543,3 +4543,20 @@ After each optimizer-related change, update this file with:
 
 ### Risks / notes
 - No intended behavior change for stable runtime context; improves resilience when bot tab topology is invalidated after start boundary.
+
+
+## Stabilization Update (2026-02-14) - Guard Runtime Securities Collection In Prime Worker
+### What changed
+- Added early runtime guard in `PrimeThreadWorkerPlace()`:
+  - validates `_master.Storage.Securities` is available before phase processing.
+- On missing securities collection, worker exits through unified `AbortPrimeWorker(...)` path.
+
+### Files touched
+- `project/OsEngine/OsOptimizer/OptimizerExecutor.cs`
+
+### Validation
+- `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --configuration Debug`
+- Result: Passed 70 / Failed 0
+
+### Risks / notes
+- No intended behavior change for valid runtime state; avoids repeated downstream server-creation failures when security storage is unavailable.
