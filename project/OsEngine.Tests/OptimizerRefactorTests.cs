@@ -1170,6 +1170,29 @@ public class OptimizerRefactorTests
     }
 
     [Fact]
+    public void BayesianAcquisitionPolicy_NullFallback_OnDirectAcquisitionPath_ShouldNotThrow()
+    {
+        BayesianAcquisitionPolicy policy = new BayesianAcquisitionPolicy();
+        HashSet<int> evaluated = new HashSet<int> { 4 };
+        List<BayesianCandidateSelector.CandidateScore> scored = new List<BayesianCandidateSelector.CandidateScore>
+        {
+            new BayesianCandidateSelector.CandidateScore { Index = 4, Score = 100m }
+        };
+
+        List<int> batch = policy.SelectNextBatch(
+            totalCount: 10,
+            evaluated,
+            scored,
+            batchSize: 2,
+            fallbackSelector: null,
+            candidates: BuildIntCandidates(10, "X", 1, 10, 1),
+            mode: BayesianAcquisitionModeType.Greedy,
+            kappa: 0m);
+
+        Assert.Equal(2, batch.Count);
+    }
+
+    [Fact]
     public void OptimizerSettings_SaveLoad_ShouldPersistOptimizationMethodFields()
     {
         lock (SettingsFileLock)
