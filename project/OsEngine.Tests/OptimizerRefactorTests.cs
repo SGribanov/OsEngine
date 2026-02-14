@@ -414,6 +414,45 @@ public class OptimizerRefactorTests
         Assert.Equal(4, reports.Count);
     }
 
+    [Fact]
+    public async Task BayesianOptimizationStrategy_OptimizeInSampleAsync_ShouldRespectIterationBudget()
+    {
+        ParameterIterator iterator = new ParameterIterator();
+        int calls = 0;
+
+        IBotEvaluator evaluator = new BotEvaluator((all, optimized, ct) =>
+        {
+            Interlocked.Increment(ref calls);
+            return Task.FromResult(new OptimizerReport(new List<IIStrategyParameter>())
+            {
+                BotName = "iter"
+            });
+        });
+
+        BayesianOptimizationStrategy strategy = new BayesianOptimizationStrategy(
+            iterator,
+            evaluator,
+            maxParallel: 2,
+            objectiveMetric: SortBotsType.TotalProfit,
+            initialSamples: 2,
+            maxIterations: 3,
+            batchSize: 2);
+
+        List<IIStrategyParameter> allParameters = new List<IIStrategyParameter>
+        {
+            new StrategyParameterInt("A", 1, 1, 3, 1),
+            new StrategyParameterInt("B", 1, 1, 3, 1)
+        };
+        List<bool> parametersToOptimization = new List<bool> { true, true };
+
+        List<OptimizerReport> reports =
+            await strategy.OptimizeInSampleAsync(allParameters, parametersToOptimization, CancellationToken.None);
+
+        // 9 grid points total, but staged budget is 2 initial + 3 iterative = 5 evaluations.
+        Assert.Equal(5, calls);
+        Assert.Equal(5, reports.Count);
+    }
+
     private static OptimizerReport BuildSampleReport()
     {
         OptimizerReport report = new OptimizerReport(new List<IIStrategyParameter>

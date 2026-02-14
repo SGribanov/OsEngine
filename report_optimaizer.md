@@ -13,6 +13,7 @@ Implemented and committed:
 4. Phase 3 started: `OptimizerReport` serialization extracted to dedicated serializer with version prefix and legacy fallback.
 5. Phase 4 started: optimization strategy abstraction interfaces and brute-force strategy scaffold added.
 6. Phase 5 started: bayesian strategy skeleton added and wired via factory with safe brute-force backend delegation.
+7. Phase 5 continued: bayesian staged candidate loop implemented (`initial sampling + iterative batches`) with limits by `InitialSamples/MaxIterations/BatchSize`.
 
 ## Commits
 - `b1e5eabe3` — `Optimizer: persist Phase1 extraction and wiring state`
@@ -101,12 +102,13 @@ Added tests:
   - `OptimizationStrategyFactory_BruteForce_ShouldReturnBruteForceWithoutMessage`
   - `OptimizationStrategyFactory_Bayesian_ShouldReturnBayesianSkeletonWithMessage`
   - `BayesianOptimizationStrategy_OptimizeInSampleAsync_ShouldUseCurrentBruteForceBackend`
+  - `BayesianOptimizationStrategy_OptimizeInSampleAsync_ShouldRespectIterationBudget`
 
 Command:
 - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --configuration Debug`
 
 Result:
-- Passed: 14
+- Passed: 15
 - Failed: 0
 
 ### Stabilization fixes from new tests
@@ -120,7 +122,7 @@ Result:
 - Phase 2: in progress (major busy-wait removal done; cancellation propagation now wired through `OptimizerExecutor -> BotConfigurator -> AsyncBotFactory`, remaining cleanup still pending).
 - Phase 3: started (serializer extracted; legacy fallback preserved; further cleanup and adoption still pending).
 - Phase 4: in progress (core abstraction contracts added; executor switched to strategy-based in-sample pipeline).
-- Phase 5 (Bayesian optimization + UI controls): started (strategy skeleton + factory wiring; runtime backend still brute-force).
+- Phase 5 (Bayesian optimization + UI controls): in progress (staged bayesian loop added; still grid-backed and not full probabilistic BO model).
 
 ## Phase 4 Changes (Started)
 ### New files
@@ -146,7 +148,11 @@ Result:
   - `BayesianBatchSize`
 - Method-selection hook added in `OptimizerExecutor` for in-sample strategy resolution:
   - `Bayesian` now resolves to `BayesianOptimizationStrategy` skeleton.
-  - skeleton logs integration message and uses brute-force backend internally (safe non-breaking stage).
+  - bayesian strategy now performs staged search on grid candidates:
+    - initial spread sampling;
+    - iterative neighborhood batches around top-scored candidates;
+    - respects `InitialSamples`, `MaxIterations`, `BatchSize`, and cancellation token.
+  - safety fallback remains for very large candidate pools (delegates to brute-force backend).
   - selection is centralized via `OptimizationStrategyFactory`.
 
 ## Phase 3 Changes (Started)
