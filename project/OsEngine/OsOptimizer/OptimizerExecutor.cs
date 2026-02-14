@@ -655,6 +655,7 @@ namespace OsEngine.OsOptimizer
             if (strategy == null)
             {
                 SendLogMessage("InSample phase skipped: optimization strategy is unavailable.", LogMessageType.Error);
+                CompensateSkippedInSamplePhase(inSampleBotsCount);
                 WaitCurrentPhaseToComplete();
                 return;
             }
@@ -875,6 +876,38 @@ namespace OsEngine.OsOptimizer
                 }
                 signaledCount++;
                 unscheduledCount--;
+            }
+
+            if (signaledCount > 0)
+            {
+                AddCompensatedOutOfSampleProgress(signaledCount);
+            }
+        }
+
+        private void CompensateSkippedInSamplePhase(int skippedCount)
+        {
+            if (skippedCount <= 0)
+            {
+                return;
+            }
+
+            CountdownEvent phase = _phaseCompletion;
+            if (phase == null)
+            {
+                return;
+            }
+
+            int signaledCount = 0;
+
+            while (skippedCount > 0)
+            {
+                if (!SafeTrySignalPhase(phase))
+                {
+                    break;
+                }
+
+                signaledCount++;
+                skippedCount--;
             }
 
             if (signaledCount > 0)

@@ -3979,3 +3979,22 @@ After each optimizer-related change, update this file with:
 
 ### Risks / notes
 - Intentional robustness change: prevents `NullReferenceException` and preserves controlled phase shutdown semantics when strategy creation failed earlier.
+
+
+## Stabilization Update (2026-02-14) - Prevent InSample Phase Hang On Null Strategy Path
+### What changed
+- Fixed `strategy == null` branch in `StartOptimizeFazeInSample(...)`:
+  - added `CompensateSkippedInSamplePhase(inSampleBotsCount)` before phase wait.
+- Added helper `CompensateSkippedInSamplePhase(...)`:
+  - signals current phase latch for skipped in-sample items;
+  - publishes matching compensated progress via existing safe progress path.
+
+### Files touched
+- `project/OsEngine/OsOptimizer/OptimizerExecutor.cs`
+
+### Validation
+- `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --configuration Debug`
+- Result: Passed 70 / Failed 0
+
+### Risks / notes
+- Intentional correctness fix: avoids potential indefinite wait when strategy creation fails after phase counter initialization.
