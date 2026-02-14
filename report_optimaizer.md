@@ -513,3 +513,18 @@ After each optimizer-related change, update this file with:
 
 ### Risks / notes
 - Prevents slot leaks when startup path throws unexpectedly; keeps async caller informed via faulted task.
+
+## Stabilization Update (2026-02-14) - Snapshot-Based Phase Access In Skip Compensation
+### What changed
+- Replaced direct field re-reads of `_phaseCompletion` in `CompensateSkippedOutOfSampleSlot` with a local snapshot (`phase`).
+- Signal call now targets the snapshot object, preserving existing exception guards.
+
+### Files touched
+- `project/OsEngine/OsOptimizer/OptimizerExecutor.cs`
+
+### Validation
+- `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --configuration Debug`
+- Result: Passed 70 / Failed 0
+
+### Risks / notes
+- Reduces race window where `_phaseCompletion` could become `null` between condition check and `Signal()` call during concurrent cleanup.

@@ -426,11 +426,12 @@ namespace OsEngine.OsOptimizer
         private void CompensateSkippedOutOfSampleSlot(bool releaseServerSlot)
         {
             bool signaled = false;
-            if (_phaseCompletion != null && !_phaseCompletion.IsSet)
+            CountdownEvent phase = _phaseCompletion;
+            if (phase != null && !phase.IsSet)
             {
                 try
                 {
-                    _phaseCompletion.Signal();
+                    phase.Signal();
                     signaled = true;
                 }
                 catch (ObjectDisposedException)
