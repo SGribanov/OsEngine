@@ -8,6 +8,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using OsEngine.Entity;
 using System;
+using System.Linq;
 
 namespace OsEngine.OsOptimizer.OptEntity
 {
@@ -18,11 +19,13 @@ namespace OsEngine.OsOptimizer.OptEntity
     {
         private readonly ParameterIterator _parameterIterator;
         private readonly IBotEvaluator _botEvaluator;
+        private readonly int _maxParallel;
 
-        public BruteForceStrategy(ParameterIterator parameterIterator, IBotEvaluator botEvaluator = null)
+        public BruteForceStrategy(ParameterIterator parameterIterator, IBotEvaluator botEvaluator = null, int maxParallel = 1)
         {
             _parameterIterator = parameterIterator;
             _botEvaluator = botEvaluator;
+            _maxParallel = maxParallel < 1 ? 1 : maxParallel;
         }
 
         public int EstimateBotCount(List<IIStrategyParameter> allParameters, List<bool> parametersToOptimization)
@@ -41,6 +44,7 @@ namespace OsEngine.OsOptimizer.OptEntity
             }
 
             List<OptimizerReport> result = new List<OptimizerReport>();
+            List<Task<OptimizerReport>> running = new List<Task<OptimizerReport>>();
 
             List<IIStrategyParameter> optimizedParametersStart = new List<IIStrategyParameter>();
 
@@ -59,9 +63,27 @@ namespace OsEngine.OsOptimizer.OptEntity
                     break;
                 }
 
-                OptimizerReport report =
-                    await _botEvaluator.EvaluateAsync(allParameters, optimizedParameters, cancellationToken).ConfigureAwait(false);
+                List<IIStrategyParameter> comboSnapshot = _parameterIterator.CopyParameters(optimizedParameters);
+                Task<OptimizerReport> task = _botEvaluator.EvaluateAsync(allParameters, comboSnapshot, cancellationToken);
+                running.Add(task);
 
+                if (running.Count >= _maxParallel)
+                {
+                    Task<OptimizerReport> completed = await Task.WhenAny(running).ConfigureAwait(false);
+                    running.Remove(completed);
+                    OptimizerReport report = await completed.ConfigureAwait(false);
+                    if (report != null)
+                    {
+                        result.Add(report);
+                    }
+                }
+            }
+
+            while (running.Count > 0)
+            {
+                Task<OptimizerReport> completed = await Task.WhenAny(running).ConfigureAwait(false);
+                running.Remove(completed);
+                OptimizerReport report = await completed.ConfigureAwait(false);
                 if (report != null)
                 {
                     result.Add(report);

@@ -5,7 +5,9 @@
 
 using System;
 using System.Collections.Generic;
+using System.Collections.Concurrent;
 using System.Threading;
+using System.Threading.Tasks;
 using OsEngine.Entity;
 using OsEngine.Language;
 using OsEngine.Logging;
@@ -48,6 +50,9 @@ namespace OsEngine.OsOptimizer
         private CountdownEvent _phaseCompletion;
 
         private CancellationTokenSource _stopCts;
+
+        private readonly ConcurrentDictionary<int, TaskCompletionSource<OptimizerReport>> _pendingEvaluationByServer =
+            new ConcurrentDictionary<int, TaskCompletionSource<OptimizerReport>>();
 
         public bool Start(List<bool> parametersOn, List<IIStrategyParameter> parameters)
         {
@@ -201,18 +206,20 @@ namespace OsEngine.OsOptimizer
 
         public int BotCountOneFaze(List<IIStrategyParameter> parameters, List<bool> parametersOn)
         {
-            IOptimizationStrategy strategy = GetInSampleOptimizationStrategy();
+            IOptimizationStrategy strategy = GetInSampleOptimizationStrategy(null);
             return strategy.EstimateBotCount(parameters, parametersOn);
         }
 
-        private IOptimizationStrategy GetInSampleOptimizationStrategy()
+        private IOptimizationStrategy GetInSampleOptimizationStrategy(IBotEvaluator evaluator)
         {
+            int parallel = Math.Max(1, _master.ThreadsCount);
+
             if (_master.OptimizationMethod == OptimizationMethodType.Bayesian)
             {
                 SendLogMessage("Bayesian strategy is not integrated yet. Fallback to BruteForce.", LogMessageType.System);
             }
 
-            return new BruteForceStrategy(_parameterIterator);
+            return new BruteForceStrategy(_parameterIterator, evaluator, parallel);
         }
 
         public List<OptimizerFazeReport> ReportsToFazes = new List<OptimizerFazeReport>();
@@ -235,29 +242,20 @@ namespace OsEngine.OsOptimizer
 
             // 2 проходим первую фазу, когда нужно обойти все варианты
 
-            List<IIStrategyParameter> optimizedParametersStart = new List<IIStrategyParameter>();
-
-            for (int i = 0; i < allParameters.Count; i++)
+            IBotEvaluator evaluator = new BotEvaluator(async (all, optimized, token) =>
             {
-                if (parametersToOptimization[i])
-                {
-                    optimizedParametersStart.Add(allParameters[i]);
-                }
-            }
+                return await StartNewBotForEvaluationAsync(all, optimized, report, " OpT InSample", token)
+                    .ConfigureAwait(false);
+            });
 
-            foreach (List<IIStrategyParameter> optimizeParamCurrent in _parameterIterator.EnumerateCombinations(optimizedParametersStart))
+            IOptimizationStrategy strategy = GetInSampleOptimizationStrategy(evaluator);
+            List<OptimizerReport> reports =
+                strategy.OptimizeInSampleAsync(allParameters, parametersToOptimization, _stopCts?.Token ?? CancellationToken.None)
+                    .GetAwaiter().GetResult();
+
+            if (reports != null && reports.Count > 0)
             {
-                if (!TryAcquireServerSlot())
-                {
-                    WaitCurrentPhaseToComplete();
-                    TestReadyEvent?.Invoke(ReportsToFazes);
-                    _primeThreadWorker = null;
-                    return;
-                }
-
-                //SendLogMessage("BotInSample" ,LogMessageType.System);
-                // (startServerIndex + i) + " OpT " + faze;
-                StartNewBot(_parameters, optimizeParamCurrent, report, " OpT InSample");
+                report.Reports.AddRange(reports);
             }
 
             WaitCurrentPhaseToComplete();
@@ -363,7 +361,18 @@ namespace OsEngine.OsOptimizer
         private void StartNewBot(List<IIStrategyParameter> parameters, List<IIStrategyParameter> parametersOptimized,
             OptimizerFazeReport report, string botName)
         {
+            StartNewBot(parameters, parametersOptimized, report, botName, null);
+        }
+
+        private void StartNewBot(List<IIStrategyParameter> parameters, List<IIStrategyParameter> parametersOptimized,
+            OptimizerFazeReport report, string botName, TaskCompletionSource<OptimizerReport> completionSource)
+        {
             OptimizerServer server = CreateNewServer(report, true);
+
+            if (completionSource != null)
+            {
+                _pendingEvaluationByServer[server.NumberServer] = completionSource;
+            }
 
             try
             {
@@ -402,6 +411,32 @@ namespace OsEngine.OsOptimizer
             }
 
             server.TestingStart();
+        }
+
+        private Task<OptimizerReport> StartNewBotForEvaluationAsync(
+            List<IIStrategyParameter> parameters,
+            List<IIStrategyParameter> parametersOptimized,
+            OptimizerFazeReport report,
+            string botName,
+            CancellationToken cancellationToken)
+        {
+            if (!TryAcquireServerSlot())
+            {
+                return Task.FromCanceled<OptimizerReport>(cancellationToken.IsCancellationRequested
+                    ? cancellationToken
+                    : new CancellationToken(true));
+            }
+
+            TaskCompletionSource<OptimizerReport> completion =
+                new TaskCompletionSource<OptimizerReport>(TaskCreationOptions.RunContinuationsAsynchronously);
+
+            if (cancellationToken.CanBeCanceled)
+            {
+                cancellationToken.Register(() => completion.TrySetCanceled(cancellationToken));
+            }
+
+            StartNewBot(parameters, parametersOptimized, report, botName, completion);
+            return completion.Task;
         }
 
         private bool TryAcquireServerSlot()
@@ -520,6 +555,11 @@ namespace OsEngine.OsOptimizer
             }
 
             ServerMaster.RemoveOptimizerServer(server);
+
+            if (_pendingEvaluationByServer.TryRemove(server.NumberServer, out TaskCompletionSource<OptimizerReport> completion))
+            {
+                completion.TrySetCanceled();
+            }
 
             if (_phaseCompletion != null && !_phaseCompletion.IsSet)
             {
@@ -775,7 +815,16 @@ namespace OsEngine.OsOptimizer
 
                 if (bot != null)
                 {
-                    ReportsToFazes[ReportsToFazes.Count - 1].Load(bot);
+                    if (_pendingEvaluationByServer.TryRemove(serverNum, out TaskCompletionSource<OptimizerReport> completion))
+                    {
+                        OptimizerReport report = new OptimizerReport(bot.Parameters);
+                        report.LoadState(bot);
+                        completion.TrySetResult(report);
+                    }
+                    else
+                    {
+                        ReportsToFazes[ReportsToFazes.Count - 1].Load(bot);
+                    }
                 }
 
                 for (int i = 0; i < _servers.Count; i++)

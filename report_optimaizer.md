@@ -97,7 +97,10 @@ Result:
 ### Notes
 - Interfaces are introduced with async contracts.
 - `BruteForceStrategy` currently enumerates combinations via `ParameterIterator` and delegates bot evaluation through `IBotEvaluator`.
-- This is an additive scaffold step; `OptimizerExecutor` now uses `IOptimizationStrategy` (`BruteForceStrategy`) for bot count estimation, while runtime test orchestration still uses existing execution flow.
+- `OptimizerExecutor` now uses strategy abstraction in two places:
+  - bot count estimation (`EstimateBotCount`),
+  - in-sample runtime execution via `IBotEvaluator` + `IOptimizationStrategy`.
+- In-sample runtime now maps server completion to evaluator tasks (`ConcurrentDictionary<int, TaskCompletionSource<OptimizerReport>>`) and collects reports from strategy output.
 - `OptimizerMaster` now forwards strategy-related settings from `OptimizerSettings`:
   - `OptimizationMethod`
   - `ObjectiveMetric`
