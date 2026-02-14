@@ -1552,6 +1552,41 @@ public class OptimizerRefactorTests
     }
 
     [Fact]
+    public void OptimizerSettings_LoadFromFile_WithInvalidBoolTailPass_ShouldKeepValueAndLoadFollowingFields()
+    {
+        lock (SettingsFileLock)
+        {
+            using SettingsFileScope scope = new SettingsFileScope();
+
+            _ = new OptimizerSettings
+            {
+                OptimizationMethod = OptimizationMethodType.Bayesian,
+                ObjectiveMetric = SortBotsType.TotalProfit,
+                BayesianInitialSamples = 10,
+                BayesianMaxIterations = 20,
+                BayesianBatchSize = 3,
+                ObjectiveDirection = ObjectiveDirectionType.Maximize,
+                BayesianAcquisitionMode = BayesianAcquisitionModeType.Ucb,
+                BayesianAcquisitionKappa = 0.5m,
+                BayesianUseTailPass = true,
+                BayesianTailSharePercent = 20
+            };
+
+            string[] lines = File.ReadAllLines(scope.SettingsPath);
+            Assert.True(lines.Length >= 10);
+
+            lines[^2] = "not-a-bool"; // BayesianUseTailPass
+            lines[^1] = "17";         // BayesianTailSharePercent
+            File.WriteAllLines(scope.SettingsPath, lines);
+
+            OptimizerSettings reader = new OptimizerSettings();
+
+            Assert.True(reader.BayesianUseTailPass);
+            Assert.Equal(17, reader.BayesianTailSharePercent);
+        }
+    }
+
+    [Fact]
     public void OptimizerSettings_SaveLoad_TailSharePercentBoundaries_ShouldRoundTrip()
     {
         lock (SettingsFileLock)

@@ -58,6 +58,7 @@ Implemented and committed:
 49. Stabilization/UI responsiveness: removed fixed `Thread.Sleep(200)` from `OptimizerUi` constructor to avoid blocking UI thread during startup.
 50. Stabilization/UI responsiveness: replaced unmanaged delayed parameter-grid reselection tasks with cancellable debounced scheduling (`CancellationTokenSource`) to prevent task buildup on rapid clicks.
 51. Stabilization: switched single-bot background runner from `async void` to `async Task` (`RunAloneBotTestAsync`) and replaced silent completion wait with explicit timed wait + error log on timeout.
+52. Stabilization: added load-path coverage for invalid bool in V2 settings (`BayesianUseTailPass`) to ensure parser keeps prior value and continues reading trailing fields.
 
 ## Commits
 - `b1e5eabe3` — `Optimizer: persist Phase1 extraction and wiring state`
@@ -164,6 +165,7 @@ Added tests:
   - `OptimizerSettings_LoadFromFile_WithInvalidEnumNumbers_ShouldKeepDefaults`
   - `OptimizerSettings_LoadFromFile_WithPartiallyInvalidV2Numbers_ShouldLoadRemainingFields`
   - `OptimizerSettings_LoadFromFile_WithCommaDecimalKappa_ShouldParseCorrectly`
+  - `OptimizerSettings_LoadFromFile_WithInvalidBoolTailPass_ShouldKeepValueAndLoadFollowingFields`
   - `OptimizerSettings_SaveLoad_TailSharePercentBoundaries_ShouldRoundTrip`
   - `BayesianOptimizationStrategy_WithTailPass_ShouldRespectTotalEvaluationBudget`
   - `BayesianOptimizationStrategy_ShouldNotEvaluateDuplicateCandidates`
@@ -191,7 +193,7 @@ Command:
 - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --configuration Debug`
 
 Result:
-- Passed: 54
+- Passed: 55
 - Failed: 0
 
 ### Stabilization fixes from new tests
