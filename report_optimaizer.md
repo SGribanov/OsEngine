@@ -943,3 +943,23 @@ After each optimizer-related change, update this file with:
 
 ### Risks / notes
 - Reduces mutable shared state and future race surface in single-bot test lifecycle.
+
+## Stabilization Update (2026-02-14) - Exception-Safe Server Testing Start In Executor TestBot
+### What changed
+- Wrapped `server.TestingStart()` in `OptimizerExecutor.TestBot(...)` with `try/catch`.
+- On start exception, method now performs deterministic cleanup:
+  - logs error with exception;
+  - clears/deletes bot (best-effort);
+  - removes optimizer server;
+  - disposes await object;
+  - returns `null`.
+
+### Files touched
+- `project/OsEngine/OsOptimizer/OptimizerExecutor.cs`
+
+### Validation
+- `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --configuration Debug`
+- Result: Passed 70 / Failed 0
+
+### Risks / notes
+- Prevents leaked single-bot test resources when server test start fails unexpectedly.

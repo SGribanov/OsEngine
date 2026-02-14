@@ -1058,7 +1058,26 @@ namespace OsEngine.OsOptimizer
                 return null;
             }
 
-            server.TestingStart();
+            try
+            {
+                server.TestingStart();
+            }
+            catch (Exception ex)
+            {
+                SendLogMessage("Single-bot test failed to start server testing: " + ex, LogMessageType.Error);
+                try
+                {
+                    bot.Clear();
+                    bot.Delete();
+                }
+                catch
+                {
+                    // ignored
+                }
+                ServerMaster.RemoveOptimizerServer(server);
+                awaitObj.Dispose();
+                return null;
+            }
 
             int countSameTime = 0;
             DateTime timeServerLast = DateTime.MinValue;
