@@ -3519,3 +3519,19 @@ After each optimizer-related change, update this file with:
 
 ### Risks / notes
 - No functional behavior change expected; reduces residual data-race risk for prime-worker activity flag under concurrent reads/writes.
+
+
+## Stabilization Update (2026-02-14) - Use `Volatile.Write` For Prime Worker Publication
+### What changed
+- Updated `Start(...)` in `OptimizerExecutor` to publish newly created prime worker thread reference via `Volatile.Write(ref _primeThreadWorker, primeWorker)` before `Start()`.
+- This aligns publication semantics with existing `Volatile.Read` in `IsPrimeWorkerActive()`.
+
+### Files touched
+- `project/OsEngine/OsOptimizer/OptimizerExecutor.cs`
+
+### Validation
+- `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --configuration Debug`
+- Result: Passed 70 / Failed 0
+
+### Risks / notes
+- No behavior change expected; improves memory-order consistency for concurrent worker-state observation.

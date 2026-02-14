@@ -121,10 +121,11 @@ namespace OsEngine.OsOptimizer
                     SendLogMessage("Optimizer start cleanup failed: previous server slots dispose. " + ex, LogMessageType.Error);
                 }
 
-                _primeThreadWorker = new Thread(PrimeThreadWorkerPlace);
-                _primeThreadWorker.Name = "OptimizerExecutorThread";
-                _primeThreadWorker.IsBackground = true;
-                _primeThreadWorker.Start();
+                Thread primeWorker = new Thread(PrimeThreadWorkerPlace);
+                primeWorker.Name = "OptimizerExecutorThread";
+                primeWorker.IsBackground = true;
+                Volatile.Write(ref _primeThreadWorker, primeWorker);
+                primeWorker.Start();
 
                 return true;
             }
