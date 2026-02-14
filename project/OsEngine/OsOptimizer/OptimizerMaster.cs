@@ -1188,8 +1188,16 @@ namespace OsEngine.OsOptimizer
             try
             {
                 await Task.Delay(2000);
+                OptimizerExecutor executor = _optimizerExecutor;
+                if (executor == null)
+                {
+                    SendLogMessage("Single-bot test canceled: optimizer executor became unavailable.", LogMessageType.Error);
+                    _resultBotAloneTest = null;
+                    return;
+                }
+
                 _resultBotAloneTest =
-                    _optimizerExecutor.TestBot(_fazeToTestAloneTest, _reportToTestAloneTest,
+                    executor.TestBot(_fazeToTestAloneTest, _reportToTestAloneTest,
                     StartProgram.IsTester, _awaitUiMasterAloneTest);
             }
             catch (Exception ex)

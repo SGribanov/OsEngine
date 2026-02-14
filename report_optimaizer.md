@@ -839,3 +839,19 @@ After each optimizer-related change, update this file with:
 
 ### Risks / notes
 - Improves recovery after rare completion-signal loss; may allow new test request while delayed background completion arrives later.
+
+## Stabilization Update (2026-02-14) - Executor Snapshot Guard In Async Single-Bot Runner
+### What changed
+- Hardened `RunAloneBotTestAsync()` against lifecycle race after initial delay.
+- Captures `_optimizerExecutor` into local snapshot and verifies it is not `null` before invoking `TestBot(...)`.
+- On missing executor, logs diagnostic message and exits async run safely.
+
+### Files touched
+- `project/OsEngine/OsOptimizer/OptimizerMaster.cs`
+
+### Validation
+- `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --configuration Debug`
+- Result: Passed 70 / Failed 0
+
+### Risks / notes
+- Prevents delayed single-bot task from dereferencing disposed/unavailable executor after UI-triggered wait window.
