@@ -101,6 +101,7 @@ Implemented and committed:
 92. Maintainability: unified out-of-sample skip compensation paths via parameterized helper (`CompensateSkippedOutOfSampleSlot(releaseServerSlot)`), reducing duplication and keeping slot/countdown semantics consistent.
 93. Stabilization: added explicit precondition guards in `BotConfigurator.CreateAndConfigureBot` for `server == null` and `BotToTest == null` with clear error diagnostics and safe early return.
 94. Stabilization: added regression coverage for `BotConfigurator` precondition guards (`server == null`, `BotToTest == null`).
+95. Stabilization: added compensation for unscheduled out-of-sample tail when slot acquisition fails mid-loop, preventing leftover `CountdownEvent` debt for not-started items.
 
 ## Commits
 - `b1e5eabe3` — `Optimizer: persist Phase1 extraction and wiring state`

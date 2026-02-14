@@ -374,6 +374,7 @@ namespace OsEngine.OsOptimizer
 
                 if (!TryAcquireServerSlot())
                 {
+                    CompensateUnscheduledOutOfSampleItems(inSampleReports.Count - i);
                     WaitCurrentPhaseToComplete();
                     TestReadyEvent?.Invoke(ReportsToFazes);
                     _primeThreadWorker = null;
@@ -427,6 +428,26 @@ namespace OsEngine.OsOptimizer
             catch
             {
                 // ignored
+            }
+        }
+
+        private void CompensateUnscheduledOutOfSampleItems(int unscheduledCount)
+        {
+            if (unscheduledCount <= 0)
+            {
+                return;
+            }
+
+            CountdownEvent phase = _phaseCompletion;
+            if (phase == null)
+            {
+                return;
+            }
+
+            while (unscheduledCount > 0 && !phase.IsSet)
+            {
+                phase.Signal();
+                unscheduledCount--;
             }
         }
 
