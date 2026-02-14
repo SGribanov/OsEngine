@@ -1465,13 +1465,18 @@ namespace OsEngine.OsOptimizer
 
         private bool SafeTrySignalPhase(CountdownEvent phase)
         {
-            if (phase == null || phase.IsSet)
+            if (phase == null)
             {
                 return false;
             }
 
             try
             {
+                if (phase.IsSet)
+                {
+                    return false;
+                }
+
                 phase.Signal();
                 return true;
             }

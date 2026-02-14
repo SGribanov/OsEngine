@@ -2339,3 +2339,20 @@ After each optimizer-related change, update this file with:
 - No normal-path behavior change; removes dependence on cancellation-registration race for completion state publication.
 
 
+
+## Stabilization Update (2026-02-14) - Guard Phase IsSet Access In SafeTrySignalPhase
+### What changed
+- Updated `SafeTrySignalPhase(...)` in `OptimizerExecutor`.
+- Moved `phase.IsSet` check inside `try` block.
+- Method now avoids potential unhandled `ObjectDisposedException` from `IsSet` access during concurrent disposal.
+
+### Files touched
+- `project/OsEngine/OsOptimizer/OptimizerExecutor.cs`
+
+### Validation
+- `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --configuration Debug`
+- Result: Passed 70 / Failed 0
+
+### Risks / notes
+- No normal-path behavior change; improves race-safety for phase signaling under concurrent shutdown/dispose.
+
