@@ -738,3 +738,22 @@ After each optimizer-related change, update this file with:
 
 ### Risks / notes
 - No behavior change; improves operator visibility of ignored concurrent test requests.
+
+## Stabilization Update (2026-02-14) - Null Parameter Guard In Executor TestBot
+### What changed
+- Added defensive guard in `OptimizerExecutor.TestBot(...)` for `reportToBot.GetParameters() == null`.
+- On null parameters, method now:
+  - logs error;
+  - removes created optimizer server;
+  - disposes await object;
+  - returns `null`.
+
+### Files touched
+- `project/OsEngine/OsOptimizer/OptimizerExecutor.cs`
+
+### Validation
+- `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --configuration Debug`
+- Result: Passed 70 / Failed 0
+
+### Risks / notes
+- Prevents null-parameter path from flowing into bot creation and leaving partially initialized single-test resources.

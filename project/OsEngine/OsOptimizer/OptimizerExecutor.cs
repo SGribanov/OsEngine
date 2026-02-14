@@ -985,6 +985,13 @@ namespace OsEngine.OsOptimizer
             OptimizerServer server = CreateNewServer(reportFaze, false);
 
             List<IIStrategyParameter> parametrs = reportToBot.GetParameters();
+            if (parametrs == null)
+            {
+                SendLogMessage("Single-bot test skipped due to null parameter set.", LogMessageType.Error);
+                ServerMaster.RemoveOptimizerServer(server);
+                awaitObj.Dispose();
+                return null;
+            }
 
             BotPanel bot = CreateNewBot(botName,
                 parametrs, parametrs, server, startProgram);
