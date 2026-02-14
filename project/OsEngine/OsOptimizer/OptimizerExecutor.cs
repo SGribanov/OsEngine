@@ -693,7 +693,7 @@ namespace OsEngine.OsOptimizer
             }
             catch (Exception ex)
             {
-                completion.TrySetException(ex);
+                SafeTrySetException(completion, ex);
                 SendLogMessage("Optimizer evaluation start failed. " + ex, LogMessageType.Error);
                 try
                 {
@@ -1235,6 +1235,18 @@ namespace OsEngine.OsOptimizer
             catch (Exception ex)
             {
                 SendLogMessage("Optimizer evaluation completion result publish failed: " + ex, LogMessageType.Error);
+            }
+        }
+
+        private void SafeTrySetException(TaskCompletionSource<OptimizerReport> completion, Exception exception)
+        {
+            try
+            {
+                completion?.TrySetException(exception);
+            }
+            catch (Exception ex)
+            {
+                SendLogMessage("Optimizer evaluation completion exception publish failed: " + ex, LogMessageType.Error);
             }
         }
 

@@ -1391,3 +1391,19 @@ After each optimizer-related change, update this file with:
 
 ### Risks / notes
 - Prevents callback-side exceptions during evaluation cancellation propagation from leaking into scheduler path.
+
+## Stabilization Update (2026-02-14) - Safe Exception Publish Helper In Evaluation Startup
+### What changed
+- Added `SafeTrySetException(TaskCompletionSource<OptimizerReport>, Exception)` helper in `OptimizerExecutor`.
+- Replaced direct `completion.TrySetException(ex)` in `StartNewBotForEvaluationAsync(...)` with safe helper usage.
+- Helper catches and logs exception-publication failures.
+
+### Files touched
+- `project/OsEngine/OsOptimizer/OptimizerExecutor.cs`
+
+### Validation
+- `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --configuration Debug`
+- Result: Passed 70 / Failed 0
+
+### Risks / notes
+- Prevents rare exception-publication failures from disrupting evaluation startup error handling.
