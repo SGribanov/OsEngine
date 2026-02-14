@@ -4980,3 +4980,46 @@ After each optimizer-related change, update this file with:
 
 ### Risks / notes
 - No intended behavior change; keeps Bayesian runtime guard logic localized and easier to audit.
+
+## Documentation Update (2026-02-14) - Bayesian Optimization Parameters Guide
+### What changed
+- Added standalone documentation file in repo root:
+  - `bayesian_optimization_parameters.md`
+- Documented for Bayesian optimizer:
+  - parameter meaning;
+  - valid ranges and runtime/UI constraints;
+  - defaults from `OptimizerSettings`;
+  - acquisition mode behavior (`Ucb`, `ExpectedImprovement`, `Greedy`);
+  - practical starting presets.
+
+### Files touched
+- `bayesian_optimization_parameters.md`
+- `report_optimaizer.md`
+
+### Validation
+- Documentation-only change.
+
+### Risks / notes
+- No code/runtime behavior change.
+
+## UI Update (2026-02-14) - Move Optimization/Bayesian Controls To Separate Tab
+### What changed
+- Reworked `OptimizerUi` layout to avoid overlapping controls in `Fazes` view.
+- Moved optimization and Bayesian controls from `TabItemFazes` into new tab `TabItemOptimization`:
+  - method/objective/direction;
+  - last in-sample;
+  - acquisition mode;
+  - initial samples, max iterations, batch size;
+  - kappa, tail share, tail pass.
+- Left `Fazes` tab focused on faze timeline/scheme and walk-forward table only.
+
+### Files touched
+- `project/OsEngine/OsOptimizer/OptimizerUi.xaml`
+- `report_optimaizer.md`
+
+### Validation
+- `dotnet build project/OsEngine/OsEngine.csproj --configuration Debug`
+- Result: Build succeeded, warnings 0, errors 0
+
+### Risks / notes
+- UI-only change; control names preserved, code-behind bindings/events remain intact.
