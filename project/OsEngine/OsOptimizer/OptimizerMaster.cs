@@ -1129,6 +1129,12 @@ namespace OsEngine.OsOptimizer
 
         public BotPanel TestBot(OptimizerFazeReport faze, OptimizerReport report)
         {
+            if (_optimizerExecutor == null)
+            {
+                SendLogMessage("Single-bot test skipped: optimizer executor is not initialized.", LogMessageType.Error);
+                return null;
+            }
+
             if (faze == null || report == null)
             {
                 SendLogMessage("Single-bot test skipped due to null faze/report input.", LogMessageType.Error);

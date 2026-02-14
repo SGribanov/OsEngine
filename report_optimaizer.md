@@ -806,3 +806,18 @@ After each optimizer-related change, update this file with:
 
 ### Risks / notes
 - Prevents null-phase dereference in single-bot test loop condition (`reportFaze.Faze.TimeEnd`).
+
+## Stabilization Update (2026-02-14) - Executor Initialization Guard In Master TestBot
+### What changed
+- Added early guard in `OptimizerMaster.TestBot(...)` for `_optimizerExecutor == null`.
+- If executor is not initialized, method logs error and returns `null` without starting async single-bot workflow.
+
+### Files touched
+- `project/OsEngine/OsOptimizer/OptimizerMaster.cs`
+
+### Validation
+- `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --configuration Debug`
+- Result: Passed 70 / Failed 0
+
+### Risks / notes
+- Prevents null-executor failures on edge lifecycle transitions (startup/disposal races).
