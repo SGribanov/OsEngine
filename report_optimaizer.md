@@ -2766,3 +2766,21 @@ After each optimizer-related change, update this file with:
 ### Risks / notes
 - No functional behavior change; small readability/maintenance cleanup.
 
+
+## Stabilization Update (2026-02-14) - Snapshot OutOfSample Report List For Async Factory Loop
+### What changed
+- Updated `StartAsuncBotFactoryOutOfSample(...)` in `OptimizerExecutor`.
+- Added local list snapshot `reports = reportFiltered.Reports`.
+- Loop now iterates via local `reports` reference instead of repeated property dereference on `reportFiltered.Reports`.
+
+### Files touched
+- `project/OsEngine/OsOptimizer/OptimizerExecutor.cs`
+
+### Validation
+- `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --configuration Debug`
+- Result: Passed 70 / Failed 0
+
+### Risks / notes
+- No functional behavior change; small readability/maintenance improvement and reduced repeated dereference noise.
+
+

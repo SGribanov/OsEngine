@@ -240,13 +240,14 @@ namespace OsEngine.OsOptimizer
                 return;
             }
 
+            List<OptimizerReport> reports = reportFiltered.Reports;
             List<string> botNames = new List<string>();
             HashSet<string> uniqueBotNames = new HashSet<string>(StringComparer.Ordinal);
             const string inSampleSuffix = " InSample";
 
-            for (int i = 0; i < reportFiltered.Reports.Count; i++)
+            for (int i = 0; i < reports.Count; i++)
             {
-                OptimizerReport sourceReport = reportFiltered.Reports[i];
+                OptimizerReport sourceReport = reports[i];
                 if (sourceReport == null)
                 {
                     SendLogMessage("Async bot factory start skipped (OutOfSample): source report is null at index " + i + ".", LogMessageType.Error);
