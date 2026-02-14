@@ -50,6 +50,11 @@ Implemented and committed:
   - Slot acquisition and phase waits now observe cancellation token and exit deterministically.
   - Connection wait path also checks cancellation token state.
 - Single-bot test loop now respects stop cancellation (`IsStopRequested`) to avoid unnecessary wait continuation after stop.
+- Added run-scope synchronization cleanup in `finally` of prime worker:
+  - dispose/reset `CountdownEvent`,
+  - dispose/reset `SemaphoreSlim`,
+  - dispose/reset `CancellationTokenSource`.
+- Replaced `Thread.Sleep(1000)` cadence in `TestBot` progression loop with cancellation-aware wait (`token.WaitHandle.WaitOne(1000)`).
 
 ### `OptEntity/AsyncBotFactory.cs`
 - Reworked from mutable shared lists + polling loops to:
