@@ -243,7 +243,14 @@ namespace OsEngine.OsOptimizer
                     continue;
                 }
 
-                string botName = reportFiltered.Reports[i].BotName.Replace(" InSample", "") + " OutOfSample";
+                string transformedBotName = reportFiltered.Reports[i].BotName.Replace(" InSample", "").Trim();
+                if (string.IsNullOrWhiteSpace(transformedBotName))
+                {
+                    SendLogMessage("Async bot factory start skipped (OutOfSample): transformed bot name is empty at index " + i + ".", LogMessageType.Error);
+                    continue;
+                }
+
+                string botName = transformedBotName + " OutOfSample";
                 botNames.Add(botName);
             }
 
