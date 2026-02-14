@@ -3419,3 +3419,20 @@ After each optimizer-related change, update this file with:
 
 ### Risks / notes
 - No functional behavior change expected; improves consistency of bot-name base index snapshots under concurrent server lifecycle activity.
+
+
+## Stabilization Update (2026-02-14) - Remove Premature Prime-Worker State Reset In OOS Early Exit
+### What changed
+- Updated `StartOptimizeFazeOutOfSample(...)` early-exit branch (unscheduled tail compensation path).
+- Removed direct `_primeThreadWorker = null` assignment from this branch.
+- Prime worker lifecycle flag now remains reset only in `PrimeThreadWorkerPlace()` `finally`.
+
+### Files touched
+- `project/OsEngine/OsOptimizer/OptimizerExecutor.cs`
+
+### Validation
+- `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --configuration Debug`
+- Result: Passed 70 / Failed 0
+
+### Risks / notes
+- Expected behavior is safer: avoids exposing false "idle" optimizer state while the prime thread is still unwinding.

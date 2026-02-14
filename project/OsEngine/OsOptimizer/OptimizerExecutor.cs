@@ -627,7 +627,6 @@ namespace OsEngine.OsOptimizer
                     }
                     WaitCurrentPhaseToComplete();
                     SafeInvokeTestReady(ReportsToFazes);
-                    _primeThreadWorker = null;
                     return;
                 }
 
