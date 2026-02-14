@@ -238,12 +238,14 @@ namespace OsEngine.OsOptimizer
 
                 int countBots = BotCountOneFaze(_parameters, _parametersOn);
 
-                int estimatedMaxTests = countBots * (iterationCount * 2);
+                long estimatedMaxTestsLong = (long)countBots * Math.Max(0, iterationCount) * 2L;
 
-                if (lastInSample)
+                if (lastInSample && estimatedMaxTestsLong > 0)
                 {
-                    estimatedMaxTests = estimatedMaxTests - countBots;
+                    estimatedMaxTestsLong -= countBots;
                 }
+
+                int estimatedMaxTests = (int)Math.Min(int.MaxValue, Math.Max(0L, estimatedMaxTestsLong));
 
                 SendLogMessage(OsLocalization.Optimizer.Message4 + estimatedMaxTests, LogMessageType.System);
 
