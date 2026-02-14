@@ -963,6 +963,7 @@ namespace OsEngine.OsOptimizer
         {
             if (_primeThreadWorker != null)
             {
+                awaitObj?.Dispose();
                 return null;
             }
 
@@ -986,6 +987,7 @@ namespace OsEngine.OsOptimizer
             {
                 SendLogMessage("Test over with error. A different robot is selected in the optimizer", LogMessageType.Error);
                 awaitObj.Dispose();
+                ServerMaster.RemoveOptimizerServer(server);
                 return null;
             }
 
@@ -995,6 +997,16 @@ namespace OsEngine.OsOptimizer
                 SendLogMessage(
                     OsLocalization.Optimizer.Message10,
                     LogMessageType.Error);
+                try
+                {
+                    bot.Clear();
+                    bot.Delete();
+                }
+                catch
+                {
+                    // ignored
+                }
+                ServerMaster.RemoveOptimizerServer(server);
                 awaitObj.Dispose();
                 return null;
             }
