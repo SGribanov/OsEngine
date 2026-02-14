@@ -142,7 +142,25 @@ namespace OsEngine.OsOptimizer
             SendLogMessage(OsLocalization.Optimizer.Message3, LogMessageType.System);
         }
 
-        private bool IsStopRequested => _stopCts != null && _stopCts.IsCancellationRequested;
+        private bool IsStopRequested => GetStopTokenOrNone().IsCancellationRequested;
+
+        private CancellationToken GetStopTokenOrNone()
+        {
+            CancellationTokenSource stopCts = _stopCts;
+            if (stopCts == null)
+            {
+                return CancellationToken.None;
+            }
+
+            try
+            {
+                return stopCts.Token;
+            }
+            catch (ObjectDisposedException)
+            {
+                return CancellationToken.None;
+            }
+        }
 
         #endregion
 
@@ -495,7 +513,7 @@ namespace OsEngine.OsOptimizer
 
             IOptimizationStrategy strategy = GetInSampleOptimizationStrategy(evaluator);
             List<OptimizerReport> reports =
-                strategy.OptimizeInSampleAsync(allParameters, parametersToOptimization, _stopCts?.Token ?? CancellationToken.None)
+                strategy.OptimizeInSampleAsync(allParameters, parametersToOptimization, GetStopTokenOrNone())
                     .GetAwaiter().GetResult();
 
             if (reports != null && reports.Count > 0)
@@ -936,7 +954,7 @@ namespace OsEngine.OsOptimizer
 
         private bool TryAcquireServerSlot()
         {
-            CancellationToken token = _stopCts?.Token ?? CancellationToken.None;
+            CancellationToken token = GetStopTokenOrNone();
             SemaphoreSlim slots = _serverSlots;
             if (slots == null)
             {
@@ -965,7 +983,7 @@ namespace OsEngine.OsOptimizer
 
         private void WaitCurrentPhaseToComplete()
         {
-            CancellationToken token = _stopCts?.Token ?? CancellationToken.None;
+            CancellationToken token = GetStopTokenOrNone();
             CountdownEvent phaseCompletion = _phaseCompletion;
 
             if (phaseCompletion == null)
@@ -1340,7 +1358,7 @@ namespace OsEngine.OsOptimizer
                     parametersOptimized,
                     server,
                     regime,
-                    _stopCts?.Token ?? CancellationToken.None);
+                    GetStopTokenOrNone());
             }
             catch (Exception ex)
             {
@@ -1396,7 +1414,7 @@ namespace OsEngine.OsOptimizer
                 return null;
             }
 
-            CancellationToken token = _stopCts?.Token ?? CancellationToken.None;
+            CancellationToken token = GetStopTokenOrNone();
 
             DateTime startTime = DateTime.Now;
 

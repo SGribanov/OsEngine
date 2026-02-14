@@ -3454,3 +3454,27 @@ After each optimizer-related change, update this file with:
 
 ### Risks / notes
 - Improves resilience for invalid phase sequencing configuration; prevents avoidable `IndexOutOfRange`-style failures in prime worker flow.
+
+
+## Stabilization Update (2026-02-14) - Centralize Safe Stop-Token Access
+### What changed
+- Added helper `GetStopTokenOrNone()` in `OptimizerExecutor`:
+  - returns current stop token from `_stopCts`;
+  - safely falls back to `CancellationToken.None` when token source is null/disposed.
+- Updated stop-token consumers to use the helper:
+  - `IsStopRequested`
+  - `StartOptimizeFazeInSample(...)` optimizer call
+  - `TryAcquireServerSlot()`
+  - `WaitCurrentPhaseToComplete()`
+  - `CreateNewBot(...)`
+  - `TestBot(...)`
+
+### Files touched
+- `project/OsEngine/OsOptimizer/OptimizerExecutor.cs`
+
+### Validation
+- `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --configuration Debug`
+- Result: Passed 70 / Failed 0
+
+### Risks / notes
+- No intended behavior change; reduces chance of `ObjectDisposedException` races during concurrent stop/cleanup timing.
