@@ -270,6 +270,12 @@ namespace OsEngine.OsOptimizer
 
                 _isClosed = true;
                 _progressPainterStop.Set();
+                CancellationTokenSource redactCts = Interlocked.Exchange(ref _stopRedactCts, null);
+                if (redactCts != null)
+                {
+                    redactCts.Cancel();
+                    redactCts.Dispose();
+                }
 
                 ComboBoxThreadsCount.SelectionChanged -= ComboBoxThreadsCount_SelectionChanged;
 
@@ -2102,16 +2108,43 @@ namespace OsEngine.OsOptimizer
 
             if (columnIndx == 0)
             {
-                Task.Run(StopRedactTableTask);
+                ScheduleStopRedactTableTask();
             }
         }
 
         private int _lastRowClickParamGridNum;
+        private CancellationTokenSource _stopRedactCts;
 
-        private async void StopRedactTableTask()
+        private async Task StopRedactTableTaskAsync(CancellationToken cancellationToken)
         {
-            await Task.Delay(700);
+            await Task.Delay(700, cancellationToken);
             StopRedactTableAction();
+        }
+
+        private void ScheduleStopRedactTableTask()
+        {
+            CancellationTokenSource previous = Interlocked.Exchange(
+                ref _stopRedactCts,
+                new CancellationTokenSource());
+
+            if (previous != null)
+            {
+                previous.Cancel();
+                previous.Dispose();
+            }
+
+            CancellationToken token = _stopRedactCts.Token;
+            _ = Task.Run(async () =>
+            {
+                try
+                {
+                    await StopRedactTableTaskAsync(token).ConfigureAwait(false);
+                }
+                catch (OperationCanceledException)
+                {
+                    // expected on fast repeated clicks
+                }
+            }, token);
         }
 
         private void StopRedactTableAction()

@@ -56,6 +56,7 @@ Implemented and committed:
 47. Stabilization: replaced fixed post-dialog sleep in single-bot test path (`OptimizerMaster.TestBot`) with explicit completion signal wait (`ManualResetEventSlim`) to remove race-prone timing dependency.
 48. Stabilization: added regression coverage for comma-decimal parsing of `BayesianAcquisitionKappa` from settings file (`0,9` -> `0.9m`).
 49. Stabilization/UI responsiveness: removed fixed `Thread.Sleep(200)` from `OptimizerUi` constructor to avoid blocking UI thread during startup.
+50. Stabilization/UI responsiveness: replaced unmanaged delayed parameter-grid reselection tasks with cancellable debounced scheduling (`CancellationTokenSource`) to prevent task buildup on rapid clicks.
 
 ## Commits
 - `b1e5eabe3` — `Optimizer: persist Phase1 extraction and wiring state`
