@@ -111,6 +111,7 @@ Implemented and committed:
 102. Stabilization: extended per-item skip compensation guard to handle `InvalidOperationException` on `CountdownEvent.Signal()` (over-signal race) in `CompensateSkippedOutOfSampleSlot(...)`.
 103. Operability: added explicit progress callback for empty out-of-sample phase (`no valid source reports`) to keep UI progress state in sync even when no bots are scheduled.
 104. Stabilization: upgraded `AsyncBotFactory.CancelAllWaiters()` to drain the waiter map fully (loop until stable empty) for more reliable cleanup under concurrent add/remove races.
+105. Stabilization: added bounded-pass safeguard and diagnostics to `AsyncBotFactory.CancelAllWaiters()` to prevent potential infinite cleanup loop under sustained concurrent waiter additions.
 
 ## Commits
 - `b1e5eabe3` — `Optimizer: persist Phase1 extraction and wiring state`

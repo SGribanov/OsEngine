@@ -175,7 +175,9 @@ namespace OsEngine.OsOptimizer.OptimizerEntity
 
         private void CancelAllWaiters()
         {
-            while (true)
+            const int maxPasses = 8;
+
+            for (int pass = 0; pass < maxPasses; pass++)
             {
                 bool removedAny = false;
 
@@ -192,6 +194,13 @@ namespace OsEngine.OsOptimizer.OptimizerEntity
                 {
                     return;
                 }
+            }
+
+            if (_botWaiters.Count > 0)
+            {
+                SendLogMessage(
+                    "AsyncBotFactory cleanup reached max passes with pending waiters: " + _botWaiters.Count,
+                    LogMessageType.Error);
             }
         }
 
