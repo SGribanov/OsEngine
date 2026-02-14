@@ -77,6 +77,7 @@ Implemented and committed:
 68. Stabilization: hardened `AsyncBotFactory` shutdown paths (worker stop/process-off) by canceling all pending waiters before worker exit.
 69. Stabilization: improved `AsyncBotFactory.CancelAllWaiters` to cancel and remove waiter entries, preventing stale waiter accumulation after shutdown/error paths.
 70. Stabilization: added pre-canceled-token fast path in `AsyncBotFactory.GetBot` to avoid unnecessary waiter registration/work during stop-cancel flow.
+71. Stabilization: added explicit coverage for `BayesianOptimizationStrategy.EstimateBotCount` with no optimized parameters (`all flags false`) to lock current zero-candidate contract.
 
 ## Commits
 - `b1e5eabe3` — `Optimizer: persist Phase1 extraction and wiring state`
@@ -200,6 +201,7 @@ Added tests:
   - `BayesianOptimizationStrategy_EstimateBotCount_WithMismatchedFlags_ShouldThrowArgumentException`
   - `BayesianOptimizationStrategy_EstimateBotCount_ShouldRespectBudgetCap`
   - `BayesianOptimizationStrategy_EstimateBotCount_WhenBudgetExceedsGrid_ShouldReturnGridSize`
+  - `BayesianOptimizationStrategy_EstimateBotCount_WithNoOptimizedFlags_ShouldReturnZero`
   - `BayesianAcquisitionPolicy_NegativeKappa_ShouldBeTreatedAsZero`
   - `BayesianAcquisitionPolicy_InvalidCandidates_ShouldFallbackToSelectorPath`
   - `BayesianAcquisitionPolicy_NullEvaluated_ShouldTreatAsEmptySet`
@@ -220,7 +222,7 @@ Command:
 - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --configuration Debug`
 
 Result:
-- Passed: 64
+- Passed: 65
 - Failed: 0
 
 ### Stabilization fixes from new tests

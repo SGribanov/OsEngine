@@ -557,6 +557,32 @@ public class OptimizerRefactorTests
     }
 
     [Fact]
+    public void BayesianOptimizationStrategy_EstimateBotCount_WithNoOptimizedFlags_ShouldReturnZero()
+    {
+        ParameterIterator iterator = new ParameterIterator();
+        BayesianOptimizationStrategy strategy = new BayesianOptimizationStrategy(
+            iterator, botEvaluator: null, maxParallel: 1,
+            objectiveMetric: SortBotsType.TotalProfit,
+            objectiveDirection: ObjectiveDirectionType.Maximize,
+            initialSamples: 20, maxIterations: 50, batchSize: 2,
+            acquisitionMode: BayesianAcquisitionModeType.Ucb,
+            acquisitionKappa: 0.25m,
+            useExploitationTailPass: true,
+            tailSharePercent: 20);
+
+        List<IIStrategyParameter> allParameters = new List<IIStrategyParameter>
+        {
+            new StrategyParameterInt("A", 1, 1, 4, 1),
+            new StrategyParameterInt("B", 1, 1, 4, 1)
+        };
+        List<bool> parametersToOptimization = new List<bool> { false, false };
+
+        int estimated = strategy.EstimateBotCount(allParameters, parametersToOptimization);
+
+        Assert.Equal(0, estimated);
+    }
+
+    [Fact]
     public async Task BayesianOptimizationStrategy_OptimizeInSampleAsync_WithNullFlags_ShouldThrowArgumentNullException()
     {
         ParameterIterator iterator = new ParameterIterator();
