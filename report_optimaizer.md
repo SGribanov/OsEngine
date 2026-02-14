@@ -2803,3 +2803,21 @@ After each optimizer-related change, update this file with:
 ### Risks / notes
 - Behavior change only for malformed/edge-case inputs where source already includes target phase suffix; avoids duplicate suffix artifacts in queued bot names.
 
+
+## Stabilization Update (2026-02-14) - Normalize InSample Name Suffix Append Semantics
+### What changed
+- Updated in-sample bot name construction in `StartAsuncBotFactoryInSample(...)`.
+- Name is now built from base (`"<server> OpT"`) plus guarded suffix append logic:
+  - append normalized phase suffix only if base name does not already end with it.
+- This keeps suffix-append behavior consistent with out-of-sample naming safeguards.
+
+### Files touched
+- `project/OsEngine/OsOptimizer/OptimizerExecutor.cs`
+
+### Validation
+- `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --configuration Debug`
+- Result: Passed 70 / Failed 0
+
+### Risks / notes
+- No functional behavior change expected for current input shape; aligns naming logic and avoids accidental duplicate suffixes in edge extensions.
+

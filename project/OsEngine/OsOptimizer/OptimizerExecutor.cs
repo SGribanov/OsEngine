@@ -196,7 +196,11 @@ namespace OsEngine.OsOptimizer
 
             for (int i = 0; i < botCount; i++)
             {
-                string botName = (startServerIndex + i) + " OpT " + normalizedFaze;
+                string botNameBase = (startServerIndex + i) + " OpT";
+                string fazeSuffix = " " + normalizedFaze;
+                string botName = botNameBase.EndsWith(fazeSuffix, StringComparison.Ordinal)
+                    ? botNameBase
+                    : botNameBase + fazeSuffix;
                 if (!uniqueBotNames.Add(botName))
                 {
                     SendLogMessage("Async bot factory start skipped duplicate bot name (InSample): " + botName + ".", LogMessageType.Error);
