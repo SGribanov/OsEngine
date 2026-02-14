@@ -1814,10 +1814,14 @@ public class OptimizerRefactorTests
     {
         AsyncBotFactory factory = new AsyncBotFactory();
 
+        var byNullType = factory.GetBot(null, "bot");
+        var byNullName = factory.GetBot("type", null);
         var byEmptyType = factory.GetBot("", "bot");
         var byEmptyName = factory.GetBot("type", "");
         var byWhitespace = factory.GetBot(" ", "   ");
 
+        Assert.Null(byNullType);
+        Assert.Null(byNullName);
         Assert.Null(byEmptyType);
         Assert.Null(byEmptyName);
         Assert.Null(byWhitespace);
