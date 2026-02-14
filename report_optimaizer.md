@@ -4909,3 +4909,26 @@ After each optimizer-related change, update this file with:
 
 ### Risks / notes
 - No intended behavior change; reduces duplicated validation branches and keeps runtime enum checks centralized.
+
+## Stabilization Update (2026-02-14) - Snapshot Strategy Identity in Single-Bot Test Path
+### What changed
+- In `GetInSampleOptimizationStrategy(...)`:
+  - captured `_master.ThreadsCount` into local `threadsCount` before validation;
+  - reused snapshot for diagnostic + `parallel` factory argument.
+- In `TestBot(...)`:
+  - captured `_master.StrategyName` and `_master.IsScript` into local snapshots;
+  - validated and used snapshots when enqueuing bot creation in async factory.
+- This removes repeated mutable `_master` reads between validation and usage in hot runtime path.
+
+### Files touched
+- `project/OsEngine/OsOptimizer/OptimizerExecutor.cs`
+- `report_optimaizer.md`
+
+### Validation
+- `dotnet build project/OsEngine/OsEngine.csproj --configuration Debug`
+- Result: Build succeeded, warnings 0, errors 0
+- `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --configuration Debug`
+- Result: Passed 70 / Failed 0
+
+### Risks / notes
+- No intended behavior change; improves runtime consistency under concurrent settings mutations.

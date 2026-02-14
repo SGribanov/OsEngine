@@ -1035,16 +1035,17 @@ namespace OsEngine.OsOptimizer
                 return null;
             }
 
-            if (_master.ThreadsCount <= 0)
+            int threadsCount = _master.ThreadsCount;
+            if (threadsCount <= 0)
             {
                 SendLogMessage(
                     "Optimizer strategy creation skipped: threads count is invalid at runtime (value " +
-                    _master.ThreadsCount + ").",
+                    threadsCount + ").",
                     LogMessageType.Error);
                 return null;
             }
 
-            int parallel = _master.ThreadsCount;
+            int parallel = threadsCount;
 
             IOptimizationStrategy strategy = null;
             string infoMessage = null;
@@ -2098,7 +2099,10 @@ namespace OsEngine.OsOptimizer
                 return null;
             }
 
-            if (!HasText(_master.StrategyName))
+            string strategyName = _master.StrategyName;
+            bool isScript = _master.IsScript;
+
+            if (!HasText(strategyName))
             {
                 SendLogMessage("Single-bot test skipped: strategy name is not set.", LogMessageType.Error);
                 SafeDisposeAwaitObject(awaitObj);
@@ -2108,7 +2112,7 @@ namespace OsEngine.OsOptimizer
             List<string> names = new List<string> { botName };
             try
             {
-                _asyncBotFactory.CreateNewBots(names, _master.StrategyName, _master.IsScript, startProgram);
+                _asyncBotFactory.CreateNewBots(names, strategyName, isScript, startProgram);
             }
             catch (Exception ex)
             {
