@@ -1724,3 +1724,21 @@ After each optimizer-related change, update this file with:
 
 ### Risks / notes
 - Prevents null dereference on `sources[i].TabType` during server bootstrap when tabs list contains null gaps.
+
+## Stabilization Update (2026-02-14) - Missing Security Guard In CreateNewServer Tab Binding
+### What changed
+- Added `secToStart == null` guards before `GetDataToSecurity(...)` calls in all tab binding branches:
+  - `BotTabSimple`;
+  - `BotTabIndex`;
+  - `BotTabScreener`.
+- Missing securities are now skipped with explicit error logs including missing security name.
+
+### Files touched
+- `project/OsEngine/OsOptimizer/OptimizerExecutor.cs`
+
+### Validation
+- `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --configuration Debug`
+- Result: Passed 70 / Failed 0
+
+### Risks / notes
+- Prevents passing null security references into optimizer server data binding path.

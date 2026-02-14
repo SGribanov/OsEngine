@@ -865,6 +865,11 @@ namespace OsEngine.OsOptimizer
 
                     Security secToStart =
                     _master.Storage.Securities.Find(s => s.Name == simple.Connector.SecurityName);
+                    if (secToStart == null)
+                    {
+                        SendLogMessage("CreateNewServer skipped security bind: not found '" + simple.Connector.SecurityName + "'.", LogMessageType.Error);
+                        continue;
+                    }
 
                     server.GetDataToSecurity(secToStart, simple.Connector.TimeFrame, report.Faze.TimeStart,
                         report.Faze.TimeEnd);
@@ -877,6 +882,11 @@ namespace OsEngine.OsOptimizer
                     {
                         Security secToStart =
                           _master.Storage.Securities.Find(s => s.Name == index.Tabs[i2].SecurityName);
+                        if (secToStart == null)
+                        {
+                            SendLogMessage("CreateNewServer skipped security bind: not found '" + index.Tabs[i2].SecurityName + "'.", LogMessageType.Error);
+                            continue;
+                        }
 
                         server.GetDataToSecurity(secToStart, index.Tabs[i2].TimeFrame, report.Faze.TimeStart,
                             report.Faze.TimeEnd);
@@ -890,6 +900,11 @@ namespace OsEngine.OsOptimizer
                     {
                         Security secToStart =
                           _master.Storage.Securities.Find(s => s.Name == screener.Tabs[i2].Connector.SecurityName);
+                        if (secToStart == null)
+                        {
+                            SendLogMessage("CreateNewServer skipped security bind: not found '" + screener.Tabs[i2].Connector.SecurityName + "'.", LogMessageType.Error);
+                            continue;
+                        }
 
                         server.GetDataToSecurity(secToStart, screener.Tabs[i2].Connector.TimeFrame, report.Faze.TimeStart,
                             report.Faze.TimeEnd);
