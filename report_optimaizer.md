@@ -70,6 +70,7 @@ Implemented and committed:
 61. Stabilization: hardened `AsyncBotFactory.CreateNewBots` with `botType` guard (`null/empty/whitespace`) to prevent invalid keying and queue churn.
 62. Stabilization: reset `BayesianOptimizationStrategy.LastTailBudgetPlanned` at start of each run to avoid stale diagnostics after early-return paths (e.g., pre-canceled token).
 63. Stabilization: added explicit null-bot guard in `BotConfigurator.CreateAndConfigureBot` after async factory retrieval to avoid noisy `NullReferenceException` on cancellation/error paths.
+64. Stabilization: added regression coverage for `BotConfigurator.CreateAndConfigureBot` null-factory-result path to ensure safe null return without exception.
 
 ## Commits
 - `b1e5eabe3` — `Optimizer: persist Phase1 extraction and wiring state`
@@ -182,6 +183,7 @@ Added tests:
   - `AsyncBotFactory_GetBot_WithInvalidKeys_ShouldReturnNull`
   - `AsyncBotFactory_CreateNewBots_WithInvalidInput_ShouldNotThrow`
   - `AsyncBotFactory_GetBot_WithCanceledToken_ShouldReturnNull`
+  - `BotConfigurator_CreateAndConfigureBot_WhenFactoryReturnsNull_ShouldReturnNull`
   - `BayesianOptimizationStrategy_WithTailPass_ShouldRespectTotalEvaluationBudget`
   - `BayesianOptimizationStrategy_ShouldNotEvaluateDuplicateCandidates`
   - `BruteForceStrategy_OptimizeInSampleAsync_WithMismatchedFlags_ShouldThrowArgumentException`
@@ -210,7 +212,7 @@ Command:
 - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --configuration Debug`
 
 Result:
-- Passed: 61
+- Passed: 62
 - Failed: 0
 
 ### Stabilization fixes from new tests

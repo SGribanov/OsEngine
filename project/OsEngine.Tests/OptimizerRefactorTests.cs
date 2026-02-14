@@ -8,6 +8,7 @@ using OsEngine.Entity;
 using OsEngine.OsOptimizer;
 using OsEngine.OsOptimizer.OptimizerEntity;
 using OsEngine.OsOptimizer.OptEntity;
+using OsEngine.OsTrader.Panels.Tab.Internal;
 using Xunit;
 
 namespace OsEngine.Tests;
@@ -1745,6 +1746,38 @@ public class OptimizerRefactorTests
         var bot = factory.GetBot("type", "bot", cts.Token);
 
         Assert.Null(bot);
+    }
+
+    [Fact]
+    public void BotConfigurator_CreateAndConfigureBot_WhenFactoryReturnsNull_ShouldReturnNull()
+    {
+        lock (SettingsFileLock)
+        {
+            using SettingsFileScope _ = new SettingsFileScope();
+
+            OptimizerSettings settings = new OptimizerSettings
+            {
+                StrategyName = string.Empty
+            };
+            AsyncBotFactory factory = new AsyncBotFactory();
+            BotManualControl manualControl = new BotManualControl("test_manual", null, StartProgram.IsOsOptimizer);
+            BotConfigurator configurator = new BotConfigurator(settings, factory, manualControl);
+
+            Exception ex = Record.Exception(() =>
+            {
+                var bot = configurator.CreateAndConfigureBot(
+                    botName: "bot",
+                    parameters: new List<IIStrategyParameter>(),
+                    parametersOptimized: null,
+                    server: null,
+                    regime: StartProgram.IsOsOptimizer,
+                    cancellationToken: CancellationToken.None);
+
+                Assert.Null(bot);
+            });
+
+            Assert.Null(ex);
+        }
     }
 
     private sealed class SettingsFileScope : IDisposable
