@@ -54,6 +54,8 @@ namespace OsEngine.OsOptimizer
         private readonly ConcurrentDictionary<int, TaskCompletionSource<OptimizerReport>> _pendingEvaluationByServer =
             new ConcurrentDictionary<int, TaskCompletionSource<OptimizerReport>>();
 
+        private readonly object _testBotsTimeSync = new object();
+
         public bool Start(List<bool> parametersOn, List<IIStrategyParameter> parameters)
         {
             if (_primeThreadWorker != null)
@@ -72,7 +74,10 @@ namespace OsEngine.OsOptimizer
             _countAllServersMax = 0;
             _countAllServersEndTest = 0;
             _serverNum = 1;
-            _testBotsTime.Clear();
+            lock (_testBotsTimeSync)
+            {
+                _testBotsTime.Clear();
+            }
             _serverSlots = new SemaphoreSlim(Math.Max(1, _master.ThreadsCount), Math.Max(1, _master.ThreadsCount));
             _phaseCompletion = null;
 
@@ -1927,46 +1932,56 @@ namespace OsEngine.OsOptimizer
                     }
                 }
 
-                _testBotsTime.Add(testTime);
                 int threadsCount = Math.Max(1, _master?.ThreadsCount ?? 1);
+                TimeSpan? timeToEndValue = null;
 
-                if (_testBotsTime.Count >= threadsCount)
+                lock (_testBotsTimeSync)
                 {
-                    TimeSpan allTime = TimeSpan.Zero;
+                    _testBotsTime.Add(testTime);
 
-                    for (int i = 0; i < _testBotsTime.Count; i++)
+                    if (_testBotsTime.Count >= threadsCount)
                     {
-                        allTime = TimeSpan.FromMilliseconds(allTime.TotalMilliseconds + _testBotsTime[i].TotalMilliseconds + 1000);
-                    }
+                        TimeSpan allTime = TimeSpan.Zero;
 
-                    decimal secondsOnOneTest = Convert.ToDecimal(allTime.TotalSeconds / _testBotsTime.Count);
-
-                    int testsToEndCount = _countAllServersMax - _countAllServersEndTest;
-
-                    if (testsToEndCount < 0)
-                    {
-                        testsToEndCount = 0;
-                    }
-
-                    decimal secondsToEndAllTests = testsToEndCount * secondsOnOneTest;
-
-                    decimal secondsToEndDivideThreads = secondsToEndAllTests / threadsCount;
-
-                    TimeSpan timeToEnd = TimeSpan.FromSeconds(Convert.ToInt32(secondsToEndDivideThreads));
-
-                    Action<TimeSpan> etaHandler = TimeToEndChangeEvent;
-
-                    if (etaHandler != null
-                        && timeToEnd.TotalSeconds != 0)
-                    {
-                        try
+                        for (int i = 0; i < _testBotsTime.Count; i++)
                         {
-                            etaHandler(timeToEnd);
+                            allTime = TimeSpan.FromMilliseconds(allTime.TotalMilliseconds + _testBotsTime[i].TotalMilliseconds + 1000);
                         }
-                        catch (Exception ex)
+
+                        decimal secondsOnOneTest = Convert.ToDecimal(allTime.TotalSeconds / _testBotsTime.Count);
+
+                        int testsToEndCount = _countAllServersMax - _countAllServersEndTest;
+
+                        if (testsToEndCount < 0)
                         {
-                            SendLogMessage("Optimizer ETA event dispatch failed: " + ex, LogMessageType.Error);
+                            testsToEndCount = 0;
                         }
+
+                        decimal secondsToEndAllTests = testsToEndCount * secondsOnOneTest;
+
+                        decimal secondsToEndDivideThreads = secondsToEndAllTests / threadsCount;
+
+                        TimeSpan timeToEnd = TimeSpan.FromSeconds(Convert.ToInt32(secondsToEndDivideThreads));
+
+                        if (timeToEnd.TotalSeconds != 0)
+                        {
+                            timeToEndValue = timeToEnd;
+                        }
+                    }
+                }
+
+                Action<TimeSpan> etaHandler = TimeToEndChangeEvent;
+
+                if (etaHandler != null
+                    && timeToEndValue.HasValue)
+                {
+                    try
+                    {
+                        etaHandler(timeToEndValue.Value);
+                    }
+                    catch (Exception ex)
+                    {
+                        SendLogMessage("Optimizer ETA event dispatch failed: " + ex, LogMessageType.Error);
                     }
                 }
             }

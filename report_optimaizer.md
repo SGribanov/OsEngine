@@ -3249,3 +3249,21 @@ After each optimizer-related change, update this file with:
 
 ### Risks / notes
 - No functional behavior change expected; improves consistency and resilience under concurrent event subscription changes.
+
+
+## Stabilization Update (2026-02-14) - Synchronize `_testBotsTime` Access In End-Event ETA Path
+### What changed
+- Added dedicated lock object `_testBotsTimeSync` in `OptimizerExecutor`.
+- Wrapped `_testBotsTime.Clear()` in `Start(...)` with this lock.
+- Wrapped `_testBotsTime` add/read ETA aggregation logic in `server_TestingEndEvent(...)` with the same lock.
+- ETA value is now computed under lock and published outside lock via local snapshot to avoid holding lock during event callbacks.
+
+### Files touched
+- `project/OsEngine/OsOptimizer/OptimizerExecutor.cs`
+
+### Validation
+- `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --configuration Debug`
+- Result: Passed 70 / Failed 0
+
+### Risks / notes
+- No functional behavior change expected; removes race conditions in concurrent end-event ETA aggregation.
