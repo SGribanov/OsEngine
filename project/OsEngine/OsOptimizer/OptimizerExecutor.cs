@@ -1239,6 +1239,36 @@ namespace OsEngine.OsOptimizer
             }
         }
 
+        private void SafeLoadBotToLastFaze(BotPanel bot)
+        {
+            if (bot == null)
+            {
+                return;
+            }
+
+            try
+            {
+                if (ReportsToFazes == null || ReportsToFazes.Count == 0)
+                {
+                    SendLogMessage("Optimizer report load skipped: faze collection is empty.", LogMessageType.Error);
+                    return;
+                }
+
+                OptimizerFazeReport lastFaze = ReportsToFazes[ReportsToFazes.Count - 1];
+                if (lastFaze == null)
+                {
+                    SendLogMessage("Optimizer report load skipped: last faze is null.", LogMessageType.Error);
+                    return;
+                }
+
+                lastFaze.Load(bot);
+            }
+            catch (Exception ex)
+            {
+                SendLogMessage("Optimizer report load to last faze failed: " + ex, LogMessageType.Error);
+            }
+        }
+
         #endregion
 
         #region Server performing optimization
@@ -1310,7 +1340,7 @@ namespace OsEngine.OsOptimizer
                     }
                     else
                     {
-                        ReportsToFazes[ReportsToFazes.Count - 1].Load(bot);
+                        SafeLoadBotToLastFaze(bot);
                     }
                 }
 
