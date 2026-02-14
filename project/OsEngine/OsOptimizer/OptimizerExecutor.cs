@@ -89,6 +89,12 @@ namespace OsEngine.OsOptimizer
                 return false;
             }
 
+            if (string.IsNullOrWhiteSpace(_master.StrategyName))
+            {
+                SendLogMessage("Optimizer start skipped: strategy name is empty.", LogMessageType.Error);
+                return false;
+            }
+
             if (parametersOn == null)
             {
                 SendLogMessage("Optimizer start skipped: parametersOn is null.", LogMessageType.Error);
