@@ -2251,3 +2251,20 @@ After each optimizer-related change, update this file with:
 ### Risks / notes
 - No behavior change; improves diagnostics for server list correlation drift at completion time.
 
+
+## Stabilization Update (2026-02-14) - Harden End-Event ETA Against Missing/Zero Threads Count
+### What changed
+- Updated `server_TestingEndEvent(...)` in `OptimizerExecutor`.
+- Added normalized `threadsCount = Math.Max(1, _master?.ThreadsCount ?? 1)` for ETA calculations.
+- Replaced direct `_master.ThreadsCount` usage in threshold check and division with guarded `threadsCount`.
+
+### Files touched
+- `project/OsEngine/OsOptimizer/OptimizerExecutor.cs`
+
+### Validation
+- `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --configuration Debug`
+- Result: Passed 70 / Failed 0
+
+### Risks / notes
+- No normal-path behavior change; prevents null-reference and divide-by-zero failures in completion-time estimation path.
+

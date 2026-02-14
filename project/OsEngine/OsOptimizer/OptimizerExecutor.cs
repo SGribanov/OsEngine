@@ -1750,8 +1750,9 @@ namespace OsEngine.OsOptimizer
                 }
 
                 _testBotsTime.Add(testTime);
+                int threadsCount = Math.Max(1, _master?.ThreadsCount ?? 1);
 
-                if (_testBotsTime.Count >= _master.ThreadsCount)
+                if (_testBotsTime.Count >= threadsCount)
                 {
                     TimeSpan allTime = TimeSpan.Zero;
 
@@ -1771,7 +1772,7 @@ namespace OsEngine.OsOptimizer
 
                     decimal secondsToEndAllTests = testsToEndCount * secondsOnOneTest;
 
-                    decimal secondsToEndDivideThreads = secondsToEndAllTests / _master.ThreadsCount;
+                    decimal secondsToEndDivideThreads = secondsToEndAllTests / threadsCount;
 
                     TimeSpan timeToEnd = TimeSpan.FromSeconds(Convert.ToInt32(secondsToEndDivideThreads));
 
