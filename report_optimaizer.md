@@ -3822,3 +3822,24 @@ After each optimizer-related change, update this file with:
 
 ### Risks / notes
 - Behavior remains equivalent for valid phase sequences; reduces sensitivity to external mutations of public report collection during active run.
+
+
+## Stabilization Update (2026-02-14) - Synchronize Shared `ReportsToFazes` Access
+### What changed
+- Added dedicated lock `_reportsSync` in `OptimizerExecutor`.
+- Protected key shared-list operations with this lock:
+  - report list initialization in `PrimeThreadWorkerPlace()`;
+  - per-phase `ReportsToFazes.Add(...)` in InSample/OutOfSample branches;
+  - snapshot creation in `GetReportsSnapshotForPublish()`;
+  - last-faze resolution in `SafeLoadBotToLastFaze(...)`.
+- `SafeLoadBotToLastFaze(...)` now resolves `lastFaze` under lock and performs `lastFaze.Load(bot)` outside lock.
+
+### Files touched
+- `project/OsEngine/OsOptimizer/OptimizerExecutor.cs`
+
+### Validation
+- `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --configuration Debug`
+- Result: Passed 70 / Failed 0
+
+### Risks / notes
+- No intended behavior change; reduces race risk between prime-phase updates and server end-event report loading/publishing.

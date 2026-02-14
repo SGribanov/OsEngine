@@ -44,6 +44,7 @@ namespace OsEngine.OsOptimizer
         private readonly ParameterIterator _parameterIterator;
 
         private readonly BotConfigurator _botConfigurator;
+        private readonly object _reportsSync = new object();
 
         private SemaphoreSlim _serverSlots;
 
@@ -229,7 +230,10 @@ namespace OsEngine.OsOptimizer
         {
             try
             {
-                ReportsToFazes = new List<OptimizerFazeReport>();
+                lock (_reportsSync)
+                {
+                    ReportsToFazes = new List<OptimizerFazeReport>();
+                }
                 List<OptimizerFaze> fazesSnapshot = new List<OptimizerFaze>(_master.Fazes);
                 string strategyName = _master.StrategyName;
                 bool isScript = _master.IsScript;
@@ -279,7 +283,10 @@ namespace OsEngine.OsOptimizer
                         OptimizerFazeReport report = new OptimizerFazeReport();
                         report.Faze = currentFaze;
 
-                        ReportsToFazes.Add(report);
+                        lock (_reportsSync)
+                        {
+                            ReportsToFazes.Add(report);
+                        }
 
                         StartAsuncBotFactoryInSample(countBots, strategyName, isScript, "InSample");
 
@@ -303,7 +310,10 @@ namespace OsEngine.OsOptimizer
                         OptimizerFazeReport report = new OptimizerFazeReport();
                         report.Faze = currentFaze;
 
-                        ReportsToFazes.Add(report);
+                        lock (_reportsSync)
+                        {
+                            ReportsToFazes.Add(report);
+                        }
 
                         StartAsuncBotFactoryOutOfSample(inSampleReport, strategyName, isScript, "OutOfSample");
 
@@ -1916,13 +1926,18 @@ namespace OsEngine.OsOptimizer
 
             try
             {
-                if (ReportsToFazes == null || ReportsToFazes.Count == 0)
+                OptimizerFazeReport lastFaze;
+                lock (_reportsSync)
                 {
-                    SendLogMessage("Optimizer report load skipped: faze collection is empty.", LogMessageType.Error);
-                    return;
+                    if (ReportsToFazes == null || ReportsToFazes.Count == 0)
+                    {
+                        SendLogMessage("Optimizer report load skipped: faze collection is empty.", LogMessageType.Error);
+                        return;
+                    }
+
+                    lastFaze = ReportsToFazes[ReportsToFazes.Count - 1];
                 }
 
-                OptimizerFazeReport lastFaze = ReportsToFazes[ReportsToFazes.Count - 1];
                 if (lastFaze == null)
                 {
                     SendLogMessage("Optimizer report load skipped: last faze is null.", LogMessageType.Error);
@@ -2235,13 +2250,16 @@ namespace OsEngine.OsOptimizer
 
         private List<OptimizerFazeReport> GetReportsSnapshotForPublish()
         {
-            List<OptimizerFazeReport> reports = ReportsToFazes;
-            if (reports == null)
+            lock (_reportsSync)
             {
-                return new List<OptimizerFazeReport>();
-            }
+                List<OptimizerFazeReport> reports = ReportsToFazes;
+                if (reports == null)
+                {
+                    return new List<OptimizerFazeReport>();
+                }
 
-            return new List<OptimizerFazeReport>(reports);
+                return new List<OptimizerFazeReport>(reports);
+            }
         }
 
         private void SafeInvokePrimeProgress(int progressEnd, int progressMax)
