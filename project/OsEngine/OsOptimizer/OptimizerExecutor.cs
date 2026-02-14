@@ -284,6 +284,12 @@ namespace OsEngine.OsOptimizer
             SendLogMessage(OsLocalization.Optimizer.Message6, LogMessageType.System);
 
             List<OptimizerReport> inSampleReports = reportInSample?.Reports;
+            if (inSampleReports != null)
+            {
+                inSampleReports = inSampleReports
+                    .FindAll(r => r != null && !string.IsNullOrWhiteSpace(r.BotName));
+            }
+
             int outOfSampleBotsCount = inSampleReports?.Count ?? 0;
             _phaseCompletion = new CountdownEvent(outOfSampleBotsCount);
 
