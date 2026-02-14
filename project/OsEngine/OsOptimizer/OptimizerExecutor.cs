@@ -253,7 +253,7 @@ namespace OsEngine.OsOptimizer
                     _countAllServersMax += inSampleBotsCount;
                 }
 
-                PrimeProgressChangeEvent?.Invoke(_countAllServersEndTest, _countAllServersMax);
+                SafeInvokePrimeProgress(_countAllServersEndTest, _countAllServersMax);
             }
 
             // 2 проходим первую фазу, когда нужно обойти все варианты
@@ -352,13 +352,13 @@ namespace OsEngine.OsOptimizer
                     _countAllServersMax += outOfSampleBotsCount;
                 }
 
-                PrimeProgressChangeEvent?.Invoke(_countAllServersEndTest, _countAllServersMax);
+                SafeInvokePrimeProgress(_countAllServersEndTest, _countAllServersMax);
             }
 
             if (outOfSampleBotsCount == 0)
             {
                 SendLogMessage("OutOfSample has no valid source reports to process.", LogMessageType.System);
-                PrimeProgressChangeEvent?.Invoke(_countAllServersEndTest, _countAllServersMax);
+                SafeInvokePrimeProgress(_countAllServersEndTest, _countAllServersMax);
                 WaitCurrentPhaseToComplete();
                 return;
             }
@@ -498,14 +498,7 @@ namespace OsEngine.OsOptimizer
                 progressMax = _countAllServersMax;
             }
 
-            try
-            {
-                PrimeProgressChangeEvent?.Invoke(progressEnd, progressMax);
-            }
-            catch (Exception ex)
-            {
-                SendLogMessage("Optimizer prime progress event dispatch failed: " + ex, LogMessageType.Error);
-            }
+            SafeInvokePrimeProgress(progressEnd, progressMax);
         }
 
         private List<bool> _parametersOn;
@@ -1822,7 +1815,7 @@ namespace OsEngine.OsOptimizer
                 }
             }
 
-            PrimeProgressChangeEvent?.Invoke(progressEnd, progressMax);
+            SafeInvokePrimeProgress(progressEnd, progressMax);
 
             if (bot != null)
             {
@@ -1848,6 +1841,18 @@ namespace OsEngine.OsOptimizer
         public event Action<TimeSpan> TimeToEndChangeEvent;
 
         public event Action<List<OptimizerFazeReport>> TestReadyEvent;
+
+        private void SafeInvokePrimeProgress(int progressEnd, int progressMax)
+        {
+            try
+            {
+                PrimeProgressChangeEvent?.Invoke(progressEnd, progressMax);
+            }
+            catch (Exception ex)
+            {
+                SendLogMessage("Optimizer prime progress event dispatch failed: " + ex, LogMessageType.Error);
+            }
+        }
 
         private void SafeInvokeTestReady(List<OptimizerFazeReport> reports)
         {

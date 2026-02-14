@@ -2446,3 +2446,25 @@ After each optimizer-related change, update this file with:
 ### Risks / notes
 - No normal-path behavior change; prevents test-ready subscribers from aborting optimizer completion/early-exit paths.
 
+
+## Stabilization Update (2026-02-14) - Centralize Safe Prime Progress Event Dispatch
+### What changed
+- Added `SafeInvokePrimeProgress(int progressEnd, int progressMax)` helper in `OptimizerExecutor`.
+- Replaced all current direct/inline `PrimeProgressChangeEvent` invocations with helper usage in:
+  - in-sample phase start;
+  - out-of-sample phase start;
+  - out-of-sample zero-work branch;
+  - compensated progress path;
+  - server end-event tail.
+- Removed duplicated inline `try/catch` around prime progress dispatch in favor of shared helper.
+
+### Files touched
+- `project/OsEngine/OsOptimizer/OptimizerExecutor.cs`
+
+### Validation
+- `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --configuration Debug`
+- Result: Passed 70 / Failed 0
+
+### Risks / notes
+- No normal-path behavior change; standardizes subscriber-fault isolation for all prime progress notifications.
+
