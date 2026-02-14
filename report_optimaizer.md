@@ -1531,3 +1531,18 @@ After each optimizer-related change, update this file with:
 
 ### Risks / notes
 - Preserves race-safe behavior while improving visibility of unexpected phase-signaling failures.
+
+## Stabilization Update (2026-02-14) - Include Exception Details In Safe Slot-Release Error Log
+### What changed
+- Improved diagnostics in `SafeReleaseServerSlot()`:
+  - unexpected catch path now logs full exception details instead of generic message.
+
+### Files touched
+- `project/OsEngine/OsOptimizer/OptimizerExecutor.cs`
+
+### Validation
+- `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --configuration Debug`
+- Result: Passed 70 / Failed 0
+
+### Risks / notes
+- No behavior change; improves post-mortem analysis when non-expected slot-release failures occur.

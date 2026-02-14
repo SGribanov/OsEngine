@@ -1246,9 +1246,9 @@ namespace OsEngine.OsOptimizer
             {
                 // ignored
             }
-            catch
+            catch (Exception ex)
             {
-                SendLogMessage("Optimizer server slot release failed.", LogMessageType.Error);
+                SendLogMessage("Optimizer server slot release failed: " + ex, LogMessageType.Error);
             }
         }
 
