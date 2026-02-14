@@ -175,11 +175,22 @@ namespace OsEngine.OsOptimizer.OptimizerEntity
 
         private void CancelAllWaiters()
         {
-            foreach (KeyValuePair<string, TaskCompletionSource<BotPanel>> waiter in _botWaiters)
+            while (true)
             {
-                if (_botWaiters.TryRemove(waiter.Key, out TaskCompletionSource<BotPanel> pending))
+                bool removedAny = false;
+
+                foreach (KeyValuePair<string, TaskCompletionSource<BotPanel>> waiter in _botWaiters)
                 {
-                    pending.TrySetCanceled();
+                    if (_botWaiters.TryRemove(waiter.Key, out TaskCompletionSource<BotPanel> pending))
+                    {
+                        pending.TrySetCanceled();
+                        removedAny = true;
+                    }
+                }
+
+                if (!removedAny)
+                {
+                    return;
                 }
             }
         }
