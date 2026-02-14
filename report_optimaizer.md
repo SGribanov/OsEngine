@@ -4467,3 +4467,19 @@ After each optimizer-related change, update this file with:
 
 ### Risks / notes
 - No intended behavior change in valid lifecycle flow; hardens against late external invalidation of core runtime dependencies.
+
+
+## Stabilization Update (2026-02-14) - Guard Runtime Settings Context In Prime Worker
+### What changed
+- Added early runtime guard in `PrimeThreadWorkerPlace()` for `_master.Settings`.
+- If settings context becomes unavailable at runtime, worker aborts through unified `AbortPrimeWorker(...)` path.
+
+### Files touched
+- `project/OsEngine/OsOptimizer/OptimizerExecutor.cs`
+
+### Validation
+- `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --configuration Debug`
+- Result: Passed 70 / Failed 0
+
+### Risks / notes
+- No intended behavior change in valid flow; adds symmetry with other runtime context guards for late state invalidation.

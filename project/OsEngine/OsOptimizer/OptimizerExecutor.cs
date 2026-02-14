@@ -353,6 +353,12 @@ namespace OsEngine.OsOptimizer
                     return;
                 }
 
+                if (_master.Settings == null)
+                {
+                    AbortPrimeWorker("Optimizer prime worker skipped: runtime settings context is unavailable.");
+                    return;
+                }
+
                 lock (_reportsSync)
                 {
                     ReportsToFazes = new List<OptimizerFazeReport>();
