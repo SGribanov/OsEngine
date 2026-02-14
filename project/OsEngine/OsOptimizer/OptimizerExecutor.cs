@@ -425,11 +425,13 @@ namespace OsEngine.OsOptimizer
 
         private void CompensateSkippedOutOfSampleSlot(bool releaseServerSlot)
         {
+            bool signaled = false;
             if (_phaseCompletion != null && !_phaseCompletion.IsSet)
             {
                 try
                 {
                     _phaseCompletion.Signal();
+                    signaled = true;
                 }
                 catch (ObjectDisposedException)
                 {
@@ -439,6 +441,11 @@ namespace OsEngine.OsOptimizer
                 {
                     // ignored
                 }
+            }
+
+            if (signaled)
+            {
+                AddCompensatedOutOfSampleProgress(1);
             }
 
             if (!releaseServerSlot)
@@ -469,11 +476,14 @@ namespace OsEngine.OsOptimizer
                 return;
             }
 
+            int signaledCount = 0;
+
             while (unscheduledCount > 0 && !phase.IsSet)
             {
                 try
                 {
                     phase.Signal();
+                    signaledCount++;
                 }
                 catch (ObjectDisposedException)
                 {
@@ -485,6 +495,26 @@ namespace OsEngine.OsOptimizer
                 }
                 unscheduledCount--;
             }
+
+            if (signaledCount > 0)
+            {
+                AddCompensatedOutOfSampleProgress(signaledCount);
+            }
+        }
+
+        private void AddCompensatedOutOfSampleProgress(int count)
+        {
+            if (count <= 0)
+            {
+                return;
+            }
+
+            lock (_serverRemoveLocker)
+            {
+                _countAllServersEndTest += count;
+            }
+
+            PrimeProgressChangeEvent?.Invoke(_countAllServersEndTest, _countAllServersMax);
         }
 
         private List<bool> _parametersOn;
