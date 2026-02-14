@@ -3364,3 +3364,22 @@ After each optimizer-related change, update this file with:
 
 ### Risks / notes
 - No expected behavior change in normal flow; improves resilience during concurrent stop/cleanup timing races.
+
+
+## Stabilization Update (2026-02-14) - Harden Start-State Reinitialization With Atomic Swap And Dispose
+### What changed
+- Updated `Start(...)` in `OptimizerExecutor` to atomically reinitialize run-scoped sync state:
+  - `_stopCts` now replaced via `Interlocked.Exchange(...)` with disposal of previous token source.
+  - `_phaseCompletion` is atomically detached and disposed before new run.
+  - `_serverSlots` now replaced via `Interlocked.Exchange(...)` with disposal of previous semaphore.
+- Added guarded logging for unexpected cleanup exceptions in start reinitialization.
+
+### Files touched
+- `project/OsEngine/OsOptimizer/OptimizerExecutor.cs`
+
+### Validation
+- `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --configuration Debug`
+- Result: Passed 70 / Failed 0
+
+### Risks / notes
+- No functional behavior change expected; improves resource hygiene and reduces stale state leakage across repeated start/stop cycles.

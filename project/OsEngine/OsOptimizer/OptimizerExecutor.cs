@@ -68,8 +68,26 @@ namespace OsEngine.OsOptimizer
 
             SendLogMessage(OsLocalization.Optimizer.Message2, LogMessageType.System);
 
-            _stopCts?.Dispose();
-            _stopCts = new CancellationTokenSource();
+            CancellationTokenSource previousStopCts = Interlocked.Exchange(ref _stopCts, new CancellationTokenSource());
+            try
+            {
+                previousStopCts?.Dispose();
+            }
+            catch (Exception ex)
+            {
+                SendLogMessage("Optimizer start cleanup failed: previous stop token dispose. " + ex, LogMessageType.Error);
+            }
+
+            CountdownEvent previousPhase = Interlocked.Exchange(ref _phaseCompletion, null);
+            try
+            {
+                previousPhase?.Dispose();
+            }
+            catch (Exception ex)
+            {
+                SendLogMessage("Optimizer start cleanup failed: previous phase completion dispose. " + ex, LogMessageType.Error);
+            }
+
             _servers = new List<OptimizerServer>();
             _countAllServersMax = 0;
             _countAllServersEndTest = 0;
@@ -78,8 +96,18 @@ namespace OsEngine.OsOptimizer
             {
                 _testBotsTime.Clear();
             }
-            _serverSlots = new SemaphoreSlim(Math.Max(1, _master.ThreadsCount), Math.Max(1, _master.ThreadsCount));
-            _phaseCompletion = null;
+            SemaphoreSlim previousServerSlots = Interlocked.Exchange(
+                ref _serverSlots,
+                new SemaphoreSlim(Math.Max(1, _master.ThreadsCount), Math.Max(1, _master.ThreadsCount)));
+
+            try
+            {
+                previousServerSlots?.Dispose();
+            }
+            catch (Exception ex)
+            {
+                SendLogMessage("Optimizer start cleanup failed: previous server slots dispose. " + ex, LogMessageType.Error);
+            }
 
             _primeThreadWorker = new Thread(PrimeThreadWorkerPlace);
             _primeThreadWorker.Name = "OptimizerExecutorThread";
