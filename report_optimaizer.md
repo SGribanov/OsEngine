@@ -20,6 +20,7 @@ Implemented and committed:
 11. Phase 5 continued: added dedicated acquisition policy (`BayesianAcquisitionPolicy`) with lightweight surrogate scoring and integrated it into bayesian iteration loop.
 12. Phase 5 continued: acquisition surrogate upgraded from index-distance to parameter-space distance across strategy parameters.
 13. Phase 5 continued: added objective-direction and acquisition-mode settings (`Ucb/EI/Greedy`, `kappa`) with wiring through settings, UI, factory and strategy.
+14. Phase 5 continued: added score normalization and metric-aware kappa scaling before acquisition.
 
 ## Commits
 - `b1e5eabe3` — `Optimizer: persist Phase1 extraction and wiring state`
@@ -113,6 +114,7 @@ Added tests:
   - `BayesianCandidateSelector_SelectNextBatch_ShouldPreferNeighborsOfTopScores`
   - `BayesianAcquisitionPolicy_SelectNextBatch_WithoutScores_ShouldFallbackToSelector`
   - `BayesianAcquisitionPolicy_SelectNextBatch_WithEqualMeans_ShouldPreferHigherUncertainty`
+  - `BayesianAcquisitionPolicy_Modes_ShouldChangeExplorationBehavior`
   - `OptimizerSettings_SaveLoad_ShouldPersistOptimizationMethodFields`
   - `OptimizerSettings_LoadLegacyWithoutV2Fields_ShouldKeepDefaultsForMethodSettings`
 
@@ -120,7 +122,7 @@ Command:
 - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --configuration Debug`
 
 Result:
-- Passed: 21
+- Passed: 22
 - Failed: 0
 
 ### Stabilization fixes from new tests
@@ -178,6 +180,7 @@ Result:
     - uncertainty proxy from normalized parameter-space distance (supports `Int`, `Decimal`, `DecimalCheckBox`, `Bool`, `CheckBox`, `String`, `TimeOfDay`);
     - acquisition mode is configurable: `Ucb`, `ExpectedImprovement`, `Greedy`;
     - objective-direction is configurable (`Maximize` / `Minimize`) and is applied in strategy score orientation before acquisition.
+  - strategy now normalizes observed objective scores (`min-max`) before acquisition and applies metric-specific kappa scaling to stabilize exploration pressure across heterogeneous metrics.
 
 ## Phase 5 UI Wiring (Continued)
 ### Updated files
@@ -231,7 +234,7 @@ Result:
    - full replacement of remaining polling in single-bot test flow where appropriate.
 2. Start Phase 3 (`OptimizerReport` serializer extraction with legacy fallback).
 3. Start Phase 4 strategy abstraction (`IOptimizationStrategy`, `IBotEvaluator`, brute-force extraction).
-4. Continue Phase 5 by adding objective-specific normalization and confidence scaling per metric family.
+4. Continue Phase 5 by adding candidate dedup across iterations and optional top-N exploitation tail pass.
 
 ## Update Rule
 After each optimizer-related change, update this file with:

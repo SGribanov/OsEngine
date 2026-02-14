@@ -122,9 +122,8 @@ namespace OsEngine.OsOptimizer.OptEntity
             while (!cancellationToken.IsCancellationRequested && iterationsLeft > 0 && evaluated.Count < candidates.Count)
             {
                 int targetBatchSize = Math.Min(BatchSize, iterationsLeft);
-                List<BayesianCandidateSelector.CandidateScore> scoredForSelector = scored
-                    .Select(s => new BayesianCandidateSelector.CandidateScore { Index = s.Index, Score = s.Score })
-                    .ToList();
+                List<BayesianCandidateSelector.CandidateScore> scoredForSelector = BuildNormalizedScores(scored);
+                decimal effectiveKappa = GetMetricAdjustedKappa();
 
                 List<int> nextBatch = _acquisitionPolicy.SelectNextBatch(
                     candidates.Count,
@@ -134,7 +133,7 @@ namespace OsEngine.OsOptimizer.OptEntity
                     _candidateSelector,
                     candidates,
                     AcquisitionMode,
-                    AcquisitionKappa);
+                    effectiveKappa);
 
                 if (nextBatch.Count == 0)
                 {
@@ -146,6 +145,58 @@ namespace OsEngine.OsOptimizer.OptEntity
             }
 
             return reports;
+        }
+
+        private List<BayesianCandidateSelector.CandidateScore> BuildNormalizedScores(List<CandidateEvaluation> scored)
+        {
+            List<BayesianCandidateSelector.CandidateScore> result = new List<BayesianCandidateSelector.CandidateScore>();
+            if (scored == null || scored.Count == 0)
+            {
+                return result;
+            }
+
+            decimal min = scored.Min(s => s.Score);
+            decimal max = scored.Max(s => s.Score);
+            decimal range = max - min;
+
+            for (int i = 0; i < scored.Count; i++)
+            {
+                decimal normalized = range <= 0 ? 0m : (scored[i].Score - min) / range;
+                result.Add(new BayesianCandidateSelector.CandidateScore
+                {
+                    Index = scored[i].Index,
+                    Score = normalized
+                });
+            }
+
+            return result;
+        }
+
+        private decimal GetMetricAdjustedKappa()
+        {
+            decimal scale;
+            switch (ObjectiveMetric)
+            {
+                case SortBotsType.PositionCount:
+                    scale = 0.5m;
+                    break;
+                case SortBotsType.MaxDrawDawn:
+                    scale = 1.3m;
+                    break;
+                case SortBotsType.SharpRatio:
+                    scale = 1.2m;
+                    break;
+                case SortBotsType.ProfitFactor:
+                case SortBotsType.PayOffRatio:
+                    scale = 0.8m;
+                    break;
+                default:
+                    scale = 1m;
+                    break;
+            }
+
+            decimal adjusted = AcquisitionKappa * scale;
+            return adjusted < 0 ? 0 : adjusted;
         }
 
         private List<List<IIStrategyParameter>> BuildCandidatePool(

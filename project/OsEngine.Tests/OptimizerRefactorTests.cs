@@ -551,6 +551,45 @@ public class OptimizerRefactorTests
     }
 
     [Fact]
+    public void BayesianAcquisitionPolicy_Modes_ShouldChangeExplorationBehavior()
+    {
+        BayesianCandidateSelector selector = new BayesianCandidateSelector(defaultBatchSize: 1);
+        BayesianAcquisitionPolicy policy = new BayesianAcquisitionPolicy();
+        HashSet<int> evaluated = new HashSet<int> { 0, 2 };
+        List<BayesianCandidateSelector.CandidateScore> scored = new List<BayesianCandidateSelector.CandidateScore>
+        {
+            new BayesianCandidateSelector.CandidateScore { Index = 0, Score = 10m },
+            new BayesianCandidateSelector.CandidateScore { Index = 2, Score = 0m }
+        };
+        List<List<IIStrategyParameter>> candidates = BuildIntCandidates(10, "X", 1, 10, 1);
+
+        List<int> greedy = policy.SelectNextBatch(
+            totalCount: 10,
+            evaluated,
+            scored,
+            batchSize: 1,
+            fallbackSelector: selector,
+            candidates: candidates,
+            mode: BayesianAcquisitionModeType.Greedy,
+            kappa: 0.25m);
+
+        List<int> ucb = policy.SelectNextBatch(
+            totalCount: 10,
+            evaluated,
+            scored,
+            batchSize: 1,
+            fallbackSelector: selector,
+            candidates: candidates,
+            mode: BayesianAcquisitionModeType.Ucb,
+            kappa: 50m);
+
+        Assert.Single(greedy);
+        Assert.Single(ucb);
+        Assert.Equal(1, greedy[0]);
+        Assert.Equal(9, ucb[0]);
+    }
+
+    [Fact]
     public void OptimizerSettings_SaveLoad_ShouldPersistOptimizationMethodFields()
     {
         lock (SettingsFileLock)
