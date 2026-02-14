@@ -867,6 +867,11 @@ namespace OsEngine.OsOptimizer
                         SendLogMessage("CreateNewServer skipped simple tab bind: connector is null at source index " + i + ".", LogMessageType.Error);
                         continue;
                     }
+                    if (string.IsNullOrWhiteSpace(simple.Connector.SecurityName))
+                    {
+                        SendLogMessage("CreateNewServer skipped simple tab bind: security name is empty at source index " + i + ".", LogMessageType.Error);
+                        continue;
+                    }
 
                     Security secToStart =
                     _master.Storage.Securities.Find(s => s.Name == simple.Connector.SecurityName);
@@ -893,6 +898,11 @@ namespace OsEngine.OsOptimizer
                         if (index.Tabs[i2] == null)
                         {
                             SendLogMessage("CreateNewServer skipped index tab bind: tab is null at source index " + i + ", tab index " + i2 + ".", LogMessageType.Error);
+                            continue;
+                        }
+                        if (string.IsNullOrWhiteSpace(index.Tabs[i2].SecurityName))
+                        {
+                            SendLogMessage("CreateNewServer skipped index tab bind: security name is empty at source index " + i + ", tab index " + i2 + ".", LogMessageType.Error);
                             continue;
                         }
 
@@ -922,6 +932,11 @@ namespace OsEngine.OsOptimizer
                         if (screener.Tabs[i2]?.Connector == null)
                         {
                             SendLogMessage("CreateNewServer skipped screener tab bind: connector is null at source index " + i + ", tab index " + i2 + ".", LogMessageType.Error);
+                            continue;
+                        }
+                        if (string.IsNullOrWhiteSpace(screener.Tabs[i2].Connector.SecurityName))
+                        {
+                            SendLogMessage("CreateNewServer skipped screener tab bind: security name is empty at source index " + i + ", tab index " + i2 + ".", LogMessageType.Error);
                             continue;
                         }
 

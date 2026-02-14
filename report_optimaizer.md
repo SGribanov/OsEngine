@@ -1777,3 +1777,21 @@ After each optimizer-related change, update this file with:
 
 ### Risks / notes
 - Prevents null list iteration in index/screener binding paths during server initialization.
+
+## Stabilization Update (2026-02-14) - Empty Security Name Guards In CreateNewServer Binding
+### What changed
+- Added `string.IsNullOrWhiteSpace(...)` guards for security names before lookup:
+  - `BotTabSimple`: `simple.Connector.SecurityName`;
+  - `BotTabIndex`: `index.Tabs[i2].SecurityName`;
+  - `BotTabScreener`: `screener.Tabs[i2].Connector.SecurityName`.
+- Empty names are skipped with source/tab index diagnostics.
+
+### Files touched
+- `project/OsEngine/OsOptimizer/OptimizerExecutor.cs`
+
+### Validation
+- `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --configuration Debug`
+- Result: Passed 70 / Failed 0
+
+### Risks / notes
+- Prevents invalid security lookup attempts with blank identifiers in server data-binding phase.
