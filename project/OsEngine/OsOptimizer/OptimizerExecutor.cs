@@ -250,6 +250,12 @@ namespace OsEngine.OsOptimizer
             }
 
             List<OptimizerReport> reports = new List<OptimizerReport>(reportFiltered.Reports);
+            if (reports.Count == 0)
+            {
+                SendLogMessage("Async bot factory start skipped (OutOfSample): source reports snapshot is empty.", LogMessageType.System);
+                return;
+            }
+
             int expectedNamesCount = Math.Max(0, reports.Count);
             List<string> botNames = new List<string>(expectedNamesCount);
             HashSet<string> uniqueBotNames = new HashSet<string>(expectedNamesCount, StringComparer.Ordinal);

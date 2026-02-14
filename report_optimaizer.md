@@ -2981,3 +2981,20 @@ After each optimizer-related change, update this file with:
 ### Risks / notes
 - No intended functional behavior change; improves robustness and determinism under concurrent/report-list mutation scenarios.
 
+
+## Stabilization Update (2026-02-14) - Add Early Empty-Snapshot Guard In OOS Async Factory Startup
+### What changed
+- Updated `StartAsuncBotFactoryOutOfSample(...)` in `OptimizerExecutor`.
+- Added early-return guard after local source snapshot creation when `reports.Count == 0`.
+- Method now emits explicit system diagnostic for empty snapshot and skips downstream batch construction loop.
+
+### Files touched
+- `project/OsEngine/OsOptimizer/OptimizerExecutor.cs`
+
+### Validation
+- `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --configuration Debug`
+- Result: Passed 70 / Failed 0
+
+### Risks / notes
+- No functional behavior change vs eventual empty-batch skip; improves clarity and avoids unnecessary iteration setup when source snapshot is empty.
+
