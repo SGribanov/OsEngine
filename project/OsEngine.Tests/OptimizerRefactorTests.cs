@@ -266,6 +266,71 @@ public class OptimizerRefactorTests
         Assert.Equal(1, ((StrategyParameterInt)allParameters[1]).ValueInt);
     }
 
+    [Fact]
+    public void OptimizerReportTab_LoadFromSaveString_LegacyWithoutSharpRatio_ShouldLoad()
+    {
+        // Legacy format had 11 fields without SharpRatio.
+        string legacyTab =
+            "BotTabSimple*BTCUSDT*5*100* -2*20*1.2*1.5*1.1*2.0*5.0*".Replace(" ", "");
+
+        OptimizerReportTab tab = new OptimizerReportTab();
+        tab.LoadFromSaveString(legacyTab);
+
+        Assert.Equal("BotTabSimple", tab.TabType);
+        Assert.Equal("BTCUSDT", tab.SecurityName);
+        Assert.Equal(5, tab.PositionsCount);
+        Assert.Equal(100m, tab.TotalProfit);
+        Assert.Equal(0m, tab.SharpRatio);
+    }
+
+    [Fact]
+    public async Task BruteForceStrategy_OptimizeInSampleAsync_ShouldPreserveDecimalCheckBoxSnapshot()
+    {
+        ParameterIterator iterator = new ParameterIterator();
+        ConcurrentBag<string> seen = new ConcurrentBag<string>();
+
+        IBotEvaluator evaluator = new BotEvaluator((all, optimized, ct) =>
+        {
+            StrategyParameterInt i = (StrategyParameterInt)optimized[0];
+            StrategyParameterDecimalCheckBox d = (StrategyParameterDecimalCheckBox)optimized[1];
+
+            string key = i.ValueInt + "_" + d.ValueDecimal + "_" + d.CheckState;
+            seen.Add(key);
+
+            // Mutate received objects intentionally.
+            i.ValueInt = 999;
+            d.ValueDecimal = 999m;
+            d.CheckState = System.Windows.Forms.CheckState.Unchecked;
+
+            OptimizerReport report = new OptimizerReport(new List<IIStrategyParameter>())
+            {
+                BotName = key
+            };
+            return Task.FromResult(report);
+        });
+
+        BruteForceStrategy strategy = new BruteForceStrategy(iterator, evaluator, maxParallel: 2);
+
+        List<IIStrategyParameter> allParameters = new List<IIStrategyParameter>
+        {
+            new StrategyParameterInt("I", 1, 1, 2, 1),
+            new StrategyParameterDecimalCheckBox("D", 1m, 1m, 2m, 1m, true)
+        };
+        List<bool> parametersToOptimization = new List<bool> { true, true };
+
+        List<OptimizerReport> reports =
+            await strategy.OptimizeInSampleAsync(allParameters, parametersToOptimization, CancellationToken.None);
+
+        Assert.Equal(4, reports.Count);
+        Assert.Equal(
+            new[] { "1_1_Checked", "1_2_Checked", "2_1_Checked", "2_2_Checked" },
+            seen.Distinct().OrderBy(x => x).ToArray());
+
+        Assert.Equal(1, ((StrategyParameterInt)allParameters[0]).ValueInt);
+        Assert.Equal(1m, ((StrategyParameterDecimalCheckBox)allParameters[1]).ValueDecimal);
+        Assert.Equal(System.Windows.Forms.CheckState.Checked, ((StrategyParameterDecimalCheckBox)allParameters[1]).CheckState);
+    }
+
     private static OptimizerReport BuildSampleReport()
     {
         OptimizerReport report = new OptimizerReport(new List<IIStrategyParameter>
