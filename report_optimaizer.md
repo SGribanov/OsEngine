@@ -591,3 +591,20 @@ After each optimizer-related change, update this file with:
 
 ### Risks / notes
 - Prevents `NullReferenceException` when `TestBot(...)` returns `null` on early failure/cancel path.
+
+## Stabilization Update (2026-02-14) - UI RowIndex Boundary Fix (Off-By-One)
+### What changed
+- Fixed phase grid row boundary checks in optimizer UI dialogs:
+  - replaced `RowIndex > _reports.Count` with `RowIndex >= _reports.Count`.
+- Applied consistently in both chart-open and parameters-open handlers.
+
+### Files touched
+- `project/OsEngine/OsOptimizer/OptimizerUi.xaml.cs`
+- `project/OsEngine/OsOptimizer/OptimizerReportUi.xaml.cs`
+
+### Validation
+- `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --configuration Debug`
+- Result: Passed 70 / Failed 0
+
+### Risks / notes
+- Prevents out-of-range access when selected row index equals report count boundary.

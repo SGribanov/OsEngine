@@ -160,7 +160,7 @@ namespace OsEngine.OsOptimizer
             }
             else
             {
-                if (_gridFazesEnd.CurrentCell.RowIndex > _reports.Count)
+                if (_gridFazesEnd.CurrentCell.RowIndex >= _reports.Count)
                 {
                     return;
                 }
@@ -206,7 +206,7 @@ namespace OsEngine.OsOptimizer
             }
             else
             {
-                if (_gridFazesEnd.CurrentCell.RowIndex > _reports.Count)
+                if (_gridFazesEnd.CurrentCell.RowIndex >= _reports.Count)
                 {
                     return;
                 }
