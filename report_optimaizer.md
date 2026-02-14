@@ -1308,3 +1308,19 @@ After each optimizer-related change, update this file with:
 
 ### Risks / notes
 - Prevents token wait-handle disposal race from crashing single-bot wait loop.
+
+## Stabilization Update (2026-02-14) - Safe Bot Cleanup Helper In Executor TestBot
+### What changed
+- Added `SafeDisposeBotPanel(BotPanel bot)` helper in `OptimizerExecutor`.
+- Replaced duplicated `bot.Clear()/bot.Delete()` try-catch blocks in `TestBot(...)` failure paths with helper call.
+- Helper catches cleanup exceptions and logs diagnostics.
+
+### Files touched
+- `project/OsEngine/OsOptimizer/OptimizerExecutor.cs`
+
+### Validation
+- `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --configuration Debug`
+- Result: Passed 70 / Failed 0
+
+### Risks / notes
+- Keeps bot cleanup logic centralized and resilient under error-path exceptions.

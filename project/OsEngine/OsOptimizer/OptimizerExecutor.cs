@@ -1091,15 +1091,7 @@ namespace OsEngine.OsOptimizer
                 SendLogMessage(
                     OsLocalization.Optimizer.Message10,
                     LogMessageType.Error);
-                try
-                {
-                    bot.Clear();
-                    bot.Delete();
-                }
-                catch
-                {
-                    // ignored
-                }
+                SafeDisposeBotPanel(bot);
                 SafeRemoveOptimizerServer(server);
                 SafeDisposeAwaitObject(awaitObj);
                 return null;
@@ -1112,15 +1104,7 @@ namespace OsEngine.OsOptimizer
             catch (Exception ex)
             {
                 SendLogMessage("Single-bot test failed to start server testing: " + ex, LogMessageType.Error);
-                try
-                {
-                    bot.Clear();
-                    bot.Delete();
-                }
-                catch
-                {
-                    // ignored
-                }
+                SafeDisposeBotPanel(bot);
                 SafeRemoveOptimizerServer(server);
                 SafeDisposeAwaitObject(awaitObj);
                 return null;
@@ -1198,6 +1182,19 @@ namespace OsEngine.OsOptimizer
             catch (ObjectDisposedException)
             {
                 return true;
+            }
+        }
+
+        private void SafeDisposeBotPanel(BotPanel bot)
+        {
+            try
+            {
+                bot?.Clear();
+                bot?.Delete();
+            }
+            catch (Exception ex)
+            {
+                SendLogMessage("Single-bot test bot cleanup failed: " + ex, LogMessageType.Error);
             }
         }
 
