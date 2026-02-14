@@ -1812,3 +1812,22 @@ After each optimizer-related change, update this file with:
 
 ### Risks / notes
 - Prevents server bootstrap path from continuing with invalid server instance when factory fails.
+
+## Stabilization Update (2026-02-14) - Safe Security Binding Helper In CreateNewServer
+### What changed
+- Added `SafeBindSecurityToServer(...)` helper in `OptimizerExecutor`.
+- Replaced direct `server.GetDataToSecurity(...)` calls in all `CreateNewServer(...)` tab branches:
+  - simple;
+  - index;
+  - screener.
+- Helper catches per-security bind exceptions and logs detailed source context (`source kind`, `source index`, optional `tab index`, `security`).
+
+### Files touched
+- `project/OsEngine/OsOptimizer/OptimizerExecutor.cs`
+
+### Validation
+- `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --configuration Debug`
+- Result: Passed 70 / Failed 0
+
+### Risks / notes
+- Prevents one failed security bind from aborting entire server bootstrap and preserves diagnostic traceability.

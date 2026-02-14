@@ -896,8 +896,8 @@ namespace OsEngine.OsOptimizer
                         continue;
                     }
 
-                    server.GetDataToSecurity(secToStart, simple.Connector.TimeFrame, report.Faze.TimeStart,
-                        report.Faze.TimeEnd);
+                    SafeBindSecurityToServer(server, secToStart, simple.Connector.TimeFrame, report.Faze.TimeStart,
+                        report.Faze.TimeEnd, "simple", i, -1);
                 }
                 else if (sources[i].TabType == BotTabType.Index)
                 {// BotTabIndex
@@ -929,8 +929,8 @@ namespace OsEngine.OsOptimizer
                             continue;
                         }
 
-                        server.GetDataToSecurity(secToStart, index.Tabs[i2].TimeFrame, report.Faze.TimeStart,
-                            report.Faze.TimeEnd);
+                        SafeBindSecurityToServer(server, secToStart, index.Tabs[i2].TimeFrame, report.Faze.TimeStart,
+                            report.Faze.TimeEnd, "index", i, i2);
                     }
                 }
                 else if (sources[i].TabType == BotTabType.Screener)
@@ -963,8 +963,8 @@ namespace OsEngine.OsOptimizer
                             continue;
                         }
 
-                        server.GetDataToSecurity(secToStart, screener.Tabs[i2].Connector.TimeFrame, report.Faze.TimeStart,
-                            report.Faze.TimeEnd);
+                        SafeBindSecurityToServer(server, secToStart, screener.Tabs[i2].Connector.TimeFrame, report.Faze.TimeStart,
+                            report.Faze.TimeEnd, "screener", i, i2);
                     }
                 }
             }
@@ -1428,6 +1428,35 @@ namespace OsEngine.OsOptimizer
             {
                 SendLogMessage("Optimizer report build from bot failed: " + ex, LogMessageType.Error);
                 return false;
+            }
+        }
+
+        private void SafeBindSecurityToServer(
+            OptimizerServer server,
+            Security security,
+            TimeFrame timeFrame,
+            DateTime timeStart,
+            DateTime timeEnd,
+            string sourceKind,
+            int sourceIndex,
+            int tabIndex)
+        {
+            if (server == null || security == null)
+            {
+                return;
+            }
+
+            try
+            {
+                server.GetDataToSecurity(security, timeFrame, timeStart, timeEnd);
+            }
+            catch (Exception ex)
+            {
+                string tabPart = tabIndex >= 0 ? (", tab index " + tabIndex) : string.Empty;
+                SendLogMessage(
+                    "CreateNewServer security bind failed (" + sourceKind + ", source index " + sourceIndex + tabPart +
+                    ", security '" + security.Name + "'): " + ex,
+                    LogMessageType.Error);
             }
         }
 
