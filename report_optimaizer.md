@@ -2092,3 +2092,20 @@ After each optimizer-related change, update this file with:
 ### Risks / notes
 - Prevents null-reference crash in optimizer/evaluation startup path when server creation fails.
 
+
+## Stabilization Update (2026-02-14) - Guard TestingStart Exception In StartNewBot
+### What changed
+- Updated `StartNewBot(...)` in `OptimizerExecutor`.
+- Wrapped `server.TestingStart()` in `try/catch`.
+- On start exception, method now logs error details and calls `FinalizeNotStartedBot(server, bot)` for centralized cleanup/signaling.
+
+### Files touched
+- `project/OsEngine/OsOptimizer/OptimizerExecutor.cs`
+
+### Validation
+- `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --configuration Debug`
+- Result: Passed 70 / Failed 0
+
+### Risks / notes
+- No normal-path behavior change; prevents unhandled server start exceptions from escaping optimizer worker flow.
+

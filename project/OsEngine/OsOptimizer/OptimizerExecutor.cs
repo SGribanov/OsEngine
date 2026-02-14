@@ -619,7 +619,15 @@ namespace OsEngine.OsOptimizer
                 _botsInTest.Add(bot);
             }
 
-            server.TestingStart();
+            try
+            {
+                server.TestingStart();
+            }
+            catch (Exception ex)
+            {
+                SendLogMessage("StartNewBot failed to start server testing: " + ex, LogMessageType.Error);
+                FinalizeNotStartedBot(server, bot);
+            }
         }
 
         private Task<OptimizerReport> StartNewBotForEvaluationAsync(
