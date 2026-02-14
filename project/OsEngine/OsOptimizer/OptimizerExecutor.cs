@@ -170,6 +170,17 @@ namespace OsEngine.OsOptimizer
                 return false;
             }
 
+            for (int i = 0; i < parameters.Count; i++)
+            {
+                if (parameters[i] == null)
+                {
+                    SendLogMessage(
+                        "Optimizer start skipped: parameter is null at index " + i + ".",
+                        LogMessageType.Error);
+                    return false;
+                }
+            }
+
             lock (_startSync)
             {
                 if (IsPrimeWorkerActive())

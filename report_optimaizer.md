@@ -4068,3 +4068,20 @@ After each optimizer-related change, update this file with:
 
 ### Risks / notes
 - Intentional robustness change: prevents invalid objective metric configuration from reaching optimization strategy setup.
+
+
+## Stabilization Update (2026-02-14) - Validate Non-Null Parameter Entries Before Start
+### What changed
+- Added early input validation in `OptimizerExecutor.Start(...)`:
+  - iterates `parameters` and rejects run when any parameter entry is `null`.
+- Failure path includes explicit index in diagnostic log.
+
+### Files touched
+- `project/OsEngine/OsOptimizer/OptimizerExecutor.cs`
+
+### Validation
+- `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --configuration Debug`
+- Result: Passed 70 / Failed 0
+
+### Risks / notes
+- Intentional robustness change: prevents downstream null dereference in parameter iterator/bot configuration paths.
