@@ -146,7 +146,7 @@ namespace OsEngine.OsOptimizer
                 return false;
             }
 
-            if (!Enum.IsDefined(typeof(OptimizationMethodType), _master.OptimizationMethod))
+            if (!IsDefinedEnum(_master.OptimizationMethod))
             {
                 SendLogMessage(
                     "Optimizer start skipped: optimization method is invalid (value " + _master.OptimizationMethod + ").",
@@ -154,7 +154,7 @@ namespace OsEngine.OsOptimizer
                 return false;
             }
 
-            if (!Enum.IsDefined(typeof(SortBotsType), _master.ObjectiveMetric))
+            if (!IsDefinedEnum(_master.ObjectiveMetric))
             {
                 SendLogMessage(
                     "Optimizer start skipped: objective metric is invalid (value " + _master.ObjectiveMetric + ").",
@@ -162,7 +162,7 @@ namespace OsEngine.OsOptimizer
                 return false;
             }
 
-            if (!Enum.IsDefined(typeof(ObjectiveDirectionType), _master.ObjectiveDirection))
+            if (!IsDefinedEnum(_master.ObjectiveDirection))
             {
                 SendLogMessage(
                     "Optimizer start skipped: objective direction is invalid (value " + _master.ObjectiveDirection + ").",
@@ -170,7 +170,7 @@ namespace OsEngine.OsOptimizer
                 return false;
             }
 
-            if (!Enum.IsDefined(typeof(BayesianAcquisitionModeType), _master.BayesianAcquisitionMode))
+            if (!IsDefinedEnum(_master.BayesianAcquisitionMode))
             {
                 SendLogMessage(
                     "Optimizer start skipped: bayesian acquisition mode is invalid (value " + _master.BayesianAcquisitionMode + ").",
@@ -388,6 +388,11 @@ namespace OsEngine.OsOptimizer
             return false;
         }
 
+        private static bool IsDefinedEnum<TEnum>(TEnum value) where TEnum : struct, Enum
+        {
+            return Enum.IsDefined(typeof(TEnum), value);
+        }
+
         #endregion
 
         #region Optimization algorithm
@@ -511,7 +516,7 @@ namespace OsEngine.OsOptimizer
                     return;
                 }
 
-                if (!Enum.IsDefined(typeof(OptimizationMethodType), optimizationMethod))
+                if (!IsDefinedEnum(optimizationMethod))
                 {
                     AbortPrimeWorker(
                         "Optimizer prime worker skipped: optimization method is invalid at runtime (value " + optimizationMethod + ").",
@@ -519,7 +524,7 @@ namespace OsEngine.OsOptimizer
                     return;
                 }
 
-                if (!Enum.IsDefined(typeof(SortBotsType), objectiveMetric))
+                if (!IsDefinedEnum(objectiveMetric))
                 {
                     AbortPrimeWorker(
                         "Optimizer prime worker skipped: objective metric is invalid at runtime (value " + objectiveMetric + ").",
@@ -527,7 +532,7 @@ namespace OsEngine.OsOptimizer
                     return;
                 }
 
-                if (!Enum.IsDefined(typeof(ObjectiveDirectionType), objectiveDirection))
+                if (!IsDefinedEnum(objectiveDirection))
                 {
                     AbortPrimeWorker(
                         "Optimizer prime worker skipped: objective direction is invalid at runtime (value " + objectiveDirection + ").",
@@ -535,7 +540,7 @@ namespace OsEngine.OsOptimizer
                     return;
                 }
 
-                if (!Enum.IsDefined(typeof(BayesianAcquisitionModeType), bayesianAcquisitionMode))
+                if (!IsDefinedEnum(bayesianAcquisitionMode))
                 {
                     AbortPrimeWorker(
                         "Optimizer prime worker skipped: bayesian acquisition mode is invalid at runtime (value " + bayesianAcquisitionMode + ").",
@@ -931,10 +936,10 @@ namespace OsEngine.OsOptimizer
                 return null;
             }
 
-            if (!Enum.IsDefined(typeof(OptimizationMethodType), _master.OptimizationMethod)
-                || !Enum.IsDefined(typeof(SortBotsType), _master.ObjectiveMetric)
-                || !Enum.IsDefined(typeof(ObjectiveDirectionType), _master.ObjectiveDirection)
-                || !Enum.IsDefined(typeof(BayesianAcquisitionModeType), _master.BayesianAcquisitionMode))
+            if (!IsDefinedEnum(_master.OptimizationMethod)
+                || !IsDefinedEnum(_master.ObjectiveMetric)
+                || !IsDefinedEnum(_master.ObjectiveDirection)
+                || !IsDefinedEnum(_master.BayesianAcquisitionMode))
             {
                 SendLogMessage("Optimizer strategy creation skipped: runtime strategy settings are invalid.", LogMessageType.Error);
                 return null;
