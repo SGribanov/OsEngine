@@ -1519,6 +1519,39 @@ public class OptimizerRefactorTests
     }
 
     [Fact]
+    public void OptimizerSettings_LoadFromFile_WithCommaDecimalKappa_ShouldParseCorrectly()
+    {
+        lock (SettingsFileLock)
+        {
+            using SettingsFileScope scope = new SettingsFileScope();
+
+            _ = new OptimizerSettings
+            {
+                OptimizationMethod = OptimizationMethodType.Bayesian,
+                ObjectiveMetric = SortBotsType.TotalProfit,
+                BayesianInitialSamples = 10,
+                BayesianMaxIterations = 20,
+                BayesianBatchSize = 3,
+                ObjectiveDirection = ObjectiveDirectionType.Maximize,
+                BayesianAcquisitionMode = BayesianAcquisitionModeType.Ucb,
+                BayesianAcquisitionKappa = 0.5m,
+                BayesianUseTailPass = true,
+                BayesianTailSharePercent = 20
+            };
+
+            string[] lines = File.ReadAllLines(scope.SettingsPath);
+            Assert.True(lines.Length >= 10);
+
+            lines[^3] = "0,9"; // BayesianAcquisitionKappa
+            File.WriteAllLines(scope.SettingsPath, lines);
+
+            OptimizerSettings reader = new OptimizerSettings();
+
+            Assert.Equal(0.9m, reader.BayesianAcquisitionKappa);
+        }
+    }
+
+    [Fact]
     public void OptimizerSettings_SaveLoad_TailSharePercentBoundaries_ShouldRoundTrip()
     {
         lock (SettingsFileLock)
