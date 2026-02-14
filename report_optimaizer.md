@@ -17,6 +17,7 @@ Implemented and committed:
 8. Phase 5 continued: optimizer UI now exposes and persists optimization method/objective/bayesian numeric settings.
 9. Stabilization continued: added persistence tests for optimizer method settings (`OptimizationMethod`, `ObjectiveMetric`, `Bayesian*`) including legacy file compatibility.
 10. Phase 5 continued: candidate selection policy extracted from strategy runtime into dedicated `BayesianCandidateSelector`.
+11. Phase 5 continued: added dedicated acquisition policy (`BayesianAcquisitionPolicy`) with lightweight surrogate scoring and integrated it into bayesian iteration loop.
 
 ## Commits
 - `b1e5eabe3` — `Optimizer: persist Phase1 extraction and wiring state`
@@ -108,6 +109,8 @@ Added tests:
   - `BayesianOptimizationStrategy_OptimizeInSampleAsync_ShouldRespectIterationBudget`
   - `BayesianCandidateSelector_SelectInitialBatch_ShouldSpreadAndFill`
   - `BayesianCandidateSelector_SelectNextBatch_ShouldPreferNeighborsOfTopScores`
+  - `BayesianAcquisitionPolicy_SelectNextBatch_WithoutScores_ShouldFallbackToSelector`
+  - `BayesianAcquisitionPolicy_SelectNextBatch_WithEqualMeans_ShouldPreferHigherUncertainty`
   - `OptimizerSettings_SaveLoad_ShouldPersistOptimizationMethodFields`
   - `OptimizerSettings_LoadLegacyWithoutV2Fields_ShouldKeepDefaultsForMethodSettings`
 
@@ -115,7 +118,7 @@ Command:
 - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --configuration Debug`
 
 Result:
-- Passed: 19
+- Passed: 21
 - Failed: 0
 
 ### Stabilization fixes from new tests
@@ -140,6 +143,7 @@ Result:
 - `project/OsEngine/OsOptimizer/OptEntity/BruteForceStrategy.cs`
 - `project/OsEngine/OsOptimizer/OptEntity/BayesianOptimizationStrategy.cs`
 - `project/OsEngine/OsOptimizer/OptEntity/BayesianCandidateSelector.cs`
+- `project/OsEngine/OsOptimizer/OptEntity/BayesianAcquisitionPolicy.cs`
 - `project/OsEngine/OsOptimizer/OptEntity/OptimizationStrategyFactory.cs`
 
 ### Notes
@@ -164,6 +168,10 @@ Result:
   - safety fallback remains for very large candidate pools (delegates to brute-force backend).
   - selection is centralized via `OptimizationStrategyFactory`.
   - candidate selection logic (initial + iterative) is now isolated in `BayesianCandidateSelector`, reducing strategy complexity and preparing surrogate/acquisition swap-in.
+  - iterative batch selection now uses `BayesianAcquisitionPolicy` with UCB-like score:
+    - local surrogate mean from nearest evaluated index score;
+    - uncertainty proxy from index-space distance;
+    - acquisition = `mean + kappa * uncertainty`.
 
 ## Phase 5 UI Wiring (Continued)
 ### Updated files
@@ -213,7 +221,7 @@ Result:
    - full replacement of remaining polling in single-bot test flow where appropriate.
 2. Start Phase 3 (`OptimizerReport` serializer extraction with legacy fallback).
 3. Start Phase 4 strategy abstraction (`IOptimizationStrategy`, `IBotEvaluator`, brute-force extraction).
-4. Continue Phase 5 with surrogate model + acquisition policy integration on top of `BayesianCandidateSelector`.
+4. Continue Phase 5 by upgrading surrogate/acquisition from index-distance heuristic to parameter-space model (and add objective-direction handling).
 
 ## Update Rule
 After each optimizer-related change, update this file with:

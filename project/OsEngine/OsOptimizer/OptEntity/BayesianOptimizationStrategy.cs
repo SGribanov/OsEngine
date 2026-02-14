@@ -25,6 +25,7 @@ namespace OsEngine.OsOptimizer.OptEntity
         private readonly int _maxParallel;
         private readonly BruteForceStrategy _fallbackBackend;
         private readonly BayesianCandidateSelector _candidateSelector;
+        private readonly BayesianAcquisitionPolicy _acquisitionPolicy;
 
         public BayesianOptimizationStrategy(
             ParameterIterator parameterIterator,
@@ -44,6 +45,7 @@ namespace OsEngine.OsOptimizer.OptEntity
             BatchSize = batchSize < 1 ? 1 : batchSize;
             _fallbackBackend = new BruteForceStrategy(parameterIterator, botEvaluator, _maxParallel);
             _candidateSelector = new BayesianCandidateSelector(BatchSize);
+            _acquisitionPolicy = new BayesianAcquisitionPolicy();
         }
 
         public SortBotsType ObjectiveMetric { get; }
@@ -112,7 +114,12 @@ namespace OsEngine.OsOptimizer.OptEntity
                     .Select(s => new BayesianCandidateSelector.CandidateScore { Index = s.Index, Score = s.Score })
                     .ToList();
 
-                List<int> nextBatch = _candidateSelector.SelectNextBatch(candidates.Count, evaluated, scoredForSelector, targetBatchSize);
+                List<int> nextBatch = _acquisitionPolicy.SelectNextBatch(
+                    candidates.Count,
+                    evaluated,
+                    scoredForSelector,
+                    targetBatchSize,
+                    _candidateSelector);
 
                 if (nextBatch.Count == 0)
                 {

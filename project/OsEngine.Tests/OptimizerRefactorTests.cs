@@ -488,6 +488,48 @@ public class OptimizerRefactorTests
     }
 
     [Fact]
+    public void BayesianAcquisitionPolicy_SelectNextBatch_WithoutScores_ShouldFallbackToSelector()
+    {
+        BayesianCandidateSelector selector = new BayesianCandidateSelector(defaultBatchSize: 3);
+        BayesianAcquisitionPolicy policy = new BayesianAcquisitionPolicy();
+        HashSet<int> evaluated = new HashSet<int> { 0 };
+
+        List<int> batch = policy.SelectNextBatch(
+            totalCount: 10,
+            evaluated,
+            scored: new List<BayesianCandidateSelector.CandidateScore>(),
+            batchSize: 3,
+            fallbackSelector: selector);
+
+        Assert.Equal(3, batch.Count);
+        Assert.DoesNotContain(0, batch);
+    }
+
+    [Fact]
+    public void BayesianAcquisitionPolicy_SelectNextBatch_WithEqualMeans_ShouldPreferHigherUncertainty()
+    {
+        BayesianCandidateSelector selector = new BayesianCandidateSelector(defaultBatchSize: 2);
+        BayesianAcquisitionPolicy policy = new BayesianAcquisitionPolicy(kappa: 1m);
+        HashSet<int> evaluated = new HashSet<int> { 1, 2 };
+        List<BayesianCandidateSelector.CandidateScore> scored = new List<BayesianCandidateSelector.CandidateScore>
+        {
+            new BayesianCandidateSelector.CandidateScore { Index = 1, Score = 10m },
+            new BayesianCandidateSelector.CandidateScore { Index = 2, Score = 10m }
+        };
+
+        List<int> batch = policy.SelectNextBatch(
+            totalCount: 8,
+            evaluated,
+            scored,
+            batchSize: 1,
+            fallbackSelector: selector);
+
+        // With equal means, farthest candidate in index-space gets max uncertainty.
+        Assert.Single(batch);
+        Assert.Equal(7, batch[0]);
+    }
+
+    [Fact]
     public void OptimizerSettings_SaveLoad_ShouldPersistOptimizationMethodFields()
     {
         lock (SettingsFileLock)
