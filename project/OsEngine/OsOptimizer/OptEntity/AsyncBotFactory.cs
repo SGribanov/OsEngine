@@ -123,6 +123,7 @@ namespace OsEngine.OsOptimizer.OptimizerEntity
                     {
                         if (MainWindow.ProccesIsWorked == false)
                         {
+                            CancelAllWaiters();
                             return;
                         }
 
@@ -147,6 +148,7 @@ namespace OsEngine.OsOptimizer.OptimizerEntity
                 }
                 catch (OperationCanceledException)
                 {
+                    CancelAllWaiters();
                     return;
                 }
                 catch (Exception e)
@@ -159,6 +161,14 @@ namespace OsEngine.OsOptimizer.OptimizerEntity
 
                     SendLogMessage("Optimizer critical error. \n Can`t create bot. Error: " + e.ToString(), LogMessageType.Error);
                 }
+            }
+        }
+
+        private void CancelAllWaiters()
+        {
+            foreach (KeyValuePair<string, TaskCompletionSource<BotPanel>> waiter in _botWaiters)
+            {
+                waiter.Value.TrySetCanceled();
             }
         }
 
