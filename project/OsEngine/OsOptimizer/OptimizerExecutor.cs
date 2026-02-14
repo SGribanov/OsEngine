@@ -182,7 +182,8 @@ namespace OsEngine.OsOptimizer
             {
                 SendLogMessage(
                     "Async bot factory start skipped (InSample): bot count is non-positive (count " + botCount +
-                    ", bot type '" + normalizedBotType + "', faze '" + normalizedFaze + "').",
+                    ", bot type '" + normalizedBotType + "', faze '" + normalizedFaze +
+                    "', isScript " + isScript + ").",
                     LogMessageType.System);
                 return;
             }
@@ -218,7 +219,8 @@ namespace OsEngine.OsOptimizer
             {
                 SendLogMessage(
                     "Async bot factory start skipped (InSample): no bot names generated (expected " +
-                    expectedNamesCount + ", bot type '" + normalizedBotType + "', faze '" + normalizedFaze + "').",
+                    expectedNamesCount + ", bot type '" + normalizedBotType + "', faze '" + normalizedFaze +
+                    "', isScript " + isScript + ").",
                     LogMessageType.System);
                 return;
             }
@@ -260,7 +262,8 @@ namespace OsEngine.OsOptimizer
             {
                 SendLogMessage(
                     "Async bot factory start skipped (OutOfSample): source reports snapshot is empty (count " +
-                    reports.Count + ", bot type '" + normalizedBotType + "', faze '" + normalizedFaze + "').",
+                    reports.Count + ", bot type '" + normalizedBotType + "', faze '" + normalizedFaze +
+                    "', isScript " + isScript + ").",
                     LogMessageType.System);
                 return;
             }
@@ -317,7 +320,8 @@ namespace OsEngine.OsOptimizer
             {
                 SendLogMessage(
                     "Async bot factory start skipped (OutOfSample): no bot names generated (expected " +
-                    expectedNamesCount + ", bot type '" + normalizedBotType + "', faze '" + normalizedFaze + "').",
+                    expectedNamesCount + ", bot type '" + normalizedBotType + "', faze '" + normalizedFaze +
+                    "', isScript " + isScript + ").",
                     LogMessageType.System);
                 return;
             }
