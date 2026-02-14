@@ -908,3 +908,23 @@ After each optimizer-related change, update this file with:
 
 ### Risks / notes
 - Reduces cross-request data races in overlapped single-bot test flows.
+
+## Stabilization Update (2026-02-14) - RunId Isolation For Async Single-Bot Completion
+### What changed
+- Added per-request `runId` in `OptimizerMaster.TestBot(...)` using `Interlocked.Increment`.
+- `RunAloneBotTestAsync(...)` now receives `runId` and publishes completion only for current run:
+  - result assignment;
+  - error-null assignment;
+  - `_aloneTestIsOver` transition;
+  - `_aloneTestDoneSignal.Set()`.
+- Guard check uses `runId == Volatile.Read(ref _aloneTestRunId)`.
+
+### Files touched
+- `project/OsEngine/OsOptimizer/OptimizerMaster.cs`
+
+### Validation
+- `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --configuration Debug`
+- Result: Passed 70 / Failed 0
+
+### Risks / notes
+- Prevents late completion of stale async run from clobbering state/result of a newer single-bot request.

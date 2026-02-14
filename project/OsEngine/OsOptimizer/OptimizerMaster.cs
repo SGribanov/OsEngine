@@ -1151,11 +1151,12 @@ namespace OsEngine.OsOptimizer
 
             _aloneTestIsOver = false;
             _aloneTestDoneSignal.Reset();
+            int runId = Interlocked.Increment(ref _aloneTestRunId);
 
             AwaitObject awaitUi = new AwaitObject(OsLocalization.Optimizer.Label52, 100, 0, true);
             _awaitUiMasterAloneTest = awaitUi;
 
-            Task.Run(() => RunAloneBotTestAsync(faze, report, awaitUi));
+            Task.Run(() => RunAloneBotTestAsync(faze, report, awaitUi, runId));
 
             AwaitUi ui = new AwaitUi(awaitUi);
             ui.ShowDialog();
@@ -1176,12 +1177,15 @@ namespace OsEngine.OsOptimizer
 
         private bool _aloneTestIsOver = true;
 
+        private int _aloneTestRunId;
+
         private readonly ManualResetEventSlim _aloneTestDoneSignal = new ManualResetEventSlim(true);
 
         private async Task RunAloneBotTestAsync(
             OptimizerFazeReport fazeToTest,
             OptimizerReport reportToTest,
-            AwaitObject awaitUi)
+            AwaitObject awaitUi,
+            int runId)
         {
             try
             {
@@ -1190,30 +1194,46 @@ namespace OsEngine.OsOptimizer
                 if (executor == null)
                 {
                     SendLogMessage("Single-bot test canceled: optimizer executor became unavailable.", LogMessageType.Error);
-                    _resultBotAloneTest = null;
+                    if (runId == Volatile.Read(ref _aloneTestRunId))
+                    {
+                        _resultBotAloneTest = null;
+                    }
                     return;
                 }
 
                 if (awaitUi == null)
                 {
                     SendLogMessage("Single-bot test canceled: await object is unavailable.", LogMessageType.Error);
-                    _resultBotAloneTest = null;
+                    if (runId == Volatile.Read(ref _aloneTestRunId))
+                    {
+                        _resultBotAloneTest = null;
+                    }
                     return;
                 }
 
-                _resultBotAloneTest =
-                    executor.TestBot(fazeToTest, reportToTest,
-                    StartProgram.IsTester, awaitUi);
+                BotPanel result =
+                    executor.TestBot(fazeToTest, reportToTest, StartProgram.IsTester, awaitUi);
+
+                if (runId == Volatile.Read(ref _aloneTestRunId))
+                {
+                    _resultBotAloneTest = result;
+                }
             }
             catch (Exception ex)
             {
                 SendLogMessage("Single-bot test failed: " + ex, LogMessageType.Error);
-                _resultBotAloneTest = null;
+                if (runId == Volatile.Read(ref _aloneTestRunId))
+                {
+                    _resultBotAloneTest = null;
+                }
             }
             finally
             {
-                _aloneTestIsOver = true;
-                _aloneTestDoneSignal.Set();
+                if (runId == Volatile.Read(ref _aloneTestRunId))
+                {
+                    _aloneTestIsOver = true;
+                    _aloneTestDoneSignal.Set();
+                }
             }
         }
 
