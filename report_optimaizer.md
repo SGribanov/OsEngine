@@ -4361,3 +4361,20 @@ After each optimizer-related change, update this file with:
 
 ### Risks / notes
 - No intended behavior change for valid flow; adds defensive integrity check at InSample->OutOfSample handoff boundary.
+
+
+## Stabilization Update (2026-02-14) - Enforce InSample Phase Type Before OOS Source Usage
+### What changed
+- Added additional guard in OutOfSample branch of `PrimeThreadWorkerPlace()`:
+  - validates that `latestInSampleReport.Faze` exists and has `TypeFaze == InSample`.
+- If check fails, OutOfSample phase is skipped with explicit diagnostic log.
+
+### Files touched
+- `project/OsEngine/OsOptimizer/OptimizerExecutor.cs`
+
+### Validation
+- `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --configuration Debug`
+- Result: Passed 70 / Failed 0
+
+### Risks / notes
+- No intended behavior change for valid flows; strengthens type-integrity assumptions for OOS source report handoff.

@@ -523,6 +523,13 @@ namespace OsEngine.OsOptimizer
                             continue;
                         }
 
+                        if (inSampleReport.Faze == null
+                            || inSampleReport.Faze.TypeFaze != OptimizerFazeType.InSample)
+                        {
+                            SendLogMessage("OutOfSample phase skipped: previous source report is not an InSample phase.", LogMessageType.Error);
+                            continue;
+                        }
+
                         int inSampleCount = inSampleReport?.Reports?.Count ?? 0;
                         SendLogMessage("ReportsCount " + inSampleCount.ToString(), LogMessageType.System);
 
