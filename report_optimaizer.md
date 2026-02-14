@@ -4194,3 +4194,21 @@ After each optimizer-related change, update this file with:
 
 ### Risks / notes
 - No intended behavior change in valid lifecycle flow; hardens against rare external state invalidation after start boundary.
+
+
+## Stabilization Update (2026-02-14) - Guard Runtime Strategy Settings Before Factory Call
+### What changed
+- Extended `GetInSampleOptimizationStrategy(...)` runtime guards in `OptimizerExecutor`:
+  - validates `_master` availability;
+  - validates strategy-related enum settings (`OptimizationMethod`, `ObjectiveMetric`, `ObjectiveDirection`, `BayesianAcquisitionMode`) before calling factory.
+- On invalid runtime state, strategy creation is skipped with explicit diagnostic and returns `null`.
+
+### Files touched
+- `project/OsEngine/OsOptimizer/OptimizerExecutor.cs`
+
+### Validation
+- `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --configuration Debug`
+- Result: Passed 70 / Failed 0
+
+### Risks / notes
+- No intended behavior change in normal runs; reduces runtime sensitivity to post-start external settings mutation before strategy construction.

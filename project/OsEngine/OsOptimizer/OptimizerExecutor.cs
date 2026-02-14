@@ -683,6 +683,21 @@ namespace OsEngine.OsOptimizer
 
         private IOptimizationStrategy GetInSampleOptimizationStrategy(IBotEvaluator evaluator)
         {
+            if (_master == null)
+            {
+                SendLogMessage("Optimizer strategy creation skipped: master context is null.", LogMessageType.Error);
+                return null;
+            }
+
+            if (!Enum.IsDefined(typeof(OptimizationMethodType), _master.OptimizationMethod)
+                || !Enum.IsDefined(typeof(SortBotsType), _master.ObjectiveMetric)
+                || !Enum.IsDefined(typeof(ObjectiveDirectionType), _master.ObjectiveDirection)
+                || !Enum.IsDefined(typeof(BayesianAcquisitionModeType), _master.BayesianAcquisitionMode))
+            {
+                SendLogMessage("Optimizer strategy creation skipped: runtime strategy settings are invalid.", LogMessageType.Error);
+                return null;
+            }
+
             int parallel = Math.Max(1, _master.ThreadsCount);
 
             IOptimizationStrategy strategy = null;
