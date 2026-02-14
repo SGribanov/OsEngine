@@ -888,8 +888,12 @@ namespace OsEngine.OsOptimizer
                         continue;
                     }
 
-                    Security secToStart =
-                    _master.Storage.Securities.Find(s => s.Name == simple.Connector.SecurityName);
+                    Security secToStart;
+                    if (!TryFindSecurityByName(simple.Connector.SecurityName, out secToStart))
+                    {
+                        SendLogMessage("CreateNewServer skipped security bind: not found '" + simple.Connector.SecurityName + "'.", LogMessageType.Error);
+                        continue;
+                    }
                     if (secToStart == null)
                     {
                         SendLogMessage("CreateNewServer skipped security bind: not found '" + simple.Connector.SecurityName + "'.", LogMessageType.Error);
@@ -921,8 +925,12 @@ namespace OsEngine.OsOptimizer
                             continue;
                         }
 
-                        Security secToStart =
-                          _master.Storage.Securities.Find(s => s.Name == index.Tabs[i2].SecurityName);
+                        Security secToStart;
+                        if (!TryFindSecurityByName(index.Tabs[i2].SecurityName, out secToStart))
+                        {
+                            SendLogMessage("CreateNewServer skipped security bind: not found '" + index.Tabs[i2].SecurityName + "'.", LogMessageType.Error);
+                            continue;
+                        }
                         if (secToStart == null)
                         {
                             SendLogMessage("CreateNewServer skipped security bind: not found '" + index.Tabs[i2].SecurityName + "'.", LogMessageType.Error);
@@ -955,8 +963,12 @@ namespace OsEngine.OsOptimizer
                             continue;
                         }
 
-                        Security secToStart =
-                          _master.Storage.Securities.Find(s => s.Name == screener.Tabs[i2].Connector.SecurityName);
+                        Security secToStart;
+                        if (!TryFindSecurityByName(screener.Tabs[i2].Connector.SecurityName, out secToStart))
+                        {
+                            SendLogMessage("CreateNewServer skipped security bind: not found '" + screener.Tabs[i2].Connector.SecurityName + "'.", LogMessageType.Error);
+                            continue;
+                        }
                         if (secToStart == null)
                         {
                             SendLogMessage("CreateNewServer skipped security bind: not found '" + screener.Tabs[i2].Connector.SecurityName + "'.", LogMessageType.Error);
@@ -1468,6 +1480,36 @@ namespace OsEngine.OsOptimizer
                     ", security '" + security.Name + "'): " + ex,
                     LogMessageType.Error);
             }
+        }
+
+        private bool TryFindSecurityByName(string securityName, out Security security)
+        {
+            security = null;
+            if (string.IsNullOrWhiteSpace(securityName)
+                || _master?.Storage?.Securities == null)
+            {
+                return false;
+            }
+
+            try
+            {
+                List<Security> all = _master.Storage.Securities;
+                for (int i = 0; i < all.Count; i++)
+                {
+                    Security candidate = all[i];
+                    if (candidate != null && candidate.Name == securityName)
+                    {
+                        security = candidate;
+                        return true;
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                SendLogMessage("CreateNewServer security lookup failed for '" + securityName + "': " + ex, LogMessageType.Error);
+            }
+
+            return false;
         }
 
         #endregion

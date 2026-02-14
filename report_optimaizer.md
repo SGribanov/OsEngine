@@ -1846,3 +1846,22 @@ After each optimizer-related change, update this file with:
 
 ### Risks / notes
 - Prevents malformed security entities from reaching `GetDataToSecurity(...)` path and improves error context.
+
+## Stabilization Update (2026-02-14) - Safe Security Lookup Helper In CreateNewServer
+### What changed
+- Added `TryFindSecurityByName(string securityName, out Security security)` helper in `OptimizerExecutor`.
+- Replaced direct `List.Find(...)` lookups against `_master.Storage.Securities` in `CreateNewServer(...)` with safe helper usage.
+- Helper:
+  - tolerates null/empty input and null storage collection;
+  - safely iterates securities list while skipping null entries;
+  - logs lookup exceptions with security context.
+
+### Files touched
+- `project/OsEngine/OsOptimizer/OptimizerExecutor.cs`
+
+### Validation
+- `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --configuration Debug`
+- Result: Passed 70 / Failed 0
+
+### Risks / notes
+- Prevents null-entry dereference in securities list during lookup (`s => s.Name`) and keeps binding flow resilient.
