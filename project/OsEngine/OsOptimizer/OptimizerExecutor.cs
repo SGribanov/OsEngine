@@ -47,6 +47,8 @@ namespace OsEngine.OsOptimizer
 
         private CountdownEvent _phaseCompletion;
 
+        private CancellationTokenSource _stopCts;
+
         public bool Start(List<bool> parametersOn, List<IIStrategyParameter> parameters)
         {
             if (_primeThreadWorker != null)
@@ -59,13 +61,15 @@ namespace OsEngine.OsOptimizer
 
             SendLogMessage(OsLocalization.Optimizer.Message2, LogMessageType.System);
 
-            _needToStop = false;
+            _stopCts?.Dispose();
+            _stopCts = new CancellationTokenSource();
             _servers = new List<OptimizerServer>();
             _countAllServersMax = 0;
             _countAllServersEndTest = 0;
             _serverNum = 1;
             _testBotsTime.Clear();
             _serverSlots = new SemaphoreSlim(Math.Max(1, _master.ThreadsCount), Math.Max(1, _master.ThreadsCount));
+            _phaseCompletion = null;
 
             _primeThreadWorker = new Thread(PrimeThreadWorkerPlace);
             _primeThreadWorker.Name = "OptimizerExecutorThread";
@@ -77,11 +81,11 @@ namespace OsEngine.OsOptimizer
 
         public void Stop()
         {
-            _needToStop = true;
+            _stopCts?.Cancel();
             SendLogMessage(OsLocalization.Optimizer.Message3, LogMessageType.System);
         }
 
-        private bool _needToStop;
+        private bool IsStopRequested => _stopCts != null && _stopCts.IsCancellationRequested;
 
         #endregion
 
@@ -106,7 +110,7 @@ namespace OsEngine.OsOptimizer
 
             for (int i = 0; i < _master.Fazes.Count; i++)
             {
-                if (_needToStop)
+                if (IsStopRequested)
                 {
                     _primeThreadWorker = null;
                     TestReadyEvent?.Invoke(ReportsToFazes);
@@ -367,8 +371,8 @@ namespace OsEngine.OsOptimizer
             // wait for the robot to connect to its data server
             // ждём пока робот подключиться к своему серверу данных
 
-            bool isConnected = SpinWait.SpinUntil(() => bot.IsConnected || _needToStop, TimeSpan.FromSeconds(2000));
-            if (!isConnected || _needToStop)
+            bool isConnected = SpinWait.SpinUntil(() => bot.IsConnected || IsStopRequested, TimeSpan.FromSeconds(2000));
+            if (!isConnected || IsStopRequested)
             {
                 SendLogMessage(
                     OsLocalization.Optimizer.Message10,
@@ -387,16 +391,25 @@ namespace OsEngine.OsOptimizer
 
         private bool TryAcquireServerSlot()
         {
-            while (!_needToStop)
+            CancellationToken token = _stopCts?.Token ?? CancellationToken.None;
+
+            while (!token.IsCancellationRequested)
             {
                 if (_serverSlots == null)
                 {
                     return false;
                 }
 
-                if (_serverSlots.Wait(100))
+                try
                 {
-                    return true;
+                    if (_serverSlots.Wait(100, token))
+                    {
+                        return true;
+                    }
+                }
+                catch (OperationCanceledException)
+                {
+                    return false;
                 }
             }
 
@@ -405,9 +418,18 @@ namespace OsEngine.OsOptimizer
 
         private void WaitCurrentPhaseToComplete()
         {
+            CancellationToken token = _stopCts?.Token ?? CancellationToken.None;
+
             while (_phaseCompletion != null && !_phaseCompletion.IsSet)
             {
-                _phaseCompletion.Wait(100);
+                try
+                {
+                    _phaseCompletion.Wait(100, token);
+                }
+                catch (OperationCanceledException)
+                {
+                    return;
+                }
             }
         }
 
@@ -537,7 +559,13 @@ namespace OsEngine.OsOptimizer
             OptimizerServer server, StartProgram regime)
         {
             _botConfigurator.BotToTest = _master.BotToTest;
-            return _botConfigurator.CreateAndConfigureBot(botName, parameters, parametersOptimized, server, regime);
+            return _botConfigurator.CreateAndConfigureBot(
+                botName,
+                parameters,
+                parametersOptimized,
+                server,
+                regime,
+                _stopCts?.Token ?? CancellationToken.None);
         }
 
         public event Action<int, int> PrimeProgressChangeEvent;
@@ -595,6 +623,10 @@ namespace OsEngine.OsOptimizer
 
             while (bot.TimeServer < reportFaze.Faze.TimeEnd)
             {
+                if (IsStopRequested)
+                {
+                    break;
+                }
 
                 Thread.Sleep(1000);
                 if (timeStartWaiting.AddSeconds(300) < DateTime.Now)

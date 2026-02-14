@@ -5,6 +5,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Threading;
 using OsEngine.Entity;
 using OsEngine.Logging;
 using OsEngine.Market;
@@ -45,13 +46,14 @@ namespace OsEngine.OsOptimizer.OptEntity
             List<IIStrategyParameter> parameters,
             List<IIStrategyParameter> parametersOptimized,
             OptimizerServer server,
-            StartProgram regime)
+            StartProgram regime,
+            CancellationToken cancellationToken = default)
         {
             BotPanel bot = null;
 
             try
             {
-                bot = _asyncBotFactory.GetBot(_settings.StrategyName, botName);
+                bot = _asyncBotFactory.GetBot(_settings.StrategyName, botName, cancellationToken);
 
                 if (bot.Parameters.Count != parameters.Count)
                 {

@@ -37,7 +37,7 @@ namespace OsEngine.OsOptimizer.OptimizerEntity
 
         private readonly ConcurrentDictionary<string, TaskCompletionSource<BotPanel>> _botWaiters = new();
 
-        public BotPanel GetBot(string botType, string botName)
+        public BotPanel GetBot(string botType, string botName, CancellationToken cancellationToken = default)
         {
             string key = GetKey(botType, botName);
             TaskCompletionSource<BotPanel> waiter = _botWaiters.GetOrAdd(key, _ =>
@@ -45,7 +45,8 @@ namespace OsEngine.OsOptimizer.OptimizerEntity
 
             try
             {
-                return waiter.Task.GetAwaiter().GetResult();
+                waiter.Task.Wait(cancellationToken);
+                return waiter.Task.Result;
             }
             finally
             {
