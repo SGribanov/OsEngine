@@ -3286,3 +3286,22 @@ After each optimizer-related change, update this file with:
 
 ### Risks / notes
 - Behavior is preserved; numbering may now contain gaps if creation fails, which is acceptable for unique ID allocation and safer under concurrency.
+
+
+## Stabilization Update (2026-02-14) - Publish Phase-Start Progress From Locked Counter Snapshots
+### What changed
+- Removed unsynchronized progress counter reads in phase-start flows:
+  - `StartOptimizeFazeInSample(...)`
+  - `StartOptimizeFazeOutOfSample(...)`
+- After updating `_countAllServersMax`, both progress values are now captured under `_serverRemoveLocker` and then passed to `SafeInvokePrimeProgress(...)`.
+- Zero-item OutOfSample path now also reads progress counters from the same locked snapshot pattern.
+
+### Files touched
+- `project/OsEngine/OsOptimizer/OptimizerExecutor.cs`
+
+### Validation
+- `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --configuration Debug`
+- Result: Passed 70 / Failed 0
+
+### Risks / notes
+- No functional behavior change expected; removes minor data-race windows in progress reporting under concurrent updates.

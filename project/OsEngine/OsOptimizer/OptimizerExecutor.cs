@@ -414,12 +414,17 @@ namespace OsEngine.OsOptimizer
 
             if (inSampleBotsCount > 0)
             {
+                int progressEnd;
+                int progressMax;
+
                 lock (_serverRemoveLocker)
                 {
                     _countAllServersMax += inSampleBotsCount;
+                    progressEnd = _countAllServersEndTest;
+                    progressMax = _countAllServersMax;
                 }
 
-                SafeInvokePrimeProgress(_countAllServersEndTest, _countAllServersMax);
+                SafeInvokePrimeProgress(progressEnd, progressMax);
             }
 
             // 2 проходим первую фазу, когда нужно обойти все варианты
@@ -513,18 +518,32 @@ namespace OsEngine.OsOptimizer
 
             if (outOfSampleBotsCount > 0)
             {
+                int progressEnd;
+                int progressMax;
+
                 lock (_serverRemoveLocker)
                 {
                     _countAllServersMax += outOfSampleBotsCount;
+                    progressEnd = _countAllServersEndTest;
+                    progressMax = _countAllServersMax;
                 }
 
-                SafeInvokePrimeProgress(_countAllServersEndTest, _countAllServersMax);
+                SafeInvokePrimeProgress(progressEnd, progressMax);
             }
 
             if (outOfSampleBotsCount == 0)
             {
+                int progressEnd;
+                int progressMax;
+
+                lock (_serverRemoveLocker)
+                {
+                    progressEnd = _countAllServersEndTest;
+                    progressMax = _countAllServersMax;
+                }
+
                 SendLogMessage("OutOfSample has no valid source reports to process.", LogMessageType.System);
-                SafeInvokePrimeProgress(_countAllServersEndTest, _countAllServersMax);
+                SafeInvokePrimeProgress(progressEnd, progressMax);
                 WaitCurrentPhaseToComplete();
                 return;
             }
