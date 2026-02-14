@@ -191,7 +191,7 @@ namespace OsEngine.OsOptimizer
             }
 
             List<string> botNames = new List<string>();
-            HashSet<string> uniqueBotNames = new HashSet<string>();
+            HashSet<string> uniqueBotNames = new HashSet<string>(StringComparer.Ordinal);
             int startServerIndex = _serverNum;
 
             for (int i = 0; i < botCount; i++)
@@ -241,7 +241,7 @@ namespace OsEngine.OsOptimizer
             }
 
             List<string> botNames = new List<string>();
-            HashSet<string> uniqueBotNames = new HashSet<string>();
+            HashSet<string> uniqueBotNames = new HashSet<string>(StringComparer.Ordinal);
 
             for (int i = 0; i < reportFiltered.Reports.Count; i++)
             {

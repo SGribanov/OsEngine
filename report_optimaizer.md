@@ -2693,3 +2693,21 @@ After each optimizer-related change, update this file with:
 ### Risks / notes
 - No normal-path behavior change for valid input; reduces failures from accidental leading/trailing whitespace in strategy type names.
 
+
+## Stabilization Update (2026-02-14) - Make Async Name Dedup Comparison Explicit
+### What changed
+- Updated async bot-name dedup sets in `OptimizerExecutor` to use explicit `StringComparer.Ordinal`.
+- Applied in both:
+  - `StartAsuncBotFactoryInSample(...)`;
+  - `StartAsuncBotFactoryOutOfSample(...)`.
+
+### Files touched
+- `project/OsEngine/OsOptimizer/OptimizerExecutor.cs`
+
+### Validation
+- `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --configuration Debug`
+- Result: Passed 70 / Failed 0
+
+### Risks / notes
+- No functional behavior change expected; makes string comparison intent explicit and stable.
+
