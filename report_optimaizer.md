@@ -2872,3 +2872,23 @@ After each optimizer-related change, update this file with:
 ### Risks / notes
 - Behavior change only for whitespace-padded source names; improves deterministic OOS name normalization.
 
+
+## Stabilization Update (2026-02-14) - Enrich Async Factory Failure Diagnostics With Type/Faze Context
+### What changed
+- Updated async bot factory failure logs in `OptimizerExecutor` for both in-sample and out-of-sample startup paths.
+- Failure diagnostics now include:
+  - batch count;
+  - normalized bot type;
+  - normalized faze label.
+- Error propagation behavior (`throw`) remains unchanged.
+
+### Files touched
+- `project/OsEngine/OsOptimizer/OptimizerExecutor.cs`
+
+### Validation
+- `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --configuration Debug`
+- Result: Passed 70 / Failed 0
+
+### Risks / notes
+- No control-flow change; improves post-mortem context when async factory startup fails.
+

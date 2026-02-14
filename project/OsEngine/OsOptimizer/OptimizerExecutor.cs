@@ -222,7 +222,10 @@ namespace OsEngine.OsOptimizer
             }
             catch (Exception ex)
             {
-                SendLogMessage("Async bot factory start failed (InSample, count " + botNames.Count + "): " + ex, LogMessageType.Error);
+                SendLogMessage(
+                    "Async bot factory start failed (InSample, count " + botNames.Count +
+                    ", bot type '" + normalizedBotType + "', faze '" + normalizedFaze + "'): " + ex,
+                    LogMessageType.Error);
                 throw;
             }
         }
@@ -303,7 +306,10 @@ namespace OsEngine.OsOptimizer
             }
             catch (Exception ex)
             {
-                SendLogMessage("Async bot factory start failed (OutOfSample, count " + botNames.Count + "): " + ex, LogMessageType.Error);
+                SendLogMessage(
+                    "Async bot factory start failed (OutOfSample, count " + botNames.Count +
+                    ", bot type '" + normalizedBotType + "', faze '" + normalizedFaze + "'): " + ex,
+                    LogMessageType.Error);
                 throw;
             }
         }
