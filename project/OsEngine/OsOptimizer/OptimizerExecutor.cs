@@ -718,8 +718,8 @@ namespace OsEngine.OsOptimizer
                 return null;
             }
 
-            bool isConnected = SpinWait.SpinUntil(() => bot.IsConnected, TimeSpan.FromSeconds(20));
-            if (!isConnected)
+            bool isConnected = SpinWait.SpinUntil(() => bot.IsConnected || IsStopRequested, TimeSpan.FromSeconds(20));
+            if (!isConnected || IsStopRequested)
             {
                 SendLogMessage(
                     OsLocalization.Optimizer.Message10,
@@ -767,9 +767,12 @@ namespace OsEngine.OsOptimizer
                 }
             }
 
-            if (startTime.AddSeconds(3) > DateTime.Now)
+            TimeSpan minRuntime = TimeSpan.FromSeconds(3);
+            TimeSpan elapsed = DateTime.Now - startTime;
+            if (elapsed < minRuntime)
             {
-                Thread.Sleep(3000);
+                TimeSpan remaining = minRuntime - elapsed;
+                (_stopCts?.Token ?? CancellationToken.None).WaitHandle.WaitOne(remaining);
             }
 
             awaitObj.Dispose();
