@@ -154,6 +154,10 @@ namespace OsEngine.OsOptimizer
                 {
                     _testBotsTime.Clear();
                 }
+                lock (_reportsSync)
+                {
+                    ReportsToFazes = new List<OptimizerFazeReport>();
+                }
 
                 CancelPendingEvaluations("Optimizer start cleanup canceled stale pending evaluations: ");
 

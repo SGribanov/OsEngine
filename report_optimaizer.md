@@ -3843,3 +3843,19 @@ After each optimizer-related change, update this file with:
 
 ### Risks / notes
 - No intended behavior change; reduces race risk between prime-phase updates and server end-event report loading/publishing.
+
+
+## Stabilization Update (2026-02-14) - Reset Public Reports Collection At Start Boundary
+### What changed
+- Added explicit `ReportsToFazes` reset in `Start(...)` under `_reportsSync`.
+- New run now starts with an empty report list immediately at lifecycle boundary, before worker thread body begins.
+
+### Files touched
+- `project/OsEngine/OsOptimizer/OptimizerExecutor.cs`
+
+### Validation
+- `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --configuration Debug`
+- Result: Passed 70 / Failed 0
+
+### Risks / notes
+- No intended behavior change; reduces stale-report visibility window between consecutive runs.
