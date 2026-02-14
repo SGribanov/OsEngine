@@ -3305,3 +3305,22 @@ After each optimizer-related change, update this file with:
 
 ### Risks / notes
 - No functional behavior change expected; removes minor data-race windows in progress reporting under concurrent updates.
+
+
+## Stabilization Update (2026-02-14) - Make Synchronization Cleanup Atomic With `Interlocked.Exchange`
+### What changed
+- Updated `DisposeRunSynchronization()` in `OptimizerExecutor` to atomically detach disposable sync objects before disposal:
+  - `_phaseCompletion`
+  - `_serverSlots`
+  - `_stopCts`
+- Implemented via `Interlocked.Exchange(ref field, null)` and disposal of detached local snapshot.
+
+### Files touched
+- `project/OsEngine/OsOptimizer/OptimizerExecutor.cs`
+
+### Validation
+- `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --configuration Debug`
+- Result: Passed 70 / Failed 0
+
+### Risks / notes
+- No behavior change expected; reduces rare race windows where a newly assigned sync object could otherwise be affected by concurrent cleanup.

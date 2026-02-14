@@ -937,43 +937,34 @@ namespace OsEngine.OsOptimizer
 
         private void DisposeRunSynchronization()
         {
+            CountdownEvent phaseCompletion = Interlocked.Exchange(ref _phaseCompletion, null);
             try
             {
-                _phaseCompletion?.Dispose();
+                phaseCompletion?.Dispose();
             }
             catch (Exception ex)
             {
                 SendLogMessage("Optimizer sync cleanup failed: phase completion dispose. " + ex, LogMessageType.Error);
             }
-            finally
-            {
-                _phaseCompletion = null;
-            }
 
+            SemaphoreSlim serverSlots = Interlocked.Exchange(ref _serverSlots, null);
             try
             {
-                _serverSlots?.Dispose();
+                serverSlots?.Dispose();
             }
             catch (Exception ex)
             {
                 SendLogMessage("Optimizer sync cleanup failed: server slots dispose. " + ex, LogMessageType.Error);
             }
-            finally
-            {
-                _serverSlots = null;
-            }
 
+            CancellationTokenSource stopCts = Interlocked.Exchange(ref _stopCts, null);
             try
             {
-                _stopCts?.Dispose();
+                stopCts?.Dispose();
             }
             catch (Exception ex)
             {
                 SendLogMessage("Optimizer sync cleanup failed: stop token source dispose. " + ex, LogMessageType.Error);
-            }
-            finally
-            {
-                _stopCts = null;
             }
         }
 
