@@ -283,6 +283,12 @@ namespace OsEngine.OsOptimizer
         {
             SendLogMessage(OsLocalization.Optimizer.Message6, LogMessageType.System);
 
+            if (report == null)
+            {
+                SendLogMessage("OutOfSample phase skipped: target report container is null.", LogMessageType.Error);
+                return;
+            }
+
             List<OptimizerReport> inSampleReports = reportInSample?.Reports;
             int sourceCount = inSampleReports?.Count ?? 0;
             if (inSampleReports != null)
