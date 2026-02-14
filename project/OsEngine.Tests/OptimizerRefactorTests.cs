@@ -1836,6 +1836,7 @@ public class OptimizerRefactorTests
         {
             factory.CreateNewBots(null, "type", isScript: false, StartProgram.IsOsOptimizer);
             factory.CreateNewBots(new List<string>(), "type", isScript: false, StartProgram.IsOsOptimizer);
+            factory.CreateNewBots(new List<string> { "bot" }, null, isScript: false, StartProgram.IsOsOptimizer);
             factory.CreateNewBots(new List<string> { "bot" }, "", isScript: false, StartProgram.IsOsOptimizer);
             factory.CreateNewBots(
                 new List<string> { "", "   " },

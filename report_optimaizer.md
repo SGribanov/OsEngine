@@ -93,6 +93,7 @@ Implemented and committed:
 84. Operability: refined out-of-sample sanitization diagnostics by separating skip reasons (`null report` vs `empty BotName`) in logs.
 85. Maintainability: extracted duplicated out-of-sample skip-compensation block into `CompensateSkippedOutOfSampleSlot()` to keep slot/countdown recovery logic consistent.
 86. Stabilization: extended `AsyncBotFactory.GetBot` invalid-key regression coverage to include `null` `botType`/`botName` cases.
+87. Stabilization: extended `AsyncBotFactory.CreateNewBots` invalid-input regression coverage to include `null botType`.
 
 ## Commits
 - `b1e5eabe3` — `Optimizer: persist Phase1 extraction and wiring state`
