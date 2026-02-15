@@ -51,9 +51,9 @@ namespace OsEngine.Entity
                     writer.Close();
                 }
             }
-            catch
+            catch (Exception ex)
             {
-                // ignore
+                SendNewLogMessage(ex.ToString(), LogMessageType.Error);
             }
         }
 
@@ -85,9 +85,9 @@ namespace OsEngine.Entity
                     reader.Close();
                 }
             }
-            catch
+            catch (Exception ex)
             {
-                // ignore
+                SendNewLogMessage(ex.ToString(), LogMessageType.Error);
             }
         }
 

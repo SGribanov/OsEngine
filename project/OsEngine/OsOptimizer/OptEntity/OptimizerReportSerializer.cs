@@ -4,6 +4,7 @@
 */
 
 using System;
+using System.Diagnostics;
 using System.Text;
 using OsEngine.Entity;
 
@@ -39,9 +40,9 @@ namespace OsEngine.OsOptimizer.OptEntity
                 // legacy format without version prefix
                 DeserializeLegacyBody(report, saveStr);
             }
-            catch
+            catch (Exception ex)
             {
-                // keep backward-compatible behavior
+                Trace.TraceWarning(ex.ToString());
             }
         }
 

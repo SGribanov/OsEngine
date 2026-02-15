@@ -109,9 +109,9 @@ namespace OsEngine.Market.Servers.Optimizer
                     _pathToFolder = reader.ReadLine();
                 }
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                // ignored
+                SendLogMessage(ex.ToString(), LogMessageType.Error);
             }
         }
 
@@ -127,9 +127,9 @@ namespace OsEngine.Market.Servers.Optimizer
                     writer.WriteLine(_pathToFolder);
                 }
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                // ignored
+                SendLogMessage(ex.ToString(), LogMessageType.Error);
             }
         }
 

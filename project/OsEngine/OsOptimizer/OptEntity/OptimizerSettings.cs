@@ -250,7 +250,11 @@ namespace OsEngine.OsOptimizer.OptEntity
         public int IterationCount
         {
             get => _iterationCount;
-            set { _iterationCount = value; Save(); }
+            set
+            {
+                _iterationCount = ClampPositiveInt(value);
+                Save();
+            }
         }
         private int _iterationCount;
 
@@ -281,9 +285,9 @@ namespace OsEngine.OsOptimizer.OptEntity
                     }
                 }
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                // ignored
+                LogMessageEvent?.Invoke(ex.ToString(), LogMessageType.Error);
             }
         }
 
@@ -311,9 +315,9 @@ namespace OsEngine.OsOptimizer.OptEntity
                     }
                 }
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                // ignored
+                LogMessageEvent?.Invoke(ex.ToString(), LogMessageType.Error);
             }
         }
 
@@ -354,9 +358,9 @@ namespace OsEngine.OsOptimizer.OptEntity
                     }
                 }
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                // ignored
+                LogMessageEvent?.Invoke(ex.ToString(), LogMessageType.Error);
             }
         }
 
@@ -384,9 +388,9 @@ namespace OsEngine.OsOptimizer.OptEntity
                     }
                 }
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                // ignored
+                LogMessageEvent?.Invoke(ex.ToString(), LogMessageType.Error);
             }
         }
 
@@ -588,7 +592,7 @@ namespace OsEngine.OsOptimizer.OptEntity
                     _filterDealsCountValue = Convert.ToInt32(reader.ReadLine());
                     _filterDealsCountIsOn = Convert.ToBoolean(reader.ReadLine());
                     _isScript = Convert.ToBoolean(reader.ReadLine());
-                    _iterationCount = Convert.ToInt32(reader.ReadLine());
+                    _iterationCount = ClampPositiveInt(Convert.ToInt32(reader.ReadLine()));
                     _commissionType = (CommissionType)Enum.Parse(typeof(CommissionType),
                         reader.ReadLine() ?? CommissionType.None.ToString());
                     _commissionValue = reader.ReadLine().ToDecimal();
@@ -658,9 +662,9 @@ namespace OsEngine.OsOptimizer.OptEntity
                     }
                 }
             }
-            catch
+            catch (Exception ex)
             {
-                // ignore - backward compatibility with old settings files
+                LogMessageEvent?.Invoke(ex.ToString(), LogMessageType.Error);
             }
         }
 

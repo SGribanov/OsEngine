@@ -42,10 +42,9 @@ namespace OsEngine.Entity
                     writer.Close();
                 }
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                // send to log
-                // отправить в лог
+                SendNewLogMessage(ex.ToString(), LogMessageType.Error);
             }
         }
 
@@ -68,10 +67,9 @@ namespace OsEngine.Entity
                     reader.Close();
                 }
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                // send to log
-                // отправить в лог
+                SendNewLogMessage(ex.ToString(), LogMessageType.Error);
             }
         }
 
