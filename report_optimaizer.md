@@ -5135,3 +5135,24 @@ After each optimizer-related change, update this file with:
 
 ### Risks / notes
 - Fix affects estimate display logic and input guard only; optimization runtime flow unchanged.
+
+## Bugfix Update (2026-02-15) - Remove Hard Limit On Combination Count
+### What changed
+- Removed hard stop limit in `ParameterIterator.CountCombinations(...)`:
+  - deleted `countBots > 5000000` cutoff;
+  - deleted corresponding error log message (`Iteration count > 5000000. Warning!!!`).
+- Combination counting now runs without this artificial cap.
+
+### Files touched
+- `project/OsEngine/OsOptimizer/OptEntity/ParameterIterator.cs`
+- `report_optimaizer.md`
+
+### Validation
+- `dotnet build project/OsEngine/OsEngine.csproj --configuration Debug`
+- Result: Build succeeded, warnings 0, errors 0
+- `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --configuration Debug`
+- Result: Passed 70 / Failed 0
+
+### Risks / notes
+- Runtime can spend significantly more time in estimate/counting path for very large parameter grids.
+- One transient parallel build/test lock (`CS2012`) occurred; sequential rerun passed.
