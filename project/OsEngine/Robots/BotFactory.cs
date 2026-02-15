@@ -455,6 +455,19 @@ namespace OsEngine.Robots
                         $"All non-abstract BotPanel derivatives found in the script's assembly: [{foundTypesMessage}]");
                 }
 
+                lock (_compiledTypesCacheLock)
+                {
+                    // Add to cache if not already added by another thread.
+                    if (!_compiledBotTypesCache.ContainsKey(nameClass))
+                    {
+                        _compiledBotTypesCache[nameClass] = botType;
+                    }
+                    else
+                    {
+                        botType = _compiledBotTypesCache[nameClass];
+                    }
+                }
+
                 // Параметры конструктора, которые ожидает BotFactory
                 object[] constructorParams = new object[] { nameInstance, startProgram };
 
