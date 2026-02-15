@@ -1,0 +1,35 @@
+# Refactoring Stage 2 Progress Log
+
+## 2026-02-15 - Step 2.1 (Atomic File Writes) - In Progress
+
+- Added `project/OsEngine/Entity/SafeFileWriter.cs`:
+  - temp file in same directory
+  - `Flush(true)` before replace
+  - `File.Replace(temp, target, backup, true)` when target exists
+  - fallback `File.Move(temp, target)` for first write
+  - cleanup of stale `.tmp`
+- Migrated save paths to atomic writes:
+  - `project/OsEngine/OsOptimizer/OptEntity/OptimizerSettings.cs`
+    - `SaveClearingInfo`
+    - `SaveNonTradePeriods`
+    - `Save`
+  - `project/OsEngine/OsTrader/Panels/BotPanel.cs`
+    - `SaveParameters`
+  - `project/OsEngine/Market/Servers/AServer.cs`
+    - `SaveParam`
+    - `Save`
+    - `SaveLeverageToFile`
+- Added tests:
+  - `project/OsEngine.Tests/SafeFileWriterTests.cs`
+    - creates new file without `.tmp` leftovers
+    - overwrite creates `.bak` with previous content
+
+### Verification
+
+- `dotnet build project/OsEngine/OsEngine.csproj` -> success, 0 warnings, 0 errors
+- `dotnet build project/OsEngine.Tests/OsEngine.Tests.csproj` -> success, 0 warnings, 0 errors
+- `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj` -> passed 78/78
+
+### Notes
+
+- `dotnet build project/OsEngine.sln` currently fails on restore path with `MSB4276` in this environment (existing toolchain issue), while project-level builds and tests pass.

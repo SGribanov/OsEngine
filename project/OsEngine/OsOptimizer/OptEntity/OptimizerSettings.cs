@@ -277,13 +277,13 @@ namespace OsEngine.OsOptimizer.OptEntity
         {
             try
             {
-                using (StreamWriter writer = new StreamWriter(@"Engine\" + @"OptimizerMasterClearings.txt", false))
+                List<string> lines = new List<string>();
+                for (int i = 0; i < ClearingTimes.Count; i++)
                 {
-                    for (int i = 0; i < ClearingTimes.Count; i++)
-                    {
-                        writer.WriteLine(ClearingTimes[i].GetSaveString());
-                    }
+                    lines.Add(ClearingTimes[i].GetSaveString());
                 }
+
+                SafeFileWriter.WriteAllLines(@"Engine\" + @"OptimizerMasterClearings.txt", lines);
             }
             catch (Exception ex)
             {
@@ -350,13 +350,13 @@ namespace OsEngine.OsOptimizer.OptEntity
         {
             try
             {
-                using (StreamWriter writer = new StreamWriter(@"Engine\" + @"OptimizerMasterNonTradePeriods.txt", false))
+                List<string> lines = new List<string>();
+                for (int i = 0; i < NonTradePeriods.Count; i++)
                 {
-                    for (int i = 0; i < NonTradePeriods.Count; i++)
-                    {
-                        writer.WriteLine(NonTradePeriods[i].GetSaveString());
-                    }
+                    lines.Add(NonTradePeriods[i].GetSaveString());
                 }
+
+                SafeFileWriter.WriteAllLines(@"Engine\" + @"OptimizerMasterNonTradePeriods.txt", lines);
             }
             catch (Exception ex)
             {
@@ -514,48 +514,50 @@ namespace OsEngine.OsOptimizer.OptEntity
         {
             try
             {
-                using (StreamWriter writer = new StreamWriter(@"Engine\OptimizerSettings.txt", false))
+                List<string> lines = new List<string>
                 {
-                    writer.WriteLine(_threadsCount);
-                    writer.WriteLine(_strategyName);
-                    writer.WriteLine(_startDeposit);
+                    _threadsCount.ToString(),
+                    _strategyName,
+                    _startDeposit.ToString(),
 
-                    writer.WriteLine(_filterProfitValue);
-                    writer.WriteLine(_filterProfitIsOn);
-                    writer.WriteLine(_filterMaxDrawDownValue);
-                    writer.WriteLine(_filterMaxDrawDownIsOn);
-                    writer.WriteLine(_filterMiddleProfitValue);
-                    writer.WriteLine(_filterMiddleProfitIsOn);
-                    writer.WriteLine(_filterProfitFactorValue);
-                    writer.WriteLine(_filterProfitFactorIsOn);
+                    _filterProfitValue.ToString(),
+                    _filterProfitIsOn.ToString(),
+                    _filterMaxDrawDownValue.ToString(),
+                    _filterMaxDrawDownIsOn.ToString(),
+                    _filterMiddleProfitValue.ToString(),
+                    _filterMiddleProfitIsOn.ToString(),
+                    _filterProfitFactorValue.ToString(),
+                    _filterProfitFactorIsOn.ToString(),
 
-                    writer.WriteLine(_timeStart.ToString(CultureInfo.InvariantCulture));
-                    writer.WriteLine(_timeEnd.ToString(CultureInfo.InvariantCulture));
-                    writer.WriteLine(_percentOnFiltration);
+                    _timeStart.ToString(CultureInfo.InvariantCulture),
+                    _timeEnd.ToString(CultureInfo.InvariantCulture),
+                    _percentOnFiltration.ToString(),
 
-                    writer.WriteLine(_filterDealsCountValue);
-                    writer.WriteLine(_filterDealsCountIsOn);
-                    writer.WriteLine(_isScript);
-                    writer.WriteLine(_iterationCount);
-                    writer.WriteLine(_commissionType);
-                    writer.WriteLine(_commissionValue);
-                    writer.WriteLine(_lastInSample);
-                    writer.WriteLine(_orderExecutionType);
-                    writer.WriteLine(_slippageToSimpleOrder);
-                    writer.WriteLine(_slippageToStopOrder);
+                    _filterDealsCountValue.ToString(),
+                    _filterDealsCountIsOn.ToString(),
+                    _isScript.ToString(),
+                    _iterationCount.ToString(),
+                    _commissionType.ToString(),
+                    _commissionValue.ToString(),
+                    _lastInSample.ToString(),
+                    _orderExecutionType.ToString(),
+                    _slippageToSimpleOrder.ToString(),
+                    _slippageToStopOrder.ToString(),
 
                     // V2 fields
-                    writer.WriteLine(_optimizationMethod);
-                    writer.WriteLine(_objectiveMetric);
-                    writer.WriteLine(_bayesianInitialSamples);
-                    writer.WriteLine(_bayesianMaxIterations);
-                    writer.WriteLine(_bayesianBatchSize);
-                    writer.WriteLine(_objectiveDirection);
-                    writer.WriteLine(_bayesianAcquisitionMode);
-                    writer.WriteLine(_bayesianAcquisitionKappa);
-                    writer.WriteLine(_bayesianUseTailPass);
-                    writer.WriteLine(_bayesianTailSharePercent);
-                }
+                    _optimizationMethod.ToString(),
+                    _objectiveMetric.ToString(),
+                    _bayesianInitialSamples.ToString(),
+                    _bayesianMaxIterations.ToString(),
+                    _bayesianBatchSize.ToString(),
+                    _objectiveDirection.ToString(),
+                    _bayesianAcquisitionMode.ToString(),
+                    _bayesianAcquisitionKappa.ToString(),
+                    _bayesianUseTailPass.ToString(),
+                    _bayesianTailSharePercent.ToString()
+                };
+
+                SafeFileWriter.WriteAllLines(@"Engine\OptimizerSettings.txt", lines);
             }
             catch (Exception error)
             {

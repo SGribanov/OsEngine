@@ -1550,16 +1550,9 @@ position => position.State != PositionStateType.OpeningFail
             }
             try
             {
-                using (StreamWriter writer = new StreamWriter(@"Engine\" + NameStrategyUniq + @"Parametrs.txt", false)
-                    )
-                {
-                    for (int i = 0; i < Parameters.Count; i++)
-                    {
-                        writer.WriteLine(Parameters[i].GetStringToSave());
-                    }
-
-                    writer.Close();
-                }
+                SafeFileWriter.WriteAllLines(
+                    @"Engine\" + NameStrategyUniq + @"Parametrs.txt",
+                    Parameters.Select(parameter => parameter.GetStringToSave()));
             }
             catch (Exception error)
             {

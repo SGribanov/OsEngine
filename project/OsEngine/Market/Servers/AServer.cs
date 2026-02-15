@@ -692,16 +692,13 @@ namespace OsEngine.Market.Servers
         {
             try
             {
-                using (StreamWriter writer = new StreamWriter(@"Engine\" + ServerNameUnique + @"Params.txt", false)
-                    )
+                List<string> lines = new List<string>();
+                for (int i = 0; i < ServerParameters.Count; i++)
                 {
-                    for (int i = 0; i < ServerParameters.Count; i++)
-                    {
-                        writer.WriteLine(ServerParameters[i].GetStringToSave());
-                    }
-
-                    writer.Close();
+                    lines.Add(ServerParameters[i].GetStringToSave());
                 }
+
+                SafeFileWriter.WriteAllLines(@"Engine\" + ServerNameUnique + @"Params.txt", lines);
             }
             catch (Exception)
             {
@@ -1060,11 +1057,9 @@ namespace OsEngine.Market.Servers
         {
             try
             {
-                using (StreamWriter writer = new StreamWriter(@"Engine\" + ServerNameUnique + @"ServerSettings.txt", false))
-                {
-                    writer.WriteLine(_serverPrefix);
-                    writer.Close();
-                }
+                SafeFileWriter.WriteAllLines(
+                    @"Engine\" + ServerNameUnique + @"ServerSettings.txt",
+                    new[] { _serverPrefix });
             }
             catch
             {
@@ -5250,7 +5245,7 @@ namespace OsEngine.Market.Servers
                 }
 
                 string json = JsonConvert.SerializeObject(_listLeverageData, Formatting.Indented);
-                File.WriteAllText(filePath, json);
+                SafeFileWriter.WriteAllText(filePath, json);
             }
             catch (Exception ex)
             {
