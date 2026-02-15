@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Globalization;
+using OsEngine.Entity;
 
 namespace OsEngine.Market.Servers.Entity
 {
@@ -282,7 +283,9 @@ namespace OsEngine.Market.Servers.Entity
                 {
                     return;
                 }
+
                 _value = value.Replace("^", "");
+
                 if (ValueChange != null)
                 {
                     ValueChange();
@@ -292,16 +295,38 @@ namespace OsEngine.Market.Servers.Entity
 
         private string _value;
 
+        public bool NeedMigrationSave { get; private set; }
+
         public string GetStringToSave()
         {
-            return Type + "^" + Name + "^" + Value;
+            string protectedValue = CredentialProtector.Protect(Value);
+            return Type + "^" + Name + "^" + protectedValue;
         }
 
         public void LoadFromStr(string value)
         {
             string[] values = value.Split('^');
             _name = values[1];
-            _value = values[2];
+
+            string storedValue = values.Length > 2
+                ? value.Substring(value.IndexOf('^', value.IndexOf('^') + 1) + 1)
+                : string.Empty;
+
+            if (CredentialProtector.TryUnprotect(storedValue, out string unprotectedValue))
+            {
+                _value = (unprotectedValue ?? string.Empty).Replace("^", "");
+                NeedMigrationSave = false;
+                return;
+            }
+
+            // Legacy plain-text value or malformed encrypted value: keep behavior and mark for re-save.
+            _value = (storedValue ?? string.Empty).Replace("^", "");
+            NeedMigrationSave = !string.IsNullOrEmpty(_value);
+        }
+
+        public void ResetMigrationFlag()
+        {
+            NeedMigrationSave = false;
         }
 
         public ServerParameterType Type

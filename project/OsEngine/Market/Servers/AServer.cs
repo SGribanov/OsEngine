@@ -630,6 +630,12 @@ namespace OsEngine.Market.Servers
 
             newParam.ValueChange += userChangeParameter_ValueChange;
 
+            if (newParam.NeedMigrationSave)
+            {
+                newParam.ResetMigrationFlag();
+                SaveParam();
+            }
+
             return newParam;
         }
 
