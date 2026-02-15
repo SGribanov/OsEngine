@@ -5061,3 +5061,46 @@ After each optimizer-related change, update this file with:
 
 ### Risks / notes
 - Scope limited to Optimization tab UI text only.
+
+## UI Layout Update (2026-02-14) - Prevent Label Overlap On Optimization Tab
+### What changed
+- Repositioned and resized controls on `TabItemOptimization` in `OptimizerUi.xaml`.
+- Increased horizontal spacing between Bayesian labels/inputs.
+- Expanded top-row combo widths for method/objective/direction to avoid clipped captions.
+- Shifted tail-pass checkbox right so it no longer intersects with tail-share label/input.
+
+### Files touched
+- `project/OsEngine/OsOptimizer/OptimizerUi.xaml`
+- `report_optimaizer.md`
+
+### Validation
+- `dotnet build project/OsEngine/OsEngine.csproj --configuration Debug`
+- Result: Build succeeded, warnings 0, errors 0
+
+### Risks / notes
+- UI-only layout adjustment on Optimization tab.
+
+## Stabilization Update (2026-02-15) - Add Fail-Safe For Stalled Phase Wait
+### What changed
+- Updated `WaitCurrentPhaseToComplete()` in `OptimizerExecutor`:
+  - switched from infinite blocking wait to periodic wait loop (5s slices).
+  - added fail-safe path for stalled phase completion.
+- Added helper `TryFinalizeStalledPhase(CountdownEvent phaseCompletion)`:
+  - if current phase has no active work left but countdown is not completed, force-signals remaining participants and compensates progress.
+- Added helper `HasActivePhaseWork()`:
+  - checks runtime activity via `_pendingEvaluationByServer`, `_servers`, `_botsInTest`.
+- Goal: prevent hanging optimizer UI state (`Stop` button remains active) when phase wait misses completion signals.
+
+### Files touched
+- `project/OsEngine/OsOptimizer/OptimizerExecutor.cs`
+- `report_optimaizer.md`
+
+### Validation
+- `dotnet build project/OsEngine/OsEngine.csproj --configuration Debug`
+- Result: Build succeeded, warnings 0, errors 0
+- `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --configuration Debug`
+- Result: Passed 70 / Failed 0
+
+### Risks / notes
+- Runtime behavior intentionally changed only in stall edge-case handling (prevents infinite wait after active work is already finished).
+- One transient parallel build/test WPF temp-project compile failure occurred; sequential rerun succeeded.

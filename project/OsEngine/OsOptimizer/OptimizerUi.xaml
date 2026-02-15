@@ -72,36 +72,36 @@
                 </TabItem>
                 <TabItem Name="TabItemOptimization" Header="Оптимизация" FontSize="14" Width="120">
                     <Grid Name="GridOptimization">
-                        <ComboBox Name="ComboBoxOptimizationMethod" HorizontalAlignment="Left" Margin="10,38,0,0" VerticalAlignment="Top" Width="170" Height="24"/>
-                        <Label Name="LabelOptimizationMethod" Content="Method" HorizontalAlignment="Left" Margin="10,10,0,0" VerticalAlignment="Top"/>
+                        <ComboBox Name="ComboBoxOptimizationMethod" HorizontalAlignment="Left" Margin="20,38,0,0" VerticalAlignment="Top" Width="250" Height="24"/>
+                        <Label Name="LabelOptimizationMethod" Content="Method" HorizontalAlignment="Left" Margin="20,10,0,0" VerticalAlignment="Top"/>
 
-                        <ComboBox Name="ComboBoxObjectiveMetric" HorizontalAlignment="Left" Margin="190,38,0,0" VerticalAlignment="Top" Width="170" Height="24"/>
-                        <Label Name="LabelObjectiveMetric" Content="Objective" HorizontalAlignment="Left" Margin="190,10,0,0" VerticalAlignment="Top"/>
+                        <ComboBox Name="ComboBoxObjectiveMetric" HorizontalAlignment="Left" Margin="290,38,0,0" VerticalAlignment="Top" Width="250" Height="24"/>
+                        <Label Name="LabelObjectiveMetric" Content="Objective" HorizontalAlignment="Left" Margin="290,10,0,0" VerticalAlignment="Top"/>
 
-                        <ComboBox Name="ComboBoxObjectiveDirection" HorizontalAlignment="Left" Margin="370,38,0,0" VerticalAlignment="Top" Width="170" Height="24"/>
-                        <Label Name="LabelObjectiveDirection" Content="Direction" HorizontalAlignment="Left" Margin="370,10,0,0" VerticalAlignment="Top"/>
+                        <ComboBox Name="ComboBoxObjectiveDirection" HorizontalAlignment="Left" Margin="560,38,0,0" VerticalAlignment="Top" Width="250" Height="24"/>
+                        <Label Name="LabelObjectiveDirection" Content="Direction" HorizontalAlignment="Left" Margin="560,10,0,0" VerticalAlignment="Top"/>
 
                         <Rectangle Margin="10,80,10,10" Height="130" VerticalAlignment="Top"/>
 
-                        <ComboBox Name="ComboBoxBayesianAcquisitionMode" HorizontalAlignment="Left" Margin="20,115,0,0" VerticalAlignment="Top" Width="170" Height="24"/>
+                        <ComboBox Name="ComboBoxBayesianAcquisitionMode" HorizontalAlignment="Left" Margin="20,115,0,0" VerticalAlignment="Top" Width="260" Height="24"/>
                         <Label Name="LabelBayesianAcquisitionMode" Content="Acquisition mode" HorizontalAlignment="Left" Margin="20,90,0,0" VerticalAlignment="Top"/>
 
-                        <TextBox Name="TextBoxBayesianInitialSamples" Height="24" Margin="210,115,0,0" TextWrapping="Wrap" VerticalAlignment="Top" HorizontalAlignment="Left" Width="90"/>
-                        <Label Name="LabelBayesianInitialSamples" Content="Initial samples" HorizontalAlignment="Left" Margin="210,90,0,0" VerticalAlignment="Top"/>
+                        <TextBox Name="TextBoxBayesianInitialSamples" Height="24" Margin="295,115,0,0" TextWrapping="Wrap" VerticalAlignment="Top" HorizontalAlignment="Left" Width="110"/>
+                        <Label Name="LabelBayesianInitialSamples" Content="Initial samples" HorizontalAlignment="Left" Margin="295,90,0,0" VerticalAlignment="Top"/>
 
-                        <TextBox Name="TextBoxBayesianMaxIterations" Height="24" Margin="310,115,0,0" TextWrapping="Wrap" VerticalAlignment="Top" HorizontalAlignment="Left" Width="100"/>
-                        <Label Name="LabelBayesianMaxIterations" Content="Max iterations" HorizontalAlignment="Left" Margin="310,90,0,0" VerticalAlignment="Top"/>
+                        <TextBox Name="TextBoxBayesianMaxIterations" Height="24" Margin="420,115,0,0" TextWrapping="Wrap" VerticalAlignment="Top" HorizontalAlignment="Left" Width="120"/>
+                        <Label Name="LabelBayesianMaxIterations" Content="Max iterations" HorizontalAlignment="Left" Margin="420,90,0,0" VerticalAlignment="Top"/>
 
-                        <TextBox Name="TextBoxBayesianBatchSize" Height="24" Margin="420,115,0,0" TextWrapping="Wrap" VerticalAlignment="Top" HorizontalAlignment="Left" Width="80"/>
-                        <Label Name="LabelBayesianBatchSize" Content="Batch size" HorizontalAlignment="Left" Margin="420,90,0,0" VerticalAlignment="Top"/>
+                        <TextBox Name="TextBoxBayesianBatchSize" Height="24" Margin="555,115,0,0" TextWrapping="Wrap" VerticalAlignment="Top" HorizontalAlignment="Left" Width="120"/>
+                        <Label Name="LabelBayesianBatchSize" Content="Batch size" HorizontalAlignment="Left" Margin="555,90,0,0" VerticalAlignment="Top"/>
 
-                        <TextBox Name="TextBoxBayesianAcquisitionKappa" Height="24" Margin="510,115,0,0" TextWrapping="Wrap" VerticalAlignment="Top" HorizontalAlignment="Left" Width="100"/>
-                        <Label Name="LabelBayesianAcquisitionKappa" Content="Kappa" HorizontalAlignment="Left" Margin="510,90,0,0" VerticalAlignment="Top"/>
+                        <TextBox Name="TextBoxBayesianAcquisitionKappa" Height="24" Margin="690,115,0,0" TextWrapping="Wrap" VerticalAlignment="Top" HorizontalAlignment="Left" Width="120"/>
+                        <Label Name="LabelBayesianAcquisitionKappa" Content="Kappa" HorizontalAlignment="Left" Margin="690,90,0,0" VerticalAlignment="Top"/>
 
-                        <TextBox Name="TextBoxBayesianTailSharePercent" Height="24" Margin="620,115,0,0" TextWrapping="Wrap" VerticalAlignment="Top" HorizontalAlignment="Left" Width="80"/>
-                        <Label Name="LabelBayesianTailSharePercent" Content="Tail share %" HorizontalAlignment="Left" Margin="620,90,0,0" VerticalAlignment="Top"/>
+                        <TextBox Name="TextBoxBayesianTailSharePercent" Height="24" Margin="825,115,0,0" TextWrapping="Wrap" VerticalAlignment="Top" HorizontalAlignment="Left" Width="120"/>
+                        <Label Name="LabelBayesianTailSharePercent" Content="Tail share %" HorizontalAlignment="Left" Margin="825,90,0,0" VerticalAlignment="Top"/>
 
-                        <CheckBox Name="CheckBoxBayesianTailPass" Content="Tail pass" HorizontalAlignment="Left" Margin="710,117,0,0" VerticalAlignment="Top"/>
+                        <CheckBox Name="CheckBoxBayesianTailPass" Content="Tail pass" HorizontalAlignment="Left" Margin="960,117,0,0" VerticalAlignment="Top"/>
                     </Grid>
                 </TabItem>
                 <TabItem Name="TabItemFilters" Header="Filters" FontSize="14" Width="120">

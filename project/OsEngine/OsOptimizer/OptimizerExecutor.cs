@@ -1674,7 +1674,21 @@ namespace OsEngine.OsOptimizer
 
             try
             {
-                phaseCompletion.Wait(token);
+                while (true)
+                {
+                    if (phaseCompletion.Wait(TimeSpan.FromSeconds(5), token))
+                    {
+                        return;
+                    }
+
+                    if (TryFinalizeStalledPhase(phaseCompletion))
+                    {
+                        SendLogMessage(
+                            "Optimizer phase wait fail-safe completed pending phase signals after active work finished.",
+                            LogMessageType.System);
+                        return;
+                    }
+                }
             }
             catch (OperationCanceledException)
             {
@@ -1689,6 +1703,62 @@ namespace OsEngine.OsOptimizer
                 SendLogMessage("Optimizer phase wait failed: " + ex, LogMessageType.Error);
                 return;
             }
+        }
+
+        private bool TryFinalizeStalledPhase(CountdownEvent phaseCompletion)
+        {
+            if (phaseCompletion == null)
+            {
+                return false;
+            }
+
+            if (!ReferenceEquals(_phaseCompletion, phaseCompletion))
+            {
+                return false;
+            }
+
+            if (HasActivePhaseWork())
+            {
+                return false;
+            }
+
+            int compensatedSignals = 0;
+
+            while (SafeTrySignalPhase(phaseCompletion))
+            {
+                compensatedSignals++;
+            }
+
+            if (compensatedSignals > 0)
+            {
+                AddCompensatedProgress(compensatedSignals);
+                return true;
+            }
+
+            return phaseCompletion.IsSet;
+        }
+
+        private bool HasActivePhaseWork()
+        {
+            if (!_pendingEvaluationByServer.IsEmpty)
+            {
+                return true;
+            }
+
+            lock (_serverRemoveLocker)
+            {
+                if (_servers != null && _servers.Count > 0)
+                {
+                    return true;
+                }
+
+                if (_botsInTest != null && _botsInTest.Count > 0)
+                {
+                    return true;
+                }
+            }
+
+            return false;
         }
 
         private void ReplacePhaseCompletion(int participantsCount)
