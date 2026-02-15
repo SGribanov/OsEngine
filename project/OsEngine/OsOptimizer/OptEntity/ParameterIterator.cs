@@ -47,6 +47,12 @@ namespace OsEngine.OsOptimizer.OptEntity
 
             while (true)
             {
+                if (countBots > 10000000)
+                {
+                    SendLogMessage("Iteration count > 10000000. Warning!!!", LogMessageType.Error);
+                    return countBots;
+                }
+
                 bool isEndOfFaze = false;
 
                 for (int i2 = 0; i2 < optimizedParams.Count + 1; i2++)

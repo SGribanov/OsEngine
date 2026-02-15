@@ -5156,3 +5156,23 @@ After each optimizer-related change, update this file with:
 ### Risks / notes
 - Runtime can spend significantly more time in estimate/counting path for very large parameter grids.
 - One transient parallel build/test lock (`CS2012`) occurred; sequential rerun passed.
+
+## Bugfix Update (2026-02-15) - Restore Combination Count Limit At 10,000,000
+### What changed
+- Reintroduced hard limit in `ParameterIterator.CountCombinations(...)` after previous full removal.
+- New threshold is `10,000,000` combinations (was previously removed; before that, old threshold was `5,000,000`).
+- Updated warning message accordingly:
+  - `Iteration count > 10000000. Warning!!!`
+
+### Files touched
+- `project/OsEngine/OsOptimizer/OptEntity/ParameterIterator.cs`
+- `report_optimaizer.md`
+
+### Validation
+- `dotnet build project/OsEngine/OsEngine.csproj --configuration Debug`
+- Result: Build succeeded, warnings 0, errors 0
+- `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --configuration Debug`
+- Result: Passed 70 / Failed 0
+
+### Risks / notes
+- Combination counter remains protected from very large grids, but with higher cap.
