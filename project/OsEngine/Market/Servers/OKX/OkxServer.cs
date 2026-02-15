@@ -162,6 +162,8 @@ namespace OsEngine.Market.Servers.OKX
                 _extendedMarketData = false;
             }
 
+            RecreatePrivateHttpClient();
+
             try
             {
                 RestRequest requestRest = new RestRequest("/api/v5/public/time", Method.GET);
@@ -216,6 +218,8 @@ namespace OsEngine.Market.Servers.OKX
                 SendLogMessage(exception.ToString(), LogMessageType.Error);
             }
 
+            DisposePrivateHttpClient();
+
             _fIFOListWebSocketPublicMessage = new ConcurrentQueue<string>();
             _fIFOListWebSocketPrivateMessage = new ConcurrentQueue<string>();
             _queueMessageMarketDepthSpot = new ConcurrentQueue<string>();
@@ -232,6 +236,8 @@ namespace OsEngine.Market.Servers.OKX
 
         public void Disconnect()
         {
+            DisposePrivateHttpClient();
+
             if (ServerStatus != ServerConnectStatus.Disconnect)
             {
                 ServerStatus = ServerConnectStatus.Disconnect;
@@ -302,6 +308,53 @@ namespace OsEngine.Market.Servers.OKX
         private bool _demoMode;
 
         private bool _extendedMarketData;
+
+        private HttpClient _privateHttpClient;
+        private readonly Lock _privateHttpClientLocker = new();
+
+        private void RecreatePrivateHttpClient()
+        {
+            lock (_privateHttpClientLocker)
+            {
+                _privateHttpClient?.Dispose();
+                _privateHttpClient = new HttpClient(new HttpInterceptor(_publicKey, _secretKey, _password, _demoMode, _myProxy));
+            }
+        }
+
+        private HttpClient GetPrivateHttpClient()
+        {
+            lock (_privateHttpClientLocker)
+            {
+                if (_privateHttpClient == null)
+                {
+                    _privateHttpClient = new HttpClient(new HttpInterceptor(_publicKey, _secretKey, _password, _demoMode, _myProxy));
+                }
+
+                return _privateHttpClient;
+            }
+        }
+
+        private void DisposePrivateHttpClient()
+        {
+            lock (_privateHttpClientLocker)
+            {
+                _privateHttpClient?.Dispose();
+                _privateHttpClient = null;
+            }
+        }
+
+        private HttpRequestMessage CreateSignedRequest(HttpMethod method, string url, string bodyJson = null)
+        {
+            HttpRequestMessage request = new HttpRequestMessage(method, url);
+
+            if (!string.IsNullOrEmpty(bodyJson))
+            {
+                request.Content = new StringContent(bodyJson, Encoding.UTF8, "application/json");
+                request.Options.Set(HttpInterceptor.SignatureBodyOptionKey, bodyJson);
+            }
+
+            return request;
+        }
 
         #endregion
 
@@ -1335,9 +1388,8 @@ namespace OsEngine.Market.Servers.OKX
         {
             string url = $"{_baseUrl}{"/api/v5/account/set-position-mode"}";
             string bodyStr = JsonConvert.SerializeObject(requestParams);
-            using HttpClient client = new HttpClient(new HttpInterceptor(_publicKey, _secretKey, _password, bodyStr, _demoMode, _myProxy));
-
-            HttpResponseMessage res = client.PostAsync(url, new StringContent(bodyStr, Encoding.UTF8, "application/json")).Result;
+            using HttpRequestMessage request = CreateSignedRequest(HttpMethod.Post, url, bodyStr);
+            HttpResponseMessage res = GetPrivateHttpClient().SendAsync(request).Result;
             string contentStr = res.Content.ReadAsStringAsync().Result;
 
             ResponseRestMessage<List<RestMessageSendOrder>> message = JsonConvert.DeserializeAnonymousType(contentStr, new ResponseRestMessage<List<RestMessageSendOrder>>());
@@ -3170,8 +3222,8 @@ namespace OsEngine.Market.Servers.OKX
 
                 string url = $"{_baseUrl}/api/v5/trade/order";
 
-                using HttpClient responseMessage = new HttpClient(new HttpInterceptor(_publicKey, _secretKey, _password, json, _demoMode, _myProxy));
-                HttpResponseMessage res = responseMessage.PostAsync(url, new StringContent(json, Encoding.UTF8, "application/json")).Result;
+                using HttpRequestMessage request = CreateSignedRequest(HttpMethod.Post, url, json);
+                HttpResponseMessage res = GetPrivateHttpClient().SendAsync(request).Result;
                 string contentStr = res.Content.ReadAsStringAsync().Result;
 
                 ResponseRestMessage<List<RestMessageSendOrder>> message = JsonConvert.DeserializeAnonymousType(contentStr, new ResponseRestMessage<List<RestMessageSendOrder>>());
@@ -3234,8 +3286,8 @@ namespace OsEngine.Market.Servers.OKX
 
                 string url = $"{_baseUrl}/api/v5/trade/order";
 
-                using HttpClient responseMessage = new HttpClient(new HttpInterceptor(_publicKey, _secretKey, _password, json, _demoMode, _myProxy));
-                HttpResponseMessage res = responseMessage.PostAsync(url, new StringContent(json, Encoding.UTF8, "application/json")).Result;
+                using HttpRequestMessage request = CreateSignedRequest(HttpMethod.Post, url, json);
+                HttpResponseMessage res = GetPrivateHttpClient().SendAsync(request).Result;
                 string contentStr = res.Content.ReadAsStringAsync().Result;
 
                 if (res.StatusCode == HttpStatusCode.OK)
@@ -3302,8 +3354,8 @@ namespace OsEngine.Market.Servers.OKX
 
                 string url = $"{_baseUrl}/api/v5/trade/cancel-order";
 
-                using HttpClient responseMessage = new HttpClient(new HttpInterceptor(_publicKey, _secretKey, _password, json, _demoMode, _myProxy));
-                HttpResponseMessage res = responseMessage.PostAsync(url, new StringContent(json, Encoding.UTF8, "application/json")).Result;
+                using HttpRequestMessage request = CreateSignedRequest(HttpMethod.Post, url, json);
+                HttpResponseMessage res = GetPrivateHttpClient().SendAsync(request).Result;
                 string contentStr = res.Content.ReadAsStringAsync().Result;
 
                 ResponseRestMessage<List<RestMessageSendOrder>> message = JsonConvert.DeserializeAnonymousType(contentStr, new ResponseRestMessage<List<RestMessageSendOrder>>());
@@ -3857,8 +3909,8 @@ namespace OsEngine.Market.Servers.OKX
 
         public HttpResponseMessage GetPrivateRequest(string url)
         {
-            using HttpClient client = new HttpClient(new HttpInterceptor(_publicKey, _secretKey, _password, null, _demoMode, _myProxy));
-            return client.GetAsync(url).Result;
+            using HttpRequestMessage request = CreateSignedRequest(HttpMethod.Get, url);
+            return GetPrivateHttpClient().SendAsync(request).Result;
         }
 
         public void SetLeverage(Security security, decimal leverage) { }

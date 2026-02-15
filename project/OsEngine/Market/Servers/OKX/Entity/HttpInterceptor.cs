@@ -10,34 +10,30 @@ namespace OsEngine.Market.Servers.OKX.Entity
 {
     public class HttpInterceptor : DelegatingHandler
     {
-        private string _apiKey;
-        private string _passPhrase;
-        private string _secret;
-        private string _bodyStr;
-        private bool _demoMode;
+        private readonly string _apiKey;
+        private readonly string _passPhrase;
+        private readonly string _secret;
+        private readonly bool _demoMode;
+        public static readonly HttpRequestOptionsKey<string> SignatureBodyOptionKey = new HttpRequestOptionsKey<string>("okx-signature-body");
 
         //Задерждка для рест запросов
         public RateGate _rateGateRest = new RateGate(1, TimeSpan.FromMilliseconds(200));
 
-        public HttpInterceptor(string apiKey, string secret, string passPhrase, string bodyStr, bool demoMode, WebProxy myProxy)
+        public HttpInterceptor(string apiKey, string secret, string passPhrase, bool demoMode, WebProxy myProxy)
         {
             this._apiKey = apiKey;
             this._passPhrase = passPhrase;
             this._secret = secret;
-            this._bodyStr = bodyStr;
             this._demoMode = demoMode;
 
-            if (myProxy == null)
+            var socketsHandler = new SocketsHttpHandler
             {
-                InnerHandler = new HttpClientHandler();
-            }
-            else if (myProxy != null)
-            {
-                InnerHandler = new HttpClientHandler
-                {
-                    Proxy = myProxy
-                };
-            }
+                PooledConnectionLifetime = TimeSpan.FromMinutes(5),
+                UseProxy = myProxy != null,
+                Proxy = myProxy
+            };
+
+            InnerHandler = socketsHandler;
         }
 
         protected override Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
@@ -51,10 +47,11 @@ namespace OsEngine.Market.Servers.OKX.Entity
             var now = DateTime.Now;
             var timeStamp = TimeZoneInfo.ConvertTimeToUtc(now).ToString("yyyy-MM-ddTHH:mm:ss.fffZ");
             var requestUrl = request.RequestUri.PathAndQuery;
+            request.Options.TryGetValue(SignatureBodyOptionKey, out string bodyStr);
             string sign;
-            if (!String.IsNullOrEmpty(this._bodyStr))
+            if (!String.IsNullOrEmpty(bodyStr))
             {
-                sign = Encryptor.HmacSHA256($"{timeStamp}{method}{requestUrl}{this._bodyStr}", this._secret);
+                sign = Encryptor.HmacSHA256($"{timeStamp}{method}{requestUrl}{bodyStr}", this._secret);
             }
             else
             {

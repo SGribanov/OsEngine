@@ -58,12 +58,12 @@ public class SecurityRefactorTests
     [Fact]
     public void WebSocket_IgnoreSslErrors_Property_ShouldBeMarkedObsolete()
     {
-        PropertyInfo property = typeof(WebSocket).GetProperty(nameof(WebSocket.IgnoreSslErrors));
+        PropertyInfo? property = typeof(WebSocket).GetProperty("IgnoreSslErrors");
         Assert.NotNull(property);
+        PropertyInfo nonNullProperty = property!;
 
-        ObsoleteAttribute attribute = property.GetCustomAttribute<ObsoleteAttribute>();
+        ObsoleteAttribute? attribute = nonNullProperty.GetCustomAttribute<ObsoleteAttribute>();
         Assert.NotNull(attribute);
-        Assert.Contains("security risk", attribute.Message, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("security risk", attribute!.Message, StringComparison.OrdinalIgnoreCase);
     }
 }
-
