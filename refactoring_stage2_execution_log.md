@@ -50,7 +50,7 @@
 
 ### Step 1.1 - Encrypt API Keys at Rest
 
-- **Status:** In progress (implemented, waiting for commit decision)
+- **Status:** Done
 - **Plan item:** `refactoring_stage2_plan.md` -> Phase 1 / Step 1.1
 - **Changes:**
   - Added DPAPI helper with `dpapi:` prefix marker and safe fallback:
@@ -63,6 +63,5 @@
     - file: `project/OsEngine/Market/Servers/AServer.cs`
 - **Verification:**
   - `dotnet build project/OsEngine/OsEngine.csproj --no-restore` succeeded, 0 errors.
-- **Commit:** pending
-- **Push:** pending
-
+- **Commit:** `48e2f71f0`
+- **Push:** yes (`origin/master`, SSH)
