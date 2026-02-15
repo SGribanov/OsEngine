@@ -58,7 +58,8 @@ namespace OsEngine.Entity
         /// </summary>
         public Side Side;
 
-        private static readonly CultureInfo CultureInfo = new CultureInfo("ru-RU");
+        private static readonly CultureInfo Invariant = CultureInfo.InvariantCulture;
+        private static readonly CultureInfo LegacyRu = new CultureInfo("ru-RU");
 
         /// <summary>
         /// To take a line to save
@@ -67,11 +68,11 @@ namespace OsEngine.Entity
         {
             string result = "";
 
-            result += Volume.ToString(CultureInfo) + "&";
-            result += Price.ToString(CultureInfo) + "&";
-            result += NumberOrderParent.ToString(CultureInfo) + "&";
-            result += Time.ToString(CultureInfo) + "&";
-            result += NumberTrade.ToString(CultureInfo) + "&";
+            result += Volume.ToString(Invariant) + "&";
+            result += Price.ToString(Invariant) + "&";
+            result += NumberOrderParent.ToString(Invariant) + "&";
+            result += Time.ToString(Invariant) + "&";
+            result += NumberTrade.ToString(Invariant) + "&";
             result += Side + "&";
             result += SecurityNameCode.Replace("@","%") + "&";
             result += NumberPosition + "&";
@@ -89,7 +90,7 @@ namespace OsEngine.Entity
             Volume = arraySave[0].ToDecimal();
             Price = arraySave[1].ToDecimal();
             NumberOrderParent = arraySave[2];
-            Time = Convert.ToDateTime(arraySave[3], CultureInfo);
+            Time = ParseDateTimeInvariantWithRuFallback(arraySave[3]);
             NumberTrade = arraySave[4];
             Enum.TryParse(arraySave[5], out Side);
             SecurityNameCode = arraySave[6].Replace('%', '@');
@@ -128,6 +129,21 @@ namespace OsEngine.Entity
             }
         }
         private string _toolTip;
+
+        private static DateTime ParseDateTimeInvariantWithRuFallback(string value)
+        {
+            if (DateTime.TryParse(value, Invariant, DateTimeStyles.None, out DateTime parsed))
+            {
+                return parsed;
+            }
+
+            if (DateTime.TryParse(value, LegacyRu, DateTimeStyles.None, out parsed))
+            {
+                return parsed;
+            }
+
+            return Convert.ToDateTime(value, Invariant);
+        }
 
         /// <summary>
         /// Service info to tester. Number candle

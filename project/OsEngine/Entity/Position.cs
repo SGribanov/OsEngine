@@ -1006,9 +1006,9 @@ namespace OsEngine.Entity
 
             result.Append( NameBot + "#");
 
-            result.Append(ProfitOperationPercent.ToString(new CultureInfo("ru-RU")) + "#");
+            result.Append(ProfitOperationPercent.ToString(CultureInfo.InvariantCulture) + "#");
 
-            result.Append(ProfitOperationAbs.ToString(new CultureInfo("ru-RU")) + "#");
+            result.Append(ProfitOperationAbs.ToString(CultureInfo.InvariantCulture) + "#");
 
             if (OpenOrders == null)
             {
@@ -1063,20 +1063,23 @@ namespace OsEngine.Entity
             result.Append(commentString + "#");
 
             result.Append(StopOrderIsActive + "#");
-            result.Append(StopOrderPrice + "#");
-            result.Append(StopOrderRedLine + "#");
+            result.Append(StopOrderPrice.ToString(CultureInfo.InvariantCulture) + "#");
+            result.Append(StopOrderRedLine.ToString(CultureInfo.InvariantCulture) + "#");
 
             result.Append(ProfitOrderIsActive + "#");
-            result.Append(ProfitOrderPrice + "#");
+            result.Append(ProfitOrderPrice.ToString(CultureInfo.InvariantCulture) + "#");
 
-            result.Append(Lots + "^" + MarginBuy + "^" + MarginSell + "#");
+            result.Append(
+                Lots.ToString(CultureInfo.InvariantCulture) + "^"
+                + MarginBuy.ToString(CultureInfo.InvariantCulture) + "^"
+                + MarginSell.ToString(CultureInfo.InvariantCulture) + "#");
 
-            result.Append(PriceStepCost + "#");
+            result.Append(PriceStepCost.ToString(CultureInfo.InvariantCulture) + "#");
 
-            result.Append(PriceStep + "#");
-            result.Append(PortfolioValueOnOpenPosition + "#");
+            result.Append(PriceStep.ToString(CultureInfo.InvariantCulture) + "#");
+            result.Append(PortfolioValueOnOpenPosition.ToString(CultureInfo.InvariantCulture) + "#");
 
-            result.Append(ProfitOrderRedLine + "#");
+            result.Append(ProfitOrderRedLine.ToString(CultureInfo.InvariantCulture) + "#");
 
             if(SignalTypeOpen != null)
             {
@@ -1092,7 +1095,7 @@ namespace OsEngine.Entity
 
             result.Append(SignalTypeClose + "#");
 
-            result.Append(CommissionValue + "#");
+            result.Append(CommissionValue.ToString(CultureInfo.InvariantCulture) + "#");
             result.Append(CommissionType);
 
             if (CloseOrders != null)

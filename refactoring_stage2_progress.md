@@ -33,3 +33,27 @@
 ### Notes
 
 - `dotnet build project/OsEngine.sln` currently fails on restore path with `MSB4276` in this environment (existing toolchain issue), while project-level builds and tests pass.
+
+## 2026-02-15 - Step 2.2 (InvariantCulture in persistence) - In Progress
+
+- Migrated persistence serialization to `CultureInfo.InvariantCulture` in core entity files:
+  - `project/OsEngine/Entity/Order.cs`
+    - save formatting for decimal/date fields switched to invariant
+    - added backward-compatible date parser: invariant first, legacy `ru-RU` fallback
+  - `project/OsEngine/Entity/MyTrade.cs`
+    - save formatting switched to invariant
+    - added backward-compatible date parser: invariant first, legacy `ru-RU` fallback
+  - `project/OsEngine/Entity/Position.cs`
+    - save formatting for decimal persistence fields switched to invariant
+- Checked `project/OsEngine/Entity/Trade.cs` and `project/OsEngine/Candles/Candle.cs`:
+  - both already persist decimal values in invariant format
+- Added tests:
+  - `project/OsEngine.Tests/PersistenceCultureTests.cs`
+    - `Order` save uses dot decimal separator under `ru-RU` current culture
+    - `MyTrade` load parses legacy `ru-RU` date format
+    - `Position` save uses dot decimal separator under `ru-RU` current culture
+
+### Verification
+
+- `dotnet build project/OsEngine/OsEngine.csproj` -> success, 0 warnings, 0 errors
+- `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj` -> passed 81/81

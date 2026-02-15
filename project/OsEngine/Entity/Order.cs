@@ -439,7 +439,8 @@ namespace OsEngine.Entity
             }
         }
 
-        private static readonly CultureInfo CultureInfo = new CultureInfo("ru-RU");
+        private static readonly CultureInfo Invariant = CultureInfo.InvariantCulture;
+        private static readonly CultureInfo LegacyRu = new CultureInfo("ru-RU");
 
         /// <summary>
         /// Take the string to save
@@ -457,15 +458,15 @@ namespace OsEngine.Entity
 
             result.Append(ServerType + "@");
 
-            result.Append(NumberMarket.ToString(CultureInfo) + "@");
+            result.Append(NumberMarket.ToString(Invariant) + "@");
             result.Append(Side + "@");
-            result.Append(Price.ToString(CultureInfo) + "@");
-            result.Append(PriceReal.ToString(CultureInfo) + "@");
-            result.Append(Volume.ToString(CultureInfo) + "@");
-            result.Append(VolumeExecute.ToString(CultureInfo) + "@");
+            result.Append(Price.ToString(Invariant) + "@");
+            result.Append(PriceReal.ToString(Invariant) + "@");
+            result.Append(Volume.ToString(Invariant) + "@");
+            result.Append(VolumeExecute.ToString(Invariant) + "@");
             result.Append(State + "@");
             result.Append(TypeOrder + "@");
-            result.Append(TimeCallBack.ToString(CultureInfo) + "@");
+            result.Append(TimeCallBack.ToString(Invariant) + "@");
             result.Append(SecurityNameCode.Replace('@', '%') + "@");
 
             if(PortfolioNumber != null)
@@ -477,9 +478,9 @@ namespace OsEngine.Entity
                 result.Append("" + "@");
             }
 
-            result.Append(TimeCreate.ToString(CultureInfo) + "@");
-            result.Append(TimeCancel.ToString(CultureInfo) + "@");
-            result.Append(TimeCallBack.ToString(CultureInfo) + "@");
+            result.Append(TimeCreate.ToString(Invariant) + "@");
+            result.Append(TimeCancel.ToString(Invariant) + "@");
+            result.Append(TimeCallBack.ToString(Invariant) + "@");
 
             result.Append(LifeTime + "@");
 
@@ -505,7 +506,7 @@ namespace OsEngine.Entity
 
             result.Append(Comment + "@");
 
-            result.Append(TimeDone.ToString(CultureInfo) + "@");
+            result.Append(TimeDone.ToString(Invariant) + "@");
 
             result.Append(OrderTypeTime + "@");
 
@@ -543,14 +544,14 @@ namespace OsEngine.Entity
 
             Enum.TryParse(saveArray[8], true, out _state);
             Enum.TryParse(saveArray[9], true, out TypeOrder);
-            TimeCallBack = Convert.ToDateTime(saveArray[10], CultureInfo);
+            TimeCallBack = ParseDateTimeInvariantWithRuFallback(saveArray[10]);
 
             SecurityNameCode = saveArray[11].Replace('%', '@');
             PortfolioNumber = saveArray[12].Replace('%', '@');
 
-            TimeCreate = Convert.ToDateTime(saveArray[13], CultureInfo);
-            TimeCancel = Convert.ToDateTime(saveArray[14], CultureInfo);
-            TimeCallBack = Convert.ToDateTime(saveArray[15], CultureInfo);
+            TimeCreate = ParseDateTimeInvariantWithRuFallback(saveArray[13]);
+            TimeCancel = ParseDateTimeInvariantWithRuFallback(saveArray[14]);
+            TimeCallBack = ParseDateTimeInvariantWithRuFallback(saveArray[15]);
 
             TimeSpan.TryParse(saveArray[16], out LifeTime);
 
@@ -573,7 +574,7 @@ namespace OsEngine.Entity
                 }
             }
             Comment = saveArray[18];
-            TimeDone = Convert.ToDateTime(saveArray[19], CultureInfo);
+            TimeDone = ParseDateTimeInvariantWithRuFallback(saveArray[19]);
 
             if(saveArray.Length > 21)
             {
@@ -596,6 +597,21 @@ namespace OsEngine.Entity
                     LastCancelTryLocalTime = Convert.ToDateTime(cancelling[2],CultureInfo.InvariantCulture);
                 }
             }
+        }
+
+        private static DateTime ParseDateTimeInvariantWithRuFallback(string value)
+        {
+            if (DateTime.TryParse(value, Invariant, DateTimeStyles.None, out DateTime parsed))
+            {
+                return parsed;
+            }
+
+            if (DateTime.TryParse(value, LegacyRu, DateTimeStyles.None, out parsed))
+            {
+                return parsed;
+            }
+
+            return Convert.ToDateTime(value, Invariant);
         }
     }
 
