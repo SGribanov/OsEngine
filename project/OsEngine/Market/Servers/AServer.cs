@@ -4706,74 +4706,28 @@ namespace OsEngine.Market.Servers
 
         private bool HasFirstOrderMessageBeenSent = false;
 
-        private string _messageFirstConnect;
-
-        private string _messageFirstOrder;
-
         private DateTime _lastDateTimeServer = DateTime.MinValue;
 
         private void SendMessageConnectorConnectInAnalysisServer()
         {
-            try
-            {
-                _messageFirstConnect = $"{this.ServerNameUnique}%Openings";
-
-                Task.Run(SendMessageConnectorConnect);
-
-                HasConnectionMessageBeenSent = true;
-            }
-            catch
-            {
-                // ignore
-            }
+            // Disabled: external analytics/telemetry sending.
+            HasConnectionMessageBeenSent = true;
         }
 
         private void SendMessageConnectorConnect()
         {
-            try
-            {
-                using TcpClient newClient = new TcpClient();
-                newClient.Connect("45.137.152.144", 11100);
-                using NetworkStream tcpStream = newClient.GetStream();
-                byte[] sendBytes = Encoding.UTF8.GetBytes(_messageFirstConnect);
-                tcpStream.Write(sendBytes, 0, sendBytes.Length);
-            }
-            catch
-            {
-                // ignore
-            }
+            // Disabled: external analytics/telemetry sending.
         }
 
         private void SendMessageFirstOrderInAnalysisServer()
         {
-            try
-            {
-                _messageFirstOrder = $"{this.ServerNameUnique}%Orders";
-
-                Task.Run(SendMessageFirstOrder);
-
-                HasFirstOrderMessageBeenSent = true;
-            }
-            catch
-            {
-                // ignore
-            }
+            // Disabled: external analytics/telemetry sending.
+            HasFirstOrderMessageBeenSent = true;
         }
 
         private void SendMessageFirstOrder()
         {
-            try
-            {
-                using TcpClient newClient = new TcpClient();
-                newClient.Connect("45.137.152.144", 11100);
-                using NetworkStream tcpStream = newClient.GetStream();
-                byte[] sendBytes = Encoding.UTF8.GetBytes(_messageFirstOrder);
-                tcpStream.Write(sendBytes, 0, sendBytes.Length);
-            }
-            catch
-            {
-                // ignore
-            }
+            // Disabled: external analytics/telemetry sending.
         }
 
         #endregion

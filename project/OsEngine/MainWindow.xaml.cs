@@ -887,24 +887,7 @@ namespace OsEngine
 
         private void SendMessageInCrashServer()
         {
-            try
-            {
-                if (PrimeSettingsMaster.ReportCriticalErrors == false)
-                {
-                    return;
-                }
-
-                TcpClient newClient = new TcpClient();
-                newClient.Connect("45.137.152.144", 11000);
-                NetworkStream tcpStream = newClient.GetStream();
-                byte[] sendBytes = Encoding.UTF8.GetBytes(_messageToCrashServer);
-                tcpStream.Write(sendBytes, 0, sendBytes.Length);
-                newClient.Close();
-            }
-            catch
-            {
-                // ignore
-            }
+            // Disabled: external crash reporting.
         }
 
         private void ButtonLocal_Click(object sender, RoutedEventArgs e)
