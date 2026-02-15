@@ -77,14 +77,28 @@ namespace OsEngine.OsOptimizer
                 return 0;
             }
 
-            int value = _optimizerExecutor.BotCountOneFaze(_parameters, _parametersOn) * Settings.IterationCount * 2;
+            int botCountRaw = _optimizerExecutor.BotCountOneFaze(_parameters, _parametersOn);
+            int botCount = Math.Max(0, botCountRaw);
+            int iterationCount = Math.Max(0, Settings.IterationCount);
 
-            if (Settings.LastInSample)
+            long valueLong = (long)botCount * iterationCount * 2L;
+
+            if (Settings.LastInSample && valueLong > 0)
             {
-                value = value - _optimizerExecutor.BotCountOneFaze(_parameters, _parametersOn);
+                valueLong -= botCount;
             }
 
-            return value;
+            if (valueLong <= 0)
+            {
+                return 0;
+            }
+
+            if (valueLong > int.MaxValue)
+            {
+                return int.MaxValue;
+            }
+
+            return (int)valueLong;
         }
 
         #endregion

@@ -121,7 +121,7 @@ namespace OsEngine.OsOptimizer
             {
                 try
                 {
-                    if (Convert.ToInt32(TextBoxIterationCount.Text) == 0)
+                    if (Convert.ToInt32(TextBoxIterationCount.Text) <= 0)
                     {
                         TextBoxIterationCount.Text = _master.IterationCount.ToString();
                         return;

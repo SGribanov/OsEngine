@@ -5104,3 +5104,34 @@ After each optimizer-related change, update this file with:
 ### Risks / notes
 - Runtime behavior intentionally changed only in stall edge-case handling (prevents infinite wait after active work is already finished).
 - One transient parallel build/test WPF temp-project compile failure occurred; sequential rerun succeeded.
+
+## Bugfix Update (2026-02-15) - Fix Negative Max Bots Count Display
+### Problem
+- `Max count of bots` could show negative values (e.g. `-4717440`, `-120`) in UI.
+- Root causes:
+  - `int` overflow in `GetMaxBotsCount()` multiplication for large brute-force counts;
+  - negative/zero iteration value could leak into displayed estimate path.
+
+### What changed
+- Updated `OptimizerMaster.GetMaxBotsCount()`:
+  - uses single bot-count snapshot;
+  - clamps bot count and iteration count to non-negative;
+  - computes via `long` to avoid overflow;
+  - applies `LastInSample` correction safely;
+  - clamps final value to `[0, int.MaxValue]`.
+- Updated iteration textbox guard in `OptimizerUi.xaml.cs`:
+  - rejects `<= 0` (previously rejected only `== 0`).
+
+### Files touched
+- `project/OsEngine/OsOptimizer/OptimizerMaster.cs`
+- `project/OsEngine/OsOptimizer/OptimizerUi.xaml.cs`
+- `report_optimaizer.md`
+
+### Validation
+- `dotnet build project/OsEngine/OsEngine.csproj --configuration Debug`
+- Result: Build succeeded, warnings 0, errors 0
+- `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --configuration Debug`
+- Result: Passed 70 / Failed 0
+
+### Risks / notes
+- Fix affects estimate display logic and input guard only; optimization runtime flow unchanged.
