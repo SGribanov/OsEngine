@@ -53,19 +53,24 @@
                 </TabItem>
                 <TabItem Name="TabItemFazes" Header="Fazes" FontSize="14" Width="120">
                     <Grid Name="GridFazes" >
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="405*"/>
+                            <ColumnDefinition Width="671*"/>
+                        </Grid.ColumnDefinitions>
                         <Button Name="ButtonCreateOptimizeFazes" Content="Create optimization scheme" HorizontalAlignment="Left" Margin="10,10,0,0" VerticalAlignment="Top" Width="256" Height="42" Click="ButtonCreateOptimizeFazes_Click"/>
-                        <WindowsFormsHost Name="HostStepsOptimize"  Foreground="Black" Margin="10,72,0,10" HorizontalAlignment="Left" Width="723"/>
-                        <DatePicker Name="DatePickerStart" HorizontalAlignment="Left" Margin="284,27,0,0" VerticalAlignment="Top" Width="131"/>
-                        <DatePicker Name="DatePickerEnd" HorizontalAlignment="Left" Margin="420,27,0,0" VerticalAlignment="Top" Width="120"/>
-                        <Label Name="Label20" Content="Test period" HorizontalAlignment="Left" Margin="377,4,0,0" VerticalAlignment="Top"/>
-                        <TextBox Name="TextBoxPercentFiltration" Height="23" Margin="0,29,10,0" TextWrapping="Wrap"  VerticalAlignment="Top" HorizontalAlignment="Right" Width="144"/>
-                        <Label Name="Label21" Content="% of time OutOfSample" HorizontalAlignment="Right" Margin="0,4,10,0" VerticalAlignment="Top"/>
-                        <TextBox Name="TextBoxIterationCount" Height="23" Margin="0,29,181,0" TextWrapping="Wrap"  VerticalAlignment="Top" HorizontalAlignment="Right" Width="144"/>
-                        <Label Name="Label23" Content="Iteration count" HorizontalAlignment="Right" Margin="0,4,204,0" VerticalAlignment="Top"/>
-                        <WindowsFormsHost Name="HostWalkForwardPeriods"  Foreground="Black" Margin="738,72,10,10"/>
+                        <WindowsFormsHost Name="HostStepsOptimize"  Foreground="Black" Margin="10,72,0,10" HorizontalAlignment="Left" Width="723" Grid.ColumnSpan="2"/>
+                        <DatePicker Name="DatePickerStart" HorizontalAlignment="Left" Margin="284,27,0,0" VerticalAlignment="Top" Width="131" Grid.ColumnSpan="2"/>
+                        <DatePicker Name="DatePickerEnd" HorizontalAlignment="Left" Margin="15,27,0,0" VerticalAlignment="Top" Width="120" Grid.Column="1"/>
+                        <Label Name="Label20" Content="Test period" HorizontalAlignment="Left" Margin="377,4,0,0" VerticalAlignment="Top" Grid.ColumnSpan="2"/>
+                        <TextBox Name="TextBoxPercentFiltration" Height="23" Margin="0,29,10,0" TextWrapping="Wrap"  VerticalAlignment="Top" HorizontalAlignment="Right" Width="144" Grid.Column="1"/>
+                        <Label Name="Label21" Content="% of time OutOfSample" HorizontalAlignment="Right" Margin="0,4,10,0" VerticalAlignment="Top" Grid.Column="1"/>
+                        <TextBox Name="TextBoxIterationCount" Height="23" Margin="0,29,181,0" TextWrapping="Wrap"  VerticalAlignment="Top" HorizontalAlignment="Right" Width="144" Grid.Column="1"/>
+                        <Label Name="Label23" Content="Iteration count" HorizontalAlignment="Right" Margin="0,4,204,0" VerticalAlignment="Top" Grid.Column="1"/>
+                        <CheckBox Name="CheckBoxLastInSample" Content="Last inSample" HorizontalAlignment="Left" Margin="196,29,0,0" VerticalAlignment="Top" Grid.Column="1"/>
+                        <WindowsFormsHost Name="HostWalkForwardPeriods"  Foreground="Black" Margin="333,72,10,10" Grid.Column="1"/>
                     </Grid>
                 </TabItem>
-                <TabItem Name="TabItemOptimization" Header="Optimization" FontSize="14" Width="120">
+                <TabItem Name="TabItemOptimization" Header="Оптимизация" FontSize="14" Width="120">
                     <Grid Name="GridOptimization">
                         <ComboBox Name="ComboBoxOptimizationMethod" HorizontalAlignment="Left" Margin="10,38,0,0" VerticalAlignment="Top" Width="170" Height="24"/>
                         <Label Name="LabelOptimizationMethod" Content="Method" HorizontalAlignment="Left" Margin="10,10,0,0" VerticalAlignment="Top"/>
@@ -75,8 +80,6 @@
 
                         <ComboBox Name="ComboBoxObjectiveDirection" HorizontalAlignment="Left" Margin="370,38,0,0" VerticalAlignment="Top" Width="170" Height="24"/>
                         <Label Name="LabelObjectiveDirection" Content="Direction" HorizontalAlignment="Left" Margin="370,10,0,0" VerticalAlignment="Top"/>
-
-                        <CheckBox Name="CheckBoxLastInSample" Content="Last inSample" HorizontalAlignment="Left" Margin="560,41,0,0" VerticalAlignment="Top"/>
 
                         <Rectangle Margin="10,80,10,10" Height="130" VerticalAlignment="Top"/>
 
