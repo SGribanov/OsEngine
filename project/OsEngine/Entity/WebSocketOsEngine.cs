@@ -4,6 +4,7 @@
 */
 
 using System;
+using System.Diagnostics;
 using System.IO;
 using System.Net;
 using System.Net.WebSockets;
@@ -49,13 +50,27 @@ namespace OsEngine.Entity.WebSocketOsEngine
             }
         }
 
-        public bool IgnoreSslErrors { get; set; } = false;
+        [Obsolete("SSL validation bypass is a security risk. Use only for debugging.")]
+        public bool IgnoreSslErrors
+        {
+            get { return _ignoreSslErrors; }
+            set
+            {
+                _ignoreSslErrors = value;
+
+                if (_ignoreSslErrors)
+                {
+                    Trace.TraceWarning("WebSocket.IgnoreSslErrors=true disables TLS certificate validation and should be used only for debugging.");
+                }
+            }
+        }
+        private bool _ignoreSslErrors = false;
 
         public void SetCertificate(X509Certificate2 certificate)
         {
             _client.Options.ClientCertificates = new X509CertificateCollection { certificate };
 
-            if (IgnoreSslErrors)
+            if (_ignoreSslErrors)
             {
                 _client.Options.RemoteCertificateValidationCallback = (sender, cert, chain, errors) => true;
             }
