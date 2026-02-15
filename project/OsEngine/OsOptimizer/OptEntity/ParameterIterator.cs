@@ -40,50 +40,97 @@ namespace OsEngine.OsOptimizer.OptEntity
                 }
             }
 
-            optimizedParams = CopyParameters(optimizedParams);
-
-            int countBots = 0;
-            bool isStart = true;
-
-            while (true)
+            if (optimizedParams.Count == 0)
             {
-                if (countBots > 10000000)
-                {
-                    SendLogMessage("Iteration count > 10000000. Warning!!!", LogMessageType.Error);
-                    return countBots;
-                }
-
-                bool isEndOfFaze = false;
-
-                for (int i2 = 0; i2 < optimizedParams.Count + 1; i2++)
-                {
-                    if (i2 == optimizedParams.Count)
-                    {
-                        isEndOfFaze = true;
-                        break;
-                    }
-
-                    if (isStart)
-                    {
-                        countBots++;
-                        isStart = false;
-                        break;
-                    }
-
-                    if (TryIncrementParameter(optimizedParams, i2))
-                    {
-                        countBots++;
-                        break;
-                    }
-                }
-
-                if (isEndOfFaze)
-                {
-                    break;
-                }
+                return 0;
             }
 
-            return countBots;
+            long totalCombinations = 1;
+
+            for (int i = 0; i < optimizedParams.Count; i++)
+            {
+                long variantsForParam = GetParameterVariantsCount(optimizedParams[i]);
+
+                if (variantsForParam <= 0)
+                {
+                    return 0;
+                }
+
+                if (totalCombinations > int.MaxValue / variantsForParam)
+                {
+                    SendLogMessage("Iteration count exceeds Int32.MaxValue. Estimate was clamped.", LogMessageType.Error);
+                    return int.MaxValue;
+                }
+
+                totalCombinations *= variantsForParam;
+            }
+
+            return (int)totalCombinations;
+        }
+
+        private long GetParameterVariantsCount(IIStrategyParameter parameter)
+        {
+            if (parameter == null)
+            {
+                return 0;
+            }
+
+            if (parameter.Type == StrategyParameterType.Int)
+            {
+                StrategyParameterInt p = (StrategyParameterInt)parameter;
+
+                if (p.ValueIntStart == p.ValueIntStop)
+                {
+                    return 1;
+                }
+
+                if (p.ValueIntStep <= 0 || p.ValueIntStart > p.ValueIntStop)
+                {
+                    return 0;
+                }
+
+                long diff = (long)p.ValueIntStop - p.ValueIntStart;
+                long increments = (diff + p.ValueIntStep - 1) / p.ValueIntStep;
+                return increments + 1;
+            }
+
+            if (parameter.Type == StrategyParameterType.Decimal)
+            {
+                StrategyParameterDecimal p = (StrategyParameterDecimal)parameter;
+                return GetDecimalVariantsCount(p.ValueDecimalStart, p.ValueDecimalStop, p.ValueDecimalStep);
+            }
+
+            if (parameter.Type == StrategyParameterType.DecimalCheckBox)
+            {
+                StrategyParameterDecimalCheckBox p = (StrategyParameterDecimalCheckBox)parameter;
+                return GetDecimalVariantsCount(p.ValueDecimalStart, p.ValueDecimalStop, p.ValueDecimalStep);
+            }
+
+            return 1;
+        }
+
+        private long GetDecimalVariantsCount(decimal start, decimal stop, decimal step)
+        {
+            if (start == stop)
+            {
+                return 1;
+            }
+
+            if (step <= 0 || start > stop)
+            {
+                return 0;
+            }
+
+            decimal raw = (stop - start) / step;
+            decimal incrementsDecimal = Math.Ceiling(raw);
+
+            if (incrementsDecimal > int.MaxValue - 1)
+            {
+                return int.MaxValue;
+            }
+
+            int increments = (int)incrementsDecimal;
+            return (long)increments + 1;
         }
 
         /// <summary>

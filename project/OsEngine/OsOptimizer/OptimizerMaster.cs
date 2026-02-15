@@ -79,7 +79,53 @@ namespace OsEngine.OsOptimizer
 
             int botCountRaw = _optimizerExecutor.BotCountOneFaze(_parameters, _parametersOn);
             int botCount = Math.Max(0, botCountRaw);
-            int iterationCount = Math.Max(0, Settings.IterationCount);
+            int iterationCount = Settings.IterationCount > 0 ? Settings.IterationCount : 1;
+
+            long valueLong = (long)botCount * iterationCount * 2L;
+
+            if (Settings.LastInSample && valueLong > 0)
+            {
+                valueLong -= botCount;
+            }
+
+            if (valueLong <= 0)
+            {
+                return 0;
+            }
+
+            if (valueLong > int.MaxValue)
+            {
+                return int.MaxValue;
+            }
+
+            return (int)valueLong;
+        }
+
+        public string GetMaxBotsCountDisplay()
+        {
+            int budgetOrTotal = GetMaxBotsCount();
+
+            if (Settings.OptimizationMethod != OptimizationMethodType.Bayesian)
+            {
+                return budgetOrTotal.ToString();
+            }
+
+            int fullGrid = GetFullGridMaxBotsCount();
+            return budgetOrTotal + " (из " + fullGrid + ")";
+        }
+
+        private int GetFullGridMaxBotsCount()
+        {
+            if (_parameters == null ||
+                _parametersOn == null)
+            {
+                return 0;
+            }
+
+            ParameterIterator iterator = new ParameterIterator();
+            int botCountRaw = iterator.CountCombinations(_parameters, _parametersOn);
+            int botCount = Math.Max(0, botCountRaw);
+            int iterationCount = Settings.IterationCount > 0 ? Settings.IterationCount : 1;
 
             long valueLong = (long)botCount * iterationCount * 2L;
 

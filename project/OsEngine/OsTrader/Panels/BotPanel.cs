@@ -2700,9 +2700,20 @@ position => position.State != PositionStateType.OpeningFail
 
         public void CreateGrid()
         {
+            if (GridToPaint != null)
+            {
+                return;
+            }
+
+            if (MainWindow.GetDispatcher == null)
+            {
+                return;
+            }
+
             if (MainWindow.GetDispatcher.CheckAccess() == false)
             {
-                MainWindow.GetDispatcher.InvokeAsync(CreateGrid);
+                // Create synchronously so callers can safely use GridToPaint right after this method.
+                MainWindow.GetDispatcher.Invoke(CreateGrid);
                 return;
             }
 
@@ -2725,20 +2736,30 @@ position => position.State != PositionStateType.OpeningFail
 
         public void AddChildren(object children)
         {
-            try
+            if (!(children is UIElement element))
             {
-                if (GridToPaint.Dispatcher.CheckAccess() == false)
-                {
-                    GridToPaint.Dispatcher.InvokeAsync(() => AddChildren(children));
-                    return;
-                }
+                return;
+            }
 
-                GridToPaint.Children.Add((UIElement)children);
-            }
-            catch
+            CreateGrid();
+
+            if (GridToPaint == null)
             {
-                // ignore
+                return;
             }
+
+            if (GridToPaint.Dispatcher.CheckAccess() == false)
+            {
+                GridToPaint.Dispatcher.Invoke(() => AddChildren(element));
+                return;
+            }
+
+            if (GridToPaint.Children.Contains(element))
+            {
+                return;
+            }
+
+            GridToPaint.Children.Add(element);
         }
     }
 	

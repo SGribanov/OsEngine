@@ -2914,12 +2914,12 @@ namespace OsEngine.OsOptimizer
         {
             lock (_locker)
             {
-                int botCount = _master.GetMaxBotsCount();
-                PaintBotsCount(botCount);
+                string botsCountDisplay = _master.GetMaxBotsCountDisplay();
+                PaintBotsCount(botsCountDisplay);
             }
         }
 
-        private void PaintBotsCount(int value)
+        private void PaintBotsCount(string value)
         {
             if (LabelIteartionCountNumber.Dispatcher.CheckAccess() == false)
             {
