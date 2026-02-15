@@ -87,19 +87,19 @@
                         <Label Name="LabelBayesianAcquisitionMode" Content="Acquisition mode" HorizontalAlignment="Left" Margin="20,90,0,0" VerticalAlignment="Top"/>
 
                         <TextBox Name="TextBoxBayesianInitialSamples" Height="24" Margin="210,115,0,0" TextWrapping="Wrap" VerticalAlignment="Top" HorizontalAlignment="Left" Width="90"/>
-                        <Label Content="Initial samples" HorizontalAlignment="Left" Margin="210,90,0,0" VerticalAlignment="Top"/>
+                        <Label Name="LabelBayesianInitialSamples" Content="Initial samples" HorizontalAlignment="Left" Margin="210,90,0,0" VerticalAlignment="Top"/>
 
                         <TextBox Name="TextBoxBayesianMaxIterations" Height="24" Margin="310,115,0,0" TextWrapping="Wrap" VerticalAlignment="Top" HorizontalAlignment="Left" Width="100"/>
-                        <Label Content="Max iterations" HorizontalAlignment="Left" Margin="310,90,0,0" VerticalAlignment="Top"/>
+                        <Label Name="LabelBayesianMaxIterations" Content="Max iterations" HorizontalAlignment="Left" Margin="310,90,0,0" VerticalAlignment="Top"/>
 
                         <TextBox Name="TextBoxBayesianBatchSize" Height="24" Margin="420,115,0,0" TextWrapping="Wrap" VerticalAlignment="Top" HorizontalAlignment="Left" Width="80"/>
-                        <Label Content="Batch size" HorizontalAlignment="Left" Margin="420,90,0,0" VerticalAlignment="Top"/>
+                        <Label Name="LabelBayesianBatchSize" Content="Batch size" HorizontalAlignment="Left" Margin="420,90,0,0" VerticalAlignment="Top"/>
 
                         <TextBox Name="TextBoxBayesianAcquisitionKappa" Height="24" Margin="510,115,0,0" TextWrapping="Wrap" VerticalAlignment="Top" HorizontalAlignment="Left" Width="100"/>
-                        <Label Content="Kappa" HorizontalAlignment="Left" Margin="510,90,0,0" VerticalAlignment="Top"/>
+                        <Label Name="LabelBayesianAcquisitionKappa" Content="Kappa" HorizontalAlignment="Left" Margin="510,90,0,0" VerticalAlignment="Top"/>
 
                         <TextBox Name="TextBoxBayesianTailSharePercent" Height="24" Margin="620,115,0,0" TextWrapping="Wrap" VerticalAlignment="Top" HorizontalAlignment="Left" Width="80"/>
-                        <Label Content="Tail share %" HorizontalAlignment="Left" Margin="620,90,0,0" VerticalAlignment="Top"/>
+                        <Label Name="LabelBayesianTailSharePercent" Content="Tail share %" HorizontalAlignment="Left" Margin="620,90,0,0" VerticalAlignment="Top"/>
 
                         <CheckBox Name="CheckBoxBayesianTailPass" Content="Tail pass" HorizontalAlignment="Left" Margin="710,117,0,0" VerticalAlignment="Top"/>
                     </Grid>

@@ -5023,3 +5023,41 @@ After each optimizer-related change, update this file with:
 
 ### Risks / notes
 - UI-only change; control names preserved, code-behind bindings/events remain intact.
+
+## UI Update (2026-02-14) - Restore Last InSample On Fazes Tab And Rename Optimization Tab
+### What changed
+- Returned `CheckBoxLastInSample` to `TabItemFazes` (original placement area).
+- Removed duplicate `CheckBoxLastInSample` from optimization settings tab.
+- Renamed tab header from `Optimization` to `Оптимизация`.
+
+### Files touched
+- `project/OsEngine/OsOptimizer/OptimizerUi.xaml`
+- `report_optimaizer.md`
+
+### Validation
+- `dotnet build project/OsEngine/OsEngine.csproj --configuration Debug`
+- Result: Build succeeded, warnings 0, errors 0
+
+### Risks / notes
+- UI-only change; no logic/event binding behavior changed.
+
+## UI Localization Update (2026-02-14) - Localize Optimization Tab Header And Controls
+### What changed
+- Localized tab header `TabItemOptimization` via `OsLocalization.ConvertToLocString(...)`.
+- Localized all visible captions on optimization tab via code-behind:
+  - method/objective/direction/acquisition labels;
+  - Bayesian labels: initial samples, max iterations, batch size, kappa, tail share;
+  - `CheckBoxBayesianTailPass` content.
+- Added missing `Name` to optimization-tab labels in XAML to allow runtime localization assignment.
+
+### Files touched
+- `project/OsEngine/OsOptimizer/OptimizerUi.xaml`
+- `project/OsEngine/OsOptimizer/OptimizerUi.xaml.cs`
+- `report_optimaizer.md`
+
+### Validation
+- `dotnet build project/OsEngine/OsEngine.csproj --configuration Debug`
+- Result: Build succeeded, warnings 0, errors 0
+
+### Risks / notes
+- Scope limited to Optimization tab UI text only.

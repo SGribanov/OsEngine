@@ -217,10 +217,39 @@ namespace OsEngine.OsOptimizer
             CheckBoxFilterDealsCount.Content = OsLocalization.Optimizer.Label34;
             ButtonStrategySelect.Content = OsLocalization.Optimizer.Label35;
             Label23.Content = OsLocalization.Optimizer.Label36;
-            LabelOptimizationMethod.Content = "Optimization method";
-            LabelObjectiveMetric.Content = "Objective metric";
-            LabelObjectiveDirection.Content = "Objective direction";
-            LabelBayesianAcquisitionMode.Content = "Acquisition mode";
+            TabItemOptimization.Header = OsLocalization.ConvertToLocString(
+                "Eng:Optimization_" +
+                "Ru:Оптимизация_");
+            LabelOptimizationMethod.Content = OsLocalization.ConvertToLocString(
+                "Eng:Optimization method_" +
+                "Ru:Метод оптимизации_");
+            LabelObjectiveMetric.Content = OsLocalization.ConvertToLocString(
+                "Eng:Objective metric_" +
+                "Ru:Целевая метрика_");
+            LabelObjectiveDirection.Content = OsLocalization.ConvertToLocString(
+                "Eng:Objective direction_" +
+                "Ru:Направление оптимизации_");
+            LabelBayesianAcquisitionMode.Content = OsLocalization.ConvertToLocString(
+                "Eng:Acquisition mode_" +
+                "Ru:Режим выбора (Acquisition)_");
+            LabelBayesianInitialSamples.Content = OsLocalization.ConvertToLocString(
+                "Eng:Initial samples_" +
+                "Ru:Стартовые выборки_");
+            LabelBayesianMaxIterations.Content = OsLocalization.ConvertToLocString(
+                "Eng:Max iterations_" +
+                "Ru:Макс. итераций_");
+            LabelBayesianBatchSize.Content = OsLocalization.ConvertToLocString(
+                "Eng:Batch size_" +
+                "Ru:Размер батча_");
+            LabelBayesianAcquisitionKappa.Content = OsLocalization.ConvertToLocString(
+                "Eng:Kappa_" +
+                "Ru:Каппа_");
+            LabelBayesianTailSharePercent.Content = OsLocalization.ConvertToLocString(
+                "Eng:Tail share %_" +
+                "Ru:Доля tail-pass, %_");
+            CheckBoxBayesianTailPass.Content = OsLocalization.ConvertToLocString(
+                "Eng:Tail pass_" +
+                "Ru:Tail pass_");
             ButtonPositionSupport.Content = OsLocalization.Trader.Label47;
             ButtonStrategyReload.Content = OsLocalization.Optimizer.Label48;
             TabControlResultsSeries.Header = OsLocalization.Optimizer.Label37;
