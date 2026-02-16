@@ -919,20 +919,26 @@ namespace OsEngine.OsTrader.Panels
         {
             try
             {
-                if (!File.Exists(@"Engine\LayoutRobotUi" + _panelName + ".txt"))
+                if (!File.Exists(GetLayoutSettingsPath()))
                 {
                     return;
                 }
 
                 try
                 {
-                    using (StreamReader reader = new StreamReader(@"Engine\LayoutRobotUi" + _panelName + ".txt"))
+                    BotPanelChartLayoutSettingsDto settings = SettingsManager.Load(
+                        GetLayoutSettingsPath(),
+                        defaultValue: null,
+                        legacyLoader: ParseLegacyLayoutSettings);
+
+                    if (settings == null)
                     {
-                        _settingsPanelIsHide = Convert.ToBoolean(reader.ReadLine());
-                        _informPanelIsHide = Convert.ToBoolean(reader.ReadLine());
-                        _lowPanelIsBig = Convert.ToBoolean(reader.ReadLine());
-                        reader.Close();
+                        return;
                     }
+
+                    _settingsPanelIsHide = settings.SettingsPanelIsHide;
+                    _informPanelIsHide = settings.InformPanelIsHide;
+                    _lowPanelIsBig = settings.LowPanelIsBig;
                 }
                 catch (Exception)
                 {
@@ -965,18 +971,60 @@ namespace OsEngine.OsTrader.Panels
         {
             try
             {
-                using (StreamWriter writer = new StreamWriter(@"Engine\LayoutRobotUi" + _panelName + ".txt", false))
-                {
-                    writer.WriteLine(_settingsPanelIsHide);
-                    writer.WriteLine(_informPanelIsHide);
-                    writer.WriteLine(_lowPanelIsBig);
-                    writer.Close();
-                }
+                SettingsManager.Save(
+                    GetLayoutSettingsPath(),
+                    new BotPanelChartLayoutSettingsDto
+                    {
+                        SettingsPanelIsHide = _settingsPanelIsHide,
+                        InformPanelIsHide = _informPanelIsHide,
+                        LowPanelIsBig = _lowPanelIsBig
+                    });
             }
             catch (Exception ex)
             {
                 SendNewLogMessage(ex.ToString(), LogMessageType.Error);
             }
+        }
+
+        private string GetLayoutSettingsPath()
+        {
+            return @"Engine\LayoutRobotUi" + _panelName + ".txt";
+        }
+
+        private static BotPanelChartLayoutSettingsDto ParseLegacyLayoutSettings(string content)
+        {
+            if (string.IsNullOrWhiteSpace(content))
+            {
+                return null;
+            }
+
+            string[] lines = content.Replace("\r", string.Empty).Split('\n');
+
+            BotPanelChartLayoutSettingsDto settings = new BotPanelChartLayoutSettingsDto();
+
+            if (lines.Length > 0 && bool.TryParse(lines[0], out bool settingsPanelIsHide))
+            {
+                settings.SettingsPanelIsHide = settingsPanelIsHide;
+            }
+
+            if (lines.Length > 1 && bool.TryParse(lines[1], out bool informPanelIsHide))
+            {
+                settings.InformPanelIsHide = informPanelIsHide;
+            }
+
+            if (lines.Length > 2 && bool.TryParse(lines[2], out bool lowPanelIsBig))
+            {
+                settings.LowPanelIsBig = lowPanelIsBig;
+            }
+
+            return settings;
+        }
+
+        private sealed class BotPanelChartLayoutSettingsDto
+        {
+            public bool SettingsPanelIsHide { get; set; }
+            public bool InformPanelIsHide { get; set; }
+            public bool LowPanelIsBig { get; set; }
         }
 
         private void ButtonHideInformPanel_Click(object sender, RoutedEventArgs e)

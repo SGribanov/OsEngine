@@ -2065,3 +2065,19 @@
 ### Verification
 
 - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` -> passed 337/337
+
+## 2026-02-16 - Step 2.3 (JSON settings subsystem) - BotPanelChartUi layout storage migrated to JSON wrapper with legacy compatibility
+
+- Updated `project/OsEngine/OsTrader/Panels/BotPanelChartUI.xaml.cs`:
+  - migrated layout settings wrapper (`LayoutRobotUi*.txt`) from direct line-based IO to `SettingsManager`
+  - `SaveLeftPanelPosition()` now persists DTO JSON (`BotPanelChartLayoutSettingsDto`)
+  - `CheckPanels()` now loads via `SettingsManager.Load(..., legacyLoader: ParseLegacyLayoutSettings)`
+  - centralized path usage via `GetLayoutSettingsPath()`
+  - added legacy parser `ParseLegacyLayoutSettings(string content)` for old 3-line bool format
+- Added tests in `project/OsEngine.Tests/BotPanelChartUILayoutPersistenceTests.cs`:
+  - verifies JSON persistence from private `SaveLeftPanelPosition()` path
+  - verifies legacy parser behavior
+
+### Verification
+
+- `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` -> passed 339/339
