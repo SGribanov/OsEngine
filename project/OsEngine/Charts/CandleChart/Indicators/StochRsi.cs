@@ -174,22 +174,28 @@ namespace OsEngine.Charts.CandleChart.Indicators
         /// </summary>
         public void Load()
         {
-            if (!File.Exists(@"Engine\" + Name + @".txt"))
+            if (!File.Exists(GetSettingsPath()))
             {
                 return;
             }
 
             try
             {
-                using (StreamReader reader = new StreamReader(@"Engine\" + Name + @".txt"))
+                StochRsiSettingsDto settings = SettingsManager.Load(
+                    GetSettingsPath(),
+                    defaultValue: null,
+                    legacyLoader: ParseLegacySettings);
+
+                if (settings == null)
                 {
-                    ColorK = Color.FromArgb(Convert.ToInt32(reader.ReadLine()));
-                    RsiLength = Convert.ToInt32(reader.ReadLine());
-                    StochasticLength = Convert.ToInt32(reader.ReadLine());
-                    K = Convert.ToInt32(reader.ReadLine());
-                    D = Convert.ToInt32(reader.ReadLine());
-                    reader.Close();
+                    return;
                 }
+
+                ColorK = Color.FromArgb(settings.ColorKArgb);
+                RsiLength = settings.RsiLength;
+                StochasticLength = settings.StochasticLength;
+                K = settings.K;
+                D = settings.D;
             }
             catch (Exception)
             {
@@ -211,15 +217,16 @@ namespace OsEngine.Charts.CandleChart.Indicators
                     return;
                 }
 
-                using (StreamWriter writer = new StreamWriter(@"Engine\" + Name + @".txt", false))
-                {
-                    writer.WriteLine(ColorK.ToArgb());
-                    writer.WriteLine(RsiLength);
-                    writer.WriteLine(StochasticLength);
-                    writer.WriteLine(K);
-                    writer.WriteLine(D);
-                    writer.Close();
-                }
+                SettingsManager.Save(
+                    GetSettingsPath(),
+                    new StochRsiSettingsDto
+                    {
+                        ColorKArgb = ColorK.ToArgb(),
+                        RsiLength = RsiLength,
+                        StochasticLength = StochasticLength,
+                        K = K,
+                        D = D
+                    });
             }
             catch (Exception)
             {
@@ -234,10 +241,58 @@ namespace OsEngine.Charts.CandleChart.Indicators
         /// </summary>
         public void Delete()
         {
-            if (File.Exists(@"Engine\" + Name + @".txt"))
+            if (File.Exists(GetSettingsPath()))
             {
-                File.Delete(@"Engine\" + Name + @".txt");
+                File.Delete(GetSettingsPath());
             }
+        }
+
+        private string GetSettingsPath()
+        {
+            return @"Engine\" + Name + @".txt";
+        }
+
+        private static StochRsiSettingsDto ParseLegacySettings(string content)
+        {
+            if (string.IsNullOrWhiteSpace(content))
+            {
+                return null;
+            }
+
+            string normalized = content.Replace("\r", string.Empty);
+            string[] lines = normalized.Split('\n');
+
+            if (lines.Length > 0 && lines[lines.Length - 1] == string.Empty)
+            {
+                Array.Resize(ref lines, lines.Length - 1);
+            }
+
+            if (lines.Length < 5)
+            {
+                return null;
+            }
+
+            return new StochRsiSettingsDto
+            {
+                ColorKArgb = Convert.ToInt32(lines[0]),
+                RsiLength = Convert.ToInt32(lines[1]),
+                StochasticLength = Convert.ToInt32(lines[2]),
+                K = Convert.ToInt32(lines[3]),
+                D = Convert.ToInt32(lines[4])
+            };
+        }
+
+        private sealed class StochRsiSettingsDto
+        {
+            public int ColorKArgb { get; set; }
+
+            public int RsiLength { get; set; }
+
+            public int StochasticLength { get; set; }
+
+            public int K { get; set; }
+
+            public int D { get; set; }
         }
 
         /// <summary>
