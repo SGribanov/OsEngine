@@ -161,15 +161,16 @@ namespace OsEngine.Charts.CandleChart.Indicators
                     return;
                 }
 
-                using (StreamWriter writer = new StreamWriter(@"Engine\" + Name + @".txt", false))
-                {
-                    writer.WriteLine(ColorBase.ToArgb());
-                    writer.WriteLine(LengthMa);
-                    writer.WriteLine(PaintOn);
-                    writer.WriteLine(TypeCalculationAverage);
-                    writer.WriteLine(LengthAverage);
-                    writer.Close();
-                }
+                SettingsManager.Save(
+                    GetSettingsPath(),
+                    new IvashovRangeSettingsDto
+                    {
+                        ColorArgb = ColorBase.ToArgb(),
+                        LengthMa = LengthMa,
+                        PaintOn = PaintOn,
+                        TypeCalculationAverage = TypeCalculationAverage,
+                        LengthAverage = LengthAverage
+                    });
             }
             catch (Exception)
             {
@@ -184,24 +185,27 @@ namespace OsEngine.Charts.CandleChart.Indicators
         /// </summary>
         public void Load()
         {
-            if (!File.Exists(@"Engine\" + Name + @".txt"))
+            if (!File.Exists(GetSettingsPath()))
             {
                 return;
             }
             try
             {
+                IvashovRangeSettingsDto settings = SettingsManager.Load(
+                    GetSettingsPath(),
+                    defaultValue: null,
+                    legacyLoader: ParseLegacySettings);
 
-                using (StreamReader reader = new StreamReader(@"Engine\" + Name + @".txt"))
+                if (settings == null)
                 {
-                    ColorBase = Color.FromArgb(Convert.ToInt32(reader.ReadLine()));
-                    LengthMa = Convert.ToInt32(reader.ReadLine());
-                    PaintOn = Convert.ToBoolean(reader.ReadLine());
-                    Enum.TryParse(reader.ReadLine(), true, out TypeCalculationAverage);
-                    LengthAverage = Convert.ToInt32(reader.ReadLine());
-                    reader.ReadLine();
-
-                    reader.Close();
+                    return;
                 }
+
+                ColorBase = Color.FromArgb(settings.ColorArgb);
+                LengthMa = settings.LengthMa;
+                PaintOn = settings.PaintOn;
+                TypeCalculationAverage = settings.TypeCalculationAverage;
+                LengthAverage = settings.LengthAverage;
 
 
             }
@@ -218,10 +222,66 @@ namespace OsEngine.Charts.CandleChart.Indicators
         /// </summary>
         public void Delete()
         {
-            if (File.Exists(@"Engine\" + Name + @".txt"))
+            if (File.Exists(GetSettingsPath()))
             {
-                File.Delete(@"Engine\" + Name + @".txt");
+                File.Delete(GetSettingsPath());
             }
+        }
+
+        private string GetSettingsPath()
+        {
+            return @"Engine\" + Name + @".txt";
+        }
+
+        private static IvashovRangeSettingsDto ParseLegacySettings(string content)
+        {
+            if (string.IsNullOrWhiteSpace(content))
+            {
+                return null;
+            }
+
+            string normalized = content.Replace("\r", string.Empty);
+            string[] lines = normalized.Split('\n');
+
+            if (lines.Length > 0 && lines[lines.Length - 1] == string.Empty)
+            {
+                Array.Resize(ref lines, lines.Length - 1);
+            }
+
+            if (lines.Length < 4)
+            {
+                return null;
+            }
+
+            MovingAverageTypeCalculation typeCalculationAverage = MovingAverageTypeCalculation.Simple;
+            Enum.TryParse(lines[3], true, out typeCalculationAverage);
+
+            int lengthMa = Convert.ToInt32(lines[1]);
+            int lengthAverage = lines.Length >= 5
+                ? Convert.ToInt32(lines[4])
+                : lengthMa;
+
+            return new IvashovRangeSettingsDto
+            {
+                ColorArgb = Convert.ToInt32(lines[0]),
+                LengthMa = lengthMa,
+                PaintOn = Convert.ToBoolean(lines[2]),
+                TypeCalculationAverage = typeCalculationAverage,
+                LengthAverage = lengthAverage
+            };
+        }
+
+        private sealed class IvashovRangeSettingsDto
+        {
+            public int ColorArgb { get; set; }
+
+            public int LengthMa { get; set; }
+
+            public bool PaintOn { get; set; }
+
+            public MovingAverageTypeCalculation TypeCalculationAverage { get; set; }
+
+            public int LengthAverage { get; set; }
         }
 
         /// <summary>

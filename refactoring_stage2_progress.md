@@ -1612,3 +1612,18 @@
 ### Verification
 
 - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` -> passed 294/294
+
+## 2026-02-16 - Step 2.3 (JSON settings subsystem) - Incremental adoption in IvashovRange indicator settings
+
+- Migrated `project/OsEngine/Charts/CandleChart/Indicators/IvashovRange.cs` (`Engine\\<Name>.txt`) persistence to `SettingsManager`:
+  - `Save()` now writes JSON DTO with color, MA length, paint flag, average type, and average length
+  - `Load()` now reads JSON and falls back to legacy line-based parser
+  - preserved compatibility with historical legacy format where `LengthAverage` may be absent (fallback to `LengthMa`)
+- Added tests `project/OsEngine.Tests/IvashovRangePersistenceTests.cs`:
+  - `Save_ShouldPersistJson_AndLoadRoundTrip`
+  - `Load_ShouldSupportLegacyLineBasedFormat_WithOptionalLengthAverageMissing`
+  - tests use file backup/restore around indicator settings path
+
+### Verification
+
+- `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` -> passed 296/296
