@@ -30,7 +30,7 @@ namespace OsEngine.Charts.CandleChart.Indicators
             PaintOn = true;
             Deviation = 2;
 
-            if (!File.Exists(@"Engine\" + Name + @".txt"))
+            if (!File.Exists(GetSettingsPath()))
             {
                 // if this is our first download.
                 // если у нас первая загрузка

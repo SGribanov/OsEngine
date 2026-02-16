@@ -1800,3 +1800,14 @@
 ### Verification
 
 - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` -> passed 318/318
+
+## 2026-02-16 - Step 2.3 (JSON settings subsystem) - Path consistency cleanup in Envelops and MacdLine constructors
+
+- Updated constructor-level settings-file checks to use `GetSettingsPath()`:
+  - `project/OsEngine/Charts/CandleChart/Indicators/Envelops.cs`
+  - `project/OsEngine/Charts/CandleChart/Indicators/MacdLine.cs`
+- This removes remaining direct `@"Engine\\<Name>.txt"` checks in these indicators and aligns path handling with already migrated `Save/Load/Delete` methods.
+
+### Verification
+
+- `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` -> passed 318/318

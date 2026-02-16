@@ -34,7 +34,7 @@ namespace OsEngine.Charts.CandleChart.Indicators
 
             PaintOn = true;
 
-            if (!File.Exists(@"Engine\" + Name + @".txt"))
+            if (!File.Exists(GetSettingsPath()))
             {// если у нас первая загрузка
                 _maShort = new MovingAverage(uniqName + "ma1", false) { Length = 12, TypeCalculationAverage = MovingAverageTypeCalculation.Exponential };
                 _maLong = new MovingAverage(uniqName + "ma2", false) { Length = 26, TypeCalculationAverage = MovingAverageTypeCalculation.Exponential };
