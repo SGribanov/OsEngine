@@ -2542,3 +2542,23 @@
   - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` succeeded (`324/324`).
 - **Commit:** `91c0d5ca6`
 - **Push:** no (manual push by user)
+
+### Step 2.3 - JSON Settings Subsystem (Incremental Adoption #123)
+
+- **Status:** In Progress (increment completed)
+- **Plan item:** `refactoring_stage2_plan.md` -> Phase 2 / Step 2.3
+- **Changes:**
+  - Migrated standard polygon settings persistence in:
+    - `project/OsEngine/OsTrader/Panels/Tab/BotTabPolygon.cs`
+  - `SaveStandartSettings()` and `LoadStandartSettings()` now use `SettingsManager` DTO JSON.
+  - Added legacy parser for old line-based ordered format:
+    - `ParseLegacyStandartPolygonSettings(string content)`
+  - Centralized standard settings file path via helper and reused it in save/load/delete.
+  - Added tests:
+    - `project/OsEngine.Tests/BotTabPolygonStandartSettingsPersistenceTests.cs`
+  - Updated running progress journal:
+    - `refactoring_stage2_progress.md`
+- **Verification:**
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` succeeded (`326/326`).
+- **Commit:** `71342ca1b`
+- **Push:** no (manual push by user)
