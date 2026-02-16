@@ -2620,3 +2620,24 @@
   - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` succeeded (`330/330`).
 - **Commit:** `34638af68`
 - **Push:** no (manual push by user)
+
+### Step 2.3 - JSON Settings Subsystem (Incremental Adoption #127)
+
+- **Status:** In Progress (increment completed)
+- **Plan item:** `refactoring_stage2_plan.md` -> Phase 2 / Step 2.3
+- **Changes:**
+  - Migrated chart master settings IO wrapper in:
+    - `project/OsEngine/Charts/CandleChart/ChartCandleMaster.cs`
+  - `Save()` and `Load()` now use `SettingsManager` DTO JSON with `Lines` payload.
+  - Preserved existing indicator reconstruction logic; source of lines changed from direct file reader to loaded DTO.
+  - Added legacy parser for old line-based settings format:
+    - `ParseLegacySettings(string content)`
+  - Centralized settings path via helper and reused it in load/save/delete.
+  - Added tests:
+    - `project/OsEngine.Tests/ChartCandleMasterSettingsPersistenceTests.cs`
+  - Updated running progress journal:
+    - `refactoring_stage2_progress.md`
+- **Verification:**
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` succeeded (`332/332`).
+- **Commit:** `c787f59fb`
+- **Push:** no (manual push by user)
