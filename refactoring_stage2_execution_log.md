@@ -1234,3 +1234,23 @@
   - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` succeeded (`208/208`).
 - **Commit:** `d320644cf`
 - **Push:** no (manual push by user)
+
+### Step 2.3 - JSON Settings Subsystem (Incremental Adoption #59)
+
+- **Status:** In Progress (increment completed)
+- **Plan item:** `refactoring_stage2_plan.md` -> Phase 2 / Step 2.3
+- **Changes:**
+  - Migrated position controller stop-limit settings persistence to JSON with legacy fallback:
+    - `project/OsEngine/Journal/Internal/PositionController.cs`
+  - Covered persisted file:
+    - dynamic `Engine\\<Name>DealControllerStopLimits.txt` path
+  - Added dedicated persistence tests:
+    - `project/OsEngine.Tests/PositionControllerStopLimitsPersistenceTests.cs`
+      - `TrySaveStopLimits_ShouldPersistJson_AndLoadRoundTrip`
+      - `LoadStopLimits_ShouldSupportLegacyLineBasedFormat`
+  - Updated running progress journal:
+    - `refactoring_stage2_progress.md`
+- **Verification:**
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` succeeded (`210/210`).
+- **Commit:** `117e637c1`
+- **Push:** no (manual push by user)
