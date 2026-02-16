@@ -2465,3 +2465,22 @@
   - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` succeeded (`318/318`).
 - **Commit:** `ab99494d5`
 - **Push:** no (manual push by user)
+
+### Step 2.3 - JSON Settings Subsystem (Incremental Adoption #119)
+
+- **Status:** In Progress (increment completed)
+- **Plan item:** `refactoring_stage2_plan.md` -> Phase 2 / Step 2.3
+- **Changes:**
+  - Centralized server-instance numbers file path in:
+    - `project/OsEngine/Market/ServerMaster.cs`
+  - Added helper:
+    - `GetServerInstanceNumbersPath(ServerType serverType)`
+  - Applied helper in:
+    - `TryLoadServerInstance(...)`
+    - `TrySaveServerInstance(...)`
+  - Updated running progress journal:
+    - `refactoring_stage2_progress.md`
+- **Verification:**
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` succeeded (`318/318`).
+- **Commit:** `b08adc3cf`
+- **Push:** no (manual push by user)
