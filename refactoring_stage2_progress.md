@@ -1036,3 +1036,18 @@
 ### Verification
 
 - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` -> passed 218/218
+
+## 2026-02-16 - Step 2.3 (JSON settings subsystem) - Incremental adoption in Cci indicator settings
+
+- Migrated `project/OsEngine/Charts/CandleChart/Indicators/CCI.cs` (`Engine\\<Name>.txt`) persistence to `SettingsManager`:
+  - `Save()` now writes JSON DTO with color/length/paint/price-point settings
+  - `Load()` now reads JSON and falls back to legacy line-based parser
+  - preserved existing settings contract for `ColorBase`, `Length`, `PaintOn`, and `TypePointsToSearch`
+- Added tests `project/OsEngine.Tests/CciPersistenceTests.cs`:
+  - `Save_ShouldPersistJson_AndLoadRoundTrip`
+  - `Load_ShouldSupportLegacyLineBasedFormat`
+  - tests use file backup/restore around indicator settings path
+
+### Verification
+
+- `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` -> passed 220/220
