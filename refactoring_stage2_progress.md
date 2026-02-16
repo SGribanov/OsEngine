@@ -601,3 +601,18 @@
 ### Verification
 
 - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` -> passed 160/160
+
+## 2026-02-16 - Step 2.3 (JSON settings subsystem) - Incremental adoption in AServer params settings
+
+- Migrated `project/OsEngine/Market/Servers/AServer.cs` (`Params.txt`) persistence to `SettingsManager`:
+  - private `SaveParam()` now writes JSON into `Engine\\<ServerNameUnique>Params.txt`
+  - private `LoadParam()` now reads JSON and falls back to legacy line-based parser
+  - preserved existing `IServerParameter` reconstruction and name/type match logic
+- Added tests `project/OsEngine.Tests/AServerParamsPersistenceTests.cs`:
+  - `SaveParam_ShouldPersistJson_AndLoadParamRoundTrip`
+  - `LoadParam_ShouldSupportLegacyLineBasedFormat`
+  - tests invoke private `SaveParam/LoadParam` via reflection on uninitialized `YahooServer` with injected realization
+
+### Verification
+
+- `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` -> passed 162/162

@@ -692,13 +692,18 @@ namespace OsEngine.Market.Servers
         {
             try
             {
-                List<string> lines = new List<string>();
+                string[] lines = new string[ServerParameters.Count];
                 for (int i = 0; i < ServerParameters.Count; i++)
                 {
-                    lines.Add(ServerParameters[i].GetStringToSave());
+                    lines[i] = ServerParameters[i].GetStringToSave();
                 }
 
-                SafeFileWriter.WriteAllLines(@"Engine\" + ServerNameUnique + @"Params.txt", lines);
+                SettingsManager.Save(
+                    GetServerParamsPath(),
+                    new ServerParamsSettingsDto
+                    {
+                        Parameters = lines
+                    });
             }
             catch (Exception)
             {
@@ -724,76 +729,119 @@ namespace OsEngine.Market.Servers
             }
 
 
-            if (!File.Exists(@"Engine\" + ServerNameUnique + @"Params.txt"))
-            {
-                return param;
-            }
             try
             {
-                using (StreamReader reader = new StreamReader(@"Engine\" + ServerNameUnique + @"Params.txt"))
+                ServerParamsSettingsDto settings = SettingsManager.Load(
+                    GetServerParamsPath(),
+                    defaultValue: null,
+                    legacyLoader: ParseLegacyServerParamsSettings);
+
+                if (settings == null || settings.Parameters == null)
                 {
-                    while (reader.EndOfStream == false)
-                    {
-                        string save = reader.ReadLine();
-
-                        string[] saveAr = save.Split('^');
-
-                        ServerParameterType type;
-                        Enum.TryParse(saveAr[0], out type);
-
-                        IServerParameter oldParam = null;
-
-                        if (type == ServerParameterType.Enum)
-                        {
-                            oldParam = new ServerParameterEnum();
-                        }
-                        if (type == ServerParameterType.String)
-                        {
-                            oldParam = new ServerParameterString();
-                        }
-                        if (type == ServerParameterType.Decimal)
-                        {
-                            oldParam = new ServerParameterDecimal();
-                        }
-                        if (type == ServerParameterType.Int)
-                        {
-                            oldParam = new ServerParameterInt();
-                        }
-                        if (type == ServerParameterType.Bool)
-                        {
-                            oldParam = new ServerParameterBool();
-                        }
-                        if (type == ServerParameterType.Password)
-                        {
-                            oldParam = new ServerParameterPassword();
-                        }
-                        if (type == ServerParameterType.Path)
-                        {
-                            oldParam = new ServerParameterPath();
-                        }
-
-                        if (oldParam == null)
-                        {
-                            continue;
-                        }
-
-                        oldParam.LoadFromStr(save);
-
-                        if (oldParam.Name == param.Name &&
-                            oldParam.Type == param.Type)
-                        {
-                            return oldParam;
-                        }
-                    }
-
                     return param;
                 }
+
+                for (int i = 0; i < settings.Parameters.Length; i++)
+                {
+                    string save = settings.Parameters[i];
+
+                    if (string.IsNullOrWhiteSpace(save))
+                    {
+                        continue;
+                    }
+
+                    string[] saveAr = save.Split('^');
+                    if (saveAr.Length < 3)
+                    {
+                        continue;
+                    }
+
+                    ServerParameterType type;
+                    Enum.TryParse(saveAr[0], out type);
+
+                    IServerParameter oldParam = null;
+
+                    if (type == ServerParameterType.Enum)
+                    {
+                        oldParam = new ServerParameterEnum();
+                    }
+                    if (type == ServerParameterType.String)
+                    {
+                        oldParam = new ServerParameterString();
+                    }
+                    if (type == ServerParameterType.Decimal)
+                    {
+                        oldParam = new ServerParameterDecimal();
+                    }
+                    if (type == ServerParameterType.Int)
+                    {
+                        oldParam = new ServerParameterInt();
+                    }
+                    if (type == ServerParameterType.Bool)
+                    {
+                        oldParam = new ServerParameterBool();
+                    }
+                    if (type == ServerParameterType.Password)
+                    {
+                        oldParam = new ServerParameterPassword();
+                    }
+                    if (type == ServerParameterType.Path)
+                    {
+                        oldParam = new ServerParameterPath();
+                    }
+
+                    if (oldParam == null)
+                    {
+                        continue;
+                    }
+
+                    oldParam.LoadFromStr(save);
+
+                    if (oldParam.Name == param.Name &&
+                        oldParam.Type == param.Type)
+                    {
+                        return oldParam;
+                    }
+                }
+
+                return param;
             }
             catch (Exception error)
             {
                 SendLogMessage(error.ToString(), LogMessageType.Error);
             }
             return param;
+        }
+
+        private string GetServerParamsPath()
+        {
+            return @"Engine\" + ServerNameUnique + @"Params.txt";
+        }
+
+        private static ServerParamsSettingsDto ParseLegacyServerParamsSettings(string content)
+        {
+            if (string.IsNullOrWhiteSpace(content))
+            {
+                return null;
+            }
+
+            string normalized = content.Replace("\r", string.Empty);
+            string[] lines = normalized.Split('\n');
+
+            if (lines.Length > 0 && lines[lines.Length - 1] == string.Empty)
+            {
+                Array.Resize(ref lines, lines.Length - 1);
+            }
+
+            return new ServerParamsSettingsDto
+            {
+                Parameters = lines
+            };
+        }
+
+        private sealed class ServerParamsSettingsDto
+        {
+            public string[] Parameters { get; set; }
         }
 
         /// <summary>
