@@ -242,3 +242,17 @@
 ### Verification
 
 - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` -> passed 110/110
+
+## 2026-02-16 - Step 2.3 (JSON settings subsystem) - Incremental adoption in MessageSender settings
+
+- Migrated `project/OsEngine/Logging/MessageSender.cs` persistence to `SettingsManager`:
+  - `Save()` now writes JSON into `Engine\\<name>MessageSender.txt`
+  - `Load()` now reads JSON and falls back to legacy line-based parser
+  - legacy parser supports truncated historical format (missing trailing fields -> default `false`)
+- Added tests `project/OsEngine.Tests/MessageSenderPersistenceTests.cs`:
+  - `Save_ShouldPersistJson_AndLoadRoundTrip`
+  - `Load_ShouldSupportLegacyLineBasedFormat`
+
+### Verification
+
+- `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` -> passed 112/112

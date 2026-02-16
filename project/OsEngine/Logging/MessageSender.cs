@@ -86,54 +86,59 @@ namespace OsEngine.Logging
         /// </summary>
         private void Load() 
         {
-            if (!File.Exists(@"Engine\" + _name + @"MessageSender.txt"))
+            MessageSenderSettingsDto settings = SettingsManager.Load(
+                GetSettingsPath(),
+                defaultValue: null,
+                legacyLoader: ParseLegacySettings);
+
+            if (settings == null)
             {
                 return;
             }
+
+            ApplySettings(settings);
+        }
+
+        private void ApplySettings(MessageSenderSettingsDto settings)
+        {
             try
             {
-                using (StreamReader reader = new StreamReader(@"Engine\" + _name + @"MessageSender.txt"))
-                {
+                MailSendOn = settings.MailSendOn;
 
-                    MailSendOn =  Convert.ToBoolean(reader.ReadLine());
+                MailSystemSendOn = settings.MailSystemSendOn;
+                MailSignalSendOn = settings.MailSignalSendOn;
+                MailErrorSendOn = settings.MailErrorSendOn;
+                MailConnectSendOn = settings.MailConnectSendOn;
+                MailTradeSendOn = settings.MailTradeSendOn;
+                MailNoNameSendOn = settings.MailNoNameSendOn;
 
-                    MailSystemSendOn = Convert.ToBoolean(reader.ReadLine());
-                    MailSignalSendOn = Convert.ToBoolean(reader.ReadLine());
-                    MailErrorSendOn = Convert.ToBoolean(reader.ReadLine());
-                    MailConnectSendOn = Convert.ToBoolean(reader.ReadLine());
-                    MailTradeSendOn = Convert.ToBoolean(reader.ReadLine());
-                    MailNoNameSendOn = Convert.ToBoolean(reader.ReadLine());
+                SmsSendOn = settings.SmsSendOn;
 
-                    SmsSendOn = Convert.ToBoolean(reader.ReadLine());
+                SmsSystemSendOn = settings.SmsSystemSendOn;
+                SmsSignalSendOn = settings.SmsSignalSendOn;
+                SmsErrorSendOn = settings.SmsErrorSendOn;
+                SmsConnectSendOn = settings.SmsConnectSendOn;
+                SmsTradeSendOn = settings.SmsTradeSendOn;
+                SmsNoNameSendOn = settings.SmsNoNameSendOn;
 
-                    SmsSystemSendOn = Convert.ToBoolean(reader.ReadLine());
-                    SmsSignalSendOn = Convert.ToBoolean(reader.ReadLine());
-                    SmsErrorSendOn = Convert.ToBoolean(reader.ReadLine());
-                    SmsConnectSendOn = Convert.ToBoolean(reader.ReadLine());
-                    SmsTradeSendOn = Convert.ToBoolean(reader.ReadLine());
-                    SmsNoNameSendOn = Convert.ToBoolean(reader.ReadLine());
+                WebhookSendOn = settings.WebhookSendOn;
 
-                    WebhookSendOn = Convert.ToBoolean(reader.ReadLine());
+                WebhookSystemSendOn = settings.WebhookSystemSendOn;
+                WebhookSignalSendOn = settings.WebhookSignalSendOn;
+                WebhookErrorSendOn = settings.WebhookErrorSendOn;
+                WebhookConnectSendOn = settings.WebhookConnectSendOn;
+                WebhookTradeSendOn = settings.WebhookTradeSendOn;
+                WebhookNoNameSendOn = settings.WebhookNoNameSendOn;
 
-                    WebhookSystemSendOn = Convert.ToBoolean(reader.ReadLine());
-                    WebhookSignalSendOn = Convert.ToBoolean(reader.ReadLine());
-                    WebhookErrorSendOn = Convert.ToBoolean(reader.ReadLine());
-                    WebhookConnectSendOn = Convert.ToBoolean(reader.ReadLine());
-                    WebhookTradeSendOn = Convert.ToBoolean(reader.ReadLine());
-                    WebhookNoNameSendOn = Convert.ToBoolean(reader.ReadLine());
+                TelegramSendOn = settings.TelegramSendOn;
 
-                    TelegramSendOn = Convert.ToBoolean(reader.ReadLine());
-
-                    TelegramSystemSendOn = Convert.ToBoolean(reader.ReadLine());
-                    TelegramSignalSendOn = Convert.ToBoolean(reader.ReadLine());
-                    TelegramErrorSendOn = Convert.ToBoolean(reader.ReadLine());
-                    TelegramConnectSendOn = Convert.ToBoolean(reader.ReadLine());
-                    TelegramTradeSendOn = Convert.ToBoolean(reader.ReadLine());
-                    TelegramNoNameSendOn = Convert.ToBoolean(reader.ReadLine());
-                    TelegramUserSendOn = Convert.ToBoolean(reader.ReadLine());
-
-                    reader.Close();
-                }
+                TelegramSystemSendOn = settings.TelegramSystemSendOn;
+                TelegramSignalSendOn = settings.TelegramSignalSendOn;
+                TelegramErrorSendOn = settings.TelegramErrorSendOn;
+                TelegramConnectSendOn = settings.TelegramConnectSendOn;
+                TelegramTradeSendOn = settings.TelegramTradeSendOn;
+                TelegramNoNameSendOn = settings.TelegramNoNameSendOn;
+                TelegramUserSendOn = settings.TelegramUserSendOn;
             }
             catch (Exception)
             {
@@ -150,52 +155,148 @@ namespace OsEngine.Logging
         {
             try
             {
-                using (StreamWriter writer = new StreamWriter(@"Engine\" + _name + @"MessageSender.txt", false))
-                {
-                    writer.WriteLine(MailSendOn);
-
-                    writer.WriteLine(MailSystemSendOn);
-                    writer.WriteLine(MailSignalSendOn);
-                    writer.WriteLine(MailErrorSendOn);
-                    writer.WriteLine(MailConnectSendOn);
-                    writer.WriteLine(MailTradeSendOn);
-                    writer.WriteLine(MailNoNameSendOn);
-
-                    writer.WriteLine(SmsSendOn);
-
-                    writer.WriteLine(SmsSystemSendOn);
-                    writer.WriteLine(SmsSignalSendOn);
-                    writer.WriteLine(SmsErrorSendOn);
-                    writer.WriteLine(SmsConnectSendOn);
-                    writer.WriteLine(SmsTradeSendOn);
-                    writer.WriteLine(SmsNoNameSendOn);
-
-                    writer.WriteLine(WebhookSendOn);
-
-                    writer.WriteLine(WebhookSystemSendOn);
-                    writer.WriteLine(WebhookSignalSendOn);
-                    writer.WriteLine(WebhookErrorSendOn);
-                    writer.WriteLine(WebhookConnectSendOn);
-                    writer.WriteLine(WebhookTradeSendOn);
-                    writer.WriteLine(WebhookNoNameSendOn);
-
-                    writer.WriteLine(TelegramSendOn);
-
-                    writer.WriteLine(TelegramSystemSendOn);
-                    writer.WriteLine(TelegramSignalSendOn);
-                    writer.WriteLine(TelegramErrorSendOn);
-                    writer.WriteLine(TelegramConnectSendOn);
-                    writer.WriteLine(TelegramTradeSendOn);
-                    writer.WriteLine(TelegramNoNameSendOn);
-                    writer.WriteLine(TelegramUserSendOn);
-                    
-                    writer.Close();
-                }
+                SettingsManager.Save(GetSettingsPath(), BuildSettings());
             }
             catch (Exception)
             {
                 // ignore
             }
+        }
+
+        private MessageSenderSettingsDto BuildSettings()
+        {
+            return new MessageSenderSettingsDto
+            {
+                MailSendOn = MailSendOn,
+                MailSystemSendOn = MailSystemSendOn,
+                MailSignalSendOn = MailSignalSendOn,
+                MailErrorSendOn = MailErrorSendOn,
+                MailConnectSendOn = MailConnectSendOn,
+                MailTradeSendOn = MailTradeSendOn,
+                MailNoNameSendOn = MailNoNameSendOn,
+                SmsSendOn = SmsSendOn,
+                SmsSystemSendOn = SmsSystemSendOn,
+                SmsSignalSendOn = SmsSignalSendOn,
+                SmsErrorSendOn = SmsErrorSendOn,
+                SmsConnectSendOn = SmsConnectSendOn,
+                SmsTradeSendOn = SmsTradeSendOn,
+                SmsNoNameSendOn = SmsNoNameSendOn,
+                WebhookSendOn = WebhookSendOn,
+                WebhookSystemSendOn = WebhookSystemSendOn,
+                WebhookSignalSendOn = WebhookSignalSendOn,
+                WebhookErrorSendOn = WebhookErrorSendOn,
+                WebhookConnectSendOn = WebhookConnectSendOn,
+                WebhookTradeSendOn = WebhookTradeSendOn,
+                WebhookNoNameSendOn = WebhookNoNameSendOn,
+                TelegramSendOn = TelegramSendOn,
+                TelegramSystemSendOn = TelegramSystemSendOn,
+                TelegramSignalSendOn = TelegramSignalSendOn,
+                TelegramErrorSendOn = TelegramErrorSendOn,
+                TelegramConnectSendOn = TelegramConnectSendOn,
+                TelegramTradeSendOn = TelegramTradeSendOn,
+                TelegramNoNameSendOn = TelegramNoNameSendOn,
+                TelegramUserSendOn = TelegramUserSendOn
+            };
+        }
+
+        private string GetSettingsPath()
+        {
+            return @"Engine\" + _name + @"MessageSender.txt";
+        }
+
+        private static MessageSenderSettingsDto ParseLegacySettings(string content)
+        {
+            if (string.IsNullOrWhiteSpace(content))
+            {
+                return null;
+            }
+
+            string normalized = content.Replace("\r", string.Empty);
+            string[] lines = normalized.Split('\n');
+
+            if (lines.Length > 0 && lines[lines.Length - 1] == string.Empty)
+            {
+                Array.Resize(ref lines, lines.Length - 1);
+            }
+
+            int index = 0;
+            return new MessageSenderSettingsDto
+            {
+                MailSendOn = TryReadBool(lines, ref index),
+                MailSystemSendOn = TryReadBool(lines, ref index),
+                MailSignalSendOn = TryReadBool(lines, ref index),
+                MailErrorSendOn = TryReadBool(lines, ref index),
+                MailConnectSendOn = TryReadBool(lines, ref index),
+                MailTradeSendOn = TryReadBool(lines, ref index),
+                MailNoNameSendOn = TryReadBool(lines, ref index),
+                SmsSendOn = TryReadBool(lines, ref index),
+                SmsSystemSendOn = TryReadBool(lines, ref index),
+                SmsSignalSendOn = TryReadBool(lines, ref index),
+                SmsErrorSendOn = TryReadBool(lines, ref index),
+                SmsConnectSendOn = TryReadBool(lines, ref index),
+                SmsTradeSendOn = TryReadBool(lines, ref index),
+                SmsNoNameSendOn = TryReadBool(lines, ref index),
+                WebhookSendOn = TryReadBool(lines, ref index),
+                WebhookSystemSendOn = TryReadBool(lines, ref index),
+                WebhookSignalSendOn = TryReadBool(lines, ref index),
+                WebhookErrorSendOn = TryReadBool(lines, ref index),
+                WebhookConnectSendOn = TryReadBool(lines, ref index),
+                WebhookTradeSendOn = TryReadBool(lines, ref index),
+                WebhookNoNameSendOn = TryReadBool(lines, ref index),
+                TelegramSendOn = TryReadBool(lines, ref index),
+                TelegramSystemSendOn = TryReadBool(lines, ref index),
+                TelegramSignalSendOn = TryReadBool(lines, ref index),
+                TelegramErrorSendOn = TryReadBool(lines, ref index),
+                TelegramConnectSendOn = TryReadBool(lines, ref index),
+                TelegramTradeSendOn = TryReadBool(lines, ref index),
+                TelegramNoNameSendOn = TryReadBool(lines, ref index),
+                TelegramUserSendOn = TryReadBool(lines, ref index)
+            };
+        }
+
+        private static bool TryReadBool(string[] lines, ref int index)
+        {
+            if (lines == null || index >= lines.Length)
+            {
+                return false;
+            }
+
+            string value = lines[index];
+            index++;
+            return value != null && value.Equals("true", StringComparison.OrdinalIgnoreCase);
+        }
+
+        private sealed class MessageSenderSettingsDto
+        {
+            public bool WebhookSendOn { get; set; }
+            public bool WebhookSystemSendOn { get; set; }
+            public bool WebhookSignalSendOn { get; set; }
+            public bool WebhookErrorSendOn { get; set; }
+            public bool WebhookConnectSendOn { get; set; }
+            public bool WebhookTradeSendOn { get; set; }
+            public bool WebhookNoNameSendOn { get; set; }
+            public bool TelegramSendOn { get; set; }
+            public bool TelegramSystemSendOn { get; set; }
+            public bool TelegramSignalSendOn { get; set; }
+            public bool TelegramErrorSendOn { get; set; }
+            public bool TelegramConnectSendOn { get; set; }
+            public bool TelegramTradeSendOn { get; set; }
+            public bool TelegramNoNameSendOn { get; set; }
+            public bool TelegramUserSendOn { get; set; }
+            public bool MailSendOn { get; set; }
+            public bool MailSystemSendOn { get; set; }
+            public bool MailSignalSendOn { get; set; }
+            public bool MailErrorSendOn { get; set; }
+            public bool MailConnectSendOn { get; set; }
+            public bool MailTradeSendOn { get; set; }
+            public bool MailNoNameSendOn { get; set; }
+            public bool SmsSendOn { get; set; }
+            public bool SmsSystemSendOn { get; set; }
+            public bool SmsSignalSendOn { get; set; }
+            public bool SmsErrorSendOn { get; set; }
+            public bool SmsConnectSendOn { get; set; }
+            public bool SmsTradeSendOn { get; set; }
+            public bool SmsNoNameSendOn { get; set; }
         }
 
         /// <summary>
