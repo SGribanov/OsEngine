@@ -1767,3 +1767,21 @@
 ### Verification
 
 - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` -> passed 314/314
+
+## 2026-02-16 - Step 2.3 (JSON settings subsystem) - Incremental adoption in PivotPoints indicator settings
+
+- Migrated `project/OsEngine/Charts/CandleChart/Indicators/PivotPoints.cs` (`Engine\\<Name>.txt`) persistence to `SettingsManager`:
+  - `Save()` now writes JSON DTO with pivot/support/resistance colors and `PaintOn`
+  - `Load()` now reads JSON and falls back to legacy line-based parser
+  - legacy parser supports historical color representations:
+    - numeric `ARGB`
+    - `Color [Name]`
+    - `Color [A=..., R=..., G=..., B=...]`
+- Added tests `project/OsEngine.Tests/PivotPointsPersistenceTests.cs`:
+  - `Save_ShouldPersistJson_AndLoadRoundTrip`
+  - `Load_ShouldSupportLegacyLineBasedFormat_WithColorStrings`
+  - tests use file backup/restore around indicator settings path
+
+### Verification
+
+- `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` -> passed 316/316
