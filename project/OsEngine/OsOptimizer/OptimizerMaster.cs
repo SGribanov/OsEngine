@@ -775,22 +775,39 @@ namespace OsEngine.OsOptimizer
 
         private void GetValueParameterSaveByUser(IIStrategyParameter parameter)
         {
-            if (!File.Exists(@"Engine\" + Settings.StrategyName + @"_StandartOptimizerParameters.txt"))
+            if (!File.Exists(GetStandardParametersPath()))
             {
                 return;
             }
             try
             {
-                using (StreamReader reader = new StreamReader(@"Engine\" + Settings.StrategyName + @"_StandartOptimizerParameters.txt"))
-                {
-                    while (!reader.EndOfStream)
-                    {
-                        string[] save = reader.ReadLine().Split('#');
+                OptimizerStandardParametersDto settings = SettingsManager.Load(
+                    GetStandardParametersPath(),
+                    defaultValue: null,
+                    legacyLoader: ParseLegacyStandardParameters);
 
-                        if (save[0] == parameter.Name)
-                        {
-                            parameter.LoadParamFromString(save);
-                        }
+                if (settings == null
+                    || settings.ParameterLines == null)
+                {
+                    return;
+                }
+
+                for (int i = 0; i < settings.ParameterLines.Count; i++)
+                {
+                    if (string.IsNullOrWhiteSpace(settings.ParameterLines[i]))
+                    {
+                        continue;
+                    }
+
+                    string[] save = settings.ParameterLines[i].Split('#');
+                    if (save.Length == 0)
+                    {
+                        continue;
+                    }
+
+                    if (save[0] == parameter.Name)
+                    {
+                        parameter.LoadParamFromString(save);
                     }
                 }
             }
@@ -810,14 +827,18 @@ namespace OsEngine.OsOptimizer
 
             try
             {
-                using (StreamWriter writer = new StreamWriter(@"Engine\" + Settings.StrategyName + @"_StandartOptimizerParameters.txt", false)
-                    )
+                List<string> parameterLines = new List<string>();
+                for (int i = 0; i < _parameters.Count; i++)
                 {
-                    for (int i = 0; i < _parameters.Count; i++)
-                    {
-                        writer.WriteLine(_parameters[i].GetStringToSave());
-                    }
+                    parameterLines.Add(_parameters[i].GetStringToSave());
                 }
+
+                SettingsManager.Save(
+                    GetStandardParametersPath(),
+                    new OptimizerStandardParametersDto
+                    {
+                        ParameterLines = parameterLines
+                    });
             }
             catch (Exception)
             {
@@ -855,19 +876,24 @@ namespace OsEngine.OsOptimizer
         {
             List<bool> result = new List<bool>();
 
-            if (!File.Exists(@"Engine\" + Settings.StrategyName + @"_StandartOptimizerParametersOnOff.txt"))
+            if (!File.Exists(GetStandardParametersOnOffPath()))
             {
                 return result;
             }
             try
             {
-                using (StreamReader reader = new StreamReader(@"Engine\" + Settings.StrategyName + @"_StandartOptimizerParametersOnOff.txt"))
+                OptimizerStandardParametersOnOffDto settings = SettingsManager.Load(
+                    GetStandardParametersOnOffPath(),
+                    defaultValue: null,
+                    legacyLoader: ParseLegacyStandardParametersOnOff);
+
+                if (settings == null
+                    || settings.ParametersOn == null)
                 {
-                    while (!reader.EndOfStream)
-                    {
-                        result.Add(Convert.ToBoolean(reader.ReadLine()));
-                    }
+                    return result;
                 }
+
+                result = settings.ParametersOn;
             }
             catch (Exception)
             {
@@ -887,20 +913,78 @@ namespace OsEngine.OsOptimizer
 
             try
             {
-                using (StreamWriter writer = new StreamWriter(@"Engine\" + Settings.StrategyName + @"_StandartOptimizerParametersOnOff.txt", false)
-                    )
-                {
-                    for (int i = 0; i < _parametersOn.Count; i++)
+                SettingsManager.Save(
+                    GetStandardParametersOnOffPath(),
+                    new OptimizerStandardParametersOnOffDto
                     {
-                        writer.WriteLine(_parametersOn[i].ToString());
-                    }
-                }
+                        ParametersOn = new List<bool>(_parametersOn)
+                    });
             }
             catch (Exception)
             {
                 // ignore
             }
 
+        }
+
+        private string GetStandardParametersPath()
+        {
+            return @"Engine\" + Settings.StrategyName + @"_StandartOptimizerParameters.txt";
+        }
+
+        private string GetStandardParametersOnOffPath()
+        {
+            return @"Engine\" + Settings.StrategyName + @"_StandartOptimizerParametersOnOff.txt";
+        }
+
+        private static OptimizerStandardParametersDto ParseLegacyStandardParameters(string content)
+        {
+            if (string.IsNullOrWhiteSpace(content))
+            {
+                return null;
+            }
+
+            string[] lines = content.Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries);
+
+            return new OptimizerStandardParametersDto
+            {
+                ParameterLines = new List<string>(lines)
+            };
+        }
+
+        private static OptimizerStandardParametersOnOffDto ParseLegacyStandardParametersOnOff(string content)
+        {
+            if (string.IsNullOrWhiteSpace(content))
+            {
+                return null;
+            }
+
+            string[] lines = content.Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries);
+
+            OptimizerStandardParametersOnOffDto settings = new OptimizerStandardParametersOnOffDto
+            {
+                ParametersOn = new List<bool>()
+            };
+
+            for (int i = 0; i < lines.Length; i++)
+            {
+                if (bool.TryParse(lines[i], out bool isOn))
+                {
+                    settings.ParametersOn.Add(isOn);
+                }
+            }
+
+            return settings;
+        }
+
+        private sealed class OptimizerStandardParametersDto
+        {
+            public List<string> ParameterLines { get; set; }
+        }
+
+        private sealed class OptimizerStandardParametersOnOffDto
+        {
+            public List<bool> ParametersOn { get; set; }
         }
 
         #endregion

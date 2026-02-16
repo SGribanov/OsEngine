@@ -2111,3 +2111,24 @@
 ### Verification
 
 - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` -> passed 341/341
+
+## 2026-02-16 - Step 2.3 (JSON settings subsystem) - OptimizerMaster standard parameters storage migrated to JSON wrappers with legacy compatibility
+
+- Updated `project/OsEngine/OsOptimizer/OptimizerMaster.cs`:
+  - migrated standard optimizer parameters wrappers from direct line-based IO to `SettingsManager`
+  - `SaveStandardParameters()` / `GetValueParameterSaveByUser(...)` now persist/load DTO JSON for:
+    - `<StrategyName>_StandartOptimizerParameters.txt`
+  - `SaveParametersOnOffByStrategy()` / `GetParametersOnOffByStrategy()` now persist/load DTO JSON for:
+    - `<StrategyName>_StandartOptimizerParametersOnOff.txt`
+  - centralized file paths via:
+    - `GetStandardParametersPath()`
+    - `GetStandardParametersOnOffPath()`
+  - added legacy parsers:
+    - `ParseLegacyStandardParameters(string content)`
+    - `ParseLegacyStandardParametersOnOff(string content)`
+- Added tests in `project/OsEngine.Tests/OptimizerMasterPersistenceTests.cs`:
+  - verifies both legacy parser behaviors
+
+### Verification
+
+- `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` -> passed 343/343
