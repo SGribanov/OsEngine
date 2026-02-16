@@ -168,21 +168,27 @@ namespace OsEngine.Charts.CandleChart.Indicators
         /// </summary>
         public void Load()
         {
-            if (!File.Exists(@"Engine\" + Name + @".txt"))
+            if (!File.Exists(GetSettingsPath()))
             {
                 return;
             }
             try
             {
-                using (StreamReader reader = new StreamReader(@"Engine\" + Name + @".txt"))
+                DonchianChannelSettingsDto settings = SettingsManager.Load(
+                    GetSettingsPath(),
+                    defaultValue: null,
+                    legacyLoader: ParseLegacySettings);
+
+                if (settings == null)
                 {
-                    ColorUp = Color.FromArgb(Convert.ToInt32(reader.ReadLine()));
-                    ColorAvg = Color.FromArgb(Convert.ToInt32(reader.ReadLine()));
-                    ColorDown = Color.FromArgb(Convert.ToInt32(reader.ReadLine()));
-                    Length = Convert.ToInt32(reader.ReadLine());
-                    PaintOn = Convert.ToBoolean(reader.ReadLine());
-                    reader.Close();
+                    return;
                 }
+
+                ColorUp = Color.FromArgb(settings.ColorUpArgb);
+                ColorAvg = Color.FromArgb(settings.ColorAvgArgb);
+                ColorDown = Color.FromArgb(settings.ColorDownArgb);
+                Length = settings.Length;
+                PaintOn = settings.PaintOn;
             }
             catch (Exception)
             {
@@ -197,15 +203,16 @@ namespace OsEngine.Charts.CandleChart.Indicators
         {
             try
             {
-                using (StreamWriter writer = new StreamWriter(@"Engine\" + Name + @".txt", false))
-                {
-                    writer.WriteLine(ColorUp.ToArgb());
-                    writer.WriteLine(ColorAvg.ToArgb());
-                    writer.WriteLine(ColorDown.ToArgb());
-                    writer.WriteLine(Length);
-                    writer.WriteLine(PaintOn);
-                    writer.Close();
-                }
+                SettingsManager.Save(
+                    GetSettingsPath(),
+                    new DonchianChannelSettingsDto
+                    {
+                        ColorUpArgb = ColorUp.ToArgb(),
+                        ColorAvgArgb = ColorAvg.ToArgb(),
+                        ColorDownArgb = ColorDown.ToArgb(),
+                        Length = Length,
+                        PaintOn = PaintOn
+                    });
             }
             catch (Exception)
             {
@@ -218,10 +225,58 @@ namespace OsEngine.Charts.CandleChart.Indicators
         /// </summary>
         public void Delete()
         {
-            if (File.Exists(@"Engine\" + Name + @".txt"))
+            if (File.Exists(GetSettingsPath()))
             {
-                File.Delete(@"Engine\" + Name + @".txt");
+                File.Delete(GetSettingsPath());
             }
+        }
+
+        private string GetSettingsPath()
+        {
+            return @"Engine\" + Name + @".txt";
+        }
+
+        private static DonchianChannelSettingsDto ParseLegacySettings(string content)
+        {
+            if (string.IsNullOrWhiteSpace(content))
+            {
+                return null;
+            }
+
+            string normalized = content.Replace("\r", string.Empty);
+            string[] lines = normalized.Split('\n');
+
+            if (lines.Length > 0 && lines[lines.Length - 1] == string.Empty)
+            {
+                Array.Resize(ref lines, lines.Length - 1);
+            }
+
+            if (lines.Length < 5)
+            {
+                return null;
+            }
+
+            return new DonchianChannelSettingsDto
+            {
+                ColorUpArgb = Convert.ToInt32(lines[0]),
+                ColorAvgArgb = Convert.ToInt32(lines[1]),
+                ColorDownArgb = Convert.ToInt32(lines[2]),
+                Length = Convert.ToInt32(lines[3]),
+                PaintOn = Convert.ToBoolean(lines[4])
+            };
+        }
+
+        private sealed class DonchianChannelSettingsDto
+        {
+            public int ColorUpArgb { get; set; }
+
+            public int ColorAvgArgb { get; set; }
+
+            public int ColorDownArgb { get; set; }
+
+            public int Length { get; set; }
+
+            public bool PaintOn { get; set; }
         }
 
         /// <summary>
