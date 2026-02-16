@@ -228,3 +228,17 @@
 ### Verification
 
 - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` -> passed 108/108
+
+## 2026-02-16 - Step 2.3 (JSON settings subsystem) - Incremental adoption in ServerWebhook settings
+
+- Migrated `project/OsEngine/Logging/ServerWebhook.cs` persistence to `SettingsManager`:
+  - `Save()` now writes JSON into `Engine\\webhookSet.txt`
+  - `Load()` now reads JSON and falls back to legacy line-based format parser
+  - preserved `IsReady` calculation semantics from stored webhook list
+- Added tests `project/OsEngine.Tests/ServerWebhookPersistenceTests.cs`:
+  - `Save_ShouldPersistJson_AndLoadRoundTrip`
+  - `Load_ShouldSupportLegacyLineBasedFormat`
+
+### Verification
+
+- `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` -> passed 110/110

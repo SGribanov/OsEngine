@@ -17,6 +17,7 @@ using System.Windows.Forms;
 using System.Windows.Forms.DataVisualization.Charting;
 using System.Windows.Threading;
 using Newtonsoft.Json;
+using OsEngine.Entity;
 using OsEngine.OsTrader.Gui;
 using RestSharp;
 using Application = System.Windows.Application;
@@ -83,35 +84,18 @@ namespace OsEngine.Logging
         /// </summary>
         public void Load()
         {
-            if (File.Exists(@"Engine\webhookSet.txt"))
+            ServerWebhookSettingsDto settings = SettingsManager.Load(
+                GetSettingsPath(),
+                defaultValue: null,
+                legacyLoader: ParseLegacyWebhookSettings);
+
+            if (settings != null)
             {
-                using StreamReader reader = new StreamReader(@"Engine\webhookSet.txt");
-
-                SlackBotToken = reader.ReadLine();
-
-                IsReady = false;
-                for (int i = 0; !reader.EndOfStream; i++)
-                {
-                    if (Webhooks == null || Webhooks[0] == null)
-                    {
-                        Webhooks = new string[1];
-                        Webhooks[0] = reader.ReadLine();
-                        IsReady = true;
-                    }
-                    else
-                    {
-                        string[] newWebhooks = new string[Webhooks.Length + 1];
-
-                        for (int ii = 0; ii < Webhooks.Length; ii++)
-                        {
-                            newWebhooks[ii] = Webhooks[ii];
-                        }
-
-                        newWebhooks[newWebhooks.Length - 1] = reader.ReadLine();
-                        Webhooks = newWebhooks;
-                        IsReady = true;
-                    }
-                }
+                SlackBotToken = settings.SlackBotToken;
+                Webhooks = settings.Webhooks;
+                IsReady = Webhooks != null
+                    && Webhooks.Length > 0
+                    && Webhooks[0] != null;
             }
             else
             {
@@ -126,17 +110,65 @@ namespace OsEngine.Logging
         /// </summary>
         public void Save()
         {
-            using StreamWriter writer = new StreamWriter(@"Engine\webhookSet.txt");
-            writer.WriteLine(SlackBotToken);
-            IsReady = false;
-            if (Webhooks != null && Webhooks[0] != null)
-            {
-                for (int i = 0; i < Webhooks.Length; i++)
+            SettingsManager.Save(
+                GetSettingsPath(),
+                new ServerWebhookSettingsDto
                 {
-                    IsReady = true;
-                    writer.WriteLine(Webhooks[i]);
+                    SlackBotToken = SlackBotToken,
+                    Webhooks = Webhooks
+                });
+
+            IsReady = false;
+            if (Webhooks != null
+                && Webhooks.Length > 0
+                && Webhooks[0] != null)
+            {
+                IsReady = true;
+            }
+        }
+
+        private static string GetSettingsPath()
+        {
+            return @"Engine\webhookSet.txt";
+        }
+
+        private static ServerWebhookSettingsDto ParseLegacyWebhookSettings(string content)
+        {
+            if (string.IsNullOrWhiteSpace(content))
+            {
+                return null;
+            }
+
+            string normalized = content.Replace("\r", string.Empty);
+            string[] lines = normalized.Split('\n');
+
+            if (lines.Length > 0 && lines[lines.Length - 1] == string.Empty)
+            {
+                Array.Resize(ref lines, lines.Length - 1);
+            }
+
+            string[] webhooks = null;
+            if (lines.Length > 1)
+            {
+                webhooks = new string[lines.Length - 1];
+                for (int i = 1; i < lines.Length; i++)
+                {
+                    webhooks[i - 1] = lines[i];
                 }
             }
+
+            return new ServerWebhookSettingsDto
+            {
+                SlackBotToken = lines.Length > 0 ? lines[0] : null,
+                Webhooks = webhooks
+            };
+        }
+
+        private sealed class ServerWebhookSettingsDto
+        {
+            public string SlackBotToken { get; set; }
+
+            public string[] Webhooks { get; set; }
         }
 
         /// <summary>
