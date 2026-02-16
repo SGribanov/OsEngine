@@ -2143,3 +2143,16 @@
 ### Verification
 
 - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` -> passed 343/343
+
+## 2026-02-16 - Step 2.3 (JSON settings subsystem) - Path consistency cleanup in YahooServer securities cache flow
+
+- Updated `project/OsEngine/Market/Servers/YahooFinance/YahooServer.cs`:
+  - centralized Yahoo securities cache paths into helper methods:
+    - `GetYahooSecuritiesPath()`
+    - `GetYahooSecuritiesFtpPath()`
+  - replaced remaining inline path literals in local file read and FTP download call
+- No behavior changes intended; cleanup removes path duplication and keeps cache-path constants in one place.
+
+### Verification
+
+- `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` -> passed 343/343

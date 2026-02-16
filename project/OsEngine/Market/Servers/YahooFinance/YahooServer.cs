@@ -110,7 +110,7 @@ namespace OsEngine.Market.Servers.YahooFinance
 
             List<Security> securities = new List<Security>();
 
-            if (!File.Exists(@"Engine\YahooSecurities.txt"))
+            if (!File.Exists(GetYahooSecuritiesPath()))
             {
                 return;
             }
@@ -118,7 +118,7 @@ namespace OsEngine.Market.Servers.YahooFinance
             {
                 List<string> list = new List<string>();
 
-                using (StreamReader reader = new StreamReader(@"Engine\YahooSecurities.txt"))
+                using (StreamReader reader = new StreamReader(GetYahooSecuritiesPath()))
                 {
                     string line;
 
@@ -211,7 +211,7 @@ namespace OsEngine.Market.Servers.YahooFinance
                 client.Connect(TimeoutFtp, ftpServer, ftpPort);
                 client.Login(TimeoutFtp, ftpUser, ftpPassword);
 
-                client.GetFile(TimeoutFtp, "Engine/YahooSecurities.txt", "/symboldirectory/nasdaqtraded.txt");
+                client.GetFile(TimeoutFtp, GetYahooSecuritiesFtpPath(), "/symboldirectory/nasdaqtraded.txt");
 
                 client.Disconnect(TimeoutFtp);
             }
@@ -219,6 +219,16 @@ namespace OsEngine.Market.Servers.YahooFinance
             {
                 SendLogMessage(e.Message, LogMessageType.Error);
             }
+        }
+
+        private static string GetYahooSecuritiesPath()
+        {
+            return @"Engine\YahooSecurities.txt";
+        }
+
+        private static string GetYahooSecuritiesFtpPath()
+        {
+            return "Engine/YahooSecurities.txt";
         }
 
         public event Action<List<Security>> SecurityEvent;
