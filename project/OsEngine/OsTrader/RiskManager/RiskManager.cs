@@ -171,20 +171,25 @@ namespace OsEngine.OsTrader.RiskManager
         /// </summary>
         private void Load()
         {
-            if (!File.Exists(@"Engine\" + _name + @".txt"))
+            if (!File.Exists(GetSettingsPath()))
             {
                 return;
             }
             try
             {
-                using (StreamReader reader = new StreamReader(@"Engine\" + _name + @".txt"))
-                {
-                    MaxDrowDownToDayPersent = Convert.ToDecimal(reader.ReadLine());
-                    IsActiv = Convert.ToBoolean(reader.ReadLine());
-                    Enum.TryParse(reader.ReadLine(), false, out ReactionType);
+                RiskManagerSettingsDto settings = SettingsManager.Load(
+                    GetSettingsPath(),
+                    defaultValue: null,
+                    legacyLoader: ParseLegacySettings);
 
-                    reader.Close();
+                if (settings == null)
+                {
+                    return;
                 }
+
+                MaxDrowDownToDayPersent = settings.MaxDrowDownToDayPersent;
+                IsActiv = settings.IsActiv;
+                ReactionType = settings.ReactionType;
             }
             catch (Exception error)
             {
@@ -199,14 +204,14 @@ namespace OsEngine.OsTrader.RiskManager
         {
             try
             {
-                using (StreamWriter writer = new StreamWriter(@"Engine\" + _name + @".txt", false))
-                {
-                    writer.WriteLine(MaxDrowDownToDayPersent);
-                    writer.WriteLine(IsActiv);
-                    writer.WriteLine(ReactionType);
-
-                    writer.Close();
-                }
+                SettingsManager.Save(
+                    GetSettingsPath(),
+                    new RiskManagerSettingsDto
+                    {
+                        MaxDrowDownToDayPersent = MaxDrowDownToDayPersent,
+                        IsActiv = IsActiv,
+                        ReactionType = ReactionType
+                    });
             }
             catch (Exception error)
             {
@@ -226,9 +231,9 @@ namespace OsEngine.OsTrader.RiskManager
                     return;
                 }
 
-                if (File.Exists(@"Engine\" + _name + @".txt"))
+                if (File.Exists(GetSettingsPath()))
                 {
-                    File.Delete(@"Engine\" + _name + @".txt");
+                    File.Delete(GetSettingsPath());
                 }
 
                 RiskManagersToCheck.Remove(this);
@@ -239,6 +244,44 @@ namespace OsEngine.OsTrader.RiskManager
             {
                 SendNewLogMessage(error.ToString(), LogMessageType.Error);
             }
+        }
+
+        private string GetSettingsPath()
+        {
+            return @"Engine\" + _name + @".txt";
+        }
+
+        private static RiskManagerSettingsDto ParseLegacySettings(string content)
+        {
+            if (string.IsNullOrWhiteSpace(content))
+            {
+                return null;
+            }
+
+            string[] lines = content.Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries);
+
+            if (lines.Length < 3)
+            {
+                return null;
+            }
+
+            Enum.TryParse(lines[2], false, out RiskManagerReactionType reactionType);
+
+            return new RiskManagerSettingsDto
+            {
+                MaxDrowDownToDayPersent = Convert.ToDecimal(lines[0]),
+                IsActiv = Convert.ToBoolean(lines[1]),
+                ReactionType = reactionType
+            };
+        }
+
+        private sealed class RiskManagerSettingsDto
+        {
+            public decimal MaxDrowDownToDayPersent { get; set; }
+
+            public bool IsActiv { get; set; }
+
+            public RiskManagerReactionType ReactionType { get; set; }
         }
 
         /// <summary>

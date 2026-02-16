@@ -871,3 +871,18 @@
 ### Verification
 
 - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` -> passed 196/196
+
+## 2026-02-16 - Step 2.3 (JSON settings subsystem) - Incremental adoption in RiskManager settings
+
+- Migrated `project/OsEngine/OsTrader/RiskManager/RiskManager.cs` (`Engine\\<name>.txt`) persistence to `SettingsManager`:
+  - private `Load()` now reads JSON and falls back to legacy line-based parser
+  - public `Save()` now writes JSON into dynamic `Engine\\<name>.txt` path
+  - preserved existing settings contract (`MaxDrowDownToDayPersent`, `IsActiv`, `ReactionType`) and delete path behavior
+- Added tests `project/OsEngine.Tests/RiskManagerSettingsPersistenceTests.cs`:
+  - `Save_ShouldPersistJson_AndLoadRoundTrip`
+  - `Load_ShouldSupportLegacyLineBasedFormat`
+  - tests invoke private loader via reflection on uninitialized instance with backup/restore of settings file
+
+### Verification
+
+- `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` -> passed 198/198
