@@ -7,6 +7,7 @@
 using System;
 using System.Collections.Generic;
 using System.Drawing;
+using System.Globalization;
 using System.IO;
 using OsEngine.Entity;
 using OsEngine.Indicators;
@@ -157,15 +158,16 @@ namespace OsEngine.Charts.CandleChart.Indicators
                     return;
                 }
 
-                using (StreamWriter writer = new StreamWriter(@"Engine\" + Name + @".txt", false))
-                {
-                    writer.WriteLine(ColorBase.ToArgb());
-                    writer.WriteLine(Sharpness);
-                    writer.WriteLine(K);
-                    writer.WriteLine(PaintOn);
-                    writer.WriteLine(TypeCalculationAverage);
-                    writer.Close();
-                }
+                SettingsManager.Save(
+                    GetSettingsPath(),
+                    new KalmanFilterSettingsDto
+                    {
+                        ColorArgb = ColorBase.ToArgb(),
+                        Sharpness = Sharpness,
+                        K = K,
+                        PaintOn = PaintOn,
+                        TypeCalculationAverage = TypeCalculationAverage
+                    });
             }
             catch (Exception)
             {
@@ -180,25 +182,27 @@ namespace OsEngine.Charts.CandleChart.Indicators
         /// </summary>
         public void Load()
         {
-            if (!File.Exists(@"Engine\" + Name + @".txt"))
+            if (!File.Exists(GetSettingsPath()))
             {
                 return;
             }
             try
             {
+                KalmanFilterSettingsDto settings = SettingsManager.Load(
+                    GetSettingsPath(),
+                    defaultValue: null,
+                    legacyLoader: ParseLegacySettings);
 
-                using (StreamReader reader = new StreamReader(@"Engine\" + Name + @".txt"))
+                if (settings == null)
                 {
-                    ColorBase = Color.FromArgb(Convert.ToInt32(reader.ReadLine()));
-                    Sharpness = Convert.ToDecimal(reader.ReadLine());
-                    K = Convert.ToDecimal(reader.ReadLine());
-                    PaintOn = Convert.ToBoolean(reader.ReadLine());
-                    Enum.TryParse(reader.ReadLine(), true, out TypeCalculationAverage);
-                    reader.ReadLine();
-
-                    reader.Close();
+                    return;
                 }
 
+                ColorBase = Color.FromArgb(settings.ColorArgb);
+                Sharpness = settings.Sharpness;
+                K = settings.K;
+                PaintOn = settings.PaintOn;
+                TypeCalculationAverage = settings.TypeCalculationAverage;
 
             }
             catch (Exception)
@@ -214,10 +218,76 @@ namespace OsEngine.Charts.CandleChart.Indicators
         /// </summary>
         public void Delete()
         {
-            if (File.Exists(@"Engine\" + Name + @".txt"))
+            if (File.Exists(GetSettingsPath()))
             {
-                File.Delete(@"Engine\" + Name + @".txt");
+                File.Delete(GetSettingsPath());
             }
+        }
+
+        private string GetSettingsPath()
+        {
+            return @"Engine\" + Name + @".txt";
+        }
+
+        private static KalmanFilterSettingsDto ParseLegacySettings(string content)
+        {
+            if (string.IsNullOrWhiteSpace(content))
+            {
+                return null;
+            }
+
+            string normalized = content.Replace("\r", string.Empty);
+            string[] lines = normalized.Split('\n');
+
+            if (lines.Length > 0 && lines[lines.Length - 1] == string.Empty)
+            {
+                Array.Resize(ref lines, lines.Length - 1);
+            }
+
+            if (lines.Length < 5)
+            {
+                return null;
+            }
+
+            MovingAverageTypeCalculation typeCalculationAverage = MovingAverageTypeCalculation.Simple;
+            Enum.TryParse(lines[4], true, out typeCalculationAverage);
+
+            return new KalmanFilterSettingsDto
+            {
+                ColorArgb = Convert.ToInt32(lines[0]),
+                Sharpness = ParseDecimalInvariantOrCurrent(lines[1]),
+                K = ParseDecimalInvariantOrCurrent(lines[2]),
+                PaintOn = Convert.ToBoolean(lines[3]),
+                TypeCalculationAverage = typeCalculationAverage
+            };
+        }
+
+        private static decimal ParseDecimalInvariantOrCurrent(string value)
+        {
+            if (decimal.TryParse(value, NumberStyles.Any, CultureInfo.InvariantCulture, out decimal parsedInvariant))
+            {
+                return parsedInvariant;
+            }
+
+            if (decimal.TryParse(value, NumberStyles.Any, CultureInfo.CurrentCulture, out decimal parsedCurrent))
+            {
+                return parsedCurrent;
+            }
+
+            return Convert.ToDecimal(value);
+        }
+
+        private sealed class KalmanFilterSettingsDto
+        {
+            public int ColorArgb { get; set; }
+
+            public decimal Sharpness { get; set; }
+
+            public decimal K { get; set; }
+
+            public bool PaintOn { get; set; }
+
+            public MovingAverageTypeCalculation TypeCalculationAverage { get; set; }
         }
 
         /// <summary>
