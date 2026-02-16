@@ -1134,3 +1134,23 @@
   - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` succeeded (`198/198`).
 - **Commit:** `afde27baf`
 - **Push:** no (manual push by user)
+
+### Step 2.3 - JSON Settings Subsystem (Incremental Adoption #54)
+
+- **Status:** In Progress (increment completed)
+- **Plan item:** `refactoring_stage2_plan.md` -> Phase 2 / Step 2.3
+- **Changes:**
+  - Migrated options tab settings persistence to JSON with legacy fallback:
+    - `project/OsEngine/OsTrader/Panels/Tab/BotTabOptions.cs`
+  - Covered persisted file:
+    - dynamic `Engine\\<TabName>\\OptionsSettings.txt` path
+  - Added dedicated persistence tests:
+    - `project/OsEngine.Tests/BotTabOptionsSettingsPersistenceTests.cs`
+      - `SaveSettings_ShouldPersistJson_AndLoadRoundTrip`
+      - `LoadSettings_ShouldSupportLegacyKeyValueFormat`
+  - Updated running progress journal:
+    - `refactoring_stage2_progress.md`
+- **Verification:**
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` succeeded (`200/200`).
+- **Commit:** `70186abfe`
+- **Push:** no (manual push by user)
