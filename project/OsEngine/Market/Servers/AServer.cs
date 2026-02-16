@@ -2491,17 +2491,19 @@ namespace OsEngine.Market.Servers
 
             try
             {
-                if (Directory.Exists(@"Engine\ServerDopSettings") == false)
+                string serverDopSettingsDirectoryPath = GetServerDopSettingsDirectoryPath();
+                if (Directory.Exists(serverDopSettingsDirectoryPath) == false)
                 {
                     return securities;
                 }
 
-                if (Directory.Exists(@"Engine\ServerDopSettings\" + ServerType) == false)
+                string serverTypeSettingsDirectoryPath = GetServerDopSettingsDirectoryPathForCurrentServerType();
+                if (Directory.Exists(serverTypeSettingsDirectoryPath) == false)
                 {
                     return securities;
                 }
 
-                string[] paths = Directory.GetFiles(@"Engine\ServerDopSettings\" + ServerType);
+                string[] paths = Directory.GetFiles(serverTypeSettingsDirectoryPath);
 
                 for (int i = 0; paths != null && i < paths.Length; i++)
                 {
@@ -5250,9 +5252,7 @@ namespace OsEngine.Market.Servers
         {
             try
             {
-                string fileName = ServerNameUnique + "_SecuritiesLeverage.json";
-
-                string filePath = @"Engine\ServerDopSettings\" + fileName;
+                string filePath = GetSecuritiesLeveragePath();
 
                 if (!File.Exists(filePath))
                 {
@@ -5316,14 +5316,13 @@ namespace OsEngine.Market.Servers
         {
             try
             {
-                if (Directory.Exists(@"Engine\ServerDopSettings\") == false)
+                string serverDopSettingsDirectoryPath = GetServerDopSettingsDirectoryPath();
+                if (Directory.Exists(serverDopSettingsDirectoryPath) == false)
                 {
-                    Directory.CreateDirectory(@"Engine\ServerDopSettings\");
+                    Directory.CreateDirectory(serverDopSettingsDirectoryPath);
                 }
 
-                string fileName = ServerNameUnique + "_SecuritiesLeverage";
-
-                string filePath = @"Engine\ServerDopSettings\" + fileName + ".json";
+                string filePath = GetSecuritiesLeveragePath();
 
                 if (_listLeverageData == null || _listLeverageData.Count == 0)
                 {
@@ -5337,6 +5336,21 @@ namespace OsEngine.Market.Servers
             {
                 ServerMaster.SendNewLogMessage(ex.ToString(), Logging.LogMessageType.Error);
             }
+        }
+
+        private static string GetServerDopSettingsDirectoryPath()
+        {
+            return @"Engine\ServerDopSettings";
+        }
+
+        private string GetServerDopSettingsDirectoryPathForCurrentServerType()
+        {
+            return Path.Combine(GetServerDopSettingsDirectoryPath(), ServerType.ToString());
+        }
+
+        private string GetSecuritiesLeveragePath()
+        {
+            return Path.Combine(GetServerDopSettingsDirectoryPath(), ServerNameUnique + "_SecuritiesLeverage.json");
         }
 
         public void SetCommonLeverage(string selectedClass, string leverage)

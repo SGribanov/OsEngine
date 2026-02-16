@@ -2285,3 +2285,20 @@
 ### Verification
 
 - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` -> passed 343/343
+
+## 2026-02-16 - Step 2.3 (JSON settings subsystem) - Path consistency cleanup in AServer ServerDopSettings paths
+
+- Updated `project/OsEngine/Market/Servers/AServer.cs`:
+  - centralized ServerDopSettings path construction via helper methods:
+    - `GetServerDopSettingsDirectoryPath()`
+    - `GetServerDopSettingsDirectoryPathForCurrentServerType()`
+    - `GetSecuritiesLeveragePath()`
+  - replaced duplicated inline path usage in:
+    - `LoadSavedSecurities()`
+    - `LoadLeverageFromFile()`
+    - `SaveLeverageToFile()`
+- No behavior changes intended; file/dir locations remain within `Engine\\ServerDopSettings`.
+
+### Verification
+
+- `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` -> passed 343/343
