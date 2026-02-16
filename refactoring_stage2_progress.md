@@ -721,3 +721,18 @@
 ### Verification
 
 - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` -> passed 176/176
+
+## 2026-02-16 - Step 2.3 (JSON settings subsystem) - Incremental adoption in MetaTrader5 securities cache settings
+
+- Migrated `project/OsEngine/Market/Servers/MetaTrader5/MetaTrader5Server.cs` (`MetaTrader5SecuritiesCache.txt`) persistence to `SettingsManager`:
+  - private `SaveToCache()` now writes JSON wrapper into `Engine\\MetaTrader5SecuritiesCache.txt`
+  - private `LoadSecuritiesFromCache()` now reads JSON and falls back to legacy raw compressed-string format
+  - preserved fallback behavior to live load (`LoadSecuritiesFromMetaTrader()`) on cache read/parse issues
+- Added tests `project/OsEngine.Tests/MetaTrader5SecuritiesCachePersistenceTests.cs`:
+  - `SaveToCache_ShouldPersistJson_AndLoadRoundTrip`
+  - `LoadSecuritiesFromCache_ShouldSupportLegacyCompressedStringFormat`
+  - tests invoke private cache methods via reflection on uninitialized realization instance
+
+### Verification
+
+- `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` -> passed 178/178

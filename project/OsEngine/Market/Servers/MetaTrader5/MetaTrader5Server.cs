@@ -482,12 +482,19 @@ namespace OsEngine.Market.Servers.MetaTrader5
         {
             try
             {
-                using (StreamReader reader = new StreamReader(SecuritiesCachePath))
+                MetaTrader5SecuritiesCacheDto settings = SettingsManager.Load(
+                    SecuritiesCachePath,
+                    defaultValue: null,
+                    legacyLoader: ParseLegacySecuritiesCacheSettings);
+
+                if (settings == null || string.IsNullOrWhiteSpace(settings.CompressedData))
                 {
-                    string data = CompressionUtils.Decompress(reader.ReadToEnd());
-                    List<Security> list = JsonConvert.DeserializeObject<List<Security>>(data);
-                    return list != null && list.Count != 0 ? list : LoadSecuritiesFromMetaTrader();
+                    return LoadSecuritiesFromMetaTrader();
                 }
+
+                string data = CompressionUtils.Decompress(settings.CompressedData);
+                List<Security> list = JsonConvert.DeserializeObject<List<Security>>(data);
+                return list != null && list.Count != 0 ? list : LoadSecuritiesFromMetaTrader();
             }
             catch (Exception ex)
             {
@@ -2150,16 +2157,36 @@ namespace OsEngine.Market.Servers.MetaTrader5
 
             try
             {
-                using (StreamWriter writer = new StreamWriter(SecuritiesCachePath, false))
-                {
-                    string data = CompressionUtils.Compress(list.ToJson());
-                    writer.WriteLine(data);
-                }
+                string data = CompressionUtils.Compress(list.ToJson());
+                SettingsManager.Save(
+                    SecuritiesCachePath,
+                    new MetaTrader5SecuritiesCacheDto
+                    {
+                        CompressedData = data
+                    });
             }
             catch (Exception e)
             {
                 SendLogMessage(e.ToString(), LogMessageType.Error);
             }
+        }
+
+        private static MetaTrader5SecuritiesCacheDto ParseLegacySecuritiesCacheSettings(string content)
+        {
+            if (string.IsNullOrWhiteSpace(content))
+            {
+                return null;
+            }
+
+            return new MetaTrader5SecuritiesCacheDto
+            {
+                CompressedData = content
+            };
+        }
+
+        private sealed class MetaTrader5SecuritiesCacheDto
+        {
+            public string CompressedData { get; set; }
         }
 
         private void SetСonnected()
