@@ -207,3 +207,23 @@
   - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` succeeded (`104/104`).
 - **Commit:** `6cd0f6857`
 - **Push:** no (manual push by user)
+
+### Step 2.3 - JSON Settings Subsystem (Incremental Adoption #8)
+
+- **Status:** In Progress (increment completed)
+- **Plan item:** `refactoring_stage2_plan.md` -> Phase 2 / Step 2.3
+- **Changes:**
+  - Migrated SMS server settings persistence to JSON with legacy fallback:
+    - `project/OsEngine/Logging/ServerSms.cs`
+  - Covered persisted file:
+    - `Engine\\smsSet.txt`
+  - Added dedicated persistence tests:
+    - `project/OsEngine.Tests/ServerSmsPersistenceTests.cs`
+      - `Save_ShouldPersistJson_AndLoadRoundTrip`
+      - `Load_ShouldSupportLegacyLineBasedFormat`
+  - Updated running progress journal:
+    - `refactoring_stage2_progress.md`
+- **Verification:**
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` succeeded (`106/106`).
+- **Commit:** `2f2114867`
+- **Push:** no (manual push by user)
