@@ -914,3 +914,23 @@
   - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` succeeded (`176/176`).
 - **Commit:** `de6aa5f0a`
 - **Push:** no (manual push by user)
+
+### Step 2.3 - JSON Settings Subsystem (Incremental Adoption #43)
+
+- **Status:** In Progress (increment completed)
+- **Plan item:** `refactoring_stage2_plan.md` -> Phase 2 / Step 2.3
+- **Changes:**
+  - Migrated MetaTrader5 securities cache persistence to JSON with legacy fallback:
+    - `project/OsEngine/Market/Servers/MetaTrader5/MetaTrader5Server.cs`
+  - Covered persisted file:
+    - `Engine\\MetaTrader5SecuritiesCache.txt`
+  - Added dedicated persistence tests:
+    - `project/OsEngine.Tests/MetaTrader5SecuritiesCachePersistenceTests.cs`
+      - `SaveToCache_ShouldPersistJson_AndLoadRoundTrip`
+      - `LoadSecuritiesFromCache_ShouldSupportLegacyCompressedStringFormat`
+  - Updated running progress journal:
+    - `refactoring_stage2_progress.md`
+- **Verification:**
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` succeeded (`178/178`).
+- **Commit:** `975cf9022`
+- **Push:** no (manual push by user)
