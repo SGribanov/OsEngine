@@ -856,3 +856,18 @@
 ### Verification
 
 - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` -> passed 194/194
+
+## 2026-02-16 - Step 2.3 (JSON settings subsystem) - Incremental adoption in CopyMaster hub settings
+
+- Migrated `project/OsEngine/Market/AutoFollow/CopyMaster.cs` (`Engine\\CopyTrader\\CopyTradersHub.txt`) persistence to `SettingsManager`:
+  - private `LoadCopyTraders()` now reads JSON and falls back to legacy line-based parser
+  - public `SaveCopyTraders()` now writes JSON wrapper
+  - preserved existing per-trader line serialization contract via `CopyTrader.GetStringToSave()`
+- Added tests `project/OsEngine.Tests/CopyMasterHubPersistenceTests.cs`:
+  - `SaveCopyTraders_ShouldPersistJson_AndLoadRoundTrip`
+  - `LoadCopyTraders_ShouldSupportLegacyLineBasedFormat`
+  - tests invoke private loader via reflection, use uninitialized fake traders for save path, and stop spawned traders via `ClearDelete()`
+
+### Verification
+
+- `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` -> passed 196/196

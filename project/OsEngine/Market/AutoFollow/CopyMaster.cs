@@ -13,6 +13,9 @@ namespace OsEngine.Market.AutoFollow
 {
     public class CopyMaster
     {
+        private static readonly string CopyTradersDirPath = @"Engine\CopyTrader\";
+        private static readonly string CopyTradersHubPath = @"Engine\CopyTrader\CopyTradersHub.txt";
+
         public void Activate()
         {
             LoadCopyTraders();
@@ -57,35 +60,40 @@ namespace OsEngine.Market.AutoFollow
 
         private void LoadCopyTraders()
         {
-            if(Directory.Exists(@"Engine\CopyTrader\") == false)
+            if (Directory.Exists(CopyTradersDirPath) == false)
             {
-                Directory.CreateDirectory(@"Engine\CopyTrader\");
+                Directory.CreateDirectory(CopyTradersDirPath);
 
             }
 
-            if (!File.Exists(@"Engine\CopyTrader\" + @"CopyTradersHub.txt"))
+            if (!File.Exists(CopyTradersHubPath))
             {
                 return;
             }
             try
             {
-                using (StreamReader reader = new StreamReader(@"Engine\CopyTrader\" + @"CopyTradersHub.txt"))
+                CopyTradersHubSettings settings = SettingsManager.Load(
+                    CopyTradersHubPath,
+                    defaultValue: null,
+                    legacyLoader: ParseLegacyCopyTradersHubSettings);
+
+                if (settings?.Traders == null)
                 {
-                    while (reader.EndOfStream == false)
+                    return;
+                }
+
+                for (int i = 0; i < settings.Traders.Count; i++)
+                {
+                    string line = settings.Traders[i];
+
+                    if (string.IsNullOrWhiteSpace(line))
                     {
-                        string line = reader.ReadLine();
-
-                        if (string.IsNullOrEmpty(line))
-                        {
-                            continue;
-                        }
-
-                        CopyTrader newCopyTrader = new CopyTrader(line);
-                        newCopyTrader.NeedToSaveEvent += NewCopyTrader_NeedToSaveEvent;
-                        CopyTraders.Add(newCopyTrader);
+                        continue;
                     }
 
-                    reader.Close();
+                    CopyTrader newCopyTrader = new CopyTrader(line);
+                    newCopyTrader.NeedToSaveEvent += NewCopyTrader_NeedToSaveEvent;
+                    CopyTraders.Add(newCopyTrader);
                 }
             }
             catch
@@ -103,20 +111,39 @@ namespace OsEngine.Market.AutoFollow
         {
             try
             {
-                using (StreamWriter writer = new StreamWriter(@"Engine\CopyTrader\" + @"CopyTradersHub.txt", false))
-                {
-                    for (int i = 0; i < CopyTraders.Count; i++)
-                    {
-                        writer.WriteLine(CopyTraders[i].GetStringToSave());
-                    }
+                List<string> traders = new List<string>();
 
-                    writer.Close();
+                for (int i = 0; i < CopyTraders.Count; i++)
+                {
+                    traders.Add(CopyTraders[i].GetStringToSave());
                 }
+
+                SettingsManager.Save(
+                    CopyTradersHubPath,
+                    new CopyTradersHubSettings
+                    {
+                        Traders = traders
+                    });
             }
             catch (Exception error)
             {
                 SendLogMessage(error.ToString(), LogMessageType.Error);
             }
+        }
+
+        private static CopyTradersHubSettings ParseLegacyCopyTradersHubSettings(string content)
+        {
+            if (string.IsNullOrWhiteSpace(content))
+            {
+                return null;
+            }
+
+            string[] lines = content.Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries);
+
+            return new CopyTradersHubSettings
+            {
+                Traders = new List<string>(lines)
+            };
         }
 
         public CopyTrader CreateNewCopyTrader()
@@ -166,6 +193,11 @@ namespace OsEngine.Market.AutoFollow
         {
             message = "Copy master.  " + message;
             LogMessageEvent?.Invoke(message, messageType);
+        }
+
+        private sealed class CopyTradersHubSettings
+        {
+            public List<string> Traders { get; set; }
         }
 
         #endregion
