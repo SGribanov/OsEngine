@@ -273,24 +273,21 @@ namespace OsEngine.Charts.CandleChart.Indicators
                     return;
                 }
 
-                using (StreamWriter writer = new StreamWriter(@"Engine\" + Name + @".txt", false))
-                {
-
-                    writer.WriteLine(ColorP);
-
-                    writer.WriteLine(ColorS1);
-                    writer.WriteLine(ColorS2);
-                    writer.WriteLine( ColorS3);
-                    writer.WriteLine(ColorS4);
-
-                    writer.WriteLine(ColorR1);
-                    writer.WriteLine(ColorR2);
-                    writer.WriteLine(ColorR3);
-                    writer.WriteLine(ColorR4);
-
-                    writer.WriteLine(PaintOn);
-                    writer.Close();
-                }
+                SettingsManager.Save(
+                    GetSettingsPath(),
+                    new PivotSettingsDto
+                    {
+                        ColorPArgb = ColorP.ToArgb(),
+                        ColorS1Argb = ColorS1.ToArgb(),
+                        ColorS2Argb = ColorS2.ToArgb(),
+                        ColorS3Argb = ColorS3.ToArgb(),
+                        ColorS4Argb = ColorS4.ToArgb(),
+                        ColorR1Argb = ColorR1.ToArgb(),
+                        ColorR2Argb = ColorR2.ToArgb(),
+                        ColorR3Argb = ColorR3.ToArgb(),
+                        ColorR4Argb = ColorR4.ToArgb(),
+                        PaintOn = PaintOn
+                    });
             }
             catch (Exception)
             {
@@ -305,35 +302,32 @@ namespace OsEngine.Charts.CandleChart.Indicators
         /// </summary>
         public void Load()
         {
-            if (!File.Exists(@"Engine\" + Name + @".txt"))
+            if (!File.Exists(GetSettingsPath()))
             {
                 return;
             }
             try
             {
+                PivotSettingsDto settings = SettingsManager.Load(
+                    GetSettingsPath(),
+                    defaultValue: null,
+                    legacyLoader: ParseLegacySettings);
 
-                using (StreamReader reader = new StreamReader(@"Engine\" + Name + @".txt"))
+                if (settings == null)
                 {
-                    ColorP = Color.FromArgb(Convert.ToInt32(reader.ReadLine()));
-
-                    ColorS1 = Color.FromArgb(Convert.ToInt32(reader.ReadLine()));
-                    ColorS2 = Color.FromArgb(Convert.ToInt32(reader.ReadLine()));
-                    ColorS3 = Color.FromArgb(Convert.ToInt32(reader.ReadLine()));
-                    ColorS4 = Color.FromArgb(Convert.ToInt32(reader.ReadLine()));
-
-                    ColorR1 = Color.FromArgb(Convert.ToInt32(reader.ReadLine()));
-                    ColorR2 = Color.FromArgb(Convert.ToInt32(reader.ReadLine()));
-                    ColorR3 = Color.FromArgb(Convert.ToInt32(reader.ReadLine()));
-                    ColorR4 = Color.FromArgb(Convert.ToInt32(reader.ReadLine()));
-
-                    PaintOn = Convert.ToBoolean(reader.ReadLine());
-                    MovingAverageTypeCalculation type;
-                    Enum.TryParse(reader.ReadLine(), true,out type);
-
-
-                    reader.Close();
+                    return;
                 }
 
+                ColorP = Color.FromArgb(settings.ColorPArgb);
+                ColorS1 = Color.FromArgb(settings.ColorS1Argb);
+                ColorS2 = Color.FromArgb(settings.ColorS2Argb);
+                ColorS3 = Color.FromArgb(settings.ColorS3Argb);
+                ColorS4 = Color.FromArgb(settings.ColorS4Argb);
+                ColorR1 = Color.FromArgb(settings.ColorR1Argb);
+                ColorR2 = Color.FromArgb(settings.ColorR2Argb);
+                ColorR3 = Color.FromArgb(settings.ColorR3Argb);
+                ColorR4 = Color.FromArgb(settings.ColorR4Argb);
+                PaintOn = settings.PaintOn;
 
             }
             catch (Exception)
@@ -349,10 +343,138 @@ namespace OsEngine.Charts.CandleChart.Indicators
         /// </summary>
         public void Delete()
         {
-            if (File.Exists(@"Engine\" + Name + @".txt"))
+            if (File.Exists(GetSettingsPath()))
             {
-                File.Delete(@"Engine\" + Name + @".txt");
+                File.Delete(GetSettingsPath());
             }
+        }
+
+        private string GetSettingsPath()
+        {
+            return @"Engine\" + Name + @".txt";
+        }
+
+        private static PivotSettingsDto ParseLegacySettings(string content)
+        {
+            if (string.IsNullOrWhiteSpace(content))
+            {
+                return null;
+            }
+
+            string normalized = content.Replace("\r", string.Empty);
+            string[] lines = normalized.Split('\n');
+
+            if (lines.Length > 0 && lines[lines.Length - 1] == string.Empty)
+            {
+                Array.Resize(ref lines, lines.Length - 1);
+            }
+
+            if (lines.Length < 10)
+            {
+                return null;
+            }
+
+            return new PivotSettingsDto
+            {
+                ColorPArgb = ParseColorLegacy(lines[0]).ToArgb(),
+                ColorS1Argb = ParseColorLegacy(lines[1]).ToArgb(),
+                ColorS2Argb = ParseColorLegacy(lines[2]).ToArgb(),
+                ColorS3Argb = ParseColorLegacy(lines[3]).ToArgb(),
+                ColorS4Argb = ParseColorLegacy(lines[4]).ToArgb(),
+                ColorR1Argb = ParseColorLegacy(lines[5]).ToArgb(),
+                ColorR2Argb = ParseColorLegacy(lines[6]).ToArgb(),
+                ColorR3Argb = ParseColorLegacy(lines[7]).ToArgb(),
+                ColorR4Argb = ParseColorLegacy(lines[8]).ToArgb(),
+                PaintOn = Convert.ToBoolean(lines[9])
+            };
+        }
+
+        private static Color ParseColorLegacy(string value)
+        {
+            if (int.TryParse(value, out int argb))
+            {
+                return Color.FromArgb(argb);
+            }
+
+            const string prefix = "Color [";
+            if (value.StartsWith(prefix, StringComparison.OrdinalIgnoreCase)
+                && value.EndsWith("]", StringComparison.Ordinal))
+            {
+                string inner = value.Substring(prefix.Length, value.Length - prefix.Length - 1);
+
+                if (!inner.Contains("="))
+                {
+                    return Color.FromName(inner);
+                }
+
+                int a = 255;
+                int r = 0;
+                int g = 0;
+                int b = 0;
+                string[] parts = inner.Split(',');
+
+                for (int i = 0; i < parts.Length; i++)
+                {
+                    string token = parts[i].Trim();
+                    int separatorIndex = token.IndexOf('=');
+                    if (separatorIndex <= 0 || separatorIndex == token.Length - 1)
+                    {
+                        continue;
+                    }
+
+                    string key = token.Substring(0, separatorIndex).Trim();
+                    string number = token.Substring(separatorIndex + 1).Trim();
+
+                    if (!int.TryParse(number, out int parsedValue))
+                    {
+                        continue;
+                    }
+
+                    if (string.Equals(key, "A", StringComparison.OrdinalIgnoreCase))
+                    {
+                        a = parsedValue;
+                    }
+                    else if (string.Equals(key, "R", StringComparison.OrdinalIgnoreCase))
+                    {
+                        r = parsedValue;
+                    }
+                    else if (string.Equals(key, "G", StringComparison.OrdinalIgnoreCase))
+                    {
+                        g = parsedValue;
+                    }
+                    else if (string.Equals(key, "B", StringComparison.OrdinalIgnoreCase))
+                    {
+                        b = parsedValue;
+                    }
+                }
+
+                return Color.FromArgb(a, r, g, b);
+            }
+
+            return Color.FromName(value);
+        }
+
+        private sealed class PivotSettingsDto
+        {
+            public int ColorPArgb { get; set; }
+
+            public int ColorS1Argb { get; set; }
+
+            public int ColorS2Argb { get; set; }
+
+            public int ColorS3Argb { get; set; }
+
+            public int ColorS4Argb { get; set; }
+
+            public int ColorR1Argb { get; set; }
+
+            public int ColorR2Argb { get; set; }
+
+            public int ColorR3Argb { get; set; }
+
+            public int ColorR4Argb { get; set; }
+
+            public bool PaintOn { get; set; }
         }
 
         /// <summary>
