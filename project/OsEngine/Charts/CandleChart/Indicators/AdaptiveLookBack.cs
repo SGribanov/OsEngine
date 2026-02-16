@@ -150,13 +150,14 @@ namespace OsEngine.Charts.CandleChart.Indicators
                     return;
                 }
 
-                using (StreamWriter writer = new StreamWriter(@"Engine\" + Name + @".txt", false))
-                {
-                    writer.WriteLine(ColorBase.ToArgb());
-                    writer.WriteLine(Length);
-                    writer.WriteLine(PaintOn);
-                    writer.Close();
-                }
+                SettingsManager.Save(
+                    GetSettingsPath(),
+                    new AdaptiveLookBackSettingsDto
+                    {
+                        ColorArgb = ColorBase.ToArgb(),
+                        Length = Length,
+                        PaintOn = PaintOn
+                    });
             }
             catch (Exception)
             {
@@ -171,23 +172,25 @@ namespace OsEngine.Charts.CandleChart.Indicators
         /// </summary>
         public void Load()
         {
-            if (!File.Exists(@"Engine\" + Name + @".txt"))
+            if (!File.Exists(GetSettingsPath()))
             {
                 return;
             }
             try
             {
+                AdaptiveLookBackSettingsDto settings = SettingsManager.Load(
+                    GetSettingsPath(),
+                    defaultValue: null,
+                    legacyLoader: ParseLegacySettings);
 
-                using (StreamReader reader = new StreamReader(@"Engine\" + Name + @".txt"))
+                if (settings == null)
                 {
-                    ColorBase = Color.FromArgb(Convert.ToInt32(reader.ReadLine()));
-                    Length = Convert.ToInt32(reader.ReadLine());
-                    PaintOn = Convert.ToBoolean(reader.ReadLine());
-                    reader.ReadLine();
-
-                    reader.Close();
+                    return;
                 }
 
+                ColorBase = Color.FromArgb(settings.ColorArgb);
+                Length = settings.Length;
+                PaintOn = settings.PaintOn;
 
             }
             catch (Exception)
@@ -203,10 +206,52 @@ namespace OsEngine.Charts.CandleChart.Indicators
         /// </summary>
         public void Delete()
         {
-            if (File.Exists(@"Engine\" + Name + @".txt"))
+            if (File.Exists(GetSettingsPath()))
             {
-                File.Delete(@"Engine\" + Name + @".txt");
+                File.Delete(GetSettingsPath());
             }
+        }
+
+        private string GetSettingsPath()
+        {
+            return @"Engine\" + Name + @".txt";
+        }
+
+        private static AdaptiveLookBackSettingsDto ParseLegacySettings(string content)
+        {
+            if (string.IsNullOrWhiteSpace(content))
+            {
+                return null;
+            }
+
+            string normalized = content.Replace("\r", string.Empty);
+            string[] lines = normalized.Split('\n');
+
+            if (lines.Length > 0 && lines[lines.Length - 1] == string.Empty)
+            {
+                Array.Resize(ref lines, lines.Length - 1);
+            }
+
+            if (lines.Length < 3)
+            {
+                return null;
+            }
+
+            return new AdaptiveLookBackSettingsDto
+            {
+                ColorArgb = Convert.ToInt32(lines[0]),
+                Length = Convert.ToInt32(lines[1]),
+                PaintOn = Convert.ToBoolean(lines[2])
+            };
+        }
+
+        private sealed class AdaptiveLookBackSettingsDto
+        {
+            public int ColorArgb { get; set; }
+
+            public int Length { get; set; }
+
+            public bool PaintOn { get; set; }
         }
 
         /// <summary>
