@@ -1534,3 +1534,23 @@
   - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` succeeded (`238/238`).
 - **Commit:** `c76e9f543`
 - **Push:** no (manual push by user)
+
+### Step 2.3 - JSON Settings Subsystem (Incremental Adoption #74)
+
+- **Status:** In Progress (increment completed)
+- **Plan item:** `refactoring_stage2_plan.md` -> Phase 2 / Step 2.3
+- **Changes:**
+  - Migrated Fractal indicator settings persistence to JSON with legacy fallback:
+    - `project/OsEngine/Charts/CandleChart/Indicators/Fractail.cs`
+  - Covered persisted file:
+    - dynamic `Engine\\<Name>.txt` path (`Fractal` indicator)
+  - Added dedicated persistence tests:
+    - `project/OsEngine.Tests/FractalPersistenceTests.cs`
+      - `Save_ShouldPersistJson_AndLoadRoundTrip`
+      - `Load_ShouldSupportLegacyLineBasedFormat`
+  - Updated running progress journal:
+    - `refactoring_stage2_progress.md`
+- **Verification:**
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` succeeded (`240/240`).
+- **Commit:** `1d1c8bdac`
+- **Push:** no (manual push by user)
