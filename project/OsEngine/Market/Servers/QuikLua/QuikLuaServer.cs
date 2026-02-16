@@ -471,12 +471,19 @@ namespace OsEngine.Market.Servers.QuikLua
         {
             try
             {
-                using (StreamReader reader = new StreamReader(SecuritiesCachePath))
+                QuikLuaSecuritiesCacheDto settings = SettingsManager.Load(
+                    SecuritiesCachePath,
+                    defaultValue: null,
+                    legacyLoader: ParseLegacySecuritiesCacheSettings);
+
+                if (settings == null || string.IsNullOrWhiteSpace(settings.CompressedData))
                 {
-                    string data = CompressionUtils.Decompress(reader.ReadToEnd());
-                    List<Security> list = JsonConvert.DeserializeObject<List<Security>>(data);
-                    return list != null && list.Count != 0 ? list : LoadSecuritiesFromQuik();
+                    return LoadSecuritiesFromQuik();
                 }
+
+                string data = CompressionUtils.Decompress(settings.CompressedData);
+                List<Security> list = JsonConvert.DeserializeObject<List<Security>>(data);
+                return list != null && list.Count != 0 ? list : LoadSecuritiesFromQuik();
             }
             catch (Exception e)
             {
@@ -549,16 +556,36 @@ namespace OsEngine.Market.Servers.QuikLua
 
             try
             {
-                using (StreamWriter writer = new StreamWriter(SecuritiesCachePath, false))
-                {
-                    string data = CompressionUtils.Compress(list.ToJson());
-                    writer.WriteLine(data);
-                }
+                string data = CompressionUtils.Compress(list.ToJson());
+                SettingsManager.Save(
+                    SecuritiesCachePath,
+                    new QuikLuaSecuritiesCacheDto
+                    {
+                        CompressedData = data
+                    });
             }
             catch (Exception e)
             {
                 SendLogMessage(e.ToString(), LogMessageType.Error);
             }
+        }
+
+        private static QuikLuaSecuritiesCacheDto ParseLegacySecuritiesCacheSettings(string content)
+        {
+            if (string.IsNullOrWhiteSpace(content))
+            {
+                return null;
+            }
+
+            return new QuikLuaSecuritiesCacheDto
+            {
+                CompressedData = content
+            };
+        }
+
+        private sealed class QuikLuaSecuritiesCacheDto
+        {
+            public string CompressedData { get; set; }
         }
 
         private void BuildSecurity(SecurityInfo oneSec, List<Security> securities)

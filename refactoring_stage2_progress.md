@@ -706,3 +706,18 @@
 ### Verification
 
 - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` -> passed 174/174
+
+## 2026-02-16 - Step 2.3 (JSON settings subsystem) - Incremental adoption in QuikLua securities cache settings
+
+- Migrated `project/OsEngine/Market/Servers/QuikLua/QuikLuaServer.cs` (`QuikLuaSecuritiesCache.txt`) persistence to `SettingsManager`:
+  - private `SaveToCache()` now writes JSON wrapper into `Engine\\QuikLuaSecuritiesCache.txt`
+  - private `LoadSecuritiesFromCache()` now reads JSON and falls back to legacy raw compressed-string format
+  - preserved fallback behavior to live load (`LoadSecuritiesFromQuik()`) on cache read/parse issues
+- Added tests `project/OsEngine.Tests/QuikLuaSecuritiesCachePersistenceTests.cs`:
+  - `SaveToCache_ShouldPersistJson_AndLoadRoundTrip`
+  - `LoadSecuritiesFromCache_ShouldSupportLegacyCompressedStringFormat`
+  - tests invoke private cache methods via reflection on uninitialized realization instance
+
+### Verification
+
+- `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` -> passed 176/176
