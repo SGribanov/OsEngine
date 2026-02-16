@@ -2081,3 +2081,18 @@
 ### Verification
 
 - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` -> passed 339/339
+
+## 2026-02-16 - Step 2.3 (JSON settings subsystem) - JournalUi2 layout storage migrated to JSON wrapper with legacy compatibility
+
+- Updated `project/OsEngine/Journal/JournalUi2.xaml.cs`:
+  - migrated layout settings wrapper (`LayoutJournal*.txt`) from direct line-based IO to `SettingsManager`
+  - `SaveSettings()` now persists DTO JSON (`JournalUiLayoutSettingsDto`)
+  - `LoadSettings()` now uses `SettingsManager.Load(..., legacyLoader: ParseLegacyLayoutSettings)`
+  - centralized path usage via `GetLayoutSettingsPath()`
+  - added legacy parser `ParseLegacyLayoutSettings(string content)` for old ordered-line format
+- Added tests in `project/OsEngine.Tests/JournalUi2LayoutSettingsTests.cs`:
+  - verifies legacy parser behavior
+
+### Verification
+
+- `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` -> passed 340/340

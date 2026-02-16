@@ -4221,40 +4221,37 @@ namespace OsEngine.Journal
 
         private void LoadSettings()
         {
-            if (!File.Exists(@"Engine\LayoutJournal" + JournalName + ".txt"))
+            if (!File.Exists(GetLayoutSettingsPath()))
             {
                 return;
             }
 
             try
             {
-                using (StreamReader reader = new StreamReader(@"Engine\LayoutJournal" + JournalName + ".txt"))
+                JournalUiLayoutSettingsDto settings = SettingsManager.Load(
+                    GetLayoutSettingsPath(),
+                    defaultValue: null,
+                    legacyLoader: ParseLegacyLayoutSettings);
+
+                if (settings == null)
                 {
-                    _leftPanelIsHide = Convert.ToBoolean(reader.ReadLine());
-                    string profitType = reader.ReadLine();
+                    return;
+                }
 
-                    if (string.IsNullOrEmpty(profitType) == false)
-                    {
-                        ComboBoxChartType.SelectedItem = profitType;
-                    }
+                _leftPanelIsHide = settings.LeftPanelIsHide;
 
-                    if(reader.EndOfStream == true)
-                    {
-                        return;
-                    }
+                if (string.IsNullOrEmpty(settings.ProfitType) == false)
+                {
+                    ComboBoxChartType.SelectedItem = settings.ProfitType;
+                }
 
-                    _visibleEquityLine = Convert.ToBoolean(reader.ReadLine());
-                    _visibleLongLine = Convert.ToBoolean(reader.ReadLine());
-                    _visibleShortLine = Convert.ToBoolean(reader.ReadLine());
+                _visibleEquityLine = settings.VisibleEquityLine;
+                _visibleLongLine = settings.VisibleLongLine;
+                _visibleShortLine = settings.VisibleShortLine;
 
-                    string benchmark = reader.ReadLine();
-
-                    if (string.IsNullOrEmpty(benchmark) == false)
-                    {
-                        ComboBoxBenchmark.SelectedItem = benchmark;
-                    }
-
-                    reader.Close();
+                if (string.IsNullOrEmpty(settings.Benchmark) == false)
+                {
+                    ComboBoxBenchmark.SelectedItem = settings.Benchmark;
                 }
             }
             catch (Exception)
@@ -4276,22 +4273,91 @@ namespace OsEngine.Journal
         {
             try
             {
-                using (StreamWriter writer = new StreamWriter(@"Engine\LayoutJournal" + JournalName + ".txt", false))
-                {
-                    writer.WriteLine(_leftPanelIsHide);
-                    writer.WriteLine(ComboBoxChartType.SelectedItem.ToString());
-                    writer.WriteLine(_visibleEquityLine.ToString());
-                    writer.WriteLine(_visibleLongLine.ToString());
-                    writer.WriteLine(_visibleShortLine.ToString());
-                    writer.WriteLine(ComboBoxBenchmark.SelectedItem.ToString());
-
-                    writer.Close();
-                }
+                SettingsManager.Save(
+                    GetLayoutSettingsPath(),
+                    new JournalUiLayoutSettingsDto
+                    {
+                        LeftPanelIsHide = _leftPanelIsHide,
+                        ProfitType = ComboBoxChartType.SelectedItem?.ToString(),
+                        VisibleEquityLine = _visibleEquityLine,
+                        VisibleLongLine = _visibleLongLine,
+                        VisibleShortLine = _visibleShortLine,
+                        Benchmark = ComboBoxBenchmark.SelectedItem?.ToString()
+                    });
             }
             catch (Exception)
             {
                 // ignore
             }
+        }
+
+        private string GetLayoutSettingsPath()
+        {
+            return @"Engine\LayoutJournal" + JournalName + ".txt";
+        }
+
+        private static JournalUiLayoutSettingsDto ParseLegacyLayoutSettings(string content)
+        {
+            if (string.IsNullOrWhiteSpace(content))
+            {
+                return null;
+            }
+
+            string[] lines = content.Replace("\r", string.Empty).Split('\n');
+
+            JournalUiLayoutSettingsDto settings = new JournalUiLayoutSettingsDto
+            {
+                VisibleEquityLine = true,
+                VisibleLongLine = true,
+                VisibleShortLine = true
+            };
+
+            if (lines.Length > 0 && bool.TryParse(lines[0], out bool leftPanelIsHide))
+            {
+                settings.LeftPanelIsHide = leftPanelIsHide;
+            }
+
+            if (lines.Length > 1)
+            {
+                settings.ProfitType = lines[1];
+            }
+
+            if (lines.Length > 2 && bool.TryParse(lines[2], out bool visibleEquityLine))
+            {
+                settings.VisibleEquityLine = visibleEquityLine;
+            }
+
+            if (lines.Length > 3 && bool.TryParse(lines[3], out bool visibleLongLine))
+            {
+                settings.VisibleLongLine = visibleLongLine;
+            }
+
+            if (lines.Length > 4 && bool.TryParse(lines[4], out bool visibleShortLine))
+            {
+                settings.VisibleShortLine = visibleShortLine;
+            }
+
+            if (lines.Length > 5)
+            {
+                settings.Benchmark = lines[5];
+            }
+
+            return settings;
+        }
+
+        private sealed class JournalUiLayoutSettingsDto
+        {
+            public bool LeftPanelIsHide { get; set; }
+
+            public string ProfitType { get; set; }
+
+            public bool VisibleEquityLine { get; set; }
+
+            public bool VisibleLongLine { get; set; }
+
+            public bool VisibleShortLine { get; set; }
+
+            public string Benchmark { get; set; }
         }
 
         private List<string> GetAllGroups(List<PanelGroups> groups)
