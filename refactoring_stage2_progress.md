@@ -1596,3 +1596,19 @@
 ### Verification
 
 - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` -> passed 292/292
+
+## 2026-02-16 - Step 2.3 (JSON settings subsystem) - Incremental adoption in DynamicTrendDetector indicator settings
+
+- Migrated `project/OsEngine/Charts/CandleChart/Indicators/DynamicTrendDetector.cs` (`Engine\\<Name>.txt`) persistence to `SettingsManager`:
+  - `Save()` now writes JSON DTO with color, length, correction coefficient, and paint settings
+  - `Load()` now reads JSON and falls back to legacy line-based parser
+  - legacy decimal parser supports both invariant (`.`) and current-culture decimal formats
+  - preserved compatibility with historical legacy format that can include an extra ignored line
+- Added tests `project/OsEngine.Tests/DynamicTrendDetectorPersistenceTests.cs`:
+  - `Save_ShouldPersistJson_AndLoadRoundTrip`
+  - `Load_ShouldSupportLegacyLineBasedFormat`
+  - tests use file backup/restore around indicator settings path
+
+### Verification
+
+- `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` -> passed 294/294

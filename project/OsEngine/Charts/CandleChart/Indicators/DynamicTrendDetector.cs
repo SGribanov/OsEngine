@@ -6,6 +6,7 @@
 using System;
 using System.Collections.Generic;
 using System.Drawing;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using OsEngine.Entity;
@@ -159,14 +160,15 @@ namespace OsEngine.Charts.CandleChart.Indicators
                     return;
                 }
 
-                using (StreamWriter writer = new StreamWriter(@"Engine\" + Name + @".txt", false))
-                {
-                    writer.WriteLine(ColorBase.ToArgb());
-                    writer.WriteLine(Length);
-                    writer.WriteLine(CorrectionCoeff);
-                    writer.WriteLine(PaintOn);
-                    writer.Close();
-                }
+                SettingsManager.Save(
+                    GetSettingsPath(),
+                    new DynamicTrendDetectorSettingsDto
+                    {
+                        ColorArgb = ColorBase.ToArgb(),
+                        Length = Length,
+                        CorrectionCoeff = CorrectionCoeff,
+                        PaintOn = PaintOn
+                    });
             }
             catch (Exception)
             {
@@ -181,23 +183,26 @@ namespace OsEngine.Charts.CandleChart.Indicators
         /// </summary>
         public void Load()
         {
-            if (!File.Exists(@"Engine\" + Name + @".txt"))
+            if (!File.Exists(GetSettingsPath()))
             {
                 return;
             }
             try
             {
+                DynamicTrendDetectorSettingsDto settings = SettingsManager.Load(
+                    GetSettingsPath(),
+                    defaultValue: null,
+                    legacyLoader: ParseLegacySettings);
 
-                using (StreamReader reader = new StreamReader(@"Engine\" + Name + @".txt"))
+                if (settings == null)
                 {
-                    ColorBase = Color.FromArgb(Convert.ToInt32(reader.ReadLine()));
-                    Length = Convert.ToInt32(reader.ReadLine());
-                    CorrectionCoeff = Convert.ToDecimal(reader.ReadLine());
-                    PaintOn = Convert.ToBoolean(reader.ReadLine());
-                    reader.ReadLine();
-
-                    reader.Close();
+                    return;
                 }
+
+                ColorBase = Color.FromArgb(settings.ColorArgb);
+                Length = settings.Length;
+                CorrectionCoeff = settings.CorrectionCoeff;
+                PaintOn = settings.PaintOn;
 
 
             }
@@ -214,10 +219,70 @@ namespace OsEngine.Charts.CandleChart.Indicators
         /// </summary>
         public void Delete()
         {
-            if (File.Exists(@"Engine\" + Name + @".txt"))
+            if (File.Exists(GetSettingsPath()))
             {
-                File.Delete(@"Engine\" + Name + @".txt");
+                File.Delete(GetSettingsPath());
             }
+        }
+
+        private string GetSettingsPath()
+        {
+            return @"Engine\" + Name + @".txt";
+        }
+
+        private static DynamicTrendDetectorSettingsDto ParseLegacySettings(string content)
+        {
+            if (string.IsNullOrWhiteSpace(content))
+            {
+                return null;
+            }
+
+            string normalized = content.Replace("\r", string.Empty);
+            string[] lines = normalized.Split('\n');
+
+            if (lines.Length > 0 && lines[lines.Length - 1] == string.Empty)
+            {
+                Array.Resize(ref lines, lines.Length - 1);
+            }
+
+            if (lines.Length < 4)
+            {
+                return null;
+            }
+
+            return new DynamicTrendDetectorSettingsDto
+            {
+                ColorArgb = Convert.ToInt32(lines[0]),
+                Length = Convert.ToInt32(lines[1]),
+                CorrectionCoeff = ParseDecimalInvariantOrCurrent(lines[2]),
+                PaintOn = Convert.ToBoolean(lines[3])
+            };
+        }
+
+        private static decimal ParseDecimalInvariantOrCurrent(string value)
+        {
+            if (decimal.TryParse(value, NumberStyles.Any, CultureInfo.InvariantCulture, out decimal parsedInvariant))
+            {
+                return parsedInvariant;
+            }
+
+            if (decimal.TryParse(value, NumberStyles.Any, CultureInfo.CurrentCulture, out decimal parsedCurrent))
+            {
+                return parsedCurrent;
+            }
+
+            return Convert.ToDecimal(value);
+        }
+
+        private sealed class DynamicTrendDetectorSettingsDto
+        {
+            public int ColorArgb { get; set; }
+
+            public int Length { get; set; }
+
+            public decimal CorrectionCoeff { get; set; }
+
+            public bool PaintOn { get; set; }
         }
 
         /// <summary>
