@@ -285,3 +285,17 @@
 ### Verification
 
 - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` -> passed 116/116
+
+## 2026-02-16 - Step 2.3 (JSON settings subsystem) - Incremental adoption in AlertToPrice settings
+
+- Migrated `project/OsEngine/Alerts/AlertToPrice.cs` persistence to `SettingsManager`:
+  - `Save()` now writes JSON into `Engine\\<Name>Alert.txt`
+  - `Load()` now reads JSON and falls back to legacy line-based parser
+  - preserved existing alert model fields and behavior
+- Added tests `project/OsEngine.Tests/AlertToPricePersistenceTests.cs`:
+  - `Save_ShouldPersistJson_AndLoadRoundTrip`
+  - `Load_ShouldSupportLegacyLineBasedFormat`
+
+### Verification
+
+- `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` -> passed 118/118

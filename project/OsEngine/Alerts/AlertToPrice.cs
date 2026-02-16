@@ -28,24 +28,7 @@ namespace OsEngine.Alerts
         {
             try
             {
-                using (StreamWriter writer = new StreamWriter(@"Engine\" + Name + @"Alert.txt", false))
-                {
-                    writer.WriteLine(Message);
-                    writer.WriteLine(IsOn);
-                    writer.WriteLine(MessageIsOn);
-                    writer.WriteLine(MusicType);
-
-                    writer.WriteLine(SignalType);
-                    writer.WriteLine(VolumeReaction);
-                    writer.WriteLine(Slippage);
-                    writer.WriteLine(NumberClosePosition);
-                    writer.WriteLine(OrderPriceType);
-
-                    writer.WriteLine(TypeActivation);
-                    writer.WriteLine(PriceActivation);
-                    writer.WriteLine(SlippageType);
-                    writer.Close();
-                }
+                SettingsManager.Save(GetSettingsPath(), BuildSettings());
             }
             catch (Exception error)
             {
@@ -55,36 +38,153 @@ namespace OsEngine.Alerts
 
         public void Load()
         {
-            if (!File.Exists(@"Engine\" + Name + @"Alert.txt"))
+            AlertToPriceSettingsDto settings = SettingsManager.Load(
+                GetSettingsPath(),
+                defaultValue: null,
+                legacyLoader: ParseLegacySettings);
+
+            if (settings == null)
             {
                 return;
             }
+
+            ApplySettings(settings);
+        }
+
+        private void ApplySettings(AlertToPriceSettingsDto settings)
+        {
             try
             {
-                using (StreamReader reader = new StreamReader(@"Engine\" + Name + @"Alert.txt"))
-                {
-                    Message = reader.ReadLine();
-                    IsOn = Convert.ToBoolean(reader.ReadLine());
-                    MessageIsOn = Convert.ToBoolean(reader.ReadLine());
-                    Enum.TryParse(reader.ReadLine(), out MusicType);
-
-                    Enum.TryParse(reader.ReadLine(), true, out SignalType);
-                    VolumeReaction = reader.ReadLine().ToDecimal();
-                    Slippage = reader.ReadLine().ToDecimal();
-                    NumberClosePosition = Convert.ToInt32(reader.ReadLine());
-                    Enum.TryParse(reader.ReadLine(), true, out OrderPriceType);
-
-                    Enum.TryParse(reader.ReadLine(), true, out TypeActivation);
-                    PriceActivation = reader.ReadLine().ToDecimal();
-                    Enum.TryParse(reader.ReadLine(), true, out SlippageType);
-                    
-                    reader.Close();
-                }
+                Message = settings.Message;
+                IsOn = settings.IsOn;
+                MessageIsOn = settings.MessageIsOn;
+                MusicType = settings.MusicType;
+                SignalType = settings.SignalType;
+                VolumeReaction = settings.VolumeReaction;
+                Slippage = settings.Slippage;
+                NumberClosePosition = settings.NumberClosePosition;
+                OrderPriceType = settings.OrderPriceType;
+                TypeActivation = settings.TypeActivation;
+                PriceActivation = settings.PriceActivation;
+                SlippageType = settings.SlippageType;
             }
             catch (Exception error)
             {
                 MessageBox.Show(error.ToString());
             }
+        }
+
+        private AlertToPriceSettingsDto BuildSettings()
+        {
+            return new AlertToPriceSettingsDto
+            {
+                Message = Message,
+                IsOn = IsOn,
+                MessageIsOn = MessageIsOn,
+                MusicType = MusicType,
+                SignalType = SignalType,
+                VolumeReaction = VolumeReaction,
+                Slippage = Slippage,
+                NumberClosePosition = NumberClosePosition,
+                OrderPriceType = OrderPriceType,
+                TypeActivation = TypeActivation,
+                PriceActivation = PriceActivation,
+                SlippageType = SlippageType
+            };
+        }
+
+        private string GetSettingsPath()
+        {
+            return @"Engine\" + Name + @"Alert.txt";
+        }
+
+        private static AlertToPriceSettingsDto ParseLegacySettings(string content)
+        {
+            if (string.IsNullOrWhiteSpace(content))
+            {
+                return null;
+            }
+
+            string normalized = content.Replace("\r", string.Empty);
+            string[] lines = normalized.Split('\n');
+
+            if (lines.Length > 0 && lines[lines.Length - 1] == string.Empty)
+            {
+                Array.Resize(ref lines, lines.Length - 1);
+            }
+
+            AlertMusic musicType = AlertMusic.Duck;
+            if (lines.Length > 3)
+            {
+                Enum.TryParse(lines[3], out musicType);
+            }
+
+            SignalType signalType = SignalType.None;
+            if (lines.Length > 4)
+            {
+                Enum.TryParse(lines[4], true, out signalType);
+            }
+
+            OrderPriceType orderPriceType = OrderPriceType.Limit;
+            if (lines.Length > 8)
+            {
+                Enum.TryParse(lines[8], true, out orderPriceType);
+            }
+
+            PriceAlertTypeActivation typeActivation = PriceAlertTypeActivation.PriceHigherOrEqual;
+            if (lines.Length > 9)
+            {
+                Enum.TryParse(lines[9], true, out typeActivation);
+            }
+
+            AlertSlippageType slippageType = AlertSlippageType.Absolute;
+            if (lines.Length > 11)
+            {
+                Enum.TryParse(lines[11], true, out slippageType);
+            }
+
+            return new AlertToPriceSettingsDto
+            {
+                Message = lines.Length > 0 ? lines[0] : string.Empty,
+                IsOn = lines.Length > 1 && lines[1].Equals("true", StringComparison.OrdinalIgnoreCase),
+                MessageIsOn = lines.Length > 2 && lines[2].Equals("true", StringComparison.OrdinalIgnoreCase),
+                MusicType = musicType,
+                SignalType = signalType,
+                VolumeReaction = lines.Length > 5 ? lines[5].ToDecimal() : 0,
+                Slippage = lines.Length > 6 ? lines[6].ToDecimal() : 0,
+                NumberClosePosition = lines.Length > 7 ? Convert.ToInt32(lines[7]) : 0,
+                OrderPriceType = orderPriceType,
+                TypeActivation = typeActivation,
+                PriceActivation = lines.Length > 10 ? lines[10].ToDecimal() : 0,
+                SlippageType = slippageType
+            };
+        }
+
+        private sealed class AlertToPriceSettingsDto
+        {
+            public string Message { get; set; }
+
+            public bool IsOn { get; set; }
+
+            public bool MessageIsOn { get; set; }
+
+            public AlertMusic MusicType { get; set; }
+
+            public SignalType SignalType { get; set; }
+
+            public decimal VolumeReaction { get; set; }
+
+            public decimal Slippage { get; set; }
+
+            public int NumberClosePosition { get; set; }
+
+            public OrderPriceType OrderPriceType { get; set; }
+
+            public PriceAlertTypeActivation TypeActivation { get; set; }
+
+            public decimal PriceActivation { get; set; }
+
+            public AlertSlippageType SlippageType { get; set; }
         }
 
         public void Delete()
