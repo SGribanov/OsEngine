@@ -2503,3 +2503,22 @@
   - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` succeeded (`320/320`).
 - **Commit:** `d09549b47`
 - **Push:** no (manual push by user)
+
+### Step 2.3 - JSON Settings Subsystem (Incremental Adoption #121)
+
+- **Status:** In Progress (increment completed)
+- **Plan item:** `refactoring_stage2_plan.md` -> Phase 2 / Step 2.3
+- **Changes:**
+  - Migrated screener tab-set persistence in:
+    - `project/OsEngine/OsTrader/Panels/Tab/BotTabScreener.cs`
+  - `SaveTabs()` now persists DTO JSON via `SettingsManager.Save(...)`.
+  - `TryLoadTabs()` now uses `SettingsManager.Load(..., legacyLoader: ParseLegacyScreenerTabSetSettings)`.
+  - Added legacy parser for old hash-delimited `TAB1#TAB2#...` format.
+  - Added tests:
+    - `project/OsEngine.Tests/BotTabScreenerTabSetPersistenceTests.cs`
+  - Updated running progress journal:
+    - `refactoring_stage2_progress.md`
+- **Verification:**
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` succeeded (`322/322`).
+- **Commit:** `fbd5131c9`
+- **Push:** no (manual push by user)
