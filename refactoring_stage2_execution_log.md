@@ -2960,3 +2960,23 @@
   - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` succeeded (`343/343`).
 - **Commit:** `9ff2134f9`
 - **Push:** no (manual push by user)
+
+### Step 2.3 - JSON Settings Subsystem (Incremental Adoption #144)
+
+- **Status:** In Progress (increment completed)
+- **Plan item:** `refactoring_stage2_plan.md` -> Phase 2 / Step 2.3
+- **Changes:**
+  - Path consistency cleanup in:
+    - `project/OsEngine/Market/Servers/MoexFixFastSpot/MoexFixFastSpotServer.cs`
+  - Centralized securities LiteDB path construction via helper methods:
+    - `GetDataBasesDirectoryPath()`
+    - `GetSecuritiesDatabasePath()`
+  - Replaced duplicated inline path-building in:
+    - `LoadSecuritiesFromFile()`
+    - `SaveSecuritiesToFile()`
+  - Updated running progress journal:
+    - `refactoring_stage2_progress.md`
+- **Verification:**
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` succeeded (`343/343`).
+- **Commit:** `2ba912695`
+- **Push:** no (manual push by user)
