@@ -814,3 +814,23 @@
   - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` succeeded (`166/166`).
 - **Commit:** `d2e35fbac`
 - **Push:** no (manual push by user)
+
+### Step 2.3 - JSON Settings Subsystem (Incremental Adoption #38)
+
+- **Status:** In Progress (increment completed)
+- **Plan item:** `refactoring_stage2_plan.md` -> Phase 2 / Step 2.3
+- **Changes:**
+  - Migrated tester clearing settings persistence to JSON with legacy fallback:
+    - `project/OsEngine/Market/Servers/Tester/TesterServer.cs`
+  - Covered persisted file:
+    - `Engine\\TestServerClearings.txt`
+  - Added dedicated persistence tests:
+    - `project/OsEngine.Tests/TesterServerClearingPersistenceTests.cs`
+      - `SaveClearingInfo_ShouldPersistJson_AndLoadRoundTrip`
+      - `LoadClearingInfo_ShouldSupportLegacyLineBasedFormat`
+  - Updated running progress journal:
+    - `refactoring_stage2_progress.md`
+- **Verification:**
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` succeeded (`168/168`).
+- **Commit:** `0d0ca36f1`
+- **Push:** no (manual push by user)
