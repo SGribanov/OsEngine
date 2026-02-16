@@ -3,11 +3,13 @@
  *Ваши права на использование кода регулируются данной лицензией http://o-s-a.net/doc/license_simple_engine.pdf
 */
 
+using System;
 using System.Globalization;
 using System.IO;
 using System.Net;
 using System.Net.Mail;
 using System.Threading;
+using OsEngine.Entity;
 
 namespace OsEngine.Logging
 {
@@ -83,38 +85,20 @@ namespace OsEngine.Logging
         /// </summary>
         public void Load()
         {
-            if (File.Exists(@"Engine\mailSet.txt"))
+            ServerMailSettingsDto settings = SettingsManager.Load(
+                GetSettingsPath(),
+                defaultValue: null,
+                legacyLoader: ParseLegacyMailSettings);
+
+            if (settings != null)
             {
-                using StreamReader reader = new StreamReader(@"Engine\mailSet.txt");
-
-                MyAdress = reader.ReadLine();
-                MyPassword = reader.ReadLine();
-                Smtp = reader.ReadLine();
-                IsReady = false;
-                for (int i = 0; !reader.EndOfStream; i++)
-                {
-                    if (Adress == null || Adress[0] == null)
-                    {
-                        Adress = new string[1];
-                        Adress[0] = reader.ReadLine();
-                        IsReady = true;
-                    }
-                    else
-                    {
-                        string[] newAdress = new string[Adress.Length+1];
-
-                        for (int ii = 0; ii < Adress.Length; ii++)
-                        {
-                            newAdress[ii] = Adress[ii];
-                        }
-                        
-                        newAdress[newAdress.Length -1] = reader.ReadLine();
-                        Adress = newAdress;
-                        IsReady = true;
-                    }
-
-                }
-
+                MyAdress = settings.MyAdress;
+                MyPassword = settings.MyPassword;
+                Smtp = settings.Smtp;
+                Adress = settings.Adress;
+                IsReady = Adress != null
+                    && Adress.Length > 0
+                    && Adress[0] != null;
             }
             else
             {
@@ -131,19 +115,73 @@ namespace OsEngine.Logging
         /// </summary>
         public void Save()
         {
-            using StreamWriter writer = new StreamWriter(@"Engine\mailSet.txt");
-            writer.WriteLine(MyAdress);
-            writer.WriteLine(MyPassword);
-            writer.WriteLine(Smtp);
-            IsReady = false;
-            if (Adress != null && Adress[0] != null)
-            {
-                for (int i = 0; i < Adress.Length; i++)
+            SettingsManager.Save(
+                GetSettingsPath(),
+                new ServerMailSettingsDto
                 {
-                    IsReady = true;
-                    writer.WriteLine(Adress[i]);
+                    MyAdress = MyAdress,
+                    MyPassword = MyPassword,
+                    Smtp = Smtp,
+                    Adress = Adress
+                });
+
+            IsReady = false;
+            if (Adress != null
+                && Adress.Length > 0
+                && Adress[0] != null)
+            {
+                IsReady = true;
+            }
+        }
+
+        private static string GetSettingsPath()
+        {
+            return @"Engine\mailSet.txt";
+        }
+
+        private static ServerMailSettingsDto ParseLegacyMailSettings(string content)
+        {
+            if (string.IsNullOrWhiteSpace(content))
+            {
+                return null;
+            }
+
+            string normalized = content.Replace("\r", string.Empty);
+            string[] lines = normalized.Split('\n');
+
+            if (lines.Length > 0 && lines[lines.Length - 1] == string.Empty)
+            {
+                Array.Resize(ref lines, lines.Length - 1);
+            }
+
+            string[] adress = null;
+            if (lines.Length > 3)
+            {
+                adress = new string[lines.Length - 3];
+                for (int i = 3; i < lines.Length; i++)
+                {
+                    adress[i - 3] = lines[i];
                 }
             }
+
+            return new ServerMailSettingsDto
+            {
+                MyAdress = lines.Length > 0 ? lines[0] : null,
+                MyPassword = lines.Length > 1 ? lines[1] : null,
+                Smtp = lines.Length > 2 ? lines[2] : null,
+                Adress = adress
+            };
+        }
+
+        private sealed class ServerMailSettingsDto
+        {
+            public string MyAdress { get; set; }
+
+            public string MyPassword { get; set; }
+
+            public string Smtp { get; set; }
+
+            public string[] Adress { get; set; }
         }
 
         /// <summary>

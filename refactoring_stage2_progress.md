@@ -214,3 +214,17 @@
 ### Verification
 
 - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` -> passed 106/106
+
+## 2026-02-16 - Step 2.3 (JSON settings subsystem) - Incremental adoption in ServerMail settings
+
+- Migrated `project/OsEngine/Logging/ServerMail.cs` persistence to `SettingsManager`:
+  - `Save()` now writes JSON into `Engine\\mailSet.txt`
+  - `Load()` now reads JSON and falls back to legacy line-based format parser
+  - preserved `IsReady` calculation semantics from stored recipients
+- Added tests `project/OsEngine.Tests/ServerMailPersistenceTests.cs`:
+  - `Save_ShouldPersistJson_AndLoadRoundTrip`
+  - `Load_ShouldSupportLegacyLineBasedFormat`
+
+### Verification
+
+- `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` -> passed 108/108
