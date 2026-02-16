@@ -218,35 +218,39 @@ namespace OsEngine.Layout
         {
             try
             {
-                using (StreamWriter writer = new StreamWriter(@"Engine\LayoutGui.txt", false))
+                List<string> windowsToSave = new List<string>();
+
+                for(int i = 0;i < UiOpenWindows.Count;i++)
                 {
-                    for(int i = 0;i < UiOpenWindows.Count;i++)
+                    if (UiOpenWindows[i].Layout.Height == 0 ||
+                        UiOpenWindows[i].Layout.Widht == 0 ||
+                        UiOpenWindows[i].Layout.Left == 0 ||
+                        UiOpenWindows[i].Layout.Top == 0)
                     {
-                        if (UiOpenWindows[i].Layout.Height == 0 ||
-                            UiOpenWindows[i].Layout.Widht == 0 ||
-                            UiOpenWindows[i].Layout.Left == 0 ||
-                            UiOpenWindows[i].Layout.Top == 0)
-                        {
-                            continue;
-                        }
-
-                        if (UiOpenWindows[i].Layout.Left == -32000 ||
-                            UiOpenWindows[i].Layout.Top == -32000)
-                        {//свернутое значение окна пропускаем при сохранение
-                            continue;
-                        }
-
-
-                        if (UiOpenWindows[i].Layout.Height < 0 || UiOpenWindows[i].Layout.Widht < 0)
-                        {
-                            continue;
-                        }
-                        
-                        writer.WriteLine(UiOpenWindows[i].GetSaveString());
+                        continue;
                     }
 
-                    writer.Close();
+                    if (UiOpenWindows[i].Layout.Left == -32000 ||
+                        UiOpenWindows[i].Layout.Top == -32000)
+                    {//свернутое значение окна пропускаем при сохранение
+                        continue;
+                    }
+
+
+                    if (UiOpenWindows[i].Layout.Height < 0 || UiOpenWindows[i].Layout.Widht < 0)
+                    {
+                        continue;
+                    }
+
+                    windowsToSave.Add(UiOpenWindows[i].GetSaveString());
                 }
+
+                SettingsManager.Save(
+                    GetLayoutSettingsPath(),
+                    new GlobalLayoutSettingsDto
+                    {
+                        Windows = windowsToSave.ToArray()
+                    });
             }
             catch (Exception)
             {
@@ -256,36 +260,72 @@ namespace OsEngine.Layout
 
         private static void Load()
         {
-            if (!File.Exists(@"Engine\LayoutGui.txt"))
+            if (!File.Exists(GetLayoutSettingsPath()))
             {
                 return;
             }
 
             try
             {
-                using (StreamReader reader = new StreamReader(@"Engine\LayoutGui.txt"))
+                GlobalLayoutSettingsDto settings = SettingsManager.Load(
+                    GetLayoutSettingsPath(),
+                    defaultValue: null,
+                    legacyLoader: ParseLegacyLayoutSettings);
+
+                if (settings == null || settings.Windows == null)
                 {
-                    while(reader.EndOfStream == false)
+                    return;
+                }
+
+                for (int i = 0; i < settings.Windows.Length; i++)
+                {
+                    string res = settings.Windows[i];
+
+                    if(string.IsNullOrEmpty(res))
                     {
-                        string res = reader.ReadLine();
-
-                        if(string.IsNullOrEmpty(res))
-                        {
-                            return;
-                        }
-
-                        OpenWindow window = new OpenWindow();
-                        window.LoadFromString(res);
-                        UiOpenWindows.Add(window);
+                        return;
                     }
 
-                    reader.Close();
+                    OpenWindow window = new OpenWindow();
+                    window.LoadFromString(res);
+                    UiOpenWindows.Add(window);
                 }
             }
             catch (Exception)
             {
                 // ignore
             }
+        }
+
+        private static string GetLayoutSettingsPath()
+        {
+            return @"Engine\LayoutGui.txt";
+        }
+
+        private static GlobalLayoutSettingsDto ParseLegacyLayoutSettings(string content)
+        {
+            if (string.IsNullOrWhiteSpace(content))
+            {
+                return null;
+            }
+
+            string normalized = content.Replace("\r", string.Empty);
+            string[] lines = normalized.Split('\n');
+
+            if (lines.Length > 0 && lines[lines.Length - 1] == string.Empty)
+            {
+                Array.Resize(ref lines, lines.Length - 1);
+            }
+
+            return new GlobalLayoutSettingsDto
+            {
+                Windows = lines
+            };
+        }
+
+        private sealed class GlobalLayoutSettingsDto
+        {
+            public string[] Windows { get; set; }
         }
 
         // Проверка размера экрана

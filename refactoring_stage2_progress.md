@@ -464,3 +464,18 @@
 ### Verification
 
 - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` -> passed 140/140
+
+## 2026-02-16 - Step 2.3 (JSON settings subsystem) - Incremental adoption in GlobalGUILayout layout settings
+
+- Migrated `project/OsEngine/Layout/GlobalGUILayout.cs` (`LayoutGui.txt`) persistence to `SettingsManager`:
+  - private `Save()` now writes JSON into `Engine\\LayoutGui.txt`
+  - private `Load()` now reads JSON and falls back to legacy line-based parser
+  - preserved existing layout-filtering rules for invalid/minimized window coordinates
+- Added tests `project/OsEngine.Tests/GlobalGUILayoutPersistenceTests.cs`:
+  - `Save_ShouldPersistJson_AndLoadRoundTrip`
+  - `Load_ShouldSupportLegacyLineBasedFormat`
+  - tests invoke private static `Save/Load` via reflection and isolate static `UiOpenWindows` state
+
+### Verification
+
+- `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` -> passed 142/142
