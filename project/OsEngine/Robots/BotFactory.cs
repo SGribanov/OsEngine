@@ -527,7 +527,17 @@ namespace OsEngine.Robots
                 }
                 try
                 {
-                    _optimizerBotsWithParam.AddRange(File.ReadAllLines(OptimizerBotsFileName));
+                    OptimizerBotsSettingsDto settings = SettingsManager.Load(
+                        OptimizerBotsFileName,
+                        defaultValue: null,
+                        legacyLoader: ParseLegacyOptimizerBotsSettings);
+
+                    if (settings?.BotNames == null)
+                    {
+                        return;
+                    }
+
+                    _optimizerBotsWithParam.AddRange(settings.BotNames);
                 }
                 catch (Exception ex)
                 {
@@ -547,13 +557,45 @@ namespace OsEngine.Robots
                     {
                         Directory.CreateDirectory(dir);
                     }
-                    File.WriteAllLines(OptimizerBotsFileName, _optimizerBotsWithParam);
+
+                    SettingsManager.Save(
+                        OptimizerBotsFileName,
+                        new OptimizerBotsSettingsDto
+                        {
+                            BotNames = new List<string>(_optimizerBotsWithParam)
+                        });
                 }
                 catch (Exception ex)
                 {
                     Console.WriteLine($"Error saving optimizer bot names to file: {ex.Message}");
                 }
             }
+        }
+
+        private static OptimizerBotsSettingsDto ParseLegacyOptimizerBotsSettings(string content)
+        {
+            if (string.IsNullOrWhiteSpace(content))
+            {
+                return null;
+            }
+
+            string normalized = content.Replace("\r", string.Empty);
+            string[] lines = normalized.Split('\n');
+
+            if (lines.Length > 0 && lines[lines.Length - 1] == string.Empty)
+            {
+                Array.Resize(ref lines, lines.Length - 1);
+            }
+
+            return new OptimizerBotsSettingsDto
+            {
+                BotNames = new List<string>(lines)
+            };
+        }
+
+        private sealed class OptimizerBotsSettingsDto
+        {
+            public List<string> BotNames { get; set; }
         }
 
         public static List<string> GetNamesStrategyWithParametersSync()

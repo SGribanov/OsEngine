@@ -976,3 +976,18 @@
 ### Verification
 
 - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` -> passed 210/210
+
+## 2026-02-16 - Step 2.3 (JSON settings subsystem) - Incremental adoption in BotFactory optimizer bots cache
+
+- Migrated `project/OsEngine/Robots/BotFactory.cs` (`Engine\\OptimizerBots.txt`) persistence to `SettingsManager`:
+  - private `SaveOptimizerBotsNamesToFile()` now writes JSON DTO with optimizer bot names
+  - private `LoadOptimizerBotsNamesFromFile()` now reads JSON and falls back to legacy line-based parser
+  - preserved existing optimizer cache contract for bot-name list content/order
+- Added tests `project/OsEngine.Tests/BotFactoryOptimizerBotsPersistenceTests.cs`:
+  - `SaveOptimizerBotsNamesToFile_ShouldPersistJson_AndLoadRoundTrip`
+  - `LoadOptimizerBotsNamesFromFile_ShouldSupportLegacyLineBasedFormat`
+  - tests invoke private static save/load via reflection with backup/restore of `Engine\\OptimizerBots.txt` and static field state
+
+### Verification
+
+- `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` -> passed 212/212
