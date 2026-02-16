@@ -2449,3 +2449,19 @@
   - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` succeeded (`318/318`).
 - **Commit:** `ae1cbc3f4`
 - **Push:** no (manual push by user)
+
+### Step 2.3 - JSON Settings Subsystem (Incremental Adoption #118)
+
+- **Status:** In Progress (increment completed)
+- **Plan item:** `refactoring_stage2_plan.md` -> Phase 2 / Step 2.3
+- **Changes:**
+  - Aligned `Delete()` settings path usage in:
+    - `project/OsEngine/OsTrader/Panels/Tab/Internal/BotManualControl.cs`
+  - Replaced inline `@"Engine\\<name>StrategSettings.txt"` path construction with `GetSettingsPath()`
+  - Preserved readonly-file handling behavior before deletion.
+  - Updated running progress journal:
+    - `refactoring_stage2_progress.md`
+- **Verification:**
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` succeeded (`318/318`).
+- **Commit:** `ab99494d5`
+- **Push:** no (manual push by user)
