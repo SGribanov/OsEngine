@@ -434,3 +434,18 @@
 ### Verification
 
 - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` -> passed 136/136
+
+## 2026-02-16 - Step 2.3 (JSON settings subsystem) - Incremental adoption in OsConverterMaster settings
+
+- Migrated `project/OsEngine/OsConverter/OsConverterMaster.cs` persistence to `SettingsManager`:
+  - `Save()` now writes JSON into `Engine\\Converter.txt`
+  - `Load()` now reads JSON and falls back to legacy 3-line format parser
+  - preserved original model (`TimeFrame`, source file, output file)
+- Added tests `project/OsEngine.Tests/OsConverterMasterPersistenceTests.cs`:
+  - `Save_ShouldPersistJson_AndLoadRoundTrip`
+  - `Load_ShouldSupportLegacyLineBasedFormat`
+  - tests use uninitialized instance + reflection to avoid constructor/UI side effects
+
+### Verification
+
+- `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` -> passed 138/138
