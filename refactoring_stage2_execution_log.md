@@ -507,3 +507,25 @@
   - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` succeeded (`134/134`).
 - **Commit:** `9cc3febbf`
 - **Push:** no (manual push by user)
+
+### Step 2.3 - JSON Settings Subsystem (Incremental Adoption #23)
+
+- **Status:** In Progress (increment completed)
+- **Plan item:** `refactoring_stage2_plan.md` -> Phase 2 / Step 2.3
+- **Changes:**
+  - Migrated index spread settings persistence to JSON with legacy fallback:
+    - `project/OsEngine/OsTrader/Panels/Tab/BotTabIndex.cs` (`SpreadSet.txt`)
+  - Covered persisted file:
+    - `Engine\\<TabName>SpreadSet.txt`
+  - Added dedicated persistence tests:
+    - `project/OsEngine.Tests/BotTabIndexSpreadPersistenceTests.cs`
+      - `Save_ShouldPersistJson_AndLoadRoundTrip`
+      - `Load_ShouldSupportLegacyLineBasedFormat`
+  - Stabilized server settings tests to avoid constructor side effects:
+    - `project/OsEngine.Tests/AServerSettingsPersistenceTests.cs`
+  - Updated running progress journal:
+    - `refactoring_stage2_progress.md`
+- **Verification:**
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` succeeded (`136/136`).
+- **Commit:** `6729c267e`
+- **Push:** no (manual push by user)
