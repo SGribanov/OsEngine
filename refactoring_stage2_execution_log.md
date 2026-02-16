@@ -1254,3 +1254,23 @@
   - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` succeeded (`210/210`).
 - **Commit:** `117e637c1`
 - **Push:** no (manual push by user)
+
+### Step 2.3 - JSON Settings Subsystem (Incremental Adoption #60)
+
+- **Status:** In Progress (increment completed)
+- **Plan item:** `refactoring_stage2_plan.md` -> Phase 2 / Step 2.3
+- **Changes:**
+  - Migrated optimizer bot cache persistence to JSON with legacy fallback:
+    - `project/OsEngine/Robots/BotFactory.cs`
+  - Covered persisted file:
+    - static `Engine\\OptimizerBots.txt` path
+  - Added dedicated persistence tests:
+    - `project/OsEngine.Tests/BotFactoryOptimizerBotsPersistenceTests.cs`
+      - `SaveOptimizerBotsNamesToFile_ShouldPersistJson_AndLoadRoundTrip`
+      - `LoadOptimizerBotsNamesFromFile_ShouldSupportLegacyLineBasedFormat`
+  - Updated running progress journal:
+    - `refactoring_stage2_progress.md`
+- **Verification:**
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` succeeded (`212/212`).
+- **Commit:** `f360c8d47`
+- **Push:** no (manual push by user)
