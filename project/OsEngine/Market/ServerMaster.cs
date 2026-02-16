@@ -239,13 +239,15 @@ namespace OsEngine.Market
 
             _loadServerInstance.Add(serverType);
 
-            if (!File.Exists(@"Engine\" + serverType + @"ServerInstanceNumbers.txt"))
+            string path = GetServerInstanceNumbersPath(serverType);
+
+            if (!File.Exists(path))
             {
                 return;
             }
             try
             {
-                using (StreamReader reader = new StreamReader(@"Engine\" + serverType + @"ServerInstanceNumbers.txt"))
+                using (StreamReader reader = new StreamReader(path))
                 {
                     while (reader.EndOfStream == false)
                     {
@@ -274,7 +276,7 @@ namespace OsEngine.Market
 
                 ServerType serverType = servers[0].ServerType;
 
-                using (StreamWriter writer = new StreamWriter(@"Engine\" + serverType + @"ServerInstanceNumbers.txt", false))
+                using (StreamWriter writer = new StreamWriter(GetServerInstanceNumbersPath(serverType), false))
                 {
                     for (int i = 0; i < servers.Count; i++)
                     {
@@ -312,6 +314,11 @@ namespace OsEngine.Market
             {
                 SendNewLogMessage(ex.ToString(), LogMessageType.Error);
             }
+        }
+
+        private static string GetServerInstanceNumbersPath(ServerType serverType)
+        {
+            return @"Engine\" + serverType + @"ServerInstanceNumbers.txt";
         }
 
         #endregion

@@ -1864,3 +1864,15 @@
 ### Verification
 
 - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` -> passed 318/318
+
+## 2026-02-16 - Step 2.3 (JSON settings subsystem) - Path consistency cleanup in ServerMaster instance-number storage
+
+- Updated `project/OsEngine/Market/ServerMaster.cs`:
+  - centralized `Engine\\<ServerType>ServerInstanceNumbers.txt` path into helper:
+    - `GetServerInstanceNumbersPath(ServerType serverType)`
+  - applied helper in `TryLoadServerInstance(...)` and `TrySaveServerInstance(...)`
+- No behavior changes intended; path construction is now reused from a single point.
+
+### Verification
+
+- `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` -> passed 318/318
