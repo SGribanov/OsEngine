@@ -2018,3 +2018,20 @@
 ### Verification
 
 - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` -> passed 334/334
+
+## 2026-02-16 - Step 2.3 (JSON settings subsystem) - AlertMaster keeper storage migrated to JSON wrapper with legacy compatibility
+
+- Updated `project/OsEngine/Alerts/AlertMaster.cs`:
+  - migrated alert-keeper file wrapper from direct line-based IO to `SettingsManager`
+  - `Save()` now persists DTO JSON (`AlertKeeperSettingsDto`) with ordered alert names
+  - `Load()` now uses `SettingsManager.Load(..., legacyLoader: ParseLegacyAlertKeeperSettings)`
+  - preserved existing alert reconstruction logic (`AlertToChart` / `AlertToPrice`) from keeper names
+  - centralized keeper path via `GetAlertKeeperPath()` and reused it in load/save/delete
+  - added legacy parser `ParseLegacyAlertKeeperSettings(string content)` for old line-based format
+- Added tests in `project/OsEngine.Tests/AlertMasterPersistenceTests.cs`:
+  - verifies JSON persistence from private `Save()` path
+  - verifies legacy parser behavior
+
+### Verification
+
+- `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` -> passed 336/336

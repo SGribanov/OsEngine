@@ -467,7 +467,7 @@ namespace OsEngine.Alerts
 
         private void Load()
         {
-            if (!File.Exists(@"Engine\" + _name + "AlertKeeper.txt"))
+            if (!File.Exists(GetAlertKeeperPath()))
             {
                 // if there is no file we need. Just go out
                 // если нет нужного нам файла. Просто выходим
@@ -483,40 +483,48 @@ namespace OsEngine.Alerts
             {
                 _alertArray = new List<IIAlert>();
 
-                using (StreamReader reader = new StreamReader(@"Engine\" + _name + "AlertKeeper.txt"))
+                AlertKeeperSettingsDto settings = SettingsManager.Load(
+                    GetAlertKeeperPath(),
+                    defaultValue: null,
+                    legacyLoader: ParseLegacyAlertKeeperSettings);
+
+                if (settings == null
+                    || settings.AlertNames == null)
                 {
-                    // if there is file. Connect to it and download data
-                    // если файл есть. Подключаемся к нему и качаем данные
-                    // indicators
-                    // индикаторы
-                    while (!reader.EndOfStream)
+                    return;
+                }
+
+                // if there is file. Connect to it and download data
+                // если файл есть. Подключаемся к нему и качаем данные
+                // indicators
+                // индикаторы
+                for (int i = 0; i < settings.AlertNames.Count; i++)
+                {
+                    string saveStr = settings.AlertNames[i];
+
+                    if (string.IsNullOrWhiteSpace(saveStr))
                     {
-                        string saveStr = reader.ReadLine();
+                        break;
+                    }
 
-                        if (string.IsNullOrWhiteSpace(saveStr))
-                        {
-                            break;
-                        }
+                    string[] alert = saveStr.Split('$');
 
-                        string[] alert = saveStr.Split('$');
+                    if (alert.Length != 2)
+                    {
+                        break;
+                    }
 
-                        if (alert.Length != 2)
-                        {
-                            break;
-                        }
+                    AlertType alertType;
 
-                        AlertType alertType;
+                    Enum.TryParse(alert[0], out alertType);
 
-                        Enum.TryParse(alert[0], out alertType);
-
-                        if (alertType == AlertType.ChartAlert)
-                        {
-                            _alertArray.Add(new AlertToChart(saveStr, HostAlert));
-                        }
-                        else if (alertType == AlertType.PriceAlert)
-                        {
-                            _alertArray.Add(new AlertToPrice(saveStr));
-                        }
+                    if (alertType == AlertType.ChartAlert)
+                    {
+                        _alertArray.Add(new AlertToChart(saveStr, HostAlert));
+                    }
+                    else if (alertType == AlertType.PriceAlert)
+                    {
+                        _alertArray.Add(new AlertToPrice(saveStr));
                     }
                 }
                 // create array and robots
@@ -538,20 +546,23 @@ namespace OsEngine.Alerts
                     return;
                 }
 
-                using (StreamWriter writer = new StreamWriter(@"Engine\" + _name + "AlertKeeper.txt", false))
+                List<string> alertNames = new List<string>();
+
+                // create file and write settings data to it
+                // создаём файл и записываем в него данные настроек
+                for (int i = 0; _alertArray != null && i < _alertArray.Count; i++)
                 {
-                    // create file and write settings data to it
-                    // создаём файл и записываем в него данные настроек
-
-                    for (int i = 0; _alertArray != null && i < _alertArray.Count; i++)
-                    {
-                        _alertArray[i].Name = _alertArray[i].TypeAlert + "$" + _name + i;
-                        _alertArray[i].Save();
-                        writer.WriteLine(_alertArray[i].Name);
-                    }
-
-                    writer.Close();
+                    _alertArray[i].Name = _alertArray[i].TypeAlert + "$" + _name + i;
+                    _alertArray[i].Save();
+                    alertNames.Add(_alertArray[i].Name);
                 }
+
+                SettingsManager.Save(
+                    GetAlertKeeperPath(),
+                    new AlertKeeperSettingsDto
+                    {
+                        AlertNames = alertNames
+                    });
             }
             catch (Exception error)
             {
@@ -577,9 +588,9 @@ namespace OsEngine.Alerts
         {
             try
             {
-                if (File.Exists(@"Engine\" + _name + "AlertKeeper.txt"))
+                if (File.Exists(GetAlertKeeperPath()))
                 {
-                    File.Delete(@"Engine\" + _name + "AlertKeeper.txt");
+                    File.Delete(GetAlertKeeperPath());
                 }
 
                 if (_alertArray != null)
@@ -609,6 +620,31 @@ namespace OsEngine.Alerts
             {
                 SendNewMessage(error.ToString(), LogMessageType.Error);
             }
+        }
+
+        private string GetAlertKeeperPath()
+        {
+            return @"Engine\" + _name + "AlertKeeper.txt";
+        }
+
+        private static AlertKeeperSettingsDto ParseLegacyAlertKeeperSettings(string content)
+        {
+            if (string.IsNullOrWhiteSpace(content))
+            {
+                return null;
+            }
+
+            string[] lines = content.Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries);
+
+            return new AlertKeeperSettingsDto
+            {
+                AlertNames = new List<string>(lines)
+            };
+        }
+
+        private sealed class AlertKeeperSettingsDto
+        {
+            public List<string> AlertNames { get; set; }
         }
 
         private void DeleteVisual()
