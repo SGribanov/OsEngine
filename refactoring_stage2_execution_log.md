@@ -1414,3 +1414,23 @@
   - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` succeeded (`226/226`).
 - **Commit:** `cc818a5cc`
 - **Push:** no (manual push by user)
+
+### Step 2.3 - JSON Settings Subsystem (Incremental Adoption #68)
+
+- **Status:** In Progress (increment completed)
+- **Plan item:** `refactoring_stage2_plan.md` -> Phase 2 / Step 2.3
+- **Changes:**
+  - Migrated AtrChannel indicator settings persistence to JSON with legacy fallback:
+    - `project/OsEngine/Charts/CandleChart/Indicators/AtrChannel.cs`
+  - Covered persisted file:
+    - dynamic `Engine\\<Name>.txt` path (`AtrChannel` indicator)
+  - Added dedicated persistence tests:
+    - `project/OsEngine.Tests/AtrChannelPersistenceTests.cs`
+      - `Save_ShouldPersistJson_AndLoadRoundTrip`
+      - `Load_ShouldSupportLegacyLineBasedFormat`
+  - Updated running progress journal:
+    - `refactoring_stage2_progress.md`
+- **Verification:**
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` succeeded (`228/228`).
+- **Commit:** `120fe88f4`
+- **Push:** no (manual push by user)
