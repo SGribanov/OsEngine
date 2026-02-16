@@ -2234,27 +2234,34 @@ namespace OsEngine.OsTrader.Panels.Tab
                 return;
             }
 
-            if (!File.Exists(@"Engine\" + _botUniqName + @"IndexAutoFormulaSettings.txt"))
+            string path = GetSettingsPath();
+
+            if (!File.Exists(path))
             {
                 return;
             }
 
             try
             {
-                using (StreamReader reader = new StreamReader(@"Engine\" + _botUniqName + @"IndexAutoFormulaSettings.txt"))
-                {
-                    Enum.TryParse(reader.ReadLine(), out _regime);
-                    Enum.TryParse(reader.ReadLine(), out _dayOfWeekToRebuildIndex);
-                    _hourInDayToRebuildIndex = Convert.ToInt32(reader.ReadLine());
-                    _indexSecCount = Convert.ToInt32(reader.ReadLine());
-                    _daysLookBackInBuilding = Convert.ToInt32(reader.ReadLine());
-                    Enum.TryParse(reader.ReadLine(), out _indexMultType);
-                    Enum.TryParse(reader.ReadLine(), out _indexSortType);
-                    _lastTimeUpdateIndex = reader.ReadLine();
-                    _writeLogMessageOnRebuild = Convert.ToBoolean(reader.ReadLine());
+                IndexFormulaBuilderSettingsDto settings = SettingsManager.Load(
+                    path,
+                    defaultValue: null,
+                    legacyLoader: ParseLegacySettings);
 
-                    reader.Close();
+                if (settings == null)
+                {
+                    return;
                 }
+
+                _regime = settings.Regime;
+                _dayOfWeekToRebuildIndex = settings.DayOfWeekToRebuildIndex;
+                _hourInDayToRebuildIndex = settings.HourInDayToRebuildIndex;
+                _indexSecCount = settings.IndexSecCount;
+                _daysLookBackInBuilding = settings.DaysLookBackInBuilding;
+                _indexMultType = settings.IndexMultType;
+                _indexSortType = settings.IndexSortType;
+                _lastTimeUpdateIndex = settings.LastTimeUpdateIndex;
+                _writeLogMessageOnRebuild = settings.WriteLogMessageOnRebuild;
             }
             catch (Exception)
             {
@@ -2274,25 +2281,119 @@ namespace OsEngine.OsTrader.Panels.Tab
 
             try
             {
-                using (StreamWriter writer = new StreamWriter(@"Engine\" + _botUniqName + @"IndexAutoFormulaSettings.txt", false))
-                {
-                    writer.WriteLine(_regime.ToString());
-                    writer.WriteLine(_dayOfWeekToRebuildIndex.ToString());
-                    writer.WriteLine(_hourInDayToRebuildIndex);
-                    writer.WriteLine(_indexSecCount);
-                    writer.WriteLine(_daysLookBackInBuilding);
-                    writer.WriteLine(_indexMultType.ToString());
-                    writer.WriteLine(_indexSortType.ToString());
-                    writer.WriteLine(_lastTimeUpdateIndex);
-                    writer.WriteLine(_writeLogMessageOnRebuild);
-
-                    writer.Close();
-                }
+                SettingsManager.Save(
+                    GetSettingsPath(),
+                    new IndexFormulaBuilderSettingsDto
+                    {
+                        Regime = _regime,
+                        DayOfWeekToRebuildIndex = _dayOfWeekToRebuildIndex,
+                        HourInDayToRebuildIndex = _hourInDayToRebuildIndex,
+                        IndexSecCount = _indexSecCount,
+                        DaysLookBackInBuilding = _daysLookBackInBuilding,
+                        IndexMultType = _indexMultType,
+                        IndexSortType = _indexSortType,
+                        LastTimeUpdateIndex = _lastTimeUpdateIndex,
+                        WriteLogMessageOnRebuild = _writeLogMessageOnRebuild
+                    });
             }
             catch (Exception)
             {
                 // ignore
             }
+        }
+
+        private string GetSettingsPath()
+        {
+            return @"Engine\" + _botUniqName + @"IndexAutoFormulaSettings.txt";
+        }
+
+        private static IndexFormulaBuilderSettingsDto ParseLegacySettings(string content)
+        {
+            if (string.IsNullOrWhiteSpace(content))
+            {
+                return null;
+            }
+
+            string normalized = content.Replace("\r", string.Empty);
+            string[] lines = normalized.Split('\n');
+
+            if (lines.Length > 0 && lines[lines.Length - 1] == string.Empty)
+            {
+                Array.Resize(ref lines, lines.Length - 1);
+            }
+
+            IndexAutoFormulaBuilderRegime regime = IndexAutoFormulaBuilderRegime.Off;
+            Enum.TryParse(GetLineAt(lines, 0), out regime);
+
+            DayOfWeek dayOfWeek = DayOfWeek.Monday;
+            Enum.TryParse(GetLineAt(lines, 1), out dayOfWeek);
+
+            IndexMultType multType = IndexMultType.EqualWeighted;
+            Enum.TryParse(GetLineAt(lines, 5), out multType);
+
+            SecuritySortType sortType = SecuritySortType.FirstInArray;
+            Enum.TryParse(GetLineAt(lines, 6), out sortType);
+
+            return new IndexFormulaBuilderSettingsDto
+            {
+                Regime = regime,
+                DayOfWeekToRebuildIndex = dayOfWeek,
+                HourInDayToRebuildIndex = TryParseInt(GetLineAt(lines, 2), 10),
+                IndexSecCount = TryParseInt(GetLineAt(lines, 3), 5),
+                DaysLookBackInBuilding = TryParseInt(GetLineAt(lines, 4), 20),
+                IndexMultType = multType,
+                IndexSortType = sortType,
+                LastTimeUpdateIndex = GetLineAt(lines, 7),
+                WriteLogMessageOnRebuild = TryParseBool(GetLineAt(lines, 8), true)
+            };
+        }
+
+        private static string GetLineAt(string[] lines, int index)
+        {
+            if (lines == null || index >= lines.Length)
+            {
+                return string.Empty;
+            }
+
+            return lines[index];
+        }
+
+        private static int TryParseInt(string value, int defaultValue)
+        {
+            if (int.TryParse(value, out int parsed))
+            {
+                return parsed;
+            }
+
+            return defaultValue;
+        }
+
+        private static bool TryParseBool(string value, bool defaultValue)
+        {
+            if (string.IsNullOrWhiteSpace(value))
+            {
+                return defaultValue;
+            }
+
+            if (bool.TryParse(value, out bool parsed))
+            {
+                return parsed;
+            }
+
+            return defaultValue;
+        }
+
+        private sealed class IndexFormulaBuilderSettingsDto
+        {
+            public IndexAutoFormulaBuilderRegime Regime { get; set; }
+            public DayOfWeek DayOfWeekToRebuildIndex { get; set; }
+            public int HourInDayToRebuildIndex { get; set; }
+            public int IndexSecCount { get; set; }
+            public int DaysLookBackInBuilding { get; set; }
+            public IndexMultType IndexMultType { get; set; }
+            public SecuritySortType IndexSortType { get; set; }
+            public string LastTimeUpdateIndex { get; set; }
+            public bool WriteLogMessageOnRebuild { get; set; }
         }
 
         /// <summary>
