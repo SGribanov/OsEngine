@@ -1214,3 +1214,23 @@
   - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` succeeded (`206/206`).
 - **Commit:** `37ee3f644`
 - **Push:** no (manual push by user)
+
+### Step 2.3 - JSON Settings Subsystem (Incremental Adoption #58)
+
+- **Status:** In Progress (increment completed)
+- **Plan item:** `refactoring_stage2_plan.md` -> Phase 2 / Step 2.3
+- **Changes:**
+  - Migrated pair instance settings persistence to JSON with legacy fallback:
+    - `project/OsEngine/OsTrader/Panels/Tab/BotTabPair.cs` (`PairToTrade`)
+  - Covered persisted file:
+    - dynamic `Engine\\<Name>PairsSettings.txt` path
+  - Added dedicated persistence tests:
+    - `project/OsEngine.Tests/PairToTradeSettingsPersistenceTests.cs`
+      - `Save_ShouldPersistJson_AndLoadRoundTrip`
+      - `Load_ShouldSupportLegacyLineBasedFormat`
+  - Updated running progress journal:
+    - `refactoring_stage2_progress.md`
+- **Verification:**
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` succeeded (`208/208`).
+- **Commit:** `d320644cf`
+- **Push:** no (manual push by user)
