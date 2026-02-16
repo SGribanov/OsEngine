@@ -167,3 +167,23 @@
   - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` succeeded (`100/100`).
 - **Commit:** `0fabce56e`
 - **Push:** no (manual push by user)
+
+### Step 2.3 - JSON Settings Subsystem (Incremental Adoption #6)
+
+- **Status:** In Progress (increment completed)
+- **Plan item:** `refactoring_stage2_plan.md` -> Phase 2 / Step 2.3
+- **Changes:**
+  - Migrated Interactive Brokers securities watchlist persistence to JSON with legacy fallback:
+    - `project/OsEngine/Market/Servers/InteractiveBrokers/InteractiveBrokersServer.cs`
+  - Covered persisted file:
+    - `IbSecuritiesToWatch.txt`
+  - Added dedicated persistence tests:
+    - `project/OsEngine.Tests/InteractiveBrokersSecuritiesPersistenceTests.cs`
+      - `SaveIbSecurities_ShouldPersistJson_AndLoadRoundTrip`
+      - `LoadIbSecurities_ShouldSupportLegacyLineBasedFormat`
+  - Updated running progress journal:
+    - `refactoring_stage2_progress.md`
+- **Verification:**
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` succeeded (`102/102`).
+- **Commit:** pending local commit in current session
+- **Push:** no (manual push by user)

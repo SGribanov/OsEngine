@@ -5,6 +5,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Threading;
 using OsEngine.Entity;
 using OsEngine.Language;
@@ -216,40 +217,23 @@ namespace OsEngine.Market.Servers.InteractiveBrokers
         {
             try
             {
-                using (StreamWriter writer = new StreamWriter(@"Engine\" + @"IbSecuritiesToWatch.txt", false))
+                IbSecuritiesSettingsDto settings = new IbSecuritiesSettingsDto
                 {
-                    for (int i = 0; _secIB != null && i < _secIB.Count; i++)
+                    Securities = new List<SecurityIbSettingsItem>()
+                };
+
+                for (int i = 0; _secIB != null && i < _secIB.Count; i++)
+                {
+                    SecurityIb sec = _secIB[i];
+                    if (sec == null)
                     {
-                        if (_secIB[i] == null)
-                        {
-                            continue;
-                        }
-                        string saveStr = "";
-                        //saveStr +=  _secToSubscribe[i].ComboLegs + "@";
-                        saveStr += _secIB[i].ComboLegsDescription + "@";
-                        saveStr += /*_secIB[i].ConId+ */ "@";
-                        saveStr += _secIB[i].Currency + "@";
-                        saveStr += _secIB[i].Exchange + "@";
-                        saveStr += _secIB[i].Expiry + "@";
-                        saveStr += _secIB[i].IncludeExpired + "@";
-                        saveStr += _secIB[i].LocalSymbol + "@";
-                        saveStr += _secIB[i].Multiplier + "@";
-                        saveStr += _secIB[i].PrimaryExch + "@";
-                        saveStr += _secIB[i].Right + "@";
-                        saveStr += /*_secIB[i].SecId + */ "@";
-                        saveStr += _secIB[i].SecIdType + "@";
-                        saveStr += _secIB[i].SecType + "@";
-                        saveStr += _secIB[i].Strike + "@";
-                        saveStr += _secIB[i].Symbol +  "@";
-                        saveStr += /*_secIB[i].TradingClass +*/ "@";
-                        saveStr += _secIB[i].CreateMarketDepthFromTrades + "@";
-                        //saveStr += _secToSubscribe[i].UnderComp + "@";
-
-
-                        writer.WriteLine(saveStr);
+                        continue;
                     }
-                    writer.Close();
+
+                    settings.Securities.Add(ToSettingsItem(sec));
                 }
+
+                SettingsManager.Save(GetSecuritiesWatchPath(), settings);
             }
             catch (Exception)
             {
@@ -259,7 +243,21 @@ namespace OsEngine.Market.Servers.InteractiveBrokers
 
         private void LoadIbSecurities()
         {
-            if (!File.Exists(@"Engine\" + @"IbSecuritiesToWatch.txt"))
+            IbSecuritiesSettingsDto settings = null;
+
+            try
+            {
+                settings = SettingsManager.Load(
+                    GetSecuritiesWatchPath(),
+                    defaultValue: null,
+                    legacyLoader: ParseLegacyIbSecurities);
+            }
+            catch
+            {
+                // ignored
+            }
+
+            if (settings == null || settings.Securities == null || settings.Securities.Count == 0)
             {
                 LoadStartSecurities();
                 return;
@@ -267,58 +265,213 @@ namespace OsEngine.Market.Servers.InteractiveBrokers
 
             try
             {
-                using (StreamReader reader = new StreamReader(@"Engine\" + @"IbSecuritiesToWatch.txt"))
+                _secIB = new List<SecurityIb>();
+
+                for (int i = 0; i < settings.Securities.Count; i++)
                 {
-                    _secIB = new List<SecurityIb>();
-                    while (!reader.EndOfStream)
+                    SecurityIb sec = ToSecurity(settings.Securities[i]);
+                    if (sec != null)
                     {
-                        try
-                        {
-                            SecurityIb security = new SecurityIb();
-
-                            string[] contrStrings = reader.ReadLine().Split('@');
-
-                            security.ComboLegsDescription = contrStrings[0];
-                            Int32.TryParse(contrStrings[1], out security.ConId);
-                            security.Currency = contrStrings[2];
-                            security.Exchange = contrStrings[3];
-                            security.Expiry = contrStrings[4];
-                            Boolean.TryParse(contrStrings[5], out security.IncludeExpired);
-                            security.LocalSymbol = contrStrings[6];
-                            security.Multiplier = contrStrings[7];
-                            security.PrimaryExch = contrStrings[8];
-                            security.Right = contrStrings[9];
-                            security.SecId = contrStrings[10];
-                            security.SecIdType = contrStrings[11];
-                            security.SecType = contrStrings[12];
-                            Double.TryParse(contrStrings[13], out security.Strike);
-                            security.Symbol = contrStrings[14];
-                            security.TradingClass = contrStrings[15];
-
-                            if (contrStrings.Length > 15 &&
-                                string.IsNullOrEmpty(contrStrings[16]) == false)
-                            {
-                                security.CreateMarketDepthFromTrades = Convert.ToBoolean(contrStrings[16]);
-                            }
-
-                            _secIB.Add(security);
-                        }
-                        catch
-                        {
-                            // ignore
-                        }
+                        _secIB.Add(sec);
                     }
+                }
 
-                    if (_secIB.Count == 0)
-                    {
-                        LoadStartSecurities();
-                    }
+                if (_secIB.Count == 0)
+                {
+                    LoadStartSecurities();
                 }
             }
             catch (Exception)
             {
                 // ignored
             }
+        }
+
+        private string GetSecuritiesWatchPath()
+        {
+            return @"Engine\" + @"IbSecuritiesToWatch.txt";
+        }
+
+        private IbSecuritiesSettingsDto ParseLegacyIbSecurities(string content)
+        {
+            if (string.IsNullOrWhiteSpace(content))
+            {
+                return null;
+            }
+
+            string[] lines = content.Replace("\r", string.Empty).Split('\n');
+            IbSecuritiesSettingsDto settings = new IbSecuritiesSettingsDto
+            {
+                Securities = new List<SecurityIbSettingsItem>()
+            };
+
+            for (int i = 0; i < lines.Length; i++)
+            {
+                SecurityIbSettingsItem item = ParseLegacyIbSecurityLine(lines[i]);
+                if (item != null)
+                {
+                    settings.Securities.Add(item);
+                }
+            }
+
+            return settings;
+        }
+
+        private SecurityIbSettingsItem ParseLegacyIbSecurityLine(string line)
+        {
+            if (string.IsNullOrWhiteSpace(line))
+            {
+                return null;
+            }
+
+            string[] parts = line.Split('@');
+            if (parts.Length < 17)
+            {
+                return null;
+            }
+
+            SecurityIbSettingsItem item = new SecurityIbSettingsItem
+            {
+                ComboLegsDescription = parts[0],
+                Currency = parts[2],
+                Exchange = parts[3],
+                Expiry = parts[4],
+                LocalSymbol = parts[6],
+                Multiplier = parts[7],
+                PrimaryExch = parts[8],
+                Right = parts[9],
+                SecId = parts[10],
+                SecIdType = parts[11],
+                SecType = parts[12],
+                Symbol = parts[14],
+                TradingClass = parts[15],
+                CreateMarketDepthFromTrades = true
+            };
+
+            if (int.TryParse(parts[1], out int conId))
+            {
+                item.ConId = conId;
+            }
+
+            if (bool.TryParse(parts[5], out bool includeExpired))
+            {
+                item.IncludeExpired = includeExpired;
+            }
+
+            if (double.TryParse(parts[13], NumberStyles.Any, CultureInfo.InvariantCulture, out double strike)
+                || double.TryParse(parts[13], NumberStyles.Any, CultureInfo.CurrentCulture, out strike))
+            {
+                item.Strike = strike;
+            }
+
+            if (parts.Length > 16 && string.IsNullOrEmpty(parts[16]) == false)
+            {
+                if (bool.TryParse(parts[16], out bool depthFromTrades))
+                {
+                    item.CreateMarketDepthFromTrades = depthFromTrades;
+                }
+            }
+
+            return item;
+        }
+
+        private SecurityIbSettingsItem ToSettingsItem(SecurityIb sec)
+        {
+            return new SecurityIbSettingsItem
+            {
+                CreateMarketDepthFromTrades = sec.CreateMarketDepthFromTrades,
+                ConId = sec.ConId,
+                Symbol = sec.Symbol,
+                LocalSymbol = sec.LocalSymbol,
+                Currency = sec.Currency,
+                Exchange = sec.Exchange,
+                PrimaryExch = sec.PrimaryExch,
+                Strike = sec.Strike,
+                TradingClass = sec.TradingClass,
+                MinTick = sec.MinTick,
+                Multiplier = sec.Multiplier,
+                Expiry = sec.Expiry,
+                IncludeExpired = sec.IncludeExpired,
+                ComboLegsDescription = sec.ComboLegsDescription,
+                Right = sec.Right,
+                SecId = sec.SecId,
+                SecIdType = sec.SecIdType,
+                SecType = sec.SecType
+            };
+        }
+
+        private SecurityIb ToSecurity(SecurityIbSettingsItem item)
+        {
+            if (item == null)
+            {
+                return null;
+            }
+
+            return new SecurityIb
+            {
+                CreateMarketDepthFromTrades = item.CreateMarketDepthFromTrades,
+                ConId = item.ConId,
+                Symbol = item.Symbol,
+                LocalSymbol = item.LocalSymbol,
+                Currency = item.Currency,
+                Exchange = item.Exchange,
+                PrimaryExch = item.PrimaryExch,
+                Strike = item.Strike,
+                TradingClass = item.TradingClass,
+                MinTick = item.MinTick,
+                Multiplier = item.Multiplier,
+                Expiry = item.Expiry,
+                IncludeExpired = item.IncludeExpired,
+                ComboLegsDescription = item.ComboLegsDescription,
+                Right = item.Right,
+                SecId = item.SecId,
+                SecIdType = item.SecIdType,
+                SecType = item.SecType
+            };
+        }
+
+        private class IbSecuritiesSettingsDto
+        {
+            public List<SecurityIbSettingsItem> Securities { get; set; }
+        }
+
+        private class SecurityIbSettingsItem
+        {
+            public bool CreateMarketDepthFromTrades { get; set; } = true;
+
+            public int ConId { get; set; }
+
+            public string Symbol { get; set; }
+
+            public string LocalSymbol { get; set; }
+
+            public string Currency { get; set; }
+
+            public string Exchange { get; set; }
+
+            public string PrimaryExch { get; set; }
+
+            public double Strike { get; set; }
+
+            public string TradingClass { get; set; }
+
+            public double MinTick { get; set; }
+
+            public string Multiplier { get; set; }
+
+            public string Expiry { get; set; }
+
+            public bool IncludeExpired { get; set; }
+
+            public string ComboLegsDescription { get; set; }
+
+            public string Right { get; set; }
+
+            public string SecId { get; set; }
+
+            public string SecIdType { get; set; }
+
+            public string SecType { get; set; }
         }
 
         private void LoadStartSecurities()

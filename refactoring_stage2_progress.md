@@ -172,3 +172,17 @@
 ### Verification
 
 - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` -> passed 100/100
+
+## 2026-02-16 - Step 2.3 (JSON settings subsystem) - Incremental adoption in InteractiveBrokers securities watchlist
+
+- Migrated `project/OsEngine/Market/Servers/InteractiveBrokers/InteractiveBrokersServer.cs` persistence to `SettingsManager`:
+  - `SaveIbSecurities()` now saves structured JSON (`IbSecuritiesToWatch.txt`)
+  - `LoadIbSecurities()` now loads JSON and falls back to legacy line-based parser
+  - preserved fallback to `LoadStartSecurities()` on missing/empty/invalid persisted content
+- Added tests `project/OsEngine.Tests/InteractiveBrokersSecuritiesPersistenceTests.cs`:
+  - `SaveIbSecurities_ShouldPersistJson_AndLoadRoundTrip`
+  - `LoadIbSecurities_ShouldSupportLegacyLineBasedFormat`
+
+### Verification
+
+- `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` -> passed 102/102
