@@ -782,23 +782,22 @@ namespace OsEngine.Market.Servers.MoexFixFastSpot
         {
             try
             {
-                string dir = Directory.GetCurrentDirectory();
-                dir += "\\Engine\\DataBases\\";
+                string dataBasesDirectoryPath = GetDataBasesDirectoryPath();
 
-                if (Directory.Exists(dir) == false)
+                if (Directory.Exists(dataBasesDirectoryPath) == false)
                 {
-                    Directory.CreateDirectory(dir);
+                    Directory.CreateDirectory(dataBasesDirectoryPath);
                 }
 
-                dir += "MoexFixFastSpotSecurities.db";
+                string securitiesDatabasePath = GetSecuritiesDatabasePath();
 
-                if (File.Exists(dir) == false)
+                if (File.Exists(securitiesDatabasePath) == false)
                 {
                     SendLogMessage("No saved securities in file", LogMessageType.System);
                     return;
                 }
 
-                using (LiteDatabase db = new LiteDatabase(dir))
+                using (LiteDatabase db = new LiteDatabase(securitiesDatabasePath))
                 {
                     ILiteCollection<SecurityToSave> collection = db.GetCollection<SecurityToSave>("securities");
 
@@ -853,17 +852,16 @@ namespace OsEngine.Market.Servers.MoexFixFastSpot
         {
             try
             {
-                string dir = Directory.GetCurrentDirectory();
-                dir += "\\Engine\\DataBases\\";
+                string dataBasesDirectoryPath = GetDataBasesDirectoryPath();
 
-                if (Directory.Exists(dir) == false)
+                if (Directory.Exists(dataBasesDirectoryPath) == false)
                 {
-                    Directory.CreateDirectory(dir);
+                    Directory.CreateDirectory(dataBasesDirectoryPath);
                 }
 
-                dir += "MoexFixFastSpotSecurities.db";
+                string securitiesDatabasePath = GetSecuritiesDatabasePath();
 
-                using (LiteDatabase db = new LiteDatabase(dir))
+                using (LiteDatabase db = new LiteDatabase(securitiesDatabasePath))
                 {
                     ILiteCollection<SecurityToSave> collection = db.GetCollection<SecurityToSave>("securities");
                     collection.DeleteAll();
@@ -890,6 +888,16 @@ namespace OsEngine.Market.Servers.MoexFixFastSpot
             {
                 SendLogMessage(e.ToString(), LogMessageType.Error);
             }
+        }
+
+        private static string GetDataBasesDirectoryPath()
+        {
+            return Path.Combine(Directory.GetCurrentDirectory(), "Engine", "DataBases");
+        }
+
+        private static string GetSecuritiesDatabasePath()
+        {
+            return Path.Combine(GetDataBasesDirectoryPath(), "MoexFixFastSpotSecurities.db");
         }
 
         private void CreateSecurities()

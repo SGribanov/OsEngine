@@ -2241,3 +2241,18 @@
 ### Verification
 
 - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` -> passed 343/343
+
+## 2026-02-16 - Step 2.3 (JSON settings subsystem) - Path consistency cleanup in MoexFixFastSpot securities DB path
+
+- Updated `project/OsEngine/Market/Servers/MoexFixFastSpot/MoexFixFastSpotServer.cs`:
+  - centralized securities LiteDB path construction via helper methods:
+    - `GetDataBasesDirectoryPath()`
+    - `GetSecuritiesDatabasePath()`
+  - replaced duplicated inline path-building in:
+    - `LoadSecuritiesFromFile()`
+    - `SaveSecuritiesToFile()`
+- No behavior changes intended; DB directory create-if-missing and file name remain unchanged.
+
+### Verification
+
+- `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` -> passed 343/343
