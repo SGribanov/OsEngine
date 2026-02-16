@@ -142,21 +142,25 @@ namespace OsEngine.Charts.CandleChart.Indicators
         /// </summary>
         public void Load()
         {
-            if (!File.Exists(@"Engine\" + Name + @".txt"))
+            if (!File.Exists(GetSettingsPath()))
             {
                 return;
             }
             try
             {
+                FractalSettingsDto settings = SettingsManager.Load(
+                    GetSettingsPath(),
+                    defaultValue: null,
+                    legacyLoader: ParseLegacySettings);
 
-                using (StreamReader reader = new StreamReader(@"Engine\" + Name + @".txt"))
+                if (settings == null)
                 {
-                    PaintOn = Convert.ToBoolean(reader.ReadLine());
-                    ColorUp = Color.FromArgb(Convert.ToInt32(reader.ReadLine()));
-                    ColorDown = Color.FromArgb(Convert.ToInt32(reader.ReadLine()));
-
-                    reader.Close();
+                    return;
                 }
+
+                PaintOn = settings.PaintOn;
+                ColorUp = Color.FromArgb(settings.ColorUpArgb);
+                ColorDown = Color.FromArgb(settings.ColorDownArgb);
 
 
             }
@@ -180,13 +184,14 @@ namespace OsEngine.Charts.CandleChart.Indicators
                     return;
                 }
 
-                using (StreamWriter writer = new StreamWriter(@"Engine\" + Name + @".txt", false))
-                {
-                    writer.WriteLine(PaintOn);
-                    writer.WriteLine(ColorUp.ToArgb());
-                    writer.WriteLine(ColorDown.ToArgb());
-                    writer.Close();
-                }
+                SettingsManager.Save(
+                    GetSettingsPath(),
+                    new FractalSettingsDto
+                    {
+                        PaintOn = PaintOn,
+                        ColorUpArgb = ColorUp.ToArgb(),
+                        ColorDownArgb = ColorDown.ToArgb()
+                    });
             }
             catch (Exception)
             {
@@ -201,10 +206,52 @@ namespace OsEngine.Charts.CandleChart.Indicators
         /// </summary>
         public void Delete()
         {
-            if (File.Exists(@"Engine\" + Name + @".txt"))
+            if (File.Exists(GetSettingsPath()))
             {
-                File.Delete(@"Engine\" + Name + @".txt");
+                File.Delete(GetSettingsPath());
             }
+        }
+
+        private string GetSettingsPath()
+        {
+            return @"Engine\" + Name + @".txt";
+        }
+
+        private static FractalSettingsDto ParseLegacySettings(string content)
+        {
+            if (string.IsNullOrWhiteSpace(content))
+            {
+                return null;
+            }
+
+            string normalized = content.Replace("\r", string.Empty);
+            string[] lines = normalized.Split('\n');
+
+            if (lines.Length > 0 && lines[lines.Length - 1] == string.Empty)
+            {
+                Array.Resize(ref lines, lines.Length - 1);
+            }
+
+            if (lines.Length < 3)
+            {
+                return null;
+            }
+
+            return new FractalSettingsDto
+            {
+                PaintOn = Convert.ToBoolean(lines[0]),
+                ColorUpArgb = Convert.ToInt32(lines[1]),
+                ColorDownArgb = Convert.ToInt32(lines[2])
+            };
+        }
+
+        private sealed class FractalSettingsDto
+        {
+            public bool PaintOn { get; set; }
+
+            public int ColorUpArgb { get; set; }
+
+            public int ColorDownArgb { get; set; }
         }
 
         /// <summary>
