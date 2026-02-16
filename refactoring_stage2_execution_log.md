@@ -2131,3 +2131,25 @@
   - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` succeeded (`296/296`).
 - **Commit:** `205b9caa7`
 - **Push:** no (manual push by user)
+
+### Step 2.3 - JSON Settings Subsystem (Incremental Adoption #103)
+
+- **Status:** In Progress (increment completed)
+- **Plan item:** `refactoring_stage2_plan.md` -> Phase 2 / Step 2.3
+- **Changes:**
+  - Migrated Alligator indicator settings persistence to JSON with legacy fallback:
+    - `project/OsEngine/Charts/CandleChart/Indicators/Alligator.cs`
+  - Covered persisted file:
+    - dynamic `Engine\\<Name>.txt` path (`Alligator` indicator)
+  - Preserved legacy compatibility for historical field ordering:
+    - lengths, shifts, colors, `PaintOn`, `TypeCalculationAverage`
+  - Added dedicated persistence tests:
+    - `project/OsEngine.Tests/AlligatorPersistenceTests.cs`
+      - `Save_ShouldPersistJson_AndLoadRoundTrip`
+      - `Load_ShouldSupportLegacyLineBasedFormat`
+  - Updated running progress journal:
+    - `refactoring_stage2_progress.md`
+- **Verification:**
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` succeeded (`298/298`).
+- **Commit:** `fcc2d80c4`
+- **Push:** no (manual push by user)
