@@ -1737,3 +1737,23 @@
   - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` succeeded (`258/258`).
 - **Commit:** `5dd88635c`
 - **Push:** no (manual push by user)
+
+### Step 2.3 - JSON Settings Subsystem (Incremental Adoption #84)
+
+- **Status:** In Progress (increment completed)
+- **Plan item:** `refactoring_stage2_plan.md` -> Phase 2 / Step 2.3
+- **Changes:**
+  - Migrated AccumulationDistribution indicator settings persistence to JSON with legacy fallback:
+    - `project/OsEngine/Charts/CandleChart/Indicators/AccumulationDistribution.cs`
+  - Covered persisted file:
+    - dynamic `Engine\\<Name>.txt` path (`AccumulationDistribution` indicator)
+  - Added dedicated persistence tests:
+    - `project/OsEngine.Tests/AccumulationDistributionPersistenceTests.cs`
+      - `Save_ShouldPersistJson_AndLoadRoundTrip`
+      - `Load_ShouldSupportLegacyLineBasedFormat`
+  - Updated running progress journal:
+    - `refactoring_stage2_progress.md`
+- **Verification:**
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` succeeded (`260/260`).
+- **Commit:** `0dd159cc4`
+- **Push:** no (manual push by user)
