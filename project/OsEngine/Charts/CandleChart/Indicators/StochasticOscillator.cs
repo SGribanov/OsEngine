@@ -183,19 +183,19 @@ namespace OsEngine.Charts.CandleChart.Indicators
                     return;
                 }
 
-                using (StreamWriter writer = new StreamWriter(@"Engine\" + Name + @".txt", false))
-                {
-                    TypeCalculationAverage = MovingAverageTypeCalculation.Simple;
-                    writer.WriteLine(P1);
-                    writer.WriteLine(P2);
-                    writer.WriteLine(P3);
-                    writer.WriteLine(TypeCalculationAverage);
-                    writer.WriteLine();
-                    writer.WriteLine(ColorUp.ToArgb());
-                    writer.WriteLine(ColorDown.ToArgb());
-                    writer.WriteLine(PaintOn);
-                    writer.Close();
-                }
+                TypeCalculationAverage = MovingAverageTypeCalculation.Simple;
+                SettingsManager.Save(
+                    GetSettingsPath(),
+                    new StochasticOscillatorSettingsDto
+                    {
+                        P1 = P1,
+                        P2 = P2,
+                        P3 = P3,
+                        TypeCalculationAverage = TypeCalculationAverage,
+                        ColorUpArgb = ColorUp.ToArgb(),
+                        ColorDownArgb = ColorDown.ToArgb(),
+                        PaintOn = PaintOn
+                    });
             }
             catch (Exception)
             {
@@ -210,27 +210,29 @@ namespace OsEngine.Charts.CandleChart.Indicators
         /// </summary>
         public void Load()
         {
-            if (!File.Exists(@"Engine\" + Name + @".txt"))
+            if (!File.Exists(GetSettingsPath()))
             {
                 return;
             }
             try
             {
+                StochasticOscillatorSettingsDto settings = SettingsManager.Load(
+                    GetSettingsPath(),
+                    defaultValue: null,
+                    legacyLoader: ParseLegacySettings);
 
-                using (StreamReader reader = new StreamReader(@"Engine\" + Name + @".txt"))
+                if (settings == null)
                 {
-                    Enum.TryParse(reader.ReadLine(), true, out TypeCalculationAverage);
-                    P1 = Convert.ToInt32(reader.ReadLine());
-                    P2 = Convert.ToInt32(reader.ReadLine());
-                    P3 = Convert.ToInt32(reader.ReadLine());
-                    ColorUp = Color.FromArgb(Convert.ToInt32(reader.ReadLine()));
-                    ColorDown = Color.FromArgb(Convert.ToInt32(reader.ReadLine()));
-                    PaintOn = Convert.ToBoolean(reader.ReadLine());
-                    reader.ReadLine();
-
-                    reader.Close();
+                    return;
                 }
 
+                TypeCalculationAverage = settings.TypeCalculationAverage;
+                P1 = settings.P1;
+                P2 = settings.P2;
+                P3 = settings.P3;
+                ColorUp = Color.FromArgb(settings.ColorUpArgb);
+                ColorDown = Color.FromArgb(settings.ColorDownArgb);
+                PaintOn = settings.PaintOn;
 
             }
             catch (Exception)
@@ -246,10 +248,100 @@ namespace OsEngine.Charts.CandleChart.Indicators
         /// </summary>
         public void Delete()
         {
-            if (File.Exists(@"Engine\" + Name + @".txt"))
+            if (File.Exists(GetSettingsPath()))
             {
-                File.Delete(@"Engine\" + Name + @".txt");
+                File.Delete(GetSettingsPath());
             }
+        }
+
+        private string GetSettingsPath()
+        {
+            return @"Engine\" + Name + @".txt";
+        }
+
+        private static StochasticOscillatorSettingsDto ParseLegacySettings(string content)
+        {
+            if (string.IsNullOrWhiteSpace(content))
+            {
+                return null;
+            }
+
+            string normalized = content.Replace("\r", string.Empty);
+            string[] lines = normalized.Split('\n');
+
+            if (lines.Length > 0 && lines[lines.Length - 1] == string.Empty)
+            {
+                Array.Resize(ref lines, lines.Length - 1);
+            }
+
+            if (lines.Length < 7)
+            {
+                return null;
+            }
+
+            bool firstTokenIsNumeric = int.TryParse(lines[0], out _);
+
+            if (!firstTokenIsNumeric
+                && Enum.TryParse(lines[0], true, out MovingAverageTypeCalculation typeFromFirst))
+            {
+                return new StochasticOscillatorSettingsDto
+                {
+                    TypeCalculationAverage = typeFromFirst,
+                    P1 = Convert.ToInt32(lines[1]),
+                    P2 = Convert.ToInt32(lines[2]),
+                    P3 = Convert.ToInt32(lines[3]),
+                    ColorUpArgb = Convert.ToInt32(lines[4]),
+                    ColorDownArgb = Convert.ToInt32(lines[5]),
+                    PaintOn = Convert.ToBoolean(lines[6])
+                };
+            }
+
+            if (lines.Length < 7)
+            {
+                return null;
+            }
+
+            MovingAverageTypeCalculation typeFromFourth = MovingAverageTypeCalculation.Simple;
+            Enum.TryParse(lines[3], true, out typeFromFourth);
+
+            int colorIndex = 4;
+            if (lines.Length > 4 && string.IsNullOrWhiteSpace(lines[4]))
+            {
+                colorIndex = 5;
+            }
+
+            if (lines.Length <= colorIndex + 2)
+            {
+                return null;
+            }
+
+            return new StochasticOscillatorSettingsDto
+            {
+                P1 = Convert.ToInt32(lines[0]),
+                P2 = Convert.ToInt32(lines[1]),
+                P3 = Convert.ToInt32(lines[2]),
+                TypeCalculationAverage = typeFromFourth,
+                ColorUpArgb = Convert.ToInt32(lines[colorIndex]),
+                ColorDownArgb = Convert.ToInt32(lines[colorIndex + 1]),
+                PaintOn = Convert.ToBoolean(lines[colorIndex + 2])
+            };
+        }
+
+        private sealed class StochasticOscillatorSettingsDto
+        {
+            public int P1 { get; set; }
+
+            public int P2 { get; set; }
+
+            public int P3 { get; set; }
+
+            public MovingAverageTypeCalculation TypeCalculationAverage { get; set; }
+
+            public int ColorUpArgb { get; set; }
+
+            public int ColorDownArgb { get; set; }
+
+            public bool PaintOn { get; set; }
         }
 
         /// <summary>

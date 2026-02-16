@@ -1718,3 +1718,19 @@
 ### Verification
 
 - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` -> passed 308/308
+
+## 2026-02-16 - Step 2.3 (JSON settings subsystem) - Incremental adoption in StochasticOscillator indicator settings
+
+- Migrated `project/OsEngine/Charts/CandleChart/Indicators/StochasticOscillator.cs` (`Engine\\<Name>.txt`) persistence to `SettingsManager`:
+  - `Save()` now writes JSON DTO with periods, average type, colors, and paint flag
+  - kept existing save-time behavior that normalizes `TypeCalculationAverage` to `Simple`
+  - `Load()` now reads JSON and falls back to legacy line-based parser
+  - legacy parser supports both historical layouts (`type-first` and save-order format with optional blank line)
+- Added tests `project/OsEngine.Tests/StochasticOscillatorPersistenceTests.cs`:
+  - `Save_ShouldPersistJson_AndLoadRoundTrip`
+  - `Load_ShouldSupportLegacyLineBasedFormat_WithSaveOrdering`
+  - tests use file backup/restore around indicator settings path
+
+### Verification
+
+- `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` -> passed 310/310
