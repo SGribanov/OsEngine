@@ -172,9 +172,9 @@ namespace OsEngine.OsTrader.Panels.Tab
 
                 try
                 {
-                    if (File.Exists(@"Engine\" + TabName + @"PolygonsNamesToLoad.txt"))
+                    if (File.Exists(GetPolygonsNamesToLoadPath()))
                     {
-                        File.Delete(@"Engine\" + TabName + @"PolygonsNamesToLoad.txt");
+                        File.Delete(GetPolygonsNamesToLoadPath());
                     }
                 }
                 catch
@@ -568,16 +568,24 @@ namespace OsEngine.OsTrader.Panels.Tab
         {
             try
             {
-                using (StreamWriter writer = new StreamWriter(@"Engine\" + TabName + @"PolygonsNamesToLoad.txt", false))
+                List<string> sequenceNames = new List<string>();
+                for (int i = 0; i < Sequences.Count; i++)
                 {
-
-                    for (int i = 0; i < Sequences.Count; i++)
+                    if (Sequences[i] == null
+                        || string.IsNullOrWhiteSpace(Sequences[i].Name))
                     {
-                        writer.WriteLine(Sequences[i].Name);
+                        continue;
                     }
 
-                    writer.Close();
+                    sequenceNames.Add(Sequences[i].Name);
                 }
+
+                SettingsManager.Save(
+                    GetPolygonsNamesToLoadPath(),
+                    new BotTabPolygonNamesToLoadSettingsDto
+                    {
+                        SequenceNames = sequenceNames
+                    });
             }
             catch (Exception)
             {
@@ -590,32 +598,68 @@ namespace OsEngine.OsTrader.Panels.Tab
         /// </summary>
         private void LoadSequences()
         {
-            if (!File.Exists(@"Engine\" + TabName + @"PolygonsNamesToLoad.txt"))
+            if (!File.Exists(GetPolygonsNamesToLoadPath()))
             {
                 return;
             }
             try
             {
-                using (StreamReader reader = new StreamReader(@"Engine\" + TabName + @"PolygonsNamesToLoad.txt"))
-                {
-                    while (reader.EndOfStream == false)
-                    {
-                        string pairName = reader.ReadLine();
-                        PolygonToTrade newPair = new PolygonToTrade(pairName, StartProgram);
-                        newPair.ProfitBySequenceChangeEvent += Pair_ProfitBySequenceChangeEvent;
-                        newPair.ProfitGreaterThanSignalValueEvent += Pair_ProfitGreaterThanSignalValueEvent;
-                        newPair.LogMessageEvent += Pair_LogMessageEvent;
+                BotTabPolygonNamesToLoadSettingsDto settings = SettingsManager.Load(
+                    GetPolygonsNamesToLoadPath(),
+                    defaultValue: null,
+                    legacyLoader: ParseLegacyPolygonNamesToLoadSettings);
 
-                        Sequences.Add(newPair);
+                if (settings == null
+                    || settings.SequenceNames == null)
+                {
+                    return;
+                }
+
+                for (int i = 0; i < settings.SequenceNames.Count; i++)
+                {
+                    string pairName = settings.SequenceNames[i];
+                    if (string.IsNullOrWhiteSpace(pairName))
+                    {
+                        continue;
                     }
 
-                    reader.Close();
+                    PolygonToTrade newPair = new PolygonToTrade(pairName, StartProgram);
+                    newPair.ProfitBySequenceChangeEvent += Pair_ProfitBySequenceChangeEvent;
+                    newPair.ProfitGreaterThanSignalValueEvent += Pair_ProfitGreaterThanSignalValueEvent;
+                    newPair.LogMessageEvent += Pair_LogMessageEvent;
+
+                    Sequences.Add(newPair);
                 }
             }
             catch (Exception error)
             {
                 SendNewLogMessage(error.ToString(), LogMessageType.Error);
             }
+        }
+
+        private string GetPolygonsNamesToLoadPath()
+        {
+            return @"Engine\" + TabName + @"PolygonsNamesToLoad.txt";
+        }
+
+        private static BotTabPolygonNamesToLoadSettingsDto ParseLegacyPolygonNamesToLoadSettings(string content)
+        {
+            if (string.IsNullOrWhiteSpace(content))
+            {
+                return null;
+            }
+
+            string[] lines = content.Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries);
+
+            return new BotTabPolygonNamesToLoadSettingsDto
+            {
+                SequenceNames = new List<string>(lines)
+            };
+        }
+
+        private sealed class BotTabPolygonNamesToLoadSettingsDto
+        {
+            public List<string> SequenceNames { get; set; }
         }
 
         /// <summary>

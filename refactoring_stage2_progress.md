@@ -1906,3 +1906,19 @@
 ### Verification
 
 - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` -> passed 322/322
+
+## 2026-02-16 - Step 2.3 (JSON settings subsystem) - BotTabPolygon sequence names migrated to JSON settings with legacy compatibility
+
+- Updated `project/OsEngine/OsTrader/Panels/Tab/BotTabPolygon.cs`:
+  - migrated sequence names persistence from line-based file IO to `SettingsManager`
+  - `SaveSequencesNames()` now saves DTO JSON (`BotTabPolygonNamesToLoadSettingsDto`)
+  - `LoadSequences()` now loads via `SettingsManager.Load(..., legacyLoader: ParseLegacyPolygonNamesToLoadSettings)`
+  - added path helper `GetPolygonsNamesToLoadPath()` and applied it in save/load/delete sites
+  - added legacy parser `ParseLegacyPolygonNamesToLoadSettings(string content)` for old line-based format
+- Added tests in `project/OsEngine.Tests/BotTabPolygonNamesPersistenceTests.cs`:
+  - verifies JSON persistence from `SaveSequencesNames()`
+  - verifies legacy line-based parser behavior
+
+### Verification
+
+- `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` -> passed 324/324
