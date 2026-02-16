@@ -427,3 +427,23 @@
   - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` succeeded (`126/126`).
 - **Commit:** `2e53efd1e`
 - **Push:** no (manual push by user)
+
+### Step 2.3 - JSON Settings Subsystem (Incremental Adoption #19)
+
+- **Status:** In Progress (increment completed)
+- **Plan item:** `refactoring_stage2_plan.md` -> Phase 2 / Step 2.3
+- **Changes:**
+  - Migrated chart alert settings persistence to JSON with legacy fallback:
+    - `project/OsEngine/Alerts/AlertToChart.cs`
+  - Covered persisted file:
+    - `Engine\\<Name>Alert.txt`
+  - Added dedicated persistence tests:
+    - `project/OsEngine.Tests/AlertToChartPersistenceTests.cs`
+      - `Save_ShouldPersistJson_AndLoadRoundTrip`
+      - `Load_ShouldSupportLegacyLineBasedFormat`
+  - Updated running progress journal:
+    - `refactoring_stage2_progress.md`
+- **Verification:**
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` succeeded (`128/128`).
+- **Commit:** `a2562fca7`
+- **Push:** no (manual push by user)
