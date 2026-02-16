@@ -2256,3 +2256,17 @@
 ### Verification
 
 - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` -> passed 343/343
+
+## 2026-02-16 - Step 2.3 (JSON settings subsystem) - Path consistency cleanup in ChartMasterColorKeeper storage paths
+
+- Updated `project/OsEngine/Charts/ColorKeeper/ChartMasterColorKeeper.cs`:
+  - centralized settings directory path via:
+    - `GetSettingsDirectoryPath()`
+  - updated:
+    - `GetSettingsPath()` to build path from directory helper
+    - `EnsureDirectoryExists()` to use same directory helper
+- No behavior changes intended; settings are still stored in `Engine\\Color`.
+
+### Verification
+
+- `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` -> passed 343/343

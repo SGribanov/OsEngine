@@ -267,7 +267,12 @@ namespace OsEngine.Charts.ColorKeeper
 
         private string GetSettingsPath()
         {
-            return @"Engine\Color\" + _name + "Color.txt";
+            return Path.Combine(GetSettingsDirectoryPath(), _name + "Color.txt");
+        }
+
+        private static string GetSettingsDirectoryPath()
+        {
+            return @"Engine\Color";
         }
 
         private static ChartColorKeeperSettingsDto ParseLegacySettings(string content)
@@ -314,9 +319,10 @@ namespace OsEngine.Charts.ColorKeeper
 
         private static void EnsureDirectoryExists()
         {
-            if (!Directory.Exists(@"Engine\Color"))
+            string settingsDirectoryPath = GetSettingsDirectoryPath();
+            if (!Directory.Exists(settingsDirectoryPath))
             {
-                Directory.CreateDirectory(@"Engine\Color");
+                Directory.CreateDirectory(settingsDirectoryPath);
             }
         }
 
