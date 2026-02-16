@@ -1853,3 +1853,14 @@
 ### Verification
 
 - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` -> passed 318/318
+
+## 2026-02-16 - Step 2.3 (JSON settings subsystem) - Path consistency cleanup in BotManualControl
+
+- Updated `project/OsEngine/OsTrader/Panels/Tab/Internal/BotManualControl.cs`:
+  - `Delete()` now uses `GetSettingsPath()` instead of rebuilding `@"Engine\\<name>StrategSettings.txt"` inline
+  - preserved existing readonly-file handling before deletion
+- No behavior changes intended; cleanup keeps persistence path usage centralized.
+
+### Verification
+
+- `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` -> passed 318/318

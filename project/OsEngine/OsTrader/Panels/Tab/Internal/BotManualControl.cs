@@ -361,10 +361,10 @@ namespace OsEngine.OsTrader.Panels.Tab.Internal
         {
             try
             {
-                if (File.Exists(@"Engine\" + _name + @"StrategSettings.txt"))
-                {
-                    string path = @"Engine\" + _name + @"StrategSettings.txt";
+                string path = GetSettingsPath();
 
+                if (File.Exists(path))
+                {
                     FileInfo file = new FileInfo(path);
                     if(file.IsReadOnly)
                     {
