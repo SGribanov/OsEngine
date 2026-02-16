@@ -970,17 +970,19 @@ namespace OsEngine.OsTrader.SystemAnalyze
         {
             try
             {
-                if (!File.Exists(@"Engine\SystemStress\EcqMemorySettings.txt"))
+                EcqUsageSettingsDto settings = OsEngine.Entity.SettingsManager.Load(
+                    GetSettingsPath(),
+                    defaultValue: null,
+                    legacyLoader: ParseLegacySettings);
+
+                if (settings == null)
                 {
                     return;
                 }
 
-                using (StreamReader reader = new StreamReader(@"Engine\SystemStress\EcqMemorySettings.txt"))
-                {
-                    _ecqCollectDataIsOn = Convert.ToBoolean(reader.ReadLine());
-                    Enum.TryParse(reader.ReadLine(), out _ecqPeriodSavePoint);
-                    _ecqPointsMax = Convert.ToInt32(reader.ReadLine());
-                }
+                _ecqCollectDataIsOn = settings.EcqCollectDataIsOn;
+                _ecqPeriodSavePoint = settings.EcqPeriodSavePoint;
+                _ecqPointsMax = settings.EcqPointsMax;
             }
             catch (Exception)
             {
@@ -997,17 +999,74 @@ namespace OsEngine.OsTrader.SystemAnalyze
                     Directory.CreateDirectory("Engine\\SystemStress");
                 }
 
-                using (StreamWriter writer = new StreamWriter(@"Engine\SystemStress\EcqMemorySettings.txt", false))
-                {
-                    writer.WriteLine(_ecqCollectDataIsOn);
-                    writer.WriteLine(_ecqPeriodSavePoint);
-                    writer.WriteLine(_ecqPointsMax);
-                }
+                OsEngine.Entity.SettingsManager.Save(
+                    GetSettingsPath(),
+                    new EcqUsageSettingsDto
+                    {
+                        EcqCollectDataIsOn = _ecqCollectDataIsOn,
+                        EcqPeriodSavePoint = _ecqPeriodSavePoint,
+                        EcqPointsMax = _ecqPointsMax
+                    });
             }
             catch (Exception)
             {
                 // ignore
             }
+        }
+
+        private static string GetSettingsPath()
+        {
+            return @"Engine\SystemStress\EcqMemorySettings.txt";
+        }
+
+        private static EcqUsageSettingsDto ParseLegacySettings(string content)
+        {
+            if (string.IsNullOrWhiteSpace(content))
+            {
+                return null;
+            }
+
+            string normalized = content.Replace("\r", string.Empty);
+            string[] lines = normalized.Split('\n');
+
+            if (lines.Length > 0 && lines[lines.Length - 1] == string.Empty)
+            {
+                Array.Resize(ref lines, lines.Length - 1);
+            }
+
+            bool collectDataIsOn = false;
+            if (lines.Length > 0)
+            {
+                bool.TryParse(lines[0], out collectDataIsOn);
+            }
+
+            SavePointPeriod period = SavePointPeriod.OneSecond;
+            if (lines.Length > 1)
+            {
+                Enum.TryParse(lines[1], out period);
+            }
+
+            int pointsMax = 100;
+            if (lines.Length > 2 && int.TryParse(lines[2], out int parsedPointsMax))
+            {
+                pointsMax = parsedPointsMax;
+            }
+
+            return new EcqUsageSettingsDto
+            {
+                EcqCollectDataIsOn = collectDataIsOn,
+                EcqPeriodSavePoint = period,
+                EcqPointsMax = pointsMax
+            };
+        }
+
+        private sealed class EcqUsageSettingsDto
+        {
+            public bool EcqCollectDataIsOn { get; set; }
+
+            public SavePointPeriod EcqPeriodSavePoint { get; set; }
+
+            public int EcqPointsMax { get; set; }
         }
 
         public bool EcqCollectDataIsOn
