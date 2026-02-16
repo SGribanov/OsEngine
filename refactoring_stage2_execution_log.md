@@ -2862,3 +2862,22 @@
   - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` succeeded (`343/343`).
 - **Commit:** `a3b673c28`
 - **Push:** no (manual push by user)
+
+### Step 2.3 - JSON Settings Subsystem (Incremental Adoption #139)
+
+- **Status:** In Progress (increment completed)
+- **Plan item:** `refactoring_stage2_plan.md` -> Phase 2 / Step 2.3
+- **Changes:**
+  - Path consistency cleanup in:
+    - `project/OsEngine/OsOptimizer/OptEntity/OptimizerSettings.cs`
+  - Centralized optimizer file paths via helper methods:
+    - `GetClearingsPath()`
+    - `GetNonTradePeriodsPath()`
+    - `GetSettingsPath()`
+  - Replaced remaining inline optimizer storage path literals in save/load methods.
+  - Updated running progress journal:
+    - `refactoring_stage2_progress.md`
+- **Verification:**
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` succeeded (`343/343`).
+- **Commit:** `9a14ce401`
+- **Push:** no (manual push by user)
