@@ -1074,3 +1074,23 @@
   - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` succeeded (`192/192`).
 - **Commit:** `f4e098eee`
 - **Push:** no (manual push by user)
+
+### Step 2.3 - JSON Settings Subsystem (Incremental Adoption #51)
+
+- **Status:** In Progress (increment completed)
+- **Plan item:** `refactoring_stage2_plan.md` -> Phase 2 / Step 2.3
+- **Changes:**
+  - Migrated auto-follow portfolio copier settings persistence to JSON with legacy fallback:
+    - `project/OsEngine/Market/AutoFollow/CopyTrader.cs` (`PortfolioToCopy`)
+  - Covered persisted file:
+    - dynamic `Engine\\CopyTrader\\<Name>.txt` path
+  - Added dedicated persistence tests:
+    - `project/OsEngine.Tests/PortfolioToCopySettingsPersistenceTests.cs`
+      - `Save_ShouldPersistJson_AndLoadRoundTrip`
+      - `Load_ShouldSupportLegacyLineBasedFormat`
+  - Updated running progress journal:
+    - `refactoring_stage2_progress.md`
+- **Verification:**
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` succeeded (`194/194`).
+- **Commit:** `423316ec7`
+- **Push:** no (manual push by user)
