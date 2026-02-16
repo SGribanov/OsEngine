@@ -1261,3 +1261,18 @@
 ### Verification
 
 - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` -> passed 248/248
+
+## 2026-02-16 - Step 2.3 (JSON settings subsystem) - Incremental adoption in Momentum indicator settings
+
+- Migrated `project/OsEngine/Charts/CandleChart/Indicators/Momentum.cs` (`Engine\\<Name>.txt`) persistence to `SettingsManager`:
+  - `Save()` now writes JSON DTO with `Nperiod`, `TypePoint`, `ColorBase`, and `PaintOn`
+  - `Load()` now reads JSON and falls back to legacy line-based parser
+  - preserved compatibility with historical legacy format that can include an extra ignored line
+- Added tests `project/OsEngine.Tests/MomentumPersistenceTests.cs`:
+  - `Save_ShouldPersistJson_AndLoadRoundTrip`
+  - `Load_ShouldSupportLegacyLineBasedFormat`
+  - tests use file backup/restore around indicator settings path
+
+### Verification
+
+- `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` -> passed 250/250
