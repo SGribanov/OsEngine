@@ -2219,3 +2219,25 @@
   - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` succeeded (`304/304`).
 - **Commit:** `a901de033`
 - **Push:** no (manual push by user)
+
+### Step 2.3 - JSON Settings Subsystem (Incremental Adoption #107)
+
+- **Status:** In Progress (increment completed)
+- **Plan item:** `refactoring_stage2_plan.md` -> Phase 2 / Step 2.3
+- **Changes:**
+  - Migrated Ichimoku indicator settings persistence to JSON with legacy fallback:
+    - `project/OsEngine/Charts/CandleChart/Indicators/Ishimoku.cs`
+  - Covered persisted file:
+    - dynamic `Engine\\<Name>.txt` path (`Ichimoku` indicator)
+  - Preserved legacy compatibility where optional `LengthChinkou` may be absent:
+    - fallback uses `LengthSdvig`
+  - Added dedicated persistence tests:
+    - `project/OsEngine.Tests/IchimokuPersistenceTests.cs`
+      - `Save_ShouldPersistJson_AndLoadRoundTrip`
+      - `Load_ShouldSupportLegacyLineBasedFormat_WithOptionalLengthChinkouMissing`
+  - Updated running progress journal:
+    - `refactoring_stage2_progress.md`
+- **Verification:**
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` succeeded (`306/306`).
+- **Commit:** `a00527e37`
+- **Push:** no (manual push by user)
