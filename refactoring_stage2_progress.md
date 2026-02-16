@@ -1534,3 +1534,18 @@
 ### Verification
 
 - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` -> passed 284/284
+
+## 2026-02-16 - Step 2.3 (JSON settings subsystem) - Incremental adoption in Trix indicator settings
+
+- Migrated `project/OsEngine/Charts/CandleChart/Indicators/Trix.cs` (`Engine\\<Name>.txt`) persistence to `SettingsManager`:
+  - `Save()` now writes JSON DTO with period, point type, average type, color, and paint settings
+  - `Load()` now reads JSON and falls back to legacy line-based parser
+  - preserved compatibility with historical legacy format that can include an extra ignored line
+- Added tests `project/OsEngine.Tests/TrixPersistenceTests.cs`:
+  - `Save_ShouldPersistJson_AndLoadRoundTrip`
+  - `Load_ShouldSupportLegacyLineBasedFormat`
+  - tests use file backup/restore around indicator settings path
+
+### Verification
+
+- `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` -> passed 286/286

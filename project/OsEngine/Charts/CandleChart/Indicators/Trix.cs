@@ -166,15 +166,16 @@ namespace OsEngine.Charts.CandleChart.Indicators
                     return;
                 }
 
-                using (StreamWriter writer = new StreamWriter(@"Engine\" + Name + @".txt", false))
-                {
-                    writer.WriteLine(Period);
-                    writer.WriteLine(TypePoint);
-                    writer.WriteLine(TypeCalculationAverage);
-                    writer.WriteLine(ColorBase.ToArgb());
-                    writer.WriteLine(PaintOn);
-                    writer.Close();
-                }
+                SettingsManager.Save(
+                    GetSettingsPath(),
+                    new TrixSettingsDto
+                    {
+                        Period = Period,
+                        TypePoint = TypePoint,
+                        TypeCalculationAverage = TypeCalculationAverage,
+                        ColorArgb = ColorBase.ToArgb(),
+                        PaintOn = PaintOn
+                    });
             }
             catch (Exception)
             {
@@ -189,25 +190,27 @@ namespace OsEngine.Charts.CandleChart.Indicators
         /// </summary>
         public void Load()
         {
-            if (!File.Exists(@"Engine\" + Name + @".txt"))
+            if (!File.Exists(GetSettingsPath()))
             {
                 return;
             }
             try
             {
+                TrixSettingsDto settings = SettingsManager.Load(
+                    GetSettingsPath(),
+                    defaultValue: null,
+                    legacyLoader: ParseLegacySettings);
 
-                using (StreamReader reader = new StreamReader(@"Engine\" + Name + @".txt"))
+                if (settings == null)
                 {
-                    Period = Convert.ToInt32(reader.ReadLine());
-                    Enum.TryParse(reader.ReadLine(), true, out TypePoint);
-                    Enum.TryParse(reader.ReadLine(), true, out TypeCalculationAverage);
-                    ColorBase = Color.FromArgb(Convert.ToInt32(reader.ReadLine()));
-                    PaintOn = Convert.ToBoolean(reader.ReadLine());
-                    reader.ReadLine();
-
-                    reader.Close();
+                    return;
                 }
 
+                Period = settings.Period;
+                TypePoint = settings.TypePoint;
+                TypeCalculationAverage = settings.TypeCalculationAverage;
+                ColorBase = Color.FromArgb(settings.ColorArgb);
+                PaintOn = settings.PaintOn;
 
             }
             catch (Exception)
@@ -223,10 +226,64 @@ namespace OsEngine.Charts.CandleChart.Indicators
         /// </summary>
         public void Delete()
         {
-            if (File.Exists(@"Engine\" + Name + @".txt"))
+            if (File.Exists(GetSettingsPath()))
             {
-                File.Delete(@"Engine\" + Name + @".txt");
+                File.Delete(GetSettingsPath());
             }
+        }
+
+        private string GetSettingsPath()
+        {
+            return @"Engine\" + Name + @".txt";
+        }
+
+        private static TrixSettingsDto ParseLegacySettings(string content)
+        {
+            if (string.IsNullOrWhiteSpace(content))
+            {
+                return null;
+            }
+
+            string normalized = content.Replace("\r", string.Empty);
+            string[] lines = normalized.Split('\n');
+
+            if (lines.Length > 0 && lines[lines.Length - 1] == string.Empty)
+            {
+                Array.Resize(ref lines, lines.Length - 1);
+            }
+
+            if (lines.Length < 5)
+            {
+                return null;
+            }
+
+            PriceTypePoints typePoint = PriceTypePoints.Close;
+            Enum.TryParse(lines[1], true, out typePoint);
+
+            MovingAverageTypeCalculation typeCalculationAverage = MovingAverageTypeCalculation.Exponential;
+            Enum.TryParse(lines[2], true, out typeCalculationAverage);
+
+            return new TrixSettingsDto
+            {
+                Period = Convert.ToInt32(lines[0]),
+                TypePoint = typePoint,
+                TypeCalculationAverage = typeCalculationAverage,
+                ColorArgb = Convert.ToInt32(lines[3]),
+                PaintOn = Convert.ToBoolean(lines[4])
+            };
+        }
+
+        private sealed class TrixSettingsDto
+        {
+            public int Period { get; set; }
+
+            public PriceTypePoints TypePoint { get; set; }
+
+            public MovingAverageTypeCalculation TypeCalculationAverage { get; set; }
+
+            public int ColorArgb { get; set; }
+
+            public bool PaintOn { get; set; }
         }
 
         /// <summary>
