@@ -61,7 +61,12 @@ namespace OsEngine.Entity
 
         private void Load()
         {
-            if (!File.Exists(@"Engine\" + _name + @"TimeFrameBuilder.txt"))
+            TimeFrameBuilderSettingsDto settings = SettingsManager.Load(
+                GetSettingsPath(),
+                defaultValue: null,
+                legacyLoader: ParseLegacySettings);
+
+            if (settings == null)
             {
                 CandleSeriesRealization = CandleFactory.CreateCandleSeriesRealization("Simple");
                 CandleSeriesRealization.Init(_startProgram);
@@ -72,37 +77,24 @@ namespace OsEngine.Entity
             }
             try
             {
-                using (StreamReader reader = new StreamReader(@"Engine\" + _name + @"TimeFrameBuilder.txt"))
-                {
+                _saveTradesInCandles = settings.SaveTradesInCandles;
+                _candleCreateType = settings.CandleCreateType;
 
-                    TimeFrame frame;
-                    Enum.TryParse(reader.ReadLine(), out frame);
-                    
-                    _saveTradesInCandles = Convert.ToBoolean(reader.ReadLine());
-                    Enum.TryParse(reader.ReadLine(), out _candleCreateType);
+                string seriesName = string.IsNullOrWhiteSpace(settings.SeriesName)
+                    ? "Simple"
+                    : settings.SeriesName;
+                CandleSeriesRealization = CandleFactory.CreateCandleSeriesRealization(seriesName);
+                CandleSeriesRealization.Init(_startProgram);
+                CandleSeriesRealization.SetSaveString(settings.SeriesSaveString);
+                CandleSeriesRealization.OnStateChange(CandleSeriesState.ParametersChange);
+                TimeFrame = settings.TimeFrame;
 
-                    string seriesName = reader.ReadLine();
-                    CandleSeriesRealization = CandleFactory.CreateCandleSeriesRealization(seriesName);
-                    CandleSeriesRealization.Init(_startProgram);
-                    CandleSeriesRealization.SetSaveString(reader.ReadLine());
-                    CandleSeriesRealization.OnStateChange(CandleSeriesState.ParametersChange);
-                    TimeFrame = frame;
+                CandleSeriesRealization.ParametersChangeByUser += CandleSeriesRealization_ParametersChangeByUser;
+                CandleSeriesRealization.CandleUpdateEvent += CandleSeriesRealization_CandleUpdateEvent;
+                CandleSeriesRealization.CandleFinishedEvent += CandleSeriesRealization_CandleFinishedEvent;
 
-                    CandleSeriesRealization.ParametersChangeByUser += CandleSeriesRealization_ParametersChangeByUser;
-                    CandleSeriesRealization.CandleUpdateEvent += CandleSeriesRealization_CandleUpdateEvent;
-                    CandleSeriesRealization.CandleFinishedEvent += CandleSeriesRealization_CandleFinishedEvent;
-
-                    if(reader.EndOfStream == false)
-                    {
-                        _marketDepthBuildMaxSpreadIsOn = Convert.ToBoolean(reader.ReadLine());
-                    }
-                    if (reader.EndOfStream == false)
-                    {
-                        _marketDepthBuildMaxSpread = reader.ReadLine().ToDecimal();
-                    }
-
-                    reader.Close();
-                }
+                _marketDepthBuildMaxSpreadIsOn = settings.MarketDepthBuildMaxSpreadIsOn;
+                _marketDepthBuildMaxSpread = settings.MarketDepthBuildMaxSpread;
             }
             catch
             {
@@ -134,24 +126,97 @@ namespace OsEngine.Entity
             }
             try
             {
-                using (StreamWriter writer = new StreamWriter(@"Engine\" + _name + @"TimeFrameBuilder.txt", false))
-                {
-                    writer.WriteLine(TimeFrame);
-                    writer.WriteLine(_saveTradesInCandles);
-                    writer.WriteLine(_candleCreateType);
-                    writer.WriteLine(CandleSeriesRealization.GetType().Name);
-                    writer.WriteLine(CandleSeriesRealization.GetSaveString());
-
-                    writer.WriteLine(_marketDepthBuildMaxSpreadIsOn);
-                    writer.WriteLine(_marketDepthBuildMaxSpread);
-
-                    writer.Close();
-                }
+                SettingsManager.Save(
+                    GetSettingsPath(),
+                    new TimeFrameBuilderSettingsDto
+                    {
+                        TimeFrame = TimeFrame,
+                        SaveTradesInCandles = _saveTradesInCandles,
+                        CandleCreateType = _candleCreateType,
+                        SeriesName = CandleSeriesRealization.GetType().Name,
+                        SeriesSaveString = CandleSeriesRealization.GetSaveString(),
+                        MarketDepthBuildMaxSpreadIsOn = _marketDepthBuildMaxSpreadIsOn,
+                        MarketDepthBuildMaxSpread = _marketDepthBuildMaxSpread
+                    });
             }
             catch
             {
                 // ignore
             }
+        }
+
+        private string GetSettingsPath()
+        {
+            return @"Engine\" + _name + @"TimeFrameBuilder.txt";
+        }
+
+        private static TimeFrameBuilderSettingsDto ParseLegacySettings(string content)
+        {
+            if (string.IsNullOrWhiteSpace(content))
+            {
+                return null;
+            }
+
+            string normalized = content.Replace("\r", string.Empty);
+            string[] lines = normalized.Split('\n');
+
+            if (lines.Length > 0 && lines[lines.Length - 1] == string.Empty)
+            {
+                Array.Resize(ref lines, lines.Length - 1);
+            }
+
+            TimeFrame frame = TimeFrame.Min1;
+            if (lines.Length > 0)
+            {
+                Enum.TryParse(lines[0], out frame);
+            }
+
+            CandleMarketDataType createType = CandleMarketDataType.Tick;
+            if (lines.Length > 2)
+            {
+                Enum.TryParse(lines[2], out createType);
+            }
+
+            bool marketDepthBuildMaxSpreadIsOn = false;
+            if (lines.Length > 5)
+            {
+                bool.TryParse(lines[5], out marketDepthBuildMaxSpreadIsOn);
+            }
+
+            decimal marketDepthBuildMaxSpread = 0.2m;
+            if (lines.Length > 6)
+            {
+                marketDepthBuildMaxSpread = lines[6].ToDecimal();
+            }
+
+            return new TimeFrameBuilderSettingsDto
+            {
+                TimeFrame = frame,
+                SaveTradesInCandles = lines.Length > 1
+                    && lines[1].Equals("true", StringComparison.OrdinalIgnoreCase),
+                CandleCreateType = createType,
+                SeriesName = lines.Length > 3 ? lines[3] : "Simple",
+                SeriesSaveString = lines.Length > 4 ? lines[4] : string.Empty,
+                MarketDepthBuildMaxSpreadIsOn = marketDepthBuildMaxSpreadIsOn,
+                MarketDepthBuildMaxSpread = marketDepthBuildMaxSpread
+            };
+        }
+
+        private sealed class TimeFrameBuilderSettingsDto
+        {
+            public TimeFrame TimeFrame { get; set; }
+
+            public bool SaveTradesInCandles { get; set; }
+
+            public CandleMarketDataType CandleCreateType { get; set; }
+
+            public string SeriesName { get; set; }
+
+            public string SeriesSaveString { get; set; }
+
+            public bool MarketDepthBuildMaxSpreadIsOn { get; set; }
+
+            public decimal MarketDepthBuildMaxSpread { get; set; }
         }
 
         private bool _canSave;

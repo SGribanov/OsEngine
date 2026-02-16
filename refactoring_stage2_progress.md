@@ -271,3 +271,17 @@
 ### Verification
 
 - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` -> passed 114/114
+
+## 2026-02-16 - Step 2.3 (JSON settings subsystem) - Incremental adoption in TimeFrameBuilder settings
+
+- Migrated `project/OsEngine/Candles/TimeFrameBuilder.cs` persistence to `SettingsManager`:
+  - `Save()` now writes JSON into `Engine\\<name>TimeFrameBuilder.txt`
+  - `Load()` now reads JSON and falls back to legacy line-based parser
+  - legacy parser keeps compatibility with optional trailing spread settings
+- Added tests `project/OsEngine.Tests/TimeFrameBuilderPersistenceTests.cs`:
+  - `Save_ShouldPersistJson_AndLoadRoundTrip`
+  - `Load_ShouldSupportLegacyLineBasedFormat`
+
+### Verification
+
+- `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` -> passed 116/116
