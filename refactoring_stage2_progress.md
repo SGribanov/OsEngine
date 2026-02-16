@@ -1981,3 +1981,20 @@
 ### Verification
 
 - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` -> passed 330/330
+
+## 2026-02-16 - Step 2.3 (JSON settings subsystem) - ChartCandleMaster settings storage migrated to JSON wrapper with legacy compatibility
+
+- Updated `project/OsEngine/Charts/CandleChart/ChartCandleMaster.cs`:
+  - migrated chart master settings file read/write wrapper from direct line-based IO to `SettingsManager`
+  - preserved existing indicator reconstruction logic; now it consumes loaded `Lines` from DTO
+  - `Save()` now persists DTO JSON (`ChartCandleMasterSettingsDto`) containing ordered settings lines
+  - `Load()` now uses `SettingsManager.Load(..., legacyLoader: ParseLegacySettings)`
+  - centralized path usage via `GetSettingsPath()` and reused it in load/save/delete
+  - added legacy parser `ParseLegacySettings(string content)` for old line-based format
+- Added tests in `project/OsEngine.Tests/ChartCandleMasterSettingsPersistenceTests.cs`:
+  - verifies JSON persistence from private `Save()` path
+  - verifies legacy parser behavior
+
+### Verification
+
+- `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` -> passed 332/332
