@@ -67,19 +67,19 @@ namespace OsEngine.Indicators
         {
             if (StartProgram != StartProgram.IsOsOptimizer)
             {
-                if (File.Exists(@"Engine\" + Name + @"Values.txt"))
+                if (File.Exists(GetValuesPath()))
                 {
-                    File.Delete(@"Engine\" + Name + @"Values.txt");
+                    File.Delete(GetValuesPath());
                 }
 
-                if (File.Exists(@"Engine\" + Name + @"Parametrs.txt"))
+                if (File.Exists(GetParametersPath()))
                 {
-                    File.Delete(@"Engine\" + Name + @"Parametrs.txt");
+                    File.Delete(GetParametersPath());
                 }
 
-                if (File.Exists(@"Engine\" + Name + @"Base.txt"))
+                if (File.Exists(GetBasePath()))
                 {
-                    File.Delete(@"Engine\" + Name + @"Base.txt");
+                    File.Delete(GetBasePath());
                 }
             }
 
@@ -356,24 +356,41 @@ namespace OsEngine.Indicators
                 return;
             }
 
-            if (!File.Exists(@"Engine\" + Name + @"Parametrs.txt"))
+            if (!File.Exists(GetParametersPath()))
             {
                 return;
             }
             try
             {
-                using (StreamReader reader = new StreamReader(@"Engine\" + Name + @"Parametrs.txt"))
-                {
-                    while (!reader.EndOfStream)
-                    {
-                        string[] save = reader.ReadLine().Split('#');
+                AindicatorLinesSettingsDto settings = SettingsManager.Load(
+                    GetParametersPath(),
+                    defaultValue: null,
+                    legacyLoader: ParseLegacyLinesSettings);
 
-                        if (save[0] == parameter.Name)
-                        {
-                            parameter.LoadParamFromString(save);
-                        }
+                if (settings == null
+                    || settings.Lines == null)
+                {
+                    return;
+                }
+
+                for (int i = 0; i < settings.Lines.Count; i++)
+                {
+                    if (string.IsNullOrWhiteSpace(settings.Lines[i]))
+                    {
+                        continue;
                     }
-                    reader.Close();
+
+                    string[] save = settings.Lines[i].Split('#');
+
+                    if (save.Length == 0)
+                    {
+                        continue;
+                    }
+
+                    if (save[0] == parameter.Name)
+                    {
+                        parameter.LoadParamFromString(save);
+                    }
                 }
             }
             catch (Exception)
@@ -429,16 +446,18 @@ namespace OsEngine.Indicators
 
             try
             {
-                using (StreamWriter writer = new StreamWriter(@"Engine\" + Name + @"Parametrs.txt", false)
-                    )
+                List<string> lines = new List<string>();
+                for (int i = 0; i < _parameters.Count; i++)
                 {
-                    for (int i = 0; i < _parameters.Count; i++)
-                    {
-                        writer.WriteLine(_parameters[i].GetStringToSave());
-                    }
-
-                    writer.Close();
+                    lines.Add(_parameters[i].GetStringToSave());
                 }
+
+                SettingsManager.Save(
+                    GetParametersPath(),
+                    new AindicatorLinesSettingsDto
+                    {
+                        Lines = lines
+                    });
             }
             catch (Exception)
             {
@@ -493,24 +512,41 @@ namespace OsEngine.Indicators
                 return;
             }
 
-            if (!File.Exists(@"Engine\" + Name + @"Values.txt"))
+            if (!File.Exists(GetValuesPath()))
             {
                 return;
             }
             try
             {
-                using (StreamReader reader = new StreamReader(@"Engine\" + Name + @"Values.txt"))
-                {
-                    while (!reader.EndOfStream)
-                    {
-                        string[] save = reader.ReadLine().Split('&');
+                AindicatorLinesSettingsDto settings = SettingsManager.Load(
+                    GetValuesPath(),
+                    defaultValue: null,
+                    legacyLoader: ParseLegacyLinesSettings);
 
-                        if (save[0] == series.Name)
-                        {
-                            series.LoadFromStr(save);
-                        }
+                if (settings == null
+                    || settings.Lines == null)
+                {
+                    return;
+                }
+
+                for (int i = 0; i < settings.Lines.Count; i++)
+                {
+                    if (string.IsNullOrWhiteSpace(settings.Lines[i]))
+                    {
+                        continue;
                     }
-                    reader.Close();
+
+                    string[] save = settings.Lines[i].Split('&');
+
+                    if (save.Length == 0)
+                    {
+                        continue;
+                    }
+
+                    if (save[0] == series.Name)
+                    {
+                        series.LoadFromStr(save);
+                    }
                 }
             }
             catch (Exception)
@@ -532,21 +568,58 @@ namespace OsEngine.Indicators
             }
             try
             {
-                using (StreamWriter writer = new StreamWriter(@"Engine\" + Name + @"Values.txt", false)
-                )
+                List<string> lines = new List<string>();
+                for (int i = 0; i < DataSeries.Count; i++)
                 {
-                    for (int i = 0; i < DataSeries.Count; i++)
-                    {
-                        writer.WriteLine(DataSeries[i].GetSaveStr());
-                    }
-
-                    writer.Close();
+                    lines.Add(DataSeries[i].GetSaveStr());
                 }
+
+                SettingsManager.Save(
+                    GetValuesPath(),
+                    new AindicatorLinesSettingsDto
+                    {
+                        Lines = lines
+                    });
             }
             catch (Exception)
             {
                 // ignore
             }
+        }
+
+        private string GetParametersPath()
+        {
+            return @"Engine\" + Name + @"Parametrs.txt";
+        }
+
+        private string GetValuesPath()
+        {
+            return @"Engine\" + Name + @"Values.txt";
+        }
+
+        private string GetBasePath()
+        {
+            return @"Engine\" + Name + @"Base.txt";
+        }
+
+        private static AindicatorLinesSettingsDto ParseLegacyLinesSettings(string content)
+        {
+            if (string.IsNullOrWhiteSpace(content))
+            {
+                return null;
+            }
+
+            string[] lines = content.Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries);
+
+            return new AindicatorLinesSettingsDto
+            {
+                Lines = new List<string>(lines)
+            };
+        }
+
+        private sealed class AindicatorLinesSettingsDto
+        {
+            public List<string> Lines { get; set; }
         }
 
         List<List<decimal>> IIndicator.ValuesToChart

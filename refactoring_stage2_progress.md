@@ -1998,3 +1998,23 @@
 ### Verification
 
 - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` -> passed 332/332
+
+## 2026-02-16 - Step 2.3 (JSON settings subsystem) - Aindicator parameters/series storage migrated to JSON wrappers with legacy compatibility
+
+- Updated `project/OsEngine/Indicators/Aindicator.cs`:
+  - migrated parameters and series settings file IO wrappers to `SettingsManager`
+  - `SaveParameters()` / `GetValueParameterSaveByUser(...)` now persist/load DTO JSON for `Parametrs.txt`
+  - `SaveSeries()` / `CheckSeriesParametersInSaveData(...)` now persist/load DTO JSON for `Values.txt`
+  - added shared legacy parser `ParseLegacyLinesSettings(string content)` for old line-based formats
+  - centralized file paths via helper methods:
+    - `GetParametersPath()`
+    - `GetValuesPath()`
+    - `GetBasePath()`
+  - applied helpers in delete flow as well
+- Added tests in `project/OsEngine.Tests/AindicatorPersistenceTests.cs`:
+  - verifies JSON persistence for parameters and series through `Save()`
+  - verifies legacy parser behavior
+
+### Verification
+
+- `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` -> passed 334/334
