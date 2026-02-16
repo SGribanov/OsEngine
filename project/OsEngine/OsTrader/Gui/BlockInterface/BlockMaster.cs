@@ -3,6 +3,7 @@ using System;
 using System.IO;
 using System.Security.Cryptography;
 using System.Text;
+using OsEngine.Entity;
 
 namespace OsEngine.OsTrader.Gui.BlockInterface
 {
@@ -12,16 +13,20 @@ namespace OsEngine.OsTrader.Gui.BlockInterface
         {
             get
             {
-                if (!File.Exists(@"Engine\PrimeSettingss.txt"))
-                {
-                    return "";
-                }
                 try
                 {
-                    using (StreamReader reader = new StreamReader(@"Engine\PrimeSettingss.txt"))
+                    EncryptedValueSettingsDto settings = SettingsManager.Load(
+                        GetPasswordPath(),
+                        defaultValue: null,
+                        legacyLoader: ParseLegacyEncryptedValueSettings);
+
+                    if (settings == null || string.IsNullOrWhiteSpace(settings.EncryptedValue))
                     {
-                        return Decrypt(reader.ReadLine());
+                        return string.Empty;
                     }
+
+                    string decrypted = Decrypt(settings.EncryptedValue);
+                    return decrypted ?? string.Empty;
                 }
                 catch (Exception)
                 {
@@ -34,14 +39,14 @@ namespace OsEngine.OsTrader.Gui.BlockInterface
             {
                 try
                 {
-                    using (StreamWriter writer = new StreamWriter(@"Engine\PrimeSettingss.txt", false))
-                    {
-                        string saveStr = Encrypt(value);
+                    string saveStr = Encrypt(value);
 
-                        writer.WriteLine(saveStr);
-
-                        writer.Close();
-                    }
+                    SettingsManager.Save(
+                        GetPasswordPath(),
+                        new EncryptedValueSettingsDto
+                        {
+                            EncryptedValue = saveStr
+                        });
                 }
                 catch (Exception)
                 {
@@ -54,23 +59,31 @@ namespace OsEngine.OsTrader.Gui.BlockInterface
         {
             get
             {
-                if (!File.Exists(@"Engine\PrimeSettingsss.txt"))
-                {
-                    return false;
-                }
                 try
                 {
-                    using (StreamReader reader = new StreamReader(@"Engine\PrimeSettingsss.txt"))
+                    EncryptedValueSettingsDto settings = SettingsManager.Load(
+                        GetIsBlockedPath(),
+                        defaultValue: null,
+                        legacyLoader: ParseLegacyEncryptedValueSettings);
+
+                    if (settings == null || string.IsNullOrWhiteSpace(settings.EncryptedValue))
                     {
-                        string res = reader.ReadLine();
-
-                        if(res == null)
-                        {
-                            return false;
-                        }
-
-                        return Convert.ToBoolean(Decrypt(res));
+                        return false;
                     }
+
+                    string decrypted = Decrypt(settings.EncryptedValue);
+
+                    if (string.IsNullOrWhiteSpace(decrypted))
+                    {
+                        return false;
+                    }
+
+                    if (bool.TryParse(decrypted, out bool isBlocked))
+                    {
+                        return isBlocked;
+                    }
+
+                    return false;
                 }
                 catch (Exception)
                 {
@@ -83,20 +96,56 @@ namespace OsEngine.OsTrader.Gui.BlockInterface
             {
                 try
                 {
-                    using (StreamWriter writer = new StreamWriter(@"Engine\PrimeSettingsss.txt", false))
-                    {
-                        string saveStr = Encrypt(value.ToString());
+                    string saveStr = Encrypt(value.ToString());
 
-                        writer.WriteLine(saveStr);
-
-                        writer.Close();
-                    }
+                    SettingsManager.Save(
+                        GetIsBlockedPath(),
+                        new EncryptedValueSettingsDto
+                        {
+                            EncryptedValue = saveStr
+                        });
                 }
                 catch (Exception)
                 {
                     // ignore
                 }
             }
+        }
+
+        private static string GetPasswordPath()
+        {
+            return @"Engine\PrimeSettingss.txt";
+        }
+
+        private static string GetIsBlockedPath()
+        {
+            return @"Engine\PrimeSettingsss.txt";
+        }
+
+        private static EncryptedValueSettingsDto ParseLegacyEncryptedValueSettings(string content)
+        {
+            if (string.IsNullOrWhiteSpace(content))
+            {
+                return null;
+            }
+
+            string normalized = content.Replace("\r", string.Empty);
+            string[] lines = normalized.Split('\n');
+
+            if (lines.Length > 0 && lines[lines.Length - 1] == string.Empty)
+            {
+                Array.Resize(ref lines, lines.Length - 1);
+            }
+
+            return new EncryptedValueSettingsDto
+            {
+                EncryptedValue = lines.Length > 0 ? lines[0] : null
+            };
+        }
+
+        private sealed class EncryptedValueSettingsDto
+        {
+            public string EncryptedValue { get; set; }
         }
 
         public static string Encrypt(string clearText)

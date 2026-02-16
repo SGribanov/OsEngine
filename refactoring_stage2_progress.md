@@ -494,3 +494,19 @@
 ### Verification
 
 - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` -> passed 144/144
+
+## 2026-02-16 - Step 2.3 (JSON settings subsystem) - Incremental adoption in BlockMaster settings
+
+- Migrated `project/OsEngine/OsTrader/Gui/BlockInterface/BlockMaster.cs` persistence to `SettingsManager`:
+  - `Password` now saves/loads JSON in `Engine\\PrimeSettingss.txt` with legacy single-line fallback
+  - `IsBlocked` now saves/loads JSON in `Engine\\PrimeSettingsss.txt` with legacy single-line fallback
+  - preserved encryption/decryption flow and safe default behavior on read errors (`""` / `false`)
+- Added tests `project/OsEngine.Tests/BlockMasterPersistenceTests.cs`:
+  - `Password_ShouldPersistJson_AndLoadRoundTrip`
+  - `Password_ShouldSupportLegacyLineBasedFormat`
+  - `IsBlocked_ShouldPersistJson_AndLoadRoundTrip`
+  - `IsBlocked_ShouldSupportLegacyLineBasedFormat`
+
+### Verification
+
+- `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` -> passed 148/148
