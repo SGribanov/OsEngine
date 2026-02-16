@@ -2109,3 +2109,25 @@
   - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` succeeded (`294/294`).
 - **Commit:** `7d5e0c010`
 - **Push:** no (manual push by user)
+
+### Step 2.3 - JSON Settings Subsystem (Incremental Adoption #102)
+
+- **Status:** In Progress (increment completed)
+- **Plan item:** `refactoring_stage2_plan.md` -> Phase 2 / Step 2.3
+- **Changes:**
+  - Migrated IvashovRange indicator settings persistence to JSON with legacy fallback:
+    - `project/OsEngine/Charts/CandleChart/Indicators/IvashovRange.cs`
+  - Covered persisted file:
+    - dynamic `Engine\\<Name>.txt` path (`IvashovRange` indicator)
+  - Preserved legacy compatibility when optional `LengthAverage` line is missing:
+    - fallback uses `LengthMa`
+  - Added dedicated persistence tests:
+    - `project/OsEngine.Tests/IvashovRangePersistenceTests.cs`
+      - `Save_ShouldPersistJson_AndLoadRoundTrip`
+      - `Load_ShouldSupportLegacyLineBasedFormat_WithOptionalLengthAverageMissing`
+  - Updated running progress journal:
+    - `refactoring_stage2_progress.md`
+- **Verification:**
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` succeeded (`296/296`).
+- **Commit:** `205b9caa7`
+- **Push:** no (manual push by user)
