@@ -460,9 +460,9 @@ namespace OsEngine.OsTrader.Panels.Tab
 
                 if (StartProgram != StartProgram.IsOsOptimizer)
                 {
-                    if (File.Exists(@"Engine\" + TabName + @"SettingsBot.txt"))
+                    if (File.Exists(GetSettingsBotPath()))
                     {
-                        File.Delete(@"Engine\" + TabName + @"SettingsBot.txt");
+                        File.Delete(GetSettingsBotPath());
                     }
                 }
 
@@ -501,6 +501,11 @@ namespace OsEngine.OsTrader.Panels.Tab
             {
                 SetNewLogMessage(error.ToString(), LogMessageType.Error);
             }
+        }
+
+        private string GetSettingsBotPath()
+        {
+            return @"Engine\" + TabName + @"SettingsBot.txt";
         }
 
         /// <summary>

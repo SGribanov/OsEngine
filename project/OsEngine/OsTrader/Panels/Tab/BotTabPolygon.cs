@@ -160,9 +160,9 @@ namespace OsEngine.OsTrader.Panels.Tab
 
                 try
                 {
-                    if (File.Exists(@"Engine\" + TabName + @"StrategSettings.txt"))
+                    if (File.Exists(GetLegacyStrategSettingsPath()))
                     {
-                        File.Delete(@"Engine\" + TabName + @"StrategSettings.txt");
+                        File.Delete(GetLegacyStrategSettingsPath());
                     }
                 }
                 catch
@@ -360,6 +360,11 @@ namespace OsEngine.OsTrader.Panels.Tab
         private string GetStandartPolygonSettingsPath()
         {
             return @"Engine\" + TabName + @"StandartPolygonSettings.txt";
+        }
+
+        private string GetLegacyStrategSettingsPath()
+        {
+            return @"Engine\" + TabName + @"StrategSettings.txt";
         }
 
         private static BotTabPolygonStandartSettingsDto ParseLegacyStandartPolygonSettings(string content)

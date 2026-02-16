@@ -1968,3 +1968,16 @@
 ### Verification
 
 - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` -> passed 330/330
+
+## 2026-02-16 - Step 2.3 (JSON settings subsystem) - Path consistency cleanup in BotTabPolygon/BotTabSimple delete flows
+
+- Updated remaining direct `@"Engine\\..."` delete checks in tab classes:
+  - `project/OsEngine/OsTrader/Panels/Tab/BotTabPolygon.cs`
+    - added and used `GetLegacyStrategSettingsPath()` for legacy `StrategSettings.txt`
+  - `project/OsEngine/OsTrader/Panels/Tab/BotTabSimple.cs`
+    - added and used `GetSettingsBotPath()` for `SettingsBot.txt`
+- No behavior changes intended; cleanup centralizes file path construction and removes last inline delete paths in these tab files.
+
+### Verification
+
+- `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` -> passed 330/330
