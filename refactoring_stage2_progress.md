@@ -479,3 +479,18 @@
 ### Verification
 
 - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` -> passed 142/142
+
+## 2026-02-16 - Step 2.3 (JSON settings subsystem) - Incremental adoption in attached servers settings
+
+- Migrated `project/OsEngine/Market/ServerMasterSourcesPainter.cs` (`AttachedServers.txt`) persistence to `SettingsManager`:
+  - private `SaveAttachedServers()` now writes JSON into `Engine\\AttachedServers.txt`
+  - private `LoadAttachedServers()` now reads JSON and falls back to legacy line-based parser
+  - preserved enum parsing behavior (`Enum.TryParse` with case-insensitive mode)
+- Added tests `project/OsEngine.Tests/ServerMasterSourcesPainterPersistenceTests.cs`:
+  - `SaveAttachedServers_ShouldPersistJson_AndLoadRoundTrip`
+  - `LoadAttachedServers_ShouldSupportLegacyLineBasedFormat`
+  - tests invoke private methods via reflection on uninitialized instance
+
+### Verification
+
+- `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` -> passed 144/144

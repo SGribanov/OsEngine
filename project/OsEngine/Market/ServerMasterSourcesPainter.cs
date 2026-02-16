@@ -11,7 +11,6 @@ using System.Windows.Forms;
 using OsEngine.Entity;
 using OsEngine.Market.Servers;
 using System.Windows.Forms.Integration;
-using System.IO;
 using System.Threading;
 using OsEngine.Language;
 using OsEngine.Logging;
@@ -1006,25 +1005,29 @@ namespace OsEngine.Market
 
         private void LoadAttachedServers()
         {
-            if (!File.Exists(@"Engine\AttachedServers.txt"))
-            {
-                return;
-            }
             try
             {
-                using (StreamReader reader = new StreamReader(@"Engine\AttachedServers.txt"))
-                {
-                    while (reader.EndOfStream == false)
-                    {
-                        ServerType type = new ServerType();
+                AttachedServersSettingsDto settings = SettingsManager.Load(
+                    GetAttachedServersPath(),
+                    defaultValue: null,
+                    legacyLoader: ParseLegacyAttachedServersSettings);
 
-                        if (Enum.TryParse(reader.ReadLine(), true, out type))
-                        {
-                            _attachedServers.Add(type);
-                        }
+                if (settings == null || settings.ServerTypes == null)
+                {
+                    return;
+                }
+
+                for (int i = 0; i < settings.ServerTypes.Length; i++)
+                {
+                    if (string.IsNullOrWhiteSpace(settings.ServerTypes[i]))
+                    {
+                        continue;
                     }
 
-                    reader.Close();
+                    if (Enum.TryParse(settings.ServerTypes[i], true, out ServerType type))
+                    {
+                        _attachedServers.Add(type);
+                    }
                 }
             }
             catch (Exception)
@@ -1037,21 +1040,54 @@ namespace OsEngine.Market
         {
             try
             {
-                using (StreamWriter writer = new StreamWriter(@"Engine\AttachedServers.txt", false)
-                    )
+                string[] serverTypes = new string[_attachedServers.Count];
+                for (int i = 0; i < _attachedServers.Count; i++)
                 {
-                    for (int i = 0; i < _attachedServers.Count; i++)
-                    {
-                        writer.WriteLine(_attachedServers[i].ToString());
-                    }
-
-                    writer.Close();
+                    serverTypes[i] = _attachedServers[i].ToString();
                 }
+
+                SettingsManager.Save(
+                    GetAttachedServersPath(),
+                    new AttachedServersSettingsDto
+                    {
+                        ServerTypes = serverTypes
+                    });
             }
             catch (Exception)
             {
                 // ignore
             }
+        }
+
+        private static string GetAttachedServersPath()
+        {
+            return @"Engine\AttachedServers.txt";
+        }
+
+        private static AttachedServersSettingsDto ParseLegacyAttachedServersSettings(string content)
+        {
+            if (string.IsNullOrWhiteSpace(content))
+            {
+                return null;
+            }
+
+            string normalized = content.Replace("\r", string.Empty);
+            string[] lines = normalized.Split('\n');
+
+            if (lines.Length > 0 && lines[lines.Length - 1] == string.Empty)
+            {
+                Array.Resize(ref lines, lines.Length - 1);
+            }
+
+            return new AttachedServersSettingsDto
+            {
+                ServerTypes = lines
+            };
+        }
+
+        private sealed class AttachedServersSettingsDto
+        {
+            public string[] ServerTypes { get; set; }
         }
 
         #endregion
