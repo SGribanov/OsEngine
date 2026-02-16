@@ -2003,3 +2003,23 @@
   - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` succeeded (`284/284`).
 - **Commit:** `f0d4bab51`
 - **Push:** no (manual push by user)
+
+### Step 2.3 - JSON Settings Subsystem (Incremental Adoption #97)
+
+- **Status:** In Progress (increment completed)
+- **Plan item:** `refactoring_stage2_plan.md` -> Phase 2 / Step 2.3
+- **Changes:**
+  - Migrated Trix indicator settings persistence to JSON with legacy fallback:
+    - `project/OsEngine/Charts/CandleChart/Indicators/Trix.cs`
+  - Covered persisted file:
+    - dynamic `Engine\\<Name>.txt` path (`Trix` indicator)
+  - Added dedicated persistence tests:
+    - `project/OsEngine.Tests/TrixPersistenceTests.cs`
+      - `Save_ShouldPersistJson_AndLoadRoundTrip`
+      - `Load_ShouldSupportLegacyLineBasedFormat`
+  - Updated running progress journal:
+    - `refactoring_stage2_progress.md`
+- **Verification:**
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` succeeded (`286/286`).
+- **Commit:** `e6e061046`
+- **Push:** no (manual push by user)
