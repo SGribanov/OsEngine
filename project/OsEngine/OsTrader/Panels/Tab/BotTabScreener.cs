@@ -391,20 +391,31 @@ namespace OsEngine.OsTrader.Panels.Tab
         {
             try
             {
-                using (StreamWriter writer = new StreamWriter(GetScreenerTabSetPath(), false))
-                {
-                    string save = "";
-                    for (int i = 0; i < Tabs.Count; i++)
-                    {
-                        save += Tabs[i].TabName + "#";
-                        Tabs[i].Connector.Save();
-                        Tabs[i].TimeFrameBuilder.Save();
-                        Tabs[i].ManualPositionSupport.Save();
-                    }
-                    writer.WriteLine(save);
+                List<string> tabNames = new List<string>();
 
-                    writer.Close();
+                for (int i = 0; i < Tabs.Count; i++)
+                {
+                    if (Tabs[i] == null)
+                    {
+                        continue;
+                    }
+
+                    if (string.IsNullOrWhiteSpace(Tabs[i].TabName) == false)
+                    {
+                        tabNames.Add(Tabs[i].TabName);
+                    }
+
+                    Tabs[i].Connector.Save();
+                    Tabs[i].TimeFrameBuilder.Save();
+                    Tabs[i].ManualPositionSupport.Save();
                 }
+
+                SettingsManager.Save(
+                    GetScreenerTabSetPath(),
+                    new BotTabScreenerTabSetSettingsDto
+                    {
+                        TabNames = tabNames
+                    });
             }
             catch (Exception)
             {
@@ -475,33 +486,44 @@ namespace OsEngine.OsTrader.Panels.Tab
             }
             try
             {
-                using (StreamReader reader = new StreamReader(GetScreenerTabSetPath()))
+                BotTabScreenerTabSetSettingsDto settings = SettingsManager.Load(
+                    GetScreenerTabSetPath(),
+                    defaultValue: null,
+                    legacyLoader: ParseLegacyScreenerTabSetSettings);
+
+                if (settings == null
+                    || settings.TabNames == null)
                 {
-                    string[] save2 = reader.ReadLine().Split('#');
-                    for (int i = 0; i < save2.Length - 1; i++)
+                    return;
+                }
+
+                for (int i = 0; i < settings.TabNames.Count; i++)
+                {
+                    string tabName = settings.TabNames[i];
+                    if (string.IsNullOrWhiteSpace(tabName))
                     {
-                        BotTabSimple newTab = new BotTabSimple(save2[i], _startProgram);
-                        newTab.Connector.SaveTradesInCandles = false;
-
-                        Tabs.Add(newTab);
-                        SubscribeOnTab(newTab);
-                        UpdateTabSettings(Tabs[Tabs.Count - 1]);
-                        PaintNewRow();
-
-                        if (NewTabCreateEvent != null)
-                        {
-                            NewTabCreateEvent(newTab);
-                        }
-
-                        if (Tabs.Count == 1)
-                        {
-                            Tabs[0].IndicatorManuallyCreateEvent += BotTabScreener_IndicatorManuallyCreateEvent;
-                            Tabs[0].IndicatorManuallyDeleteEvent += BotTabScreener_IndicatorManuallyDeleteEvent;
-                            Tabs[0].IndicatorUpdateEvent += BotTabScreener_IndicatorUpdateEvent;
-                        }
+                        continue;
                     }
 
-                    reader.Close();
+                    BotTabSimple newTab = new BotTabSimple(tabName, _startProgram);
+                    newTab.Connector.SaveTradesInCandles = false;
+
+                    Tabs.Add(newTab);
+                    SubscribeOnTab(newTab);
+                    UpdateTabSettings(Tabs[Tabs.Count - 1]);
+                    PaintNewRow();
+
+                    if (NewTabCreateEvent != null)
+                    {
+                        NewTabCreateEvent(newTab);
+                    }
+
+                    if (Tabs.Count == 1)
+                    {
+                        Tabs[0].IndicatorManuallyCreateEvent += BotTabScreener_IndicatorManuallyCreateEvent;
+                        Tabs[0].IndicatorManuallyDeleteEvent += BotTabScreener_IndicatorManuallyDeleteEvent;
+                        Tabs[0].IndicatorUpdateEvent += BotTabScreener_IndicatorUpdateEvent;
+                    }
                 }
             }
             catch (Exception error)
@@ -2007,6 +2029,32 @@ namespace OsEngine.OsTrader.Panels.Tab
         private string GetScreenerTabSetPath()
         {
             return @"Engine\" + TabName + @"ScreenerTabSet.txt";
+        }
+
+        private static BotTabScreenerTabSetSettingsDto ParseLegacyScreenerTabSetSettings(string content)
+        {
+            if (string.IsNullOrWhiteSpace(content))
+            {
+                return null;
+            }
+
+            string[] lines = content.Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries);
+            if (lines.Length == 0)
+            {
+                return null;
+            }
+
+            string[] tabNames = lines[0].Split(new[] { '#' }, StringSplitOptions.RemoveEmptyEntries);
+
+            return new BotTabScreenerTabSetSettingsDto
+            {
+                TabNames = new List<string>(tabNames)
+            };
+        }
+
+        private sealed class BotTabScreenerTabSetSettingsDto
+        {
+            public List<string> TabNames { get; set; }
         }
 
         private static BotTabScreenerSettingsDto ParseLegacyScreenerSettings(string content)

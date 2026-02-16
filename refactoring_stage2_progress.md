@@ -1891,3 +1891,18 @@
 ### Verification
 
 - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` -> passed 320/320
+
+## 2026-02-16 - Step 2.3 (JSON settings subsystem) - BotTabScreener tab-set migrated to JSON settings with legacy compatibility
+
+- Updated `project/OsEngine/OsTrader/Panels/Tab/BotTabScreener.cs`:
+  - migrated tab-set persistence from line-based `#`-delimited file IO to `SettingsManager`
+  - `SaveTabs()` now saves DTO JSON (`BotTabScreenerTabSetSettingsDto`)
+  - `TryLoadTabs()` now loads via `SettingsManager.Load(..., legacyLoader: ParseLegacyScreenerTabSetSettings)`
+  - added legacy parser `ParseLegacyScreenerTabSetSettings(string content)` for old `TAB1#TAB2#...` format
+- Added tests in `project/OsEngine.Tests/BotTabScreenerTabSetPersistenceTests.cs`:
+  - verifies JSON persistence from `SaveTabs()`
+  - verifies legacy hash-separated parser behavior
+
+### Verification
+
+- `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` -> passed 322/322
