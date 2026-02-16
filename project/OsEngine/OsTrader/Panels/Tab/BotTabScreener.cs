@@ -391,7 +391,7 @@ namespace OsEngine.OsTrader.Panels.Tab
         {
             try
             {
-                using (StreamWriter writer = new StreamWriter(@"Engine\" + TabName + @"ScreenerTabSet.txt", false))
+                using (StreamWriter writer = new StreamWriter(GetScreenerTabSetPath(), false))
                 {
                     string save = "";
                     for (int i = 0; i < Tabs.Count; i++)
@@ -469,13 +469,13 @@ namespace OsEngine.OsTrader.Panels.Tab
             }
             _tabIsLoad = true;
 
-            if (!File.Exists(@"Engine\" + TabName + @"ScreenerTabSet.txt"))
+            if (!File.Exists(GetScreenerTabSetPath()))
             {
                 return;
             }
             try
             {
-                using (StreamReader reader = new StreamReader(@"Engine\" + TabName + @"ScreenerTabSet.txt"))
+                using (StreamReader reader = new StreamReader(GetScreenerTabSetPath()))
                 {
                     string[] save2 = reader.ReadLine().Split('#');
                     for (int i = 0; i < save2.Length - 1; i++)
@@ -661,19 +661,19 @@ namespace OsEngine.OsTrader.Panels.Tab
                 Tabs[i].Delete();
             }
 
-            if (File.Exists(@"Engine\" + TabName + @"ScreenerSet.txt"))
+            if (File.Exists(GetScreenerSettingsPath()))
             {
-                File.Delete(@"Engine\" + TabName + @"ScreenerSet.txt");
+                File.Delete(GetScreenerSettingsPath());
             }
 
-            if (File.Exists(@"Engine\" + TabName + @"ScreenerTabSet.txt"))
+            if (File.Exists(GetScreenerTabSetPath()))
             {
-                File.Delete(@"Engine\" + TabName + @"ScreenerTabSet.txt");
+                File.Delete(GetScreenerTabSetPath());
             }
 
-            if (File.Exists(@"Engine\" + TabName + @"ScreenerIndicators.txt"))
+            if (File.Exists(GetIndicatorsPath()))
             {
-                File.Delete(@"Engine\" + TabName + @"ScreenerIndicators.txt");
+                File.Delete(GetIndicatorsPath());
             }
 
             if (_positionViewer != null)
@@ -2002,6 +2002,11 @@ namespace OsEngine.OsTrader.Panels.Tab
         private string GetScreenerSettingsPath()
         {
             return @"Engine\" + TabName + @"ScreenerSet.txt";
+        }
+
+        private string GetScreenerTabSetPath()
+        {
+            return @"Engine\" + TabName + @"ScreenerTabSet.txt";
         }
 
         private static BotTabScreenerSettingsDto ParseLegacyScreenerSettings(string content)

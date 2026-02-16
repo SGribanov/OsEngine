@@ -141,9 +141,9 @@ namespace OsEngine.OsTrader.Panels.Tab
 
                 try
                 {
-                    if (File.Exists(@"Engine\" + TabName + @"StandartPairsSettings.txt"))
+                    if (File.Exists(GetStandartSettingsPath()))
                     {
-                        File.Delete(@"Engine\" + TabName + @"StandartPairsSettings.txt");
+                        File.Delete(GetStandartSettingsPath());
                     }
                 }
                 catch
@@ -153,9 +153,9 @@ namespace OsEngine.OsTrader.Panels.Tab
 
                 try
                 {
-                    if (File.Exists(@"Engine\" + TabName + @"StrategSettings.txt"))
+                    if (File.Exists(GetLegacyStrategSettingsPath()))
                     {
-                        File.Delete(@"Engine\" + TabName + @"StrategSettings.txt");
+                        File.Delete(GetLegacyStrategSettingsPath());
                     }
                 }
                 catch
@@ -165,9 +165,9 @@ namespace OsEngine.OsTrader.Panels.Tab
 
                 try
                 {
-                    if (File.Exists(@"Engine\" + TabName + @"PairsNamesToLoad.txt"))
+                    if (File.Exists(GetPairsNamesToLoadPath()))
                     {
-                        File.Delete(@"Engine\" + TabName + @"PairsNamesToLoad.txt");
+                        File.Delete(GetPairsNamesToLoadPath());
                     }
                 }
                 catch
@@ -465,6 +465,16 @@ namespace OsEngine.OsTrader.Panels.Tab
             return @"Engine\" + TabName + @"StandartPairsSettings.txt";
         }
 
+        private string GetLegacyStrategSettingsPath()
+        {
+            return @"Engine\" + TabName + @"StrategSettings.txt";
+        }
+
+        private string GetPairsNamesToLoadPath()
+        {
+            return @"Engine\" + TabName + @"PairsNamesToLoad.txt";
+        }
+
         private static BotTabPairStandartSettingsDto ParseLegacyStandartSettings(string content)
         {
             if (string.IsNullOrWhiteSpace(content))
@@ -691,7 +701,7 @@ namespace OsEngine.OsTrader.Panels.Tab
         {
             try
             {
-                using (StreamWriter writer = new StreamWriter(@"Engine\" + TabName + @"PairsNamesToLoad.txt", false))
+                using (StreamWriter writer = new StreamWriter(GetPairsNamesToLoadPath(), false))
                 {
 
                     for (int i = 0; i < Pairs.Count; i++)
@@ -713,13 +723,13 @@ namespace OsEngine.OsTrader.Panels.Tab
         /// </summary>
         private void LoadPairs()
         {
-            if (!File.Exists(@"Engine\" + TabName + @"PairsNamesToLoad.txt"))
+            if (!File.Exists(GetPairsNamesToLoadPath()))
             {
                 return;
             }
             try
             {
-                using (StreamReader reader = new StreamReader(@"Engine\" + TabName + @"PairsNamesToLoad.txt"))
+                using (StreamReader reader = new StreamReader(GetPairsNamesToLoadPath()))
                 {
                     while (reader.EndOfStream == false)
                     {

@@ -1837,3 +1837,19 @@
 ### Verification
 
 - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` -> passed 318/318
+
+## 2026-02-16 - Step 2.3 (JSON settings subsystem) - Path consistency cleanup in AServer/BotTabPair/BotTabScreener
+
+- Aligned remaining direct `@"Engine\\..."` file-path usage with helper methods:
+  - `project/OsEngine/Market/Servers/AServer.cs`:
+    - delete cleanup now uses `GetServerParamsPath()`, `GetServerSettingsPath()`, `GetNonTradePeriodsPath()`
+  - `project/OsEngine/OsTrader/Panels/Tab/BotTabPair.cs`:
+    - settings/pair names delete/save/load now use helper paths (`GetStandartSettingsPath()`, `GetLegacyStrategSettingsPath()`, `GetPairsNamesToLoadPath()`)
+  - `project/OsEngine/OsTrader/Panels/Tab/BotTabScreener.cs`:
+    - tab-set save/load/delete now use `GetScreenerTabSetPath()`
+    - settings/indicators delete now use existing helper paths
+- No behavior changes intended; cleanup reduces path-fragment duplication and keeps persistence paths centralized.
+
+### Verification
+
+- `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` -> passed 318/318

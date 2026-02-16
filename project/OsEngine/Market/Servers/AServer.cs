@@ -41,19 +41,19 @@ namespace OsEngine.Market.Servers
 
             try
             {
-                if (File.Exists(@"Engine\" + ServerNameUnique + @"Params.txt"))
+                if (File.Exists(GetServerParamsPath()))
                 {
-                    File.Delete(@"Engine\" + ServerNameUnique + @"Params.txt");
+                    File.Delete(GetServerParamsPath());
                 }
 
-                if (File.Exists(@"Engine\" + ServerNameUnique + @"ServerSettings.txt"))
+                if (File.Exists(GetServerSettingsPath()))
                 {
-                    File.Delete(@"Engine\" + ServerNameUnique + @"ServerSettings.txt");
+                    File.Delete(GetServerSettingsPath());
                 }
 
-                if (File.Exists(@"Engine\" + ServerNameUnique + @"nonTradePeriod.txt"))
+                if (File.Exists(GetNonTradePeriodsPath()))
                 {
-                    File.Delete(@"Engine\" + ServerNameUnique + @"nonTradePeriod.txt");
+                    File.Delete(GetNonTradePeriodsPath());
                 }
             }
             catch
@@ -1120,6 +1120,11 @@ namespace OsEngine.Market.Servers
         private string GetServerSettingsPath()
         {
             return @"Engine\" + ServerNameUnique + @"ServerSettings.txt";
+        }
+
+        private string GetNonTradePeriodsPath()
+        {
+            return @"Engine\" + ServerNameUnique + @"nonTradePeriod.txt";
         }
 
         private ServerSettingsDto ParseLegacyServerSettings(string content)
