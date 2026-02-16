@@ -2035,3 +2035,17 @@
 ### Verification
 
 - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` -> passed 336/336
+
+## 2026-02-16 - Step 2.3 (JSON settings subsystem) - Path consistency cleanup in BotPanel strategy parameters storage
+
+- Updated `project/OsEngine/OsTrader/Panels/BotPanel.cs`:
+  - centralized strategy parameters file path into `GetParametersPath()`
+  - replaced remaining inline `@"Engine\\<NameStrategyUniq>Parametrs.txt"` usage in:
+    - delete flow
+    - parameter load (`GetValueParameterSaveByUser`)
+    - parameter save (`SaveParameters`)
+- No behavior changes intended; this cleanup keeps path construction in one place for further persistence migration steps.
+
+### Verification
+
+- `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` -> passed 336/336

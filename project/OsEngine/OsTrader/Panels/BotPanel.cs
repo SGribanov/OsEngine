@@ -183,9 +183,9 @@ namespace OsEngine.OsTrader.Panels
                     ParamGuiSettings.LogMessageEvent -= SendNewLogMessage;
                     ParamGuiSettings = null;
 
-                    if (File.Exists(@"Engine\" + NameStrategyUniq + @"Parametrs.txt"))
+                    if (File.Exists(GetParametersPath()))
                     {
-                        File.Delete(@"Engine\" + NameStrategyUniq + @"Parametrs.txt");
+                        File.Delete(GetParametersPath());
                     }
                 }
 
@@ -1479,13 +1479,13 @@ position => position.State != PositionStateType.OpeningFail
         /// </summary>
         private void GetValueParameterSaveByUser(IIStrategyParameter parameter)
         {
-            if (!File.Exists(@"Engine\" + NameStrategyUniq + @"Parametrs.txt"))
+            if (!File.Exists(GetParametersPath()))
             {
                 return;
             }
             try
             {
-                using (StreamReader reader = new StreamReader(@"Engine\" + NameStrategyUniq + @"Parametrs.txt"))
+                using (StreamReader reader = new StreamReader(GetParametersPath()))
                 {
                     while (!reader.EndOfStream)
                     {
@@ -1551,13 +1551,18 @@ position => position.State != PositionStateType.OpeningFail
             try
             {
                 SafeFileWriter.WriteAllLines(
-                    @"Engine\" + NameStrategyUniq + @"Parametrs.txt",
+                    GetParametersPath(),
                     Parameters.Select(parameter => parameter.GetStringToSave()));
             }
             catch (Exception error)
             {
                 LogMessageEvent(error.ToString(), LogMessageType.Error);
             }
+        }
+
+        private string GetParametersPath()
+        {
+            return @"Engine\" + NameStrategyUniq + @"Parametrs.txt";
         }
 
         /// <summary>
