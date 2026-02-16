@@ -307,3 +307,23 @@
   - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` succeeded (`114/114`).
 - **Commit:** `4dd26a36a`
 - **Push:** no (manual push by user)
+
+### Step 2.3 - JSON Settings Subsystem (Incremental Adoption #13)
+
+- **Status:** In Progress (increment completed)
+- **Plan item:** `refactoring_stage2_plan.md` -> Phase 2 / Step 2.3
+- **Changes:**
+  - Migrated timeframe builder settings persistence to JSON with legacy fallback:
+    - `project/OsEngine/Candles/TimeFrameBuilder.cs`
+  - Covered persisted file:
+    - `Engine\\<name>TimeFrameBuilder.txt`
+  - Added dedicated persistence tests:
+    - `project/OsEngine.Tests/TimeFrameBuilderPersistenceTests.cs`
+      - `Save_ShouldPersistJson_AndLoadRoundTrip`
+      - `Load_ShouldSupportLegacyLineBasedFormat`
+  - Updated running progress journal:
+    - `refactoring_stage2_progress.md`
+- **Verification:**
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` succeeded (`116/116`).
+- **Commit:** `14f21b9ef`
+- **Push:** no (manual push by user)
