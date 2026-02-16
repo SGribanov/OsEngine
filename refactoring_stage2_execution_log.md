@@ -2684,3 +2684,20 @@
   - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` succeeded (`336/336`).
 - **Commit:** `b1f502fc4`
 - **Push:** no (manual push by user)
+
+### Step 2.3 - JSON Settings Subsystem (Incremental Adoption #130)
+
+- **Status:** In Progress (increment completed)
+- **Plan item:** `refactoring_stage2_plan.md` -> Phase 2 / Step 2.3
+- **Changes:**
+  - Path consistency cleanup in:
+    - `project/OsEngine/OsTrader/Panels/BotPanel.cs`
+  - Centralized strategy-parameters file path into helper:
+    - `GetParametersPath()`
+  - Replaced remaining inline `@"Engine\\<NameStrategyUniq>Parametrs.txt"` path usage in delete/load/save parameter flows.
+  - Updated running progress journal:
+    - `refactoring_stage2_progress.md`
+- **Verification:**
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` succeeded (`336/336`).
+- **Commit:** `c7d3bcbe5`
+- **Push:** no (manual push by user)
