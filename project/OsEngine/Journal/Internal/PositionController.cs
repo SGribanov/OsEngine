@@ -118,36 +118,28 @@ namespace OsEngine.Journal.Internal
                 return;
             }
 
-            if (!File.Exists(@"Engine\" + _name + @"DealController.txt"))
+            if (!File.Exists(GetDealsPath()))
             {
                 return;
             }
             try
             {
-                // 1 count the number of transactions in the file
-                //1 считаем кол-во сделок в файле
+                PositionControllerDealsSettingsDto settings = SettingsManager.Load(
+                    GetDealsPath(),
+                    defaultValue: null,
+                    legacyLoader: ParseLegacyDealsSettings);
 
-                List<string> deals = new List<string>();
-
-                using (StreamReader reader = new StreamReader(@"Engine\" + _name + @"DealController.txt"))
+                if (settings == null)
                 {
-                    try
-                    {
-                        Enum.TryParse(reader.ReadLine(), out _commissionType);
-                        _commissionValue = reader.ReadLine().ToDecimal();
-                    }
-                    catch
-                    {
-                        // ignore
-                    }
-
-                    while (!reader.EndOfStream)
-                    {
-                        deals.Add(reader.ReadLine());
-                    }
+                    return;
                 }
 
-                if (deals.Count == 0)
+                _commissionType = settings.CommissionType;
+                _commissionValue = settings.CommissionValue;
+
+                List<string> deals = settings.Deals;
+
+                if (deals == null || deals.Count == 0)
                 {
                     return;
                 }
@@ -361,12 +353,9 @@ namespace OsEngine.Journal.Internal
 
             try
             {
-                string saveString = GetSaveString();
-
-                using (StreamWriter writer = new StreamWriter(@"Engine\" + _name + @"DealController.txt", false))
-                {
-                    writer.Write(saveString);
-                }
+                SettingsManager.Save(
+                    GetDealsPath(),
+                    BuildDealsSettings());
             }
             catch (Exception error)
             {
@@ -378,12 +367,14 @@ namespace OsEngine.Journal.Internal
             }
         }
 
-        private string GetSaveString()
+        private PositionControllerDealsSettingsDto BuildDealsSettings()
         {
-            StringBuilder result = new StringBuilder();
-
-            result.Append(_commissionType + "\r\n");
-            result.Append(_commissionValue + "\r\n");
+            PositionControllerDealsSettingsDto settings = new PositionControllerDealsSettingsDto
+            {
+                CommissionType = _commissionType,
+                CommissionValue = _commissionValue,
+                Deals = new List<string>()
+            };
 
             if (_startProgram == StartProgram.IsOsTrader)
             {
@@ -398,11 +389,66 @@ namespace OsEngine.Journal.Internal
                         continue;
                     }
 
-                    result.Append(deals[i].GetStringForSave() + "\r\n");
+                    settings.Deals.Add(deals[i].GetStringForSave().ToString());
                 }
             }
 
-            return result.ToString();
+            return settings;
+        }
+
+        private string GetDealsPath()
+        {
+            return @"Engine\" + _name + @"DealController.txt";
+        }
+
+        private static PositionControllerDealsSettingsDto ParseLegacyDealsSettings(string content)
+        {
+            if (string.IsNullOrWhiteSpace(content))
+            {
+                return null;
+            }
+
+            string normalized = content.Replace("\r", string.Empty);
+            string[] lines = normalized.Split('\n');
+
+            if (lines.Length > 0 && lines[lines.Length - 1] == string.Empty)
+            {
+                Array.Resize(ref lines, lines.Length - 1);
+            }
+
+            CommissionType commissionType = CommissionType.None;
+            if (lines.Length > 0)
+            {
+                Enum.TryParse(lines[0], out commissionType);
+            }
+
+            decimal commissionValue = 0;
+            if (lines.Length > 1)
+            {
+                commissionValue = lines[1].ToDecimal();
+            }
+
+            List<string> deals = new List<string>();
+            for (int i = 2; i < lines.Length; i++)
+            {
+                deals.Add(lines[i]);
+            }
+
+            return new PositionControllerDealsSettingsDto
+            {
+                CommissionType = commissionType,
+                CommissionValue = commissionValue,
+                Deals = deals
+            };
+        }
+
+        private sealed class PositionControllerDealsSettingsDto
+        {
+            public CommissionType CommissionType { get; set; }
+
+            public decimal CommissionValue { get; set; }
+
+            public List<string> Deals { get; set; }
         }
 
         public void Save()

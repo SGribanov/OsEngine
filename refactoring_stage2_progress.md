@@ -991,3 +991,18 @@
 ### Verification
 
 - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` -> passed 212/212
+
+## 2026-02-16 - Step 2.3 (JSON settings subsystem) - Incremental adoption in PositionController deals settings
+
+- Migrated `project/OsEngine/Journal/Internal/PositionController.cs` (`Engine\\<Name>DealController.txt`) persistence to `SettingsManager`:
+  - private `SavePositions()` now writes JSON DTO with commission settings and position lines
+  - private `Load()` now reads JSON and falls back to legacy line-based parser
+  - preserved existing deal serialization contract via `Position.GetStringForSave()/SetDealFromString()`
+- Added tests `project/OsEngine.Tests/PositionControllerDealsPersistenceTests.cs`:
+  - `SavePositions_ShouldPersistJson_AndLoadRoundTrip`
+  - `Load_ShouldSupportLegacyLineBasedFormat`
+  - tests invoke private load/save via reflection on uninitialized controller instances with backup/restore of deals settings file
+
+### Verification
+
+- `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` -> passed 214/214
