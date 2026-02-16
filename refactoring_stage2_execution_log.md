@@ -2196,3 +2196,26 @@
   - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` succeeded (`302/302`).
 - **Commit:** `19162e776`
 - **Push:** no (manual push by user)
+
+### Step 2.3 - JSON Settings Subsystem (Incremental Adoption #106)
+
+- **Status:** In Progress (increment completed)
+- **Plan item:** `refactoring_stage2_plan.md` -> Phase 2 / Step 2.3
+- **Changes:**
+  - Migrated ParabolicSaR indicator settings persistence to JSON with legacy fallback:
+    - `project/OsEngine/Charts/CandleChart/Indicators/ParabolicSAR.cs`
+  - Covered persisted file:
+    - dynamic `Engine\\<Name>.txt` path (`ParabolicSaR` indicator)
+  - Preserved legacy compatibility with optional trailing line in historical format
+  - Hardened legacy decimal parsing for `Af` and `MaxAf`:
+    - supports current-culture and invariant decimal formats
+  - Added dedicated persistence tests:
+    - `project/OsEngine.Tests/ParabolicSarPersistenceTests.cs`
+      - `Save_ShouldPersistJson_AndLoadRoundTrip`
+      - `Load_ShouldSupportLegacyLineBasedFormat_WithOptionalTrailingLine`
+  - Updated running progress journal:
+    - `refactoring_stage2_progress.md`
+- **Verification:**
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` succeeded (`304/304`).
+- **Commit:** `a901de033`
+- **Push:** no (manual push by user)
