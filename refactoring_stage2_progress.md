@@ -1564,3 +1564,20 @@
 ### Verification
 
 - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` -> passed 288/288
+
+## 2026-02-16 - Step 2.3 (JSON settings subsystem) - Incremental adoption in Envelops indicator settings
+
+- Migrated `project/OsEngine/Charts/CandleChart/Indicators/Envelops.cs` (`Engine\\<Name>.txt`) persistence to `SettingsManager`:
+  - `Save()` now writes JSON DTO with colors, paint flag, and `Deviation`
+  - `Load()` now reads JSON and falls back to legacy line-based parser
+  - legacy decimal parser supports both invariant (`.`) and current-culture decimal formats
+  - preserved compatibility with historical legacy format that can include an extra ignored line
+  - kept existing nested moving average persistence behavior (`<Name>maSignal`)
+- Added tests `project/OsEngine.Tests/EnvelopsPersistenceTests.cs`:
+  - `Save_ShouldPersistJson_AndLoadRoundTrip`
+  - `Load_ShouldSupportLegacyLineBasedFormat`
+  - tests use backup/restore for indicator settings file and nested MA settings file
+
+### Verification
+
+- `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` -> passed 290/290

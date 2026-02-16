@@ -6,6 +6,7 @@
 using System;
 using System.Collections.Generic;
 using System.Drawing;
+using System.Globalization;
 using System.IO;
 using OsEngine.Entity;
 using OsEngine.Indicators;
@@ -194,14 +195,15 @@ namespace OsEngine.Charts.CandleChart.Indicators
                     return;
                 }
 
-                using (StreamWriter writer = new StreamWriter(@"Engine\" + Name + @".txt", false))
-                {
-                    writer.WriteLine(ColorUp.ToArgb());
-                    writer.WriteLine(ColorDown.ToArgb());
-                    writer.WriteLine(PaintOn);
-                    writer.WriteLine(Deviation);
-                    writer.Close();
-                }
+                SettingsManager.Save(
+                    GetSettingsPath(),
+                    new EnvelopsSettingsDto
+                    {
+                        ColorUpArgb = ColorUp.ToArgb(),
+                        ColorDownArgb = ColorDown.ToArgb(),
+                        PaintOn = PaintOn,
+                        Deviation = Deviation
+                    });
             }
             catch (Exception)
             {
@@ -216,23 +218,26 @@ namespace OsEngine.Charts.CandleChart.Indicators
         /// </summary>
         public void Load()
         {
-            if (!File.Exists(@"Engine\" + Name + @".txt"))
+            if (!File.Exists(GetSettingsPath()))
             {
                 return;
             }
             try
             {
+                EnvelopsSettingsDto settings = SettingsManager.Load(
+                    GetSettingsPath(),
+                    defaultValue: null,
+                    legacyLoader: ParseLegacySettings);
 
-                using (StreamReader reader = new StreamReader(@"Engine\" + Name + @".txt"))
+                if (settings == null)
                 {
-                    ColorUp = Color.FromArgb(Convert.ToInt32(reader.ReadLine()));
-                    ColorDown = Color.FromArgb(Convert.ToInt32(reader.ReadLine()));
-                    PaintOn = Convert.ToBoolean(reader.ReadLine());
-                    Deviation = Convert.ToDecimal(reader.ReadLine());
-                    reader.ReadLine();
-
-                    reader.Close();
+                    return;
                 }
+
+                ColorUp = Color.FromArgb(settings.ColorUpArgb);
+                ColorDown = Color.FromArgb(settings.ColorDownArgb);
+                PaintOn = settings.PaintOn;
+                Deviation = settings.Deviation;
 
 
             }
@@ -249,11 +254,71 @@ namespace OsEngine.Charts.CandleChart.Indicators
         /// </summary>
         public void Delete()
         {
-            if (File.Exists(@"Engine\" + Name + @".txt"))
+            if (File.Exists(GetSettingsPath()))
             {
-                File.Delete(@"Engine\" + Name + @".txt");
+                File.Delete(GetSettingsPath());
             }
             MovingAverage.Delete();
+        }
+
+        private string GetSettingsPath()
+        {
+            return @"Engine\" + Name + @".txt";
+        }
+
+        private static EnvelopsSettingsDto ParseLegacySettings(string content)
+        {
+            if (string.IsNullOrWhiteSpace(content))
+            {
+                return null;
+            }
+
+            string normalized = content.Replace("\r", string.Empty);
+            string[] lines = normalized.Split('\n');
+
+            if (lines.Length > 0 && lines[lines.Length - 1] == string.Empty)
+            {
+                Array.Resize(ref lines, lines.Length - 1);
+            }
+
+            if (lines.Length < 4)
+            {
+                return null;
+            }
+
+            return new EnvelopsSettingsDto
+            {
+                ColorUpArgb = Convert.ToInt32(lines[0]),
+                ColorDownArgb = Convert.ToInt32(lines[1]),
+                PaintOn = Convert.ToBoolean(lines[2]),
+                Deviation = ParseDecimalInvariantOrCurrent(lines[3])
+            };
+        }
+
+        private static decimal ParseDecimalInvariantOrCurrent(string value)
+        {
+            if (decimal.TryParse(value, NumberStyles.Any, CultureInfo.InvariantCulture, out decimal parsedInvariant))
+            {
+                return parsedInvariant;
+            }
+
+            if (decimal.TryParse(value, NumberStyles.Any, CultureInfo.CurrentCulture, out decimal parsedCurrent))
+            {
+                return parsedCurrent;
+            }
+
+            return Convert.ToDecimal(value);
+        }
+
+        private sealed class EnvelopsSettingsDto
+        {
+            public int ColorUpArgb { get; set; }
+
+            public int ColorDownArgb { get; set; }
+
+            public bool PaintOn { get; set; }
+
+            public decimal Deviation { get; set; }
         }
 
         /// <summary>
