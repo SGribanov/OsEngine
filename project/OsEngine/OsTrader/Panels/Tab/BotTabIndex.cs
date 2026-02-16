@@ -593,21 +593,26 @@ namespace OsEngine.OsTrader.Panels.Tab
                     return;
                 }
 
-                using (StreamWriter writer = new StreamWriter(@"Engine\" + TabName + @"SpreadSet.txt", false))
+                string[] connectorUniqueNames = Array.Empty<string>();
+                if (Tabs != null && Tabs.Count > 0)
                 {
-                    string save = "";
+                    connectorUniqueNames = new string[Tabs.Count];
                     for (int i = 0; i < Tabs.Count; i++)
                     {
-                        save += Tabs[i].UniqueName + "#";
+                        connectorUniqueNames[i] = Tabs[i].UniqueName;
                     }
-                    writer.WriteLine(save);
-
-                    writer.WriteLine(_userFormula);
-                    writer.WriteLine(EventsIsOn);
-                    writer.WriteLine(CalculationDepth);
-                    writer.WriteLine(PercentNormalization);
-                    writer.Close();
                 }
+
+                SettingsManager.Save(
+                    GetSpreadSettingsPath(),
+                    new BotTabIndexSpreadSettingsDto
+                    {
+                        ConnectorUniqueNames = connectorUniqueNames,
+                        UserFormula = _userFormula,
+                        EventsIsOn = _eventsIsOn,
+                        CalculationDepth = CalculationDepth,
+                        PercentNormalization = PercentNormalization
+                    });
             }
             catch (Exception)
             {
@@ -623,47 +628,54 @@ namespace OsEngine.OsTrader.Panels.Tab
         {
             _isLoaded = true;
 
-            if (!File.Exists(@"Engine\" + TabName + @"SpreadSet.txt"))
+            string path = GetSpreadSettingsPath();
+
+            if (!File.Exists(path))
             {
                 _isLoaded = false;
                 return;
             }
             try
             {
-                using (StreamReader reader = new StreamReader(@"Engine\" + TabName + @"SpreadSet.txt"))
+                BotTabIndexSpreadSettingsDto settings = SettingsManager.Load(
+                    path,
+                    defaultValue: null,
+                    legacyLoader: ParseLegacySpreadSettings);
+
+                if (settings == null)
                 {
-                    string[] save2 = reader.ReadLine().Split('#');
-                    for (int i = 0; i < save2.Length - 1; i++)
-                    {
-                        ConnectorCandles newConnector = new ConnectorCandles(save2[i], _startProgram, false);
-                        newConnector.SaveTradesInCandles = false;
-
-
-                        if (newConnector.CandleMarketDataType != CandleMarketDataType.MarketDepth)
-                        {
-                            newConnector.NeedToLoadServerData = false;
-                        }
-
-                        Tabs.Add(newConnector);
-                        Tabs[Tabs.Count - 1].NewCandlesChangeEvent += BotTabIndex_NewCandlesChangeEvent;
-                        Tabs[Tabs.Count - 1].LogMessageEvent += SendNewLogMessage;
-                    }
-
-                    UserFormula = reader.ReadLine();
-
-                    if (reader.EndOfStream == false)
-                    {
-                        _eventsIsOn = Convert.ToBoolean(reader.ReadLine());
-                        CalculationDepth = Convert.ToInt32(reader.ReadLine());
-                        PercentNormalization = Convert.ToBoolean(reader.ReadLine());
-                    }
-                    else
-                    {
-                        _eventsIsOn = true;
-                    }
-
-                    reader.Close();
+                    throw new InvalidOperationException("Unable to load spread settings.");
                 }
+
+                string[] uniqueNames = settings.ConnectorUniqueNames ?? Array.Empty<string>();
+                for (int i = 0; i < uniqueNames.Length; i++)
+                {
+                    if (string.IsNullOrWhiteSpace(uniqueNames[i]))
+                    {
+                        continue;
+                    }
+
+                    ConnectorCandles newConnector = new ConnectorCandles(uniqueNames[i], _startProgram, false);
+                    newConnector.SaveTradesInCandles = false;
+
+                    if (newConnector.CandleMarketDataType != CandleMarketDataType.MarketDepth)
+                    {
+                        newConnector.NeedToLoadServerData = false;
+                    }
+
+                    Tabs.Add(newConnector);
+                    Tabs[Tabs.Count - 1].NewCandlesChangeEvent += BotTabIndex_NewCandlesChangeEvent;
+                    Tabs[Tabs.Count - 1].LogMessageEvent += SendNewLogMessage;
+                }
+
+                _userFormula = settings.UserFormula;
+                if (_chartMaster != null)
+                {
+                    FullRecalculateIndex();
+                }
+                _eventsIsOn = settings.EventsIsOn;
+                CalculationDepth = settings.CalculationDepth;
+                PercentNormalization = settings.PercentNormalization;
             }
             catch (Exception)
             {
@@ -679,6 +691,74 @@ namespace OsEngine.OsTrader.Panels.Tab
             }
 
             _isLoaded = false;
+        }
+
+        private string GetSpreadSettingsPath()
+        {
+            return @"Engine\" + TabName + @"SpreadSet.txt";
+        }
+
+        private static BotTabIndexSpreadSettingsDto ParseLegacySpreadSettings(string content)
+        {
+            if (string.IsNullOrWhiteSpace(content))
+            {
+                return null;
+            }
+
+            string normalized = content.Replace("\r", string.Empty);
+            string[] lines = normalized.Split('\n');
+
+            if (lines.Length > 0 && lines[lines.Length - 1] == string.Empty)
+            {
+                Array.Resize(ref lines, lines.Length - 1);
+            }
+
+            string connectorsRow = lines.Length > 0 ? lines[0] : string.Empty;
+            string[] split = connectorsRow.Split('#');
+            List<string> names = new List<string>();
+            for (int i = 0; i < split.Length; i++)
+            {
+                if (!string.IsNullOrWhiteSpace(split[i]))
+                {
+                    names.Add(split[i]);
+                }
+            }
+
+            bool eventsIsOn = true;
+            if (lines.Length > 2)
+            {
+                bool.TryParse(lines[2], out eventsIsOn);
+            }
+
+            int calculationDepth = 1000;
+            if (lines.Length > 3 && int.TryParse(lines[3], out int parsedDepth))
+            {
+                calculationDepth = parsedDepth;
+            }
+
+            bool percentNormalization = false;
+            if (lines.Length > 4)
+            {
+                bool.TryParse(lines[4], out percentNormalization);
+            }
+
+            return new BotTabIndexSpreadSettingsDto
+            {
+                ConnectorUniqueNames = names.ToArray(),
+                UserFormula = lines.Length > 1 ? lines[1] : string.Empty,
+                EventsIsOn = eventsIsOn,
+                CalculationDepth = calculationDepth,
+                PercentNormalization = percentNormalization
+            };
+        }
+
+        private sealed class BotTabIndexSpreadSettingsDto
+        {
+            public string[] ConnectorUniqueNames { get; set; }
+            public string UserFormula { get; set; }
+            public bool EventsIsOn { get; set; }
+            public int CalculationDepth { get; set; }
+            public bool PercentNormalization { get; set; }
         }
 
         bool _isLoaded = false;

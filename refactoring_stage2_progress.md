@@ -416,3 +416,21 @@
 ### Verification
 
 - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` -> passed 134/134
+
+## 2026-02-16 - Step 2.3 (JSON settings subsystem) - Incremental adoption in BotTabIndex spread settings
+
+- Migrated `project/OsEngine/OsTrader/Panels/Tab/BotTabIndex.cs` (`SpreadSet.txt`) persistence to `SettingsManager`:
+  - public `Save()` now writes structured JSON into `Engine\\<TabName>SpreadSet.txt`
+  - public `Load()` now reads JSON and falls back to legacy line-based parser
+  - preserved defaults and connector reconstruction behavior from stored unique names
+  - made formula apply path null-safe for non-constructor test instances (`FullRecalculateIndex()` only when chart is initialized)
+- Added tests `project/OsEngine.Tests/BotTabIndexSpreadPersistenceTests.cs`:
+  - `Save_ShouldPersistJson_AndLoadRoundTrip`
+  - `Load_ShouldSupportLegacyLineBasedFormat`
+- Stabilized `project/OsEngine.Tests/AServerSettingsPersistenceTests.cs`:
+  - switched to uninitialized `YahooServer` instances with explicit `_serverRealization` injection
+  - invoke private `AServer.Load()` via reflection to avoid constructor side effects (UI/file-lock flakiness)
+
+### Verification
+
+- `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` -> passed 136/136

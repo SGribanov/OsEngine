@@ -1,6 +1,9 @@
 using System;
 using System.IO;
 using System.Linq;
+using System.Reflection;
+using System.Runtime.CompilerServices;
+using OsEngine.Market.Servers;
 using OsEngine.Market.Servers.YahooFinance;
 using Xunit;
 
@@ -13,13 +16,14 @@ public class AServerSettingsPersistenceTests
     {
         using AServerSettingsFileScope scope = new AServerSettingsFileScope("YahooFinance");
 
-        YahooServer source = new YahooServer();
+        YahooServer source = CreateServerWithoutConstructor();
         source.ServerPrefix = "prefix_json";
 
         string content = File.ReadAllText(scope.SettingsPath);
         Assert.StartsWith("{", content.TrimStart());
 
-        YahooServer loaded = new YahooServer();
+        YahooServer loaded = CreateServerWithoutConstructor();
+        InvokePrivateLoad(loaded);
         Assert.Equal("prefix_json", loaded.ServerPrefix);
     }
 
@@ -29,8 +33,27 @@ public class AServerSettingsPersistenceTests
         using AServerSettingsFileScope scope = new AServerSettingsFileScope("YahooFinance");
         File.WriteAllLines(scope.SettingsPath, new[] { "legacy_prefix" });
 
-        YahooServer loaded = new YahooServer();
+        YahooServer loaded = CreateServerWithoutConstructor();
+        InvokePrivateLoad(loaded);
         Assert.Equal("legacy_prefix", loaded.ServerPrefix);
+    }
+
+    private static YahooServer CreateServerWithoutConstructor()
+    {
+        YahooServer server = (YahooServer)RuntimeHelpers.GetUninitializedObject(typeof(YahooServer));
+
+        FieldInfo realizationField = typeof(AServer).GetField("_serverRealization", BindingFlags.NonPublic | BindingFlags.Instance)
+            ?? throw new InvalidOperationException("Field _serverRealization not found.");
+        realizationField.SetValue(server, new YahooServerRealization());
+
+        return server;
+    }
+
+    private static void InvokePrivateLoad(YahooServer server)
+    {
+        MethodInfo loadMethod = typeof(AServer).GetMethod("Load", BindingFlags.NonPublic | BindingFlags.Instance)
+            ?? throw new InvalidOperationException("Method Load not found.");
+        loadMethod.Invoke(server, null);
     }
 
     private sealed class AServerSettingsFileScope : IDisposable
