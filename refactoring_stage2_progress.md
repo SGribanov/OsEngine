@@ -541,3 +541,18 @@
 ### Verification
 
 - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` -> passed 152/152
+
+## 2026-02-16 - Step 2.3 (JSON settings subsystem) - Incremental adoption in RamMemoryUsageAnalyze settings
+
+- Migrated `project/OsEngine/OsTrader/SystemAnalyze/SystemAnalyzeMaster.cs` (`RamMemoryUsageAnalyze`) persistence to `SettingsManager`:
+  - private `Save()` now writes JSON into `Engine\\SystemStress\\RamMemorySettings.txt`
+  - private `Load()` now reads JSON and falls back to legacy 3-line format parser
+  - preserved defaults and value-application behavior for `_ramCollectDataIsOn`, `_ramPeriodSavePoint`, `_ramPointsMax`
+- Added tests `project/OsEngine.Tests/RamMemoryUsageAnalyzePersistenceTests.cs`:
+  - `Save_ShouldPersistJson_AndLoadRoundTrip`
+  - `Load_ShouldSupportLegacyLineBasedFormat`
+  - tests invoke private `Load/Save` via reflection on uninitialized instance
+
+### Verification
+
+- `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` -> passed 154/154
