@@ -387,3 +387,23 @@
   - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` succeeded (`122/122`).
 - **Commit:** `bc9a0d013`
 - **Push:** no (manual push by user)
+
+### Step 2.3 - JSON Settings Subsystem (Incremental Adoption #17)
+
+- **Status:** In Progress (increment completed)
+- **Plan item:** `refactoring_stage2_plan.md` -> Phase 2 / Step 2.3
+- **Changes:**
+  - Migrated cluster chart master settings persistence to JSON with legacy fallback:
+    - `project/OsEngine/Charts/ClusterChart/ChartClusterMaster.cs`
+  - Covered persisted file:
+    - `Engine\\<name>ClusterChartMasterSet.txt`
+  - Added dedicated persistence tests:
+    - `project/OsEngine.Tests/ChartClusterMasterPersistenceTests.cs`
+      - `Save_ShouldPersistJson_AndLoadRoundTrip`
+      - `Load_ShouldSupportLegacyLineBasedFormat`
+  - Updated running progress journal:
+    - `refactoring_stage2_progress.md`
+- **Verification:**
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` succeeded (`124/124`).
+- **Commit:** `5c0f3023f`
+- **Push:** no (manual push by user)
