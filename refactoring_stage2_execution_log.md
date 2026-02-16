@@ -2745,3 +2745,24 @@
   - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` succeeded (`339/339`).
 - **Commit:** `c2c7e49c5`
 - **Push:** no (manual push by user)
+
+### Step 2.3 - JSON Settings Subsystem (Incremental Adoption #133)
+
+- **Status:** In Progress (increment completed)
+- **Plan item:** `refactoring_stage2_plan.md` -> Phase 2 / Step 2.3
+- **Changes:**
+  - Migrated journal UI layout settings wrapper in:
+    - `project/OsEngine/Journal/JournalUi2.xaml.cs`
+  - `SaveSettings()` / `LoadSettings()` now use `SettingsManager` DTO JSON.
+  - Added legacy parser for old ordered-line layout format:
+    - `ParseLegacyLayoutSettings(string content)`
+  - Centralized layout path via helper:
+    - `GetLayoutSettingsPath()`
+  - Added tests:
+    - `project/OsEngine.Tests/JournalUi2LayoutSettingsTests.cs`
+  - Updated running progress journal:
+    - `refactoring_stage2_progress.md`
+- **Verification:**
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` succeeded (`340/340`).
+- **Commit:** `b3b813f4e`
+- **Push:** no (manual push by user)
