@@ -513,7 +513,10 @@ namespace OsEngine.Robots
         public static bool NeedToReloadOptimizerBots = true; // Renamed for clarity
         private static List<string> _optimizerBotsWithParam = new List<string>();
         private static readonly Lock _optimizerBotsLocker = new();
-        private const string OptimizerBotsFileName = "Engine\\OptimizerBots.txt";
+        private static string GetOptimizerBotsFilePath()
+        {
+            return "Engine\\OptimizerBots.txt";
+        }
 
 
         private static void LoadOptimizerBotsNamesFromFile()
@@ -521,14 +524,15 @@ namespace OsEngine.Robots
             lock (_optimizerBotsLocker)
             {
                 _optimizerBotsWithParam.Clear();
-                if (!File.Exists(OptimizerBotsFileName))
+                string optimizerBotsFilePath = GetOptimizerBotsFilePath();
+                if (!File.Exists(optimizerBotsFilePath))
                 {
                     return;
                 }
                 try
                 {
                     OptimizerBotsSettingsDto settings = SettingsManager.Load(
-                        OptimizerBotsFileName,
+                        optimizerBotsFilePath,
                         defaultValue: null,
                         legacyLoader: ParseLegacyOptimizerBotsSettings);
 
@@ -552,14 +556,15 @@ namespace OsEngine.Robots
             {
                 try
                 {
-                    string dir = Path.GetDirectoryName(OptimizerBotsFileName);
+                    string optimizerBotsFilePath = GetOptimizerBotsFilePath();
+                    string dir = Path.GetDirectoryName(optimizerBotsFilePath);
                     if (!string.IsNullOrEmpty(dir) && !Directory.Exists(dir))
                     {
                         Directory.CreateDirectory(dir);
                     }
 
                     SettingsManager.Save(
-                        OptimizerBotsFileName,
+                        optimizerBotsFilePath,
                         new OptimizerBotsSettingsDto
                         {
                             BotNames = new List<string>(_optimizerBotsWithParam)

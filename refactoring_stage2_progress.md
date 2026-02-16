@@ -2270,3 +2270,18 @@
 ### Verification
 
 - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` -> passed 343/343
+
+## 2026-02-16 - Step 2.3 (JSON settings subsystem) - Path consistency cleanup in BotFactory optimizer-bots storage path
+
+- Updated `project/OsEngine/Robots/BotFactory.cs`:
+  - replaced hardcoded `OptimizerBotsFileName` constant usage with helper:
+    - `GetOptimizerBotsFilePath()`
+  - updated path usage in:
+    - `LoadOptimizerBotsNamesFromFile()`
+    - `SaveOptimizerBotsNamesToFile()`
+  - save-path directory extraction now derives from helper path.
+- No behavior changes intended; storage file remains `Engine\\OptimizerBots.txt`.
+
+### Verification
+
+- `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` -> passed 343/343
