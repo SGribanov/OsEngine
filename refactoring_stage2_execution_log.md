@@ -874,3 +874,23 @@
   - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` succeeded (`172/172`).
 - **Commit:** `b7e79172f`
 - **Push:** no (manual push by user)
+
+### Step 2.3 - JSON Settings Subsystem (Incremental Adoption #41)
+
+- **Status:** In Progress (increment completed)
+- **Plan item:** `refactoring_stage2_plan.md` -> Phase 2 / Step 2.3
+- **Changes:**
+  - Migrated tester security dop settings persistence to JSON with legacy fallback:
+    - `project/OsEngine/Market/Servers/Tester/TesterServer.cs`
+  - Covered persisted file:
+    - dynamic `...\\SecuritiesSettings.txt` path
+  - Added dedicated persistence tests:
+    - `project/OsEngine.Tests/TesterServerSecurityDopSettingsPersistenceTests.cs`
+      - `SaveSecurityDopSettings_ShouldPersistJson_AndLoadSettings`
+      - `LoadSecurityDopSettings_ShouldSupportLegacyLineBasedFormat`
+  - Updated running progress journal:
+    - `refactoring_stage2_progress.md`
+- **Verification:**
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` succeeded (`174/174`).
+- **Commit:** `0be3d609e`
+- **Push:** no (manual push by user)
