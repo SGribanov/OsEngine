@@ -854,3 +854,23 @@
   - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` succeeded (`170/170`).
 - **Commit:** `a16635e96`
 - **Push:** no (manual push by user)
+
+### Step 2.3 - JSON Settings Subsystem (Incremental Adoption #40)
+
+- **Status:** In Progress (increment completed)
+- **Plan item:** `refactoring_stage2_plan.md` -> Phase 2 / Step 2.3
+- **Changes:**
+  - Migrated tester securities timeframe settings persistence to JSON with legacy fallback:
+    - `project/OsEngine/Market/Servers/Tester/TesterServer.cs`
+  - Covered persisted file:
+    - dynamic `Engine\\TestServerSecuritiesTf...txt` path
+  - Added dedicated persistence tests:
+    - `project/OsEngine.Tests/TesterServerSecuritiesTimeFramePersistenceTests.cs`
+      - `SaveSetSecuritiesTimeFrameSettings_ShouldPersistJson_AndLoadRoundTrip`
+      - `LoadSetSecuritiesTimeFrameSettings_ShouldSupportLegacyLineBasedFormat`
+  - Updated running progress journal:
+    - `refactoring_stage2_progress.md`
+- **Verification:**
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` succeeded (`172/172`).
+- **Commit:** `b7e79172f`
+- **Push:** no (manual push by user)
