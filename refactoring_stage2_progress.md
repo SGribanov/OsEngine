@@ -128,3 +128,17 @@
 ### Verification
 
 - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` -> passed 92/92
+
+## 2026-02-16 - Step 2.3 (JSON settings subsystem) - Incremental adoption in HorizontalVolume
+
+- Migrated `project/OsEngine/Entity/HorizontalVolume.cs` persistence to `SettingsManager`:
+  - `Save()` now writes JSON via `SettingsManager.Save(...)`
+  - `Load()` now reads via `SettingsManager.Load(...)`
+  - added legacy fallback parser for the old single-line decimal format
+- Added tests `project/OsEngine.Tests/HorizontalVolumePersistenceTests.cs`:
+  - `Save_ShouldPersistJson_AndLoadRoundTrip`
+  - `Load_ShouldSupportLegacyLineBasedFormat`
+
+### Verification
+
+- `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` -> passed 94/94

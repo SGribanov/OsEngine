@@ -35,12 +35,12 @@ namespace OsEngine.Entity
         {
             try
             {
-                using (StreamWriter writer = new StreamWriter(@"Engine\" + _name + @"HorizontalVolumeSet.txt", false))
+                HorizontalVolumeSettingsDto settings = new HorizontalVolumeSettingsDto
                 {
-                    writer.WriteLine(_lineStep);
+                    LineStep = _lineStep
+                };
 
-                    writer.Close();
-                }
+                SettingsManager.Save(GetSettingsPath(), settings);
             }
             catch (Exception ex)
             {
@@ -54,23 +54,53 @@ namespace OsEngine.Entity
         /// </summary>
         public void Load()
         {
-            if (!File.Exists(@"Engine\" + _name + @"HorizontalVolumeSet.txt"))
-            {
-                return;
-            }
             try
             {
-                using (StreamReader reader = new StreamReader(@"Engine\" + _name + @"HorizontalVolumeSet.txt"))
-                {
-                    _lineStep = reader.ReadLine().ToDecimal();
+                HorizontalVolumeSettingsDto settings = SettingsManager.Load(
+                    GetSettingsPath(),
+                    defaultValue: null,
+                    legacyLoader: ParseLegacySettings);
 
-                    reader.Close();
+                if (settings != null)
+                {
+                    _lineStep = settings.LineStep;
                 }
             }
             catch (Exception ex)
             {
                 SendNewLogMessage(ex.ToString(), LogMessageType.Error);
             }
+        }
+
+        private string GetSettingsPath()
+        {
+            return @"Engine\" + _name + @"HorizontalVolumeSet.txt";
+        }
+
+        private HorizontalVolumeSettingsDto ParseLegacySettings(string content)
+        {
+            if (string.IsNullOrWhiteSpace(content))
+            {
+                return null;
+            }
+
+            string normalized = content.Replace("\r", string.Empty);
+            string[] lines = normalized.Split('\n');
+
+            if (lines.Length == 0 || string.IsNullOrWhiteSpace(lines[0]))
+            {
+                return null;
+            }
+
+            return new HorizontalVolumeSettingsDto
+            {
+                LineStep = lines[0].ToDecimal()
+            };
+        }
+
+        private class HorizontalVolumeSettingsDto
+        {
+            public decimal LineStep { get; set; }
         }
 
         /// <summary>

@@ -108,3 +108,21 @@
   - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` succeeded (`92/92`).
 - **Commit:** `3f865ce92`
 - **Push:** no (manual push by user)
+
+### Step 2.3 - JSON Settings Subsystem (Incremental Adoption #3)
+
+- **Status:** In Progress (increment completed)
+- **Plan item:** `refactoring_stage2_plan.md` -> Phase 2 / Step 2.3
+- **Changes:**
+  - Migrated `HorizontalVolume` persistence to JSON with legacy fallback:
+    - `project/OsEngine/Entity/HorizontalVolume.cs`
+  - Added dedicated persistence tests:
+    - `project/OsEngine.Tests/HorizontalVolumePersistenceTests.cs`
+      - `Save_ShouldPersistJson_AndLoadRoundTrip`
+      - `Load_ShouldSupportLegacyLineBasedFormat`
+  - Updated running progress journal:
+    - `refactoring_stage2_progress.md`
+- **Verification:**
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` succeeded (`94/94`).
+- **Commit:** pending local commit in current session
+- **Push:** no (manual push by user)
