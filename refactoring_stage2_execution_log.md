@@ -2043,3 +2043,27 @@
   - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` succeeded (`288/288`).
 - **Commit:** `deb4f32e4`
 - **Push:** no (manual push by user)
+
+### Step 2.3 - JSON Settings Subsystem (Incremental Adoption #99)
+
+- **Status:** In Progress (increment completed)
+- **Plan item:** `refactoring_stage2_plan.md` -> Phase 2 / Step 2.3
+- **Changes:**
+  - Migrated Envelops indicator settings persistence to JSON with legacy fallback:
+    - `project/OsEngine/Charts/CandleChart/Indicators/Envelops.cs`
+  - Covered persisted file:
+    - dynamic `Engine\\<Name>.txt` path (`Envelops` indicator)
+  - Kept existing nested moving average persistence behavior:
+    - `Engine\\<Name>maSignal.txt`
+  - Hardened legacy decimal parsing in fallback loader:
+    - supports invariant and current-culture decimal formats
+  - Added dedicated persistence tests:
+    - `project/OsEngine.Tests/EnvelopsPersistenceTests.cs`
+      - `Save_ShouldPersistJson_AndLoadRoundTrip`
+      - `Load_ShouldSupportLegacyLineBasedFormat`
+  - Updated running progress journal:
+    - `refactoring_stage2_progress.md`
+- **Verification:**
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` succeeded (`290/290`).
+- **Commit:** `b85fb5fab`
+- **Push:** no (manual push by user)
