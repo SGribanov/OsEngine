@@ -1785,35 +1785,39 @@ namespace OsEngine.OsTrader.Panels.Tab
         /// </summary>
         private void Load()
         {
-            if (!File.Exists(@"Engine\" + Name + @"PolygonSettings.txt"))
+            if (!File.Exists(GetSettingsPath()))
             {
                 return;
             }
             try
             {
-                using (StreamReader reader = new StreamReader(@"Engine\" + Name + @"PolygonSettings.txt"))
+                PolygonToTradeSettingsDto settings = SettingsManager.Load(
+                    GetSettingsPath(),
+                    defaultValue: null,
+                    legacyLoader: ParseLegacyPolygonToTradeSettings);
+
+                if (settings == null)
                 {
-                    PairNum = Convert.ToInt32(reader.ReadLine());
-                    _showTradePanelOnChart = Convert.ToBoolean(reader.ReadLine());
-
-                    BaseCurrency = reader.ReadLine();
-                    Enum.TryParse(reader.ReadLine(), out Tab1TradeSide);
-                    Enum.TryParse(reader.ReadLine(), out Tab2TradeSide);
-                    Enum.TryParse(reader.ReadLine(), out Tab3TradeSide);
-                    SeparatorToSecurities = reader.ReadLine();
-                    Enum.TryParse(reader.ReadLine(), out CommissionType);
-                    CommissionValue = reader.ReadLine().ToDecimal();
-                    CommissionIsSubstract = Convert.ToBoolean(reader.ReadLine());
-                    Enum.TryParse(reader.ReadLine(), out DelayType);
-                    DelayMls = Convert.ToInt32(reader.ReadLine());
-                    QtyStart = reader.ReadLine().ToDecimal();
-                    SlippagePercent = reader.ReadLine().ToDecimal();
-                    ProfitToSignal = reader.ReadLine().ToDecimal();
-                    Enum.TryParse(reader.ReadLine(), out ActionOnSignalType);
-                    Enum.TryParse(reader.ReadLine(), out OrderPriceType);
-
-                    reader.Close();
+                    return;
                 }
+
+                PairNum = settings.PairNum;
+                _showTradePanelOnChart = settings.ShowTradePanelOnChart;
+                BaseCurrency = settings.BaseCurrency;
+                Tab1TradeSide = settings.Tab1TradeSide;
+                Tab2TradeSide = settings.Tab2TradeSide;
+                Tab3TradeSide = settings.Tab3TradeSide;
+                SeparatorToSecurities = settings.SeparatorToSecurities;
+                CommissionType = settings.CommissionType;
+                CommissionValue = settings.CommissionValue;
+                CommissionIsSubstract = settings.CommissionIsSubstract;
+                DelayType = settings.DelayType;
+                DelayMls = settings.DelayMls;
+                QtyStart = settings.QtyStart;
+                SlippagePercent = settings.SlippagePercent;
+                ProfitToSignal = settings.ProfitToSignal;
+                ActionOnSignalType = settings.ActionOnSignalType;
+                OrderPriceType = settings.OrderPriceType;
             }
             catch (Exception)
             {
@@ -1828,28 +1832,28 @@ namespace OsEngine.OsTrader.Panels.Tab
         {
             try
             {
-                using (StreamWriter writer = new StreamWriter(@"Engine\" + Name + @"PolygonSettings.txt", false))
-                {
-                    writer.WriteLine(PairNum);
-                    writer.WriteLine(_showTradePanelOnChart);
-
-                    writer.WriteLine(BaseCurrency);
-                    writer.WriteLine(Tab1TradeSide);
-                    writer.WriteLine(Tab2TradeSide);
-                    writer.WriteLine(Tab3TradeSide);
-                    writer.WriteLine(SeparatorToSecurities);
-                    writer.WriteLine(CommissionType);
-                    writer.WriteLine(CommissionValue);
-                    writer.WriteLine(CommissionIsSubstract);
-                    writer.WriteLine(DelayType);
-                    writer.WriteLine(DelayMls);
-                    writer.WriteLine(QtyStart);
-                    writer.WriteLine(SlippagePercent);
-                    writer.WriteLine(ProfitToSignal);
-                    writer.WriteLine(ActionOnSignalType);
-                    writer.WriteLine(OrderPriceType);
-                    writer.Close();
-                }
+                SettingsManager.Save(
+                    GetSettingsPath(),
+                    new PolygonToTradeSettingsDto
+                    {
+                        PairNum = PairNum,
+                        ShowTradePanelOnChart = _showTradePanelOnChart,
+                        BaseCurrency = BaseCurrency,
+                        Tab1TradeSide = Tab1TradeSide,
+                        Tab2TradeSide = Tab2TradeSide,
+                        Tab3TradeSide = Tab3TradeSide,
+                        SeparatorToSecurities = SeparatorToSecurities,
+                        CommissionType = CommissionType,
+                        CommissionValue = CommissionValue,
+                        CommissionIsSubstract = CommissionIsSubstract,
+                        DelayType = DelayType,
+                        DelayMls = DelayMls,
+                        QtyStart = QtyStart,
+                        SlippagePercent = SlippagePercent,
+                        ProfitToSignal = ProfitToSignal,
+                        ActionOnSignalType = ActionOnSignalType,
+                        OrderPriceType = OrderPriceType
+                    });
             }
             catch (Exception)
             {
@@ -1864,9 +1868,9 @@ namespace OsEngine.OsTrader.Panels.Tab
         {
             try
             {
-                if (File.Exists(@"Engine\" + Name + @"PolygonSettings.txt"))
+                if (File.Exists(GetSettingsPath()))
                 {
-                    File.Delete(@"Engine\" + Name + @"PolygonSettings.txt");
+                    File.Delete(GetSettingsPath());
                 }
             }
             catch
@@ -1893,6 +1897,67 @@ namespace OsEngine.OsTrader.Panels.Tab
             Tab1.Delete();
             Tab2.Delete();
             Tab3.Delete();
+        }
+
+        private string GetSettingsPath()
+        {
+            return @"Engine\" + Name + @"PolygonSettings.txt";
+        }
+
+        private static PolygonToTradeSettingsDto ParseLegacyPolygonToTradeSettings(string content)
+        {
+            if (string.IsNullOrWhiteSpace(content))
+            {
+                return null;
+            }
+
+            string[] lines = content.Replace("\r", string.Empty).Split('\n');
+
+            PolygonToTradeSettingsDto settings = new PolygonToTradeSettingsDto
+            {
+                ShowTradePanelOnChart = true
+            };
+
+            if (lines.Length > 0 && int.TryParse(lines[0], out int pairNum)) settings.PairNum = pairNum;
+            if (lines.Length > 1 && bool.TryParse(lines[1], out bool showTradePanelOnChart)) settings.ShowTradePanelOnChart = showTradePanelOnChart;
+            if (lines.Length > 2) settings.BaseCurrency = lines[2];
+            if (lines.Length > 3 && Enum.TryParse(lines[3], out Side tab1TradeSide)) settings.Tab1TradeSide = tab1TradeSide;
+            if (lines.Length > 4 && Enum.TryParse(lines[4], out Side tab2TradeSide)) settings.Tab2TradeSide = tab2TradeSide;
+            if (lines.Length > 5 && Enum.TryParse(lines[5], out Side tab3TradeSide)) settings.Tab3TradeSide = tab3TradeSide;
+            if (lines.Length > 6) settings.SeparatorToSecurities = lines[6];
+            if (lines.Length > 7 && Enum.TryParse(lines[7], out CommissionPolygonType commissionType)) settings.CommissionType = commissionType;
+            if (lines.Length > 8) settings.CommissionValue = lines[8].ToDecimal();
+            if (lines.Length > 9 && bool.TryParse(lines[9], out bool commissionIsSubstract)) settings.CommissionIsSubstract = commissionIsSubstract;
+            if (lines.Length > 10 && Enum.TryParse(lines[10], out DelayPolygonType delayType)) settings.DelayType = delayType;
+            if (lines.Length > 11 && int.TryParse(lines[11], out int delayMls)) settings.DelayMls = delayMls;
+            if (lines.Length > 12) settings.QtyStart = lines[12].ToDecimal();
+            if (lines.Length > 13) settings.SlippagePercent = lines[13].ToDecimal();
+            if (lines.Length > 14) settings.ProfitToSignal = lines[14].ToDecimal();
+            if (lines.Length > 15 && Enum.TryParse(lines[15], out PolygonActionOnSignalType actionOnSignalType)) settings.ActionOnSignalType = actionOnSignalType;
+            if (lines.Length > 16 && Enum.TryParse(lines[16], out OrderPriceType orderPriceType)) settings.OrderPriceType = orderPriceType;
+
+            return settings;
+        }
+
+        private sealed class PolygonToTradeSettingsDto
+        {
+            public int PairNum { get; set; }
+            public bool ShowTradePanelOnChart { get; set; }
+            public string BaseCurrency { get; set; }
+            public Side Tab1TradeSide { get; set; }
+            public Side Tab2TradeSide { get; set; }
+            public Side Tab3TradeSide { get; set; }
+            public string SeparatorToSecurities { get; set; }
+            public CommissionPolygonType CommissionType { get; set; }
+            public decimal CommissionValue { get; set; }
+            public bool CommissionIsSubstract { get; set; }
+            public DelayPolygonType DelayType { get; set; }
+            public int DelayMls { get; set; }
+            public decimal QtyStart { get; set; }
+            public decimal SlippagePercent { get; set; }
+            public decimal ProfitToSignal { get; set; }
+            public PolygonActionOnSignalType ActionOnSignalType { get; set; }
+            public OrderPriceType OrderPriceType { get; set; }
         }
 
         /// <summary>

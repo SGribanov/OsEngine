@@ -1937,3 +1937,18 @@
 ### Verification
 
 - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` -> passed 326/326
+
+## 2026-02-16 - Step 2.3 (JSON settings subsystem) - PolygonToTrade settings migrated to JSON with legacy compatibility
+
+- Updated `project/OsEngine/OsTrader/Panels/Tab/BotTabPolygon.cs` (`PolygonToTrade`):
+  - migrated `Save()` / `Load()` from line-based file IO to `SettingsManager`
+  - added legacy parser `ParseLegacyPolygonToTradeSettings(string content)` for old ordered-line format
+  - introduced DTO `PolygonToTradeSettingsDto` for typed settings persistence
+  - centralized settings path via `GetSettingsPath()` and reused it in load/save/delete
+- Added tests in `project/OsEngine.Tests/PolygonToTradeSettingsPersistenceTests.cs`:
+  - verifies JSON save and load roundtrip for `PolygonToTrade` settings
+  - verifies loading legacy line-based format
+
+### Verification
+
+- `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` -> passed 328/328
