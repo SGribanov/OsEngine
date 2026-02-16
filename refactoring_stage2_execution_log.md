@@ -714,3 +714,23 @@
   - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` succeeded (`156/156`).
 - **Commit:** `dc4af9143`
 - **Push:** no (manual push by user)
+
+### Step 2.3 - JSON Settings Subsystem (Incremental Adoption #33)
+
+- **Status:** In Progress (increment completed)
+- **Plan item:** `refactoring_stage2_plan.md` -> Phase 2 / Step 2.3
+- **Changes:**
+  - Migrated ECQ usage analyze settings persistence to JSON with legacy fallback:
+    - `project/OsEngine/OsTrader/SystemAnalyze/SystemAnalyzeMaster.cs` (`EcqUsageAnalyze`)
+  - Covered persisted file:
+    - `Engine\\SystemStress\\EcqMemorySettings.txt`
+  - Added dedicated persistence tests:
+    - `project/OsEngine.Tests/EcqUsageAnalyzePersistenceTests.cs`
+      - `Save_ShouldPersistJson_AndLoadRoundTrip`
+      - `Load_ShouldSupportLegacyLineBasedFormat`
+  - Updated running progress journal:
+    - `refactoring_stage2_progress.md`
+- **Verification:**
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` succeeded (`158/158`).
+- **Commit:** `94aaf1e0a`
+- **Push:** no (manual push by user)
