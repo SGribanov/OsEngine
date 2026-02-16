@@ -2787,3 +2787,26 @@
   - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` succeeded (`341/341`).
 - **Commit:** `6864c1206`
 - **Push:** no (manual push by user)
+
+### Step 2.3 - JSON Settings Subsystem (Incremental Adoption #135)
+
+- **Status:** In Progress (increment completed)
+- **Plan item:** `refactoring_stage2_plan.md` -> Phase 2 / Step 2.3
+- **Changes:**
+  - Migrated optimizer standard-parameters settings wrappers in:
+    - `project/OsEngine/OsOptimizer/OptimizerMaster.cs`
+  - Parameters and on/off settings wrappers now use `SettingsManager` DTO JSON with compatibility loaders.
+  - Added legacy parsers for old line-based formats:
+    - `ParseLegacyStandardParameters(string content)`
+    - `ParseLegacyStandardParametersOnOff(string content)`
+  - Centralized paths via:
+    - `GetStandardParametersPath()`
+    - `GetStandardParametersOnOffPath()`
+  - Added tests:
+    - `project/OsEngine.Tests/OptimizerMasterPersistenceTests.cs`
+  - Updated running progress journal:
+    - `refactoring_stage2_progress.md`
+- **Verification:**
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` succeeded (`343/343`).
+- **Commit:** `66066f1fb`
+- **Push:** no (manual push by user)
