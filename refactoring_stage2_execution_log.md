@@ -954,3 +954,23 @@
   - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` succeeded (`180/180`).
 - **Commit:** `2f8e072d5`
 - **Push:** no (manual push by user)
+
+### Step 2.3 - JSON Settings Subsystem (Incremental Adoption #45)
+
+- **Status:** In Progress (increment completed)
+- **Plan item:** `refactoring_stage2_plan.md` -> Phase 2 / Step 2.3
+- **Changes:**
+  - Migrated proxy master core settings persistence to JSON with legacy fallback:
+    - `project/OsEngine/Market/Proxy/ProxyMaster.cs`
+  - Covered persisted file:
+    - `Engine\\ProxyMaster.txt`
+  - Added dedicated persistence tests:
+    - `project/OsEngine.Tests/ProxyMasterSettingsPersistenceTests.cs`
+      - `SaveSettings_ShouldPersistJson_AndLoadRoundTrip`
+      - `LoadSettings_ShouldSupportLegacyLineBasedFormat`
+  - Updated running progress journal:
+    - `refactoring_stage2_progress.md`
+- **Verification:**
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` succeeded (`182/182`).
+- **Commit:** `e71c81f72`
+- **Push:** no (manual push by user)
