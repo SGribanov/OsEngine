@@ -247,3 +247,23 @@
   - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` succeeded (`108/108`).
 - **Commit:** `c5dd4220a`
 - **Push:** no (manual push by user)
+
+### Step 2.3 - JSON Settings Subsystem (Incremental Adoption #10)
+
+- **Status:** In Progress (increment completed)
+- **Plan item:** `refactoring_stage2_plan.md` -> Phase 2 / Step 2.3
+- **Changes:**
+  - Migrated webhook server settings persistence to JSON with legacy fallback:
+    - `project/OsEngine/Logging/ServerWebhook.cs`
+  - Covered persisted file:
+    - `Engine\\webhookSet.txt`
+  - Added dedicated persistence tests:
+    - `project/OsEngine.Tests/ServerWebhookPersistenceTests.cs`
+      - `Save_ShouldPersistJson_AndLoadRoundTrip`
+      - `Load_ShouldSupportLegacyLineBasedFormat`
+  - Updated running progress journal:
+    - `refactoring_stage2_progress.md`
+- **Verification:**
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` succeeded (`110/110`).
+- **Commit:** `7949ce1ab`
+- **Push:** no (manual push by user)
