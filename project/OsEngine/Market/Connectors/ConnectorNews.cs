@@ -51,21 +51,26 @@ namespace OsEngine.Market.Connectors
         /// </summary>
         private void Load()
         {
-            if (!File.Exists(@"Engine\" + _name + @"ConnectorNews.txt"))
+            if (!File.Exists(SettingsPath))
             {
                 return;
             }
             try
             {
-                using (StreamReader reader = new StreamReader(@"Engine\" + _name + @"ConnectorNews.txt"))
-                {
-                    Enum.TryParse(reader.ReadLine(), true, out _serverType);
-                    _eventsIsOn = Convert.ToBoolean(reader.ReadLine());
-                    _countNewsToSave = Convert.ToInt32(reader.ReadLine());
-                    _serverFullName = reader.ReadLine();
+                ConnectorNewsSettings settings = SettingsManager.Load(
+                    SettingsPath,
+                    defaultValue: null,
+                    legacyLoader: ParseLegacySettings);
 
-                    reader.Close();
+                if (settings == null)
+                {
+                    return;
                 }
+
+                _serverType = settings.ServerType;
+                _eventsIsOn = settings.EventsIsOn;
+                _countNewsToSave = settings.CountNewsToSave;
+                _serverFullName = settings.ServerFullName;
             }
             catch
             {
@@ -89,15 +94,15 @@ namespace OsEngine.Market.Connectors
             }
             try
             {
-                using (StreamWriter writer = new StreamWriter(@"Engine\" + _name + @"ConnectorNews.txt", false))
-                {
-                    writer.WriteLine(_serverType);
-                    writer.WriteLine(_eventsIsOn);
-                    writer.WriteLine(_countNewsToSave);
-                    writer.WriteLine(_serverFullName);
-
-                    writer.Close();
-                }
+                SettingsManager.Save(
+                    SettingsPath,
+                    new ConnectorNewsSettings
+                    {
+                        ServerType = _serverType,
+                        EventsIsOn = _eventsIsOn,
+                        CountNewsToSave = _countNewsToSave,
+                        ServerFullName = _serverFullName
+                    });
             }
             catch
             {
@@ -117,9 +122,9 @@ namespace OsEngine.Market.Connectors
 
                 try
                 {
-                    if (File.Exists(@"Engine\" + _name + @"ConnectorNews.txt"))
+                    if (File.Exists(SettingsPath))
                     {
-                        File.Delete(@"Engine\" + _name + @"ConnectorNews.txt");
+                        File.Delete(SettingsPath);
                     }
                 }
                 catch
@@ -659,5 +664,43 @@ namespace OsEngine.Market.Connectors
         public event Action<string, LogMessageType> LogMessageEvent;
 
         #endregion
+
+        private string SettingsPath => @"Engine\" + _name + @"ConnectorNews.txt";
+
+        private static ConnectorNewsSettings ParseLegacySettings(string content)
+        {
+            if (string.IsNullOrWhiteSpace(content))
+            {
+                return null;
+            }
+
+            string[] lines = content.Replace("\r", string.Empty).Split('\n');
+
+            if (lines.Length < 3)
+            {
+                return null;
+            }
+
+            Enum.TryParse(lines[0], true, out ServerType serverType);
+
+            return new ConnectorNewsSettings
+            {
+                ServerType = serverType,
+                EventsIsOn = Convert.ToBoolean(lines[1]),
+                CountNewsToSave = Convert.ToInt32(lines[2]),
+                ServerFullName = lines.Length > 3 ? lines[3] : null
+            };
+        }
+
+        private sealed class ConnectorNewsSettings
+        {
+            public ServerType ServerType { get; set; }
+
+            public bool EventsIsOn { get; set; }
+
+            public int CountNewsToSave { get; set; }
+
+            public string ServerFullName { get; set; }
+        }
     }
 }

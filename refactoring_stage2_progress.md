@@ -781,3 +781,18 @@
 ### Verification
 
 - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` -> passed 184/184
+
+## 2026-02-16 - Step 2.3 (JSON settings subsystem) - Incremental adoption in ConnectorNews settings
+
+- Migrated `project/OsEngine/Market/Connectors/ConnectorNews.cs` (`<name>ConnectorNews.txt`) persistence to `SettingsManager`:
+  - private `Load()` now reads JSON and falls back to legacy line-based parser
+  - public `Save()` now writes JSON into dynamic `Engine\\<name>ConnectorNews.txt` path
+  - preserved delete/save guards and existing settings contract (`server type/events flag/news limit/server full name`)
+- Added tests `project/OsEngine.Tests/ConnectorNewsSettingsPersistenceTests.cs`:
+  - `Save_ShouldPersistJson_AndLoadRoundTrip`
+  - `Load_ShouldSupportLegacyLineBasedFormat`
+  - tests invoke private loader and backing fields via reflection on uninitialized instance (without starting subscription task)
+
+### Verification
+
+- `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` -> passed 186/186
