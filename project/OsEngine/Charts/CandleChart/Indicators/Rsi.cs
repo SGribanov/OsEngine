@@ -138,19 +138,24 @@ namespace OsEngine.Charts.CandleChart.Indicators
         /// </summary>
         public void Load()
         {
-            if (!File.Exists(@"Engine\" + Name + @".txt"))
+            if (!File.Exists(GetSettingsPath()))
             {
                 return;
             }
             try
             {
-                using (StreamReader reader = new StreamReader(@"Engine\" + Name + @".txt"))
-                {
-                    ColorBase = Color.FromArgb(Convert.ToInt32(reader.ReadLine()));
-                    Length = Convert.ToInt32(reader.ReadLine());
+                RsiSettingsDto settings = SettingsManager.Load(
+                    GetSettingsPath(),
+                    defaultValue: null,
+                    legacyLoader: ParseLegacySettings);
 
-                    reader.Close();
+                if (settings == null)
+                {
+                    return;
                 }
+
+                ColorBase = Color.FromArgb(settings.ColorArgb);
+                Length = settings.Length;
             }
             catch (Exception)
             {
@@ -171,13 +176,14 @@ namespace OsEngine.Charts.CandleChart.Indicators
                 {
                     return;
                 }
-                using (StreamWriter writer = new StreamWriter(@"Engine\" + Name + @".txt", false))
-                {
-                    writer.WriteLine(ColorBase.ToArgb());
-                    writer.WriteLine(Length);
 
-                    writer.Close();
-                }
+                SettingsManager.Save(
+                    GetSettingsPath(),
+                    new RsiSettingsDto
+                    {
+                        ColorArgb = ColorBase.ToArgb(),
+                        Length = Length
+                    });
             }
             catch (Exception)
             {
@@ -192,10 +198,49 @@ namespace OsEngine.Charts.CandleChart.Indicators
         /// </summary>
         public void Delete()
         {
-            if (File.Exists(@"Engine\" + Name + @".txt"))
+            if (File.Exists(GetSettingsPath()))
             {
-                File.Delete(@"Engine\" + Name + @".txt");
+                File.Delete(GetSettingsPath());
             }
+        }
+
+        private string GetSettingsPath()
+        {
+            return @"Engine\" + Name + @".txt";
+        }
+
+        private static RsiSettingsDto ParseLegacySettings(string content)
+        {
+            if (string.IsNullOrWhiteSpace(content))
+            {
+                return null;
+            }
+
+            string normalized = content.Replace("\r", string.Empty);
+            string[] lines = normalized.Split('\n');
+
+            if (lines.Length > 0 && lines[lines.Length - 1] == string.Empty)
+            {
+                Array.Resize(ref lines, lines.Length - 1);
+            }
+
+            if (lines.Length < 2)
+            {
+                return null;
+            }
+
+            return new RsiSettingsDto
+            {
+                ColorArgb = Convert.ToInt32(lines[0]),
+                Length = Convert.ToInt32(lines[1])
+            };
+        }
+
+        private sealed class RsiSettingsDto
+        {
+            public int ColorArgb { get; set; }
+
+            public int Length { get; set; }
         }
 
         /// <summary>
