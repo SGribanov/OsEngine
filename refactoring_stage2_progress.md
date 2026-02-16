@@ -901,3 +901,18 @@
 ### Verification
 
 - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` -> passed 200/200
+
+## 2026-02-16 - Step 2.3 (JSON settings subsystem) - Incremental adoption in BotTabScreener indicators settings
+
+- Migrated `project/OsEngine/OsTrader/Panels/Tab/BotTabScreener.cs` (`Engine\\<TabName>ScreenerIndicators.txt`) persistence to `SettingsManager`:
+  - private `SaveIndicators()` now writes JSON wrapper
+  - private `LoadIndicators()` now reads JSON and falls back to legacy line-based parser
+  - preserved indicator serialization contract via `IndicatorOnTabs.GetSaveStr()/SetFromStr()`
+- Added tests `project/OsEngine.Tests/BotTabScreenerIndicatorsPersistenceTests.cs`:
+  - `SaveIndicators_ShouldPersistJson_AndLoadRoundTrip`
+  - `LoadIndicators_ShouldSupportLegacyLineBasedFormat`
+  - tests invoke private load/save methods via reflection on uninitialized tab instance with file backup/restore
+
+### Verification
+
+- `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` -> passed 202/202

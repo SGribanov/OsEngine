@@ -1946,24 +1946,34 @@ namespace OsEngine.OsTrader.Panels.Tab
         /// </summary>
         private void LoadIndicators()
         {
-            if (!File.Exists(@"Engine\" + TabName + @"ScreenerIndicators.txt"))
+            if (!File.Exists(GetIndicatorsPath()))
             {
                 return;
             }
             try
             {
-                using (StreamReader reader = new StreamReader(@"Engine\" + TabName + @"ScreenerIndicators.txt"))
-                {
-                    while (reader.EndOfStream == false)
-                    {
-                        string str = reader.ReadLine();
+                ScreenerIndicatorsSettingsDto settings = SettingsManager.Load(
+                    GetIndicatorsPath(),
+                    defaultValue: null,
+                    legacyLoader: ParseLegacyIndicatorsSettings);
 
-                        IndicatorOnTabs ind = new IndicatorOnTabs();
-                        ind.SetFromStr(str);
-                        _indicators.Add(ind);
+                if (settings?.Indicators == null)
+                {
+                    return;
+                }
+
+                for (int i = 0; i < settings.Indicators.Count; i++)
+                {
+                    string str = settings.Indicators[i];
+
+                    if (string.IsNullOrWhiteSpace(str))
+                    {
+                        continue;
                     }
 
-                    reader.Close();
+                    IndicatorOnTabs ind = new IndicatorOnTabs();
+                    ind.SetFromStr(str);
+                    _indicators.Add(ind);
                 }
             }
             catch (Exception)
@@ -1979,20 +1989,49 @@ namespace OsEngine.OsTrader.Panels.Tab
         {
             try
             {
-                using (StreamWriter writer = new StreamWriter(@"Engine\" + TabName + @"ScreenerIndicators.txt", false))
-                {
-                    for (int i = 0; i < _indicators.Count; i++)
-                    {
-                        writer.WriteLine(_indicators[i].GetSaveStr());
-                    }
+                List<string> indicators = new List<string>();
 
-                    writer.Close();
+                for (int i = 0; i < _indicators.Count; i++)
+                {
+                    indicators.Add(_indicators[i].GetSaveStr());
                 }
+
+                SettingsManager.Save(
+                    GetIndicatorsPath(),
+                    new ScreenerIndicatorsSettingsDto
+                    {
+                        Indicators = indicators
+                    });
             }
             catch (Exception)
             {
                 // ignore
             }
+        }
+
+        private string GetIndicatorsPath()
+        {
+            return @"Engine\" + TabName + @"ScreenerIndicators.txt";
+        }
+
+        private static ScreenerIndicatorsSettingsDto ParseLegacyIndicatorsSettings(string content)
+        {
+            if (string.IsNullOrWhiteSpace(content))
+            {
+                return null;
+            }
+
+            string[] lines = content.Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries);
+
+            return new ScreenerIndicatorsSettingsDto
+            {
+                Indicators = new List<string>(lines)
+            };
+        }
+
+        private sealed class ScreenerIndicatorsSettingsDto
+        {
+            public List<string> Indicators { get; set; }
         }
 
         /// <summary>
