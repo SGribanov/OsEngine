@@ -5,6 +5,7 @@
 
 using System;
 using System.IO;
+using OsEngine.Entity;
 
 namespace OsEngine.PrimeSettings
 {
@@ -141,18 +142,18 @@ namespace OsEngine.PrimeSettings
         {
             try
             {
-                using (StreamWriter writer = new StreamWriter(@"Engine\PrimeSettings.txt", false))
-                {
-                    writer.WriteLine(_transactionBeepIsActive);
-                    writer.WriteLine(_errorLogBeepIsActive);
-                    writer.WriteLine(_errorLogMessageBoxIsActive);
-                    writer.WriteLine(_labelInHeaderBotStation);
-                    writer.WriteLine(_rebootTradeUiLight);
-                    writer.WriteLine(_reportCriticalErrors);
-                    writer.WriteLine(_memoryCleanerRegime);
-
-                    writer.Close();
-                }
+                SettingsManager.Save(
+                    GetSettingsPath(),
+                    new PrimeSettingsDto
+                    {
+                        TransactionBeepIsActive = _transactionBeepIsActive,
+                        ErrorLogBeepIsActive = _errorLogBeepIsActive,
+                        ErrorLogMessageBoxIsActive = _errorLogMessageBoxIsActive,
+                        LabelInHeaderBotStation = _labelInHeaderBotStation,
+                        RebootTradeUiLight = _rebootTradeUiLight,
+                        ReportCriticalErrors = _reportCriticalErrors,
+                        MemoryCleanerRegime = _memoryCleanerRegime
+                    });
             }
             catch (Exception)
             {
@@ -165,32 +166,23 @@ namespace OsEngine.PrimeSettings
         private static void Load()
         {
             _isLoad = true;
-            if (!File.Exists(@"Engine\PrimeSettings.txt"))
-            {
-                return;
-            }
+
             try
             {
-                using (StreamReader reader = new StreamReader(@"Engine\PrimeSettings.txt"))
+                PrimeSettingsDto settings = SettingsManager.Load(
+                    GetSettingsPath(),
+                    defaultValue: null,
+                    legacyLoader: ParseLegacySettings);
+
+                if (settings != null)
                 {
-                    _transactionBeepIsActive = Convert.ToBoolean(reader.ReadLine());
-                    _errorLogBeepIsActive = Convert.ToBoolean(reader.ReadLine());
-                    _errorLogMessageBoxIsActive = Convert.ToBoolean(reader.ReadLine());
-
-                    _labelInHeaderBotStation = reader.ReadLine();
-
-                    if(_labelInHeaderBotStation == "True"
-                        || _labelInHeaderBotStation == "False")
-                    {
-                        _labelInHeaderBotStation = "";
-                    }
-
-                    _rebootTradeUiLight = Convert.ToBoolean(reader.ReadLine());
-                    _reportCriticalErrors = Convert.ToBoolean(reader.ReadLine());
-
-                    Enum.TryParse(reader.ReadLine(), out _memoryCleanerRegime);
-
-                    reader.Close();
+                    _transactionBeepIsActive = settings.TransactionBeepIsActive;
+                    _errorLogBeepIsActive = settings.ErrorLogBeepIsActive;
+                    _errorLogMessageBoxIsActive = settings.ErrorLogMessageBoxIsActive;
+                    _labelInHeaderBotStation = settings.LabelInHeaderBotStation;
+                    _rebootTradeUiLight = settings.RebootTradeUiLight;
+                    _reportCriticalErrors = settings.ReportCriticalErrors;
+                    _memoryCleanerRegime = settings.MemoryCleanerRegime;
                 }
             }
             catch (Exception)
@@ -198,6 +190,69 @@ namespace OsEngine.PrimeSettings
                 _reportCriticalErrors = true;
                 // ignore
             }
+        }
+
+        private static string GetSettingsPath()
+        {
+            return @"Engine\PrimeSettings.txt";
+        }
+
+        private static PrimeSettingsDto ParseLegacySettings(string content)
+        {
+            if (string.IsNullOrWhiteSpace(content))
+            {
+                return null;
+            }
+
+            string normalized = content.Replace("\r", string.Empty);
+            string[] lines = normalized.Split('\n');
+
+            if (lines.Length > 0 && lines[lines.Length - 1] == string.Empty)
+            {
+                Array.Resize(ref lines, lines.Length - 1);
+            }
+
+            string labelInHeader = lines.Length > 3 ? lines[3] : string.Empty;
+            if (labelInHeader == "True" || labelInHeader == "False")
+            {
+                labelInHeader = string.Empty;
+            }
+
+            MemoryCleanerRegime memoryCleanerRegime = MemoryCleanerRegime.Disable;
+            if (lines.Length > 6)
+            {
+                Enum.TryParse(lines[6], out memoryCleanerRegime);
+            }
+
+            return new PrimeSettingsDto
+            {
+                TransactionBeepIsActive = lines.Length > 0 && lines[0].Equals("true", StringComparison.OrdinalIgnoreCase),
+                ErrorLogBeepIsActive = lines.Length > 1 && lines[1].Equals("true", StringComparison.OrdinalIgnoreCase),
+                ErrorLogMessageBoxIsActive = lines.Length > 2 && lines[2].Equals("true", StringComparison.OrdinalIgnoreCase),
+                LabelInHeaderBotStation = labelInHeader,
+                RebootTradeUiLight = lines.Length > 4 && lines[4].Equals("true", StringComparison.OrdinalIgnoreCase),
+                ReportCriticalErrors = lines.Length > 5
+                    ? lines[5].Equals("true", StringComparison.OrdinalIgnoreCase)
+                    : true,
+                MemoryCleanerRegime = memoryCleanerRegime
+            };
+        }
+
+        private sealed class PrimeSettingsDto
+        {
+            public bool TransactionBeepIsActive { get; set; }
+
+            public bool ErrorLogBeepIsActive { get; set; }
+
+            public bool ErrorLogMessageBoxIsActive { get; set; }
+
+            public string LabelInHeaderBotStation { get; set; }
+
+            public bool RebootTradeUiLight { get; set; }
+
+            public bool ReportCriticalErrors { get; set; }
+
+            public MemoryCleanerRegime MemoryCleanerRegime { get; set; }
         }
     }
 

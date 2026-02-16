@@ -299,3 +299,17 @@
 ### Verification
 
 - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` -> passed 118/118
+
+## 2026-02-16 - Step 2.3 (JSON settings subsystem) - Incremental adoption in PrimeSettingsMaster
+
+- Migrated `project/OsEngine/PrimeSettings/PrimeSettingsMaster.cs` persistence to `SettingsManager`:
+  - `Save()` now writes JSON into `Engine\\PrimeSettings.txt`
+  - `Load()` now reads JSON and falls back to legacy line-based parser
+  - preserved compatibility rule for legacy bool-like header label values
+- Added tests `project/OsEngine.Tests/PrimeSettingsMasterPersistenceTests.cs`:
+  - `Save_ShouldPersistJson_AndLoadRoundTrip`
+  - `Load_ShouldSupportLegacyLineBasedFormat`
+
+### Verification
+
+- `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` -> passed 120/120
