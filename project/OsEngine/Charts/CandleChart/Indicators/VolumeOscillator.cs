@@ -148,22 +148,26 @@ namespace OsEngine.Charts.CandleChart.Indicators
         /// </summary>
         public void Load()
         {
-            if (!File.Exists(@"Engine\" + Name + @".txt"))
+            if (!File.Exists(GetSettingsPath()))
             {
                 return;
             }
             try
             {
-                using (StreamReader reader = new StreamReader(@"Engine\" + Name + @".txt"))
-                {
-                    ColorBase = Color.FromArgb(Convert.ToInt32(reader.ReadLine()));
-                    Length1 = Convert.ToInt32(reader.ReadLine());
-                    Length2 = Convert.ToInt32(reader.ReadLine());
-                    PaintOn = Convert.ToBoolean(reader.ReadLine());
-                    reader.ReadLine();
+                VolumeOscillatorSettingsDto settings = SettingsManager.Load(
+                    GetSettingsPath(),
+                    defaultValue: null,
+                    legacyLoader: ParseLegacySettings);
 
-                    reader.Close();
+                if (settings == null)
+                {
+                    return;
                 }
+
+                ColorBase = Color.FromArgb(settings.ColorBaseArgb);
+                Length1 = settings.Length1;
+                Length2 = settings.Length2;
+                PaintOn = settings.PaintOn;
             }
             catch (Exception)
             {
@@ -180,14 +184,20 @@ namespace OsEngine.Charts.CandleChart.Indicators
         {
             try
             {
-                using (StreamWriter writer = new StreamWriter(@"Engine\" + Name + @".txt", false))
+                if (string.IsNullOrWhiteSpace(Name))
                 {
-                    writer.WriteLine(ColorBase.ToArgb());
-                    writer.WriteLine(Length1);
-                    writer.WriteLine(Length2);
-                    writer.WriteLine(PaintOn);
-                    writer.Close();
+                    return;
                 }
+
+                SettingsManager.Save(
+                    GetSettingsPath(),
+                    new VolumeOscillatorSettingsDto
+                    {
+                        ColorBaseArgb = ColorBase.ToArgb(),
+                        Length1 = Length1,
+                        Length2 = Length2,
+                        PaintOn = PaintOn
+                    });
             }
             catch (Exception)
             {
@@ -202,10 +212,55 @@ namespace OsEngine.Charts.CandleChart.Indicators
         /// </summary>
         public void Delete()
         {
-            if (File.Exists(@"Engine\" + Name + @".txt"))
+            if (File.Exists(GetSettingsPath()))
             {
-                File.Delete(@"Engine\" + Name + @".txt");
+                File.Delete(GetSettingsPath());
             }
+        }
+
+        private string GetSettingsPath()
+        {
+            return @"Engine\" + Name + @".txt";
+        }
+
+        private static VolumeOscillatorSettingsDto ParseLegacySettings(string content)
+        {
+            if (string.IsNullOrWhiteSpace(content))
+            {
+                return null;
+            }
+
+            string normalized = content.Replace("\r", string.Empty);
+            string[] lines = normalized.Split('\n');
+
+            if (lines.Length > 0 && lines[lines.Length - 1] == string.Empty)
+            {
+                Array.Resize(ref lines, lines.Length - 1);
+            }
+
+            if (lines.Length < 4)
+            {
+                return null;
+            }
+
+            return new VolumeOscillatorSettingsDto
+            {
+                ColorBaseArgb = Convert.ToInt32(lines[0]),
+                Length1 = Convert.ToInt32(lines[1]),
+                Length2 = Convert.ToInt32(lines[2]),
+                PaintOn = Convert.ToBoolean(lines[3])
+            };
+        }
+
+        private sealed class VolumeOscillatorSettingsDto
+        {
+            public int ColorBaseArgb { get; set; }
+
+            public int Length1 { get; set; }
+
+            public int Length2 { get; set; }
+
+            public bool PaintOn { get; set; }
         }
 
         /// <summary>
