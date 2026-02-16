@@ -2383,15 +2383,18 @@ namespace OsEngine.Market.Servers.Tester
         {
             try
             {
-                using (StreamWriter writer = new StreamWriter(@"Engine\" + @"TestServerNonTradePeriods.txt", false))
+                string[] periods = new string[NonTradePeriods.Count];
+                for (int i = 0; i < NonTradePeriods.Count; i++)
                 {
-                    for (int i = 0; i < NonTradePeriods.Count; i++)
-                    {
-                        writer.WriteLine(NonTradePeriods[i].GetSaveString());
-                    }
-
-                    writer.Close();
+                    periods[i] = NonTradePeriods[i].GetSaveString();
                 }
+
+                SettingsManager.Save(
+                    GetNonTradePeriodsPath(),
+                    new TesterNonTradePeriodsSettingsDto
+                    {
+                        Periods = periods
+                    });
             }
             catch (Exception)
             {
@@ -2401,34 +2404,65 @@ namespace OsEngine.Market.Servers.Tester
 
         private void LoadNonTradePeriods()
         {
-            if (!File.Exists(@"Engine\" + @"TestServerNonTradePeriods.txt"))
-            {
-                return;
-            }
-
             try
             {
-                using (StreamReader reader = new StreamReader(@"Engine\" + @"TestServerNonTradePeriods.txt"))
+                TesterNonTradePeriodsSettingsDto settings = SettingsManager.Load(
+                    GetNonTradePeriodsPath(),
+                    defaultValue: null,
+                    legacyLoader: ParseLegacyNonTradePeriodsSettings);
+
+                if (settings == null || settings.Periods == null)
                 {
-                    while (reader.EndOfStream == false)
+                    return;
+                }
+
+                for (int i = 0; i < settings.Periods.Length; i++)
+                {
+                    string str = settings.Periods[i];
+
+                    if (str != "")
                     {
-                        string str = reader.ReadLine();
-
-                        if (str != "")
-                        {
-                            NonTradePeriod period = new NonTradePeriod();
-                            period.SetFromString(str);
-                            NonTradePeriods.Add(period);
-                        }
+                        NonTradePeriod period = new NonTradePeriod();
+                        period.SetFromString(str);
+                        NonTradePeriods.Add(period);
                     }
-
-                    reader.Close();
                 }
             }
             catch (Exception)
             {
                 // ignored
             }
+        }
+
+        private static string GetNonTradePeriodsPath()
+        {
+            return @"Engine\TestServerNonTradePeriods.txt";
+        }
+
+        private static TesterNonTradePeriodsSettingsDto ParseLegacyNonTradePeriodsSettings(string content)
+        {
+            if (string.IsNullOrWhiteSpace(content))
+            {
+                return null;
+            }
+
+            string normalized = content.Replace("\r", string.Empty);
+            string[] lines = normalized.Split('\n');
+
+            if (lines.Length > 0 && lines[lines.Length - 1] == string.Empty)
+            {
+                Array.Resize(ref lines, lines.Length - 1);
+            }
+
+            return new TesterNonTradePeriodsSettingsDto
+            {
+                Periods = lines
+            };
+        }
+
+        private sealed class TesterNonTradePeriodsSettingsDto
+        {
+            public string[] Periods { get; set; }
         }
 
         public void CreateNewNonTradePeriod()

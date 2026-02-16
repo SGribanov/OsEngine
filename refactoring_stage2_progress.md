@@ -661,3 +661,18 @@
 ### Verification
 
 - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` -> passed 168/168
+
+## 2026-02-16 - Step 2.3 (JSON settings subsystem) - Incremental adoption in TesterServer non-trade periods settings
+
+- Migrated `project/OsEngine/Market/Servers/Tester/TesterServer.cs` (`TestServerNonTradePeriods.txt`) persistence to `SettingsManager`:
+  - `SaveNonTradePeriods()` now writes JSON into `Engine\\TestServerNonTradePeriods.txt`
+  - private `LoadNonTradePeriods()` now reads JSON and falls back to legacy line-based parser
+  - preserved `NonTradePeriod` serialization contract via existing `GetSaveString()/SetFromString()`
+- Added tests `project/OsEngine.Tests/TesterServerNonTradePeriodsPersistenceTests.cs`:
+  - `SaveNonTradePeriods_ShouldPersistJson_AndLoadRoundTrip`
+  - `LoadNonTradePeriods_ShouldSupportLegacyLineBasedFormat`
+  - tests invoke private `LoadNonTradePeriods()` via reflection on uninitialized instance
+
+### Verification
+
+- `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` -> passed 170/170
