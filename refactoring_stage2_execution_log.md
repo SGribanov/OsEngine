@@ -2396,3 +2396,24 @@
   - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` succeeded (`318/318`).
 - **Commit:** `85e655941`
 - **Push:** no (manual push by user)
+
+### Step 2.3 - JSON Settings Subsystem (Incremental Adoption #115)
+
+- **Status:** In Progress (increment completed)
+- **Plan item:** `refactoring_stage2_plan.md` -> Phase 2 / Step 2.3
+- **Changes:**
+  - Aligned `Delete()` settings-file path handling with existing helpers in migrated classes:
+    - `project/OsEngine/Candles/TimeFrameBuilder.cs`
+    - `project/OsEngine/Alerts/AlertToPrice.cs`
+    - `project/OsEngine/Alerts/AlertToChart.cs`
+    - `project/OsEngine/Logging/MessageSender.cs`
+    - `project/OsEngine/Entity/HorizontalVolume.cs`
+    - `project/OsEngine/Entity/NonTradePeriods.cs`
+  - Replaced remaining direct `@"Engine\\..."` delete calls with:
+    - `GetSettingsPath()` / `GetStoragePath()`
+  - Updated running progress journal:
+    - `refactoring_stage2_progress.md`
+- **Verification:**
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` succeeded (`318/318`).
+- **Commit:** `7cc346247`
+- **Push:** no (manual push by user)
