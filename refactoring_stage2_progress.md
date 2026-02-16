@@ -1051,3 +1051,18 @@
 ### Verification
 
 - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` -> passed 220/220
+
+## 2026-02-16 - Step 2.3 (JSON settings subsystem) - Incremental adoption in BearsPower indicator settings
+
+- Migrated `project/OsEngine/Charts/CandleChart/Indicators/BearsPower.cs` (`Engine\\<Name>.txt`) persistence to `SettingsManager`:
+  - `Save()` now writes JSON DTO with period/colors/paint settings
+  - `Load()` now reads JSON and falls back to legacy line-based parser
+  - preserved existing settings contract for `Period`, `ColorUp`, `ColorDown`, and `PaintOn`
+- Added tests `project/OsEngine.Tests/BearsPowerPersistenceTests.cs`:
+  - `Save_ShouldPersistJson_AndLoadRoundTrip`
+  - `Load_ShouldSupportLegacyLineBasedFormat`
+  - tests use file backup/restore around indicator settings path
+
+### Verification
+
+- `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` -> passed 222/222
