@@ -2724,3 +2724,24 @@
   - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` succeeded (`337/337`).
 - **Commit:** `e74ff94f9`
 - **Push:** no (manual push by user)
+
+### Step 2.3 - JSON Settings Subsystem (Incremental Adoption #132)
+
+- **Status:** In Progress (increment completed)
+- **Plan item:** `refactoring_stage2_plan.md` -> Phase 2 / Step 2.3
+- **Changes:**
+  - Migrated bot panel UI layout settings wrapper in:
+    - `project/OsEngine/OsTrader/Panels/BotPanelChartUI.xaml.cs`
+  - `SaveLeftPanelPosition()` / `CheckPanels()` now use `SettingsManager` DTO JSON.
+  - Added legacy parser for old 3-line bool layout format:
+    - `ParseLegacyLayoutSettings(string content)`
+  - Centralized layout file path via helper:
+    - `GetLayoutSettingsPath()`
+  - Added tests:
+    - `project/OsEngine.Tests/BotPanelChartUILayoutPersistenceTests.cs`
+  - Updated running progress journal:
+    - `refactoring_stage2_progress.md`
+- **Verification:**
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` succeeded (`339/339`).
+- **Commit:** `c2c7e49c5`
+- **Push:** no (manual push by user)
