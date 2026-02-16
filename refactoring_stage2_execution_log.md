@@ -2417,3 +2417,18 @@
   - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` succeeded (`318/318`).
 - **Commit:** `7cc346247`
 - **Push:** no (manual push by user)
+
+### Step 2.3 - JSON Settings Subsystem (Incremental Adoption #116)
+
+- **Status:** In Progress (increment completed)
+- **Plan item:** `refactoring_stage2_plan.md` -> Phase 2 / Step 2.3
+- **Changes:**
+  - Aligned remaining path checks in `project/OsEngine/OsTrader/Panels/Tab/BotTabIndex.cs` with existing helper methods:
+    - spread settings delete uses `GetSpreadSettingsPath()`
+    - nested index auto-formula builder delete check uses `GetSettingsPath()`
+  - Updated running progress journal:
+    - `refactoring_stage2_progress.md`
+- **Verification:**
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` succeeded (`318/318`).
+- **Commit:** `d3d7a812d`
+- **Push:** no (manual push by user)
