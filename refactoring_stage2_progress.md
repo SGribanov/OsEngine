@@ -1412,3 +1412,18 @@
 ### Verification
 
 - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` -> passed 270/270
+
+## 2026-02-16 - Step 2.3 (JSON settings subsystem) - Incremental adoption in TradeThread indicator settings
+
+- Migrated `project/OsEngine/Charts/CandleChart/Indicators/TradeThread.cs` (`Engine\\<Name>.txt`) persistence to `SettingsManager`:
+  - `Save()` now writes JSON DTO with `ColorBase`, `Length`, `PaintOn`, and `TypePointsToSearch`
+  - `Load()` now reads JSON and falls back to legacy line-based parser
+  - preserved compatibility with historical legacy format that can include an extra ignored line
+- Added tests `project/OsEngine.Tests/TradeThreadPersistenceTests.cs`:
+  - `Save_ShouldPersistJson_AndLoadRoundTrip`
+  - `Load_ShouldSupportLegacyLineBasedFormat`
+  - tests use file backup/restore around indicator settings path
+
+### Verification
+
+- `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` -> passed 270/270
