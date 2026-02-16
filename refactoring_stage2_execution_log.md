@@ -549,3 +549,23 @@
   - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` succeeded (`138/138`).
 - **Commit:** `f55fe2ebb`
 - **Push:** no (manual push by user)
+
+### Step 2.3 - JSON Settings Subsystem (Incremental Adoption #25)
+
+- **Status:** In Progress (increment completed)
+- **Plan item:** `refactoring_stage2_plan.md` -> Phase 2 / Step 2.3
+- **Changes:**
+  - Migrated localization settings persistence to JSON with legacy fallback:
+    - `project/OsEngine/Language/OsLocalization.cs`
+  - Covered persisted file:
+    - `Engine\\local.txt`
+  - Added dedicated persistence tests:
+    - `project/OsEngine.Tests/OsLocalizationPersistenceTests.cs`
+      - `Save_ShouldPersistJson_AndLoadRoundTrip`
+      - `Load_ShouldSupportLegacyLineBasedFormat`
+  - Updated running progress journal:
+    - `refactoring_stage2_progress.md`
+- **Verification:**
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` succeeded (`140/140`).
+- **Commit:** `d01c06dc4`
+- **Push:** no (manual push by user)
