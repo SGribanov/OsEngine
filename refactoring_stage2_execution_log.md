@@ -407,3 +407,23 @@
   - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` succeeded (`124/124`).
 - **Commit:** `5c0f3023f`
 - **Push:** no (manual push by user)
+
+### Step 2.3 - JSON Settings Subsystem (Incremental Adoption #18)
+
+- **Status:** In Progress (increment completed)
+- **Plan item:** `refactoring_stage2_plan.md` -> Phase 2 / Step 2.3
+- **Changes:**
+  - Migrated cluster tab on/off settings persistence to JSON with legacy fallback:
+    - `project/OsEngine/OsTrader/Panels/Tab/BotTabCluster.cs`
+  - Covered persisted file:
+    - `Engine\\<TabName>ClusterOnOffSet.txt`
+  - Added dedicated persistence tests:
+    - `project/OsEngine.Tests/BotTabClusterPersistenceTests.cs`
+      - `Save_ShouldPersistJson_AndLoadRoundTrip`
+      - `Load_ShouldSupportLegacyLineBasedFormat`
+  - Updated running progress journal:
+    - `refactoring_stage2_progress.md`
+- **Verification:**
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` succeeded (`126/126`).
+- **Commit:** `2e53efd1e`
+- **Push:** no (manual push by user)
