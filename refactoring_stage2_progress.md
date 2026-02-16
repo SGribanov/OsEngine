@@ -343,3 +343,18 @@
 ### Verification
 
 - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` -> passed 124/124
+
+## 2026-02-16 - Step 2.3 (JSON settings subsystem) - Incremental adoption in BotTabCluster on/off settings
+
+- Migrated `project/OsEngine/OsTrader/Panels/Tab/BotTabCluster.cs` persistence to `SettingsManager`:
+  - private `Save()` now writes JSON into `Engine\\<TabName>ClusterOnOffSet.txt`
+  - private `Load()` now reads JSON and falls back to legacy single-line bool parser
+  - preserved fallback behavior (`_eventsIsOn = true` on load exceptions)
+- Added tests `project/OsEngine.Tests/BotTabClusterPersistenceTests.cs`:
+  - `Save_ShouldPersistJson_AndLoadRoundTrip`
+  - `Load_ShouldSupportLegacyLineBasedFormat`
+  - tests invoke private `Save/Load` via reflection on uninitialized instance
+
+### Verification
+
+- `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` -> passed 126/126

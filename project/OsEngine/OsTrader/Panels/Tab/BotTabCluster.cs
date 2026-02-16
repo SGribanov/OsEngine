@@ -202,11 +202,12 @@ namespace OsEngine.OsTrader.Panels.Tab
         {
             try
             {
-                using (StreamWriter writer = new StreamWriter(@"Engine\" + TabName + @"ClusterOnOffSet.txt", false))
-                {
-                    writer.WriteLine(EventsIsOn);
-                    writer.Close();
-                }
+                SettingsManager.Save(
+                    GetSettingsPath(),
+                    new BotTabClusterSettingsDto
+                    {
+                        EventsIsOn = _eventsIsOn
+                    });
             }
             catch (Exception)
             {
@@ -216,24 +217,51 @@ namespace OsEngine.OsTrader.Panels.Tab
 
         private void Load()
         {
-            if (!File.Exists(@"Engine\" + TabName + @"ClusterOnOffSet.txt"))
-            {
-                return;
-            }
-
             try
             {
-                using (StreamReader reader = new StreamReader(@"Engine\" + TabName + @"ClusterOnOffSet.txt"))
+                BotTabClusterSettingsDto settings = SettingsManager.Load(
+                    GetSettingsPath(),
+                    defaultValue: null,
+                    legacyLoader: ParseLegacySettings);
+
+                if (settings == null)
                 {
-                    _eventsIsOn = Convert.ToBoolean(reader.ReadLine());
-                    reader.Close();
+                    return;
                 }
+
+                _eventsIsOn = settings.EventsIsOn;
             }
             catch (Exception)
             {
                 _eventsIsOn = true;
                 // ignore
             }
+        }
+
+        private string GetSettingsPath()
+        {
+            return @"Engine\" + TabName + @"ClusterOnOffSet.txt";
+        }
+
+        private static BotTabClusterSettingsDto ParseLegacySettings(string content)
+        {
+            if (string.IsNullOrWhiteSpace(content))
+            {
+                return null;
+            }
+
+            string normalized = content.Replace("\r", string.Empty);
+            string[] lines = normalized.Split('\n');
+
+            return new BotTabClusterSettingsDto
+            {
+                EventsIsOn = lines.Length > 0 && lines[0].Equals("true", StringComparison.OrdinalIgnoreCase)
+            };
+        }
+
+        private sealed class BotTabClusterSettingsDto
+        {
+            public bool EventsIsOn { get; set; }
         }
 
         /// <summary>
