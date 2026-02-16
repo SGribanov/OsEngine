@@ -1697,3 +1697,23 @@
   - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` succeeded (`254/254`).
 - **Commit:** `3c33432d9`
 - **Push:** no (manual push by user)
+
+### Step 2.3 - JSON Settings Subsystem (Incremental Adoption #82)
+
+- **Status:** In Progress (increment completed)
+- **Plan item:** `refactoring_stage2_plan.md` -> Phase 2 / Step 2.3
+- **Changes:**
+  - Migrated WilliamsRange indicator settings persistence to JSON with legacy fallback:
+    - `project/OsEngine/Charts/CandleChart/Indicators/WilliamsRange.cs`
+  - Covered persisted file:
+    - dynamic `Engine\\<Name>.txt` path (`WilliamsRange` indicator)
+  - Added dedicated persistence tests:
+    - `project/OsEngine.Tests/WilliamsRangePersistenceTests.cs`
+      - `Save_ShouldPersistJson_AndLoadRoundTrip`
+      - `Load_ShouldSupportLegacyLineBasedFormat`
+  - Updated running progress journal:
+    - `refactoring_stage2_progress.md`
+- **Verification:**
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` succeeded (`256/256`).
+- **Commit:** `5fa987fc6`
+- **Push:** no (manual push by user)
