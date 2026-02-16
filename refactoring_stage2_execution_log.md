@@ -834,3 +834,23 @@
   - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` succeeded (`168/168`).
 - **Commit:** `0d0ca36f1`
 - **Push:** no (manual push by user)
+
+### Step 2.3 - JSON Settings Subsystem (Incremental Adoption #39)
+
+- **Status:** In Progress (increment completed)
+- **Plan item:** `refactoring_stage2_plan.md` -> Phase 2 / Step 2.3
+- **Changes:**
+  - Migrated tester non-trade periods settings persistence to JSON with legacy fallback:
+    - `project/OsEngine/Market/Servers/Tester/TesterServer.cs`
+  - Covered persisted file:
+    - `Engine\\TestServerNonTradePeriods.txt`
+  - Added dedicated persistence tests:
+    - `project/OsEngine.Tests/TesterServerNonTradePeriodsPersistenceTests.cs`
+      - `SaveNonTradePeriods_ShouldPersistJson_AndLoadRoundTrip`
+      - `LoadNonTradePeriods_ShouldSupportLegacyLineBasedFormat`
+  - Updated running progress journal:
+    - `refactoring_stage2_progress.md`
+- **Verification:**
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` succeeded (`170/170`).
+- **Commit:** `a16635e96`
+- **Push:** no (manual push by user)
