@@ -2484,3 +2484,22 @@
   - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` succeeded (`318/318`).
 - **Commit:** `b08adc3cf`
 - **Push:** no (manual push by user)
+
+### Step 2.3 - JSON Settings Subsystem (Incremental Adoption #120)
+
+- **Status:** In Progress (increment completed)
+- **Plan item:** `refactoring_stage2_plan.md` -> Phase 2 / Step 2.3
+- **Changes:**
+  - Migrated pair names persistence in:
+    - `project/OsEngine/OsTrader/Panels/Tab/BotTabPair.cs`
+  - `SavePairNames()` now persists DTO JSON via `SettingsManager.Save(...)`.
+  - `LoadPairs()` now uses `SettingsManager.Load(..., legacyLoader: ParseLegacyPairNamesToLoadSettings)`.
+  - Added legacy line-based parser method to preserve backward compatibility.
+  - Added tests:
+    - `project/OsEngine.Tests/BotTabPairNamesPersistenceTests.cs`
+  - Updated running progress journal:
+    - `refactoring_stage2_progress.md`
+- **Verification:**
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` succeeded (`320/320`).
+- **Commit:** `d09549b47`
+- **Push:** no (manual push by user)
