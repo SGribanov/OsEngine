@@ -23,7 +23,6 @@ namespace OsEngine.OsOptimizer.OptEntity
         private readonly ParameterIterator _parameterIterator;
         private readonly IBotEvaluator _botEvaluator;
         private readonly int _maxParallel;
-        private readonly BruteForceStrategy _fallbackBackend;
         private readonly BayesianCandidateSelector _candidateSelector;
         private readonly BayesianAcquisitionPolicy _acquisitionPolicy;
 
@@ -53,7 +52,6 @@ namespace OsEngine.OsOptimizer.OptEntity
             AcquisitionKappa = acquisitionKappa < 0 ? 0 : acquisitionKappa;
             UseExploitationTailPass = useExploitationTailPass;
             TailSharePercent = tailSharePercent < 1 ? 1 : (tailSharePercent > 50 ? 50 : tailSharePercent);
-            _fallbackBackend = new BruteForceStrategy(parameterIterator, botEvaluator, _maxParallel);
             _candidateSelector = new BayesianCandidateSelector(BatchSize);
             _acquisitionPolicy = new BayesianAcquisitionPolicy();
         }
@@ -122,18 +120,14 @@ namespace OsEngine.OsOptimizer.OptEntity
                 return new List<OptimizerReport>();
             }
 
-            List<List<IIStrategyParameter>> candidates = BuildCandidatePool(allParameters, parametersToOptimization, cancellationToken);
+            int plannedBudget = Math.Max(1, InitialSamples + MaxIterations);
+            int maxCandidatePoolSize = Math.Min(50000, Math.Max(5000, plannedBudget * 10));
+
+            List<List<IIStrategyParameter>> candidates =
+                BuildCandidatePool(allParameters, parametersToOptimization, cancellationToken, maxCandidatePoolSize);
             if (candidates.Count == 0 || cancellationToken.IsCancellationRequested)
             {
                 return new List<OptimizerReport>();
-            }
-
-            // Protect runtime memory on huge grids in this phase-5 stage.
-            if (candidates.Count > 250000)
-            {
-                return await _fallbackBackend
-                    .OptimizeInSampleAsync(allParameters, parametersToOptimization, cancellationToken)
-                    .ConfigureAwait(false);
             }
 
             HashSet<int> evaluated = new HashSet<int>();
@@ -280,7 +274,8 @@ namespace OsEngine.OsOptimizer.OptEntity
         private List<List<IIStrategyParameter>> BuildCandidatePool(
             List<IIStrategyParameter> allParameters,
             List<bool> parametersToOptimization,
-            CancellationToken cancellationToken)
+            CancellationToken cancellationToken,
+            int maxPoolSize)
         {
             List<IIStrategyParameter> optimizedStart = new List<IIStrategyParameter>();
 
@@ -310,6 +305,11 @@ namespace OsEngine.OsOptimizer.OptEntity
                 }
 
                 candidates.Add(CloneCombinationSnapshot(optimized));
+
+                if (candidates.Count >= maxPoolSize)
+                {
+                    break;
+                }
             }
 
             return candidates;

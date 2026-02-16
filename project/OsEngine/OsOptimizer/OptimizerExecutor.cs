@@ -116,10 +116,10 @@ namespace OsEngine.OsOptimizer
             }
             int threadsCount = _master.ThreadsCount;
 
-            if (_master.IterationCount < 0)
+            if (_master.IterationCount < 1)
             {
                 SendLogMessage(
-                    "Optimizer start skipped: iteration count cannot be negative (value " + _master.IterationCount + ").",
+                    "Optimizer start skipped: iteration count must be positive (value " + _master.IterationCount + ").",
                     LogMessageType.Error);
                 return false;
             }
@@ -503,8 +503,14 @@ namespace OsEngine.OsOptimizer
                         "Optimizer bot count estimate was negative and was clamped to zero: " + countBotsRaw + ".",
                         LogMessageType.Error);
                 }
+                else if (countBots == 0)
+                {
+                    SendLogMessage(
+                        "Optimizer bot count estimate is zero. Check optimization parameter ranges (start/step/stop).",
+                        LogMessageType.Error);
+                }
 
-                long estimatedMaxTestsLong = (long)countBots * Math.Max(0, iterationCount) * 2L;
+                long estimatedMaxTestsLong = (long)countBots * Math.Max(1, iterationCount) * 2L;
 
                 if (lastInSample && estimatedMaxTestsLong > 0)
                 {
@@ -619,6 +625,11 @@ namespace OsEngine.OsOptimizer
                 }
 
                 SafeInvokeTestReady(reportsSnapshot);
+            }
+            catch (OperationCanceledException)
+            {
+                SendLogMessage("Optimizer prime worker canceled by user.", LogMessageType.System);
+                PublishTestReadySnapshot();
             }
             catch (Exception ex)
             {
@@ -736,10 +747,10 @@ namespace OsEngine.OsOptimizer
                 return false;
             }
 
-            if (iterationCount < 0)
+            if (iterationCount < 1)
             {
                 AbortPrimeWorker(
-                    "Optimizer prime worker skipped: iteration count is invalid at runtime (value " + iterationCount + ").");
+                    "Optimizer prime worker skipped: iteration count must be positive at runtime (value " + iterationCount + ").");
                 return false;
             }
 

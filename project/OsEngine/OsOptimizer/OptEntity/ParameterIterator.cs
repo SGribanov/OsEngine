@@ -187,9 +187,25 @@ namespace OsEngine.OsOptimizer.OptEntity
             if (parameters[idx].Type == StrategyParameterType.Int)
             {
                 StrategyParameterInt parameter = (StrategyParameterInt)parameters[idx];
+                if (parameter.ValueIntStep <= 0)
+                {
+                    return false;
+                }
+
                 if (parameter.ValueInt < parameter.ValueIntStop)
                 {
-                    parameter.ValueInt = parameter.ValueInt + parameter.ValueIntStep;
+                    int nextValue = parameter.ValueInt + parameter.ValueIntStep;
+                    if (nextValue <= parameter.ValueInt)
+                    {
+                        return false;
+                    }
+
+                    if (nextValue > parameter.ValueIntStop)
+                    {
+                        nextValue = parameter.ValueIntStop;
+                    }
+
+                    parameter.ValueInt = nextValue;
                     for (int i3 = 0; i3 < idx; i3++)
                     {
                         ReloadParam(parameters[i3]);
@@ -200,9 +216,25 @@ namespace OsEngine.OsOptimizer.OptEntity
             else if (parameters[idx].Type == StrategyParameterType.Decimal)
             {
                 StrategyParameterDecimal parameter = (StrategyParameterDecimal)parameters[idx];
+                if (parameter.ValueDecimalStep <= 0)
+                {
+                    return false;
+                }
+
                 if (parameter.ValueDecimal < parameter.ValueDecimalStop)
                 {
-                    parameter.ValueDecimal = parameter.ValueDecimal + parameter.ValueDecimalStep;
+                    decimal nextValue = parameter.ValueDecimal + parameter.ValueDecimalStep;
+                    if (nextValue <= parameter.ValueDecimal)
+                    {
+                        return false;
+                    }
+
+                    if (nextValue > parameter.ValueDecimalStop)
+                    {
+                        nextValue = parameter.ValueDecimalStop;
+                    }
+
+                    parameter.ValueDecimal = nextValue;
                     for (int i3 = 0; i3 < idx; i3++)
                     {
                         ReloadParam(parameters[i3]);
@@ -213,9 +245,25 @@ namespace OsEngine.OsOptimizer.OptEntity
             else if (parameters[idx].Type == StrategyParameterType.DecimalCheckBox)
             {
                 StrategyParameterDecimalCheckBox parameter = (StrategyParameterDecimalCheckBox)parameters[idx];
+                if (parameter.ValueDecimalStep <= 0)
+                {
+                    return false;
+                }
+
                 if (parameter.ValueDecimal < parameter.ValueDecimalStop)
                 {
-                    parameter.ValueDecimal = parameter.ValueDecimal + parameter.ValueDecimalStep;
+                    decimal nextValue = parameter.ValueDecimal + parameter.ValueDecimalStep;
+                    if (nextValue <= parameter.ValueDecimal)
+                    {
+                        return false;
+                    }
+
+                    if (nextValue > parameter.ValueDecimalStop)
+                    {
+                        nextValue = parameter.ValueDecimalStop;
+                    }
+
+                    parameter.ValueDecimal = nextValue;
                     for (int i3 = 0; i3 < idx; i3++)
                     {
                         ReloadParam(parameters[i3]);

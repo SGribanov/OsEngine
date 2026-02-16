@@ -57,3 +57,17 @@
 
 - `dotnet build project/OsEngine/OsEngine.csproj` -> success, 0 warnings, 0 errors
 - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj` -> passed 81/81
+
+## 2026-02-15 - Step 2.3 (JSON settings subsystem) - Initial Implementation
+
+- Added `project/OsEngine/Entity/SettingsManager.cs`:
+  - `Save<T>(path, settings)` via `System.Text.Json`
+  - atomic write via `SafeFileWriter.WriteAllText`
+  - `Load<T>(path, defaultValue, legacyLoader)` with:
+    - default fallback on missing/unreadable file
+    - JSON deserialize path
+    - optional legacy parser fallback on JSON parse failure
+- Added tests `project/OsEngine.Tests/SettingsManagerTests.cs`:
+  - JSON save/load roundtrip
+  - invalid JSON fallback through legacy loader
+  - missing file returns provided default value
