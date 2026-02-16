@@ -1014,3 +1014,23 @@
   - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` succeeded (`186/186`).
 - **Commit:** `2c6ec95f9`
 - **Push:** no (manual push by user)
+
+### Step 2.3 - JSON Settings Subsystem (Incremental Adoption #48)
+
+- **Status:** In Progress (increment completed)
+- **Plan item:** `refactoring_stage2_plan.md` -> Phase 2 / Step 2.3
+- **Changes:**
+  - Migrated connector candles settings persistence to JSON with legacy fallback:
+    - `project/OsEngine/Market/Connectors/ConnectorCandles.cs`
+  - Covered persisted file:
+    - dynamic `Engine\\<name>ConnectorPrime.txt` path
+  - Added dedicated persistence tests:
+    - `project/OsEngine.Tests/ConnectorCandlesSettingsPersistenceTests.cs`
+      - `Save_ShouldPersistJson_AndLoadRoundTrip`
+      - `Load_ShouldSupportLegacyLineBasedFormat_WithOptionalFieldsMissing`
+  - Updated running progress journal:
+    - `refactoring_stage2_progress.md`
+- **Verification:**
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` succeeded (`188/188`).
+- **Commit:** `5521ddf82`
+- **Push:** no (manual push by user)
