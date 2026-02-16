@@ -1688,3 +1688,18 @@
 ### Verification
 
 - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` -> passed 304/304
+
+## 2026-02-16 - Step 2.3 (JSON settings subsystem) - Incremental adoption in Ichimoku indicator settings
+
+- Migrated `project/OsEngine/Charts/CandleChart/Indicators/Ishimoku.cs` (`Engine\\<Name>.txt`) persistence to `SettingsManager`:
+  - `Save()` now writes JSON DTO with lengths, colors, paint flag, and shift settings
+  - `Load()` now reads JSON and falls back to legacy line-based parser
+  - preserved compatibility with historical legacy format where optional `LengthChinkou` may be absent (fallback to `LengthSdvig`)
+- Added tests `project/OsEngine.Tests/IchimokuPersistenceTests.cs`:
+  - `Save_ShouldPersistJson_AndLoadRoundTrip`
+  - `Load_ShouldSupportLegacyLineBasedFormat_WithOptionalLengthChinkouMissing`
+  - tests use file backup/restore around indicator settings path
+
+### Verification
+
+- `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` -> passed 306/306

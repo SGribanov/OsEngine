@@ -257,25 +257,22 @@ namespace OsEngine.Charts.CandleChart.Indicators
                     return;
                 }
 
-                using (StreamWriter writer = new StreamWriter(@"Engine\" + Name + @".txt", false))
-                {
-                    writer.WriteLine(LengthFirst);
-                    writer.WriteLine(LengthSecond);
-                    writer.WriteLine(LengthFird);
-
-                    writer.WriteLine(ColorEtalonLine.ToArgb());
-                    writer.WriteLine(ColorLineRounded.ToArgb());
-                    writer.WriteLine(ColorLineLate.ToArgb());
-                    writer.WriteLine(ColorLineFirst.ToArgb());
-                    writer.WriteLine(ColorLineSecond.ToArgb());
-
-                    writer.WriteLine(PaintOn);
-
-                    writer.WriteLine(LengthSdvig);
-                    writer.WriteLine(LengthChinkou);
-
-                    writer.Close();
-                }
+                SettingsManager.Save(
+                    GetSettingsPath(),
+                    new IchimokuSettingsDto
+                    {
+                        LengthFirst = LengthFirst,
+                        LengthSecond = LengthSecond,
+                        LengthFird = LengthFird,
+                        ColorEtalonLineArgb = ColorEtalonLine.ToArgb(),
+                        ColorLineRoundedArgb = ColorLineRounded.ToArgb(),
+                        ColorLineLateArgb = ColorLineLate.ToArgb(),
+                        ColorLineFirstArgb = ColorLineFirst.ToArgb(),
+                        ColorLineSecondArgb = ColorLineSecond.ToArgb(),
+                        PaintOn = PaintOn,
+                        LengthSdvig = LengthSdvig,
+                        LengthChinkou = LengthChinkou
+                    });
             }
             catch (Exception)
             {
@@ -290,33 +287,33 @@ namespace OsEngine.Charts.CandleChart.Indicators
         /// </summary>
         public void Load()
         {
-            if (!File.Exists(@"Engine\" + Name + @".txt"))
+            if (!File.Exists(GetSettingsPath()))
             {
                 return;
             }
             try
             {
+                IchimokuSettingsDto settings = SettingsManager.Load(
+                    GetSettingsPath(),
+                    defaultValue: null,
+                    legacyLoader: ParseLegacySettings);
 
-                using (StreamReader reader = new StreamReader(@"Engine\" + Name + @".txt"))
+                if (settings == null)
                 {
-                    LengthFirst = Convert.ToInt32(reader.ReadLine());
-                    LengthSecond = Convert.ToInt32(reader.ReadLine());
-                    LengthFird = Convert.ToInt32(reader.ReadLine());
-
-                    ColorEtalonLine = Color.FromArgb(Convert.ToInt32(reader.ReadLine()));
-                    ColorLineRounded = Color.FromArgb(Convert.ToInt32(reader.ReadLine()));
-                    ColorLineLate = Color.FromArgb(Convert.ToInt32(reader.ReadLine()));
-                    ColorLineFirst = Color.FromArgb(Convert.ToInt32(reader.ReadLine()));
-                    ColorLineSecond = Color.FromArgb(Convert.ToInt32(reader.ReadLine()));
-
-                    PaintOn = Convert.ToBoolean(reader.ReadLine());
-
-                    LengthSdvig = Convert.ToInt32(reader.ReadLine());
-                    LengthChinkou = Convert.ToInt32(reader.ReadLine());
-
-                    reader.Close();
+                    return;
                 }
 
+                LengthFirst = settings.LengthFirst;
+                LengthSecond = settings.LengthSecond;
+                LengthFird = settings.LengthFird;
+                ColorEtalonLine = Color.FromArgb(settings.ColorEtalonLineArgb);
+                ColorLineRounded = Color.FromArgb(settings.ColorLineRoundedArgb);
+                ColorLineLate = Color.FromArgb(settings.ColorLineLateArgb);
+                ColorLineFirst = Color.FromArgb(settings.ColorLineFirstArgb);
+                ColorLineSecond = Color.FromArgb(settings.ColorLineSecondArgb);
+                PaintOn = settings.PaintOn;
+                LengthSdvig = settings.LengthSdvig;
+                LengthChinkou = settings.LengthChinkou;
 
             }
             catch (Exception)
@@ -332,10 +329,81 @@ namespace OsEngine.Charts.CandleChart.Indicators
         /// </summary>
         public void Delete()
         {
-            if (File.Exists(@"Engine\" + Name + @".txt"))
+            if (File.Exists(GetSettingsPath()))
             {
-                File.Delete(@"Engine\" + Name + @".txt");
+                File.Delete(GetSettingsPath());
             }
+        }
+
+        private string GetSettingsPath()
+        {
+            return @"Engine\" + Name + @".txt";
+        }
+
+        private static IchimokuSettingsDto ParseLegacySettings(string content)
+        {
+            if (string.IsNullOrWhiteSpace(content))
+            {
+                return null;
+            }
+
+            string normalized = content.Replace("\r", string.Empty);
+            string[] lines = normalized.Split('\n');
+
+            if (lines.Length > 0 && lines[lines.Length - 1] == string.Empty)
+            {
+                Array.Resize(ref lines, lines.Length - 1);
+            }
+
+            if (lines.Length < 10)
+            {
+                return null;
+            }
+
+            int lengthSdvig = Convert.ToInt32(lines[9]);
+            int lengthChinkou = lines.Length >= 11
+                ? Convert.ToInt32(lines[10])
+                : lengthSdvig;
+
+            return new IchimokuSettingsDto
+            {
+                LengthFirst = Convert.ToInt32(lines[0]),
+                LengthSecond = Convert.ToInt32(lines[1]),
+                LengthFird = Convert.ToInt32(lines[2]),
+                ColorEtalonLineArgb = Convert.ToInt32(lines[3]),
+                ColorLineRoundedArgb = Convert.ToInt32(lines[4]),
+                ColorLineLateArgb = Convert.ToInt32(lines[5]),
+                ColorLineFirstArgb = Convert.ToInt32(lines[6]),
+                ColorLineSecondArgb = Convert.ToInt32(lines[7]),
+                PaintOn = Convert.ToBoolean(lines[8]),
+                LengthSdvig = lengthSdvig,
+                LengthChinkou = lengthChinkou
+            };
+        }
+
+        private sealed class IchimokuSettingsDto
+        {
+            public int LengthFirst { get; set; }
+
+            public int LengthSecond { get; set; }
+
+            public int LengthFird { get; set; }
+
+            public int ColorEtalonLineArgb { get; set; }
+
+            public int ColorLineRoundedArgb { get; set; }
+
+            public int ColorLineLateArgb { get; set; }
+
+            public int ColorLineFirstArgb { get; set; }
+
+            public int ColorLineSecondArgb { get; set; }
+
+            public bool PaintOn { get; set; }
+
+            public int LengthSdvig { get; set; }
+
+            public int LengthChinkou { get; set; }
         }
 
         /// <summary>
