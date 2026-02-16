@@ -1126,3 +1126,18 @@
 ### Verification
 
 - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` -> passed 230/230
+
+## 2026-02-16 - Step 2.3 (JSON settings subsystem) - Incremental adoption in Bollinger indicator settings
+
+- Migrated `project/OsEngine/Charts/CandleChart/Indicators/Bollinger.cs` (`Engine\\<Name>.txt`) persistence to `SettingsManager`:
+  - `Save()` now writes JSON DTO with colors/length/deviation/paint settings
+  - `Load()` now reads JSON and falls back to legacy line-based parser
+  - preserved existing settings contract for `ColorUp`, `ColorDown`, `Length`, `Deviation`, and `PaintOn`
+- Added tests `project/OsEngine.Tests/BollingerPersistenceTests.cs`:
+  - `Save_ShouldPersistJson_AndLoadRoundTrip`
+  - `Load_ShouldSupportLegacyLineBasedFormat`
+  - tests use file backup/restore around indicator settings path
+
+### Verification
+
+- `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` -> passed 232/232

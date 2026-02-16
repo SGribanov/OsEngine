@@ -176,21 +176,27 @@ namespace OsEngine.Charts.CandleChart.Indicators
         /// </summary>
         public void Load()
         {
-            if (!File.Exists(@"Engine\" + Name + @".txt"))
+            if (!File.Exists(GetSettingsPath()))
             {
                 return;
             }
             try
             {
-                using (StreamReader reader = new StreamReader(@"Engine\" + Name + @".txt"))
+                BollingerSettingsDto settings = SettingsManager.Load(
+                    GetSettingsPath(),
+                    defaultValue: null,
+                    legacyLoader: ParseLegacySettings);
+
+                if (settings == null)
                 {
-                    ColorUp = Color.FromArgb(Convert.ToInt32(reader.ReadLine()));
-                    ColorDown = Color.FromArgb(Convert.ToInt32(reader.ReadLine()));
-                    Length = Convert.ToInt32(reader.ReadLine());
-                    Deviation = Convert.ToDecimal(reader.ReadLine());
-                    PaintOn = Convert.ToBoolean(reader.ReadLine());
-                    reader.Close();
+                    return;
                 }
+
+                ColorUp = Color.FromArgb(settings.ColorUpArgb);
+                ColorDown = Color.FromArgb(settings.ColorDownArgb);
+                Length = settings.Length;
+                Deviation = settings.Deviation;
+                PaintOn = settings.PaintOn;
             }
             catch (Exception)
             {
@@ -207,15 +213,16 @@ namespace OsEngine.Charts.CandleChart.Indicators
         {
             try
             {
-                using (StreamWriter writer = new StreamWriter(@"Engine\" + Name + @".txt", false))
-                {
-                    writer.WriteLine(ColorUp.ToArgb());
-                    writer.WriteLine(ColorDown.ToArgb());
-                    writer.WriteLine(Length);
-                    writer.WriteLine(Deviation);
-                    writer.WriteLine(PaintOn);
-                    writer.Close();
-                }
+                SettingsManager.Save(
+                    GetSettingsPath(),
+                    new BollingerSettingsDto
+                    {
+                        ColorUpArgb = ColorUp.ToArgb(),
+                        ColorDownArgb = ColorDown.ToArgb(),
+                        Length = Length,
+                        Deviation = Deviation,
+                        PaintOn = PaintOn
+                    });
             }
             catch (Exception)
             {
@@ -230,13 +237,61 @@ namespace OsEngine.Charts.CandleChart.Indicators
         /// </summary>
         public void Delete()
         {
-            if (File.Exists(@"Engine\" + Name + @".txt"))
+            if (File.Exists(GetSettingsPath()))
             {
-                File.Delete(@"Engine\" + Name + @".txt");
+                File.Delete(GetSettingsPath());
             }
 
             ValuesUp = null;
             ValuesDown = null;
+        }
+
+        private string GetSettingsPath()
+        {
+            return @"Engine\" + Name + @".txt";
+        }
+
+        private static BollingerSettingsDto ParseLegacySettings(string content)
+        {
+            if (string.IsNullOrWhiteSpace(content))
+            {
+                return null;
+            }
+
+            string normalized = content.Replace("\r", string.Empty);
+            string[] lines = normalized.Split('\n');
+
+            if (lines.Length > 0 && lines[lines.Length - 1] == string.Empty)
+            {
+                Array.Resize(ref lines, lines.Length - 1);
+            }
+
+            if (lines.Length < 5)
+            {
+                return null;
+            }
+
+            return new BollingerSettingsDto
+            {
+                ColorUpArgb = Convert.ToInt32(lines[0]),
+                ColorDownArgb = Convert.ToInt32(lines[1]),
+                Length = Convert.ToInt32(lines[2]),
+                Deviation = lines[3].ToDecimal(),
+                PaintOn = Convert.ToBoolean(lines[4])
+            };
+        }
+
+        private sealed class BollingerSettingsDto
+        {
+            public int ColorUpArgb { get; set; }
+
+            public int ColorDownArgb { get; set; }
+
+            public int Length { get; set; }
+
+            public decimal Deviation { get; set; }
+
+            public bool PaintOn { get; set; }
         }
 
         /// <summary>
