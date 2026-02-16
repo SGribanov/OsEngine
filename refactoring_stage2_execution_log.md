@@ -2999,3 +2999,22 @@
   - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` succeeded (`343/343`).
 - **Commit:** `c3d3edd25`
 - **Push:** no (manual push by user)
+
+### Step 2.3 - JSON Settings Subsystem (Incremental Adoption #146)
+
+- **Status:** In Progress (increment completed)
+- **Plan item:** `refactoring_stage2_plan.md` -> Phase 2 / Step 2.3
+- **Changes:**
+  - Path consistency cleanup in:
+    - `project/OsEngine/Robots/BotFactory.cs`
+  - Replaced hardcoded optimizer-bots file constant usage with helper:
+    - `GetOptimizerBotsFilePath()`
+  - Updated path usage in:
+    - `LoadOptimizerBotsNamesFromFile()`
+    - `SaveOptimizerBotsNamesToFile()`
+  - Updated running progress journal:
+    - `refactoring_stage2_progress.md`
+- **Verification:**
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` succeeded (`343/343`).
+- **Commit:** `29b86664e`
+- **Push:** no (manual push by user)
