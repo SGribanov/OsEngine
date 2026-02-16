@@ -158,27 +158,27 @@ namespace OsEngine.Charts.CandleChart.Indicators
         /// </summary>
         public void Load()
         {
-            if (!File.Exists(@"Engine\" + Name + @".txt"))
+            if (!File.Exists(GetSettingsPath()))
             {
                 return;
             }
             try
             {
+                LinearRegressionCurveSettingsDto settings = SettingsManager.Load(
+                    GetSettingsPath(),
+                    defaultValue: null,
+                    legacyLoader: ParseLegacySettings);
 
-                using (StreamReader reader = new StreamReader(@"Engine\" + Name + @".txt"))
+                if (settings == null)
                 {
-                    ColorBase = Color.FromArgb(Convert.ToInt32(reader.ReadLine()));
-                    Length = Convert.ToInt32(reader.ReadLine());
-                    Lag = Convert.ToInt32(reader.ReadLine());
-                    PaintOn = Convert.ToBoolean(reader.ReadLine());
-
-                    Enum.TryParse(reader.ReadLine(), true, out TypePointsToSearch);
-
-                    reader.ReadLine();
-
-                    reader.Close();
+                    return;
                 }
 
+                ColorBase = Color.FromArgb(settings.ColorBaseArgb);
+                Length = settings.Length;
+                Lag = settings.Lag;
+                PaintOn = settings.PaintOn;
+                TypePointsToSearch = settings.TypePointsToSearch;
 
             }
             catch (Exception)
@@ -196,15 +196,16 @@ namespace OsEngine.Charts.CandleChart.Indicators
         {
             try
             {
-                using (StreamWriter writer = new StreamWriter(@"Engine\" + Name + @".txt", false))
-                {
-                    writer.WriteLine(ColorBase.ToArgb());
-                    writer.WriteLine(Length);
-                    writer.WriteLine(Lag);
-                    writer.WriteLine(PaintOn);
-                    writer.WriteLine(TypePointsToSearch);
-                    writer.Close();
-                }
+                SettingsManager.Save(
+                    GetSettingsPath(),
+                    new LinearRegressionCurveSettingsDto
+                    {
+                        ColorBaseArgb = ColorBase.ToArgb(),
+                        Length = Length,
+                        Lag = Lag,
+                        PaintOn = PaintOn,
+                        TypePointsToSearch = TypePointsToSearch
+                    });
             }
             catch (Exception)
             {
@@ -219,10 +220,61 @@ namespace OsEngine.Charts.CandleChart.Indicators
         /// </summary>
         public void Delete()
         {
-            if (File.Exists(@"Engine\" + Name + @".txt"))
+            if (File.Exists(GetSettingsPath()))
             {
-                File.Delete(@"Engine\" + Name + @".txt");
+                File.Delete(GetSettingsPath());
             }
+        }
+
+        private string GetSettingsPath()
+        {
+            return @"Engine\" + Name + @".txt";
+        }
+
+        private static LinearRegressionCurveSettingsDto ParseLegacySettings(string content)
+        {
+            if (string.IsNullOrWhiteSpace(content))
+            {
+                return null;
+            }
+
+            string normalized = content.Replace("\r", string.Empty);
+            string[] lines = normalized.Split('\n');
+
+            if (lines.Length > 0 && lines[lines.Length - 1] == string.Empty)
+            {
+                Array.Resize(ref lines, lines.Length - 1);
+            }
+
+            if (lines.Length < 5)
+            {
+                return null;
+            }
+
+            PriceTypePoints typePointsToSearch = 0;
+            Enum.TryParse(lines[4], true, out typePointsToSearch);
+
+            return new LinearRegressionCurveSettingsDto
+            {
+                ColorBaseArgb = Convert.ToInt32(lines[0]),
+                Length = Convert.ToInt32(lines[1]),
+                Lag = Convert.ToInt32(lines[2]),
+                PaintOn = Convert.ToBoolean(lines[3]),
+                TypePointsToSearch = typePointsToSearch
+            };
+        }
+
+        private sealed class LinearRegressionCurveSettingsDto
+        {
+            public int ColorBaseArgb { get; set; }
+
+            public int Length { get; set; }
+
+            public int Lag { get; set; }
+
+            public bool PaintOn { get; set; }
+
+            public PriceTypePoints TypePointsToSearch { get; set; }
         }
 
         /// <summary>
