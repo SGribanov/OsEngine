@@ -525,3 +525,19 @@
 ### Verification
 
 - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` -> passed 150/150
+
+## 2026-02-16 - Step 2.3 (JSON settings subsystem) - Incremental adoption in Atp securities cache settings
+
+- Migrated `project/OsEngine/Market/Servers/Atp/AtpServer.cs` (`AtpServerRealization`) persistence to `SettingsManager`:
+  - `TrySaveSecuritiesInFile()` now writes JSON into `Engine\\AtpSecurities.txt`
+  - `TryLoadSecuritiesFromFile()` now reads JSON and falls back to legacy line-based parser
+  - preserved legacy `NameId` fallback behavior when legacy cache has empty identifier
+- Added tests `project/OsEngine.Tests/AtpServerSecuritiesPersistenceTests.cs`:
+  - `SaveSecurities_ShouldPersistJson_AndLoadRoundTrip`
+  - `LoadSecurities_ShouldSupportLegacyLineBasedFormat`
+- Stabilized `project/OsEngine.Tests/OsLocalizationPersistenceTests.cs` against parallel file races:
+  - moved tests into collection with `DisableParallelization = true`
+
+### Verification
+
+- `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` -> passed 152/152

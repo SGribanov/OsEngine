@@ -569,52 +569,57 @@ namespace OsEngine.Market.Servers.Atp
 
         public void TryLoadSecuritiesFromFile()
         {
-            if (!File.Exists(@"Engine\" + @"AtpSecurities.txt"))
-            {
-                return;
-            }
             try
             {
-                using (StreamReader reader = new StreamReader(@"Engine\" + @"AtpSecurities.txt"))
+                AtpSecuritiesSettingsDto settings = SettingsManager.Load(
+                    GetSecuritiesPath(),
+                    defaultValue: null,
+                    legacyLoader: ParseLegacySecuritiesSettings);
+
+                if (settings == null || settings.Securities == null)
                 {
-                    while (reader.EndOfStream == false)
+                    return;
+                }
+
+                if (_securities == null)
+                {
+                    _securities = new List<Security>();
+                }
+                else
+                {
+                    _securities.Clear();
+                }
+
+                for (int i = 0; i < settings.Securities.Length; i++)
+                {
+                    AtpSecurityDto dto = settings.Securities[i];
+                    if (dto == null)
                     {
-                        string str = reader.ReadLine();
-
-                        string[] array = str.Split('!');
-
-                        Security newSec = new Security();
-
-                        newSec.Name = array[0];
-                        newSec.NameClass = array[1];
-                        newSec.NameFull = array[2];
-                        newSec.NameId = array[3];
-
-                        if (string.IsNullOrEmpty(newSec.NameId))
-                        {
-                            newSec.NameId = newSec.NameFull;
-                        }
-
-                        newSec.NameFull = array[4];
-                        Enum.TryParse(array[5], out newSec.State);
-                        newSec.PriceStep = array[6].ToDecimal();
-                        newSec.Lot = array[7].ToDecimal();
-                        newSec.PriceStepCost = array[8].ToDecimal();
-                        newSec.MarginBuy = array[9].ToDecimal();
-                        Enum.TryParse(array[10], out newSec.SecurityType);
-                        newSec.Decimals = Convert.ToInt32(array[11]);
-                        newSec.PriceLimitLow = array[12].ToDecimal();
-                        newSec.PriceLimitHigh = array[13].ToDecimal();
-                        Enum.TryParse(array[14], out newSec.OptionType);
-                        newSec.Strike = array[15].ToDecimal();
-                        newSec.Expiration = Convert.ToDateTime(array[16]);
-
-                        _securities.Add(newSec);
+                        continue;
                     }
 
-                    reader.Close();
+                    _securities.Add(new Security
+                    {
+                        Name = dto.Name,
+                        NameClass = dto.NameClass,
+                        NameFull = dto.NameFull,
+                        NameId = dto.NameId,
+                        State = dto.State,
+                        PriceStep = dto.PriceStep,
+                        Lot = dto.Lot,
+                        PriceStepCost = dto.PriceStepCost,
+                        MarginBuy = dto.MarginBuy,
+                        SecurityType = dto.SecurityType,
+                        Decimals = dto.Decimals,
+                        PriceLimitLow = dto.PriceLimitLow,
+                        PriceLimitHigh = dto.PriceLimitHigh,
+                        OptionType = dto.OptionType,
+                        Strike = dto.Strike,
+                        Expiration = dto.Expiration
+                    });
                 }
-                SecurityEvent(_securities);
+
+                SecurityEvent?.Invoke(_securities);
             }
             catch (Exception)
             {
@@ -626,40 +631,185 @@ namespace OsEngine.Market.Servers.Atp
         {
             try
             {
-                using (StreamWriter writer = new StreamWriter(@"Engine\" + @"AtpSecurities.txt", false))
+                AtpSecurityDto[] securitiesToSave = new AtpSecurityDto[_securities.Count];
+
+                for (int i = 0; i < _securities.Count; i++)
                 {
-                    for (int i = 0; i < _securities.Count; i++)
+                    _securities[i].NameClass = "atpSecurity";
+
+                    securitiesToSave[i] = new AtpSecurityDto
                     {
-                        _securities[i].NameClass = "atpSecurity";
-
-                        string result = _securities[i].Name + "!";
-                        result += _securities[i].NameClass + "!";
-                        result += _securities[i].NameFull + "!";
-                        result += _securities[i].NameId + "!";
-                        result += _securities[i].NameFull + "!";
-                        result += _securities[i].State + "!";
-                        result += _securities[i].PriceStep + "!";
-                        result += _securities[i].Lot + "!";
-                        result += _securities[i].PriceStepCost + "!";
-                        result += _securities[i].MarginBuy + "!";
-                        result += _securities[i].SecurityType + "!";
-                        result += _securities[i].Decimals + "!";
-                        result += _securities[i].PriceLimitLow + "!";
-                        result += _securities[i].PriceLimitHigh + "!";
-                        result += _securities[i].OptionType + "!";
-                        result += _securities[i].Strike + "!";
-                        result += _securities[i].Expiration + "!";
-
-                        writer.WriteLine(result);
-                    }
-
-                    writer.Close();
+                        Name = _securities[i].Name,
+                        NameClass = _securities[i].NameClass,
+                        NameFull = _securities[i].NameFull,
+                        NameId = _securities[i].NameId,
+                        State = _securities[i].State,
+                        PriceStep = _securities[i].PriceStep,
+                        Lot = _securities[i].Lot,
+                        PriceStepCost = _securities[i].PriceStepCost,
+                        MarginBuy = _securities[i].MarginBuy,
+                        SecurityType = _securities[i].SecurityType,
+                        Decimals = _securities[i].Decimals,
+                        PriceLimitLow = _securities[i].PriceLimitLow,
+                        PriceLimitHigh = _securities[i].PriceLimitHigh,
+                        OptionType = _securities[i].OptionType,
+                        Strike = _securities[i].Strike,
+                        Expiration = _securities[i].Expiration
+                    };
                 }
+
+                SettingsManager.Save(
+                    GetSecuritiesPath(),
+                    new AtpSecuritiesSettingsDto
+                    {
+                        Securities = securitiesToSave
+                    });
             }
             catch (Exception)
             {
                 // ignore
             }
+        }
+
+        private static string GetSecuritiesPath()
+        {
+            return @"Engine\AtpSecurities.txt";
+        }
+
+        private static AtpSecuritiesSettingsDto ParseLegacySecuritiesSettings(string content)
+        {
+            if (string.IsNullOrWhiteSpace(content))
+            {
+                return null;
+            }
+
+            string normalized = content.Replace("\r", string.Empty);
+            string[] lines = normalized.Split('\n');
+
+            if (lines.Length > 0 && lines[lines.Length - 1] == string.Empty)
+            {
+                Array.Resize(ref lines, lines.Length - 1);
+            }
+
+            List<AtpSecurityDto> securities = new List<AtpSecurityDto>();
+
+            for (int i = 0; i < lines.Length; i++)
+            {
+                if (string.IsNullOrWhiteSpace(lines[i]))
+                {
+                    continue;
+                }
+
+                AtpSecurityDto security = ParseLegacySecurityLine(lines[i]);
+                if (security != null)
+                {
+                    securities.Add(security);
+                }
+            }
+
+            return new AtpSecuritiesSettingsDto
+            {
+                Securities = securities.ToArray()
+            };
+        }
+
+        private static AtpSecurityDto ParseLegacySecurityLine(string line)
+        {
+            string[] array = line.Split('!');
+            if (array.Length < 17)
+            {
+                return null;
+            }
+
+            string name = array[0];
+            string nameClass = array[1];
+            string nameFullFromThird = array[2];
+            string nameId = array[3];
+            if (string.IsNullOrEmpty(nameId))
+            {
+                nameId = nameFullFromThird;
+            }
+
+            SecurityStateType state = SecurityStateType.UnKnown;
+            Enum.TryParse(array[5], out state);
+
+            SecurityType securityType = SecurityType.None;
+            Enum.TryParse(array[10], out securityType);
+
+            OptionType optionType = OptionType.None;
+            Enum.TryParse(array[14], out optionType);
+
+            int decimals = 0;
+            if (array.Length > 11)
+            {
+                int.TryParse(array[11], out decimals);
+            }
+
+            DateTime expiration = DateTime.MinValue;
+            if (array.Length > 16)
+            {
+                DateTime.TryParse(array[16], out expiration);
+            }
+
+            return new AtpSecurityDto
+            {
+                Name = name,
+                NameClass = nameClass,
+                NameFull = array[4],
+                NameId = nameId,
+                State = state,
+                PriceStep = array[6].ToDecimal(),
+                Lot = array[7].ToDecimal(),
+                PriceStepCost = array[8].ToDecimal(),
+                MarginBuy = array[9].ToDecimal(),
+                SecurityType = securityType,
+                Decimals = decimals,
+                PriceLimitLow = array[12].ToDecimal(),
+                PriceLimitHigh = array[13].ToDecimal(),
+                OptionType = optionType,
+                Strike = array[15].ToDecimal(),
+                Expiration = expiration
+            };
+        }
+
+        private sealed class AtpSecuritiesSettingsDto
+        {
+            public AtpSecurityDto[] Securities { get; set; }
+        }
+
+        private sealed class AtpSecurityDto
+        {
+            public string Name { get; set; }
+
+            public string NameClass { get; set; }
+
+            public string NameFull { get; set; }
+
+            public string NameId { get; set; }
+
+            public SecurityStateType State { get; set; }
+
+            public decimal PriceStep { get; set; }
+
+            public decimal Lot { get; set; }
+
+            public decimal PriceStepCost { get; set; }
+
+            public decimal MarginBuy { get; set; }
+
+            public SecurityType SecurityType { get; set; }
+
+            public int Decimals { get; set; }
+
+            public decimal PriceLimitLow { get; set; }
+
+            public decimal PriceLimitHigh { get; set; }
+
+            public OptionType OptionType { get; set; }
+
+            public decimal Strike { get; set; }
+
+            public DateTime Expiration { get; set; }
         }
 
         public event Action<List<Security>> SecurityEvent;

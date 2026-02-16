@@ -7,6 +7,7 @@ using Xunit;
 
 namespace OsEngine.Tests;
 
+[Collection("OsLocalizationPersistence")]
 public class OsLocalizationPersistenceTests
 {
     [Fact]
@@ -160,4 +161,9 @@ public class OsLocalizationPersistenceTests
             }
         }
     }
+}
+
+[CollectionDefinition("OsLocalizationPersistence", DisableParallelization = true)]
+public class OsLocalizationPersistenceCollectionDefinition
+{
 }
