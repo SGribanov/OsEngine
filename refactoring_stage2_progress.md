@@ -142,3 +142,17 @@
 ### Verification
 
 - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` -> passed 94/94
+
+## 2026-02-16 - Step 2.3 (JSON settings subsystem) - Incremental adoption in NumberGen
+
+- Migrated `project/OsEngine/Entity/NumberGen.cs` persistence to `SettingsManager`:
+  - private `Save()` now writes JSON via `SettingsManager.Save(...)`
+  - private `Load()` now reads via `SettingsManager.Load(...)`
+  - added legacy fallback parser for old two-line integer format
+- Added tests `project/OsEngine.Tests/NumberGenPersistenceTests.cs`:
+  - `Save_ShouldPersistJson_AndLoadRoundTrip` (reflection-based call to private static `Save/Load`)
+  - `Load_ShouldSupportLegacyLineBasedFormat`
+
+### Verification
+
+- `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` -> passed 96/96

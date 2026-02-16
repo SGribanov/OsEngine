@@ -162,17 +162,17 @@ namespace OsEngine.Entity
 
         private static void Load()
         {
-            if (!File.Exists(@"Engine\" + @"NumberGen.txt"))
-            {
-                return;
-            }
             try
             {
-                using (StreamReader reader = new StreamReader(@"Engine\" + @"NumberGen.txt"))
+                NumberGenSettings settings = SettingsManager.Load(
+                    GetSettingsPath(),
+                    defaultValue: null,
+                    legacyLoader: ParseLegacySettings);
+
+                if (settings != null)
                 {
-                    _numberDealForRealTrading = Convert.ToInt32(reader.ReadLine());
-                    _numberOrderForRealTrading = Convert.ToInt32(reader.ReadLine());
-                    reader.Close();
+                    _numberDealForRealTrading = settings.NumberDealForRealTrading;
+                    _numberOrderForRealTrading = settings.NumberOrderForRealTrading;
                 }
             }
             catch (Exception)
@@ -186,18 +186,63 @@ namespace OsEngine.Entity
         {
             try
             {
-                using (StreamWriter writer = new StreamWriter(@"Engine\" + @"NumberGen.txt", false))
+                NumberGenSettings settings = new NumberGenSettings
                 {
-                    writer.WriteLine(_numberDealForRealTrading);
-                    writer.WriteLine(_numberOrderForRealTrading);
-                    writer.Close();
-                }
+                    NumberDealForRealTrading = _numberDealForRealTrading,
+                    NumberOrderForRealTrading = _numberOrderForRealTrading
+                };
+
+                SettingsManager.Save(GetSettingsPath(), settings);
             }
             catch (Exception)
             {
                 //send to log
                 // отправить в лог
             }
+        }
+
+        private static string GetSettingsPath()
+        {
+            return @"Engine\" + @"NumberGen.txt";
+        }
+
+        private static NumberGenSettings ParseLegacySettings(string content)
+        {
+            if (string.IsNullOrWhiteSpace(content))
+            {
+                return null;
+            }
+
+            string normalized = content.Replace("\r", string.Empty);
+            string[] lines = normalized.Split('\n');
+
+            if (lines.Length < 2)
+            {
+                return null;
+            }
+
+            if (!int.TryParse(lines[0], out int dealNumber))
+            {
+                return null;
+            }
+
+            if (!int.TryParse(lines[1], out int orderNumber))
+            {
+                return null;
+            }
+
+            return new NumberGenSettings
+            {
+                NumberDealForRealTrading = dealNumber,
+                NumberOrderForRealTrading = orderNumber
+            };
+        }
+
+        private class NumberGenSettings
+        {
+            public int NumberDealForRealTrading { get; set; }
+
+            public int NumberOrderForRealTrading { get; set; }
         }
 
         public static void ResetToZeroInTester()
