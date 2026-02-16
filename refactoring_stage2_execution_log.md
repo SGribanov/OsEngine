@@ -2663,3 +2663,24 @@
   - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` succeeded (`334/334`).
 - **Commit:** `2b9f891c4`
 - **Push:** no (manual push by user)
+
+### Step 2.3 - JSON Settings Subsystem (Incremental Adoption #129)
+
+- **Status:** In Progress (increment completed)
+- **Plan item:** `refactoring_stage2_plan.md` -> Phase 2 / Step 2.3
+- **Changes:**
+  - Migrated alert keeper settings wrapper in:
+    - `project/OsEngine/Alerts/AlertMaster.cs`
+  - `Save()` and `Load()` now use `SettingsManager` DTO JSON.
+  - Preserved existing alert reconstruction flow from keeper records (`AlertToChart` / `AlertToPrice`).
+  - Added legacy parser for old line-based keeper format:
+    - `ParseLegacyAlertKeeperSettings(string content)`
+  - Centralized keeper file path via helper and reused it in load/save/delete.
+  - Added tests:
+    - `project/OsEngine.Tests/AlertMasterPersistenceTests.cs`
+  - Updated running progress journal:
+    - `refactoring_stage2_progress.md`
+- **Verification:**
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` succeeded (`336/336`).
+- **Commit:** `b1f502fc4`
+- **Push:** no (manual push by user)
