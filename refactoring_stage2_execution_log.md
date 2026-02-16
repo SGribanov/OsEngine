@@ -2641,3 +2641,25 @@
   - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` succeeded (`332/332`).
 - **Commit:** `c787f59fb`
 - **Push:** no (manual push by user)
+
+### Step 2.3 - JSON Settings Subsystem (Incremental Adoption #128)
+
+- **Status:** In Progress (increment completed)
+- **Plan item:** `refactoring_stage2_plan.md` -> Phase 2 / Step 2.3
+- **Changes:**
+  - Migrated Aindicator settings IO wrappers in:
+    - `project/OsEngine/Indicators/Aindicator.cs`
+  - Parameters and series storage now use `SettingsManager` DTO JSON:
+    - `Parametrs.txt` wrapper (`SaveParameters` / load-by-user-parameter)
+    - `Values.txt` wrapper (`SaveSeries` / series-load)
+  - Added shared legacy parser for old line-based settings format:
+    - `ParseLegacyLinesSettings(string content)`
+  - Centralized path usage via helper methods for parameters/values/base files.
+  - Added tests:
+    - `project/OsEngine.Tests/AindicatorPersistenceTests.cs`
+  - Updated running progress journal:
+    - `refactoring_stage2_progress.md`
+- **Verification:**
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` succeeded (`334/334`).
+- **Commit:** `2b9f891c4`
+- **Push:** no (manual push by user)
