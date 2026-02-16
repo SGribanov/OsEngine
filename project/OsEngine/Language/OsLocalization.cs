@@ -8,6 +8,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Windows;
+using OsEngine.Entity;
 
 namespace OsEngine.Language
 {
@@ -174,14 +175,14 @@ namespace OsEngine.Language
         {
             try
             {
-                using (StreamWriter writer = new StreamWriter(@"Engine\local.txt", false)
-                )
-                {
-                    writer.WriteLine(_curLocalization);
-                    writer.WriteLine(_longTimePattern);
-                    writer.WriteLine(_shortDatePattern);
-                    writer.Close();
-                }
+                SettingsManager.Save(
+                    GetSettingsPath(),
+                    new OsLocalizationSettingsDto
+                    {
+                        CurLocalization = _curLocalization,
+                        LongTimePattern = _longTimePattern,
+                        ShortDatePattern = _shortDatePattern
+                    });
             }
             catch
             {
@@ -194,7 +195,7 @@ namespace OsEngine.Language
         /// </summary>
         private static void Load()
         {
-            if (!File.Exists(@"Engine\local.txt"))
+            if (!File.Exists(GetSettingsPath()))
             {
                 _longTimePattern = "H:mm:ss";
                 _shortDatePattern = "dd.MM.yyyy";
@@ -202,12 +203,16 @@ namespace OsEngine.Language
             }
             try
             {
-                using (StreamReader reader = new StreamReader(@"Engine\local.txt"))
+                OsLocalizationSettingsDto settings = SettingsManager.Load(
+                    GetSettingsPath(),
+                    defaultValue: null,
+                    legacyLoader: ParseLegacySettings);
+
+                if (settings != null)
                 {
-                    Enum.TryParse(reader.ReadLine(), true, out _curLocalization);
-                    _longTimePattern = reader.ReadLine();
-                    _shortDatePattern = reader.ReadLine();
-                    reader.Close();
+                    _curLocalization = settings.CurLocalization;
+                    _longTimePattern = settings.LongTimePattern;
+                    _shortDatePattern = settings.ShortDatePattern;
                 }
 
                 // System.Threading.Thread.CurrentThread.CurrentUICulture = OsLocalization.CurCulture;
@@ -226,6 +231,49 @@ namespace OsEngine.Language
             {
                 _shortDatePattern = "dd.MM.yyyy";
             }
+        }
+
+        private static string GetSettingsPath()
+        {
+            return @"Engine\local.txt";
+        }
+
+        private static OsLocalizationSettingsDto ParseLegacySettings(string content)
+        {
+            if (string.IsNullOrWhiteSpace(content))
+            {
+                return null;
+            }
+
+            string normalized = content.Replace("\r", string.Empty);
+            string[] lines = normalized.Split('\n');
+
+            if (lines.Length > 0 && lines[lines.Length - 1] == string.Empty)
+            {
+                Array.Resize(ref lines, lines.Length - 1);
+            }
+
+            OsLocalType localization = OsLocalType.None;
+            if (lines.Length > 0)
+            {
+                Enum.TryParse(lines[0], true, out localization);
+            }
+
+            return new OsLocalizationSettingsDto
+            {
+                CurLocalization = localization,
+                LongTimePattern = lines.Length > 1 ? lines[1] : null,
+                ShortDatePattern = lines.Length > 2 ? lines[2] : null
+            };
+        }
+
+        private sealed class OsLocalizationSettingsDto
+        {
+            public OsLocalType CurLocalization { get; set; }
+
+            public string LongTimePattern { get; set; }
+
+            public string ShortDatePattern { get; set; }
         }
 
         public static event Action LocalizationTypeChangeEvent;

@@ -449,3 +449,18 @@
 ### Verification
 
 - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` -> passed 138/138
+
+## 2026-02-16 - Step 2.3 (JSON settings subsystem) - Incremental adoption in OsLocalization settings
+
+- Migrated `project/OsEngine/Language/OsLocalization.cs` persistence to `SettingsManager`:
+  - `Save()` now writes JSON into `Engine\\local.txt`
+  - private `Load()` now reads JSON and falls back to legacy 3-line format parser
+  - preserved default date/time format fallback behavior when settings file is missing or incomplete
+- Added tests `project/OsEngine.Tests/OsLocalizationPersistenceTests.cs`:
+  - `Save_ShouldPersistJson_AndLoadRoundTrip`
+  - `Load_ShouldSupportLegacyLineBasedFormat`
+  - tests isolate and restore static localization state via reflection
+
+### Verification
+
+- `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` -> passed 140/140
