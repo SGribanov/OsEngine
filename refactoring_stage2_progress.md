@@ -961,3 +961,18 @@
 ### Verification
 
 - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` -> passed 208/208
+
+## 2026-02-16 - Step 2.3 (JSON settings subsystem) - Incremental adoption in PositionController stop-limits settings
+
+- Migrated `project/OsEngine/Journal/Internal/PositionController.cs` (`Engine\\<Name>DealControllerStopLimits.txt`) persistence to `SettingsManager`:
+  - private `TrySaveStopLimits()` now writes JSON DTO with stop-limit order strings
+  - public `LoadStopLimits()` now reads JSON and falls back to legacy line-based parser
+  - preserved existing stop-limit serialization contract via `PositionOpenerToStopLimit.GetSaveString()/SetFromString()`
+- Added tests `project/OsEngine.Tests/PositionControllerStopLimitsPersistenceTests.cs`:
+  - `TrySaveStopLimits_ShouldPersistJson_AndLoadRoundTrip`
+  - `LoadStopLimits_ShouldSupportLegacyLineBasedFormat`
+  - tests invoke private saver via reflection on uninitialized controller instance with backup/restore of stop-limits settings file
+
+### Verification
+
+- `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` -> passed 210/210

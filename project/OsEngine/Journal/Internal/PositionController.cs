@@ -917,28 +917,32 @@ namespace OsEngine.Journal.Internal
             {
                 if (_actualStopLimits == null
                    || _actualStopLimits.Count == 0)
-                { // очищаем файл от записей
-                    using (StreamWriter writer = new StreamWriter(@"Engine\" + _name + @"DealControllerStopLimits.txt", false))
-                    {
-
-                    }
+                {
+                    SettingsManager.Save(
+                        GetStopLimitsPath(),
+                        new PositionControllerStopLimitsSettingsDto
+                        {
+                            StopLimitOrders = new List<string>()
+                        });
                     return;
                 }
 
-                string positionsString = "";
+                List<string> positions = new List<string>();
 
                 for (int i = 0; i < _actualStopLimits.Count; i++)
                 {
                     if (_actualStopLimits[i].LifeTimeType == PositionOpenerToStopLifeTimeType.NoLifeTime)
                     {
-                        positionsString += _actualStopLimits[i].GetSaveString() + "\n";
+                        positions.Add(_actualStopLimits[i].GetSaveString());
                     }
                 }
 
-                using (StreamWriter writer = new StreamWriter(@"Engine\" + _name + @"DealControllerStopLimits.txt", false))
-                {
-                    writer.Write(positionsString);
-                }
+                SettingsManager.Save(
+                    GetStopLimitsPath(),
+                    new PositionControllerStopLimitsSettingsDto
+                    {
+                        StopLimitOrders = positions
+                    });
             }
             catch (Exception error)
             {
@@ -956,31 +960,26 @@ namespace OsEngine.Journal.Internal
                     return null;
                 }
 
-                if (File.Exists(@"Engine\" + _name + @"DealControllerStopLimits.txt") == false)
+                if (File.Exists(GetStopLimitsPath()) == false)
                 {
                     return null;
                 }
 
-                // 1 count the number of transactions in the file
-                //1 считаем кол-во сделок в файле
+                PositionControllerStopLimitsSettingsDto settings = SettingsManager.Load(
+                    GetStopLimitsPath(),
+                    defaultValue: null,
+                    legacyLoader: ParseLegacyStopLimitsSettings);
 
-                List<string> orders = new List<string>();
-
-
-
-                using (StreamReader reader = new StreamReader(@"Engine\" + _name + @"DealControllerStopLimits.txt"))
+                if (settings?.StopLimitOrders == null)
                 {
-                    while (!reader.EndOfStream)
-                    {
-                        orders.Add(reader.ReadLine());
-                    }
+                    return new List<PositionOpenerToStopLimit>();
                 }
 
                 List<PositionOpenerToStopLimit> stopLimits = new List<PositionOpenerToStopLimit>();
 
-                for (int i = 0; i < orders.Count; i++)
+                for (int i = 0; i < settings.StopLimitOrders.Count; i++)
                 {
-                    string str = orders[i];
+                    string str = settings.StopLimitOrders[i];
 
                     if (String.IsNullOrEmpty(str))
                     {
@@ -1000,6 +999,31 @@ namespace OsEngine.Journal.Internal
             }
 
             return null;
+        }
+
+        private string GetStopLimitsPath()
+        {
+            return @"Engine\" + _name + @"DealControllerStopLimits.txt";
+        }
+
+        private static PositionControllerStopLimitsSettingsDto ParseLegacyStopLimitsSettings(string content)
+        {
+            if (string.IsNullOrWhiteSpace(content))
+            {
+                return null;
+            }
+
+            string[] lines = content.Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries);
+
+            return new PositionControllerStopLimitsSettingsDto
+            {
+                StopLimitOrders = new List<string>(lines)
+            };
+        }
+
+        private sealed class PositionControllerStopLimitsSettingsDto
+        {
+            public List<string> StopLimitOrders { get; set; }
         }
 
         #endregion
