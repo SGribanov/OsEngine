@@ -616,3 +616,18 @@
 ### Verification
 
 - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` -> passed 162/162
+
+## 2026-02-16 - Step 2.3 (JSON settings subsystem) - Incremental adoption in TesterServer core settings
+
+- Migrated `project/OsEngine/Market/Servers/Tester/TesterServer.cs` (`TestServer.txt`) persistence to `SettingsManager`:
+  - private `Load()` now reads JSON and falls back to legacy 11-line format parser
+  - public `Save()` now writes JSON into `Engine\\TestServer.txt`
+  - preserved existing model fields and defaults (`_activeSet`, slippages, tester/source types, execution type, UI and memory flags)
+- Added tests `project/OsEngine.Tests/TesterServerPersistenceTests.cs`:
+  - `Save_ShouldPersistJson_AndLoadRoundTrip`
+  - `Load_ShouldSupportLegacyLineBasedFormat`
+  - tests use uninitialized instance + reflection for private `Load`
+
+### Verification
+
+- `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` -> passed 164/164

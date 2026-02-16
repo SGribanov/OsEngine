@@ -166,29 +166,29 @@ namespace OsEngine.Market.Servers.Tester
 
         private void Load()
         {
-            if (!File.Exists(@"Engine\" + @"TestServer.txt"))
-            {
-                return;
-            }
-
             try
             {
-                using (StreamReader reader = new StreamReader(@"Engine\" + @"TestServer.txt"))
-                {
-                    _activeSet = reader.ReadLine();
-                    _slippageToSimpleOrder = Convert.ToInt32(reader.ReadLine());
-                    StartPortfolio = reader.ReadLine().ToDecimal();
-                    Enum.TryParse(reader.ReadLine(), out _typeTesterData);
-                    Enum.TryParse(reader.ReadLine(), out _sourceDataType);
-                    _pathToFolder = reader.ReadLine();
-                    _slippageToStopOrder = Convert.ToInt32(reader.ReadLine());
-                    Enum.TryParse(reader.ReadLine(), out _orderExecutionType);
-                    _profitMarketIsOn = Convert.ToBoolean(reader.ReadLine());
-                    _guiIsOpenFullSettings = Convert.ToBoolean(reader.ReadLine());
-                    _removeTradesFromMemory = Convert.ToBoolean(reader.ReadLine());
+                TesterServerSettingsDto settings = SettingsManager.Load(
+                    GetTesterSettingsPath(),
+                    defaultValue: null,
+                    legacyLoader: ParseLegacyTesterServerSettings);
 
-                    reader.Close();
+                if (settings == null)
+                {
+                    return;
                 }
+
+                _activeSet = settings.ActiveSet;
+                _slippageToSimpleOrder = settings.SlippageToSimpleOrder;
+                StartPortfolio = settings.StartPortfolio;
+                _typeTesterData = settings.TypeTesterData;
+                _sourceDataType = settings.SourceDataType;
+                _pathToFolder = settings.PathToFolder;
+                _slippageToStopOrder = settings.SlippageToStopOrder;
+                _orderExecutionType = settings.OrderExecutionType;
+                _profitMarketIsOn = settings.ProfitMarketIsOn;
+                _guiIsOpenFullSettings = settings.GuiIsOpenFullSettings;
+                _removeTradesFromMemory = settings.RemoveTradesFromMemory;
             }
             catch (Exception)
             {
@@ -200,26 +200,142 @@ namespace OsEngine.Market.Servers.Tester
         {
             try
             {
-                using (StreamWriter writer = new StreamWriter(@"Engine\" + @"TestServer.txt", false))
-                {
-                    writer.WriteLine(_activeSet);
-                    writer.WriteLine(_slippageToSimpleOrder);
-                    writer.WriteLine(StartPortfolio);
-                    writer.WriteLine(_typeTesterData);
-                    writer.WriteLine(_sourceDataType);
-                    writer.WriteLine(_pathToFolder);
-                    writer.WriteLine(_slippageToStopOrder);
-                    writer.WriteLine(_orderExecutionType);
-                    writer.WriteLine(_profitMarketIsOn);
-                    writer.WriteLine(_guiIsOpenFullSettings);
-                    writer.WriteLine(_removeTradesFromMemory);
-                    writer.Close();
-                }
+                SettingsManager.Save(
+                    GetTesterSettingsPath(),
+                    new TesterServerSettingsDto
+                    {
+                        ActiveSet = _activeSet,
+                        SlippageToSimpleOrder = _slippageToSimpleOrder,
+                        StartPortfolio = StartPortfolio,
+                        TypeTesterData = _typeTesterData,
+                        SourceDataType = _sourceDataType,
+                        PathToFolder = _pathToFolder,
+                        SlippageToStopOrder = _slippageToStopOrder,
+                        OrderExecutionType = _orderExecutionType,
+                        ProfitMarketIsOn = _profitMarketIsOn,
+                        GuiIsOpenFullSettings = _guiIsOpenFullSettings,
+                        RemoveTradesFromMemory = _removeTradesFromMemory
+                    });
             }
             catch (Exception)
             {
                 // ignored
             }
+        }
+
+        private static string GetTesterSettingsPath()
+        {
+            return @"Engine\TestServer.txt";
+        }
+
+        private static TesterServerSettingsDto ParseLegacyTesterServerSettings(string content)
+        {
+            if (string.IsNullOrWhiteSpace(content))
+            {
+                return null;
+            }
+
+            string normalized = content.Replace("\r", string.Empty);
+            string[] lines = normalized.Split('\n');
+
+            if (lines.Length > 0 && lines[lines.Length - 1] == string.Empty)
+            {
+                Array.Resize(ref lines, lines.Length - 1);
+            }
+
+            TesterDataType testerDataType = TesterDataType.Candle;
+            if (lines.Length > 3)
+            {
+                Enum.TryParse(lines[3], out testerDataType);
+            }
+
+            TesterSourceDataType sourceDataType = TesterSourceDataType.Folder;
+            if (lines.Length > 4)
+            {
+                Enum.TryParse(lines[4], out sourceDataType);
+            }
+
+            OrderExecutionType orderExecutionType = OrderExecutionType.Intersection;
+            if (lines.Length > 7)
+            {
+                Enum.TryParse(lines[7], out orderExecutionType);
+            }
+
+            int slippageToSimpleOrder = 0;
+            if (lines.Length > 1 && int.TryParse(lines[1], out int parsedSimpleSlippage))
+            {
+                slippageToSimpleOrder = parsedSimpleSlippage;
+            }
+
+            decimal startPortfolio = 1000000m;
+            if (lines.Length > 2)
+            {
+                startPortfolio = lines[2].ToDecimal();
+            }
+
+            int slippageToStopOrder = 0;
+            if (lines.Length > 6 && int.TryParse(lines[6], out int parsedStopSlippage))
+            {
+                slippageToStopOrder = parsedStopSlippage;
+            }
+
+            bool profitMarketIsOn = true;
+            if (lines.Length > 8)
+            {
+                bool.TryParse(lines[8], out profitMarketIsOn);
+            }
+
+            bool guiIsOpenFullSettings = false;
+            if (lines.Length > 9)
+            {
+                bool.TryParse(lines[9], out guiIsOpenFullSettings);
+            }
+
+            bool removeTradesFromMemory = false;
+            if (lines.Length > 10)
+            {
+                bool.TryParse(lines[10], out removeTradesFromMemory);
+            }
+
+            return new TesterServerSettingsDto
+            {
+                ActiveSet = lines.Length > 0 ? lines[0] : null,
+                SlippageToSimpleOrder = slippageToSimpleOrder,
+                StartPortfolio = startPortfolio,
+                TypeTesterData = testerDataType,
+                SourceDataType = sourceDataType,
+                PathToFolder = lines.Length > 5 ? lines[5] : null,
+                SlippageToStopOrder = slippageToStopOrder,
+                OrderExecutionType = orderExecutionType,
+                ProfitMarketIsOn = profitMarketIsOn,
+                GuiIsOpenFullSettings = guiIsOpenFullSettings,
+                RemoveTradesFromMemory = removeTradesFromMemory
+            };
+        }
+
+        private sealed class TesterServerSettingsDto
+        {
+            public string ActiveSet { get; set; }
+
+            public int SlippageToSimpleOrder { get; set; }
+
+            public decimal StartPortfolio { get; set; }
+
+            public TesterDataType TypeTesterData { get; set; }
+
+            public TesterSourceDataType SourceDataType { get; set; }
+
+            public string PathToFolder { get; set; }
+
+            public int SlippageToStopOrder { get; set; }
+
+            public OrderExecutionType OrderExecutionType { get; set; }
+
+            public bool ProfitMarketIsOn { get; set; }
+
+            public bool GuiIsOpenFullSettings { get; set; }
+
+            public bool RemoveTradesFromMemory { get; set; }
         }
 
         public void SaveSecurityTestSettings()
