@@ -1514,3 +1514,23 @@
   - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` succeeded (`236/236`).
 - **Commit:** `11575aba9`
 - **Push:** no (manual push by user)
+
+### Step 2.3 - JSON Settings Subsystem (Incremental Adoption #73)
+
+- **Status:** In Progress (increment completed)
+- **Plan item:** `refactoring_stage2_plan.md` -> Phase 2 / Step 2.3
+- **Changes:**
+  - Migrated EfficiencyRatio indicator settings persistence to JSON with legacy fallback:
+    - `project/OsEngine/Charts/CandleChart/Indicators/EfficiencyRatio.cs`
+  - Covered persisted file:
+    - dynamic `Engine\\<Name>.txt` path (`EfficiencyRatio` indicator)
+  - Added dedicated persistence tests:
+    - `project/OsEngine.Tests/EfficiencyRatioPersistenceTests.cs`
+      - `Save_ShouldPersistJson_AndLoadRoundTrip`
+      - `Load_ShouldSupportLegacyLineBasedFormat`
+  - Updated running progress journal:
+    - `refactoring_stage2_progress.md`
+- **Verification:**
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` succeeded (`238/238`).
+- **Commit:** `c76e9f543`
+- **Push:** no (manual push by user)
