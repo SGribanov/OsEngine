@@ -1276,3 +1276,19 @@
 ### Verification
 
 - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` -> passed 250/250
+
+## 2026-02-16 - Step 2.3 (JSON settings subsystem) - Incremental adoption in PriceOscillator indicator settings
+
+- Migrated `project/OsEngine/Charts/CandleChart/Indicators/PriceOscillator.cs` (`Engine\\<Name>.txt`) persistence to `SettingsManager`:
+  - `Save()` now writes JSON DTO with `ColorBase`, `PaintOn`, and `TypeSerch`
+  - `Load()` now reads JSON and falls back to legacy line-based parser
+  - preserved compatibility with historical legacy format that can include an extra ignored line
+  - kept existing behavior for nested moving averages persistence (`<Name>ma1`, `<Name>ma2`)
+- Added tests `project/OsEngine.Tests/PriceOscillatorPersistenceTests.cs`:
+  - `Save_ShouldPersistJson_AndLoadRoundTrip`
+  - `Load_ShouldSupportLegacyLineBasedFormat`
+  - tests use backup/restore for indicator settings file and nested MA settings files
+
+### Verification
+
+- `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` -> passed 252/252

@@ -1,0 +1,137 @@
+using System;
+using System.Collections.Generic;
+using System.Drawing;
+using System.IO;
+using System.Linq;
+using OsEngine.Charts.CandleChart.Indicators;
+using Xunit;
+
+namespace OsEngine.Tests;
+
+public class PriceOscillatorPersistenceTests
+{
+    [Fact]
+    public void Save_ShouldPersistJson_AndLoadRoundTrip()
+    {
+        const string name = "CodexPriceOscillatorJson";
+        using PriceOscillatorFileScope scope = new PriceOscillatorFileScope(name);
+
+        PriceOscillator source = new PriceOscillator(name, canDelete: true)
+        {
+            ColorBase = Color.OrangeRed,
+            PaintOn = false,
+            TypeSerch = PriceOscillatorSerchType.Persent
+        };
+        source.Save();
+
+        string content = File.ReadAllText(scope.SettingsPath);
+        Assert.StartsWith("{", content.TrimStart());
+
+        PriceOscillator loaded = new PriceOscillator(name, canDelete: true);
+
+        Assert.Equal(Color.OrangeRed.ToArgb(), loaded.ColorBase.ToArgb());
+        Assert.False(loaded.PaintOn);
+        Assert.Equal(PriceOscillatorSerchType.Persent, loaded.TypeSerch);
+    }
+
+    [Fact]
+    public void Load_ShouldSupportLegacyLineBasedFormat()
+    {
+        const string name = "CodexPriceOscillatorLegacy";
+        using PriceOscillatorFileScope scope = new PriceOscillatorFileScope(name);
+
+        string legacy = string.Join(
+            "\n",
+            Color.Goldenrod.ToArgb().ToString(),
+            "True",
+            "Punkt",
+            "legacy-ignored-line") + "\n";
+        File.WriteAllText(scope.SettingsPath, legacy);
+
+        PriceOscillator loaded = new PriceOscillator(name, canDelete: true);
+
+        Assert.Equal(Color.Goldenrod.ToArgb(), loaded.ColorBase.ToArgb());
+        Assert.True(loaded.PaintOn);
+        Assert.Equal(PriceOscillatorSerchType.Punkt, loaded.TypeSerch);
+    }
+
+    private sealed class PriceOscillatorFileScope : IDisposable
+    {
+        private readonly string _engineDirPath;
+        private readonly bool _engineDirExisted;
+        private readonly List<FileState> _states;
+
+        public PriceOscillatorFileScope(string name)
+        {
+            _engineDirPath = Path.GetFullPath("Engine");
+            _engineDirExisted = Directory.Exists(_engineDirPath);
+            if (!_engineDirExisted)
+            {
+                Directory.CreateDirectory(_engineDirPath);
+            }
+
+            SettingsPath = Path.Combine(_engineDirPath, name + ".txt");
+            _states = new List<FileState>
+            {
+                Capture(SettingsPath),
+                Capture(Path.Combine(_engineDirPath, name + "ma1.txt")),
+                Capture(Path.Combine(_engineDirPath, name + "ma2.txt"))
+            };
+        }
+
+        public string SettingsPath { get; }
+
+        public void Dispose()
+        {
+            foreach (FileState state in _states)
+            {
+                if (state.FileExisted)
+                {
+                    if (File.Exists(state.BackupPath))
+                    {
+                        File.Copy(state.BackupPath, state.Path, overwrite: true);
+                        File.Delete(state.BackupPath);
+                    }
+                }
+                else
+                {
+                    if (File.Exists(state.Path))
+                    {
+                        File.Delete(state.Path);
+                    }
+
+                    if (File.Exists(state.BackupPath))
+                    {
+                        File.Delete(state.BackupPath);
+                    }
+                }
+            }
+
+            if (!_engineDirExisted
+                && Directory.Exists(_engineDirPath)
+                && !Directory.EnumerateFileSystemEntries(_engineDirPath).Any())
+            {
+                Directory.Delete(_engineDirPath);
+            }
+        }
+
+        private static FileState Capture(string path)
+        {
+            string backupPath = path + ".codex.bak";
+            bool fileExisted = File.Exists(path);
+
+            if (fileExisted)
+            {
+                File.Copy(path, backupPath, overwrite: true);
+            }
+            else if (File.Exists(backupPath))
+            {
+                File.Delete(backupPath);
+            }
+
+            return new FileState(path, backupPath, fileExisted);
+        }
+
+        private sealed record FileState(string Path, string BackupPath, bool FileExisted);
+    }
+}
