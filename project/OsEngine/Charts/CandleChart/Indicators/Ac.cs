@@ -168,16 +168,17 @@ namespace OsEngine.Charts.CandleChart.Indicators
                     return;
                 }
 
-                using (StreamWriter writer = new StreamWriter(@"Engine\" + Name + @".txt", false))
-                {
-                    writer.WriteLine(ColorUp.ToArgb());
-                    writer.WriteLine(ColorDown.ToArgb());
-                    writer.WriteLine(LengthLong);
-                    writer.WriteLine(LengthShort);
-                    writer.WriteLine(PaintOn);
-                    writer.WriteLine(TypeCalculationAverage);
-                    writer.Close();
-                }
+                SettingsManager.Save(
+                    GetSettingsPath(),
+                    new AcSettingsDto
+                    {
+                        ColorUpArgb = ColorUp.ToArgb(),
+                        ColorDownArgb = ColorDown.ToArgb(),
+                        LengthLong = LengthLong,
+                        LengthShort = LengthShort,
+                        PaintOn = PaintOn,
+                        TypeCalculationAverage = TypeCalculationAverage
+                    });
             }
             catch (Exception)
             {
@@ -192,24 +193,28 @@ namespace OsEngine.Charts.CandleChart.Indicators
         /// </summary>
         public void Load()
         {
-            if (!File.Exists(@"Engine\" + Name + @".txt"))
+            if (!File.Exists(GetSettingsPath()))
             {
                 return;
             }
             try
             {
-                using (StreamReader reader = new StreamReader(@"Engine\" + Name + @".txt"))
-                {
-                    ColorUp = Color.FromArgb(Convert.ToInt32(reader.ReadLine()));
-                    ColorDown = Color.FromArgb(Convert.ToInt32(reader.ReadLine()));
-                    LengthLong = Convert.ToInt32(reader.ReadLine());
-                    LengthShort = Convert.ToInt32(reader.ReadLine());
-                    PaintOn = Convert.ToBoolean(reader.ReadLine());
-                    Enum.TryParse(reader.ReadLine(), true, out TypeCalculationAverage);
-                    reader.ReadLine();
+                AcSettingsDto settings = SettingsManager.Load(
+                    GetSettingsPath(),
+                    defaultValue: null,
+                    legacyLoader: ParseLegacySettings);
 
-                    reader.Close();
+                if (settings == null)
+                {
+                    return;
                 }
+
+                ColorUp = Color.FromArgb(settings.ColorUpArgb);
+                ColorDown = Color.FromArgb(settings.ColorDownArgb);
+                LengthLong = settings.LengthLong;
+                LengthShort = settings.LengthShort;
+                PaintOn = settings.PaintOn;
+                TypeCalculationAverage = settings.TypeCalculationAverage;
             }
             catch (Exception)
             {
@@ -224,10 +229,64 @@ namespace OsEngine.Charts.CandleChart.Indicators
         /// </summary>
         public void Delete()
         {
-            if (File.Exists(@"Engine\" + Name + @".txt"))
+            if (File.Exists(GetSettingsPath()))
             {
-                File.Delete(@"Engine\" + Name + @".txt");
+                File.Delete(GetSettingsPath());
             }
+        }
+
+        private string GetSettingsPath()
+        {
+            return @"Engine\" + Name + @".txt";
+        }
+
+        private static AcSettingsDto ParseLegacySettings(string content)
+        {
+            if (string.IsNullOrWhiteSpace(content))
+            {
+                return null;
+            }
+
+            string normalized = content.Replace("\r", string.Empty);
+            string[] lines = normalized.Split('\n');
+
+            if (lines.Length > 0 && lines[lines.Length - 1] == string.Empty)
+            {
+                Array.Resize(ref lines, lines.Length - 1);
+            }
+
+            if (lines.Length < 6)
+            {
+                return null;
+            }
+
+            MovingAverageTypeCalculation typeCalculationAverage = MovingAverageTypeCalculation.Simple;
+            Enum.TryParse(lines[5], true, out typeCalculationAverage);
+
+            return new AcSettingsDto
+            {
+                ColorUpArgb = Convert.ToInt32(lines[0]),
+                ColorDownArgb = Convert.ToInt32(lines[1]),
+                LengthLong = Convert.ToInt32(lines[2]),
+                LengthShort = Convert.ToInt32(lines[3]),
+                PaintOn = Convert.ToBoolean(lines[4]),
+                TypeCalculationAverage = typeCalculationAverage
+            };
+        }
+
+        private sealed class AcSettingsDto
+        {
+            public int ColorUpArgb { get; set; }
+
+            public int ColorDownArgb { get; set; }
+
+            public int LengthLong { get; set; }
+
+            public int LengthShort { get; set; }
+
+            public bool PaintOn { get; set; }
+
+            public MovingAverageTypeCalculation TypeCalculationAverage { get; set; }
         }
 
         /// <summary>
