@@ -1634,3 +1634,23 @@
   - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` succeeded (`248/248`).
 - **Commit:** `6a70cb00f`
 - **Push:** no (manual push by user)
+
+### Step 2.3 - JSON Settings Subsystem (Incremental Adoption #79)
+
+- **Status:** In Progress (increment completed)
+- **Plan item:** `refactoring_stage2_plan.md` -> Phase 2 / Step 2.3
+- **Changes:**
+  - Migrated Momentum indicator settings persistence to JSON with legacy fallback:
+    - `project/OsEngine/Charts/CandleChart/Indicators/Momentum.cs`
+  - Covered persisted file:
+    - dynamic `Engine\\<Name>.txt` path (`Momentum` indicator)
+  - Added dedicated persistence tests:
+    - `project/OsEngine.Tests/MomentumPersistenceTests.cs`
+      - `Save_ShouldPersistJson_AndLoadRoundTrip`
+      - `Load_ShouldSupportLegacyLineBasedFormat`
+  - Updated running progress journal:
+    - `refactoring_stage2_progress.md`
+- **Verification:**
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` succeeded (`250/250`).
+- **Commit:** `3e5e427c1`
+- **Push:** no (manual push by user)
