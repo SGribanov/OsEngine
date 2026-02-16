@@ -1156,3 +1156,18 @@
 ### Verification
 
 - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` -> passed 234/234
+
+## 2026-02-16 - Step 2.3 (JSON settings subsystem) - Incremental adoption in ForceIndex indicator settings
+
+- Migrated `project/OsEngine/Charts/CandleChart/Indicators/ForceIndex.cs` (`Engine\\<Name>.txt`) persistence to `SettingsManager`:
+  - `Save()` now writes JSON DTO with period/point/average/color/paint settings
+  - `Load()` now reads JSON and falls back to legacy line-based parser
+  - preserved existing settings contract for `Period`, `TypePoint`, `TypeCalculationAverage`, `ColorBase`, and `PaintOn`
+- Added tests `project/OsEngine.Tests/ForceIndexPersistenceTests.cs`:
+  - `Save_ShouldPersistJson_AndLoadRoundTrip`
+  - `Load_ShouldSupportLegacyLineBasedFormat`
+  - tests use file backup/restore around indicator settings path
+
+### Verification
+
+- `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` -> passed 236/236
