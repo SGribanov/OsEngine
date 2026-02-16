@@ -256,3 +256,18 @@
 ### Verification
 
 - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` -> passed 112/112
+
+## 2026-02-16 - Step 2.3 (JSON settings subsystem) - Incremental adoption in ServerTelegram settings
+
+- Migrated `project/OsEngine/Logging/ServerTelegram.cs` persistence to `SettingsManager`:
+  - `Save()` now writes JSON into `Engine\\telegramSet.txt`
+  - `Load()` now reads JSON and falls back to legacy 3-line format parser
+  - preserved readiness behavior (`_isReady`) on successful load/save
+- Added tests `project/OsEngine.Tests/ServerTelegramPersistenceTests.cs`:
+  - `Save_ShouldPersistJson_AndLoadRoundTrip`
+  - `Load_ShouldSupportLegacyLineBasedFormat`
+  - tests use uninitialized instance to avoid constructor side effects (network polling threads)
+
+### Verification
+
+- `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` -> passed 114/114

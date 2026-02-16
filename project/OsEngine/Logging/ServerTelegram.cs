@@ -6,6 +6,7 @@ using System.IO;
 using System.Net.Http;
 using System.Threading;
 using System.Windows;
+using OsEngine.Entity;
 
 namespace OsEngine.Logging
 {
@@ -323,21 +324,16 @@ namespace OsEngine.Logging
         {
             try
             {
-                if (File.Exists(@"Engine\telegramSet.txt"))
-                {
-                    using StreamReader reader = new StreamReader(@"Engine\telegramSet.txt");
-                    BotToken = reader.ReadLine();
-                    ChatId = Convert.ToInt64(reader.ReadLine());
-                    string isProcessingCommand = reader.ReadLine();
-                    if (isProcessingCommand == "True" || isProcessingCommand == "true")
-                    {
-                        ProcessingCommand = true;
-                    }
-                    else
-                    {
-                        ProcessingCommand = false;
-                    }
+                ServerTelegramSettingsDto settings = SettingsManager.Load(
+                    GetSettingsPath(),
+                    defaultValue: null,
+                    legacyLoader: ParseLegacySettings);
 
+                if (settings != null)
+                {
+                    BotToken = settings.BotToken;
+                    ChatId = settings.ChatId;
+                    ProcessingCommand = settings.ProcessingCommand;
                     _isReady = true;
                 }
                 else
@@ -362,10 +358,14 @@ namespace OsEngine.Logging
         {
             try
             {
-                using StreamWriter writer = new StreamWriter(@"Engine\telegramSet.txt");
-                writer.WriteLine(BotToken);
-                writer.WriteLine(ChatId);
-                writer.WriteLine(ProcessingCommand);
+                SettingsManager.Save(
+                    GetSettingsPath(),
+                    new ServerTelegramSettingsDto
+                    {
+                        BotToken = BotToken,
+                        ChatId = ChatId,
+                        ProcessingCommand = ProcessingCommand
+                    });
 
                 if(string.IsNullOrEmpty(BotToken) == false &&
                     ChatId != 0)
@@ -377,6 +377,39 @@ namespace OsEngine.Logging
             {
                 // ignore
             }
+        }
+
+        private static string GetSettingsPath()
+        {
+            return @"Engine\telegramSet.txt";
+        }
+
+        private static ServerTelegramSettingsDto ParseLegacySettings(string content)
+        {
+            if (string.IsNullOrWhiteSpace(content))
+            {
+                return null;
+            }
+
+            string normalized = content.Replace("\r", string.Empty);
+            string[] lines = normalized.Split('\n');
+
+            return new ServerTelegramSettingsDto
+            {
+                BotToken = lines.Length > 0 ? lines[0] : string.Empty,
+                ChatId = lines.Length > 1 && long.TryParse(lines[1], out long chatId) ? chatId : 0,
+                ProcessingCommand = lines.Length > 2
+                    && lines[2].Equals("true", StringComparison.OrdinalIgnoreCase)
+            };
+        }
+
+        private sealed class ServerTelegramSettingsDto
+        {
+            public string BotToken { get; set; }
+
+            public long ChatId { get; set; }
+
+            public bool ProcessingCommand { get; set; }
         }
 
         /// <summary>
