@@ -260,26 +260,29 @@ namespace OsEngine.Charts.CandleChart.Indicators
         /// </summary>
         public void Load()
         {
-            if (!File.Exists(@"Engine\" + Name + @".txt"))
+            if (!File.Exists(GetSettingsPath()))
             {
                 return;
             }
             try
             {
+                MovingAverageSettingsDto settings = SettingsManager.Load(
+                    GetSettingsPath(),
+                    defaultValue: null,
+                    legacyLoader: ParseLegacySettings);
 
-                using (StreamReader reader = new StreamReader(@"Engine\" + Name + @".txt"))
+                if (settings == null)
                 {
-                    ColorBase = Color.FromArgb(Convert.ToInt32(reader.ReadLine()));
-                    Length = Convert.ToInt32(reader.ReadLine());
-                    PaintOn = Convert.ToBoolean(reader.ReadLine());
-                    Enum.TryParse(reader.ReadLine(), true, out TypeCalculationAverage);
-                    Enum.TryParse(reader.ReadLine(), true, out TypePointsToSearch);
-                    KaufmanFastEma = Convert.ToInt32(reader.ReadLine());
-                    KaufmanSlowEma = Convert.ToInt32(reader.ReadLine());
-                    reader.ReadLine();
-
-                    reader.Close();
+                    return;
                 }
+
+                ColorBase = Color.FromArgb(settings.ColorArgb);
+                Length = settings.Length;
+                PaintOn = settings.PaintOn;
+                TypeCalculationAverage = settings.TypeCalculationAverage;
+                TypePointsToSearch = settings.TypePointsToSearch;
+                KaufmanFastEma = settings.KaufmanFastEma;
+                KaufmanSlowEma = settings.KaufmanSlowEma;
 
 
             }
@@ -298,17 +301,18 @@ namespace OsEngine.Charts.CandleChart.Indicators
         {
             try
             {
-                using (StreamWriter writer = new StreamWriter(@"Engine\" + Name + @".txt", false))
-                {
-                    writer.WriteLine(ColorBase.ToArgb());
-                    writer.WriteLine(Length);
-                    writer.WriteLine(PaintOn);
-                    writer.WriteLine(TypeCalculationAverage);
-                    writer.WriteLine(TypePointsToSearch);
-                    writer.WriteLine(KaufmanFastEma);
-                    writer.WriteLine(KaufmanSlowEma);
-                    writer.Close();
-                }
+                SettingsManager.Save(
+                    GetSettingsPath(),
+                    new MovingAverageSettingsDto
+                    {
+                        ColorArgb = ColorBase.ToArgb(),
+                        Length = Length,
+                        PaintOn = PaintOn,
+                        TypeCalculationAverage = TypeCalculationAverage,
+                        TypePointsToSearch = TypePointsToSearch,
+                        KaufmanFastEma = KaufmanFastEma,
+                        KaufmanSlowEma = KaufmanSlowEma
+                    });
             }
             catch (Exception)
             {
@@ -323,10 +327,70 @@ namespace OsEngine.Charts.CandleChart.Indicators
         /// </summary>
         public void Delete()
         {
-            if (File.Exists(@"Engine\" + Name + @".txt"))
+            if (File.Exists(GetSettingsPath()))
             {
-                File.Delete(@"Engine\" + Name + @".txt");
+                File.Delete(GetSettingsPath());
             }
+        }
+
+        private string GetSettingsPath()
+        {
+            return @"Engine\" + Name + @".txt";
+        }
+
+        private static MovingAverageSettingsDto ParseLegacySettings(string content)
+        {
+            if (string.IsNullOrWhiteSpace(content))
+            {
+                return null;
+            }
+
+            string normalized = content.Replace("\r", string.Empty);
+            string[] lines = normalized.Split('\n');
+
+            if (lines.Length > 0 && lines[lines.Length - 1] == string.Empty)
+            {
+                Array.Resize(ref lines, lines.Length - 1);
+            }
+
+            if (lines.Length < 7)
+            {
+                return null;
+            }
+
+            MovingAverageTypeCalculation typeCalculationAverage = MovingAverageTypeCalculation.Simple;
+            Enum.TryParse(lines[3], true, out typeCalculationAverage);
+
+            PriceTypePoints typePointsToSearch = PriceTypePoints.Close;
+            Enum.TryParse(lines[4], true, out typePointsToSearch);
+
+            return new MovingAverageSettingsDto
+            {
+                ColorArgb = Convert.ToInt32(lines[0]),
+                Length = Convert.ToInt32(lines[1]),
+                PaintOn = Convert.ToBoolean(lines[2]),
+                TypeCalculationAverage = typeCalculationAverage,
+                TypePointsToSearch = typePointsToSearch,
+                KaufmanFastEma = Convert.ToInt32(lines[5]),
+                KaufmanSlowEma = Convert.ToInt32(lines[6])
+            };
+        }
+
+        private sealed class MovingAverageSettingsDto
+        {
+            public int ColorArgb { get; set; }
+
+            public int Length { get; set; }
+
+            public bool PaintOn { get; set; }
+
+            public MovingAverageTypeCalculation TypeCalculationAverage { get; set; }
+
+            public PriceTypePoints TypePointsToSearch { get; set; }
+
+            public int KaufmanFastEma { get; set; }
+
+            public int KaufmanSlowEma { get; set; }
         }
 
         /// <summary>

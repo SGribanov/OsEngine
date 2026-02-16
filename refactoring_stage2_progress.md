@@ -1549,3 +1549,18 @@
 ### Verification
 
 - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` -> passed 286/286
+
+## 2026-02-16 - Step 2.3 (JSON settings subsystem) - Incremental adoption in MovingAverage indicator settings
+
+- Migrated `project/OsEngine/Charts/CandleChart/Indicators/MovingAverage.cs` (`Engine\\<Name>.txt`) persistence to `SettingsManager`:
+  - `Save()` now writes JSON DTO with color, length, paint flag, MA type, point type, and Kaufman EMA settings
+  - `Load()` now reads JSON and falls back to legacy line-based parser
+  - preserved compatibility with historical legacy format that can include an extra ignored line
+- Added tests `project/OsEngine.Tests/MovingAveragePersistenceTests.cs`:
+  - `Save_ShouldPersistJson_AndLoadRoundTrip`
+  - `Load_ShouldSupportLegacyLineBasedFormat`
+  - tests use file backup/restore around indicator settings path
+
+### Verification
+
+- `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` -> passed 288/288
