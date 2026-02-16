@@ -336,31 +336,20 @@ namespace OsEngine.Layout
             int heightCur = System.Windows.Forms.Screen.PrimaryScreen.Bounds.Size.Height;
             int monitorCountCur = System.Windows.Forms.Screen.AllScreens.Length;
 
-            if (!File.Exists(@"Engine\ScreenResolution.txt"))
+            if (!File.Exists(GetScreenResolutionPath()))
             {
                 SaveResolution(widthCur, heightCur, monitorCountCur);
                 return true;
             }
 
-            int widthOld = 0;
-            int heightOld = 0;
-            int monitorCountOld = 0;
+            ScreenResolutionSettingsDto settings = SettingsManager.Load(
+                GetScreenResolutionPath(),
+                defaultValue: new ScreenResolutionSettingsDto(),
+                legacyLoader: ParseLegacyScreenResolutionSettings);
 
-            try
-            {
-                using (StreamReader reader = new StreamReader(@"Engine\ScreenResolution.txt"))
-                {
-                    widthOld = Convert.ToInt32(reader.ReadLine());
-                    heightOld = Convert.ToInt32(reader.ReadLine());
-                    monitorCountOld = Convert.ToInt32(reader.ReadLine());
-
-                    reader.Close();
-                }
-            }
-            catch (Exception)
-            {
-                // ignore
-            }
+            int widthOld = settings.Width;
+            int heightOld = settings.Height;
+            int monitorCountOld = settings.MonitorCount;
 
             if(widthCur != widthOld ||
                 heightCur != heightOld ||
@@ -378,19 +367,74 @@ namespace OsEngine.Layout
         {
             try
             {
-                using (StreamWriter writer = new StreamWriter(@"Engine\ScreenResolution.txt", false))
-                {
-                    writer.WriteLine(widthCur.ToString());
-                    writer.WriteLine(heightCur.ToString());
-                    writer.WriteLine(monitorCountCur.ToString());
-
-                    writer.Close();
-                }
+                SettingsManager.Save(
+                    GetScreenResolutionPath(),
+                    new ScreenResolutionSettingsDto
+                    {
+                        Width = widthCur,
+                        Height = heightCur,
+                        MonitorCount = monitorCountCur
+                    });
             }
             catch (Exception)
             {
                 // ignore
             }
+        }
+
+        private static string GetScreenResolutionPath()
+        {
+            return @"Engine\ScreenResolution.txt";
+        }
+
+        private static ScreenResolutionSettingsDto ParseLegacyScreenResolutionSettings(string content)
+        {
+            if (string.IsNullOrWhiteSpace(content))
+            {
+                return new ScreenResolutionSettingsDto();
+            }
+
+            string normalized = content.Replace("\r", string.Empty);
+            string[] lines = normalized.Split('\n');
+
+            if (lines.Length > 0 && lines[lines.Length - 1] == string.Empty)
+            {
+                Array.Resize(ref lines, lines.Length - 1);
+            }
+
+            int width = 0;
+            if (lines.Length > 0)
+            {
+                int.TryParse(lines[0], out width);
+            }
+
+            int height = 0;
+            if (lines.Length > 1)
+            {
+                int.TryParse(lines[1], out height);
+            }
+
+            int monitorCount = 0;
+            if (lines.Length > 2)
+            {
+                int.TryParse(lines[2], out monitorCount);
+            }
+
+            return new ScreenResolutionSettingsDto
+            {
+                Width = width,
+                Height = height,
+                MonitorCount = monitorCount
+            };
+        }
+
+        private sealed class ScreenResolutionSettingsDto
+        {
+            public int Width { get; set; }
+
+            public int Height { get; set; }
+
+            public int MonitorCount { get; set; }
         }
     }
 

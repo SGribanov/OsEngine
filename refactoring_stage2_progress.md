@@ -510,3 +510,18 @@
 ### Verification
 
 - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` -> passed 148/148
+
+## 2026-02-16 - Step 2.3 (JSON settings subsystem) - Incremental adoption in GlobalGUILayout screen resolution settings
+
+- Migrated `project/OsEngine/Layout/GlobalGUILayout.cs` (`ScreenResolution.txt`) persistence to `SettingsManager`:
+  - private `SaveResolution(...)` now writes JSON into `Engine\\ScreenResolution.txt`
+  - private `ScreenSettingsIsAllRight()` now reads JSON and falls back to legacy 3-line format parser
+  - preserved mismatch behavior (re-save current resolution and return `false` when stored values differ)
+- Added tests `project/OsEngine.Tests/GlobalGUILayoutScreenResolutionPersistenceTests.cs`:
+  - `SaveResolution_ShouldPersistJson_AndScreenSettingsCheckReturnTrue`
+  - `ScreenSettingsIsAllRight_ShouldSupportLegacyLineBasedFormat`
+  - tests invoke private static methods via reflection
+
+### Verification
+
+- `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` -> passed 150/150
