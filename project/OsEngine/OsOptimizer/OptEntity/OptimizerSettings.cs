@@ -283,7 +283,7 @@ namespace OsEngine.OsOptimizer.OptEntity
                     lines.Add(ClearingTimes[i].GetSaveString());
                 }
 
-                SafeFileWriter.WriteAllLines(@"Engine\" + @"OptimizerMasterClearings.txt", lines);
+                SafeFileWriter.WriteAllLines(GetClearingsPath(), lines);
             }
             catch (Exception ex)
             {
@@ -293,14 +293,14 @@ namespace OsEngine.OsOptimizer.OptEntity
 
         private void LoadClearingInfo()
         {
-            if (!File.Exists(@"Engine\" + @"OptimizerMasterClearings.txt"))
+            if (!File.Exists(GetClearingsPath()))
             {
                 return;
             }
 
             try
             {
-                using (StreamReader reader = new StreamReader(@"Engine\" + @"OptimizerMasterClearings.txt"))
+                using (StreamReader reader = new StreamReader(GetClearingsPath()))
                 {
                     while (reader.EndOfStream == false)
                     {
@@ -356,7 +356,7 @@ namespace OsEngine.OsOptimizer.OptEntity
                     lines.Add(NonTradePeriods[i].GetSaveString());
                 }
 
-                SafeFileWriter.WriteAllLines(@"Engine\" + @"OptimizerMasterNonTradePeriods.txt", lines);
+                SafeFileWriter.WriteAllLines(GetNonTradePeriodsPath(), lines);
             }
             catch (Exception ex)
             {
@@ -366,14 +366,14 @@ namespace OsEngine.OsOptimizer.OptEntity
 
         private void LoadNonTradePeriods()
         {
-            if (!File.Exists(@"Engine\" + @"OptimizerMasterNonTradePeriods.txt"))
+            if (!File.Exists(GetNonTradePeriodsPath()))
             {
                 return;
             }
 
             try
             {
-                using (StreamReader reader = new StreamReader(@"Engine\" + @"OptimizerMasterNonTradePeriods.txt"))
+                using (StreamReader reader = new StreamReader(GetNonTradePeriodsPath()))
                 {
                     while (reader.EndOfStream == false)
                     {
@@ -557,7 +557,7 @@ namespace OsEngine.OsOptimizer.OptEntity
                     _bayesianTailSharePercent.ToString()
                 };
 
-                SafeFileWriter.WriteAllLines(@"Engine\OptimizerSettings.txt", lines);
+                SafeFileWriter.WriteAllLines(GetSettingsPath(), lines);
             }
             catch (Exception error)
             {
@@ -567,13 +567,13 @@ namespace OsEngine.OsOptimizer.OptEntity
 
         private void Load()
         {
-            if (!File.Exists(@"Engine\OptimizerSettings.txt"))
+            if (!File.Exists(GetSettingsPath()))
             {
                 return;
             }
             try
             {
-                using (StreamReader reader = new StreamReader(@"Engine\OptimizerSettings.txt"))
+                using (StreamReader reader = new StreamReader(GetSettingsPath()))
                 {
                     _threadsCount = Convert.ToInt32(reader.ReadLine());
                     _strategyName = reader.ReadLine();
@@ -668,6 +668,21 @@ namespace OsEngine.OsOptimizer.OptEntity
             {
                 LogMessageEvent?.Invoke(ex.ToString(), LogMessageType.Error);
             }
+        }
+
+        private static string GetClearingsPath()
+        {
+            return @"Engine\OptimizerMasterClearings.txt";
+        }
+
+        private static string GetNonTradePeriodsPath()
+        {
+            return @"Engine\OptimizerMasterNonTradePeriods.txt";
+        }
+
+        private static string GetSettingsPath()
+        {
+            return @"Engine\OptimizerSettings.txt";
         }
 
         public event Action<string, LogMessageType> LogMessageEvent;

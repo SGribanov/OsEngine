@@ -2169,3 +2169,17 @@
 ### Verification
 
 - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` -> passed 343/343
+
+## 2026-02-16 - Step 2.3 (JSON settings subsystem) - Path consistency cleanup in OptimizerSettings storage paths
+
+- Updated `project/OsEngine/OsOptimizer/OptEntity/OptimizerSettings.cs`:
+  - centralized optimizer storage file paths into helper methods:
+    - `GetClearingsPath()`
+    - `GetNonTradePeriodsPath()`
+    - `GetSettingsPath()`
+  - replaced remaining inline path literals in clearing/non-trade/settings save/load flows
+- No behavior changes intended; cleanup keeps optimizer persistence paths maintained in one place.
+
+### Verification
+
+- `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` -> passed 343/343
