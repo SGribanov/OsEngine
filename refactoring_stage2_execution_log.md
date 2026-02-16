@@ -1054,3 +1054,23 @@
   - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` succeeded (`190/190`).
 - **Commit:** `0b0d5564f`
 - **Push:** no (manual push by user)
+
+### Step 2.3 - JSON Settings Subsystem (Incremental Adoption #50)
+
+- **Status:** In Progress (increment completed)
+- **Plan item:** `refactoring_stage2_plan.md` -> Phase 2 / Step 2.3
+- **Changes:**
+  - Migrated server popularity stats persistence to JSON with legacy fallback:
+    - `project/OsEngine/Market/ServerMaster.cs`
+  - Covered persisted file:
+    - `Engine\\MostPopularServers.txt`
+  - Added dedicated persistence tests:
+    - `project/OsEngine.Tests/ServerMasterMostPopularServersPersistenceTests.cs`
+      - `SaveMostPopularServers_ShouldPersistJson_AndLoadCounts`
+      - `LoadMostPopularServersWithCount_ShouldSupportLegacyLineBasedFormat`
+  - Updated running progress journal:
+    - `refactoring_stage2_progress.md`
+- **Verification:**
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` succeeded (`192/192`).
+- **Commit:** `f4e098eee`
+- **Push:** no (manual push by user)
