@@ -467,3 +467,23 @@
   - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` succeeded (`130/130`).
 - **Commit:** `d1a49f148`
 - **Push:** no (manual push by user)
+
+### Step 2.3 - JSON Settings Subsystem (Incremental Adoption #21)
+
+- **Status:** In Progress (increment completed)
+- **Plan item:** `refactoring_stage2_plan.md` -> Phase 2 / Step 2.3
+- **Changes:**
+  - Migrated manual control settings persistence to JSON with legacy fallback:
+    - `project/OsEngine/OsTrader/Panels/Tab/Internal/BotManualControl.cs`
+  - Covered persisted file:
+    - `Engine\\<name>StrategSettings.txt`
+  - Added dedicated persistence tests:
+    - `project/OsEngine.Tests/BotManualControlPersistenceTests.cs`
+      - `Save_ShouldPersistJson_AndLoadRoundTrip`
+      - `Load_ShouldSupportLegacyLineBasedFormat`
+  - Updated running progress journal:
+    - `refactoring_stage2_progress.md`
+- **Verification:**
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` succeeded (`132/132`).
+- **Commit:** `37a914336`
+- **Push:** no (manual push by user)
