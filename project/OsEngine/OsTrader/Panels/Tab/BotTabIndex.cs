@@ -110,9 +110,11 @@ namespace OsEngine.OsTrader.Panels.Tab
             _chartMaster.Delete();
             _chartMaster = null;
 
-            if (File.Exists(@"Engine\" + TabName + @"SpreadSet.txt"))
+            string spreadSettingsPath = GetSpreadSettingsPath();
+
+            if (File.Exists(spreadSettingsPath))
             {
-                File.Delete(@"Engine\" + TabName + @"SpreadSet.txt");
+                File.Delete(spreadSettingsPath);
             }
 
             for (int i = 0; Tabs != null && i < Tabs.Count; i++)
@@ -2483,7 +2485,7 @@ namespace OsEngine.OsTrader.Panels.Tab
         {
             if (_startProgram != StartProgram.IsOsOptimizer)
             {
-                if (!File.Exists(@"Engine\" + _botUniqName + @"IndexAutoFormulaSettings.txt"))
+                if (!File.Exists(GetSettingsPath()))
                 {
                     return;
                 }

@@ -1826,3 +1826,14 @@
 ### Verification
 
 - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` -> passed 318/318
+
+## 2026-02-16 - Step 2.3 (JSON settings subsystem) - Path consistency cleanup in BotTabIndex
+
+- Removed remaining direct `@"Engine\\..."` file-path checks in `project/OsEngine/OsTrader/Panels/Tab/BotTabIndex.cs`:
+  - tab spread settings delete now uses existing `GetSpreadSettingsPath()`
+  - index auto-formula settings existence check in nested builder delete now uses `GetSettingsPath()`
+- No behavior changes intended; cleanup aligns path handling with existing helper methods.
+
+### Verification
+
+- `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` -> passed 318/318
