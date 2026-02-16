@@ -147,17 +147,20 @@ namespace OsEngine.OsTrader.Panels.Tab
                     Directory.CreateDirectory(SettingsFolderPath);
                 }
 
-                using (var writer = new StreamWriter(SettingsFilePath, false))
-                {
-                    writer.WriteLine($"{nameof(PortfolioName)}:{PortfolioName}");
-                    writer.WriteLine(
-                        $"{nameof(UnderlyingAssets)}:{string.Join(",", UnderlyingAssets ?? new List<string>())}");
-                    writer.WriteLine($"StrikesToShow:{_strikesToShowNumericUpDown.Value}");
-                    writer.WriteLine($"{nameof(ServerType)}:{ServerType}");
-                    writer.WriteLine($"{nameof(ServerName)}:{ServerName}");
-                    writer.WriteLine($"EmulatorIsOn:{_emulatorIsOn}");
-                    writer.WriteLine($"EventsIsOn:{_eventsOn}");
-                }
+                SettingsManager.Save(
+                    SettingsFilePath,
+                    new BotTabOptionsSettingsDto
+                    {
+                        PortfolioName = PortfolioName,
+                        UnderlyingAssets = UnderlyingAssets == null
+                            ? new List<string>()
+                            : new List<string>(UnderlyingAssets),
+                        StrikesToShow = _strikesToShowNumericUpDown.Value,
+                        ServerType = ServerType,
+                        ServerName = ServerName,
+                        EmulatorIsOn = _emulatorIsOn,
+                        EventsIsOn = _eventsOn
+                    });
             }
             catch (Exception e)
             {
@@ -174,49 +177,109 @@ namespace OsEngine.OsTrader.Panels.Tab
 
             try
             {
-                using (var reader = new StreamReader(SettingsFilePath))
+                BotTabOptionsSettingsDto settings = SettingsManager.Load(
+                    SettingsFilePath,
+                    defaultValue: null,
+                    legacyLoader: ParseLegacySettings);
+
+                if (settings == null)
                 {
-                    while (!reader.EndOfStream)
-                    {
-                        var line = reader.ReadLine()?.Split(':');
-                        if (line == null || line.Length < 2) continue;
-
-                        var key = line[0];
-                        var value = string.Join(":", line.Skip(1));
-
-                        if (key == nameof(PortfolioName))
-                        {
-                            PortfolioName = value;
-                        }
-                        else if (key == nameof(UnderlyingAssets))
-                        {
-                            UnderlyingAssets = value.Split(',').ToList();
-                        }
-                        else if (key == "StrikesToShow")
-                        {
-                            _strikesToShowNumericUpDown.Value = Convert.ToDecimal(value);
-                        }
-                        else if (key == nameof(ServerType))
-                        {
-                            Enum.TryParse(value, out ServerType serverType);
-                            ServerType = serverType;
-                        }
-                        else if (key == nameof(ServerName))
-                        {
-                            ServerName = value;
-                        }
-                        else if (key == "EmulatorIsOn") { _emulatorIsOn = Convert.ToBoolean(value); }
-                        else if (key == "EventsIsOn")
-                        {
-                            _eventsOn = Convert.ToBoolean(value);
-                        }
-                    }
+                    return;
                 }
+
+                PortfolioName = settings.PortfolioName;
+                UnderlyingAssets = settings.UnderlyingAssets ?? new List<string>();
+                _strikesToShowNumericUpDown.Value = settings.StrikesToShow;
+                ServerType = settings.ServerType;
+                ServerName = settings.ServerName;
+                _emulatorIsOn = settings.EmulatorIsOn;
+                _eventsOn = settings.EventsIsOn;
             }
             catch (Exception e)
             {
                 LogMessageEvent?.Invoke(e.ToString(), LogMessageType.Error);
             }
+        }
+
+        private static BotTabOptionsSettingsDto ParseLegacySettings(string content)
+        {
+            if (string.IsNullOrWhiteSpace(content))
+            {
+                return null;
+            }
+
+            BotTabOptionsSettingsDto settings = new BotTabOptionsSettingsDto
+            {
+                UnderlyingAssets = new List<string>()
+            };
+
+            string[] lines = content.Replace("\r", string.Empty).Split('\n');
+
+            for (int i = 0; i < lines.Length; i++)
+            {
+                if (string.IsNullOrWhiteSpace(lines[i]))
+                {
+                    continue;
+                }
+
+                string[] line = lines[i].Split(':');
+                if (line.Length < 2)
+                {
+                    continue;
+                }
+
+                string key = line[0];
+                string value = string.Join(":", line.Skip(1));
+
+                if (key == nameof(PortfolioName))
+                {
+                    settings.PortfolioName = value;
+                }
+                else if (key == nameof(UnderlyingAssets))
+                {
+                    settings.UnderlyingAssets = value.Split(',').ToList();
+                }
+                else if (key == "StrikesToShow")
+                {
+                    settings.StrikesToShow = Convert.ToDecimal(value);
+                }
+                else if (key == nameof(ServerType))
+                {
+                    Enum.TryParse(value, out ServerType serverType);
+                    settings.ServerType = serverType;
+                }
+                else if (key == nameof(ServerName))
+                {
+                    settings.ServerName = value;
+                }
+                else if (key == "EmulatorIsOn")
+                {
+                    settings.EmulatorIsOn = Convert.ToBoolean(value);
+                }
+                else if (key == "EventsIsOn")
+                {
+                    settings.EventsIsOn = Convert.ToBoolean(value);
+                }
+            }
+
+            return settings;
+        }
+
+        private sealed class BotTabOptionsSettingsDto
+        {
+            public string PortfolioName { get; set; }
+
+            public List<string> UnderlyingAssets { get; set; }
+
+            public decimal StrikesToShow { get; set; }
+
+            public ServerType ServerType { get; set; }
+
+            public string ServerName { get; set; }
+
+            public bool EmulatorIsOn { get; set; }
+
+            public bool EventsIsOn { get; set; }
         }
 
         #endregion

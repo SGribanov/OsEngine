@@ -886,3 +886,18 @@
 ### Verification
 
 - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` -> passed 198/198
+
+## 2026-02-16 - Step 2.3 (JSON settings subsystem) - Incremental adoption in BotTabOptions settings
+
+- Migrated `project/OsEngine/OsTrader/Panels/Tab/BotTabOptions.cs` (`Engine\\<TabName>\\OptionsSettings.txt`) persistence to `SettingsManager`:
+  - private `SaveSettings()` now writes JSON into tab-specific settings path
+  - public `LoadSettings()` now reads JSON and falls back to legacy key:value parser
+  - preserved existing settings contract (`PortfolioName`, `UnderlyingAssets`, `StrikesToShow`, server binding, emulator/events flags)
+- Added tests `project/OsEngine.Tests/BotTabOptionsSettingsPersistenceTests.cs`:
+  - `SaveSettings_ShouldPersistJson_AndLoadRoundTrip`
+  - `LoadSettings_ShouldSupportLegacyKeyValueFormat`
+  - tests use uninitialized tab instance with reflection-based setup of private fields/backing fields and folder backup/restore
+
+### Verification
+
+- `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` -> passed 200/200
