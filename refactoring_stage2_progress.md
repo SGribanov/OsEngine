@@ -676,3 +676,18 @@
 ### Verification
 
 - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` -> passed 170/170
+
+## 2026-02-16 - Step 2.3 (JSON settings subsystem) - Incremental adoption in TesterServer securities timeframe settings
+
+- Migrated `project/OsEngine/Market/Servers/Tester/TesterServer.cs` (`TestServerSecuritiesTf...txt`) persistence to `SettingsManager`:
+  - `SaveSetSecuritiesTimeFrameSettings()` now writes JSON into dynamic `Engine\\TestServerSecuritiesTf...txt` path
+  - private `LoadSetSecuritiesTimeFrameSettings()` now reads JSON and falls back to legacy `name#timeframe` line-based parser
+  - preserved strict ordered security-name matching behavior during load
+- Added tests `project/OsEngine.Tests/TesterServerSecuritiesTimeFramePersistenceTests.cs`:
+  - `SaveSetSecuritiesTimeFrameSettings_ShouldPersistJson_AndLoadRoundTrip`
+  - `LoadSetSecuritiesTimeFrameSettings_ShouldSupportLegacyLineBasedFormat`
+  - tests invoke private load/path methods via reflection on uninitialized instance
+
+### Verification
+
+- `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` -> passed 172/172

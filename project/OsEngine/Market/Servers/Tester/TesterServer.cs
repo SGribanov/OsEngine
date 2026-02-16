@@ -4713,38 +4713,28 @@ namespace OsEngine.Market.Servers.Tester
         {
             try
             {
-                string fileName = @"Engine\TestServerSecuritiesTf"
-                    + _sourceDataType.ToString()
-                    + TypeTesterData.ToString();
-
-                if (_sourceDataType == TesterSourceDataType.Set)
+                string fileName = GetSecuritiesTimeFrameSettingsPath();
+                if (string.IsNullOrEmpty(fileName))
                 {
-                    if (string.IsNullOrEmpty(_activeSet))
-                    {
-                        return;
-                    }
-                    fileName += _activeSet.RemoveExcessFromSecurityName();
-                }
-                else if (_sourceDataType == TesterSourceDataType.Folder)
-                {
-                    if (string.IsNullOrEmpty(_pathToFolder))
-                    {
-                        return;
-                    }
-                    fileName += _pathToFolder.RemoveExcessFromSecurityName();
+                    return;
                 }
 
-                fileName += ".txt";
-
-                using (StreamWriter writer = new StreamWriter(fileName, false))
+                TesterSecurityTimeFrameItemDto[] items = new TesterSecurityTimeFrameItemDto[SecuritiesTester.Count];
+                for (int i = 0; i < SecuritiesTester.Count; i++)
                 {
-                    for (int i = 0; i < SecuritiesTester.Count; i++)
+                    items[i] = new TesterSecurityTimeFrameItemDto
                     {
-                        writer.WriteLine(SecuritiesTester[i].Security.Name + "#" + SecuritiesTester[i].TimeFrame);
-                    }
-
-                    writer.Close();
+                        SecurityName = SecuritiesTester[i].Security.Name,
+                        TimeFrame = SecuritiesTester[i].TimeFrame
+                    };
                 }
+
+                SettingsManager.Save(
+                    fileName,
+                    new TesterSecuritiesTimeFrameSettingsDto
+                    {
+                        Items = items
+                    });
             }
             catch
             {
@@ -4754,61 +4744,38 @@ namespace OsEngine.Market.Servers.Tester
 
         private void LoadSetSecuritiesTimeFrameSettings()
         {
-            string fileName = @"Engine\TestServerSecuritiesTf"
-                  + _sourceDataType.ToString()
-                  + TypeTesterData.ToString();
-
-            if (_sourceDataType == TesterSourceDataType.Set)
-            {
-                if (string.IsNullOrEmpty(_activeSet))
-                {
-                    return;
-                }
-                fileName += _activeSet.RemoveExcessFromSecurityName();
-            }
-            else if (_sourceDataType == TesterSourceDataType.Folder)
-            {
-                if (string.IsNullOrEmpty(_pathToFolder))
-                {
-                    return;
-                }
-                fileName += _pathToFolder.RemoveExcessFromSecurityName();
-            }
-
-            fileName += ".txt";
-
-            if (!File.Exists(fileName))
+            string fileName = GetSecuritiesTimeFrameSettingsPath();
+            if (string.IsNullOrEmpty(fileName))
             {
                 return;
             }
 
             try
             {
-                using (StreamReader reader = new StreamReader(fileName))
+                TesterSecuritiesTimeFrameSettingsDto settings = SettingsManager.Load(
+                    fileName,
+                    defaultValue: null,
+                    legacyLoader: ParseLegacySecuritiesTimeFrameSettings);
+
+                if (settings == null || settings.Items == null)
                 {
-                    for (int i = 0; i < SecuritiesTester.Count; i++)
+                    return;
+                }
+
+                for (int i = 0; i < SecuritiesTester.Count; i++)
+                {
+                    if (i >= settings.Items.Length)
                     {
-                        if (reader.EndOfStream == true)
-                        {
-                            return;
-                        }
-
-                        string[] security = reader.ReadLine().Split('#');
-
-                        if (SecuritiesTester[i].Security.Name != security[0])
-                        {
-                            return;
-                        }
-
-                        TimeFrame frame;
-
-                        if (Enum.TryParse(security[1], out frame))
-                        {
-                            SecuritiesTester[i].TimeFrame = frame;
-                        }
+                        return;
                     }
 
-                    reader.Close();
+                    TesterSecurityTimeFrameItemDto security = settings.Items[i];
+                    if (security == null || SecuritiesTester[i].Security.Name != security.SecurityName)
+                    {
+                        return;
+                    }
+
+                    SecuritiesTester[i].TimeFrame = security.TimeFrame;
                 }
             }
             catch
@@ -4816,6 +4783,91 @@ namespace OsEngine.Market.Servers.Tester
                 // ignored
             }
 
+        }
+
+        private string GetSecuritiesTimeFrameSettingsPath()
+        {
+            string fileName = @"Engine\TestServerSecuritiesTf"
+                + _sourceDataType.ToString()
+                + TypeTesterData.ToString();
+
+            if (_sourceDataType == TesterSourceDataType.Set)
+            {
+                if (string.IsNullOrEmpty(_activeSet))
+                {
+                    return null;
+                }
+                fileName += _activeSet.RemoveExcessFromSecurityName();
+            }
+            else if (_sourceDataType == TesterSourceDataType.Folder)
+            {
+                if (string.IsNullOrEmpty(_pathToFolder))
+                {
+                    return null;
+                }
+                fileName += _pathToFolder.RemoveExcessFromSecurityName();
+            }
+
+            fileName += ".txt";
+            return fileName;
+        }
+
+        private static TesterSecuritiesTimeFrameSettingsDto ParseLegacySecuritiesTimeFrameSettings(string content)
+        {
+            if (string.IsNullOrWhiteSpace(content))
+            {
+                return null;
+            }
+
+            string normalized = content.Replace("\r", string.Empty);
+            string[] lines = normalized.Split('\n');
+
+            if (lines.Length > 0 && lines[lines.Length - 1] == string.Empty)
+            {
+                Array.Resize(ref lines, lines.Length - 1);
+            }
+
+            List<TesterSecurityTimeFrameItemDto> items = new List<TesterSecurityTimeFrameItemDto>();
+
+            for (int i = 0; i < lines.Length; i++)
+            {
+                if (string.IsNullOrWhiteSpace(lines[i]))
+                {
+                    continue;
+                }
+
+                string[] security = lines[i].Split('#');
+                if (security.Length < 2)
+                {
+                    continue;
+                }
+
+                if (Enum.TryParse(security[1], out TimeFrame frame))
+                {
+                    items.Add(new TesterSecurityTimeFrameItemDto
+                    {
+                        SecurityName = security[0],
+                        TimeFrame = frame
+                    });
+                }
+            }
+
+            return new TesterSecuritiesTimeFrameSettingsDto
+            {
+                Items = items.ToArray()
+            };
+        }
+
+        private sealed class TesterSecuritiesTimeFrameSettingsDto
+        {
+            public TesterSecurityTimeFrameItemDto[] Items { get; set; }
+        }
+
+        private sealed class TesterSecurityTimeFrameItemDto
+        {
+            public string SecurityName { get; set; }
+
+            public TimeFrame TimeFrame { get; set; }
         }
 
         #endregion
