@@ -287,3 +287,23 @@
   - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` succeeded (`112/112`).
 - **Commit:** `077153161`
 - **Push:** no (manual push by user)
+
+### Step 2.3 - JSON Settings Subsystem (Incremental Adoption #12)
+
+- **Status:** In Progress (increment completed)
+- **Plan item:** `refactoring_stage2_plan.md` -> Phase 2 / Step 2.3
+- **Changes:**
+  - Migrated Telegram server settings persistence to JSON with legacy fallback:
+    - `project/OsEngine/Logging/ServerTelegram.cs`
+  - Covered persisted file:
+    - `Engine\\telegramSet.txt`
+  - Added dedicated persistence tests:
+    - `project/OsEngine.Tests/ServerTelegramPersistenceTests.cs`
+      - `Save_ShouldPersistJson_AndLoadRoundTrip`
+      - `Load_ShouldSupportLegacyLineBasedFormat`
+  - Updated running progress journal:
+    - `refactoring_stage2_progress.md`
+- **Verification:**
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` succeeded (`114/114`).
+- **Commit:** `4dd26a36a`
+- **Push:** no (manual push by user)
