@@ -2263,3 +2263,26 @@
   - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` succeeded (`308/308`).
 - **Commit:** `6ffe00b2e`
 - **Push:** no (manual push by user)
+
+### Step 2.3 - JSON Settings Subsystem (Incremental Adoption #109)
+
+- **Status:** In Progress (increment completed)
+- **Plan item:** `refactoring_stage2_plan.md` -> Phase 2 / Step 2.3
+- **Changes:**
+  - Migrated StochasticOscillator indicator settings persistence to JSON with legacy fallback:
+    - `project/OsEngine/Charts/CandleChart/Indicators/StochasticOscillator.cs`
+  - Covered persisted file:
+    - dynamic `Engine\\<Name>.txt` path (`StochasticOscillator` indicator)
+  - Preserved behavior where save normalizes `TypeCalculationAverage` to `Simple`
+  - Legacy parser supports historical formats:
+    - `type-first` and save-order with optional blank separator line
+  - Added dedicated persistence tests:
+    - `project/OsEngine.Tests/StochasticOscillatorPersistenceTests.cs`
+      - `Save_ShouldPersistJson_AndLoadRoundTrip`
+      - `Load_ShouldSupportLegacyLineBasedFormat_WithSaveOrdering`
+  - Updated running progress journal:
+    - `refactoring_stage2_progress.md`
+- **Verification:**
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` succeeded (`310/310`).
+- **Commit:** `f5b4d9a43`
+- **Push:** no (manual push by user)
