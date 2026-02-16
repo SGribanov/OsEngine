@@ -8,6 +8,7 @@ using System;
 using System.IO;
 using System.Net;
 using System.Text;
+using OsEngine.Entity;
 
 namespace OsEngine.Logging
 {
@@ -49,15 +50,17 @@ namespace OsEngine.Logging
         /// </summary>
         private void Load()
         {
-            if (File.Exists(@"Engine\smsSet.txt"))
+            ServerSmsSettingsDto settings = SettingsManager.Load(
+                GetSettingsPath(),
+                defaultValue: null,
+                legacyLoader: ParseLegacySmsSettings);
+
+            if (settings != null)
             {
-                using StreamReader reader = new StreamReader(@"Engine\smsSet.txt");
-
-                SmscLogin = reader.ReadLine();
-                SmscPassword = reader.ReadLine();
-                Phones = reader.ReadLine();
+                SmscLogin = settings.SmscLogin;
+                SmscPassword = settings.SmscPassword;
+                Phones = settings.Phones;
             }
-
         }
 
         /// <summary>
@@ -66,10 +69,46 @@ namespace OsEngine.Logging
         /// </summary>
         public void Save()
         {
-            using StreamWriter writer = new StreamWriter(@"Engine\smsSet.txt");
-            writer.WriteLine(SmscLogin);
-            writer.WriteLine(SmscPassword);
-            writer.WriteLine(Phones);
+            SettingsManager.Save(
+                GetSettingsPath(),
+                new ServerSmsSettingsDto
+                {
+                    SmscLogin = SmscLogin,
+                    SmscPassword = SmscPassword,
+                    Phones = Phones
+                });
+        }
+
+        private static string GetSettingsPath()
+        {
+            return @"Engine\smsSet.txt";
+        }
+
+        private static ServerSmsSettingsDto ParseLegacySmsSettings(string content)
+        {
+            if (string.IsNullOrWhiteSpace(content))
+            {
+                return null;
+            }
+
+            string normalized = content.Replace("\r", string.Empty);
+            string[] lines = normalized.Split('\n');
+
+            return new ServerSmsSettingsDto
+            {
+                SmscLogin = lines.Length > 0 ? lines[0] : null,
+                SmscPassword = lines.Length > 1 ? lines[1] : null,
+                Phones = lines.Length > 2 ? lines[2] : null
+            };
+        }
+
+        private sealed class ServerSmsSettingsDto
+        {
+            public string SmscLogin { get; set; }
+
+            public string SmscPassword { get; set; }
+
+            public string Phones { get; set; }
         }
 
         /// <summary>

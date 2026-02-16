@@ -200,3 +200,17 @@
 ### Verification
 
 - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` -> passed 104/104
+
+## 2026-02-16 - Step 2.3 (JSON settings subsystem) - Incremental adoption in ServerSms settings
+
+- Migrated `project/OsEngine/Logging/ServerSms.cs` persistence to `SettingsManager`:
+  - `Save()` now writes JSON into `Engine\\smsSet.txt`
+  - `Load()` now reads JSON and falls back to legacy 3-line format parser
+  - preserved default values behavior when settings file is missing
+- Added tests `project/OsEngine.Tests/ServerSmsPersistenceTests.cs`:
+  - `Save_ShouldPersistJson_AndLoadRoundTrip`
+  - `Load_ShouldSupportLegacyLineBasedFormat`
+
+### Verification
+
+- `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` -> passed 106/106
