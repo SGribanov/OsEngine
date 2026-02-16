@@ -2602,3 +2602,21 @@
   - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` succeeded (`330/330`).
 - **Commit:** `bd3fb9dce`
 - **Push:** no (manual push by user)
+
+### Step 2.3 - JSON Settings Subsystem (Incremental Adoption #126)
+
+- **Status:** In Progress (increment completed)
+- **Plan item:** `refactoring_stage2_plan.md` -> Phase 2 / Step 2.3
+- **Changes:**
+  - Path consistency cleanup in delete flows:
+    - `project/OsEngine/OsTrader/Panels/Tab/BotTabPolygon.cs`
+      - added/used `GetLegacyStrategSettingsPath()` for legacy `StrategSettings.txt`
+    - `project/OsEngine/OsTrader/Panels/Tab/BotTabSimple.cs`
+      - added/used `GetSettingsBotPath()` for `SettingsBot.txt`
+  - Removed remaining inline `@"Engine\\..."` delete path construction in these tab files.
+  - Updated running progress journal:
+    - `refactoring_stage2_progress.md`
+- **Verification:**
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` succeeded (`330/330`).
+- **Commit:** `34638af68`
+- **Push:** no (manual push by user)
