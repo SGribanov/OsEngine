@@ -271,24 +271,22 @@ namespace OsEngine.Charts.CandleChart.Indicators
                     return;
                 }
 
-                using (StreamWriter writer = new StreamWriter(@"Engine\" + Name + @".txt", false))
-                {
-                    writer.WriteLine(LengthBase);
-                    writer.WriteLine(ShiftBase);
-                    writer.WriteLine(ColorBase.ToArgb());
-
-                    writer.WriteLine(LengthUp);
-                    writer.WriteLine(ShiftUp);
-                    writer.WriteLine(ColorUp.ToArgb());
-
-                    writer.WriteLine(LengthDown);
-                    writer.WriteLine(ShiftDown);
-                    writer.WriteLine(ColorDown.ToArgb());
-                    
-                    writer.WriteLine(PaintOn);
-                    writer.WriteLine(TypeCalculationAverage);
-                    writer.Close();
-                }
+                SettingsManager.Save(
+                    GetSettingsPath(),
+                    new AlligatorSettingsDto
+                    {
+                        LengthBase = LengthBase,
+                        ShiftBase = ShiftBase,
+                        ColorBaseArgb = ColorBase.ToArgb(),
+                        LengthUp = LengthUp,
+                        ShiftUp = ShiftUp,
+                        ColorUpArgb = ColorUp.ToArgb(),
+                        LengthDown = LengthDown,
+                        ShiftDown = ShiftDown,
+                        ColorDownArgb = ColorDown.ToArgb(),
+                        PaintOn = PaintOn,
+                        TypeCalculationAverage = TypeCalculationAverage
+                    });
             }
             catch (Exception)
             {
@@ -303,35 +301,34 @@ namespace OsEngine.Charts.CandleChart.Indicators
         /// </summary>
         public void Load()
         {
-            if (!File.Exists(@"Engine\" + Name + @".txt"))
+            if (!File.Exists(GetSettingsPath()))
             {
                 return;
             }
 
             try
             {
-                using (StreamReader reader = new StreamReader(@"Engine\" + Name + @".txt"))
+                AlligatorSettingsDto settings = SettingsManager.Load(
+                    GetSettingsPath(),
+                    defaultValue: null,
+                    legacyLoader: ParseLegacySettings);
+
+                if (settings == null)
                 {
-                    LengthBase = Convert.ToInt32(reader.ReadLine());
-                    ShiftBase = Convert.ToInt32(reader.ReadLine());
-                    ColorBase = Color.FromArgb(Convert.ToInt32(reader.ReadLine()));
-
-                    LengthUp = Convert.ToInt32(reader.ReadLine());
-                    ShiftUp = Convert.ToInt32(reader.ReadLine());
-                    ColorUp = Color.FromArgb(Convert.ToInt32(reader.ReadLine()));
-
-                    LengthDown = Convert.ToInt32(reader.ReadLine());
-                    ShiftDown = Convert.ToInt32(reader.ReadLine());
-                    ColorDown = Color.FromArgb(Convert.ToInt32(reader.ReadLine()));
-
-                    PaintOn = Convert.ToBoolean(reader.ReadLine());
-                    MovingAverageTypeCalculation type;
-                    Enum.TryParse(reader.ReadLine(), true, out type);
-
-                    TypeCalculationAverage = type;
-
-                    reader.Close();
+                    return;
                 }
+
+                LengthBase = settings.LengthBase;
+                ShiftBase = settings.ShiftBase;
+                ColorBase = Color.FromArgb(settings.ColorBaseArgb);
+                LengthUp = settings.LengthUp;
+                ShiftUp = settings.ShiftUp;
+                ColorUp = Color.FromArgb(settings.ColorUpArgb);
+                LengthDown = settings.LengthDown;
+                ShiftDown = settings.ShiftDown;
+                ColorDown = Color.FromArgb(settings.ColorDownArgb);
+                PaintOn = settings.PaintOn;
+                TypeCalculationAverage = settings.TypeCalculationAverage;
             }
             catch (Exception)
             {
@@ -346,10 +343,79 @@ namespace OsEngine.Charts.CandleChart.Indicators
         /// </summary>
         public void Delete()
         {
-            if (File.Exists(@"Engine\" + Name + @".txt"))
+            if (File.Exists(GetSettingsPath()))
             {
-                File.Delete(@"Engine\" + Name + @".txt");
+                File.Delete(GetSettingsPath());
             }
+        }
+
+        private string GetSettingsPath()
+        {
+            return @"Engine\" + Name + @".txt";
+        }
+
+        private static AlligatorSettingsDto ParseLegacySettings(string content)
+        {
+            if (string.IsNullOrWhiteSpace(content))
+            {
+                return null;
+            }
+
+            string normalized = content.Replace("\r", string.Empty);
+            string[] lines = normalized.Split('\n');
+
+            if (lines.Length > 0 && lines[lines.Length - 1] == string.Empty)
+            {
+                Array.Resize(ref lines, lines.Length - 1);
+            }
+
+            if (lines.Length < 11)
+            {
+                return null;
+            }
+
+            MovingAverageTypeCalculation typeCalculationAverage = 0;
+            Enum.TryParse(lines[10], true, out typeCalculationAverage);
+
+            return new AlligatorSettingsDto
+            {
+                LengthBase = Convert.ToInt32(lines[0]),
+                ShiftBase = Convert.ToInt32(lines[1]),
+                ColorBaseArgb = Convert.ToInt32(lines[2]),
+                LengthUp = Convert.ToInt32(lines[3]),
+                ShiftUp = Convert.ToInt32(lines[4]),
+                ColorUpArgb = Convert.ToInt32(lines[5]),
+                LengthDown = Convert.ToInt32(lines[6]),
+                ShiftDown = Convert.ToInt32(lines[7]),
+                ColorDownArgb = Convert.ToInt32(lines[8]),
+                PaintOn = Convert.ToBoolean(lines[9]),
+                TypeCalculationAverage = typeCalculationAverage
+            };
+        }
+
+        private sealed class AlligatorSettingsDto
+        {
+            public int LengthBase { get; set; }
+
+            public int ShiftBase { get; set; }
+
+            public int ColorBaseArgb { get; set; }
+
+            public int LengthUp { get; set; }
+
+            public int ShiftUp { get; set; }
+
+            public int ColorUpArgb { get; set; }
+
+            public int LengthDown { get; set; }
+
+            public int ShiftDown { get; set; }
+
+            public int ColorDownArgb { get; set; }
+
+            public bool PaintOn { get; set; }
+
+            public MovingAverageTypeCalculation TypeCalculationAverage { get; set; }
         }
 
         /// <summary>

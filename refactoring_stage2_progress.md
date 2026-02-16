@@ -1627,3 +1627,18 @@
 ### Verification
 
 - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` -> passed 296/296
+
+## 2026-02-16 - Step 2.3 (JSON settings subsystem) - Incremental adoption in Alligator indicator settings
+
+- Migrated `project/OsEngine/Charts/CandleChart/Indicators/Alligator.cs` (`Engine\\<Name>.txt`) persistence to `SettingsManager`:
+  - `Save()` now writes JSON DTO with all periods, shifts, colors, paint flag, and average type
+  - `Load()` now reads JSON and falls back to legacy line-based parser
+  - preserved compatibility with historical legacy format and field ordering
+- Added tests `project/OsEngine.Tests/AlligatorPersistenceTests.cs`:
+  - `Save_ShouldPersistJson_AndLoadRoundTrip`
+  - `Load_ShouldSupportLegacyLineBasedFormat`
+  - tests use file backup/restore around indicator settings path
+
+### Verification
+
+- `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` -> passed 298/298
