@@ -301,25 +301,26 @@ namespace OsEngine.Market.AutoFollow
         {
             try
             {
-                using (StreamWriter writer = new StreamWriter(@"Engine\CopyTrader\" + NameUnique + ".txt", false))
-                {
-                    writer.WriteLine(ServerName);
-                    writer.WriteLine(PortfolioName);
-                    writer.WriteLine(IsOn);
-                    writer.WriteLine(VolumeType);
-                    writer.WriteLine(VolumeMult);
-                    writer.WriteLine(MasterAsset);
-                    writer.WriteLine(SlaveAsset);
-                    writer.WriteLine(OrderType);
-                    writer.WriteLine(IcebergCount);
-                    writer.WriteLine(GetSecuritiesSaveString());
-                    writer.WriteLine(PanelsPosition);
-                    writer.WriteLine(MinCurrencyQty);
-                    writer.WriteLine(FailOpenOrdersReactionIsOn);
-                    writer.WriteLine(FailOpenOrdersCountToReaction);
-                    writer.WriteLine(IcebergMillisecondsDelay);
-                    writer.Close();
-                }
+                SettingsManager.Save(
+                    SettingsPath,
+                    new PortfolioToCopySettings
+                    {
+                        ServerName = ServerName,
+                        PortfolioName = PortfolioName,
+                        IsOn = IsOn,
+                        VolumeType = VolumeType,
+                        VolumeMult = VolumeMult,
+                        MasterAsset = MasterAsset,
+                        SlaveAsset = SlaveAsset,
+                        OrderType = OrderType,
+                        IcebergCount = IcebergCount,
+                        SecuritiesSaveString = GetSecuritiesSaveString(),
+                        PanelsPosition = PanelsPosition,
+                        MinCurrencyQty = MinCurrencyQty,
+                        FailOpenOrdersReactionIsOn = FailOpenOrdersReactionIsOn,
+                        FailOpenOrdersCountToReaction = FailOpenOrdersCountToReaction,
+                        IcebergMillisecondsDelay = IcebergMillisecondsDelay
+                    });
             }
             catch (Exception error)
             {
@@ -329,36 +330,37 @@ namespace OsEngine.Market.AutoFollow
 
         public void Load()
         {
-            if (!File.Exists(@"Engine\CopyTrader\" + NameUnique + ".txt"))
+            if (!File.Exists(SettingsPath))
             {
                 return;
             }
             try
             {
-                using (StreamReader reader = new StreamReader(@"Engine\CopyTrader\" + NameUnique + ".txt"))
+                PortfolioToCopySettings settings = SettingsManager.Load(
+                    SettingsPath,
+                    defaultValue: null,
+                    legacyLoader: ParseLegacySettings);
+
+                if (settings == null)
                 {
-                    ServerName = reader.ReadLine();
-
-                    PortfolioName = reader.ReadLine();
-                    IsOn = Convert.ToBoolean(reader.ReadLine());
-                    Enum.TryParse(reader.ReadLine(), out VolumeType);
-                    
-                    VolumeMult = reader.ReadLine().ToDecimal();
-                    MasterAsset = reader.ReadLine();
-                    SlaveAsset = reader.ReadLine();
-                    
-                    Enum.TryParse(reader.ReadLine(), out OrderType);
-                    IcebergCount = Convert.ToInt32(reader.ReadLine());
-                    LoadSecuritiesFromString(reader.ReadLine());
-                    PanelsPosition = reader.ReadLine();
-                    MinCurrencyQty = reader.ReadLine().ToDecimal();
-
-                    FailOpenOrdersReactionIsOn = Convert.ToBoolean(reader.ReadLine());
-                    FailOpenOrdersCountToReaction = Convert.ToInt32(reader.ReadLine());
-                    IcebergMillisecondsDelay = Convert.ToInt32(reader.ReadLine());
-
-                    reader.Close();
+                    return;
                 }
+
+                ServerName = settings.ServerName;
+                PortfolioName = settings.PortfolioName;
+                IsOn = settings.IsOn;
+                VolumeType = settings.VolumeType;
+                VolumeMult = settings.VolumeMult;
+                MasterAsset = settings.MasterAsset;
+                SlaveAsset = settings.SlaveAsset;
+                OrderType = settings.OrderType;
+                IcebergCount = settings.IcebergCount;
+                LoadSecuritiesFromString(settings.SecuritiesSaveString ?? string.Empty);
+                PanelsPosition = settings.PanelsPosition;
+                MinCurrencyQty = settings.MinCurrencyQty;
+                FailOpenOrdersReactionIsOn = settings.FailOpenOrdersReactionIsOn;
+                FailOpenOrdersCountToReaction = settings.FailOpenOrdersCountToReaction;
+                IcebergMillisecondsDelay = settings.IcebergMillisecondsDelay;
             }
             catch
             {
@@ -374,9 +376,9 @@ namespace OsEngine.Market.AutoFollow
                 IsOn = false;
                 _isDelete = true;
 
-                if (File.Exists(@"Engine\CopyTrader\" + NameUnique + ".txt"))
+                if (File.Exists(SettingsPath))
                 {
-                    File.Delete(@"Engine\CopyTrader\" + NameUnique + ".txt");
+                    File.Delete(SettingsPath);
                 }
 
                 if(MyCopyServer != null)
@@ -397,6 +399,78 @@ namespace OsEngine.Market.AutoFollow
             {
                 // ignore
             }
+        }
+
+        private static PortfolioToCopySettings ParseLegacySettings(string content)
+        {
+            if (string.IsNullOrWhiteSpace(content))
+            {
+                return null;
+            }
+
+            string[] lines = content.Replace("\r", string.Empty).Split('\n');
+
+            if (lines.Length < 15)
+            {
+                return null;
+            }
+
+            Enum.TryParse(lines[3], out CopyTraderVolumeType volumeType);
+            Enum.TryParse(lines[7], out CopyTraderOrdersType orderType);
+
+            return new PortfolioToCopySettings
+            {
+                ServerName = lines[0],
+                PortfolioName = lines[1],
+                IsOn = Convert.ToBoolean(lines[2]),
+                VolumeType = volumeType,
+                VolumeMult = lines[4].ToDecimal(),
+                MasterAsset = lines[5],
+                SlaveAsset = lines[6],
+                OrderType = orderType,
+                IcebergCount = Convert.ToInt32(lines[8]),
+                SecuritiesSaveString = lines[9],
+                PanelsPosition = lines[10],
+                MinCurrencyQty = lines[11].ToDecimal(),
+                FailOpenOrdersReactionIsOn = Convert.ToBoolean(lines[12]),
+                FailOpenOrdersCountToReaction = Convert.ToInt32(lines[13]),
+                IcebergMillisecondsDelay = Convert.ToInt32(lines[14])
+            };
+        }
+
+        private string SettingsPath => @"Engine\CopyTrader\" + NameUnique + ".txt";
+
+        private sealed class PortfolioToCopySettings
+        {
+            public string ServerName { get; set; }
+
+            public string PortfolioName { get; set; }
+
+            public bool IsOn { get; set; }
+
+            public CopyTraderVolumeType VolumeType { get; set; }
+
+            public decimal VolumeMult { get; set; }
+
+            public string MasterAsset { get; set; }
+
+            public string SlaveAsset { get; set; }
+
+            public CopyTraderOrdersType OrderType { get; set; }
+
+            public int IcebergCount { get; set; }
+
+            public string SecuritiesSaveString { get; set; }
+
+            public string PanelsPosition { get; set; }
+
+            public decimal MinCurrencyQty { get; set; }
+
+            public bool FailOpenOrdersReactionIsOn { get; set; }
+
+            public int FailOpenOrdersCountToReaction { get; set; }
+
+            public int IcebergMillisecondsDelay { get; set; }
         }
 
         private bool _isDelete;

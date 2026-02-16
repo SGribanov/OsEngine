@@ -841,3 +841,18 @@
 ### Verification
 
 - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` -> passed 192/192
+
+## 2026-02-16 - Step 2.3 (JSON settings subsystem) - Incremental adoption in PortfolioToCopy settings
+
+- Migrated `project/OsEngine/Market/AutoFollow/CopyTrader.cs` (`Engine\\CopyTrader\\<Name>.txt`) persistence to `SettingsManager`:
+  - `PortfolioToCopy.Save()` now writes JSON
+  - `PortfolioToCopy.Load()` now reads JSON and falls back to legacy line-based parser
+  - preserved existing field contract, security mapping serialization string and delete path behavior
+- Added tests `project/OsEngine.Tests/PortfolioToCopySettingsPersistenceTests.cs`:
+  - `Save_ShouldPersistJson_AndLoadRoundTrip`
+  - `Load_ShouldSupportLegacyLineBasedFormat`
+  - tests use uninitialized `PortfolioToCopy` instances with backup/restore of `Engine\\CopyTrader\\<Name>.txt`
+
+### Verification
+
+- `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` -> passed 194/194
