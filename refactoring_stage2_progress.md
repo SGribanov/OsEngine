@@ -931,3 +931,18 @@
 ### Verification
 
 - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` -> passed 204/204
+
+## 2026-02-16 - Step 2.3 (JSON settings subsystem) - Incremental adoption in BotTabPair standard settings
+
+- Migrated `project/OsEngine/OsTrader/Panels/Tab/BotTabPair.cs` (`Engine\\<TabName>StandartPairsSettings.txt`) persistence to `SettingsManager`:
+  - public `SaveStandartSettings()` now writes JSON DTO
+  - private `LoadStandartSettings()` now reads JSON and falls back to legacy line-based parser
+  - preserved settings contract for slippage/volume/correlation/cointegration/trade regimes and flags
+- Added tests `project/OsEngine.Tests/BotTabPairStandartSettingsPersistenceTests.cs`:
+  - `SaveStandartSettings_ShouldPersistJson_AndLoadRoundTrip`
+  - `LoadStandartSettings_ShouldSupportLegacyLineBasedFormat`
+  - tests invoke private loader via reflection on uninitialized tab instance with file backup/restore
+
+### Verification
+
+- `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` -> passed 206/206

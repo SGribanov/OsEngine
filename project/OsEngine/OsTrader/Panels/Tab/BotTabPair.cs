@@ -384,30 +384,29 @@ namespace OsEngine.OsTrader.Panels.Tab
 
             try
             {
-                using (StreamWriter writer = new StreamWriter(@"Engine\" + TabName + @"StandartPairsSettings.txt", false))
-                {
-
-                    writer.WriteLine(Sec1Slippage);
-                    writer.WriteLine(Sec1Volume);
-                    writer.WriteLine(Sec2Slippage);
-                    writer.WriteLine(Sec2Volume);
-                    writer.WriteLine(CorrelationLookBack);
-                    writer.WriteLine(CointegrationDeviation);
-                    writer.WriteLine(CointegrationLookBack);
-                    writer.WriteLine(PairSortType);
-                    writer.WriteLine(Sec1SlippageType);
-                    writer.WriteLine(Sec1VolumeType);
-                    writer.WriteLine(Sec2SlippageType);
-                    writer.WriteLine(Sec2VolumeType);
-                    writer.WriteLine(_eventsIsOn);
-                    writer.WriteLine(_emulatorIsOn);
-                    writer.WriteLine(Sec1TradeRegime);
-                    writer.WriteLine(Sec2TradeRegime);
-                    writer.WriteLine(AutoRebuildCointegration);
-                    writer.WriteLine(AutoRebuildCorrelation);
-
-                    writer.Close();
-                }
+                SettingsManager.Save(
+                    GetStandartSettingsPath(),
+                    new BotTabPairStandartSettingsDto
+                    {
+                        Sec1Slippage = Sec1Slippage,
+                        Sec1Volume = Sec1Volume,
+                        Sec2Slippage = Sec2Slippage,
+                        Sec2Volume = Sec2Volume,
+                        CorrelationLookBack = CorrelationLookBack,
+                        CointegrationDeviation = CointegrationDeviation,
+                        CointegrationLookBack = CointegrationLookBack,
+                        PairSortType = PairSortType,
+                        Sec1SlippageType = Sec1SlippageType,
+                        Sec1VolumeType = Sec1VolumeType,
+                        Sec2SlippageType = Sec2SlippageType,
+                        Sec2VolumeType = Sec2VolumeType,
+                        EventsIsOn = _eventsIsOn,
+                        EmulatorIsOn = _emulatorIsOn,
+                        Sec1TradeRegime = Sec1TradeRegime,
+                        Sec2TradeRegime = Sec2TradeRegime,
+                        AutoRebuildCointegration = AutoRebuildCointegration,
+                        AutoRebuildCorrelation = AutoRebuildCorrelation
+                    });
             }
             catch (Exception)
             {
@@ -420,43 +419,109 @@ namespace OsEngine.OsTrader.Panels.Tab
         /// </summary>
         private void LoadStandartSettings()
         {
-            if (!File.Exists(@"Engine\" + TabName + @"StandartPairsSettings.txt"))
+            if (!File.Exists(GetStandartSettingsPath()))
             {
                 return;
             }
             try
             {
-                using (StreamReader reader = new StreamReader(@"Engine\" + TabName + @"StandartPairsSettings.txt"))
+                BotTabPairStandartSettingsDto settings = SettingsManager.Load(
+                    GetStandartSettingsPath(),
+                    defaultValue: null,
+                    legacyLoader: ParseLegacyStandartSettings);
+
+                if (settings == null)
                 {
-                    Sec1Slippage = reader.ReadLine().ToDecimal();
-                    Sec1Volume = reader.ReadLine().ToDecimal();
-                    Sec2Slippage = reader.ReadLine().ToDecimal();
-                    Sec2Volume = reader.ReadLine().ToDecimal();
-                    CorrelationLookBack = Convert.ToInt32(reader.ReadLine());
-                    CointegrationDeviation = reader.ReadLine().ToDecimal();
-                    CointegrationLookBack = Convert.ToInt32(reader.ReadLine());
-                    Enum.TryParse(reader.ReadLine(), out PairSortType);
-                    Enum.TryParse(reader.ReadLine(), out Sec1SlippageType);
-                    Enum.TryParse(reader.ReadLine(), out Sec1VolumeType);
-                    Enum.TryParse(reader.ReadLine(), out Sec2SlippageType);
-                    Enum.TryParse(reader.ReadLine(), out Sec2VolumeType);
-
-                    _eventsIsOn = Convert.ToBoolean(reader.ReadLine());
-                    _emulatorIsOn = Convert.ToBoolean(reader.ReadLine());
-
-                    Enum.TryParse(reader.ReadLine(), out Sec1TradeRegime);
-                    Enum.TryParse(reader.ReadLine(), out Sec2TradeRegime);
-
-                    AutoRebuildCointegration = Convert.ToBoolean(reader.ReadLine());
-                    AutoRebuildCorrelation = Convert.ToBoolean(reader.ReadLine());
-
-                    reader.Close();
+                    return;
                 }
+
+                Sec1Slippage = settings.Sec1Slippage;
+                Sec1Volume = settings.Sec1Volume;
+                Sec2Slippage = settings.Sec2Slippage;
+                Sec2Volume = settings.Sec2Volume;
+                CorrelationLookBack = settings.CorrelationLookBack;
+                CointegrationDeviation = settings.CointegrationDeviation;
+                CointegrationLookBack = settings.CointegrationLookBack;
+                PairSortType = settings.PairSortType;
+                Sec1SlippageType = settings.Sec1SlippageType;
+                Sec1VolumeType = settings.Sec1VolumeType;
+                Sec2SlippageType = settings.Sec2SlippageType;
+                Sec2VolumeType = settings.Sec2VolumeType;
+                _eventsIsOn = settings.EventsIsOn;
+                _emulatorIsOn = settings.EmulatorIsOn;
+                Sec1TradeRegime = settings.Sec1TradeRegime;
+                Sec2TradeRegime = settings.Sec2TradeRegime;
+                AutoRebuildCointegration = settings.AutoRebuildCointegration;
+                AutoRebuildCorrelation = settings.AutoRebuildCorrelation;
             }
             catch (Exception)
             {
                 // ignore
             }
+        }
+
+        private string GetStandartSettingsPath()
+        {
+            return @"Engine\" + TabName + @"StandartPairsSettings.txt";
+        }
+
+        private static BotTabPairStandartSettingsDto ParseLegacyStandartSettings(string content)
+        {
+            if (string.IsNullOrWhiteSpace(content))
+            {
+                return null;
+            }
+
+            string[] lines = content.Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries);
+
+            if (lines.Length < 18)
+            {
+                return null;
+            }
+
+            return new BotTabPairStandartSettingsDto
+            {
+                Sec1Slippage = lines[0].ToDecimal(),
+                Sec1Volume = lines[1].ToDecimal(),
+                Sec2Slippage = lines[2].ToDecimal(),
+                Sec2Volume = lines[3].ToDecimal(),
+                CorrelationLookBack = Convert.ToInt32(lines[4]),
+                CointegrationDeviation = lines[5].ToDecimal(),
+                CointegrationLookBack = Convert.ToInt32(lines[6]),
+                PairSortType = Enum.TryParse(lines[7], out MainGridPairSortType pairSortType) ? pairSortType : default,
+                Sec1SlippageType = Enum.TryParse(lines[8], out PairTraderSlippageType sec1SlippageType) ? sec1SlippageType : default,
+                Sec1VolumeType = Enum.TryParse(lines[9], out PairTraderVolumeType sec1VolumeType) ? sec1VolumeType : default,
+                Sec2SlippageType = Enum.TryParse(lines[10], out PairTraderSlippageType sec2SlippageType) ? sec2SlippageType : default,
+                Sec2VolumeType = Enum.TryParse(lines[11], out PairTraderVolumeType sec2VolumeType) ? sec2VolumeType : default,
+                EventsIsOn = Convert.ToBoolean(lines[12]),
+                EmulatorIsOn = Convert.ToBoolean(lines[13]),
+                Sec1TradeRegime = Enum.TryParse(lines[14], out PairTraderSecurityTradeRegime sec1TradeRegime) ? sec1TradeRegime : default,
+                Sec2TradeRegime = Enum.TryParse(lines[15], out PairTraderSecurityTradeRegime sec2TradeRegime) ? sec2TradeRegime : default,
+                AutoRebuildCointegration = Convert.ToBoolean(lines[16]),
+                AutoRebuildCorrelation = Convert.ToBoolean(lines[17])
+            };
+        }
+
+        private sealed class BotTabPairStandartSettingsDto
+        {
+            public decimal Sec1Slippage { get; set; }
+            public decimal Sec1Volume { get; set; }
+            public decimal Sec2Slippage { get; set; }
+            public decimal Sec2Volume { get; set; }
+            public int CorrelationLookBack { get; set; }
+            public decimal CointegrationDeviation { get; set; }
+            public int CointegrationLookBack { get; set; }
+            public MainGridPairSortType PairSortType { get; set; }
+            public PairTraderSlippageType Sec1SlippageType { get; set; }
+            public PairTraderVolumeType Sec1VolumeType { get; set; }
+            public PairTraderSlippageType Sec2SlippageType { get; set; }
+            public PairTraderVolumeType Sec2VolumeType { get; set; }
+            public bool EventsIsOn { get; set; }
+            public bool EmulatorIsOn { get; set; }
+            public PairTraderSecurityTradeRegime Sec1TradeRegime { get; set; }
+            public PairTraderSecurityTradeRegime Sec2TradeRegime { get; set; }
+            public bool AutoRebuildCointegration { get; set; }
+            public bool AutoRebuildCorrelation { get; set; }
         }
 
         #endregion
