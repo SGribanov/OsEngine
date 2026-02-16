@@ -157,13 +157,14 @@ namespace OsEngine.Charts.CandleChart.Indicators
                     return;
                 }
 
-                using (StreamWriter writer = new StreamWriter(@"Engine\" + Name + @".txt", false))
-                {
-                    writer.WriteLine(Period);
-                    writer.WriteLine(ColorBase.ToArgb());
-                    writer.WriteLine(PaintOn);
-                    writer.Close();
-                }
+                SettingsManager.Save(
+                    GetSettingsPath(),
+                    new CmoSettingsDto
+                    {
+                        Period = Period,
+                        ColorArgb = ColorBase.ToArgb(),
+                        PaintOn = PaintOn
+                    });
             }
             catch (Exception)
             {
@@ -178,23 +179,25 @@ namespace OsEngine.Charts.CandleChart.Indicators
         /// </summary>
         public void Load()
         {
-            if (!File.Exists(@"Engine\" + Name + @".txt"))
+            if (!File.Exists(GetSettingsPath()))
             {
                 return;
             }
             try
             {
+                CmoSettingsDto settings = SettingsManager.Load(
+                    GetSettingsPath(),
+                    defaultValue: null,
+                    legacyLoader: ParseLegacySettings);
 
-                using (StreamReader reader = new StreamReader(@"Engine\" + Name + @".txt"))
+                if (settings == null)
                 {
-                    Period = Convert.ToInt32(reader.ReadLine());
-                    ColorBase = Color.FromArgb(Convert.ToInt32(reader.ReadLine()));
-                    PaintOn = Convert.ToBoolean(reader.ReadLine());
-                    reader.ReadLine();
-
-                    reader.Close();
+                    return;
                 }
 
+                Period = settings.Period;
+                ColorBase = Color.FromArgb(settings.ColorArgb);
+                PaintOn = settings.PaintOn;
 
             }
             catch (Exception)
@@ -210,10 +213,52 @@ namespace OsEngine.Charts.CandleChart.Indicators
         /// </summary>
         public void Delete()
         {
-            if (File.Exists(@"Engine\" + Name + @".txt"))
+            if (File.Exists(GetSettingsPath()))
             {
-                File.Delete(@"Engine\" + Name + @".txt");
+                File.Delete(GetSettingsPath());
             }
+        }
+
+        private string GetSettingsPath()
+        {
+            return @"Engine\" + Name + @".txt";
+        }
+
+        private static CmoSettingsDto ParseLegacySettings(string content)
+        {
+            if (string.IsNullOrWhiteSpace(content))
+            {
+                return null;
+            }
+
+            string normalized = content.Replace("\r", string.Empty);
+            string[] lines = normalized.Split('\n');
+
+            if (lines.Length > 0 && lines[lines.Length - 1] == string.Empty)
+            {
+                Array.Resize(ref lines, lines.Length - 1);
+            }
+
+            if (lines.Length < 3)
+            {
+                return null;
+            }
+
+            return new CmoSettingsDto
+            {
+                Period = Convert.ToInt32(lines[0]),
+                ColorArgb = Convert.ToInt32(lines[1]),
+                PaintOn = Convert.ToBoolean(lines[2])
+            };
+        }
+
+        private sealed class CmoSettingsDto
+        {
+            public int Period { get; set; }
+
+            public int ColorArgb { get; set; }
+
+            public bool PaintOn { get; set; }
         }
 
         /// <summary>
