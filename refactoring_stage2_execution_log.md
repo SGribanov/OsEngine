@@ -2918,3 +2918,25 @@
     - `refactoring_stage2_progress.md`
 - **Verification:**
   - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` succeeded (`343/343`).
+- **Commit:** `dde945a05`
+- **Push:** no (manual push by user)
+
+### Step 2.3 - JSON Settings Subsystem (Incremental Adoption #142)
+
+- **Status:** In Progress (increment completed)
+- **Plan item:** `refactoring_stage2_plan.md` -> Phase 2 / Step 2.3
+- **Changes:**
+  - Path consistency cleanup in:
+    - `project/OsEngine/OsTrader/SystemAnalyze/SystemAnalyzeMaster.cs`
+  - Removed hardcoded `Engine\\SystemStress` directory checks from 4 `Save()` methods:
+    - `RamMemoryUsageAnalyze`
+    - `CpuUsageAnalyze`
+    - `EcqUsageAnalyze`
+    - `MoqUsageAnalyze`
+  - Directory path for create-if-missing now resolves from `GetSettingsPath()` via `Path.GetDirectoryName(...)`.
+  - Updated running progress journal:
+    - `refactoring_stage2_progress.md`
+- **Verification:**
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` succeeded (`343/343`).
+- **Commit:** `63e511199`
+- **Push:** no (manual push by user)
