@@ -2980,3 +2980,22 @@
   - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` succeeded (`343/343`).
 - **Commit:** `2ba912695`
 - **Push:** no (manual push by user)
+
+### Step 2.3 - JSON Settings Subsystem (Incremental Adoption #145)
+
+- **Status:** In Progress (increment completed)
+- **Plan item:** `refactoring_stage2_plan.md` -> Phase 2 / Step 2.3
+- **Changes:**
+  - Path consistency cleanup in:
+    - `project/OsEngine/Charts/ColorKeeper/ChartMasterColorKeeper.cs`
+  - Centralized chart-color settings directory path via:
+    - `GetSettingsDirectoryPath()`
+  - Updated:
+    - `GetSettingsPath()` to build file path from directory helper
+    - `EnsureDirectoryExists()` to use the same directory helper
+  - Updated running progress journal:
+    - `refactoring_stage2_progress.md`
+- **Verification:**
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` succeeded (`343/343`).
+- **Commit:** `c3d3edd25`
+- **Push:** no (manual push by user)
