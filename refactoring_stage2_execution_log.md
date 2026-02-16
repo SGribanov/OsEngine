@@ -2356,3 +2356,27 @@
   - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` succeeded (`316/316`).
 - **Commit:** `27e4a88f9`
 - **Push:** no (manual push by user)
+
+### Step 2.3 - JSON Settings Subsystem (Incremental Adoption #113)
+
+- **Status:** In Progress (increment completed)
+- **Plan item:** `refactoring_stage2_plan.md` -> Phase 2 / Step 2.3
+- **Changes:**
+  - Migrated Vwap indicator settings persistence to JSON with legacy fallback:
+    - `project/OsEngine/Charts/CandleChart/Indicators/VWAP.cs`
+  - Covered persisted file:
+    - dynamic `Engine\\<Name>.txt` path (`Vwap` indicator)
+  - Preserved legacy compatibility for line-based files:
+    - boolean flags, dates/times, deviation toggles, colors, and `PaintOn`
+  - Hardened legacy `DateTime` parsing:
+    - supports current-culture and invariant-culture date formats
+  - Added dedicated persistence tests:
+    - `project/OsEngine.Tests/VwapPersistenceTests.cs`
+      - `Save_ShouldPersistJson_AndLoadRoundTrip`
+      - `Load_ShouldSupportLegacyLineBasedFormat`
+  - Updated running progress journal:
+    - `refactoring_stage2_progress.md`
+- **Verification:**
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` succeeded (`318/318`).
+- **Commit:** `6dd4756c7`
+- **Push:** no (manual push by user)
