@@ -441,17 +441,16 @@ namespace OsEngine.Market.Servers
         {
             try
             {
-                string dir = Directory.GetCurrentDirectory();
-                dir += "\\Engine\\DataBases\\";
+                string dataBasesDirectoryPath = GetDataBasesDirectoryPath();
 
-                if (Directory.Exists(dir) == false)
+                if (Directory.Exists(dataBasesDirectoryPath) == false)
                 {
-                    Directory.CreateDirectory(dir);
+                    Directory.CreateDirectory(dataBasesDirectoryPath);
                 }
 
-                dir += _server.ServerNameUnique + "_active_orders.db";
+                string activeOrdersDatabasePath = GetActiveOrdersDatabasePath();
 
-                using (LiteDatabase db = new LiteDatabase(dir))
+                using (LiteDatabase db = new LiteDatabase(activeOrdersDatabasePath))
                 {
                     var collection = db.GetCollection<OrderToSave>("orders");
 
@@ -505,17 +504,16 @@ namespace OsEngine.Market.Servers
         {
             try
             {
-                string dir = Directory.GetCurrentDirectory();
-                dir += "\\Engine\\DataBases\\";
+                string dataBasesDirectoryPath = GetDataBasesDirectoryPath();
 
-                if (Directory.Exists(dir) == false)
+                if (Directory.Exists(dataBasesDirectoryPath) == false)
                 {
-                    Directory.CreateDirectory(dir);
+                    Directory.CreateDirectory(dataBasesDirectoryPath);
                 }
 
-                dir += _server.ServerNameUnique + "_active_orders.db";
+                string activeOrdersDatabasePath = GetActiveOrdersDatabasePath();
 
-                using (LiteDatabase db = new LiteDatabase(dir))
+                using (LiteDatabase db = new LiteDatabase(activeOrdersDatabasePath))
                 {
                     var collection = db.GetCollection<OrderToSave>("orders");
 
@@ -616,6 +614,16 @@ namespace OsEngine.Market.Servers
             {
                 //SendLogMessage(e.ToString(), LogMessageType.Error);
             }
+        }
+
+        private static string GetDataBasesDirectoryPath()
+        {
+            return Path.Combine(Directory.GetCurrentDirectory(), "Engine", "DataBases");
+        }
+
+        private string GetActiveOrdersDatabasePath()
+        {
+            return Path.Combine(GetDataBasesDirectoryPath(), _server.ServerNameUnique + "_active_orders.db");
         }
 
         #endregion

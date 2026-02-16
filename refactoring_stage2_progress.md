@@ -2226,3 +2226,18 @@
 ### Verification
 
 - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` -> passed 343/343
+
+## 2026-02-16 - Step 2.3 (JSON settings subsystem) - Path consistency cleanup in AServerOrdersHub active orders DB path
+
+- Updated `project/OsEngine/Market/Servers/AServerOrdersHub.cs`:
+  - centralized active-orders LiteDB path construction via helper methods:
+    - `GetDataBasesDirectoryPath()`
+    - `GetActiveOrdersDatabasePath()`
+  - replaced duplicated inline path-building in:
+    - `LoadOrdersFromFile()`
+    - `SaveOrdersInFile()`
+- No behavior changes intended; DB directory create-if-missing and file naming remain unchanged.
+
+### Verification
+
+- `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` -> passed 343/343
