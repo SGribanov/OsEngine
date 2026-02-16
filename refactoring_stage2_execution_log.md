@@ -2582,3 +2582,23 @@
   - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` succeeded (`328/328`).
 - **Commit:** `a86937cc1`
 - **Push:** no (manual push by user)
+
+### Step 2.3 - JSON Settings Subsystem (Incremental Adoption #125)
+
+- **Status:** In Progress (increment completed)
+- **Plan item:** `refactoring_stage2_plan.md` -> Phase 2 / Step 2.3
+- **Changes:**
+  - Migrated trade grids master settings persistence in:
+    - `project/OsEngine/OsTrader/Grids/TradeGridsMaster.cs`
+  - `SaveGrids()` and `LoadGrids()` now use `SettingsManager` DTO JSON.
+  - Added legacy parser for old line-based grid-settings format:
+    - `ParseLegacyGridsSettings(string content)`
+  - Centralized settings file path via helper and reused it in save/load/delete.
+  - Added tests:
+    - `project/OsEngine.Tests/TradeGridsMasterPersistenceTests.cs`
+  - Updated running progress journal:
+    - `refactoring_stage2_progress.md`
+- **Verification:**
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` succeeded (`330/330`).
+- **Commit:** `bd3fb9dce`
+- **Push:** no (manual push by user)
