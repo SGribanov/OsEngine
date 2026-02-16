@@ -2286,3 +2286,25 @@
   - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` succeeded (`310/310`).
 - **Commit:** `f5b4d9a43`
 - **Push:** no (manual push by user)
+
+### Step 2.3 - JSON Settings Subsystem (Incremental Adoption #110)
+
+- **Status:** In Progress (increment completed)
+- **Plan item:** `refactoring_stage2_plan.md` -> Phase 2 / Step 2.3
+- **Changes:**
+  - Migrated StochRsi indicator settings persistence to JSON with legacy fallback:
+    - `project/OsEngine/Charts/CandleChart/Indicators/StochRsi.cs`
+  - Covered persisted file:
+    - dynamic `Engine\\<Name>.txt` path (`StochRsi` indicator)
+  - Preserved existing persistence scope for settings fields:
+    - `ColorK`, `RsiLength`, `StochasticLength`, `K`, `D`
+  - Added dedicated persistence tests:
+    - `project/OsEngine.Tests/StochRsiPersistenceTests.cs`
+      - `Save_ShouldPersistJson_AndLoadRoundTrip`
+      - `Load_ShouldSupportLegacyLineBasedFormat`
+  - Updated running progress journal:
+    - `refactoring_stage2_progress.md`
+- **Verification:**
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` succeeded (`312/312`).
+- **Commit:** `f90c2bbdf`
+- **Push:** no (manual push by user)
