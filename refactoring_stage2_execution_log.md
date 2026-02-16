@@ -2432,3 +2432,20 @@
   - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` succeeded (`318/318`).
 - **Commit:** `d3d7a812d`
 - **Push:** no (manual push by user)
+
+### Step 2.3 - JSON Settings Subsystem (Incremental Adoption #117)
+
+- **Status:** In Progress (increment completed)
+- **Plan item:** `refactoring_stage2_plan.md` -> Phase 2 / Step 2.3
+- **Changes:**
+  - Centralized remaining hardcoded settings paths via helper methods in:
+    - `project/OsEngine/Market/Servers/AServer.cs`
+    - `project/OsEngine/OsTrader/Panels/Tab/BotTabPair.cs`
+    - `project/OsEngine/OsTrader/Panels/Tab/BotTabScreener.cs`
+  - Added/used path helpers for delete/save/load sites to remove direct `@"Engine\\..."` path duplication.
+  - Updated running progress journal:
+    - `refactoring_stage2_progress.md`
+- **Verification:**
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` succeeded (`318/318`).
+- **Commit:** `ae1cbc3f4`
+- **Push:** no (manual push by user)
