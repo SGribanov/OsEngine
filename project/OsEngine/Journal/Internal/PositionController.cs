@@ -197,7 +197,7 @@ namespace OsEngine.Journal.Internal
                 }
 
                 _needToSave = false;
-                string dealControllerPath = @"Engine\" + _name + @"DealController.txt";
+                string dealControllerPath = GetDealsPath();
 
                 if (File.Exists(dealControllerPath))
                 {
@@ -211,7 +211,7 @@ namespace OsEngine.Journal.Internal
                     }
                 }
 
-                string dealControllerStopLimitsPath = @"Engine\" + _name + @"DealControllerStopLimits.txt";
+                string dealControllerStopLimitsPath = GetStopLimitsPath();
 
                 if (File.Exists(dealControllerStopLimitsPath))
                 {
