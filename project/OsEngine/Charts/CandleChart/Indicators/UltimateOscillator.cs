@@ -166,15 +166,16 @@ namespace OsEngine.Charts.CandleChart.Indicators
             }
             try
             {
-                using (StreamWriter writer = new StreamWriter(@"Engine\" + Name + @".txt", false))
-                {
-                    writer.WriteLine(ColorBase.ToArgb());
-                    writer.WriteLine(Period1);
-                    writer.WriteLine(Period2);
-                    writer.WriteLine(Period3);
-                    writer.WriteLine(PaintOn);
-                    writer.Close();
-                }
+                SettingsManager.Save(
+                    GetSettingsPath(),
+                    new UltimateOscillatorSettingsDto
+                    {
+                        ColorArgb = ColorBase.ToArgb(),
+                        Period1 = Period1,
+                        Period2 = Period2,
+                        Period3 = Period3,
+                        PaintOn = PaintOn
+                    });
             }
             catch (Exception)
             {
@@ -189,24 +190,27 @@ namespace OsEngine.Charts.CandleChart.Indicators
         /// </summary>
         public void Load()
         {
-            if (!File.Exists(@"Engine\" + Name + @".txt"))
+            if (!File.Exists(GetSettingsPath()))
             {
                 return;
             }
             try
             {
+                UltimateOscillatorSettingsDto settings = SettingsManager.Load(
+                    GetSettingsPath(),
+                    defaultValue: null,
+                    legacyLoader: ParseLegacySettings);
 
-                using (StreamReader reader = new StreamReader(@"Engine\" + Name + @".txt"))
+                if (settings == null)
                 {
-                    ColorBase = Color.FromArgb(Convert.ToInt32(reader.ReadLine()));
-                    Period1 = Convert.ToInt32(reader.ReadLine());
-                    Period2 = Convert.ToInt32(reader.ReadLine());
-                    Period3 = Convert.ToInt32(reader.ReadLine());
-
-                    PaintOn = Convert.ToBoolean(reader.ReadLine());
-
-                    reader.Close();
+                    return;
                 }
+
+                ColorBase = Color.FromArgb(settings.ColorArgb);
+                Period1 = settings.Period1;
+                Period2 = settings.Period2;
+                Period3 = settings.Period3;
+                PaintOn = settings.PaintOn;
 
 
             }
@@ -223,10 +227,58 @@ namespace OsEngine.Charts.CandleChart.Indicators
         /// </summary>
         public void Delete()
         {
-            if (File.Exists(@"Engine\" + Name + @".txt"))
+            if (File.Exists(GetSettingsPath()))
             {
-                File.Delete(@"Engine\" + Name + @".txt");
+                File.Delete(GetSettingsPath());
             }
+        }
+
+        private string GetSettingsPath()
+        {
+            return @"Engine\" + Name + @".txt";
+        }
+
+        private static UltimateOscillatorSettingsDto ParseLegacySettings(string content)
+        {
+            if (string.IsNullOrWhiteSpace(content))
+            {
+                return null;
+            }
+
+            string normalized = content.Replace("\r", string.Empty);
+            string[] lines = normalized.Split('\n');
+
+            if (lines.Length > 0 && lines[lines.Length - 1] == string.Empty)
+            {
+                Array.Resize(ref lines, lines.Length - 1);
+            }
+
+            if (lines.Length < 5)
+            {
+                return null;
+            }
+
+            return new UltimateOscillatorSettingsDto
+            {
+                ColorArgb = Convert.ToInt32(lines[0]),
+                Period1 = Convert.ToInt32(lines[1]),
+                Period2 = Convert.ToInt32(lines[2]),
+                Period3 = Convert.ToInt32(lines[3]),
+                PaintOn = Convert.ToBoolean(lines[4])
+            };
+        }
+
+        private sealed class UltimateOscillatorSettingsDto
+        {
+            public int ColorArgb { get; set; }
+
+            public int Period1 { get; set; }
+
+            public int Period2 { get; set; }
+
+            public int Period3 { get; set; }
+
+            public bool PaintOn { get; set; }
         }
 
         /// <summary>

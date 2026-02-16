@@ -1519,3 +1519,18 @@
 ### Verification
 
 - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` -> passed 282/282
+
+## 2026-02-16 - Step 2.3 (JSON settings subsystem) - Incremental adoption in UltimateOscillator indicator settings
+
+- Migrated `project/OsEngine/Charts/CandleChart/Indicators/UltimateOscillator.cs` (`Engine\\<Name>.txt`) persistence to `SettingsManager`:
+  - `Save()` now writes JSON DTO with color, periods, and paint settings
+  - `Load()` now reads JSON and falls back to legacy line-based parser
+  - preserved compatibility with historical legacy format that can include an extra ignored line
+- Added tests `project/OsEngine.Tests/UltimateOscillatorPersistenceTests.cs`:
+  - `Save_ShouldPersistJson_AndLoadRoundTrip`
+  - `Load_ShouldSupportLegacyLineBasedFormat`
+  - tests use file backup/restore around indicator settings path
+
+### Verification
+
+- `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` -> passed 284/284
