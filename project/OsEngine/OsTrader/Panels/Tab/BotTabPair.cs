@@ -701,16 +701,24 @@ namespace OsEngine.OsTrader.Panels.Tab
         {
             try
             {
-                using (StreamWriter writer = new StreamWriter(GetPairsNamesToLoadPath(), false))
+                List<string> pairNames = new List<string>();
+                for (int i = 0; i < Pairs.Count; i++)
                 {
-
-                    for (int i = 0; i < Pairs.Count; i++)
+                    if (Pairs[i] == null
+                        || string.IsNullOrWhiteSpace(Pairs[i].Name))
                     {
-                        writer.WriteLine(Pairs[i].Name);
+                        continue;
                     }
 
-                    writer.Close();
+                    pairNames.Add(Pairs[i].Name);
                 }
+
+                SettingsManager.Save(
+                    GetPairsNamesToLoadPath(),
+                    new BotTabPairNamesToLoadSettingsDto
+                    {
+                        PairNames = pairNames
+                    });
             }
             catch (Exception)
             {
@@ -729,21 +737,32 @@ namespace OsEngine.OsTrader.Panels.Tab
             }
             try
             {
-                using (StreamReader reader = new StreamReader(GetPairsNamesToLoadPath()))
+                BotTabPairNamesToLoadSettingsDto settings = SettingsManager.Load(
+                    GetPairsNamesToLoadPath(),
+                    defaultValue: null,
+                    legacyLoader: ParseLegacyPairNamesToLoadSettings);
+
+                if (settings == null
+                    || settings.PairNames == null)
                 {
-                    while (reader.EndOfStream == false)
+                    return;
+                }
+
+                for (int i = 0; i < settings.PairNames.Count; i++)
+                {
+                    string pairName = settings.PairNames[i];
+                    if (string.IsNullOrWhiteSpace(pairName))
                     {
-                        string pairName = reader.ReadLine();
-                        PairToTrade newPair = new PairToTrade(pairName, StartProgram);
-                        newPair.CointegrationPositionSideChangeEvent += Pair_CointegrationPositionSideChangeEvent;
-                        newPair.CorrelationChangeEvent += NewPair_CorrelationChangeEvent;
-                        newPair.CointegrationChangeEvent += Pair_CointegrationChangeEvent;
-                        newPair.LogMessageEvent += SendNewLogMessage;
-                        newPair.CandlesInPairSyncFinishedEvent += Pair_CandlesInPairSyncFinishedEvent;
-                        Pairs.Add(newPair);
+                        continue;
                     }
 
-                    reader.Close();
+                    PairToTrade newPair = new PairToTrade(pairName, StartProgram);
+                    newPair.CointegrationPositionSideChangeEvent += Pair_CointegrationPositionSideChangeEvent;
+                    newPair.CorrelationChangeEvent += NewPair_CorrelationChangeEvent;
+                    newPair.CointegrationChangeEvent += Pair_CointegrationChangeEvent;
+                    newPair.LogMessageEvent += SendNewLogMessage;
+                    newPair.CandlesInPairSyncFinishedEvent += Pair_CandlesInPairSyncFinishedEvent;
+                    Pairs.Add(newPair);
                 }
             }
             catch (Exception error)
@@ -752,6 +771,26 @@ namespace OsEngine.OsTrader.Panels.Tab
             }
 
             SetJournalsInPosViewer();
+        }
+
+        private static BotTabPairNamesToLoadSettingsDto ParseLegacyPairNamesToLoadSettings(string content)
+        {
+            if (string.IsNullOrWhiteSpace(content))
+            {
+                return null;
+            }
+
+            string[] lines = content.Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries);
+
+            return new BotTabPairNamesToLoadSettingsDto
+            {
+                PairNames = new List<string>(lines)
+            };
+        }
+
+        private sealed class BotTabPairNamesToLoadSettingsDto
+        {
+            public List<string> PairNames { get; set; }
         }
 
         /// <summary>

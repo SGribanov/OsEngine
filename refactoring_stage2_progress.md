@@ -1876,3 +1876,18 @@
 ### Verification
 
 - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` -> passed 318/318
+
+## 2026-02-16 - Step 2.3 (JSON settings subsystem) - BotTabPair pair names migrated to JSON settings with legacy compatibility
+
+- Updated `project/OsEngine/OsTrader/Panels/Tab/BotTabPair.cs`:
+  - migrated pair names persistence from line-based file IO to `SettingsManager`
+  - `SavePairNames()` now saves DTO JSON (`BotTabPairNamesToLoadSettingsDto`)
+  - `LoadPairs()` now loads via `SettingsManager.Load(..., legacyLoader: ParseLegacyPairNamesToLoadSettings)`
+  - added legacy parser `ParseLegacyPairNamesToLoadSettings(string content)` to preserve backward compatibility with old line-based format
+- Added tests in `project/OsEngine.Tests/BotTabPairNamesPersistenceTests.cs`:
+  - verifies JSON persistence from `SavePairNames()`
+  - verifies legacy line-based parser behavior
+
+### Verification
+
+- `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` -> passed 320/320
