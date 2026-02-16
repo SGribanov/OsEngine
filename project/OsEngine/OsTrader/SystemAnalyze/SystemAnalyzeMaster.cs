@@ -1223,17 +1223,19 @@ namespace OsEngine.OsTrader.SystemAnalyze
         {
             try
             {
-                if (!File.Exists(@"Engine\SystemStress\MoqMemorySettings.txt"))
+                MoqUsageSettingsDto settings = OsEngine.Entity.SettingsManager.Load(
+                    GetSettingsPath(),
+                    defaultValue: null,
+                    legacyLoader: ParseLegacySettings);
+
+                if (settings == null)
                 {
                     return;
                 }
 
-                using (StreamReader reader = new StreamReader(@"Engine\SystemStress\MoqMemorySettings.txt"))
-                {
-                    _moqCollectDataIsOn = Convert.ToBoolean(reader.ReadLine());
-                    Enum.TryParse(reader.ReadLine(), out _moqPeriodSavePoint);
-                    _moqPointsMax = Convert.ToInt32(reader.ReadLine());
-                }
+                _moqCollectDataIsOn = settings.MoqCollectDataIsOn;
+                _moqPeriodSavePoint = settings.MoqPeriodSavePoint;
+                _moqPointsMax = settings.MoqPointsMax;
             }
             catch (Exception)
             {
@@ -1250,17 +1252,74 @@ namespace OsEngine.OsTrader.SystemAnalyze
                     Directory.CreateDirectory("Engine\\SystemStress");
                 }
 
-                using (StreamWriter writer = new StreamWriter(@"Engine\SystemStress\MoqMemorySettings.txt", false))
-                {
-                    writer.WriteLine(_moqCollectDataIsOn);
-                    writer.WriteLine(_moqPeriodSavePoint);
-                    writer.WriteLine(_moqPointsMax);
-                }
+                OsEngine.Entity.SettingsManager.Save(
+                    GetSettingsPath(),
+                    new MoqUsageSettingsDto
+                    {
+                        MoqCollectDataIsOn = _moqCollectDataIsOn,
+                        MoqPeriodSavePoint = _moqPeriodSavePoint,
+                        MoqPointsMax = _moqPointsMax
+                    });
             }
             catch (Exception)
             {
                 // ignore
             }
+        }
+
+        private static string GetSettingsPath()
+        {
+            return @"Engine\SystemStress\MoqMemorySettings.txt";
+        }
+
+        private static MoqUsageSettingsDto ParseLegacySettings(string content)
+        {
+            if (string.IsNullOrWhiteSpace(content))
+            {
+                return null;
+            }
+
+            string normalized = content.Replace("\r", string.Empty);
+            string[] lines = normalized.Split('\n');
+
+            if (lines.Length > 0 && lines[lines.Length - 1] == string.Empty)
+            {
+                Array.Resize(ref lines, lines.Length - 1);
+            }
+
+            bool collectDataIsOn = false;
+            if (lines.Length > 0)
+            {
+                bool.TryParse(lines[0], out collectDataIsOn);
+            }
+
+            SavePointPeriod period = SavePointPeriod.OneSecond;
+            if (lines.Length > 1)
+            {
+                Enum.TryParse(lines[1], out period);
+            }
+
+            int pointsMax = 100;
+            if (lines.Length > 2 && int.TryParse(lines[2], out int parsedPointsMax))
+            {
+                pointsMax = parsedPointsMax;
+            }
+
+            return new MoqUsageSettingsDto
+            {
+                MoqCollectDataIsOn = collectDataIsOn,
+                MoqPeriodSavePoint = period,
+                MoqPointsMax = pointsMax
+            };
+        }
+
+        private sealed class MoqUsageSettingsDto
+        {
+            public bool MoqCollectDataIsOn { get; set; }
+
+            public SavePointPeriod MoqPeriodSavePoint { get; set; }
+
+            public int MoqPointsMax { get; set; }
         }
 
         public bool MoqCollectDataIsOn

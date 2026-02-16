@@ -586,3 +586,18 @@
 ### Verification
 
 - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` -> passed 158/158
+
+## 2026-02-16 - Step 2.3 (JSON settings subsystem) - Incremental adoption in MoqUsageAnalyze settings
+
+- Migrated `project/OsEngine/OsTrader/SystemAnalyze/SystemAnalyzeMaster.cs` (`MoqUsageAnalyze`) persistence to `SettingsManager`:
+  - private `Save()` now writes JSON into `Engine\\SystemStress\\MoqMemorySettings.txt`
+  - private `Load()` now reads JSON and falls back to legacy 3-line format parser
+  - preserved defaults and value-application behavior for `_moqCollectDataIsOn`, `_moqPeriodSavePoint`, `_moqPointsMax`
+- Added tests `project/OsEngine.Tests/MoqUsageAnalyzePersistenceTests.cs`:
+  - `Save_ShouldPersistJson_AndLoadRoundTrip`
+  - `Load_ShouldSupportLegacyLineBasedFormat`
+  - tests invoke private `Load/Save` via reflection on uninitialized instance
+
+### Verification
+
+- `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` -> passed 160/160
