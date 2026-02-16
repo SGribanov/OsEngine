@@ -508,9 +508,11 @@ namespace OsEngine.OsTrader.SystemAnalyze
         {
             try
             {
-                if(Directory.Exists("Engine\\SystemStress") == false)
+                string settingsDirectoryPath = Path.GetDirectoryName(GetSettingsPath());
+                if (string.IsNullOrEmpty(settingsDirectoryPath) == false
+                    && Directory.Exists(settingsDirectoryPath) == false)
                 {
-                    Directory.CreateDirectory("Engine\\SystemStress");
+                    Directory.CreateDirectory(settingsDirectoryPath);
                 }
 
                 OsEngine.Entity.SettingsManager.Save(
@@ -751,9 +753,11 @@ namespace OsEngine.OsTrader.SystemAnalyze
         {
             try
             {
-                if (Directory.Exists("Engine\\SystemStress") == false)
+                string settingsDirectoryPath = Path.GetDirectoryName(GetSettingsPath());
+                if (string.IsNullOrEmpty(settingsDirectoryPath) == false
+                    && Directory.Exists(settingsDirectoryPath) == false)
                 {
-                    Directory.CreateDirectory("Engine\\SystemStress");
+                    Directory.CreateDirectory(settingsDirectoryPath);
                 }
 
                 OsEngine.Entity.SettingsManager.Save(
@@ -994,9 +998,11 @@ namespace OsEngine.OsTrader.SystemAnalyze
         {
             try
             {
-                if (Directory.Exists("Engine\\SystemStress") == false)
+                string settingsDirectoryPath = Path.GetDirectoryName(GetSettingsPath());
+                if (string.IsNullOrEmpty(settingsDirectoryPath) == false
+                    && Directory.Exists(settingsDirectoryPath) == false)
                 {
-                    Directory.CreateDirectory("Engine\\SystemStress");
+                    Directory.CreateDirectory(settingsDirectoryPath);
                 }
 
                 OsEngine.Entity.SettingsManager.Save(
@@ -1247,9 +1253,11 @@ namespace OsEngine.OsTrader.SystemAnalyze
         {
             try
             {
-                if (Directory.Exists("Engine\\SystemStress") == false)
+                string settingsDirectoryPath = Path.GetDirectoryName(GetSettingsPath());
+                if (string.IsNullOrEmpty(settingsDirectoryPath) == false
+                    && Directory.Exists(settingsDirectoryPath) == false)
                 {
-                    Directory.CreateDirectory("Engine\\SystemStress");
+                    Directory.CreateDirectory(settingsDirectoryPath);
                 }
 
                 OsEngine.Entity.SettingsManager.Save(

@@ -2211,3 +2211,18 @@
 ### Verification
 
 - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` -> passed 343/343
+
+## 2026-02-16 - Step 2.3 (JSON settings subsystem) - Path consistency cleanup in SystemAnalyze settings directory usage
+
+- Updated `project/OsEngine/OsTrader/SystemAnalyze/SystemAnalyzeMaster.cs`:
+  - removed hardcoded `Engine\\SystemStress` directory checks from 4 `Save()` methods:
+    - `RamMemoryUsageAnalyze`
+    - `CpuUsageAnalyze`
+    - `EcqUsageAnalyze`
+    - `MoqUsageAnalyze`
+  - directory path is now resolved from `GetSettingsPath()` via `Path.GetDirectoryName(...)`
+- No behavior changes intended; directory creation remains identical but path construction is centralized via existing settings-file path helpers.
+
+### Verification
+
+- `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` -> passed 343/343
