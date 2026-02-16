@@ -2701,3 +2701,26 @@
   - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` succeeded (`336/336`).
 - **Commit:** `c7d3bcbe5`
 - **Push:** no (manual push by user)
+
+### Step 2.3 - JSON Settings Subsystem (Incremental Adoption #131)
+
+- **Status:** In Progress (increment completed)
+- **Plan item:** `refactoring_stage2_plan.md` -> Phase 2 / Step 2.3
+- **Changes:**
+  - Migrated bot-keeper settings wrapper in:
+    - `project/OsEngine/OsTrader/OsTraderMaster.cs`
+  - `Load()` / `Save()` now use `SettingsManager` DTO JSON with compatibility loader.
+  - Updated `BotNames` source to use same compatibility loader for:
+    - `SettingsRealKeeper.txt`
+    - `SettingsTesterKeeper.txt`
+  - Added legacy parser for old line-based keeper format:
+    - `ParseLegacyBotKeeperSettings(string content)`
+  - Centralized keeper-path construction via helper method.
+  - Added tests:
+    - `project/OsEngine.Tests/OsTraderMasterKeeperSettingsTests.cs`
+  - Updated running progress journal:
+    - `refactoring_stage2_progress.md`
+- **Verification:**
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` succeeded (`337/337`).
+- **Commit:** `e74ff94f9`
+- **Push:** no (manual push by user)
