@@ -1594,3 +1594,23 @@
   - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` succeeded (`244/244`).
 - **Commit:** `e3ef0e217`
 - **Push:** no (manual push by user)
+
+### Step 2.3 - JSON Settings Subsystem (Incremental Adoption #77)
+
+- **Status:** In Progress (increment completed)
+- **Plan item:** `refactoring_stage2_plan.md` -> Phase 2 / Step 2.3
+- **Changes:**
+  - Migrated VolumeOscillator indicator settings persistence to JSON with legacy fallback:
+    - `project/OsEngine/Charts/CandleChart/Indicators/VolumeOscillator.cs`
+  - Covered persisted file:
+    - dynamic `Engine\\<Name>.txt` path (`VolumeOscillator` indicator)
+  - Added dedicated persistence tests:
+    - `project/OsEngine.Tests/VolumeOscillatorPersistenceTests.cs`
+      - `Save_ShouldPersistJson_AndLoadRoundTrip`
+      - `Load_ShouldSupportLegacyLineBasedFormat`
+  - Updated running progress journal:
+    - `refactoring_stage2_progress.md`
+- **Verification:**
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` succeeded (`246/246`).
+- **Commit:** `de14af676`
+- **Push:** no (manual push by user)
