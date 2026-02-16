@@ -751,3 +751,18 @@
 ### Verification
 
 - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` -> passed 180/180
+
+## 2026-02-16 - Step 2.3 (JSON settings subsystem) - Incremental adoption in ProxyMaster core settings
+
+- Migrated `project/OsEngine/Market/Proxy/ProxyMaster.cs` (`ProxyMaster.txt`) persistence to `SettingsManager`:
+  - private `LoadSettings()` now reads JSON and falls back to legacy line-based parser
+  - public `SaveSettings()` now writes JSON into `Engine\\ProxyMaster.txt`
+  - preserved current defaults/activation flow and existing field contract (`AutoPingIsOn/AutoPingLastTime/AutoPingMinutes`)
+- Added tests `project/OsEngine.Tests/ProxyMasterSettingsPersistenceTests.cs`:
+  - `SaveSettings_ShouldPersistJson_AndLoadRoundTrip`
+  - `LoadSettings_ShouldSupportLegacyLineBasedFormat`
+  - tests invoke private loader via reflection with backup/restore of `Engine\\ProxyMaster.txt`
+
+### Verification
+
+- `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` -> passed 182/182

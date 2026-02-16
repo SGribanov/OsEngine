@@ -5,6 +5,7 @@
 
 #pragma warning disable SYSLIB0014 // WebRequest/WebClient are obsolete
 using Newtonsoft.Json;
+using OsEngine.Entity;
 using OsEngine.Logging;
 using System;
 using System.Collections.Generic;
@@ -19,6 +20,7 @@ namespace OsEngine.Market.Proxy
 {
     public class ProxyMaster
     {
+        private static readonly string ProxyMasterSettingsPath = @"Engine\ProxyMaster.txt";
 
         public void Activate()
         {
@@ -33,20 +35,25 @@ namespace OsEngine.Market.Proxy
 
         private void LoadSettings()
         {
-            if (!File.Exists(@"Engine\" + @"ProxyMaster.txt"))
+            if (!File.Exists(ProxyMasterSettingsPath))
             {
                 return;
             }
             try
             {
-                using (StreamReader reader = new StreamReader(@"Engine\" + @"ProxyMaster.txt"))
-                {
-                    AutoPingIsOn = Convert.ToBoolean(reader.ReadLine());
-                    AutoPingLastTime = Convert.ToDateTime(reader.ReadLine());
-                    AutoPingMinutes = Convert.ToInt32(reader.ReadLine());
+                ProxyMasterSettings settings = SettingsManager.Load(
+                    ProxyMasterSettingsPath,
+                    defaultValue: null,
+                    legacyLoader: ParseLegacySettings);
 
-                    reader.Close();
+                if (settings == null)
+                {
+                    return;
                 }
+
+                AutoPingIsOn = settings.AutoPingIsOn;
+                AutoPingLastTime = settings.AutoPingLastTime;
+                AutoPingMinutes = settings.AutoPingMinutes;
             }
             catch
             {
@@ -58,19 +65,41 @@ namespace OsEngine.Market.Proxy
         {
             try
             {
-                using (StreamWriter writer = new StreamWriter(@"Engine\" + @"ProxyMaster.txt", false))
-                {
-                    writer.WriteLine(AutoPingIsOn);
-                    writer.WriteLine(AutoPingLastTime);
-                    writer.WriteLine(AutoPingMinutes);
-
-                    writer.Close();
-                }
+                SettingsManager.Save(
+                    ProxyMasterSettingsPath,
+                    new ProxyMasterSettings
+                    {
+                        AutoPingIsOn = AutoPingIsOn,
+                        AutoPingLastTime = AutoPingLastTime,
+                        AutoPingMinutes = AutoPingMinutes
+                    });
             }
             catch (Exception error)
             {
                 SendLogMessage(error.ToString(), LogMessageType.Error);
             }
+        }
+
+        private static ProxyMasterSettings ParseLegacySettings(string content)
+        {
+            if (string.IsNullOrWhiteSpace(content))
+            {
+                return null;
+            }
+
+            string[] lines = content.Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries);
+
+            if (lines.Length < 3)
+            {
+                return null;
+            }
+
+            return new ProxyMasterSettings
+            {
+                AutoPingIsOn = Convert.ToBoolean(lines[0]),
+                AutoPingLastTime = Convert.ToDateTime(lines[1]),
+                AutoPingMinutes = Convert.ToInt32(lines[2])
+            };
         }
 
         public void ShowDialog()
@@ -104,6 +133,15 @@ namespace OsEngine.Market.Proxy
         public DateTime AutoPingLastTime;
 
         public int AutoPingMinutes = 10;
+
+        private sealed class ProxyMasterSettings
+        {
+            public bool AutoPingIsOn { get; set; }
+
+            public DateTime AutoPingLastTime { get; set; }
+
+            public int AutoPingMinutes { get; set; }
+        }
 
         #region Proxy hub
 
