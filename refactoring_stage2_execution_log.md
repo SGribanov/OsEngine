@@ -1919,3 +1919,27 @@
   - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` succeeded (`276/276`).
 - **Commit:** `776dfa9e1`
 - **Push:** no (manual push by user)
+
+### Step 2.3 - JSON Settings Subsystem (Incremental Adoption #93)
+
+- **Status:** In Progress (increment completed)
+- **Plan item:** `refactoring_stage2_plan.md` -> Phase 2 / Step 2.3
+- **Changes:**
+  - Migrated MacdLine indicator settings persistence to JSON with legacy fallback:
+    - `project/OsEngine/Charts/CandleChart/Indicators/MacdLine.cs`
+  - Covered persisted file:
+    - dynamic `Engine\\<Name>.txt` path (`MacdLine` indicator)
+  - Kept existing nested moving averages persistence behavior:
+    - `Engine\\<Name>ma1.txt`
+    - `Engine\\<Name>ma2.txt`
+    - `Engine\\<Name>maSignal.txt`
+  - Added dedicated persistence tests:
+    - `project/OsEngine.Tests/MacdLinePersistenceTests.cs`
+      - `Save_ShouldPersistJson_AndLoadRoundTrip`
+      - `Load_ShouldSupportLegacyLineBasedFormat`
+  - Updated running progress journal:
+    - `refactoring_stage2_progress.md`
+- **Verification:**
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` succeeded (`278/278`).
+- **Commit:** `bd5797012`
+- **Push:** no (manual push by user)
