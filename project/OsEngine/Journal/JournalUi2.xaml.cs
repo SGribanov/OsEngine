@@ -4547,7 +4547,7 @@ namespace OsEngine.Journal
 
         private void LoadGroups()
         {
-            string path = @"Engine\" + _startProgram + @"JournalSettings.txt";
+            string path = GetJournalGroupsSettingsPath();
 
             //_botsJournals;
 
@@ -4557,37 +4557,35 @@ namespace OsEngine.Journal
             }
             try
             {
-                using (StreamReader reader = new StreamReader(path))
+                JournalGroupsSettingsDto settings = SettingsManager.Load(
+                    path,
+                    defaultValue: null,
+                    legacyLoader: ParseLegacyJournalGroupsSettings);
+
+                if (settings == null
+                    || settings.Groups == null)
                 {
-                    while (reader.EndOfStream == false)
+                    return;
+                }
+
+                for (int i = 0; i < settings.Groups.Count; i++)
+                {
+                    JournalGroupSettingsItem item = settings.Groups[i];
+                    if (item == null
+                        || string.IsNullOrEmpty(item.BotName))
                     {
-                        string botString = reader.ReadLine();
-
-                        if (string.IsNullOrEmpty(botString))
-                        {
-                            continue;
-                        }
-
-                        string[] saveArray = botString.Split('&');
-
-                        string botName = saveArray[0];
-                        string botGroup = saveArray[1];
-                        decimal mult = saveArray[2].ToDecimal();
-                        bool isOn = Convert.ToBoolean(saveArray[3]);
-
-                        BotPanelJournal journal = _botsJournals.Find(b => b.BotName == botName);
-
-                        if (journal == null)
-                        {
-                            continue;
-                        }
-
-                        journal.BotGroup = botGroup;
-                        journal.Mult = mult;
-                        journal.IsOn = isOn;
+                        continue;
                     }
 
-                    reader.Close();
+                    BotPanelJournal journal = _botsJournals.Find(b => b.BotName == item.BotName);
+                    if (journal == null)
+                    {
+                        continue;
+                    }
+
+                    journal.BotGroup = item.BotGroup;
+                    journal.Mult = item.Mult;
+                    journal.IsOn = item.IsOn;
                 }
             }
             catch (Exception)
@@ -4604,29 +4602,90 @@ namespace OsEngine.Journal
             }
             try
             {
-                string path = @"Engine\" + _startProgram + @"JournalSettings.txt";
-
-                using (StreamWriter writer = new StreamWriter(path, false)
-                    )
+                List<JournalGroupSettingsItem> groups = new List<JournalGroupSettingsItem>();
+                for (int i = 0; i < _botsJournals.Count; i++)
                 {
-                    for (int i = 0; i < _botsJournals.Count; i++)
+                    groups.Add(new JournalGroupSettingsItem
                     {
-                        string res = _botsJournals[i].BotName +
-                            "&" + _botsJournals[i].BotGroup +
-                            "&" + _botsJournals[i].Mult +
-                            "&" + _botsJournals[i].IsOn;
-
-
-                        writer.WriteLine(res);
-                    }
-
-                    writer.Close();
+                        BotName = _botsJournals[i].BotName,
+                        BotGroup = _botsJournals[i].BotGroup,
+                        Mult = _botsJournals[i].Mult,
+                        IsOn = _botsJournals[i].IsOn
+                    });
                 }
+
+                SettingsManager.Save(
+                    GetJournalGroupsSettingsPath(),
+                    new JournalGroupsSettingsDto
+                    {
+                        Groups = groups
+                    });
             }
             catch (Exception)
             {
                 // ignore
             }
+        }
+
+        private string GetJournalGroupsSettingsPath()
+        {
+            return @"Engine\" + _startProgram + @"JournalSettings.txt";
+        }
+
+        private static JournalGroupsSettingsDto ParseLegacyJournalGroupsSettings(string content)
+        {
+            if (string.IsNullOrWhiteSpace(content))
+            {
+                return null;
+            }
+
+            string[] lines = content.Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries);
+
+            JournalGroupsSettingsDto settings = new JournalGroupsSettingsDto
+            {
+                Groups = new List<JournalGroupSettingsItem>()
+            };
+
+            for (int i = 0; i < lines.Length; i++)
+            {
+                string[] saveArray = lines[i].Split('&');
+                if (saveArray.Length < 4)
+                {
+                    continue;
+                }
+
+                JournalGroupSettingsItem item = new JournalGroupSettingsItem
+                {
+                    BotName = saveArray[0],
+                    BotGroup = saveArray[1],
+                    Mult = saveArray[2].ToDecimal()
+                };
+
+                if (bool.TryParse(saveArray[3], out bool isOn))
+                {
+                    item.IsOn = isOn;
+                }
+
+                settings.Groups.Add(item);
+            }
+
+            return settings;
+        }
+
+        private sealed class JournalGroupsSettingsDto
+        {
+            public List<JournalGroupSettingsItem> Groups { get; set; }
+        }
+
+        private sealed class JournalGroupSettingsItem
+        {
+            public string BotName { get; set; }
+
+            public string BotGroup { get; set; }
+
+            public decimal Mult { get; set; }
+
+            public bool IsOn { get; set; }
         }
 
         private void _gridLeftBotsPanel_CellBeginEdit(object sender, DataGridViewCellCancelEventArgs e)

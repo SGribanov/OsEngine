@@ -2096,3 +2096,18 @@
 ### Verification
 
 - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` -> passed 340/340
+
+## 2026-02-16 - Step 2.3 (JSON settings subsystem) - JournalUi2 groups storage migrated to JSON wrapper with legacy compatibility
+
+- Updated `project/OsEngine/Journal/JournalUi2.xaml.cs`:
+  - migrated groups settings wrapper (`<StartProgram>JournalSettings.txt`) from direct line-based IO to `SettingsManager`
+  - `SaveGroups()` now persists typed DTO JSON (`JournalGroupsSettingsDto`)
+  - `LoadGroups()` now uses `SettingsManager.Load(..., legacyLoader: ParseLegacyJournalGroupsSettings)`
+  - centralized groups path usage via `GetJournalGroupsSettingsPath()`
+  - added legacy parser `ParseLegacyJournalGroupsSettings(string content)` for old `BotName&BotGroup&Mult&IsOn` format
+- Added tests in `project/OsEngine.Tests/JournalUi2GroupsSettingsTests.cs`:
+  - verifies legacy parser behavior
+
+### Verification
+
+- `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` -> passed 341/341
