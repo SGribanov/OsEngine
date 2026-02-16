@@ -447,3 +447,23 @@
   - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` succeeded (`128/128`).
 - **Commit:** `a2562fca7`
 - **Push:** no (manual push by user)
+
+### Step 2.3 - JSON Settings Subsystem (Incremental Adoption #20)
+
+- **Status:** In Progress (increment completed)
+- **Plan item:** `refactoring_stage2_plan.md` -> Phase 2 / Step 2.3
+- **Changes:**
+  - Migrated chart color keeper settings persistence to JSON with legacy fallback:
+    - `project/OsEngine/Charts/ColorKeeper/ChartMasterColorKeeper.cs`
+  - Covered persisted file:
+    - `Engine\\Color\\<name>Color.txt`
+  - Added dedicated persistence tests:
+    - `project/OsEngine.Tests/ChartMasterColorKeeperPersistenceTests.cs`
+      - `Save_ShouldPersistJson_AndLoadRoundTrip`
+      - `Load_ShouldSupportLegacyLineBasedFormat`
+  - Updated running progress journal:
+    - `refactoring_stage2_progress.md`
+- **Verification:**
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` succeeded (`130/130`).
+- **Commit:** `d1a49f148`
+- **Push:** no (manual push by user)
