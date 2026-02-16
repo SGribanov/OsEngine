@@ -2132,3 +2132,14 @@
 ### Verification
 
 - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` -> passed 343/343
+
+## 2026-02-16 - Step 2.3 (JSON settings subsystem) - Path consistency cleanup in MainWindow directory check flow
+
+- Updated `project/OsEngine/MainWindow.xaml.cs`:
+  - centralized `Engine\\checkFile.txt` path into helper `GetDirectoryCheckFilePath()`
+  - replaced remaining inline path usage in `CheckWorkWithDirectory()`
+- No behavior changes intended; cleanup keeps path construction in one place.
+
+### Verification
+
+- `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` -> passed 343/343

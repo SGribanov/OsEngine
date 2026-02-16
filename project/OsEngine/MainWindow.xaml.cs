@@ -444,14 +444,14 @@ namespace OsEngine
                     Directory.CreateDirectory("Engine");
                 }
 
-                if (File.Exists("Engine\\checkFile.txt"))
+                if (File.Exists(GetDirectoryCheckFilePath()))
                 {
-                    File.Delete("Engine\\checkFile.txt");
+                    File.Delete(GetDirectoryCheckFilePath());
                 }
 
-                File.Create("Engine\\checkFile.txt");
+                File.Create(GetDirectoryCheckFilePath());
 
-                if (File.Exists("Engine\\checkFile.txt") == false)
+                if (File.Exists(GetDirectoryCheckFilePath()) == false)
                 {
                     return false;
                 }
@@ -463,6 +463,11 @@ namespace OsEngine
 
 
             return true;
+        }
+
+        private static string GetDirectoryCheckFilePath()
+        {
+            return "Engine\\checkFile.txt";
         }
 
         private bool CheckAlreadyWorkEngine()
