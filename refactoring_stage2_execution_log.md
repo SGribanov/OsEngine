@@ -2175,3 +2175,24 @@
   - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` succeeded (`300/300`).
 - **Commit:** `860aeeac4`
 - **Push:** no (manual push by user)
+
+### Step 2.3 - JSON Settings Subsystem (Incremental Adoption #105)
+
+- **Status:** In Progress (increment completed)
+- **Plan item:** `refactoring_stage2_plan.md` -> Phase 2 / Step 2.3
+- **Changes:**
+  - Migrated LinearRegressionCurve indicator settings persistence to JSON with legacy fallback:
+    - `project/OsEngine/Charts/CandleChart/Indicators/LinearRegressionCurve.cs`
+  - Covered persisted file:
+    - dynamic `Engine\\<Name>.txt` path (`LinearRegressionCurve` indicator)
+  - Preserved legacy compatibility with optional trailing line in historical format
+  - Added dedicated persistence tests:
+    - `project/OsEngine.Tests/LinearRegressionCurvePersistenceTests.cs`
+      - `Save_ShouldPersistJson_AndLoadRoundTrip`
+      - `Load_ShouldSupportLegacyLineBasedFormat_WithOptionalTrailingLine`
+  - Updated running progress journal:
+    - `refactoring_stage2_progress.md`
+- **Verification:**
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` succeeded (`302/302`).
+- **Commit:** `19162e776`
+- **Push:** no (manual push by user)
