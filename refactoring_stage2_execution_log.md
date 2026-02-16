@@ -674,3 +674,23 @@
   - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` succeeded (`152/152`).
 - **Commit:** `13857cc54`
 - **Push:** no (manual push by user)
+
+### Step 2.3 - JSON Settings Subsystem (Incremental Adoption #31)
+
+- **Status:** In Progress (increment completed)
+- **Plan item:** `refactoring_stage2_plan.md` -> Phase 2 / Step 2.3
+- **Changes:**
+  - Migrated RAM usage analyze settings persistence to JSON with legacy fallback:
+    - `project/OsEngine/OsTrader/SystemAnalyze/SystemAnalyzeMaster.cs` (`RamMemoryUsageAnalyze`)
+  - Covered persisted file:
+    - `Engine\\SystemStress\\RamMemorySettings.txt`
+  - Added dedicated persistence tests:
+    - `project/OsEngine.Tests/RamMemoryUsageAnalyzePersistenceTests.cs`
+      - `Save_ShouldPersistJson_AndLoadRoundTrip`
+      - `Load_ShouldSupportLegacyLineBasedFormat`
+  - Updated running progress journal:
+    - `refactoring_stage2_progress.md`
+- **Verification:**
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` succeeded (`154/154`).
+- **Commit:** `d479ec569`
+- **Push:** no (manual push by user)
