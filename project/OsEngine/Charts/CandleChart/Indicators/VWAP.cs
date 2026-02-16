@@ -146,43 +146,35 @@ namespace OsEngine.Charts.CandleChart.Indicators
                     return;
                 }
 
-                using (StreamWriter writer = new StreamWriter(@"Engine\" + Name + @".txt", false))
-                {
-                    writer.WriteLine(UseDate);
-                    writer.WriteLine(DatePickerStart);
-                    writer.WriteLine(TimePickerStart);
-                    writer.WriteLine(ToEndTicks);
-                    writer.WriteLine(DatePickerEnd);
-                    writer.WriteLine(TimePickerEnd);
-
-                    writer.WriteLine(DateDev2);
-                    writer.WriteLine(DateDev3);
-                    writer.WriteLine(DateDev4);
-
-                    writer.WriteLine(ColorDate.ToArgb());
-                    writer.WriteLine(ColorDateDev.ToArgb());
-
-                    writer.WriteLine(UseDay);
-
-                    writer.WriteLine(DayDev2);
-                    writer.WriteLine(DayDev3);
-                    writer.WriteLine(DayDev4);
-
-                    writer.WriteLine(ColorDay.ToArgb());
-                    writer.WriteLine(ColorDayDev.ToArgb());
-
-                    writer.WriteLine(UseWeekly);
-
-                    writer.WriteLine(WeekDev2);
-                    writer.WriteLine(WeekDev3);
-                    writer.WriteLine(WeekDev4);
-
-                    writer.WriteLine(ColorWeek.ToArgb());
-                    writer.WriteLine(ColorWeekDev.ToArgb());
-
-                    writer.WriteLine(PaintOn);
-                    writer.Close();
-                }
+                SettingsManager.Save(
+                    GetSettingsPath(),
+                    new VwapSettingsDto
+                    {
+                        UseDate = UseDate,
+                        DatePickerStart = DatePickerStart,
+                        TimePickerStart = TimePickerStart,
+                        ToEndTicks = ToEndTicks,
+                        DatePickerEnd = DatePickerEnd,
+                        TimePickerEnd = TimePickerEnd,
+                        DateDev2 = DateDev2,
+                        DateDev3 = DateDev3,
+                        DateDev4 = DateDev4,
+                        ColorDateArgb = ColorDate.ToArgb(),
+                        ColorDateDevArgb = ColorDateDev.ToArgb(),
+                        UseDay = UseDay,
+                        DayDev2 = DayDev2,
+                        DayDev3 = DayDev3,
+                        DayDev4 = DayDev4,
+                        ColorDayArgb = ColorDay.ToArgb(),
+                        ColorDayDevArgb = ColorDayDev.ToArgb(),
+                        UseWeekly = UseWeekly,
+                        WeekDev2 = WeekDev2,
+                        WeekDev3 = WeekDev3,
+                        WeekDev4 = WeekDev4,
+                        ColorWeekArgb = ColorWeek.ToArgb(),
+                        ColorWeekDevArgb = ColorWeekDev.ToArgb(),
+                        PaintOn = PaintOn
+                    });
             }
             catch (Exception)
             {
@@ -196,49 +188,46 @@ namespace OsEngine.Charts.CandleChart.Indicators
         /// </summary>
         public void Load()
         {
-            if (!File.Exists(@"Engine\" + Name + @".txt"))
+            if (!File.Exists(GetSettingsPath()))
             {
                 return;
             }
             try
             {
-                using (StreamReader reader = new StreamReader(@"Engine\" + Name + @".txt"))
+                VwapSettingsDto settings = SettingsManager.Load(
+                    GetSettingsPath(),
+                    defaultValue: null,
+                    legacyLoader: ParseLegacySettings);
+
+                if (settings == null)
                 {
-                    UseDate = Convert.ToBoolean(reader.ReadLine());
-                    DatePickerStart = DateTime.Parse(reader.ReadLine());
-                    TimePickerStart = DateTime.Parse(reader.ReadLine());
-                    ToEndTicks = Convert.ToBoolean(reader.ReadLine());
-                    DatePickerEnd = DateTime.Parse(reader.ReadLine());
-                    TimePickerEnd = DateTime.Parse(reader.ReadLine());
-
-                    DateDev2 = Convert.ToBoolean(reader.ReadLine());
-                    DateDev3 = Convert.ToBoolean(reader.ReadLine());
-                    DateDev4 = Convert.ToBoolean(reader.ReadLine());
-
-                    ColorDate = Color.FromArgb(Convert.ToInt32(reader.ReadLine()));
-                    ColorDateDev = Color.FromArgb(Convert.ToInt32(reader.ReadLine()));
-
-                    UseDay = Convert.ToBoolean(reader.ReadLine());
-
-                    DayDev2 = Convert.ToBoolean(reader.ReadLine());
-                    DayDev3 = Convert.ToBoolean(reader.ReadLine());
-                    DayDev4 = Convert.ToBoolean(reader.ReadLine());
-
-                    ColorDay = Color.FromArgb(Convert.ToInt32(reader.ReadLine()));
-                    ColorDayDev = Color.FromArgb(Convert.ToInt32(reader.ReadLine()));
-
-                    UseWeekly = Convert.ToBoolean(reader.ReadLine());
-
-                    WeekDev2 = Convert.ToBoolean(reader.ReadLine());
-                    WeekDev3 = Convert.ToBoolean(reader.ReadLine());
-                    WeekDev4 = Convert.ToBoolean(reader.ReadLine());
-
-                    ColorWeek = Color.FromArgb(Convert.ToInt32(reader.ReadLine()));
-                    ColorWeekDev = Color.FromArgb(Convert.ToInt32(reader.ReadLine()));
-
-                    PaintOn = Convert.ToBoolean(reader.ReadLine());
-                    reader.Close();
+                    return;
                 }
+
+                UseDate = settings.UseDate;
+                DatePickerStart = settings.DatePickerStart;
+                TimePickerStart = settings.TimePickerStart;
+                ToEndTicks = settings.ToEndTicks;
+                DatePickerEnd = settings.DatePickerEnd;
+                TimePickerEnd = settings.TimePickerEnd;
+                DateDev2 = settings.DateDev2;
+                DateDev3 = settings.DateDev3;
+                DateDev4 = settings.DateDev4;
+                ColorDate = Color.FromArgb(settings.ColorDateArgb);
+                ColorDateDev = Color.FromArgb(settings.ColorDateDevArgb);
+                UseDay = settings.UseDay;
+                DayDev2 = settings.DayDev2;
+                DayDev3 = settings.DayDev3;
+                DayDev4 = settings.DayDev4;
+                ColorDay = Color.FromArgb(settings.ColorDayArgb);
+                ColorDayDev = Color.FromArgb(settings.ColorDayDevArgb);
+                UseWeekly = settings.UseWeekly;
+                WeekDev2 = settings.WeekDev2;
+                WeekDev3 = settings.WeekDev3;
+                WeekDev4 = settings.WeekDev4;
+                ColorWeek = Color.FromArgb(settings.ColorWeekArgb);
+                ColorWeekDev = Color.FromArgb(settings.ColorWeekDevArgb);
+                PaintOn = settings.PaintOn;
             }
             catch (Exception)
             {
@@ -252,10 +241,130 @@ namespace OsEngine.Charts.CandleChart.Indicators
         /// </summary>
         public void Delete()
         {
-            if (File.Exists(@"Engine\" + Name + @".txt"))
+            if (File.Exists(GetSettingsPath()))
             {
-                File.Delete(@"Engine\" + Name + @".txt");
+                File.Delete(GetSettingsPath());
             }
+        }
+
+        private string GetSettingsPath()
+        {
+            return @"Engine\" + Name + @".txt";
+        }
+
+        private static VwapSettingsDto ParseLegacySettings(string content)
+        {
+            if (string.IsNullOrWhiteSpace(content))
+            {
+                return null;
+            }
+
+            string normalized = content.Replace("\r", string.Empty);
+            string[] lines = normalized.Split('\n');
+
+            if (lines.Length > 0 && lines[lines.Length - 1] == string.Empty)
+            {
+                Array.Resize(ref lines, lines.Length - 1);
+            }
+
+            if (lines.Length < 24)
+            {
+                return null;
+            }
+
+            return new VwapSettingsDto
+            {
+                UseDate = Convert.ToBoolean(lines[0]),
+                DatePickerStart = ParseLegacyDateTime(lines[1]),
+                TimePickerStart = ParseLegacyDateTime(lines[2]),
+                ToEndTicks = Convert.ToBoolean(lines[3]),
+                DatePickerEnd = ParseLegacyDateTime(lines[4]),
+                TimePickerEnd = ParseLegacyDateTime(lines[5]),
+                DateDev2 = Convert.ToBoolean(lines[6]),
+                DateDev3 = Convert.ToBoolean(lines[7]),
+                DateDev4 = Convert.ToBoolean(lines[8]),
+                ColorDateArgb = Convert.ToInt32(lines[9]),
+                ColorDateDevArgb = Convert.ToInt32(lines[10]),
+                UseDay = Convert.ToBoolean(lines[11]),
+                DayDev2 = Convert.ToBoolean(lines[12]),
+                DayDev3 = Convert.ToBoolean(lines[13]),
+                DayDev4 = Convert.ToBoolean(lines[14]),
+                ColorDayArgb = Convert.ToInt32(lines[15]),
+                ColorDayDevArgb = Convert.ToInt32(lines[16]),
+                UseWeekly = Convert.ToBoolean(lines[17]),
+                WeekDev2 = Convert.ToBoolean(lines[18]),
+                WeekDev3 = Convert.ToBoolean(lines[19]),
+                WeekDev4 = Convert.ToBoolean(lines[20]),
+                ColorWeekArgb = Convert.ToInt32(lines[21]),
+                ColorWeekDevArgb = Convert.ToInt32(lines[22]),
+                PaintOn = Convert.ToBoolean(lines[23])
+            };
+        }
+
+        private static DateTime ParseLegacyDateTime(string value)
+        {
+            if (DateTime.TryParse(value, System.Globalization.CultureInfo.CurrentCulture, System.Globalization.DateTimeStyles.None, out DateTime currentCulture))
+            {
+                return currentCulture;
+            }
+
+            if (DateTime.TryParse(value, System.Globalization.CultureInfo.InvariantCulture, System.Globalization.DateTimeStyles.None, out DateTime invariantCulture))
+            {
+                return invariantCulture;
+            }
+
+            return Convert.ToDateTime(value, System.Globalization.CultureInfo.CurrentCulture);
+        }
+
+        private sealed class VwapSettingsDto
+        {
+            public bool UseDate { get; set; }
+
+            public DateTime DatePickerStart { get; set; }
+
+            public DateTime TimePickerStart { get; set; }
+
+            public bool ToEndTicks { get; set; }
+
+            public DateTime DatePickerEnd { get; set; }
+
+            public DateTime TimePickerEnd { get; set; }
+
+            public bool DateDev2 { get; set; }
+
+            public bool DateDev3 { get; set; }
+
+            public bool DateDev4 { get; set; }
+
+            public int ColorDateArgb { get; set; }
+
+            public int ColorDateDevArgb { get; set; }
+
+            public bool UseDay { get; set; }
+
+            public bool DayDev2 { get; set; }
+
+            public bool DayDev3 { get; set; }
+
+            public bool DayDev4 { get; set; }
+
+            public int ColorDayArgb { get; set; }
+
+            public int ColorDayDevArgb { get; set; }
+
+            public bool UseWeekly { get; set; }
+
+            public bool WeekDev2 { get; set; }
+
+            public bool WeekDev3 { get; set; }
+
+            public bool WeekDev4 { get; set; }
+
+            public int ColorWeekArgb { get; set; }
+
+            public int ColorWeekDevArgb { get; set; }
+
+            public bool PaintOn { get; set; }
         }
 
         public void Clear()

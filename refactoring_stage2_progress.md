@@ -1785,3 +1785,18 @@
 ### Verification
 
 - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` -> passed 316/316
+
+## 2026-02-16 - Step 2.3 (JSON settings subsystem) - Incremental adoption in Vwap indicator settings
+
+- Migrated `project/OsEngine/Charts/CandleChart/Indicators/VWAP.cs` (`Engine\\<Name>.txt`) persistence to `SettingsManager`:
+  - `Save()` now writes JSON DTO for all date/day/week flags, time boundaries, deviation toggles, colors, and `PaintOn`
+  - `Load()` now reads JSON and falls back to legacy line-based parser
+  - legacy parser includes resilient `DateTime` parsing for current-culture and invariant-culture formats
+- Added tests `project/OsEngine.Tests/VwapPersistenceTests.cs`:
+  - `Save_ShouldPersistJson_AndLoadRoundTrip`
+  - `Load_ShouldSupportLegacyLineBasedFormat`
+  - tests use file backup/restore around indicator settings path
+
+### Verification
+
+- `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` -> passed 318/318
