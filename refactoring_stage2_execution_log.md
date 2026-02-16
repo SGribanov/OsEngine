@@ -2380,3 +2380,19 @@
   - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` succeeded (`318/318`).
 - **Commit:** `6dd4756c7`
 - **Push:** no (manual push by user)
+
+### Step 2.3 - JSON Settings Subsystem (Incremental Adoption #114)
+
+- **Status:** In Progress (increment completed)
+- **Plan item:** `refactoring_stage2_plan.md` -> Phase 2 / Step 2.3
+- **Changes:**
+  - Aligned constructor-level settings file checks with migrated path helper:
+    - `project/OsEngine/Charts/CandleChart/Indicators/Envelops.cs`
+    - `project/OsEngine/Charts/CandleChart/Indicators/MacdLine.cs`
+  - Replaced remaining direct `@"Engine\\<Name>.txt"` checks with `GetSettingsPath()`
+  - Updated running progress journal:
+    - `refactoring_stage2_progress.md`
+- **Verification:**
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` succeeded (`318/318`).
+- **Commit:** `85e655941`
+- **Push:** no (manual push by user)
