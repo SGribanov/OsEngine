@@ -1274,3 +1274,23 @@
   - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` succeeded (`212/212`).
 - **Commit:** `f360c8d47`
 - **Push:** no (manual push by user)
+
+### Step 2.3 - JSON Settings Subsystem (Incremental Adoption #61)
+
+- **Status:** In Progress (increment completed)
+- **Plan item:** `refactoring_stage2_plan.md` -> Phase 2 / Step 2.3
+- **Changes:**
+  - Migrated position controller deals persistence to JSON with legacy fallback:
+    - `project/OsEngine/Journal/Internal/PositionController.cs`
+  - Covered persisted file:
+    - dynamic `Engine\\<Name>DealController.txt` path
+  - Added dedicated persistence tests:
+    - `project/OsEngine.Tests/PositionControllerDealsPersistenceTests.cs`
+      - `SavePositions_ShouldPersistJson_AndLoadRoundTrip`
+      - `Load_ShouldSupportLegacyLineBasedFormat`
+  - Updated running progress journal:
+    - `refactoring_stage2_progress.md`
+- **Verification:**
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` succeeded (`214/214`).
+- **Commit:** `f8f43d786`
+- **Push:** no (manual push by user)
