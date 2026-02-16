@@ -148,9 +148,9 @@ namespace OsEngine.OsTrader.Panels.Tab
 
                 try
                 {
-                    if (File.Exists(@"Engine\" + TabName + @"StandartPolygonSettings.txt"))
+                    if (File.Exists(GetStandartPolygonSettingsPath()))
                     {
-                        File.Delete(@"Engine\" + TabName + @"StandartPolygonSettings.txt");
+                        File.Delete(GetStandartPolygonSettingsPath());
                     }
                 }
                 catch
@@ -285,30 +285,27 @@ namespace OsEngine.OsTrader.Panels.Tab
 
             try
             {
-                using (StreamWriter writer = new StreamWriter(@"Engine\" + TabName + @"StandartPolygonSettings.txt", false))
-                {
-                    writer.WriteLine(_eventsIsOn);
-                    writer.WriteLine(_emulatorIsOn);
-
-                    writer.WriteLine(SeparatorToSecurities);
-                    writer.WriteLine(CommissionType);
-                    writer.WriteLine(CommissionValue);
-                    writer.WriteLine(CommissionIsSubstract);
-                    writer.WriteLine(DelayType);
-                    writer.WriteLine(DelayMls);
-                    writer.WriteLine(QtyStart);
-                    writer.WriteLine(SlippagePercent);
-                    writer.WriteLine(ProfitToSignal);
-                    writer.WriteLine(ActionOnSignalType);
-                    writer.WriteLine(OrderPriceType);
-
-                    writer.WriteLine(AutoCreatorSequenceBaseCurrency);
-                    writer.WriteLine(AutoCreatorSequenceSeparator);
-
-                    writer.WriteLine(SortingOnOff);
-
-                    writer.Close();
-                }
+                SettingsManager.Save(
+                    GetStandartPolygonSettingsPath(),
+                    new BotTabPolygonStandartSettingsDto
+                    {
+                        EventsIsOn = _eventsIsOn,
+                        EmulatorIsOn = _emulatorIsOn,
+                        SeparatorToSecurities = SeparatorToSecurities,
+                        CommissionType = CommissionType,
+                        CommissionValue = CommissionValue,
+                        CommissionIsSubstract = CommissionIsSubstract,
+                        DelayType = DelayType,
+                        DelayMls = DelayMls,
+                        QtyStart = QtyStart,
+                        SlippagePercent = SlippagePercent,
+                        ProfitToSignal = ProfitToSignal,
+                        ActionOnSignalType = ActionOnSignalType,
+                        OrderPriceType = OrderPriceType,
+                        AutoCreatorSequenceBaseCurrency = AutoCreatorSequenceBaseCurrency,
+                        AutoCreatorSequenceSeparator = AutoCreatorSequenceSeparator,
+                        SortingOnOff = SortingOnOff
+                    });
             }
             catch (Exception)
             {
@@ -321,41 +318,103 @@ namespace OsEngine.OsTrader.Panels.Tab
         /// </summary>
         private void LoadStandartSettings()
         {
-            if (!File.Exists(@"Engine\" + TabName + @"StandartPolygonSettings.txt"))
+            if (!File.Exists(GetStandartPolygonSettingsPath()))
             {
                 return;
             }
             try
             {
-                using (StreamReader reader = new StreamReader(@"Engine\" + TabName + @"StandartPolygonSettings.txt"))
+                BotTabPolygonStandartSettingsDto settings = SettingsManager.Load(
+                    GetStandartPolygonSettingsPath(),
+                    defaultValue: null,
+                    legacyLoader: ParseLegacyStandartPolygonSettings);
+
+                if (settings == null)
                 {
-                    _eventsIsOn = Convert.ToBoolean(reader.ReadLine());
-                    _emulatorIsOn = Convert.ToBoolean(reader.ReadLine());
-
-                    SeparatorToSecurities = reader.ReadLine();
-                    Enum.TryParse(reader.ReadLine(), out CommissionType);
-                    CommissionValue = reader.ReadLine().ToDecimal();
-                    CommissionIsSubstract = Convert.ToBoolean(reader.ReadLine());
-                    Enum.TryParse(reader.ReadLine(), out DelayType);
-                    DelayMls = Convert.ToInt32(reader.ReadLine());
-                    QtyStart = reader.ReadLine().ToDecimal();
-                    SlippagePercent = reader.ReadLine().ToDecimal();
-                    ProfitToSignal = reader.ReadLine().ToDecimal();
-                    Enum.TryParse(reader.ReadLine(), out ActionOnSignalType);
-                    Enum.TryParse(reader.ReadLine(), out OrderPriceType);
-
-                    AutoCreatorSequenceBaseCurrency = reader.ReadLine();
-                    AutoCreatorSequenceSeparator = reader.ReadLine();
-
-                    SortingOnOff = Convert.ToBoolean(reader.ReadLine());
-
-                    reader.Close();
+                    return;
                 }
+
+                _eventsIsOn = settings.EventsIsOn;
+                _emulatorIsOn = settings.EmulatorIsOn;
+                SeparatorToSecurities = settings.SeparatorToSecurities;
+                CommissionType = settings.CommissionType;
+                CommissionValue = settings.CommissionValue;
+                CommissionIsSubstract = settings.CommissionIsSubstract;
+                DelayType = settings.DelayType;
+                DelayMls = settings.DelayMls;
+                QtyStart = settings.QtyStart;
+                SlippagePercent = settings.SlippagePercent;
+                ProfitToSignal = settings.ProfitToSignal;
+                ActionOnSignalType = settings.ActionOnSignalType;
+                OrderPriceType = settings.OrderPriceType;
+                AutoCreatorSequenceBaseCurrency = settings.AutoCreatorSequenceBaseCurrency;
+                AutoCreatorSequenceSeparator = settings.AutoCreatorSequenceSeparator;
+                SortingOnOff = settings.SortingOnOff;
             }
             catch (Exception)
             {
                 // ignore
             }
+        }
+
+        private string GetStandartPolygonSettingsPath()
+        {
+            return @"Engine\" + TabName + @"StandartPolygonSettings.txt";
+        }
+
+        private static BotTabPolygonStandartSettingsDto ParseLegacyStandartPolygonSettings(string content)
+        {
+            if (string.IsNullOrWhiteSpace(content))
+            {
+                return null;
+            }
+
+            string[] lines = content.Replace("\r", string.Empty).Split('\n');
+
+            BotTabPolygonStandartSettingsDto settings = new BotTabPolygonStandartSettingsDto
+            {
+                EventsIsOn = true,
+                SortingOnOff = true
+            };
+
+            if (lines.Length > 0 && bool.TryParse(lines[0], out bool eventsIsOn)) settings.EventsIsOn = eventsIsOn;
+            if (lines.Length > 1 && bool.TryParse(lines[1], out bool emulatorIsOn)) settings.EmulatorIsOn = emulatorIsOn;
+            if (lines.Length > 2) settings.SeparatorToSecurities = lines[2];
+            if (lines.Length > 3 && Enum.TryParse(lines[3], out CommissionPolygonType commissionType)) settings.CommissionType = commissionType;
+            if (lines.Length > 4) settings.CommissionValue = lines[4].ToDecimal();
+            if (lines.Length > 5 && bool.TryParse(lines[5], out bool commissionIsSubstract)) settings.CommissionIsSubstract = commissionIsSubstract;
+            if (lines.Length > 6 && Enum.TryParse(lines[6], out DelayPolygonType delayType)) settings.DelayType = delayType;
+            if (lines.Length > 7 && int.TryParse(lines[7], out int delayMls)) settings.DelayMls = delayMls;
+            if (lines.Length > 8) settings.QtyStart = lines[8].ToDecimal();
+            if (lines.Length > 9) settings.SlippagePercent = lines[9].ToDecimal();
+            if (lines.Length > 10) settings.ProfitToSignal = lines[10].ToDecimal();
+            if (lines.Length > 11 && Enum.TryParse(lines[11], out PolygonActionOnSignalType actionOnSignalType)) settings.ActionOnSignalType = actionOnSignalType;
+            if (lines.Length > 12 && Enum.TryParse(lines[12], out OrderPriceType orderPriceType)) settings.OrderPriceType = orderPriceType;
+            if (lines.Length > 13) settings.AutoCreatorSequenceBaseCurrency = lines[13];
+            if (lines.Length > 14) settings.AutoCreatorSequenceSeparator = lines[14];
+            if (lines.Length > 15 && bool.TryParse(lines[15], out bool sortingOnOff)) settings.SortingOnOff = sortingOnOff;
+
+            return settings;
+        }
+
+        private sealed class BotTabPolygonStandartSettingsDto
+        {
+            public bool EventsIsOn { get; set; }
+            public bool EmulatorIsOn { get; set; }
+            public string SeparatorToSecurities { get; set; }
+            public CommissionPolygonType CommissionType { get; set; }
+            public decimal CommissionValue { get; set; }
+            public bool CommissionIsSubstract { get; set; }
+            public DelayPolygonType DelayType { get; set; }
+            public int DelayMls { get; set; }
+            public decimal QtyStart { get; set; }
+            public decimal SlippagePercent { get; set; }
+            public decimal ProfitToSignal { get; set; }
+            public PolygonActionOnSignalType ActionOnSignalType { get; set; }
+            public OrderPriceType OrderPriceType { get; set; }
+            public string AutoCreatorSequenceBaseCurrency { get; set; }
+            public string AutoCreatorSequenceSeparator { get; set; }
+            public bool SortingOnOff { get; set; }
         }
 
         /// <summary>

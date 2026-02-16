@@ -1922,3 +1922,18 @@
 ### Verification
 
 - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` -> passed 324/324
+
+## 2026-02-16 - Step 2.3 (JSON settings subsystem) - BotTabPolygon standard settings migrated to JSON with legacy compatibility
+
+- Updated `project/OsEngine/OsTrader/Panels/Tab/BotTabPolygon.cs`:
+  - migrated `SaveStandartSettings()` / `LoadStandartSettings()` from line-based file IO to `SettingsManager`
+  - added legacy parser `ParseLegacyStandartPolygonSettings(string content)` for old ordered-line format
+  - introduced DTO `BotTabPolygonStandartSettingsDto` for typed settings persistence
+  - centralized standard settings file path via `GetStandartPolygonSettingsPath()` and reused it in save/load/delete sites
+- Added tests in `project/OsEngine.Tests/BotTabPolygonStandartSettingsPersistenceTests.cs`:
+  - verifies JSON save and load roundtrip for standard polygon settings
+  - verifies loading legacy line-based format
+
+### Verification
+
+- `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` -> passed 326/326
