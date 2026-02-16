@@ -58,17 +58,16 @@ namespace OsEngine.Market.Servers
         {
             try
             {
-                using (StreamWriter writer = new StreamWriter(@"Engine\" + Server.ServerNameUnique + @"CompareModule.txt", false))
+                ComparePositionsModuleSettingsDto settings = new ComparePositionsModuleSettingsDto
                 {
-                    writer.WriteLine(_verificationPeriod + "#" + TimeDelaySeconds);
+                    VerificationPeriod = _verificationPeriod,
+                    TimeDelaySeconds = TimeDelaySeconds,
+                    PortfoliosToWatch = PortfoliosToWatch == null
+                        ? new List<string>()
+                        : new List<string>(PortfoliosToWatch)
+                };
 
-                    for(int i = 0;i < PortfoliosToWatch.Count;i++)
-                    {
-                        writer.WriteLine(PortfoliosToWatch[i]);
-                    }
-
-                    writer.Close();
-                }
+                SettingsManager.Save(GetSettingsPath(), settings);
             }
             catch
             {
@@ -78,41 +77,97 @@ namespace OsEngine.Market.Servers
 
         private void Load()
         {
-            if (!File.Exists(@"Engine\" + Server.ServerNameUnique + @"CompareModule.txt"))
-            {
-                return;
-            }
             try
             {
-                using (StreamReader reader = new StreamReader(@"Engine\" + Server.ServerNameUnique + @"CompareModule.txt"))
+                ComparePositionsModuleSettingsDto settings = SettingsManager.Load(
+                    GetSettingsPath(),
+                    defaultValue: null,
+                    legacyLoader: ParseLegacySettings);
+
+                if (settings == null)
                 {
-                    string[] firstSaveStr = reader.ReadLine().Split('#');
+                    return;
+                }
 
-                    Enum.TryParse(firstSaveStr[0], out _verificationPeriod);
+                _verificationPeriod = settings.VerificationPeriod;
+                TimeDelaySeconds = settings.TimeDelaySeconds;
 
-                    if(firstSaveStr.Length > 1 
-                        && string.IsNullOrEmpty(firstSaveStr[1]) == false)
+                if (settings.PortfoliosToWatch != null)
+                {
+                    PortfoliosToWatch.Clear();
+
+                    for (int i = 0; i < settings.PortfoliosToWatch.Count; i++)
                     {
-                        TimeDelaySeconds = Convert.ToInt32(firstSaveStr[1]);
-                    }
-
-                    while(reader.EndOfStream == false)
-                    {
-                        string portfolio = reader.ReadLine();
-
-                        if(string.IsNullOrEmpty(portfolio)  == false)
+                        if (string.IsNullOrEmpty(settings.PortfoliosToWatch[i]) == false)
                         {
-                            PortfoliosToWatch.Add(portfolio);
+                            PortfoliosToWatch.Add(settings.PortfoliosToWatch[i]);
                         }
                     }
-
-                    reader.Close();
                 }
             }
             catch
             {
                 // ignore
             }
+        }
+
+        private string GetSettingsPath()
+        {
+            return @"Engine\" + Server.ServerNameUnique + @"CompareModule.txt";
+        }
+
+        private string GetIgnoredSettingsPath()
+        {
+            return @"Engine\" + Server.ServerNameUnique + @"CompareModule_IgnoreSec.txt";
+        }
+
+        private ComparePositionsModuleSettingsDto ParseLegacySettings(string content)
+        {
+            if (string.IsNullOrWhiteSpace(content))
+            {
+                return null;
+            }
+
+            string[] lines = content.Replace("\r", string.Empty).Split('\n');
+            if (lines.Length == 0 || string.IsNullOrWhiteSpace(lines[0]))
+            {
+                return null;
+            }
+
+            ComparePositionsModuleSettingsDto settings = new ComparePositionsModuleSettingsDto
+            {
+                VerificationPeriod = ComparePositionsVerificationPeriod.Min1,
+                TimeDelaySeconds = 20,
+                PortfoliosToWatch = new List<string>()
+            };
+
+            string[] firstSaveStr = lines[0].Split('#');
+
+            if (firstSaveStr.Length > 0)
+            {
+                if (Enum.TryParse(firstSaveStr[0], out ComparePositionsVerificationPeriod verificationPeriod))
+                {
+                    settings.VerificationPeriod = verificationPeriod;
+                }
+            }
+
+            if (firstSaveStr.Length > 1 && string.IsNullOrEmpty(firstSaveStr[1]) == false)
+            {
+                if (int.TryParse(firstSaveStr[1], out int parsedDelay))
+                {
+                    settings.TimeDelaySeconds = parsedDelay;
+                }
+            }
+
+            for (int i = 1; i < lines.Length; i++)
+            {
+                if (string.IsNullOrEmpty(lines[i]) == false)
+                {
+                    settings.PortfoliosToWatch.Add(lines[i]);
+                }
+            }
+
+            return settings;
         }
 
         public List<ComparePositionsPortfolio> ComparePortfolios = new List<ComparePositionsPortfolio>();
@@ -654,14 +709,74 @@ namespace OsEngine.Market.Servers
         {
             try
             {
-                using (StreamWriter writer = new StreamWriter(@"Engine\" + Server.ServerNameUnique + @"CompareModule_IgnoreSec.txt", false))
+                ComparePositionsIgnoredSettingsDto settings = new ComparePositionsIgnoredSettingsDto
                 {
-                    for (int i = 0; i < IgnoredSecurities.Count; i++)
+                    IgnoredSecurityLines = new List<string>()
+                };
+
+                for (int i = 0; i < IgnoredSecurities.Count; i++)
+                {
+                    settings.IgnoredSecurityLines.Add(IgnoredSecurities[i].GetSaveString());
+                }
+
+                SettingsManager.Save(GetIgnoredSettingsPath(), settings);
+            }
+            catch
+            {
+                // ignore
+            }
+        }
+
+        private ComparePositionsIgnoredSettingsDto ParseLegacyIgnoredSettings(string content)
+        {
+            if (string.IsNullOrWhiteSpace(content))
+            {
+                return null;
+            }
+
+            string[] lines = content.Replace("\r", string.Empty).Split('\n');
+            ComparePositionsIgnoredSettingsDto settings = new ComparePositionsIgnoredSettingsDto
+            {
+                IgnoredSecurityLines = new List<string>()
+            };
+
+            for (int i = 0; i < lines.Length; i++)
+            {
+                if (string.IsNullOrEmpty(lines[i]) == false)
+                {
+                    settings.IgnoredSecurityLines.Add(lines[i]);
+                }
+            }
+
+            return settings;
+        }
+
+        public void LoadIgnoredSecurities()
+        {
+            try
+            {
+                ComparePositionsIgnoredSettingsDto settings = SettingsManager.Load(
+                    GetIgnoredSettingsPath(),
+                    defaultValue: null,
+                    legacyLoader: ParseLegacyIgnoredSettings);
+
+                if (settings == null || settings.IgnoredSecurityLines == null)
+                {
+                    return;
+                }
+
+                for (int i = 0; i < settings.IgnoredSecurityLines.Count; i++)
+                {
+                    string sec = settings.IgnoredSecurityLines[i];
+
+                    if (string.IsNullOrEmpty(sec))
                     {
-                        writer.WriteLine(IgnoredSecurities[i].GetSaveString());
+                        continue;
                     }
 
-                    writer.Close();
+                    ComparePositionsSecurity newCompareSecurity = new ComparePositionsSecurity();
+                    newCompareSecurity.LoadFromString(sec);
+                    IgnoredSecurities.Add(newCompareSecurity);
                 }
             }
             catch
@@ -670,38 +785,18 @@ namespace OsEngine.Market.Servers
             }
         }
 
-        public void LoadIgnoredSecurities()
+        private class ComparePositionsModuleSettingsDto
         {
-            if (!File.Exists(@"Engine\" + Server.ServerNameUnique + @"CompareModule_IgnoreSec.txt"))
-            {
-                return;
-            }
+            public ComparePositionsVerificationPeriod VerificationPeriod { get; set; }
 
-            try
-            {
-                using (StreamReader reader = new StreamReader(@"Engine\" + Server.ServerNameUnique + @"CompareModule_IgnoreSec.txt"))
-                {
-                    while (reader.EndOfStream == false)
-                    {
-                        string sec = reader.ReadLine();
+            public int TimeDelaySeconds { get; set; } = 20;
 
-                        if (string.IsNullOrEmpty(sec) == true)
-                        {
-                            continue;
-                        }
+            public List<string> PortfoliosToWatch { get; set; }
+        }
 
-                        ComparePositionsSecurity newCompareSecurity = new ComparePositionsSecurity();
-                        newCompareSecurity.LoadFromString(sec);
-                        IgnoredSecurities.Add(newCompareSecurity);
-                    }
-
-                    reader.Close();
-                }
-            }
-            catch
-            {
-                // ignore
-            }
+        private class ComparePositionsIgnoredSettingsDto
+        {
+            public List<string> IgnoredSecurityLines { get; set; }
         }
 
         #endregion

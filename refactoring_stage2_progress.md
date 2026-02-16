@@ -156,3 +156,19 @@
 ### Verification
 
 - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` -> passed 96/96
+
+## 2026-02-16 - Step 2.3 (JSON settings subsystem) - Incremental adoption in ComparePositionsModule
+
+- Migrated `project/OsEngine/Market/Servers/ComparePositionsModule.cs` persistence to `SettingsManager`:
+  - main settings (`CompareModule.txt`) now save/load as JSON
+  - ignored-securities settings (`CompareModule_IgnoreSec.txt`) now save/load as JSON
+  - added legacy fallback parsers for both old line-based formats
+- Added tests `project/OsEngine.Tests/ComparePositionsModulePersistenceTests.cs`:
+  - `SaveLoad_ShouldPersistJsonForMainSettings`
+  - `Load_ShouldSupportLegacyLineBasedMainSettings`
+  - `SaveLoadIgnoredSecurities_ShouldPersistJson`
+  - `LoadIgnoredSecurities_ShouldSupportLegacyLineBasedFormat`
+
+### Verification
+
+- `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` -> passed 100/100

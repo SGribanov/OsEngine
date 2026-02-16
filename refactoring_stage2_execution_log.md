@@ -144,3 +144,26 @@
   - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` succeeded (`96/96`).
 - **Commit:** `358e6cb8e`
 - **Push:** no (manual push by user)
+
+### Step 2.3 - JSON Settings Subsystem (Incremental Adoption #5)
+
+- **Status:** In Progress (increment completed)
+- **Plan item:** `refactoring_stage2_plan.md` -> Phase 2 / Step 2.3
+- **Changes:**
+  - Migrated `ComparePositionsModule` persistence to JSON with legacy fallback:
+    - `project/OsEngine/Market/Servers/ComparePositionsModule.cs`
+  - Covered both persisted files:
+    - `CompareModule.txt` (main settings)
+    - `CompareModule_IgnoreSec.txt` (ignored securities)
+  - Added dedicated persistence tests:
+    - `project/OsEngine.Tests/ComparePositionsModulePersistenceTests.cs`
+      - `SaveLoad_ShouldPersistJsonForMainSettings`
+      - `Load_ShouldSupportLegacyLineBasedMainSettings`
+      - `SaveLoadIgnoredSecurities_ShouldPersistJson`
+      - `LoadIgnoredSecurities_ShouldSupportLegacyLineBasedFormat`
+  - Updated running progress journal:
+    - `refactoring_stage2_progress.md`
+- **Verification:**
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` succeeded (`100/100`).
+- **Commit:** pending local commit in current session
+- **Push:** no (manual push by user)
