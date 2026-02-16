@@ -826,3 +826,18 @@
 ### Verification
 
 - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` -> passed 190/190
+
+## 2026-02-16 - Step 2.3 (JSON settings subsystem) - Incremental adoption in ServerMaster most-popular servers stats
+
+- Migrated `project/OsEngine/Market/ServerMaster.cs` (`MostPopularServers.txt`) persistence to `SettingsManager`:
+  - private `SaveMostPopularServers(type)` now writes JSON wrapper into `Engine\\MostPopularServers.txt`
+  - public `LoadMostPopularServersWithCount()` now reads JSON and falls back to legacy `ServerType&Count` line-based parser
+  - preserved existing deduplication and count aggregation flow
+- Added tests `project/OsEngine.Tests/ServerMasterMostPopularServersPersistenceTests.cs`:
+  - `SaveMostPopularServers_ShouldPersistJson_AndLoadCounts`
+  - `LoadMostPopularServersWithCount_ShouldSupportLegacyLineBasedFormat`
+  - tests invoke private saver via reflection and backup/restore `Engine\\MostPopularServers.txt`
+
+### Verification
+
+- `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` -> passed 192/192

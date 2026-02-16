@@ -141,6 +141,7 @@ namespace OsEngine.Market
 
         private static ServerMasterUi _ui;
         private static readonly string ServerMasterSettingsPath = @"Engine\ServerMaster.txt";
+        private static readonly string MostPopularServersPath = @"Engine\MostPopularServers.txt";
 
         /// <summary>
         /// save settings
@@ -1019,34 +1020,40 @@ namespace OsEngine.Market
 
             try
             {
-                using (StreamWriter writer = new StreamWriter(@"Engine\" + @"MostPopularServers.txt", false))
+                List<ServerPopularityEntry> entries = new List<ServerPopularityEntry>();
+                List<ServerType> alreadySaveServers = new List<ServerType>();
+
+                for (int i = 0; i < servers.Count; i++)
                 {
-                    List<ServerType> alreadySaveServers = new List<ServerType>();
-
-                    for (int i = 0; i < servers.Count; i++)
+                    bool isSaved = false;
+                    for (int i2 = 0; i2 < alreadySaveServers.Count; i2++)
                     {
-                        bool isSaved = false;
-                        for (int i2 = 0; i2 < alreadySaveServers.Count; i2++)
+                        if (alreadySaveServers[i2] == servers[i].ServerType)
                         {
-                            if (alreadySaveServers[i2] == servers[i].ServerType)
-                            {
-                                isSaved = true;
-                                break;
-                            }
+                            isSaved = true;
+                            break;
                         }
-
-                        if (isSaved)
-                        {
-                            continue;
-                        }
-
-                        alreadySaveServers.Add(servers[i].ServerType);
-                        string saveStr = servers[i].ServerType + "&" + servers[i].CountOfCreation;
-                        writer.WriteLine(saveStr);
                     }
 
-                    writer.Close();
+                    if (isSaved)
+                    {
+                        continue;
+                    }
+
+                    alreadySaveServers.Add(servers[i].ServerType);
+                    entries.Add(new ServerPopularityEntry
+                    {
+                        ServerType = servers[i].ServerType,
+                        CountOfCreation = servers[i].CountOfCreation
+                    });
                 }
+
+                SettingsManager.Save(
+                    MostPopularServersPath,
+                    new MostPopularServersSettings
+                    {
+                        Servers = entries
+                    });
             }
             catch
             {
@@ -1061,34 +1068,38 @@ namespace OsEngine.Market
         {
             List<ServerPop> servers = new List<ServerPop>();
 
-            if (!File.Exists(@"Engine\" + @"MostPopularServers.txt"))
+            if (!File.Exists(MostPopularServersPath))
             {
                 return servers;
             }
             try
             {
-                using (StreamReader reader = new StreamReader(@"Engine\" + @"MostPopularServers.txt"))
+                MostPopularServersSettings settings = SettingsManager.Load(
+                    MostPopularServersPath,
+                    defaultValue: null,
+                    legacyLoader: ParseLegacyMostPopularServersSettings);
+
+                if (settings?.Servers == null)
                 {
-                    while (reader.EndOfStream == false)
+                    return servers;
+                }
+
+                for (int i = 0; i < settings.Servers.Count; i++)
+                {
+                    ServerPopularityEntry entry = settings.Servers[i];
+
+                    if (entry == null)
                     {
-                        string res = reader.ReadLine();
-
-                        if (res.Split('&').Length <= 1)
-                        {
-                            continue;
-                        }
-
-                        string[] saveInStr = res.Split('&');
-
-                        ServerPop curServ = new ServerPop();
-
-                        Enum.TryParse(saveInStr[0], out curServ.ServerType);
-                        curServ.CountOfCreation = Convert.ToInt32(saveInStr[1]);
-
-                        servers.Add(curServ);
+                        continue;
                     }
 
-                    reader.Close();
+                    ServerPop curServ = new ServerPop
+                    {
+                        ServerType = entry.ServerType,
+                        CountOfCreation = entry.CountOfCreation
+                    };
+
+                    servers.Add(curServ);
                 }
             }
             catch
@@ -1115,6 +1126,53 @@ namespace OsEngine.Market
             }
 
             return servers;
+        }
+
+        private static MostPopularServersSettings ParseLegacyMostPopularServersSettings(string content)
+        {
+            if (string.IsNullOrWhiteSpace(content))
+            {
+                return null;
+            }
+
+            string[] lines = content.Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries);
+            List<ServerPopularityEntry> entries = new List<ServerPopularityEntry>();
+
+            for (int i = 0; i < lines.Length; i++)
+            {
+                string line = lines[i];
+                string[] saveInStr = line.Split('&');
+
+                if (saveInStr.Length <= 1)
+                {
+                    continue;
+                }
+
+                Enum.TryParse(saveInStr[0], out ServerType serverType);
+
+                entries.Add(new ServerPopularityEntry
+                {
+                    ServerType = serverType,
+                    CountOfCreation = Convert.ToInt32(saveInStr[1])
+                });
+            }
+
+            return new MostPopularServersSettings
+            {
+                Servers = entries
+            };
+        }
+
+        private sealed class MostPopularServersSettings
+        {
+            public List<ServerPopularityEntry> Servers { get; set; }
+        }
+
+        private sealed class ServerPopularityEntry
+        {
+            public ServerType ServerType { get; set; }
+
+            public int CountOfCreation { get; set; }
         }
 
         private static readonly Lock _optimizerGeneratorLocker = new();
