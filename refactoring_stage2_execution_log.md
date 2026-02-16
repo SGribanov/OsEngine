@@ -2087,3 +2087,25 @@
   - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` succeeded (`292/292`).
 - **Commit:** `c3c2f2320`
 - **Push:** no (manual push by user)
+
+### Step 2.3 - JSON Settings Subsystem (Incremental Adoption #101)
+
+- **Status:** In Progress (increment completed)
+- **Plan item:** `refactoring_stage2_plan.md` -> Phase 2 / Step 2.3
+- **Changes:**
+  - Migrated DynamicTrendDetector indicator settings persistence to JSON with legacy fallback:
+    - `project/OsEngine/Charts/CandleChart/Indicators/DynamicTrendDetector.cs`
+  - Covered persisted file:
+    - dynamic `Engine\\<Name>.txt` path (`DynamicTrendDetector` indicator)
+  - Hardened legacy decimal parsing in fallback loader:
+    - supports invariant and current-culture decimal formats
+  - Added dedicated persistence tests:
+    - `project/OsEngine.Tests/DynamicTrendDetectorPersistenceTests.cs`
+      - `Save_ShouldPersistJson_AndLoadRoundTrip`
+      - `Load_ShouldSupportLegacyLineBasedFormat`
+  - Updated running progress journal:
+    - `refactoring_stage2_progress.md`
+- **Verification:**
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` succeeded (`294/294`).
+- **Commit:** `7d5e0c010`
+- **Push:** no (manual push by user)
