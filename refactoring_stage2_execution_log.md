@@ -1474,3 +1474,23 @@
   - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` succeeded (`232/232`).
 - **Commit:** `8ce7d4f38`
 - **Push:** no (manual push by user)
+
+### Step 2.3 - JSON Settings Subsystem (Incremental Adoption #71)
+
+- **Status:** In Progress (increment completed)
+- **Plan item:** `refactoring_stage2_plan.md` -> Phase 2 / Step 2.3
+- **Changes:**
+  - Migrated DonchianChannel indicator settings persistence to JSON with legacy fallback:
+    - `project/OsEngine/Charts/CandleChart/Indicators/DonchianChannel.cs`
+  - Covered persisted file:
+    - dynamic `Engine\\<Name>.txt` path (`DonchianChannel` indicator)
+  - Added dedicated persistence tests:
+    - `project/OsEngine.Tests/DonchianChannelPersistenceTests.cs`
+      - `Save_ShouldPersistJson_AndLoadRoundTrip`
+      - `Load_ShouldSupportLegacyLineBasedFormat`
+  - Updated running progress journal:
+    - `refactoring_stage2_progress.md`
+- **Verification:**
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` succeeded (`234/234`).
+- **Commit:** `e544032d2`
+- **Push:** no (manual push by user)
