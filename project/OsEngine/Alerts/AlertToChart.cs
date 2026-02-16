@@ -57,46 +57,50 @@ namespace OsEngine.Alerts
         /// </summary>
         public void Load()
         {
-            if (!File.Exists(@"Engine\" + Name + @"Alert.txt"))
+            AlertToChartSettingsDto settings = SettingsManager.Load(
+                GetSettingsPath(),
+                defaultValue: null,
+                legacyLoader: ParseLegacySettings);
+
+            if (settings == null)
             {
                 return;
             }
+
+            ApplySettings(settings);
+        }
+
+        private void ApplySettings(AlertToChartSettingsDto settings)
+        {
             try
             {
-                using (StreamReader reader = new StreamReader(@"Engine\" + Name + @"Alert.txt"))
+                Type = settings.Type;
+
+                string[] lineSaves = settings.Lines ?? Array.Empty<string>();
+                Lines = new ChartAlertLine[lineSaves.Length];
+                for (int i = 0; i < lineSaves.Length; i++)
                 {
-                    Enum.TryParse(reader.ReadLine(), true, out Type);
-
-                    string [] savesLine = reader.ReadLine().Split('%');
-
-                    Lines = new ChartAlertLine[savesLine.Length-1];
-
-                    for (int i = 0; i < savesLine.Length - 1; i++)
-                    {
-                        Lines[i] = new ChartAlertLine();
-                        Lines[i].SetFromSaveString(savesLine[i]);
-                    }
-
-                    Label = reader.ReadLine();
-                    Message = reader.ReadLine();
-                    BorderWidth = Convert.ToInt32(reader.ReadLine());
-                    IsOn = Convert.ToBoolean(reader.ReadLine());
-                    IsMusicOn = Convert.ToBoolean(reader.ReadLine());
-                    IsMessageOn = Convert.ToBoolean(reader.ReadLine());
-
-                    ColorLine = Color.FromArgb(Convert.ToInt32(reader.ReadLine()));
-                    ColorLabel = Color.FromArgb(Convert.ToInt32(reader.ReadLine()));
-                    Enum.TryParse(reader.ReadLine(), out Music);
-
-                    Enum.TryParse(reader.ReadLine(), true, out SignalType);
-                    VolumeReaction = reader.ReadLine().ToDecimal();
-                    Slippage = reader.ReadLine().ToDecimal();
-                    NumberClosePosition = Convert.ToInt32(reader.ReadLine());
-                    Enum.TryParse(reader.ReadLine(),true,out OrderPriceType);
-                    Enum.TryParse(reader.ReadLine(), true, out SlippageType);
-                   
-                    reader.Close();
+                    Lines[i] = new ChartAlertLine();
+                    Lines[i].SetFromSaveString(lineSaves[i]);
                 }
+
+                Label = settings.Label;
+                Message = settings.Message;
+                BorderWidth = settings.BorderWidth;
+                IsOn = settings.IsOn;
+                IsMusicOn = settings.IsMusicOn;
+                IsMessageOn = settings.IsMessageOn;
+
+                ColorLine = Color.FromArgb(settings.ColorLineArgb);
+                ColorLabel = Color.FromArgb(settings.ColorLabelArgb);
+                Music = settings.Music;
+
+                SignalType = settings.SignalType;
+                VolumeReaction = settings.VolumeReaction;
+                Slippage = settings.Slippage;
+                NumberClosePosition = settings.NumberClosePosition;
+                OrderPriceType = settings.OrderPriceType;
+                SlippageType = settings.SlippageType;
             }
             catch (Exception error)
             {
@@ -118,42 +122,164 @@ namespace OsEngine.Alerts
                     return;
                 }
 
-                using (StreamWriter writer = new StreamWriter(@"Engine\" + Name + @"Alert.txt", false))
-                {
-                    writer.WriteLine(Type);
-
-                    string saveLineString = "";
-
-                    for (int i = 0; i < Lines.Length; i++)
-                    {
-                        saveLineString += Lines[i].GetStringToSave() + "%";
-                    }
-
-                    writer.WriteLine(saveLineString);
-
-                    writer.WriteLine(Label);
-                    writer.WriteLine(Message);
-                    writer.WriteLine(BorderWidth);
-                    writer.WriteLine(IsOn);
-                    writer.WriteLine(IsMusicOn);
-                    writer.WriteLine(IsMessageOn);
-                    writer.WriteLine(ColorLine.ToArgb());
-                    writer.WriteLine(ColorLabel.ToArgb());
-                    writer.WriteLine(Music);
-                    writer.WriteLine(SignalType);
-                    writer.WriteLine(VolumeReaction);
-                    writer.WriteLine(Slippage);
-                    writer.WriteLine(NumberClosePosition);
-                    writer.WriteLine(OrderPriceType);
-                    writer.WriteLine(SlippageType);
-
-                    writer.Close();
-                }
+                SettingsManager.Save(GetSettingsPath(), BuildSettings());
             }
             catch (Exception error)
             {
                 MessageBox.Show(error.ToString());
             }
+        }
+
+        private AlertToChartSettingsDto BuildSettings()
+        {
+            string[] lines = new string[Lines.Length];
+            for (int i = 0; i < Lines.Length; i++)
+            {
+                lines[i] = Lines[i].GetStringToSave();
+            }
+
+            return new AlertToChartSettingsDto
+            {
+                Type = Type,
+                Lines = lines,
+                Label = Label,
+                Message = Message,
+                BorderWidth = BorderWidth,
+                IsOn = IsOn,
+                IsMusicOn = IsMusicOn,
+                IsMessageOn = IsMessageOn,
+                ColorLineArgb = ColorLine.ToArgb(),
+                ColorLabelArgb = ColorLabel.ToArgb(),
+                Music = Music,
+                SignalType = SignalType,
+                VolumeReaction = VolumeReaction,
+                Slippage = Slippage,
+                NumberClosePosition = NumberClosePosition,
+                OrderPriceType = OrderPriceType,
+                SlippageType = SlippageType
+            };
+        }
+
+        private string GetSettingsPath()
+        {
+            return @"Engine\" + Name + @"Alert.txt";
+        }
+
+        private static AlertToChartSettingsDto ParseLegacySettings(string content)
+        {
+            if (string.IsNullOrWhiteSpace(content))
+            {
+                return null;
+            }
+
+            string normalized = content.Replace("\r", string.Empty);
+            string[] rows = normalized.Split('\n');
+
+            if (rows.Length > 0 && rows[rows.Length - 1] == string.Empty)
+            {
+                Array.Resize(ref rows, rows.Length - 1);
+            }
+
+            ChartAlertType type = ChartAlertType.Line;
+            if (rows.Length > 0)
+            {
+                Enum.TryParse(rows[0], true, out type);
+            }
+
+            string[] lines = Array.Empty<string>();
+            if (rows.Length > 1 && !string.IsNullOrEmpty(rows[1]))
+            {
+                string[] raw = rows[1].Split('%');
+                int count = raw.Length;
+                if (count > 0 && raw[count - 1] == string.Empty)
+                {
+                    count--;
+                }
+                lines = new string[count];
+                Array.Copy(raw, lines, count);
+            }
+
+            AlertMusic music = AlertMusic.Duck;
+            if (rows.Length > 10)
+            {
+                Enum.TryParse(rows[10], out music);
+            }
+
+            SignalType signalType = SignalType.None;
+            if (rows.Length > 11)
+            {
+                Enum.TryParse(rows[11], true, out signalType);
+            }
+
+            OrderPriceType orderPriceType = OrderPriceType.Limit;
+            if (rows.Length > 15)
+            {
+                Enum.TryParse(rows[15], true, out orderPriceType);
+            }
+
+            AlertSlippageType slippageType = AlertSlippageType.Absolute;
+            if (rows.Length > 16)
+            {
+                Enum.TryParse(rows[16], true, out slippageType);
+            }
+
+            return new AlertToChartSettingsDto
+            {
+                Type = type,
+                Lines = lines,
+                Label = rows.Length > 2 ? rows[2] : string.Empty,
+                Message = rows.Length > 3 ? rows[3] : string.Empty,
+                BorderWidth = rows.Length > 4 ? Convert.ToInt32(rows[4]) : 0,
+                IsOn = rows.Length > 5 && rows[5].Equals("true", StringComparison.OrdinalIgnoreCase),
+                IsMusicOn = rows.Length > 6 && rows[6].Equals("true", StringComparison.OrdinalIgnoreCase),
+                IsMessageOn = rows.Length > 7 && rows[7].Equals("true", StringComparison.OrdinalIgnoreCase),
+                ColorLineArgb = rows.Length > 8 ? Convert.ToInt32(rows[8]) : Color.Black.ToArgb(),
+                ColorLabelArgb = rows.Length > 9 ? Convert.ToInt32(rows[9]) : Color.Black.ToArgb(),
+                Music = music,
+                SignalType = signalType,
+                VolumeReaction = rows.Length > 12 ? rows[12].ToDecimal() : 0,
+                Slippage = rows.Length > 13 ? rows[13].ToDecimal() : 0,
+                NumberClosePosition = rows.Length > 14 ? Convert.ToInt32(rows[14]) : 0,
+                OrderPriceType = orderPriceType,
+                SlippageType = slippageType
+            };
+        }
+
+        private sealed class AlertToChartSettingsDto
+        {
+            public ChartAlertType Type { get; set; }
+
+            public string[] Lines { get; set; }
+
+            public string Label { get; set; }
+
+            public string Message { get; set; }
+
+            public int BorderWidth { get; set; }
+
+            public bool IsOn { get; set; }
+
+            public bool IsMusicOn { get; set; }
+
+            public bool IsMessageOn { get; set; }
+
+            public int ColorLineArgb { get; set; }
+
+            public int ColorLabelArgb { get; set; }
+
+            public AlertMusic Music { get; set; }
+
+            public SignalType SignalType { get; set; }
+
+            public decimal VolumeReaction { get; set; }
+
+            public decimal Slippage { get; set; }
+
+            public int NumberClosePosition { get; set; }
+
+            public OrderPriceType OrderPriceType { get; set; }
+
+            public AlertSlippageType SlippageType { get; set; }
         }
 
         /// <summary>

@@ -358,3 +358,17 @@
 ### Verification
 
 - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` -> passed 126/126
+
+## 2026-02-16 - Step 2.3 (JSON settings subsystem) - Incremental adoption in AlertToChart settings
+
+- Migrated `project/OsEngine/Alerts/AlertToChart.cs` persistence to `SettingsManager`:
+  - `Save()` now writes JSON into `Engine\\<Name>Alert.txt`
+  - `Load()` now reads JSON and falls back to legacy line-based parser
+  - preserved chart-line model and signal/slippage fields
+- Added tests `project/OsEngine.Tests/AlertToChartPersistenceTests.cs`:
+  - `Save_ShouldPersistJson_AndLoadRoundTrip`
+  - `Load_ShouldSupportLegacyLineBasedFormat`
+
+### Verification
+
+- `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` -> passed 128/128
