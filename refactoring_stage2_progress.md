@@ -71,3 +71,45 @@
   - JSON save/load roundtrip
   - invalid JSON fallback through legacy loader
   - missing file returns provided default value
+
+## 2026-02-16 - Session Resume / Snapshot Commit
+
+- Resumed interrupted session without MCP resume and restored working context from local git state.
+- Verified snapshot state:
+  - `dotnet build project/OsEngine/OsEngine.csproj --no-restore` -> success, 0 warnings, 0 errors
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` -> passed 84/84
+- Fixed nullable warning in tests:
+  - `project/OsEngine.Tests/SettingsManagerTests.cs` (`TestSettings.Name` initialized with `string.Empty`)
+- Created snapshot commit:
+  - `bf7d8ea1a` — `refactor(stage2): add JSON settings manager and harden optimizer flow`
+- Push attempt from current environment failed due network restrictions:
+  - SSH (`github.com:22`) blocked
+  - HTTPS (`github.com:443`) blocked
+
+## 2026-02-16 - Optimizer Hardening Follow-up (Regression tests)
+
+- Added regression tests in `project/OsEngine.Tests/OptimizerRefactorTests.cs` for recent `ParameterIterator` guards:
+  - `CountCombinations` returns `0` when step is non-positive
+  - `EnumerateCombinations` with non-positive step yields start value once and terminates
+  - int overshoot step clamps to stop value during enumeration
+  - decimal overshoot step clamps to stop value during enumeration
+
+### Verification
+
+- `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` -> passed 88/88
+
+## 2026-02-16 - Step 2.3 (JSON settings subsystem) - Incremental adoption in OptimizerDataStorage
+
+- Migrated `project/OsEngine/Market/Servers/Optimizer/OptimizerDataStorage.cs` persistence to `SettingsManager`:
+  - `Save()` now writes JSON via `SettingsManager.Save(...)`
+  - `Load()` now reads via `SettingsManager.Load(...)`
+  - added legacy fallback parser for old line-based `.txt` content in the same file path
+  - preserved enum-safety checks (`Enum.IsDefined`) while applying loaded values
+- Added coverage in `project/OsEngine.Tests/OptimizerRefactorTests.cs`:
+  - `OptimizerDataStorage_Load_ShouldReadLegacyTextSettings`
+  - `OptimizerDataStorage_Save_ShouldPersistJsonAndRoundTrip`
+- Added `ParameterIterator` regression tests (from hardening follow-up) and kept them green in same run.
+
+### Verification
+
+- `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` -> passed 90/90

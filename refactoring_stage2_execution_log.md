@@ -65,3 +65,28 @@
   - `dotnet build project/OsEngine/OsEngine.csproj --no-restore` succeeded, 0 errors.
 - **Commit:** `48e2f71f0`
 - **Push:** yes (`origin/master`, SSH)
+
+## 2026-02-16
+
+### Step 2.3 - JSON Settings Subsystem (Incremental Adoption #1)
+
+- **Status:** In Progress (increment completed)
+- **Plan item:** `refactoring_stage2_plan.md` -> Phase 2 / Step 2.3
+- **Changes:**
+  - Added generic JSON settings utility:
+    - `project/OsEngine/Entity/SettingsManager.cs`
+  - Added tests for JSON manager:
+    - `project/OsEngine.Tests/SettingsManagerTests.cs`
+  - Migrated optimizer storage settings persistence to JSON with backward-compatible legacy fallback parser:
+    - `project/OsEngine/Market/Servers/Optimizer/OptimizerDataStorage.cs`
+  - Added regression tests:
+    - `OptimizerDataStorage_Load_ShouldReadLegacyTextSettings`
+    - `OptimizerDataStorage_Save_ShouldPersistJsonAndRoundTrip`
+    - additional `ParameterIterator` guard tests for non-positive/overshoot step handling
+    - file: `project/OsEngine.Tests/OptimizerRefactorTests.cs`
+  - Updated running progress journal:
+    - `refactoring_stage2_progress.md`
+- **Verification:**
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` succeeded (`90/90`).
+- **Commit:** pending local commit in current session
+- **Push:** no (manual push by user)

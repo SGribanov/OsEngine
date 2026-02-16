@@ -7,6 +7,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using OsEngine.Entity;
 using OsEngine.Market.Servers.Optimizer;
+using OsEngine.Market.Servers.Tester;
 using OsEngine.OsOptimizer;
 using OsEngine.OsOptimizer.OptimizerEntity;
 using OsEngine.OsOptimizer.OptEntity;
@@ -236,6 +237,71 @@ public class OptimizerRefactorTests
 
         await Assert.ThrowsAsync<ArgumentException>(async () =>
             await strategy.OptimizeInSampleAsync(allParameters, parametersToOptimization, CancellationToken.None));
+    }
+
+    [Fact]
+    public void ParameterIterator_CountCombinations_WithNonPositiveStep_ShouldReturnZero()
+    {
+        ParameterIterator iterator = new ParameterIterator();
+
+        List<IIStrategyParameter> allParameters = new List<IIStrategyParameter>
+        {
+            new StrategyParameterInt("A", 1, 1, 5, 0)
+        };
+        List<bool> parametersToOptimization = new List<bool> { true };
+
+        int count = iterator.CountCombinations(allParameters, parametersToOptimization);
+
+        Assert.Equal(0, count);
+    }
+
+    [Fact]
+    public void ParameterIterator_EnumerateCombinations_WithNonPositiveStep_ShouldYieldSingleStartAndStop()
+    {
+        ParameterIterator iterator = new ParameterIterator();
+        List<IIStrategyParameter> optimized = new List<IIStrategyParameter>
+        {
+            new StrategyParameterInt("A", 1, 1, 5, 0)
+        };
+
+        List<int> values = iterator.EnumerateCombinations(optimized)
+            .Select(x => ((StrategyParameterInt)x[0]).ValueInt)
+            .ToList();
+
+        Assert.Single(values);
+        Assert.Equal(1, values[0]);
+    }
+
+    [Fact]
+    public void ParameterIterator_EnumerateCombinations_IntStepOvershoot_ShouldClampToStop()
+    {
+        ParameterIterator iterator = new ParameterIterator();
+        List<IIStrategyParameter> optimized = new List<IIStrategyParameter>
+        {
+            new StrategyParameterInt("A", 1, 1, 5, 6)
+        };
+
+        List<int> values = iterator.EnumerateCombinations(optimized)
+            .Select(x => ((StrategyParameterInt)x[0]).ValueInt)
+            .ToList();
+
+        Assert.Equal(new[] { 1, 5 }, values);
+    }
+
+    [Fact]
+    public void ParameterIterator_EnumerateCombinations_DecimalStepOvershoot_ShouldClampToStop()
+    {
+        ParameterIterator iterator = new ParameterIterator();
+        List<IIStrategyParameter> optimized = new List<IIStrategyParameter>
+        {
+            new StrategyParameterDecimal("A", 0.1m, 0.1m, 0.5m, 1m)
+        };
+
+        List<decimal> values = iterator.EnumerateCombinations(optimized)
+            .Select(x => ((StrategyParameterDecimal)x[0]).ValueDecimal)
+            .ToList();
+
+        Assert.Equal(new[] { 0.1m, 0.5m }, values);
     }
 
     [Fact]
@@ -1812,6 +1878,52 @@ public class OptimizerRefactorTests
     }
 
     [Fact]
+    public void OptimizerDataStorage_Load_ShouldReadLegacyTextSettings()
+    {
+        string name = "codex_legacy_" + Guid.NewGuid().ToString("N");
+
+        using OptimizerDataStorageFileScope scope = new OptimizerDataStorageFileScope(name);
+        File.WriteAllLines(scope.SettingsPath, new[]
+        {
+            @"Data\Set_Legacy",
+            TesterDataType.TickOnlyReadyCandle.ToString(),
+            TesterSourceDataType.Folder.ToString(),
+            @"C:\temp\legacy"
+        });
+
+        OptimizerDataStorage storage = new OptimizerDataStorage(name, needToCreateThread: false);
+
+        Assert.Equal(@"Data\Set_Legacy", storage.ActiveSet);
+        Assert.Equal(TesterDataType.TickOnlyReadyCandle, storage.TypeTesterData);
+        Assert.Equal(TesterSourceDataType.Folder, storage.SourceDataType);
+        Assert.Equal(@"C:\temp\legacy", storage.PathToFolder);
+    }
+
+    [Fact]
+    public void OptimizerDataStorage_Save_ShouldPersistJsonAndRoundTrip()
+    {
+        string name = "codex_json_" + Guid.NewGuid().ToString("N");
+
+        using OptimizerDataStorageFileScope scope = new OptimizerDataStorageFileScope(name);
+
+        OptimizerDataStorage storage = new OptimizerDataStorage(name, needToCreateThread: false);
+        storage.SetNewSet("JsonSet");
+        storage.PathToFolder = @"C:\temp\json";
+        storage.SourceDataType = TesterSourceDataType.Folder;
+        storage.TypeTesterData = TesterDataType.TickAllCandleState;
+        storage.Save();
+
+        string content = File.ReadAllText(scope.SettingsPath);
+        Assert.StartsWith("{", content.TrimStart());
+
+        OptimizerDataStorage reloaded = new OptimizerDataStorage(name, needToCreateThread: false);
+        Assert.Equal(@"Data\Set_JsonSet", reloaded.ActiveSet);
+        Assert.Equal(TesterDataType.TickAllCandleState, reloaded.TypeTesterData);
+        Assert.Equal(TesterSourceDataType.Folder, reloaded.SourceDataType);
+        Assert.Equal(@"C:\temp\json", reloaded.PathToFolder);
+    }
+
+    [Fact]
     public void AsyncBotFactory_GetBot_WithInvalidKeys_ShouldReturnNull()
     {
         AsyncBotFactory factory = new AsyncBotFactory();
@@ -2099,6 +2211,71 @@ public class OptimizerRefactorTests
                 {
                     Directory.Delete(_engineDirPath);
                 }
+            }
+        }
+    }
+
+    private sealed class OptimizerDataStorageFileScope : IDisposable
+    {
+        private readonly string _engineDirPath;
+        private readonly bool _engineDirExisted;
+        private readonly bool _settingsFileExisted;
+        private readonly string _settingsBackup;
+
+        public OptimizerDataStorageFileScope(string storageName)
+        {
+            _engineDirPath = Path.GetFullPath("Engine");
+            SettingsPath = Path.Combine(_engineDirPath, storageName + "OptimizerDataStorage.txt");
+            _settingsBackup = SettingsPath + ".codex.bak";
+
+            _engineDirExisted = Directory.Exists(_engineDirPath);
+            if (!_engineDirExisted)
+            {
+                Directory.CreateDirectory(_engineDirPath);
+            }
+
+            _settingsFileExisted = File.Exists(SettingsPath);
+            if (_settingsFileExisted)
+            {
+                File.Copy(SettingsPath, _settingsBackup, overwrite: true);
+            }
+            else if (File.Exists(_settingsBackup))
+            {
+                File.Delete(_settingsBackup);
+            }
+        }
+
+        public string SettingsPath { get; }
+
+        public void Dispose()
+        {
+            if (_settingsFileExisted)
+            {
+                if (File.Exists(_settingsBackup))
+                {
+                    File.Copy(_settingsBackup, SettingsPath, overwrite: true);
+                    File.Delete(_settingsBackup);
+                }
+            }
+            else
+            {
+                if (File.Exists(SettingsPath))
+                {
+                    File.Delete(SettingsPath);
+                }
+
+                if (File.Exists(_settingsBackup))
+                {
+                    File.Delete(_settingsBackup);
+                }
+            }
+
+            if (!_engineDirExisted
+                && Directory.Exists(_engineDirPath)
+                && Directory.GetFiles(_engineDirPath).Length == 0
+                && Directory.GetDirectories(_engineDirPath).Length == 0)
+            {
+                Directory.Delete(_engineDirPath);
             }
         }
     }

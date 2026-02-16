@@ -94,19 +94,29 @@ namespace OsEngine.Market.Servers.Optimizer
 
         private void Load()
         {
-            if (!File.Exists(@"Engine\" + _name + @"OptimizerDataStorage.txt"))
-            {
-                return;
-            }
-
             try
             {
-                using (StreamReader reader = new StreamReader(@"Engine\" + _name + @"OptimizerDataStorage.txt"))
+                OptimizerDataStorageSettings settings = SettingsManager.Load(
+                    GetSettingsPath(),
+                    defaultValue: null,
+                    legacyLoader: ParseLegacySettings);
+
+                if (settings == null)
                 {
-                    _activeSet = reader.ReadLine();
-                    Enum.TryParse(reader.ReadLine(), out _typeTesterData);
-                    Enum.TryParse(reader.ReadLine(), out _sourceDataType);
-                    _pathToFolder = reader.ReadLine();
+                    return;
+                }
+
+                _activeSet = settings.ActiveSet;
+                _pathToFolder = settings.PathToFolder;
+
+                if (Enum.IsDefined(typeof(TesterDataType), settings.TypeTesterData))
+                {
+                    _typeTesterData = settings.TypeTesterData;
+                }
+
+                if (Enum.IsDefined(typeof(TesterSourceDataType), settings.SourceDataType))
+                {
+                    _sourceDataType = settings.SourceDataType;
                 }
             }
             catch (Exception ex)
@@ -119,18 +129,70 @@ namespace OsEngine.Market.Servers.Optimizer
         {
             try
             {
-                using (StreamWriter writer = new StreamWriter(@"Engine\" + _name + @"OptimizerDataStorage.txt", false))
+                OptimizerDataStorageSettings settings = new OptimizerDataStorageSettings
                 {
-                    writer.WriteLine(_activeSet);
-                    writer.WriteLine(_typeTesterData);
-                    writer.WriteLine(_sourceDataType);
-                    writer.WriteLine(_pathToFolder);
-                }
+                    ActiveSet = _activeSet,
+                    TypeTesterData = _typeTesterData,
+                    SourceDataType = _sourceDataType,
+                    PathToFolder = _pathToFolder
+                };
+
+                SettingsManager.Save(GetSettingsPath(), settings);
             }
             catch (Exception ex)
             {
                 SendLogMessage(ex.ToString(), LogMessageType.Error);
             }
+        }
+
+        private string GetSettingsPath()
+        {
+            return @"Engine\" + _name + @"OptimizerDataStorage.txt";
+        }
+
+        private OptimizerDataStorageSettings ParseLegacySettings(string content)
+        {
+            if (string.IsNullOrWhiteSpace(content))
+            {
+                return null;
+            }
+
+            string[] lines = content.Replace("\r", string.Empty).Split('\n');
+
+            OptimizerDataStorageSettings settings = new OptimizerDataStorageSettings();
+
+            if (lines.Length > 0)
+            {
+                settings.ActiveSet = lines[0];
+            }
+
+            if (lines.Length > 1 && Enum.TryParse(lines[1], out TesterDataType testerDataType))
+            {
+                settings.TypeTesterData = testerDataType;
+            }
+
+            if (lines.Length > 2 && Enum.TryParse(lines[2], out TesterSourceDataType sourceDataType))
+            {
+                settings.SourceDataType = sourceDataType;
+            }
+
+            if (lines.Length > 3)
+            {
+                settings.PathToFolder = lines[3];
+            }
+
+            return settings;
+        }
+
+        private class OptimizerDataStorageSettings
+        {
+            public string ActiveSet { get; set; }
+
+            public TesterDataType TypeTesterData { get; set; } = TesterDataType.Candle;
+
+            public TesterSourceDataType SourceDataType { get; set; } = TesterSourceDataType.Set;
+
+            public string PathToFolder { get; set; }
         }
 
         public TesterSourceDataType SourceDataType
