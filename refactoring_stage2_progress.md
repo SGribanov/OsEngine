@@ -328,3 +328,18 @@
 ### Verification
 
 - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` -> passed 122/122
+
+## 2026-02-16 - Step 2.3 (JSON settings subsystem) - Incremental adoption in ChartClusterMaster settings
+
+- Migrated `project/OsEngine/Charts/ClusterChart/ChartClusterMaster.cs` persistence to `SettingsManager`:
+  - `Save()` now writes JSON into `Engine\\<name>ClusterChartMasterSet.txt`
+  - `Load()` now reads JSON and falls back to legacy single-line enum parser
+  - made load-side chart assignment null-safe (`_chart != null`) for compatibility with non-constructor test instances
+- Added tests `project/OsEngine.Tests/ChartClusterMasterPersistenceTests.cs`:
+  - `Save_ShouldPersistJson_AndLoadRoundTrip`
+  - `Load_ShouldSupportLegacyLineBasedFormat`
+  - tests use uninitialized instance to avoid UI constructor dependencies
+
+### Verification
+
+- `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` -> passed 124/124

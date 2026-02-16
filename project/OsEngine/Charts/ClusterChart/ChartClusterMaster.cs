@@ -33,12 +33,12 @@ namespace OsEngine.Charts.ClusterChart
         {
             try
             {
-                using (StreamWriter writer = new StreamWriter(@"Engine\" + _name + @"ClusterChartMasterSet.txt", false))
-                {
-                    writer.WriteLine(_chartType);
-
-                    writer.Close();
-                }
+                SettingsManager.Save(
+                    GetSettingsPath(),
+                    new ChartClusterMasterSettingsDto
+                    {
+                        ChartType = _chartType
+                    });
             }
             catch (Exception)
             {
@@ -53,17 +53,22 @@ namespace OsEngine.Charts.ClusterChart
         /// </summary>
         public void Load()
         {
-            if (!File.Exists(@"Engine\" + _name + @"ClusterChartMasterSet.txt"))
-            {
-                return;
-            }
             try
             {
-                using (StreamReader reader = new StreamReader(@"Engine\" + _name + @"ClusterChartMasterSet.txt"))
+                ChartClusterMasterSettingsDto settings = SettingsManager.Load(
+                    GetSettingsPath(),
+                    defaultValue: null,
+                    legacyLoader: ParseLegacySettings);
+
+                if (settings == null)
                 {
-                    Enum.TryParse(reader.ReadLine(), out _chartType);
-                    _chart.ChartType =_chartType;
-                    reader.Close();
+                    return;
+                }
+
+                _chartType = settings.ChartType;
+                if (_chart != null)
+                {
+                    _chart.ChartType = _chartType;
                 }
             }
             catch (Exception)
@@ -79,9 +84,9 @@ namespace OsEngine.Charts.ClusterChart
         /// </summary>
         public void Delete()
         {
-            if (File.Exists(@"Engine\" + _name + @"ClusterChartMasterSet.txt"))
+            if (File.Exists(GetSettingsPath()))
             {
-                File.Delete(@"Engine\" + _name + @"ClusterChartMasterSet.txt");
+                File.Delete(GetSettingsPath());
             }
         }
 
@@ -220,6 +225,38 @@ namespace OsEngine.Charts.ClusterChart
         public Chart GetChart()
         {
             return _chart.GetChart();
+        }
+
+        private string GetSettingsPath()
+        {
+            return @"Engine\" + _name + @"ClusterChartMasterSet.txt";
+        }
+
+        private static ChartClusterMasterSettingsDto ParseLegacySettings(string content)
+        {
+            if (string.IsNullOrWhiteSpace(content))
+            {
+                return null;
+            }
+
+            string normalized = content.Replace("\r", string.Empty);
+            string[] lines = normalized.Split('\n');
+            ClusterType chartType = ClusterType.SummVolume;
+
+            if (lines.Length > 0)
+            {
+                Enum.TryParse(lines[0], out chartType);
+            }
+
+            return new ChartClusterMasterSettingsDto
+            {
+                ChartType = chartType
+            };
+        }
+
+        private sealed class ChartClusterMasterSettingsDto
+        {
+            public ClusterType ChartType { get; set; }
         }
     }
 
