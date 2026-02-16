@@ -2898,3 +2898,23 @@
   - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` succeeded (`343/343`).
 - **Commit:** `781da233a`
 - **Push:** no (manual push by user)
+
+### Step 2.3 - JSON Settings Subsystem (Incremental Adoption #141)
+
+- **Status:** In Progress (increment completed)
+- **Plan item:** `refactoring_stage2_plan.md` -> Phase 2 / Step 2.3
+- **Changes:**
+  - Path consistency cleanup in:
+    - `project/OsEngine/Logging/Log.cs`
+  - Centralized daily log storage paths via helper methods:
+    - `GetLogsDirectoryPath()`
+    - `GetCurrentDayLogPath()`
+  - Replaced remaining inline `Engine\\Log\\...` path construction in:
+    - show-file action
+    - delete cleanup
+    - save thread
+    - load-last-day flow
+  - Updated running progress journal:
+    - `refactoring_stage2_progress.md`
+- **Verification:**
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` succeeded (`343/343`).
