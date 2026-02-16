@@ -946,3 +946,18 @@
 ### Verification
 
 - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` -> passed 206/206
+
+## 2026-02-16 - Step 2.3 (JSON settings subsystem) - Incremental adoption in PairToTrade settings
+
+- Migrated `project/OsEngine/OsTrader/Panels/Tab/BotTabPair.cs` (`Engine\\<Name>PairsSettings.txt`, class `PairToTrade`) persistence to `SettingsManager`:
+  - `PairToTrade.Save()` now writes JSON DTO
+  - private `PairToTrade.Load()` now reads JSON and falls back to legacy line-based parser
+  - preserved settings contract for pair parameters, trade regimes, cointegration side and auto-rebuild flags
+- Added tests `project/OsEngine.Tests/PairToTradeSettingsPersistenceTests.cs`:
+  - `Save_ShouldPersistJson_AndLoadRoundTrip`
+  - `Load_ShouldSupportLegacyLineBasedFormat`
+  - tests invoke private loader via reflection on uninitialized pair instance with file backup/restore
+
+### Verification
+
+- `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` -> passed 208/208
