@@ -255,26 +255,9 @@ namespace OsEngine.OsTrader
         /// </summary>
         private void Load()
         {
-            if (!File.Exists(@"Engine\Settings" + _typeWorkKeeper + "Keeper.txt"))
-            { 
-                // if there is no file we need. Just go out
-                return;
-            }
-
-
-            int botCount = 0;
-            using (StreamReader reader = new StreamReader(@"Engine\Settings" + _typeWorkKeeper + "Keeper.txt"))
-            {
-                while (!reader.EndOfStream)
-                {
-                    if (!string.IsNullOrWhiteSpace(reader.ReadLine()))
-                    {
-                        botCount++;
-                    }
-                }
-            }
-
-            if (botCount == 0)
+            List<string> botSettings = LoadKeeperEntries(_typeWorkKeeper);
+            if (botSettings == null
+                || botSettings.Count == 0)
             {
                 return;
             }
@@ -282,62 +265,64 @@ namespace OsEngine.OsTrader
             PanelsArray = new List<BotPanel>();
 
             int botIterator = 0;
-            using (StreamReader reader = new StreamReader(@"Engine\Settings" + _typeWorkKeeper + "Keeper.txt"))
+            for (int i = 0; i < botSettings.Count; i++)
             {
-                while (!reader.EndOfStream)
+                string[] names = botSettings[i].Split('@');
+
+                if (names.Length < 2)
                 {
-                    string[] names = reader.ReadLine().Split('@');
+                    continue;
+                }
 
-                    BotPanel bot = null;
+                BotPanel bot = null;
 
-                    if (names.Length > 2)
+                if (names.Length > 2)
+                {
+                    try
                     {
-                        try
-                        {
-                            bot = BotFactory.GetStrategyForName(names[1], names[0], _startProgram, Convert.ToBoolean(names[2]));
-                        }
-                        catch (Exception e)
-                        {
-                            MessageBox.Show(" Error on bot creation. Bot Name: " + names[1] + " \n" + e.ToString());
-                            continue;
-                        }
+                        bot = BotFactory.GetStrategyForName(names[1], names[0], _startProgram, Convert.ToBoolean(names[2]));
                     }
-                    else
+                    catch (Exception e)
                     {
-                        bot = BotFactory.GetStrategyForName(names[1], names[0], _startProgram, false);
+                        MessageBox.Show(" Error on bot creation. Bot Name: " + names[1] + " \n" + e.ToString());
+                        continue;
                     }
+                }
+                else
+                {
+                    bot = BotFactory.GetStrategyForName(names[1], names[0], _startProgram, false);
+                }
 
-                    if(names.Length >= 4)
+                if(names.Length >= 4)
+                {
+                    if(string.IsNullOrEmpty(names[3]) == false)
                     {
-                        if(string.IsNullOrEmpty(names[3]) == false)
-                        {
-                            bot.PublicName = names[3];
-                        }
+                        bot.PublicName = names[3];
                     }
+                }
 
-                    if (bot != null)
+                if (bot != null)
+                {
+                    PanelsArray.Add(bot);
+
+                    if (BotCreateEvent != null)
                     {
-                        PanelsArray.Add(bot);
-
-                        if (BotCreateEvent != null)
-                        {
-                            BotCreateEvent(bot);
-                        }
-
-                        if (_tabBotNames != null)
-                        {
-                            _tabBotNames.Items.Add(" " + PanelsArray[botIterator].NameStrategyUniq + " ");
-                            SendNewLogMessage(OsLocalization.Trader.Label2 + PanelsArray[botIterator].NameStrategyUniq,
-                                LogMessageType.System);
-                        }
-
-                        botIterator++;
-
-                        bot.NewTabCreateEvent += () =>
-                        {
-                            ReloadRiskJournals();
-                        };
+                        BotCreateEvent(bot);
                     }
+
+                    if (_tabBotNames != null)
+                    {
+                        _tabBotNames.Items.Add(" " + PanelsArray[botIterator].NameStrategyUniq + " ");
+                        SendNewLogMessage(OsLocalization.Trader.Label2 + PanelsArray[botIterator].NameStrategyUniq,
+                            LogMessageType.System);
+                    }
+
+                    botIterator++;
+
+                    bot.NewTabCreateEvent += () =>
+                    {
+                        ReloadRiskJournals();
+                    };
                 }
             }
             if (PanelsArray.Count != 0)
@@ -353,28 +338,32 @@ namespace OsEngine.OsTrader
         {
             try
             {
-                using (StreamWriter writer = new StreamWriter(@"Engine\Settings" + _typeWorkKeeper + "Keeper.txt", false))
-                {
-                    for (int i = 0; PanelsArray != null && i < PanelsArray.Count; i++)
-                    {
-                        if(PanelsArray[i].IsScript == false)
-                        {
-                            writer.WriteLine(PanelsArray[i].NameStrategyUniq + "@" +
-                                             PanelsArray[i].GetNameStrategyType() +
-                                              "@" + false
-                                              + "@" + PanelsArray[i].PublicName);
-                        }
-                        else
-                        {
-                            writer.WriteLine(PanelsArray[i].NameStrategyUniq + "@" +
-                            PanelsArray[i].FileName +
-                            "@" + true
-                             + "@" + PanelsArray[i].PublicName);
-                        }
-                    }
+                List<string> botSettings = new List<string>();
 
-                    writer.Close();
+                for (int i = 0; PanelsArray != null && i < PanelsArray.Count; i++)
+                {
+                    if(PanelsArray[i].IsScript == false)
+                    {
+                        botSettings.Add(PanelsArray[i].NameStrategyUniq + "@" +
+                                        PanelsArray[i].GetNameStrategyType() +
+                                        "@" + false
+                                        + "@" + PanelsArray[i].PublicName);
+                    }
+                    else
+                    {
+                        botSettings.Add(PanelsArray[i].NameStrategyUniq + "@" +
+                                        PanelsArray[i].FileName +
+                                        "@" + true
+                                        + "@" + PanelsArray[i].PublicName);
+                    }
                 }
+
+                SettingsManager.Save(
+                    GetSettingsKeeperPath(_typeWorkKeeper),
+                    new BotKeeperSettingsDto
+                    {
+                        BotSettings = botSettings
+                    });
             }
             catch
             {
@@ -1678,37 +1667,78 @@ namespace OsEngine.OsTrader
             {
                 List<string> result = new List<string>();
 
-                if (File.Exists(@"Engine\" + @"SettingsRealKeeper.txt"))
+                List<string> realSettings = LoadKeeperEntries(ConnectorWorkType.Real);
+                if (realSettings != null)
                 {
-                    using (StreamReader reader = new StreamReader(@"Engine\" + @"SettingsRealKeeper.txt"))
+                    for (int i = 0; i < realSettings.Count; i++)
                     {
-                        while (!reader.EndOfStream)
+                        string[] str = realSettings[i].Split('@');
+                        if (str.Length == 0)
                         {
-                            string[] str = reader.ReadLine().Split('@');
-
-                            string name = str[0];
-
-                            result.Add(name);
+                            continue;
                         }
+
+                        result.Add(str[0]);
                     }
                 }
 
-                if (File.Exists(@"Engine\" + @"SettingsTesterKeeper.txt"))
+                List<string> testerSettings = LoadKeeperEntries(ConnectorWorkType.Tester);
+                if (testerSettings != null)
                 {
-                    using (StreamReader reader = new StreamReader(@"Engine\" + @"SettingsTesterKeeper.txt"))
+                    for (int i = 0; i < testerSettings.Count; i++)
                     {
-                        while (!reader.EndOfStream)
+                        string[] str = testerSettings[i].Split('@');
+                        if (str.Length == 0)
                         {
-                            string[] str = reader.ReadLine().Split('@');
-
-                            string name = str[0];
-
-                            result.Add(name);
+                            continue;
                         }
+
+                        result.Add(str[0]);
                     }
                 }
                 return result;
             }
+        }
+
+        private List<string> LoadKeeperEntries(ConnectorWorkType connectorWorkType)
+        {
+            string path = GetSettingsKeeperPath(connectorWorkType);
+            if (!File.Exists(path))
+            {
+                return null;
+            }
+
+            BotKeeperSettingsDto settings = SettingsManager.Load(
+                path,
+                defaultValue: null,
+                legacyLoader: ParseLegacyBotKeeperSettings);
+
+            return settings?.BotSettings;
+        }
+
+        private static string GetSettingsKeeperPath(ConnectorWorkType connectorWorkType)
+        {
+            return @"Engine\Settings" + connectorWorkType + "Keeper.txt";
+        }
+
+        private static BotKeeperSettingsDto ParseLegacyBotKeeperSettings(string content)
+        {
+            if (string.IsNullOrWhiteSpace(content))
+            {
+                return null;
+            }
+
+            string[] lines = content.Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries);
+
+            return new BotKeeperSettingsDto
+            {
+                BotSettings = new List<string>(lines)
+            };
+        }
+
+        private sealed class BotKeeperSettingsDto
+        {
+            public List<string> BotSettings { get; set; }
         }
 
         /// <summary>

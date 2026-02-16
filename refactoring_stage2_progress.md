@@ -2049,3 +2049,19 @@
 ### Verification
 
 - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` -> passed 336/336
+
+## 2026-02-16 - Step 2.3 (JSON settings subsystem) - OsTraderMaster keeper storage migrated to JSON wrapper with legacy compatibility
+
+- Updated `project/OsEngine/OsTrader/OsTraderMaster.cs`:
+  - migrated bot keeper settings wrapper from direct line-based IO to `SettingsManager`
+  - `Load()` now consumes keeper entries loaded via `SettingsManager.Load(..., legacyLoader: ParseLegacyBotKeeperSettings)`
+  - `Save()` now persists DTO JSON (`BotKeeperSettingsDto`) with bot settings entries
+  - updated `BotNames` helper logic to read both `SettingsRealKeeper.txt` and `SettingsTesterKeeper.txt` through the same compatibility loader
+  - centralized keeper paths via `GetSettingsKeeperPath(ConnectorWorkType connectorWorkType)`
+  - added legacy parser `ParseLegacyBotKeeperSettings(string content)` for old line-based format
+- Added tests in `project/OsEngine.Tests/OsTraderMasterKeeperSettingsTests.cs`:
+  - verifies legacy parser behavior
+
+### Verification
+
+- `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` -> passed 337/337
