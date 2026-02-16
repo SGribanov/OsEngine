@@ -305,9 +305,9 @@ namespace OsEngine.Logging
         /// </summary>
         public void Delete() 
         {
-            if (File.Exists(@"Engine\" + _name + @"MessageSender.txt"))
+            if (File.Exists(GetSettingsPath()))
             {
-                File.Delete(@"Engine\" + _name + @"MessageSender.txt");
+                File.Delete(GetSettingsPath());
             }
         }
 

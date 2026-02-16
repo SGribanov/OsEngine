@@ -109,9 +109,9 @@ namespace OsEngine.Entity
         /// </summary>
         public void Delete()
         {
-            if (File.Exists(@"Engine\" + _name + @"HorizontalVolumeSet.txt"))
+            if (File.Exists(GetSettingsPath()))
             {
-                File.Delete(@"Engine\" + _name + @"HorizontalVolumeSet.txt");
+                File.Delete(GetSettingsPath());
             }
         }
 

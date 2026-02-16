@@ -237,9 +237,9 @@ namespace OsEngine.Entity
         {
             try
             {
-                if (File.Exists(@"Engine\" + NameUnique + ".txt"))
+                if (File.Exists(GetStoragePath()))
                 {
-                    File.Delete(@"Engine\" + NameUnique + ".txt");
+                    File.Delete(GetStoragePath());
                 }
             }
             catch

@@ -1811,3 +1811,18 @@
 ### Verification
 
 - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` -> passed 318/318
+
+## 2026-02-16 - Step 2.3 (JSON settings subsystem) - Path consistency cleanup in migrated non-indicator classes
+
+- Aligned `Delete()` path handling with existing helper methods in migrated classes:
+  - `project/OsEngine/Candles/TimeFrameBuilder.cs` (`GetSettingsPath()`)
+  - `project/OsEngine/Alerts/AlertToPrice.cs` (`GetSettingsPath()`)
+  - `project/OsEngine/Alerts/AlertToChart.cs` (`GetSettingsPath()`)
+  - `project/OsEngine/Logging/MessageSender.cs` (`GetSettingsPath()`)
+  - `project/OsEngine/Entity/HorizontalVolume.cs` (`GetSettingsPath()`)
+  - `project/OsEngine/Entity/NonTradePeriods.cs` (`GetStoragePath()`)
+- Removed remaining direct `@"Engine\\..."` delete calls from these classes; behavior remains unchanged.
+
+### Verification
+
+- `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` -> passed 318/318

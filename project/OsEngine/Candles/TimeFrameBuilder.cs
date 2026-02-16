@@ -225,9 +225,9 @@ namespace OsEngine.Entity
         {
             try
             {
-                if (File.Exists(@"Engine\" + _name + @"TimeFrameBuilder.txt"))
+                if (File.Exists(GetSettingsPath()))
                 {
-                    File.Delete(@"Engine\" + _name + @"TimeFrameBuilder.txt");
+                    File.Delete(GetSettingsPath());
                 }
             }
             catch

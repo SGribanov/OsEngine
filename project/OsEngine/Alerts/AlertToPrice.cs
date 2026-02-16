@@ -189,9 +189,9 @@ namespace OsEngine.Alerts
 
         public void Delete()
         {
-            if (File.Exists(@"Engine\" + Name + @"Alert.txt"))
+            if (File.Exists(GetSettingsPath()))
             {
-                File.Delete(@"Engine\" + Name + @"Alert.txt");
+                File.Delete(GetSettingsPath());
             }
         }
 
