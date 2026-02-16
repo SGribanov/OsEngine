@@ -2790,25 +2790,21 @@ namespace OsEngine.Market.Servers.Tester
                 return null;
             }
 
-            if (!File.Exists(path))
-            {
-                return null;
-            }
             try
             {
-                using (StreamReader reader = new StreamReader(path))
+                TesterSecurityDopSettingsDto settings = SettingsManager.Load(
+                    path,
+                    defaultValue: null,
+                    legacyLoader: ParseLegacySecurityDopSettings);
+
+                if (settings == null || settings.Items == null)
                 {
-                    List<string[]> array = new List<string[]>();
-
-                    while (!reader.EndOfStream)
-                    {
-                        string[] set = reader.ReadLine().Split('$');
-                        array.Add(set);
-                    }
-
-                    reader.Close();
-                    return array;
+                    return null;
                 }
+
+                return settings.Items
+                    .Where(item => item != null && item.Length > 0)
+                    .ToList();
             }
             catch (Exception)
             {
@@ -2903,25 +2899,12 @@ namespace OsEngine.Market.Servers.Tester
 
             try
             {
-                using (StreamWriter writer = new StreamWriter(pathToSettings, false))
-                {
-                    // name, lot, GO, price step, cost of price step / Имя, Лот, ГО, Цена шага, стоимость цены шага
-                    for (int i = 0; i < saves.Count; i++)
+                SettingsManager.Save(
+                    pathToSettings,
+                    new TesterSecurityDopSettingsDto
                     {
-                        writer.WriteLine(
-                            saves[i][0] + "$" +
-                            saves[i][1] + "$" +
-                            saves[i][2] + "$" +
-                            saves[i][3] + "$" +
-                            saves[i][4] + "$" +
-                            saves[i][5] + "$" +
-                            saves[i][6] + "$" +
-                            saves[i][7]
-                            );
-                    }
-
-                    writer.Close();
-                }
+                        Items = saves.ToArray()
+                    });
             }
             catch (Exception)
             {
@@ -2932,6 +2915,43 @@ namespace OsEngine.Market.Servers.Tester
             {
                 NeedToReconnectEvent();
             }
+        }
+
+        private static TesterSecurityDopSettingsDto ParseLegacySecurityDopSettings(string content)
+        {
+            if (string.IsNullOrWhiteSpace(content))
+            {
+                return null;
+            }
+
+            string normalized = content.Replace("\r", string.Empty);
+            string[] lines = normalized.Split('\n');
+
+            if (lines.Length > 0 && lines[lines.Length - 1] == string.Empty)
+            {
+                Array.Resize(ref lines, lines.Length - 1);
+            }
+
+            List<string[]> items = new List<string[]>();
+            for (int i = 0; i < lines.Length; i++)
+            {
+                if (string.IsNullOrWhiteSpace(lines[i]))
+                {
+                    continue;
+                }
+
+                items.Add(lines[i].Split('$'));
+            }
+
+            return new TesterSecurityDopSettingsDto
+            {
+                Items = items.ToArray()
+            };
+        }
+
+        private sealed class TesterSecurityDopSettingsDto
+        {
+            public string[][] Items { get; set; }
         }
 
         #endregion

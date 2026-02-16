@@ -691,3 +691,18 @@
 ### Verification
 
 - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` -> passed 172/172
+
+## 2026-02-16 - Step 2.3 (JSON settings subsystem) - Incremental adoption in TesterServer security dop settings
+
+- Migrated `project/OsEngine/Market/Servers/Tester/TesterServer.cs` (`SecuritiesSettings.txt`) persistence to `SettingsManager`:
+  - private `LoadSecurityDopSettings(path)` now reads JSON and falls back to legacy `$`-line parser
+  - `SaveSecurityDopSettings(security)` now writes JSON to dynamic `...\\SecuritiesSettings.txt` path
+  - preserved current save/update flow and existing data contract (`name/lot/GO/step cost/step/decimals/margin sell/expiration`)
+- Added tests `project/OsEngine.Tests/TesterServerSecurityDopSettingsPersistenceTests.cs`:
+  - `SaveSecurityDopSettings_ShouldPersistJson_AndLoadSettings`
+  - `LoadSecurityDopSettings_ShouldSupportLegacyLineBasedFormat`
+  - tests invoke private loader and dynamic path resolver via reflection on uninitialized instance
+
+### Verification
+
+- `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` -> passed 174/174
