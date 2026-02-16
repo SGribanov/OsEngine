@@ -267,3 +267,23 @@
   - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` succeeded (`110/110`).
 - **Commit:** `7949ce1ab`
 - **Push:** no (manual push by user)
+
+### Step 2.3 - JSON Settings Subsystem (Incremental Adoption #11)
+
+- **Status:** In Progress (increment completed)
+- **Plan item:** `refactoring_stage2_plan.md` -> Phase 2 / Step 2.3
+- **Changes:**
+  - Migrated message sender settings persistence to JSON with legacy fallback:
+    - `project/OsEngine/Logging/MessageSender.cs`
+  - Covered persisted file:
+    - `Engine\\<name>MessageSender.txt`
+  - Added dedicated persistence tests:
+    - `project/OsEngine.Tests/MessageSenderPersistenceTests.cs`
+      - `Save_ShouldPersistJson_AndLoadRoundTrip`
+      - `Load_ShouldSupportLegacyLineBasedFormat`
+  - Updated running progress journal:
+    - `refactoring_stage2_progress.md`
+- **Verification:**
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` succeeded (`112/112`).
+- **Commit:** `077153161`
+- **Push:** no (manual push by user)
