@@ -2766,3 +2766,24 @@
   - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` succeeded (`340/340`).
 - **Commit:** `b3b813f4e`
 - **Push:** no (manual push by user)
+
+### Step 2.3 - JSON Settings Subsystem (Incremental Adoption #134)
+
+- **Status:** In Progress (increment completed)
+- **Plan item:** `refactoring_stage2_plan.md` -> Phase 2 / Step 2.3
+- **Changes:**
+  - Migrated journal groups settings wrapper in:
+    - `project/OsEngine/Journal/JournalUi2.xaml.cs`
+  - `SaveGroups()` / `LoadGroups()` now use `SettingsManager` typed DTO JSON.
+  - Added legacy parser for old line-based groups format:
+    - `ParseLegacyJournalGroupsSettings(string content)`
+  - Centralized groups-settings path via helper:
+    - `GetJournalGroupsSettingsPath()`
+  - Added tests:
+    - `project/OsEngine.Tests/JournalUi2GroupsSettingsTests.cs`
+  - Updated running progress journal:
+    - `refactoring_stage2_progress.md`
+- **Verification:**
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` succeeded (`341/341`).
+- **Commit:** `6864c1206`
+- **Push:** no (manual push by user)
