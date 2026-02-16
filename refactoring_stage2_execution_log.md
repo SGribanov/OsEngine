@@ -1857,3 +1857,25 @@
   - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` succeeded (`270/270`).
 - **Commit:** `314b9b2bf`
 - **Push:** no (manual push by user)
+
+### Step 2.3 - JSON Settings Subsystem (Incremental Adoption #90)
+
+- **Status:** In Progress (increment completed)
+- **Plan item:** `refactoring_stage2_plan.md` -> Phase 2 / Step 2.3
+- **Changes:**
+  - Migrated KalmanFilter indicator settings persistence to JSON with legacy fallback:
+    - `project/OsEngine/Charts/CandleChart/Indicators/KalmanFilter.cs`
+  - Covered persisted file:
+    - dynamic `Engine\\<Name>.txt` path (`KalmanFilter` indicator)
+  - Hardened legacy decimal parsing in fallback loader:
+    - supports invariant and current-culture decimal formats
+  - Added dedicated persistence tests:
+    - `project/OsEngine.Tests/KalmanFilterPersistenceTests.cs`
+      - `Save_ShouldPersistJson_AndLoadRoundTrip`
+      - `Load_ShouldSupportLegacyLineBasedFormat`
+  - Updated running progress journal:
+    - `refactoring_stage2_progress.md`
+- **Verification:**
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` succeeded (`272/272`).
+- **Commit:** `07511e635`
+- **Push:** no (manual push by user)
