@@ -646,3 +646,18 @@
 ### Verification
 
 - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` -> passed 166/166
+
+## 2026-02-16 - Step 2.3 (JSON settings subsystem) - Incremental adoption in TesterServer clearing settings
+
+- Migrated `project/OsEngine/Market/Servers/Tester/TesterServer.cs` (`TestServerClearings.txt`) persistence to `SettingsManager`:
+  - `SaveClearingInfo()` now writes JSON into `Engine\\TestServerClearings.txt`
+  - private `LoadClearingInfo()` now reads JSON and falls back to legacy line-based parser
+  - preserved `OrderClearing` serialization contract via existing `GetSaveString()/SetFromString()`
+- Added tests `project/OsEngine.Tests/TesterServerClearingPersistenceTests.cs`:
+  - `SaveClearingInfo_ShouldPersistJson_AndLoadRoundTrip`
+  - `LoadClearingInfo_ShouldSupportLegacyLineBasedFormat`
+  - tests invoke private `LoadClearingInfo()` via reflection on uninitialized instance
+
+### Verification
+
+- `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` -> passed 168/168

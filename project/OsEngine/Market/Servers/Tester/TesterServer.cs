@@ -2175,15 +2175,18 @@ namespace OsEngine.Market.Servers.Tester
         {
             try
             {
-                using (StreamWriter writer = new StreamWriter(@"Engine\" + @"TestServerClearings.txt", false))
+                string[] clearings = new string[ClearingTimes.Count];
+                for (int i = 0; i < ClearingTimes.Count; i++)
                 {
-                    for (int i = 0; i < ClearingTimes.Count; i++)
-                    {
-                        writer.WriteLine(ClearingTimes[i].GetSaveString());
-                    }
-
-                    writer.Close();
+                    clearings[i] = ClearingTimes[i].GetSaveString();
                 }
+
+                SettingsManager.Save(
+                    GetClearingSettingsPath(),
+                    new TesterClearingsSettingsDto
+                    {
+                        Clearings = clearings
+                    });
             }
             catch (Exception)
             {
@@ -2193,34 +2196,65 @@ namespace OsEngine.Market.Servers.Tester
 
         private void LoadClearingInfo()
         {
-            if (!File.Exists(@"Engine\" + @"TestServerClearings.txt"))
-            {
-                return;
-            }
-
             try
             {
-                using (StreamReader reader = new StreamReader(@"Engine\" + @"TestServerClearings.txt"))
+                TesterClearingsSettingsDto settings = SettingsManager.Load(
+                    GetClearingSettingsPath(),
+                    defaultValue: null,
+                    legacyLoader: ParseLegacyClearingsSettings);
+
+                if (settings == null || settings.Clearings == null)
                 {
-                    while (reader.EndOfStream == false)
+                    return;
+                }
+
+                for (int i = 0; i < settings.Clearings.Length; i++)
+                {
+                    string str = settings.Clearings[i];
+
+                    if (str != "")
                     {
-                        string str = reader.ReadLine();
-
-                        if (str != "")
-                        {
-                            OrderClearing clearings = new OrderClearing();
-                            clearings.SetFromString(str);
-                            ClearingTimes.Add(clearings);
-                        }
+                        OrderClearing clearings = new OrderClearing();
+                        clearings.SetFromString(str);
+                        ClearingTimes.Add(clearings);
                     }
-
-                    reader.Close();
                 }
             }
             catch (Exception)
             {
                 // ignored
             }
+        }
+
+        private static string GetClearingSettingsPath()
+        {
+            return @"Engine\TestServerClearings.txt";
+        }
+
+        private static TesterClearingsSettingsDto ParseLegacyClearingsSettings(string content)
+        {
+            if (string.IsNullOrWhiteSpace(content))
+            {
+                return null;
+            }
+
+            string normalized = content.Replace("\r", string.Empty);
+            string[] lines = normalized.Split('\n');
+
+            if (lines.Length > 0 && lines[lines.Length - 1] == string.Empty)
+            {
+                Array.Resize(ref lines, lines.Length - 1);
+            }
+
+            return new TesterClearingsSettingsDto
+            {
+                Clearings = lines
+            };
+        }
+
+        private sealed class TesterClearingsSettingsDto
+        {
+            public string[] Clearings { get; set; }
         }
 
         public void CreateNewClearing()
