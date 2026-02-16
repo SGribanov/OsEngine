@@ -187,3 +187,23 @@
   - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` succeeded (`102/102`).
 - **Commit:** `aafd4bc8c`
 - **Push:** no (manual push by user)
+
+### Step 2.3 - JSON Settings Subsystem (Incremental Adoption #7)
+
+- **Status:** In Progress (increment completed)
+- **Plan item:** `refactoring_stage2_plan.md` -> Phase 2 / Step 2.3
+- **Changes:**
+  - Migrated AServer core settings persistence to JSON with legacy fallback:
+    - `project/OsEngine/Market/Servers/AServer.cs`
+  - Covered persisted file:
+    - `<ServerNameUnique>ServerSettings.txt`
+  - Added dedicated persistence tests:
+    - `project/OsEngine.Tests/AServerSettingsPersistenceTests.cs`
+      - `Save_ShouldPersistJson_AndLoadRoundTrip`
+      - `Load_ShouldSupportLegacyLineBasedFormat`
+  - Updated running progress journal:
+    - `refactoring_stage2_progress.md`
+- **Verification:**
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` succeeded (`104/104`).
+- **Commit:** `6cd0f6857`
+- **Push:** no (manual push by user)
