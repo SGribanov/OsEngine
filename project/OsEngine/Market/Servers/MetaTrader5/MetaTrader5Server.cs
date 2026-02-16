@@ -2010,11 +2010,13 @@ namespace OsEngine.Market.Servers.MetaTrader5
         {
             try
             {
-                using (StreamWriter writer = new StreamWriter(PositionsCachePath, false))
-                {
-                    string data = CompressionUtils.Compress(_dictionaryOpenPositions.ToJson());
-                    writer.WriteLine(data);
-                }
+                string data = CompressionUtils.Compress(_dictionaryOpenPositions.ToJson());
+                SettingsManager.Save(
+                    PositionsCachePath,
+                    new MetaTrader5PositionsCacheDto
+                    {
+                        CompressedData = data
+                    });
             }
             catch (Exception ex)
             {
@@ -2031,11 +2033,18 @@ namespace OsEngine.Market.Servers.MetaTrader5
                     return;
                 }
 
-                using (StreamReader reader = new StreamReader(PositionsCachePath))
+                MetaTrader5PositionsCacheDto settings = SettingsManager.Load(
+                    PositionsCachePath,
+                    defaultValue: null,
+                    legacyLoader: ParseLegacyPositionsCacheSettings);
+
+                if (settings == null || string.IsNullOrWhiteSpace(settings.CompressedData))
                 {
-                    string data = CompressionUtils.Decompress(reader.ReadToEnd());
-                    _dictionaryOpenPositions = JsonConvert.DeserializeObject<Dictionary<int, ulong>>(data);
+                    return;
                 }
+
+                string data = CompressionUtils.Decompress(settings.CompressedData);
+                _dictionaryOpenPositions = JsonConvert.DeserializeObject<Dictionary<int, ulong>>(data);
             }
             catch (Exception ex)
             {
@@ -2185,6 +2194,24 @@ namespace OsEngine.Market.Servers.MetaTrader5
         }
 
         private sealed class MetaTrader5SecuritiesCacheDto
+        {
+            public string CompressedData { get; set; }
+        }
+
+        private static MetaTrader5PositionsCacheDto ParseLegacyPositionsCacheSettings(string content)
+        {
+            if (string.IsNullOrWhiteSpace(content))
+            {
+                return null;
+            }
+
+            return new MetaTrader5PositionsCacheDto
+            {
+                CompressedData = content
+            };
+        }
+
+        private sealed class MetaTrader5PositionsCacheDto
         {
             public string CompressedData { get; set; }
         }

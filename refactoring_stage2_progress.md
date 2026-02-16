@@ -736,3 +736,18 @@
 ### Verification
 
 - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` -> passed 178/178
+
+## 2026-02-16 - Step 2.3 (JSON settings subsystem) - Incremental adoption in MetaTrader5 positions cache settings
+
+- Migrated `project/OsEngine/Market/Servers/MetaTrader5/MetaTrader5Server.cs` (`MetaTrader5PositionsCache.txt`) persistence to `SettingsManager`:
+  - private `SavePositionsInFile()` now writes JSON wrapper into `Engine\\MetaTrader5PositionsCache.txt`
+  - private `LoadPositionsFromFile()` now reads JSON and falls back to legacy raw compressed-string format
+  - preserved existing no-op behavior on missing cache file and current dictionary deserialization contract
+- Added tests `project/OsEngine.Tests/MetaTrader5PositionsCachePersistenceTests.cs`:
+  - `SavePositionsInFile_ShouldPersistJson_AndLoadRoundTrip`
+  - `LoadPositionsFromFile_ShouldSupportLegacyCompressedStringFormat`
+  - tests invoke private cache methods and backing dictionary field via reflection on uninitialized realization instance
+
+### Verification
+
+- `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` -> passed 180/180
