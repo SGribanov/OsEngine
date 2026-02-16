@@ -178,21 +178,27 @@ namespace OsEngine.Charts.CandleChart.Indicators
         /// </summary>
         public void Load()
         {
-            if (!File.Exists(@"Engine\" + Name + @".txt"))
+            if (!File.Exists(GetSettingsPath()))
             {
                 return;
             }
             try
             {
-                using (StreamReader reader = new StreamReader(@"Engine\" + Name + @".txt"))
+                PriceChannelSettingsDto settings = SettingsManager.Load(
+                    GetSettingsPath(),
+                    defaultValue: null,
+                    legacyLoader: ParseLegacySettings);
+
+                if (settings == null)
                 {
-                    ColorUp = Color.FromArgb(Convert.ToInt32(reader.ReadLine()));
-                    ColorDown = Color.FromArgb(Convert.ToInt32(reader.ReadLine()));
-                    LengthUpLine = Convert.ToInt32(reader.ReadLine());
-                    LengthDownLine = Convert.ToInt32(reader.ReadLine());
-                    PaintOn = Convert.ToBoolean(reader.ReadLine());
-                    reader.Close();
+                    return;
                 }
+
+                ColorUp = Color.FromArgb(settings.ColorUpArgb);
+                ColorDown = Color.FromArgb(settings.ColorDownArgb);
+                LengthUpLine = settings.LengthUpLine;
+                LengthDownLine = settings.LengthDownLine;
+                PaintOn = settings.PaintOn;
             }
             catch (Exception)
             {
@@ -213,15 +219,17 @@ namespace OsEngine.Charts.CandleChart.Indicators
                 {
                     return;
                 }
-                using (StreamWriter writer = new StreamWriter(@"Engine\" + Name + @".txt", false))
-                {
-                    writer.WriteLine(ColorUp.ToArgb());
-                    writer.WriteLine(ColorDown.ToArgb());
-                    writer.WriteLine(LengthUpLine);
-                    writer.WriteLine(LengthDownLine);
-                    writer.WriteLine(PaintOn);
-                    writer.Close();
-                }
+
+                SettingsManager.Save(
+                    GetSettingsPath(),
+                    new PriceChannelSettingsDto
+                    {
+                        ColorUpArgb = ColorUp.ToArgb(),
+                        ColorDownArgb = ColorDown.ToArgb(),
+                        LengthUpLine = LengthUpLine,
+                        LengthDownLine = LengthDownLine,
+                        PaintOn = PaintOn
+                    });
             }
             catch (Exception)
             {
@@ -236,10 +244,58 @@ namespace OsEngine.Charts.CandleChart.Indicators
         /// </summary>
         public void Delete()
         {
-            if (File.Exists(@"Engine\" + Name + @".txt"))
+            if (File.Exists(GetSettingsPath()))
             {
-                File.Delete(@"Engine\" + Name + @".txt");
+                File.Delete(GetSettingsPath());
             }
+        }
+
+        private string GetSettingsPath()
+        {
+            return @"Engine\" + Name + @".txt";
+        }
+
+        private static PriceChannelSettingsDto ParseLegacySettings(string content)
+        {
+            if (string.IsNullOrWhiteSpace(content))
+            {
+                return null;
+            }
+
+            string normalized = content.Replace("\r", string.Empty);
+            string[] lines = normalized.Split('\n');
+
+            if (lines.Length > 0 && lines[lines.Length - 1] == string.Empty)
+            {
+                Array.Resize(ref lines, lines.Length - 1);
+            }
+
+            if (lines.Length < 5)
+            {
+                return null;
+            }
+
+            return new PriceChannelSettingsDto
+            {
+                ColorUpArgb = Convert.ToInt32(lines[0]),
+                ColorDownArgb = Convert.ToInt32(lines[1]),
+                LengthUpLine = Convert.ToInt32(lines[2]),
+                LengthDownLine = Convert.ToInt32(lines[3]),
+                PaintOn = Convert.ToBoolean(lines[4])
+            };
+        }
+
+        private sealed class PriceChannelSettingsDto
+        {
+            public int ColorUpArgb { get; set; }
+
+            public int ColorDownArgb { get; set; }
+
+            public int LengthUpLine { get; set; }
+
+            public int LengthDownLine { get; set; }
+
+            public bool PaintOn { get; set; }
         }
 
         /// <summary>
