@@ -186,3 +186,17 @@
 ### Verification
 
 - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` -> passed 102/102
+
+## 2026-02-16 - Step 2.3 (JSON settings subsystem) - Incremental adoption in AServer core settings
+
+- Migrated `project/OsEngine/Market/Servers/AServer.cs` persistence to `SettingsManager`:
+  - `Save()` now stores `ServerPrefix` in JSON (`<ServerNameUnique>ServerSettings.txt`)
+  - `Load()` now reads JSON and falls back to legacy single-line format parser
+  - preserved existing behavior for missing/empty/invalid settings file
+- Added tests `project/OsEngine.Tests/AServerSettingsPersistenceTests.cs`:
+  - `Save_ShouldPersistJson_AndLoadRoundTrip`
+  - `Load_ShouldSupportLegacyLineBasedFormat`
+
+### Verification
+
+- `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` -> passed 104/104

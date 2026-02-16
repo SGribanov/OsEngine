@@ -1031,17 +1031,16 @@ namespace OsEngine.Market.Servers
         /// </summary>
         private void Load()
         {
-            if (!File.Exists(@"Engine\" + ServerNameUnique + @"ServerSettings.txt"))
-            {
-                return;
-            }
             try
             {
-                using (StreamReader reader = new StreamReader(@"Engine\" + ServerNameUnique + @"ServerSettings.txt"))
-                {
-                    _serverPrefix = reader.ReadLine();
+                ServerSettingsDto settings = SettingsManager.Load(
+                    GetServerSettingsPath(),
+                    defaultValue: null,
+                    legacyLoader: ParseLegacyServerSettings);
 
-                    reader.Close();
+                if (settings != null)
+                {
+                    _serverPrefix = settings.ServerPrefix;
                 }
             }
             catch
@@ -1057,14 +1056,48 @@ namespace OsEngine.Market.Servers
         {
             try
             {
-                SafeFileWriter.WriteAllLines(
-                    @"Engine\" + ServerNameUnique + @"ServerSettings.txt",
-                    new[] { _serverPrefix });
+                SettingsManager.Save(
+                    GetServerSettingsPath(),
+                    new ServerSettingsDto
+                    {
+                        ServerPrefix = _serverPrefix
+                    });
             }
             catch
             {
                 // ignore
             }
+        }
+
+        private string GetServerSettingsPath()
+        {
+            return @"Engine\" + ServerNameUnique + @"ServerSettings.txt";
+        }
+
+        private ServerSettingsDto ParseLegacyServerSettings(string content)
+        {
+            if (string.IsNullOrWhiteSpace(content))
+            {
+                return null;
+            }
+
+            string normalized = content.Replace("\r", string.Empty);
+            string[] lines = normalized.Split('\n');
+
+            if (lines.Length == 0)
+            {
+                return null;
+            }
+
+            return new ServerSettingsDto
+            {
+                ServerPrefix = lines[0]
+            };
+        }
+
+        private class ServerSettingsDto
+        {
+            public string ServerPrefix { get; set; }
         }
 
         /// <summary>
