@@ -246,9 +246,8 @@ namespace OsEngine.Logging
         {
             try
             {
-                string date = DateTime.Now.Year + "_" + DateTime.Now.Month + "_" + DateTime.Now.Day;
                 string path = Application.ExecutablePath.Replace("OsEngine.exe", "")
-                               + @"Engine\Log\" + _uniqName + @"Log_" + date + ".txt";
+                               + GetCurrentDayLogPath();
 
                 if (File.Exists(path) == false)
                 {
@@ -312,11 +311,10 @@ namespace OsEngine.Logging
             {
                 DeleteFromLogsToCheck(this);
 
-                string date = DateTime.Now.Year + "_" + DateTime.Now.Month + "_" + DateTime.Now.Day;
-
-                if (File.Exists(@"Engine\Log\" + _uniqName + @"Log_" + date + ".txt"))
+                string path = GetCurrentDayLogPath();
+                if (File.Exists(path))
                 {
-                    File.Delete(@"Engine\Log\" + _uniqName + @"Log_" + date + ".txt");
+                    File.Delete(path);
                 }
             }
 
@@ -792,9 +790,9 @@ namespace OsEngine.Logging
             {
                 return;
             }
-            if (!Directory.Exists(@"Engine\Log\"))
+            if (!Directory.Exists(GetLogsDirectoryPath()))
             {
-                Directory.CreateDirectory(@"Engine\Log\");
+                Directory.CreateDirectory(GetLogsDirectoryPath());
             }
 
             try
@@ -805,8 +803,7 @@ namespace OsEngine.Logging
                     return;
                 }
 
-                string date = DateTime.Now.Year + "_" + DateTime.Now.Month + "_" + DateTime.Now.Day;
-                string path = @"Engine\Log\" + _uniqName + @"Log_" + date + ".txt";
+                string path = GetCurrentDayLogPath();
 
                 using (StreamWriter writer = new StreamWriter(
                         path, true))
@@ -859,8 +856,7 @@ namespace OsEngine.Logging
         {
             try
             {
-                string date = DateTime.Now.Year + "_" + DateTime.Now.Month + "_" + DateTime.Now.Day;
-                string path = @"Engine\Log\" + _uniqName + @"Log_" + date + ".txt";
+                string path = GetCurrentDayLogPath();
 
                 if (!File.Exists(path))
                 {
@@ -927,6 +923,17 @@ namespace OsEngine.Logging
             }
 
             return null;
+        }
+
+        private static string GetLogsDirectoryPath()
+        {
+            return @"Engine\Log\";
+        }
+
+        private string GetCurrentDayLogPath()
+        {
+            string date = DateTime.Now.Year + "_" + DateTime.Now.Month + "_" + DateTime.Now.Day;
+            return GetLogsDirectoryPath() + _uniqName + @"Log_" + date + ".txt";
         }
 
         // distribution

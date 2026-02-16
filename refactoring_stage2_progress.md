@@ -2194,3 +2194,20 @@
 ### Verification
 
 - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` -> passed 343/343
+
+## 2026-02-16 - Step 2.3 (JSON settings subsystem) - Path consistency cleanup in Log daily-file flow
+
+- Updated `project/OsEngine/Logging/Log.cs`:
+  - centralized log storage paths via helper methods:
+    - `GetLogsDirectoryPath()`
+    - `GetCurrentDayLogPath()`
+  - replaced remaining inline `Engine\\Log\\...` path construction in:
+    - show-file action
+    - delete cleanup
+    - save thread
+    - load-last-day flow
+- No behavior changes intended; cleanup keeps daily log path construction centralized.
+
+### Verification
+
+- `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` -> passed 343/343
