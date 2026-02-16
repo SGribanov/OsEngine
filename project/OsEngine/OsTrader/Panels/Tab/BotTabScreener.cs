@@ -520,30 +520,34 @@ namespace OsEngine.OsTrader.Panels.Tab
         {
             try
             {
-                using (StreamWriter writer = new StreamWriter(@"Engine\" + TabName + @"ScreenerSet.txt", false))
+                List<string> securities = new List<string>();
+                for (int i = 0; i < SecuritiesNames.Count; i++)
                 {
-                    writer.WriteLine(PortfolioName);
-                    writer.WriteLine(SecuritiesClass);
-                    writer.WriteLine(TimeFrame);
-                    writer.WriteLine(ServerType + "&" + ServerName);
-                    writer.WriteLine(_emulatorIsOn);
-                    writer.WriteLine(CandleMarketDataType + "&" + MarketDepthBuildMaxSpread  + "&" + MarketDepthBuildMaxSpreadIsOn);
-                    writer.WriteLine(CandleCreateMethodType);
-                    writer.WriteLine(CommissionType);
-                    writer.WriteLine(CommissionValue);
-                    writer.WriteLine(SaveTradesInCandles);
-                    writer.WriteLine(_eventsIsOn);
-
-                    writer.WriteLine(CandleSeriesRealization.GetType().Name);
-                    writer.WriteLine(CandleSeriesRealization.GetSaveString());
-
-                    for (int i = 0; i < SecuritiesNames.Count; i++)
-                    {
-                        writer.WriteLine(SecuritiesNames[i].GetSaveStr());
-                    }
-
-                    writer.Close();
+                    securities.Add(SecuritiesNames[i].GetSaveStr());
                 }
+
+                SettingsManager.Save(
+                    GetScreenerSettingsPath(),
+                    new BotTabScreenerSettingsDto
+                    {
+                        PortfolioName = PortfolioName,
+                        SecuritiesClass = SecuritiesClass,
+                        TimeFrame = TimeFrame,
+                        ServerType = ServerType,
+                        ServerName = ServerName,
+                        EmulatorIsOn = _emulatorIsOn,
+                        CandleMarketDataType = CandleMarketDataType,
+                        MarketDepthBuildMaxSpread = MarketDepthBuildMaxSpread,
+                        MarketDepthBuildMaxSpreadIsOn = MarketDepthBuildMaxSpreadIsOn,
+                        CandleCreateMethodType = CandleCreateMethodType,
+                        CommissionType = CommissionType,
+                        CommissionValue = CommissionValue,
+                        SaveTradesInCandles = SaveTradesInCandles,
+                        EventsIsOn = _eventsIsOn,
+                        CandleSeriesRealizationName = CandleSeriesRealization?.GetType().Name,
+                        CandleSeriesRealizationSaveString = CandleSeriesRealization?.GetSaveString(),
+                        Securities = securities
+                    });
             }
             catch (Exception)
             {
@@ -556,7 +560,7 @@ namespace OsEngine.OsTrader.Panels.Tab
         /// </summary>
         public void LoadSettings()
         {
-            if (!File.Exists(@"Engine\" + TabName + @"ScreenerSet.txt"))
+            if (!File.Exists(GetScreenerSettingsPath()))
             {
                 _candleCreateMethodType = "Simple";
                 CandleSeriesRealization = CandleFactory.CreateCandleSeriesRealization("Simple");
@@ -565,73 +569,59 @@ namespace OsEngine.OsTrader.Panels.Tab
             }
             try
             {
-                using (StreamReader reader = new StreamReader(@"Engine\" + TabName + @"ScreenerSet.txt"))
+                BotTabScreenerSettingsDto settings = SettingsManager.Load(
+                    GetScreenerSettingsPath(),
+                    defaultValue: null,
+                    legacyLoader: ParseLegacyScreenerSettings);
+
+                if (settings == null)
                 {
-                    PortfolioName = reader.ReadLine();
-                    SecuritiesClass = reader.ReadLine();
+                    return;
+                }
 
-                    Enum.TryParse(reader.ReadLine(), out TimeFrame);
+                PortfolioName = settings.PortfolioName;
+                SecuritiesClass = settings.SecuritiesClass;
+                TimeFrame = settings.TimeFrame;
+                ServerType = settings.ServerType;
+                ServerName = string.IsNullOrEmpty(settings.ServerName)
+                    ? ServerType.ToString()
+                    : settings.ServerName;
+                _emulatorIsOn = settings.EmulatorIsOn;
+                CandleMarketDataType = settings.CandleMarketDataType;
+                MarketDepthBuildMaxSpread = settings.MarketDepthBuildMaxSpread;
+                MarketDepthBuildMaxSpreadIsOn = settings.MarketDepthBuildMaxSpreadIsOn;
 
-                    string server = reader.ReadLine();
+                CandleCreateMethodType = string.IsNullOrEmpty(settings.CandleCreateMethodType)
+                    ? "Simple"
+                    : settings.CandleCreateMethodType;
 
-                    Enum.TryParse(server.Split('&')[0], out ServerType);
+                CommissionType = settings.CommissionType;
+                CommissionValue = settings.CommissionValue;
+                SaveTradesInCandles = settings.SaveTradesInCandles;
+                _eventsIsOn = settings.EventsIsOn;
 
-                    if (server.Split('&').Length > 1)
+                string seriesName = string.IsNullOrEmpty(settings.CandleSeriesRealizationName)
+                    ? "Simple"
+                    : settings.CandleSeriesRealizationName;
+                CandleSeriesRealization = CandleFactory.CreateCandleSeriesRealization(seriesName);
+                CandleSeriesRealization.Init(_startProgram);
+                CandleSeriesRealization.SetSaveString(settings.CandleSeriesRealizationSaveString);
+
+                if (settings.Securities != null)
+                {
+                    for (int i = 0; i < settings.Securities.Count; i++)
                     {
-                        ServerName = server.Split('&')[1];
-                    }
-                    else
-                    {
-                        ServerName = ServerType.ToString();
-                    }
+                        string str = settings.Securities[i];
 
-                    _emulatorIsOn = Convert.ToBoolean(reader.ReadLine());
-
-                    string[] candleMarketDataType = reader.ReadLine().Split('&');
-
-                    Enum.TryParse(candleMarketDataType[0], out CandleMarketDataType);
-
-                    if(candleMarketDataType.Length > 1)
-                    {
-                        MarketDepthBuildMaxSpread = candleMarketDataType[1].ToDecimal();
-                        MarketDepthBuildMaxSpreadIsOn = Convert.ToBoolean(candleMarketDataType[2]);
-                    }
-
-                    CandleCreateMethodType = reader.ReadLine();
-
-                    try
-                    {
-                        Enum.TryParse(reader.ReadLine(), out CommissionType);
-                        CommissionValue = reader.ReadLine().ToDecimal();
-                        SaveTradesInCandles = Convert.ToBoolean(reader.ReadLine());
-                        _eventsIsOn = Convert.ToBoolean(reader.ReadLine());
-
-                        string seriesName = reader.ReadLine();
-                        CandleSeriesRealization = CandleFactory.CreateCandleSeriesRealization(seriesName);
-                        CandleSeriesRealization.Init(_startProgram);
-                        CandleSeriesRealization.SetSaveString(reader.ReadLine());
-                    }
-                    catch
-                    {
-                        // ignore
-                    }
-
-
-
-                    while (reader.EndOfStream == false)
-                    {
-                        string str = reader.ReadLine();
-
-                        if (string.IsNullOrEmpty(str))
+                        if (string.IsNullOrWhiteSpace(str))
                         {
                             continue;
                         }
+
                         ActivatedSecurity sec = new ActivatedSecurity();
                         sec.SetFromStr(str);
                         SecuritiesNames.Add(sec);
                     }
-
-                    reader.Close();
                 }
             }
             catch (Exception)
@@ -2007,6 +1997,120 @@ namespace OsEngine.OsTrader.Panels.Tab
             {
                 // ignore
             }
+        }
+
+        private string GetScreenerSettingsPath()
+        {
+            return @"Engine\" + TabName + @"ScreenerSet.txt";
+        }
+
+        private static BotTabScreenerSettingsDto ParseLegacyScreenerSettings(string content)
+        {
+            if (string.IsNullOrWhiteSpace(content))
+            {
+                return null;
+            }
+
+            string[] lines = content.Replace("\r", string.Empty).Split('\n');
+
+            BotTabScreenerSettingsDto settings = new BotTabScreenerSettingsDto
+            {
+                CandleCreateMethodType = "Simple",
+                CandleSeriesRealizationName = "Simple",
+                Securities = new List<string>()
+            };
+
+            if (lines.Length > 0) settings.PortfolioName = lines[0];
+            if (lines.Length > 1) settings.SecuritiesClass = lines[1];
+            if (lines.Length > 2 && Enum.TryParse(lines[2], out TimeFrame parsedTimeFrame))
+            {
+                settings.TimeFrame = parsedTimeFrame;
+            }
+
+            if (lines.Length > 3)
+            {
+                string[] server = lines[3].Split('&');
+                if (server.Length > 0)
+                {
+                    if (Enum.TryParse(server[0], out ServerType parsedServerType))
+                    {
+                        settings.ServerType = parsedServerType;
+                    }
+                }
+
+                if (server.Length > 1)
+                {
+                    settings.ServerName = server[1];
+                }
+                else
+                {
+                    settings.ServerName = settings.ServerType.ToString();
+                }
+            }
+
+            if (lines.Length > 4) settings.EmulatorIsOn = Convert.ToBoolean(lines[4]);
+
+            if (lines.Length > 5)
+            {
+                string[] candleMarketDataType = lines[5].Split('&');
+                if (candleMarketDataType.Length > 0)
+                {
+                    if (Enum.TryParse(candleMarketDataType[0], out CandleMarketDataType parsedCandleMarketDataType))
+                    {
+                        settings.CandleMarketDataType = parsedCandleMarketDataType;
+                    }
+                }
+
+                if (candleMarketDataType.Length > 2)
+                {
+                    settings.MarketDepthBuildMaxSpread = candleMarketDataType[1].ToDecimal();
+                    settings.MarketDepthBuildMaxSpreadIsOn = Convert.ToBoolean(candleMarketDataType[2]);
+                }
+            }
+
+            if (lines.Length > 6) settings.CandleCreateMethodType = lines[6];
+            if (lines.Length > 7 && Enum.TryParse(lines[7], out CommissionType parsedCommissionType))
+            {
+                settings.CommissionType = parsedCommissionType;
+            }
+            if (lines.Length > 8) settings.CommissionValue = lines[8].ToDecimal();
+            if (lines.Length > 9) settings.SaveTradesInCandles = Convert.ToBoolean(lines[9]);
+            if (lines.Length > 10) settings.EventsIsOn = Convert.ToBoolean(lines[10]);
+            if (lines.Length > 11) settings.CandleSeriesRealizationName = lines[11];
+            if (lines.Length > 12) settings.CandleSeriesRealizationSaveString = lines[12];
+
+            for (int i = 13; i < lines.Length; i++)
+            {
+                if (string.IsNullOrWhiteSpace(lines[i]))
+                {
+                    continue;
+                }
+
+                settings.Securities.Add(lines[i]);
+            }
+
+            return settings;
+        }
+
+        private sealed class BotTabScreenerSettingsDto
+        {
+            public string PortfolioName { get; set; }
+            public string SecuritiesClass { get; set; }
+            public TimeFrame TimeFrame { get; set; }
+            public ServerType ServerType { get; set; }
+            public string ServerName { get; set; }
+            public bool EmulatorIsOn { get; set; }
+            public CandleMarketDataType CandleMarketDataType { get; set; }
+            public decimal MarketDepthBuildMaxSpread { get; set; }
+            public bool MarketDepthBuildMaxSpreadIsOn { get; set; }
+            public string CandleCreateMethodType { get; set; }
+            public CommissionType CommissionType { get; set; }
+            public decimal CommissionValue { get; set; }
+            public bool SaveTradesInCandles { get; set; }
+            public bool EventsIsOn { get; set; }
+            public string CandleSeriesRealizationName { get; set; }
+            public string CandleSeriesRealizationSaveString { get; set; }
+            public List<string> Securities { get; set; }
         }
 
         private string GetIndicatorsPath()

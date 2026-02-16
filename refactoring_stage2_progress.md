@@ -916,3 +916,18 @@
 ### Verification
 
 - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` -> passed 202/202
+
+## 2026-02-16 - Step 2.3 (JSON settings subsystem) - Incremental adoption in BotTabScreener core settings
+
+- Migrated `project/OsEngine/OsTrader/Panels/Tab/BotTabScreener.cs` (`Engine\\<TabName>ScreenerSet.txt`) persistence to `SettingsManager`:
+  - public `SaveSettings()` now writes JSON DTO with screener/tab/candle/commission/security settings
+  - public `LoadSettings()` now reads JSON and falls back to legacy line-based parser
+  - preserved default fallback behavior for missing/corrupted settings (`Simple` candle realization)
+- Added tests `project/OsEngine.Tests/BotTabScreenerSettingsPersistenceTests.cs`:
+  - `SaveSettings_ShouldPersistJson_AndLoadRoundTrip`
+  - `LoadSettings_ShouldSupportLegacyLineBasedFormat`
+  - tests use uninitialized screener instance with reflection-based setup and backup/restore of screener settings file
+
+### Verification
+
+- `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` -> passed 204/204
