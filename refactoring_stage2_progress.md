@@ -2183,3 +2183,14 @@
 ### Verification
 
 - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` -> passed 343/343
+
+## 2026-02-16 - Step 2.3 (JSON settings subsystem) - Path consistency cleanup in PolygonServer securities cache flow
+
+- Updated `project/OsEngine/Market/Servers/Polygon/PolygonServer.cs`:
+  - centralized Polygon securities cache path into helper `GetSecuritiesCachePath()`
+  - replaced remaining inline `Engine\\PolygonSecurities.csv` path usage in read/write flows
+- No behavior changes intended; cleanup removes path duplication and keeps cache path maintenance localized.
+
+### Verification
+
+- `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` -> passed 343/343

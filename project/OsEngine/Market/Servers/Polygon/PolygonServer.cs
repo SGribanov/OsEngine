@@ -222,14 +222,14 @@ namespace OsEngine.Market.Servers.Polygon
 
                 List<Security> securities = new List<Security>();
 
-                if (!File.Exists(@"Engine\PolygonSecurities.csv"))
+                if (!File.Exists(GetSecuritiesCachePath()))
                 {
                     return;
                 }
 
                 List<string> list = new List<string>();
 
-                using (StreamReader reader = new StreamReader(@"Engine\PolygonSecurities.csv"))
+                using (StreamReader reader = new StreamReader(GetSecuritiesCachePath()))
                 {
                     string line;
 
@@ -337,7 +337,7 @@ namespace OsEngine.Market.Servers.Polygon
         {
             try
             {                
-                using (StreamWriter writer = new StreamWriter(@"Engine\PolygonSecurities.csv", resave))
+                using (StreamWriter writer = new StreamWriter(GetSecuritiesCachePath(), resave))
                 {                    
                     for (int i = 0; i < response.results.Count; i++)
                     {
@@ -356,6 +356,11 @@ namespace OsEngine.Market.Servers.Polygon
             {
                 SendLogMessage($"SaveSecurityToFile: {ex.Message}", LogMessageType.Error);
             }
+        }
+
+        private static string GetSecuritiesCachePath()
+        {
+            return @"Engine\PolygonSecurities.csv";
         }
 
         public event Action<List<Security>> SecurityEvent;
