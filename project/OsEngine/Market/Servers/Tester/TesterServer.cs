@@ -342,11 +342,13 @@ namespace OsEngine.Market.Servers.Tester
         {
             try
             {
-                using (StreamWriter writer = new StreamWriter(GetSecurityTestSettingsPath(), false))
-                {
-                    writer.WriteLine(TimeStart.ToString(CultureInfo));
-                    writer.WriteLine(TimeEnd.ToString(CultureInfo));
-                }
+                SettingsManager.Save(
+                    GetSecurityTestSettingsPath(),
+                    new TesterSecurityTestSettingsDto
+                    {
+                        TimeStart = TimeStart,
+                        TimeEnd = TimeEnd
+                    });
             }
             catch (Exception)
             {
@@ -359,29 +361,62 @@ namespace OsEngine.Market.Servers.Tester
             try
             {
                 string pathToSettings = GetSecurityTestSettingsPath();
-                if (!File.Exists(pathToSettings))
-                {
-                    return;
-                }
+                TesterSecurityTestSettingsDto settings = SettingsManager.Load(
+                    pathToSettings,
+                    defaultValue: null,
+                    legacyLoader: ParseLegacySecurityTestSettings);
 
-                using (StreamReader reader = new StreamReader(pathToSettings))
+                if (settings != null)
                 {
-                    string timeStart = reader.ReadLine();
-                    if (timeStart != null)
-                    {
-                        TimeStart = Convert.ToDateTime(timeStart, CultureInfo);
-                    }
-                    string timeEnd = reader.ReadLine();
-                    if (timeEnd != null)
-                    {
-                        TimeEnd = Convert.ToDateTime(timeEnd, CultureInfo);
-                    }
+                    TimeStart = settings.TimeStart;
+                    TimeEnd = settings.TimeEnd;
                 }
             }
             catch (Exception)
             {
                 // ignored
             }
+        }
+
+        private static TesterSecurityTestSettingsDto ParseLegacySecurityTestSettings(string content)
+        {
+            if (string.IsNullOrWhiteSpace(content))
+            {
+                return null;
+            }
+
+            string normalized = content.Replace("\r", string.Empty);
+            string[] lines = normalized.Split('\n');
+
+            if (lines.Length > 0 && lines[lines.Length - 1] == string.Empty)
+            {
+                Array.Resize(ref lines, lines.Length - 1);
+            }
+
+            DateTime timeStart = DateTime.MinValue;
+            if (lines.Length > 0 && !string.IsNullOrWhiteSpace(lines[0]))
+            {
+                timeStart = Convert.ToDateTime(lines[0], CultureInfo);
+            }
+
+            DateTime timeEnd = DateTime.MinValue;
+            if (lines.Length > 1 && !string.IsNullOrWhiteSpace(lines[1]))
+            {
+                timeEnd = Convert.ToDateTime(lines[1], CultureInfo);
+            }
+
+            return new TesterSecurityTestSettingsDto
+            {
+                TimeStart = timeStart,
+                TimeEnd = timeEnd
+            };
+        }
+
+        private sealed class TesterSecurityTestSettingsDto
+        {
+            public DateTime TimeStart { get; set; }
+
+            public DateTime TimeEnd { get; set; }
         }
 
         private string GetSecurityTestSettingsPath()

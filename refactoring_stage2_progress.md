@@ -631,3 +631,18 @@
 ### Verification
 
 - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` -> passed 164/164
+
+## 2026-02-16 - Step 2.3 (JSON settings subsystem) - Incremental adoption in TesterServer security test settings
+
+- Migrated `project/OsEngine/Market/Servers/Tester/TesterServer.cs` (`SecurityTestSettings.txt`) persistence to `SettingsManager`:
+  - `SaveSecurityTestSettings()` now writes JSON to dynamic `...\\SecurityTestSettings.txt` path
+  - `LoadSecurityTestSettings()` now reads JSON and falls back to legacy 2-line date format parser
+  - preserved path resolution logic based on `TesterSourceDataType` (`Set`/`Folder`)
+- Added tests `project/OsEngine.Tests/TesterServerSecurityTestSettingsPersistenceTests.cs`:
+  - `SaveSecurityTestSettings_ShouldPersistJson_AndLoadRoundTrip`
+  - `LoadSecurityTestSettings_ShouldSupportLegacyLineBasedFormat`
+  - tests use uninitialized instance with reflection-based folder-mode configuration
+
+### Verification
+
+- `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` -> passed 166/166
