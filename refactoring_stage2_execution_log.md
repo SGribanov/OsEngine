@@ -2562,3 +2562,23 @@
   - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` succeeded (`326/326`).
 - **Commit:** `71342ca1b`
 - **Push:** no (manual push by user)
+
+### Step 2.3 - JSON Settings Subsystem (Incremental Adoption #124)
+
+- **Status:** In Progress (increment completed)
+- **Plan item:** `refactoring_stage2_plan.md` -> Phase 2 / Step 2.3
+- **Changes:**
+  - Migrated `PolygonToTrade` settings persistence in:
+    - `project/OsEngine/OsTrader/Panels/Tab/BotTabPolygon.cs`
+  - `Save()` and `Load()` now use `SettingsManager` DTO JSON.
+  - Added legacy parser for old line-based ordered format:
+    - `ParseLegacyPolygonToTradeSettings(string content)`
+  - Centralized `PolygonToTrade` settings file path via helper and reused it in load/save/delete.
+  - Added tests:
+    - `project/OsEngine.Tests/PolygonToTradeSettingsPersistenceTests.cs`
+  - Updated running progress journal:
+    - `refactoring_stage2_progress.md`
+- **Verification:**
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` succeeded (`328/328`).
+- **Commit:** `a86937cc1`
+- **Push:** no (manual push by user)
