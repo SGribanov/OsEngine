@@ -34,7 +34,7 @@ namespace OsEngine.Charts.CandleChart.Indicators
             ColorDown = Color.DarkRed;
             PaintOn = true;
 
-            if (!File.Exists(@"Engine\" + Name + @".txt"))
+            if (!File.Exists(GetSettingsPath()))
             {// если у нас первая загрузка
                 _maShort = new MovingAverage(uniqName + "ma1", false) { Length = 12, TypeCalculationAverage = MovingAverageTypeCalculation.Exponential };
                 _maLong = new MovingAverage(uniqName + "ma2", false) { Length = 26, TypeCalculationAverage = MovingAverageTypeCalculation.Exponential };
@@ -198,13 +198,14 @@ namespace OsEngine.Charts.CandleChart.Indicators
                     return;
                 }
 
-                using (StreamWriter writer = new StreamWriter(@"Engine\" + Name + @".txt", false))
-                {
-                    writer.WriteLine(ColorUp.ToArgb());
-                    writer.WriteLine(ColorDown.ToArgb());
-                    writer.WriteLine(PaintOn);
-                    writer.Close();
-                }
+                SettingsManager.Save(
+                    GetSettingsPath(),
+                    new MacdHistogramSettingsDto
+                    {
+                        ColorUpArgb = ColorUp.ToArgb(),
+                        ColorDownArgb = ColorDown.ToArgb(),
+                        PaintOn = PaintOn
+                    });
             }
             catch (Exception)
             {
@@ -219,23 +220,25 @@ namespace OsEngine.Charts.CandleChart.Indicators
         /// </summary>
         public void Load()
         {
-            if (!File.Exists(@"Engine\" + Name + @".txt"))
+            if (!File.Exists(GetSettingsPath()))
             {
                 return;
             }
             try
             {
+                MacdHistogramSettingsDto settings = SettingsManager.Load(
+                    GetSettingsPath(),
+                    defaultValue: null,
+                    legacyLoader: ParseLegacySettings);
 
-                using (StreamReader reader = new StreamReader(@"Engine\" + Name + @".txt"))
+                if (settings == null)
                 {
-                    ColorUp = Color.FromArgb(Convert.ToInt32(reader.ReadLine()));
-                    ColorDown = Color.FromArgb(Convert.ToInt32(reader.ReadLine()));
-                    PaintOn = Convert.ToBoolean(reader.ReadLine());
-                    reader.ReadLine();
-
-                    reader.Close();
+                    return;
                 }
 
+                ColorUp = Color.FromArgb(settings.ColorUpArgb);
+                ColorDown = Color.FromArgb(settings.ColorDownArgb);
+                PaintOn = settings.PaintOn;
 
             }
             catch (Exception)
@@ -251,13 +254,55 @@ namespace OsEngine.Charts.CandleChart.Indicators
         /// </summary>
         public void Delete()
         {
-            if (File.Exists(@"Engine\" + Name + @".txt"))
+            if (File.Exists(GetSettingsPath()))
             {
-                File.Delete(@"Engine\" + Name + @".txt");
+                File.Delete(GetSettingsPath());
             }
             _maShort.Delete();
             _maLong.Delete();
             _maSignal.Delete();
+        }
+
+        private string GetSettingsPath()
+        {
+            return @"Engine\" + Name + @".txt";
+        }
+
+        private static MacdHistogramSettingsDto ParseLegacySettings(string content)
+        {
+            if (string.IsNullOrWhiteSpace(content))
+            {
+                return null;
+            }
+
+            string normalized = content.Replace("\r", string.Empty);
+            string[] lines = normalized.Split('\n');
+
+            if (lines.Length > 0 && lines[lines.Length - 1] == string.Empty)
+            {
+                Array.Resize(ref lines, lines.Length - 1);
+            }
+
+            if (lines.Length < 3)
+            {
+                return null;
+            }
+
+            return new MacdHistogramSettingsDto
+            {
+                ColorUpArgb = Convert.ToInt32(lines[0]),
+                ColorDownArgb = Convert.ToInt32(lines[1]),
+                PaintOn = Convert.ToBoolean(lines[2])
+            };
+        }
+
+        private sealed class MacdHistogramSettingsDto
+        {
+            public int ColorUpArgb { get; set; }
+
+            public int ColorDownArgb { get; set; }
+
+            public bool PaintOn { get; set; }
         }
 
         /// <summary>

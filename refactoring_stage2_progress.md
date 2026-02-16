@@ -1703,3 +1703,18 @@
 ### Verification
 
 - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` -> passed 306/306
+
+## 2026-02-16 - Step 2.3 (JSON settings subsystem) - Incremental adoption in MacdHistogram indicator settings
+
+- Migrated `project/OsEngine/Charts/CandleChart/Indicators/MacdHistogram.cs` (`Engine\\<Name>.txt`) persistence to `SettingsManager`:
+  - `Save()` now writes JSON DTO with `ColorUp`, `ColorDown`, and `PaintOn`
+  - `Load()` now reads JSON and falls back to legacy line-based parser
+  - kept nested moving average persistence behavior (`<Name>ma1`, `<Name>ma2`, `<Name>maSignal`)
+- Added tests `project/OsEngine.Tests/MacdHistogramPersistenceTests.cs`:
+  - `Save_ShouldPersistJson_AndLoadRoundTrip`
+  - `Load_ShouldSupportLegacyLineBasedFormat`
+  - tests use backup/restore for indicator settings file and nested MA settings files
+
+### Verification
+
+- `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` -> passed 308/308
