@@ -90,3 +90,21 @@
   - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` succeeded (`90/90`).
 - **Commit:** `5e94ce9e6`
 - **Push:** no (manual push by user)
+
+### Step 2.3 - JSON Settings Subsystem (Incremental Adoption #2)
+
+- **Status:** In Progress (increment completed)
+- **Plan item:** `refactoring_stage2_plan.md` -> Phase 2 / Step 2.3
+- **Changes:**
+  - Migrated `NonTradePeriods` persistence to JSON with legacy fallback:
+    - `project/OsEngine/Entity/NonTradePeriods.cs`
+  - Added dedicated persistence tests:
+    - `project/OsEngine.Tests/NonTradePeriodsPersistenceTests.cs`
+      - `Save_ShouldPersistJson_AndLoadRoundTrip`
+      - `Load_ShouldSupportLegacyLineBasedFormat`
+  - Updated running progress journal:
+    - `refactoring_stage2_progress.md`
+- **Verification:**
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` succeeded (`92/92`).
+- **Commit:** pending local commit in current session
+- **Push:** no (manual push by user)

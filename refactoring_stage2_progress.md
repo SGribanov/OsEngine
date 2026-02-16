@@ -113,3 +113,18 @@
 ### Verification
 
 - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` -> passed 90/90
+
+## 2026-02-16 - Step 2.3 (JSON settings subsystem) - Incremental adoption in NonTradePeriods
+
+- Migrated `project/OsEngine/Entity/NonTradePeriods.cs` persistence to `SettingsManager`:
+  - `Save()` now writes JSON via `SettingsManager.Save(...)`
+  - `Load()` now reads via `SettingsManager.Load(...)`
+  - added legacy fallback parser for old line-based format (`GetFullSaveArray`-compatible)
+  - preserved existing in-memory model and `LoadFromString...` application flow
+- Added tests `project/OsEngine.Tests/NonTradePeriodsPersistenceTests.cs`:
+  - `Save_ShouldPersistJson_AndLoadRoundTrip`
+  - `Load_ShouldSupportLegacyLineBasedFormat`
+
+### Verification
+
+- `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` -> passed 92/92

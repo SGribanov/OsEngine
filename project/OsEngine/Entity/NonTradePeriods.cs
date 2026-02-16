@@ -38,18 +38,8 @@ namespace OsEngine.Entity
         {
             try
             {
-                using (StreamWriter writer = new StreamWriter(@"Engine\" + NameUnique + ".txt", false))
-                {
-
-                    List<string> array = GetFullSaveArray();
-
-                    for(int i = 0;i < array.Count;i++)
-                    {
-                        writer.WriteLine(array[i]);
-                    }
-
-                    writer.Close();
-                }
+                NonTradePeriodsSettingsDto settings = CreateSettingsSnapshot();
+                SettingsManager.Save(GetStoragePath(), settings);
             }
             catch (Exception ex)
             {
@@ -59,36 +49,149 @@ namespace OsEngine.Entity
 
         public void Load()
         {
-            if (!File.Exists(@"Engine\" + NameUnique + ".txt"))
-            {
-                return;
-            }
             try
             {
-                using (StreamReader reader = new StreamReader(@"Engine\" + NameUnique + ".txt"))
-                {
-                    LoadFromStringDays(reader.ReadLine());
+                NonTradePeriodsSettingsDto settings = SettingsManager.Load(
+                    GetStoragePath(),
+                    defaultValue: null,
+                    legacyLoader: ParseLegacySettings);
 
-                    NonTradePeriodGeneral.LoadFromString(reader.ReadLine());
-
-                    if(reader.EndOfStream == false)
-                    {
-                        NonTradePeriodMonday.LoadFromString(reader.ReadLine());
-                        NonTradePeriodTuesday.LoadFromString(reader.ReadLine());
-                        NonTradePeriodWednesday.LoadFromString(reader.ReadLine());
-                        NonTradePeriodThursday.LoadFromString(reader.ReadLine());
-                        NonTradePeriodFriday.LoadFromString(reader.ReadLine());
-                        NonTradePeriodSaturday.LoadFromString(reader.ReadLine());
-                        NonTradePeriodSunday.LoadFromString(reader.ReadLine());
-                    }
-
-                    reader.Close();
-                }
+                ApplySettings(settings);
             }
             catch (Exception ex)
             {
                 SendNewLogMessage(ex.ToString(), LogMessageType.Error);
             }
+        }
+
+        private string GetStoragePath()
+        {
+            return @"Engine\" + NameUnique + ".txt";
+        }
+
+        private NonTradePeriodsSettingsDto CreateSettingsSnapshot()
+        {
+            return new NonTradePeriodsSettingsDto
+            {
+                DaysLine = GetSaveStringDays(),
+                GeneralLine = NonTradePeriodGeneral.GetSaveString(),
+                MondayLine = NonTradePeriodMonday.GetSaveString(),
+                TuesdayLine = NonTradePeriodTuesday.GetSaveString(),
+                WednesdayLine = NonTradePeriodWednesday.GetSaveString(),
+                ThursdayLine = NonTradePeriodThursday.GetSaveString(),
+                FridayLine = NonTradePeriodFriday.GetSaveString(),
+                SaturdayLine = NonTradePeriodSaturday.GetSaveString(),
+                SundayLine = NonTradePeriodSunday.GetSaveString()
+            };
+        }
+
+        private NonTradePeriodsSettingsDto ParseLegacySettings(string content)
+        {
+            if (string.IsNullOrWhiteSpace(content))
+            {
+                return null;
+            }
+
+            string normalized = content.Replace("\r", string.Empty);
+            string[] lines = normalized.Split('\n');
+            int lineCount = lines.Length;
+
+            while (lineCount > 0 && string.IsNullOrEmpty(lines[lineCount - 1]))
+            {
+                lineCount--;
+            }
+
+            if (lineCount == 0)
+            {
+                return null;
+            }
+
+            return new NonTradePeriodsSettingsDto
+            {
+                DaysLine = lineCount > 0 ? lines[0] : null,
+                GeneralLine = lineCount > 1 ? lines[1] : null,
+                MondayLine = lineCount > 2 ? lines[2] : null,
+                TuesdayLine = lineCount > 3 ? lines[3] : null,
+                WednesdayLine = lineCount > 4 ? lines[4] : null,
+                ThursdayLine = lineCount > 5 ? lines[5] : null,
+                FridayLine = lineCount > 6 ? lines[6] : null,
+                SaturdayLine = lineCount > 7 ? lines[7] : null,
+                SundayLine = lineCount > 8 ? lines[8] : null
+            };
+        }
+
+        private void ApplySettings(NonTradePeriodsSettingsDto settings)
+        {
+            if (settings == null)
+            {
+                return;
+            }
+
+            if (string.IsNullOrWhiteSpace(settings.DaysLine) == false)
+            {
+                LoadFromStringDays(settings.DaysLine);
+            }
+
+            if (string.IsNullOrWhiteSpace(settings.GeneralLine) == false)
+            {
+                NonTradePeriodGeneral.LoadFromString(settings.GeneralLine);
+            }
+
+            if (string.IsNullOrWhiteSpace(settings.MondayLine) == false)
+            {
+                NonTradePeriodMonday.LoadFromString(settings.MondayLine);
+            }
+
+            if (string.IsNullOrWhiteSpace(settings.TuesdayLine) == false)
+            {
+                NonTradePeriodTuesday.LoadFromString(settings.TuesdayLine);
+            }
+
+            if (string.IsNullOrWhiteSpace(settings.WednesdayLine) == false)
+            {
+                NonTradePeriodWednesday.LoadFromString(settings.WednesdayLine);
+            }
+
+            if (string.IsNullOrWhiteSpace(settings.ThursdayLine) == false)
+            {
+                NonTradePeriodThursday.LoadFromString(settings.ThursdayLine);
+            }
+
+            if (string.IsNullOrWhiteSpace(settings.FridayLine) == false)
+            {
+                NonTradePeriodFriday.LoadFromString(settings.FridayLine);
+            }
+
+            if (string.IsNullOrWhiteSpace(settings.SaturdayLine) == false)
+            {
+                NonTradePeriodSaturday.LoadFromString(settings.SaturdayLine);
+            }
+
+            if (string.IsNullOrWhiteSpace(settings.SundayLine) == false)
+            {
+                NonTradePeriodSunday.LoadFromString(settings.SundayLine);
+            }
+        }
+
+        private class NonTradePeriodsSettingsDto
+        {
+            public string DaysLine { get; set; }
+
+            public string GeneralLine { get; set; }
+
+            public string MondayLine { get; set; }
+
+            public string TuesdayLine { get; set; }
+
+            public string WednesdayLine { get; set; }
+
+            public string ThursdayLine { get; set; }
+
+            public string FridayLine { get; set; }
+
+            public string SaturdayLine { get; set; }
+
+            public string SundayLine { get; set; }
         }
 
         public List<string> GetFullSaveArray()
