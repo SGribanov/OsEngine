@@ -10,7 +10,6 @@ using OsEngine.Market;
 using OsEngine.Market.Servers;
 using System;
 using System.Collections.Generic;
-using System.Globalization;
 using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
@@ -139,49 +138,44 @@ namespace OsEngine.OsTrader.Panels.Tab.Internal
         /// </summary>
         private bool Load()
         {
-            if (!File.Exists(@"Engine\" + _name + @"StrategSettings.txt"))
+            string path = GetSettingsPath();
+
+            if (!File.Exists(path))
             {
                 return false;
             }
             try
             {
-                using (StreamReader reader = new StreamReader(@"Engine\" + _name + @"StrategSettings.txt"))
+                BotManualControlSettingsDto settings = SettingsManager.Load(
+                    path,
+                    defaultValue: null,
+                    legacyLoader: ParseLegacySettings);
+
+                if (settings == null)
                 {
-
-                    StopIsOn = Convert.ToBoolean(reader.ReadLine());
-                    StopDistance = reader.ReadLine().ToDecimal();
-                    StopSlippage = reader.ReadLine().ToDecimal();
-                    ProfitIsOn = Convert.ToBoolean(reader.ReadLine());
-                    ProfitDistance = reader.ReadLine().ToDecimal();
-                    ProfitSlippage = reader.ReadLine().ToDecimal();
-                    TimeSpan.TryParse(reader.ReadLine(), out _secondToOpen);
-                    TimeSpan.TryParse(reader.ReadLine(), out _secondToClose);
-
-                    DoubleExitIsOn = Convert.ToBoolean(reader.ReadLine());
-
-                    SecondToOpenIsOn = Convert.ToBoolean(reader.ReadLine());
-                    SecondToCloseIsOn = Convert.ToBoolean(reader.ReadLine());
-
-                    SetbackToOpenIsOn = Convert.ToBoolean(reader.ReadLine());
-                    SetbackToOpenPosition = reader.ReadLine().ToDecimal();
-                    SetbackToCloseIsOn = Convert.ToBoolean(reader.ReadLine());
-                    SetbackToClosePosition = reader.ReadLine().ToDecimal();
-
-                    DoubleExitSlippage = reader.ReadLine().ToDecimal();
-                    Enum.TryParse(reader.ReadLine(), out TypeDoubleExitOrder);
-                    Enum.TryParse(reader.ReadLine(), out ValuesType);
-                    Enum.TryParse(reader.ReadLine(), out OrderTypeTime);
-
-                    try
-                    {
-                        LimitsMakerOnly = Convert.ToBoolean(reader.ReadLine());
-                    }
-                    catch
-                    {
-                        // ignore
-                    }
-
+                    return true;
                 }
+
+                StopIsOn = settings.StopIsOn;
+                StopDistance = settings.StopDistance;
+                StopSlippage = settings.StopSlippage;
+                ProfitIsOn = settings.ProfitIsOn;
+                ProfitDistance = settings.ProfitDistance;
+                ProfitSlippage = settings.ProfitSlippage;
+                _secondToOpen = settings.SecondToOpen;
+                _secondToClose = settings.SecondToClose;
+                DoubleExitIsOn = settings.DoubleExitIsOn;
+                SecondToOpenIsOn = settings.SecondToOpenIsOn;
+                SecondToCloseIsOn = settings.SecondToCloseIsOn;
+                SetbackToOpenIsOn = settings.SetbackToOpenIsOn;
+                SetbackToOpenPosition = settings.SetbackToOpenPosition;
+                SetbackToCloseIsOn = settings.SetbackToCloseIsOn;
+                SetbackToClosePosition = settings.SetbackToClosePosition;
+                DoubleExitSlippage = settings.DoubleExitSlippage;
+                TypeDoubleExitOrder = settings.TypeDoubleExitOrder;
+                ValuesType = settings.ValuesType;
+                OrderTypeTime = settings.OrderTypeTime;
+                LimitsMakerOnly = settings.LimitsMakerOnly;
             }
             catch (Exception error)
             {
@@ -202,7 +196,7 @@ namespace OsEngine.OsTrader.Panels.Tab.Internal
 
             try
             {
-                string path = @"Engine\" + _name + @"StrategSettings.txt";
+                string path = GetSettingsPath();
 
                 string dir = Path.GetDirectoryName(path);
 
@@ -211,38 +205,153 @@ namespace OsEngine.OsTrader.Panels.Tab.Internal
                     Directory.CreateDirectory(dir);
                 }
 
-                using (StreamWriter writer = new StreamWriter(path, false))
-                {
-                    CultureInfo myCultureInfo = new CultureInfo("ru-RU");
-                    writer.WriteLine(StopIsOn);
-                    writer.WriteLine(StopDistance.ToString(myCultureInfo));
-                    writer.WriteLine(StopSlippage.ToString(myCultureInfo));
-                    writer.WriteLine(ProfitIsOn.ToString(myCultureInfo));
-                    writer.WriteLine(ProfitDistance.ToString(myCultureInfo));
-                    writer.WriteLine(ProfitSlippage.ToString(myCultureInfo));
-                    writer.WriteLine(SecondToOpen.ToString());
-                    writer.WriteLine(SecondToClose.ToString());
-
-                    writer.WriteLine(DoubleExitIsOn);
-
-                    writer.WriteLine(SecondToOpenIsOn);
-                    writer.WriteLine(SecondToCloseIsOn);
-
-                    writer.WriteLine(SetbackToOpenIsOn);
-                    writer.WriteLine(SetbackToOpenPosition);
-                    writer.WriteLine(SetbackToCloseIsOn);
-                    writer.WriteLine(SetbackToClosePosition);
-                    writer.WriteLine(DoubleExitSlippage);
-                    writer.WriteLine(TypeDoubleExitOrder);
-                    writer.WriteLine(ValuesType);
-                    writer.WriteLine(OrderTypeTime);
-                    writer.WriteLine(LimitsMakerOnly);
-                }
+                SettingsManager.Save(
+                    path,
+                    new BotManualControlSettingsDto
+                    {
+                        StopIsOn = StopIsOn,
+                        StopDistance = StopDistance,
+                        StopSlippage = StopSlippage,
+                        ProfitIsOn = ProfitIsOn,
+                        ProfitDistance = ProfitDistance,
+                        ProfitSlippage = ProfitSlippage,
+                        SecondToOpen = _secondToOpen,
+                        SecondToClose = _secondToClose,
+                        DoubleExitIsOn = DoubleExitIsOn,
+                        SecondToOpenIsOn = SecondToOpenIsOn,
+                        SecondToCloseIsOn = SecondToCloseIsOn,
+                        SetbackToOpenIsOn = SetbackToOpenIsOn,
+                        SetbackToOpenPosition = SetbackToOpenPosition,
+                        SetbackToCloseIsOn = SetbackToCloseIsOn,
+                        SetbackToClosePosition = SetbackToClosePosition,
+                        DoubleExitSlippage = DoubleExitSlippage,
+                        TypeDoubleExitOrder = TypeDoubleExitOrder,
+                        ValuesType = ValuesType,
+                        OrderTypeTime = OrderTypeTime,
+                        LimitsMakerOnly = LimitsMakerOnly
+                    });
             }
             catch (Exception error)
             {
                 SendNewLogMessage(error.ToString(), LogMessageType.Error);
             }
+        }
+
+        private string GetSettingsPath()
+        {
+            return @"Engine\" + _name + @"StrategSettings.txt";
+        }
+
+        private static BotManualControlSettingsDto ParseLegacySettings(string content)
+        {
+            if (string.IsNullOrWhiteSpace(content))
+            {
+                return null;
+            }
+
+            string normalized = content.Replace("\r", string.Empty);
+            string[] lines = normalized.Split('\n');
+
+            if (lines.Length > 0 && lines[lines.Length - 1] == string.Empty)
+            {
+                Array.Resize(ref lines, lines.Length - 1);
+            }
+
+            TimeSpan secondToOpen = TimeSpan.Zero;
+            TimeSpan.TryParse(GetLineAt(lines, 6), out secondToOpen);
+
+            TimeSpan secondToClose = TimeSpan.Zero;
+            TimeSpan.TryParse(GetLineAt(lines, 7), out secondToClose);
+
+            OrderPriceType typeDoubleExitOrder = OrderPriceType.Limit;
+            Enum.TryParse(GetLineAt(lines, 16), out typeDoubleExitOrder);
+
+            ManualControlValuesType valuesType = ManualControlValuesType.MinPriceStep;
+            Enum.TryParse(GetLineAt(lines, 17), out valuesType);
+
+            OrderTypeTime orderTypeTime = OrderTypeTime.Specified;
+            Enum.TryParse(GetLineAt(lines, 18), out orderTypeTime);
+
+            bool limitsMakerOnly = false;
+            string makerOnly = GetLineAt(lines, 19);
+            if (!string.IsNullOrEmpty(makerOnly))
+            {
+                bool.TryParse(makerOnly, out limitsMakerOnly);
+            }
+
+            return new BotManualControlSettingsDto
+            {
+                StopIsOn = TryParseBool(GetLineAt(lines, 0)),
+                StopDistance = TryParseDecimal(GetLineAt(lines, 1)),
+                StopSlippage = TryParseDecimal(GetLineAt(lines, 2)),
+                ProfitIsOn = TryParseBool(GetLineAt(lines, 3)),
+                ProfitDistance = TryParseDecimal(GetLineAt(lines, 4)),
+                ProfitSlippage = TryParseDecimal(GetLineAt(lines, 5)),
+                SecondToOpen = secondToOpen,
+                SecondToClose = secondToClose,
+                DoubleExitIsOn = TryParseBool(GetLineAt(lines, 8)),
+                SecondToOpenIsOn = TryParseBool(GetLineAt(lines, 9)),
+                SecondToCloseIsOn = TryParseBool(GetLineAt(lines, 10)),
+                SetbackToOpenIsOn = TryParseBool(GetLineAt(lines, 11)),
+                SetbackToOpenPosition = TryParseDecimal(GetLineAt(lines, 12)),
+                SetbackToCloseIsOn = TryParseBool(GetLineAt(lines, 13)),
+                SetbackToClosePosition = TryParseDecimal(GetLineAt(lines, 14)),
+                DoubleExitSlippage = TryParseDecimal(GetLineAt(lines, 15)),
+                TypeDoubleExitOrder = typeDoubleExitOrder,
+                ValuesType = valuesType,
+                OrderTypeTime = orderTypeTime,
+                LimitsMakerOnly = limitsMakerOnly
+            };
+        }
+
+        private static string GetLineAt(string[] lines, int index)
+        {
+            if (lines == null || index >= lines.Length)
+            {
+                return string.Empty;
+            }
+
+            return lines[index];
+        }
+
+        private static bool TryParseBool(string value)
+        {
+            return !string.IsNullOrEmpty(value)
+                && value.Equals("true", StringComparison.OrdinalIgnoreCase);
+        }
+
+        private static decimal TryParseDecimal(string value)
+        {
+            if (string.IsNullOrWhiteSpace(value))
+            {
+                return 0;
+            }
+
+            return value.ToDecimal();
+        }
+
+        private sealed class BotManualControlSettingsDto
+        {
+            public bool StopIsOn { get; set; }
+            public decimal StopDistance { get; set; }
+            public decimal StopSlippage { get; set; }
+            public bool ProfitIsOn { get; set; }
+            public decimal ProfitDistance { get; set; }
+            public decimal ProfitSlippage { get; set; }
+            public TimeSpan SecondToOpen { get; set; }
+            public TimeSpan SecondToClose { get; set; }
+            public bool DoubleExitIsOn { get; set; }
+            public bool SecondToOpenIsOn { get; set; }
+            public bool SecondToCloseIsOn { get; set; }
+            public bool SetbackToOpenIsOn { get; set; }
+            public decimal SetbackToOpenPosition { get; set; }
+            public bool SetbackToCloseIsOn { get; set; }
+            public decimal SetbackToClosePosition { get; set; }
+            public decimal DoubleExitSlippage { get; set; }
+            public OrderPriceType TypeDoubleExitOrder { get; set; }
+            public ManualControlValuesType ValuesType { get; set; }
+            public OrderTypeTime OrderTypeTime { get; set; }
+            public bool LimitsMakerOnly { get; set; }
         }
 
         /// <summary>

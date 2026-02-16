@@ -386,3 +386,18 @@
 ### Verification
 
 - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` -> passed 130/130
+
+## 2026-02-16 - Step 2.3 (JSON settings subsystem) - Incremental adoption in BotManualControl settings
+
+- Migrated `project/OsEngine/OsTrader/Panels/Tab/Internal/BotManualControl.cs` persistence to `SettingsManager`:
+  - `Save()` now writes JSON into `Engine\\<name>StrategSettings.txt`
+  - private `Load()` now reads JSON and falls back to legacy line-based parser
+  - preserved original `Load()` contract (`false` only when file is missing)
+- Added tests `project/OsEngine.Tests/BotManualControlPersistenceTests.cs`:
+  - `Save_ShouldPersistJson_AndLoadRoundTrip`
+  - `Load_ShouldSupportLegacyLineBasedFormat`
+  - tests use uninitialized instance + reflection to avoid constructor side effects
+
+### Verification
+
+- `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` -> passed 132/132
