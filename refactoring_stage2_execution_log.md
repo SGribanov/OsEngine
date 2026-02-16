@@ -1294,3 +1294,23 @@
   - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` succeeded (`214/214`).
 - **Commit:** `f8f43d786`
 - **Push:** no (manual push by user)
+
+### Step 2.3 - JSON Settings Subsystem (Incremental Adoption #62)
+
+- **Status:** In Progress (increment completed)
+- **Plan item:** `refactoring_stage2_plan.md` -> Phase 2 / Step 2.3
+- **Changes:**
+  - Migrated Cmo indicator settings persistence to JSON with legacy fallback:
+    - `project/OsEngine/Charts/CandleChart/Indicators/Cmo.cs`
+  - Covered persisted file:
+    - dynamic `Engine\\<Name>.txt` path (`Cmo` indicator)
+  - Added dedicated persistence tests:
+    - `project/OsEngine.Tests/CmoPersistenceTests.cs`
+      - `Save_ShouldPersistJson_AndLoadRoundTrip`
+      - `Load_ShouldSupportLegacyLineBasedFormat`
+  - Updated running progress journal:
+    - `refactoring_stage2_progress.md`
+- **Verification:**
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` succeeded (`216/216`).
+- **Commit:** `894d83a8c`
+- **Push:** no (manual push by user)
