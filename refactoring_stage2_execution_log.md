@@ -1677,3 +1677,23 @@
   - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` succeeded (`252/252`).
 - **Commit:** `64e1e006d`
 - **Push:** no (manual push by user)
+
+### Step 2.3 - JSON Settings Subsystem (Incremental Adoption #81)
+
+- **Status:** In Progress (increment completed)
+- **Plan item:** `refactoring_stage2_plan.md` -> Phase 2 / Step 2.3
+- **Changes:**
+  - Migrated OnBalanceVolume indicator settings persistence to JSON with legacy fallback:
+    - `project/OsEngine/Charts/CandleChart/Indicators/OnBalanceVolume.cs`
+  - Covered persisted file:
+    - dynamic `Engine\\<Name>.txt` path (`OnBalanceVolume` indicator)
+  - Added dedicated persistence tests:
+    - `project/OsEngine.Tests/OnBalanceVolumePersistenceTests.cs`
+      - `Save_ShouldPersistJson_AndLoadRoundTrip`
+      - `Load_ShouldSupportLegacyLineBasedFormat`
+  - Updated running progress journal:
+    - `refactoring_stage2_progress.md`
+- **Verification:**
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` succeeded (`254/254`).
+- **Commit:** `3c33432d9`
+- **Push:** no (manual push by user)
