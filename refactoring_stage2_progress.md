@@ -1952,3 +1952,19 @@
 ### Verification
 
 - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` -> passed 328/328
+
+## 2026-02-16 - Step 2.3 (JSON settings subsystem) - TradeGridsMaster settings migrated to JSON with legacy compatibility
+
+- Updated `project/OsEngine/OsTrader/Grids/TradeGridsMaster.cs`:
+  - migrated grid-settings persistence from line-based file IO to `SettingsManager`
+  - `SaveGrids()` now persists DTO JSON (`TradeGridsMasterSettingsDto`)
+  - `LoadGrids()` now loads via `SettingsManager.Load(..., legacyLoader: ParseLegacyGridsSettings)`
+  - added helper `GetGridsSettingsPath()` and applied it in save/load/delete sites
+  - added legacy parser `ParseLegacyGridsSettings(string content)` for old line-based format
+- Added tests in `project/OsEngine.Tests/TradeGridsMasterPersistenceTests.cs`:
+  - verifies JSON persistence from `SaveGrids()`
+  - verifies legacy line-based parser behavior
+
+### Verification
+
+- `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` -> passed 330/330

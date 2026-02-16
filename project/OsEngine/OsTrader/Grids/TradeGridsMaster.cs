@@ -64,9 +64,9 @@ namespace OsEngine.OsTrader.Grids
 
             try
             {
-                if (File.Exists(@"Engine\" + _nameBot + @"GridsSettings.txt"))
+                if (File.Exists(GetGridsSettingsPath()))
                 {
-                    File.Delete(@"Engine\" + _nameBot + @"GridsSettings.txt");
+                    File.Delete(GetGridsSettingsPath());
                 }
             }
             catch (Exception)
@@ -266,15 +266,23 @@ namespace OsEngine.OsTrader.Grids
 
             try
             {
-                using (StreamWriter writer = new StreamWriter(@"Engine\" + _nameBot + @"GridsSettings.txt", false))
+                List<string> gridSaveStrings = new List<string>();
+                for (int i = 0; i < TradeGrids.Count; i++)
                 {
-                    for (int i = 0; i < TradeGrids.Count; i++)
+                    if (TradeGrids[i] == null)
                     {
-                        writer.WriteLine(TradeGrids[i].GetSaveString());
+                        continue;
                     }
 
-                    writer.Close();
+                    gridSaveStrings.Add(TradeGrids[i].GetSaveString());
                 }
+
+                SettingsManager.Save(
+                    GetGridsSettingsPath(),
+                    new TradeGridsMasterSettingsDto
+                    {
+                        GridSaveStrings = gridSaveStrings
+                    });
             }
             catch (Exception)
             {
@@ -290,42 +298,73 @@ namespace OsEngine.OsTrader.Grids
                 return;
             }
 
-            if (!File.Exists(@"Engine\" + _nameBot + @"GridsSettings.txt"))
+            if (!File.Exists(GetGridsSettingsPath()))
             {
                 return;
             }
             try
             {
-                using (StreamReader reader = new StreamReader(@"Engine\" + _nameBot + @"GridsSettings.txt"))
+                TradeGridsMasterSettingsDto settings = SettingsManager.Load(
+                    GetGridsSettingsPath(),
+                    defaultValue: null,
+                    legacyLoader: ParseLegacyGridsSettings);
+
+                if (settings == null
+                    || settings.GridSaveStrings == null)
                 {
-                    while (reader.EndOfStream == false)
+                    return;
+                }
+
+                for (int i = 0; i < settings.GridSaveStrings.Count; i++)
+                {
+                    string gridSettings = settings.GridSaveStrings[i];
+
+                    if (string.IsNullOrEmpty(gridSettings))
                     {
-                        string settings = reader.ReadLine();
-
-                        if (string.IsNullOrEmpty(settings) == true)
-                        {
-                            continue;
-                        }
-
-                        int num = Convert.ToInt32(settings.Split('@')[0]);
-
-                        TradeGrid newGrid = new TradeGrid(_startProgram, _tab, num);
-
-                        newGrid.NeedToSaveEvent += NewGrid_NeedToSaveEvent;
-                        newGrid.LogMessageEvent += SendNewLogMessage;
-                        newGrid.RePaintSettingsEvent += NewGrid_UpdateTableEvent;
-
-                        newGrid.LoadFromString(settings);
-                        TradeGrids.Add(newGrid);
+                        continue;
                     }
 
-                    reader.Close();
+                    int num = Convert.ToInt32(gridSettings.Split('@')[0]);
+
+                    TradeGrid newGrid = new TradeGrid(_startProgram, _tab, num);
+
+                    newGrid.NeedToSaveEvent += NewGrid_NeedToSaveEvent;
+                    newGrid.LogMessageEvent += SendNewLogMessage;
+                    newGrid.RePaintSettingsEvent += NewGrid_UpdateTableEvent;
+
+                    newGrid.LoadFromString(gridSettings);
+                    TradeGrids.Add(newGrid);
                 }
             }
             catch (Exception)
             {
                 // ignore
             }
+        }
+
+        private string GetGridsSettingsPath()
+        {
+            return @"Engine\" + _nameBot + @"GridsSettings.txt";
+        }
+
+        private static TradeGridsMasterSettingsDto ParseLegacyGridsSettings(string content)
+        {
+            if (string.IsNullOrWhiteSpace(content))
+            {
+                return null;
+            }
+
+            string[] lines = content.Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries);
+
+            return new TradeGridsMasterSettingsDto
+            {
+                GridSaveStrings = new List<string>(lines)
+            };
+        }
+
+        private sealed class TradeGridsMasterSettingsDto
+        {
+            public List<string> GridSaveStrings { get; set; }
         }
 
         #endregion
