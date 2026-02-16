@@ -609,3 +609,26 @@
   - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` succeeded (`144/144`).
 - **Commit:** `108e3d16e`
 - **Push:** no (manual push by user)
+
+### Step 2.3 - JSON Settings Subsystem (Incremental Adoption #28)
+
+- **Status:** In Progress (increment completed)
+- **Plan item:** `refactoring_stage2_plan.md` -> Phase 2 / Step 2.3
+- **Changes:**
+  - Migrated block interface settings persistence to JSON with legacy fallback:
+    - `project/OsEngine/OsTrader/Gui/BlockInterface/BlockMaster.cs`
+  - Covered persisted files:
+    - `Engine\\PrimeSettingss.txt`
+    - `Engine\\PrimeSettingsss.txt`
+  - Added dedicated persistence tests:
+    - `project/OsEngine.Tests/BlockMasterPersistenceTests.cs`
+      - `Password_ShouldPersistJson_AndLoadRoundTrip`
+      - `Password_ShouldSupportLegacyLineBasedFormat`
+      - `IsBlocked_ShouldPersistJson_AndLoadRoundTrip`
+      - `IsBlocked_ShouldSupportLegacyLineBasedFormat`
+  - Updated running progress journal:
+    - `refactoring_stage2_progress.md`
+- **Verification:**
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` succeeded (`148/148`).
+- **Commit:** `648bca710`
+- **Push:** no (manual push by user)
