@@ -86,41 +86,31 @@ namespace OsEngine.Market.Connectors
         /// </summary>
         private void Load()
         {
-            if (!File.Exists(@"Engine\" + _name + @"ConnectorPrime.txt"))
+            if (!File.Exists(SettingsPath))
             {
                 return;
             }
             try
             {
-                using (StreamReader reader = new StreamReader(@"Engine\" + _name + @"ConnectorPrime.txt"))
+                ConnectorCandlesSettings settings = SettingsManager.Load(
+                    SettingsPath,
+                    defaultValue: null,
+                    legacyLoader: ParseLegacySettings);
+
+                if (settings == null)
                 {
-
-                    PortfolioName = reader.ReadLine();
-                    EmulatorIsOn = Convert.ToBoolean(reader.ReadLine());
-                    _securityName = reader.ReadLine();
-                    Enum.TryParse(reader.ReadLine(), true, out ServerType);
-                    _securityClass = reader.ReadLine();
-
-                    if (reader.EndOfStream == false)
-                    {
-                        _eventsIsOn = Convert.ToBoolean(reader.ReadLine());
-                    }
-                    else
-                    {
-                        _eventsIsOn = true;
-                    }
-
-                    if (reader.EndOfStream == false)
-                    {
-                        ServerFullName = reader.ReadLine();
-                    }
-                    else
-                    {
-                        ServerFullName = ServerType.ToString();
-                    }
-
-                    reader.Close();
+                    return;
                 }
+
+                PortfolioName = settings.PortfolioName;
+                EmulatorIsOn = settings.EmulatorIsOn;
+                _securityName = settings.SecurityName;
+                ServerType = settings.ServerType;
+                _securityClass = settings.SecurityClass;
+                _eventsIsOn = settings.EventsIsOn;
+                ServerFullName = string.IsNullOrWhiteSpace(settings.ServerFullName)
+                    ? settings.ServerType.ToString()
+                    : settings.ServerFullName;
             }
             catch
             {
@@ -144,18 +134,18 @@ namespace OsEngine.Market.Connectors
             }
             try
             {
-                using (StreamWriter writer = new StreamWriter(@"Engine\" + _name + @"ConnectorPrime.txt", false))
-                {
-                    writer.WriteLine(PortfolioName);
-                    writer.WriteLine(EmulatorIsOn);
-                    writer.WriteLine(SecurityName);
-                    writer.WriteLine(ServerType);
-                    writer.WriteLine(SecurityClass);
-                    writer.WriteLine(EventsIsOn);
-                    writer.WriteLine(ServerFullName);
-
-                    writer.Close();
-                }
+                SettingsManager.Save(
+                    SettingsPath,
+                    new ConnectorCandlesSettings
+                    {
+                        PortfolioName = PortfolioName,
+                        EmulatorIsOn = EmulatorIsOn,
+                        SecurityName = SecurityName,
+                        ServerType = ServerType,
+                        SecurityClass = SecurityClass,
+                        EventsIsOn = EventsIsOn,
+                        ServerFullName = ServerFullName
+                    });
             }
             catch
             {
@@ -179,9 +169,9 @@ namespace OsEngine.Market.Connectors
             {
                 try
                 {
-                    if (File.Exists(@"Engine\" + _name + @"ConnectorPrime.txt"))
+                    if (File.Exists(SettingsPath))
                     {
-                        File.Delete(@"Engine\" + _name + @"ConnectorPrime.txt");
+                        File.Delete(SettingsPath);
                     }
                 }
                 catch
@@ -2234,6 +2224,53 @@ namespace OsEngine.Market.Connectors
         public event Action<string, LogMessageType> LogMessageEvent;
 
         #endregion
+
+        private string SettingsPath => @"Engine\" + _name + @"ConnectorPrime.txt";
+
+        private static ConnectorCandlesSettings ParseLegacySettings(string content)
+        {
+            if (string.IsNullOrWhiteSpace(content))
+            {
+                return null;
+            }
+
+            string[] lines = content.Replace("\r", string.Empty).Split('\n');
+
+            if (lines.Length < 5)
+            {
+                return null;
+            }
+
+            Enum.TryParse(lines[3], true, out ServerType serverType);
+
+            return new ConnectorCandlesSettings
+            {
+                PortfolioName = lines[0],
+                EmulatorIsOn = Convert.ToBoolean(lines[1]),
+                SecurityName = lines[2],
+                ServerType = serverType,
+                SecurityClass = lines[4],
+                EventsIsOn = lines.Length > 5 ? Convert.ToBoolean(lines[5]) : true,
+                ServerFullName = lines.Length > 6 ? lines[6] : serverType.ToString()
+            };
+        }
+
+        private sealed class ConnectorCandlesSettings
+        {
+            public string PortfolioName { get; set; }
+
+            public bool EmulatorIsOn { get; set; }
+
+            public string SecurityName { get; set; }
+
+            public ServerType ServerType { get; set; }
+
+            public string SecurityClass { get; set; }
+
+            public bool EventsIsOn { get; set; }
+
+            public string ServerFullName { get; set; }
+        }
     }
 
     /// <summary>

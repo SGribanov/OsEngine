@@ -796,3 +796,18 @@
 ### Verification
 
 - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` -> passed 186/186
+
+## 2026-02-16 - Step 2.3 (JSON settings subsystem) - Incremental adoption in ConnectorCandles settings
+
+- Migrated `project/OsEngine/Market/Connectors/ConnectorCandles.cs` (`<name>ConnectorPrime.txt`) persistence to `SettingsManager`:
+  - private `Load()` now reads JSON and falls back to legacy line-based parser
+  - public `Save()` now writes JSON into dynamic `Engine\\<name>ConnectorPrime.txt` path
+  - preserved legacy optional-line behavior (`EventsIsOn` default `true`, `ServerFullName` default `ServerType.ToString()`)
+- Added tests `project/OsEngine.Tests/ConnectorCandlesSettingsPersistenceTests.cs`:
+  - `Save_ShouldPersistJson_AndLoadRoundTrip`
+  - `Load_ShouldSupportLegacyLineBasedFormat_WithOptionalFieldsMissing`
+  - tests invoke private loader and backing fields via reflection on uninitialized instance (without starting subscription task)
+
+### Verification
+
+- `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` -> passed 188/188
