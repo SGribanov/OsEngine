@@ -1672,3 +1672,19 @@
 ### Verification
 
 - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` -> passed 302/302
+
+## 2026-02-16 - Step 2.3 (JSON settings subsystem) - Incremental adoption in ParabolicSaR indicator settings
+
+- Migrated `project/OsEngine/Charts/CandleChart/Indicators/ParabolicSAR.cs` (`Engine\\<Name>.txt`) persistence to `SettingsManager`:
+  - `Save()` now writes JSON DTO with `ColorUp`, `ColorDown`, `Af`, `MaxAf`, and paint flag
+  - `Load()` now reads JSON and falls back to legacy line-based parser
+  - preserved compatibility with legacy files that may contain an extra trailing line
+  - hardened legacy `double` parsing to support both current-culture and invariant formats
+- Added tests `project/OsEngine.Tests/ParabolicSarPersistenceTests.cs`:
+  - `Save_ShouldPersistJson_AndLoadRoundTrip`
+  - `Load_ShouldSupportLegacyLineBasedFormat_WithOptionalTrailingLine`
+  - tests use file backup/restore around indicator settings path
+
+### Verification
+
+- `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` -> passed 304/304
