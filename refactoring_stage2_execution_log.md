@@ -2153,3 +2153,25 @@
   - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` succeeded (`298/298`).
 - **Commit:** `fcc2d80c4`
 - **Push:** no (manual push by user)
+
+### Step 2.3 - JSON Settings Subsystem (Incremental Adoption #104)
+
+- **Status:** In Progress (increment completed)
+- **Plan item:** `refactoring_stage2_plan.md` -> Phase 2 / Step 2.3
+- **Changes:**
+  - Migrated AwesomeOscillator indicator settings persistence to JSON with legacy fallback:
+    - `project/OsEngine/Charts/CandleChart/Indicators/AwesomeOscillator.cs`
+  - Covered persisted file:
+    - dynamic `Engine\\<Name>.txt` path (`AwesomeOscillator` indicator)
+  - Preserved legacy compatibility for historical field ordering:
+    - `ColorUp`, `ColorDown`, short/long lengths, `PaintOn`, `TypeCalculationAverage`
+  - Added dedicated persistence tests:
+    - `project/OsEngine.Tests/AwesomeOscillatorPersistenceTests.cs`
+      - `Save_ShouldPersistJson_AndLoadRoundTrip`
+      - `Load_ShouldSupportLegacyLineBasedFormat`
+  - Updated running progress journal:
+    - `refactoring_stage2_progress.md`
+- **Verification:**
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` succeeded (`300/300`).
+- **Commit:** `860aeeac4`
+- **Push:** no (manual push by user)
