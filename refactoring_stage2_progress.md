@@ -766,3 +766,18 @@
 ### Verification
 
 - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` -> passed 182/182
+
+## 2026-02-16 - Step 2.3 (JSON settings subsystem) - Incremental adoption in ProxyMaster proxy hub settings
+
+- Migrated `project/OsEngine/Market/Proxy/ProxyMaster.cs` (`ProxyHub.txt`) persistence to `SettingsManager`:
+  - private `LoadProxy()` now reads JSON and falls back to legacy line-based parser
+  - public `SaveProxy()` now writes JSON wrapper into `Engine\\ProxyHub.txt`
+  - preserved existing proxy serialization contract via `ProxyOsa.GetStringToSave()/LoadFromString()`
+- Added tests `project/OsEngine.Tests/ProxyMasterProxyHubPersistenceTests.cs`:
+  - `SaveProxy_ShouldPersistJson_AndLoadRoundTrip`
+  - `LoadProxy_ShouldSupportLegacyLineBasedFormat`
+  - tests invoke private loader via reflection with backup/restore of `Engine\\ProxyHub.txt`
+
+### Verification
+
+- `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` -> passed 184/184

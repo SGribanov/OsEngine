@@ -21,6 +21,7 @@ namespace OsEngine.Market.Proxy
     public class ProxyMaster
     {
         private static readonly string ProxyMasterSettingsPath = @"Engine\ProxyMaster.txt";
+        private static readonly string ProxyHubPath = @"Engine\ProxyHub.txt";
 
         public void Activate()
         {
@@ -141,6 +142,11 @@ namespace OsEngine.Market.Proxy
             public DateTime AutoPingLastTime { get; set; }
 
             public int AutoPingMinutes { get; set; }
+        }
+
+        private sealed class ProxyHubSettings
+        {
+            public List<string> ProxyLines { get; set; }
         }
 
         #region Proxy hub
@@ -264,29 +270,34 @@ namespace OsEngine.Market.Proxy
 
         private void LoadProxy()
         {
-            if (!File.Exists(@"Engine\" + @"ProxyHub.txt"))
+            if (!File.Exists(ProxyHubPath))
             {
                 return;
             }
             try
             {
-                using (StreamReader reader = new StreamReader(@"Engine\" + @"ProxyHub.txt"))
+                ProxyHubSettings settings = SettingsManager.Load(
+                    ProxyHubPath,
+                    defaultValue: null,
+                    legacyLoader: ParseLegacyProxyHubSettings);
+
+                if (settings?.ProxyLines == null)
                 {
-                    while(reader.EndOfStream == false)
+                    return;
+                }
+
+                for (int i = 0; i < settings.ProxyLines.Count; i++)
+                {
+                    string line = settings.ProxyLines[i];
+
+                    if (string.IsNullOrWhiteSpace(line))
                     {
-                        string line = reader.ReadLine();
-
-                        if(string.IsNullOrEmpty(line))
-                        {
-                            continue;
-                        }
-
-                        ProxyOsa newProxy = new ProxyOsa();
-                        newProxy.LoadFromString(line);
-                        Proxies.Add(newProxy);
+                        continue;
                     }
 
-                    reader.Close();
+                    ProxyOsa newProxy = new ProxyOsa();
+                    newProxy.LoadFromString(line);
+                    Proxies.Add(newProxy);
                 }
             }
             catch
@@ -299,20 +310,39 @@ namespace OsEngine.Market.Proxy
         {
             try
             {
-                using (StreamWriter writer = new StreamWriter(@"Engine\" + @"ProxyHub.txt", false))
-                {
-                    for (int i = 0; i < Proxies.Count; i++)
-                    {
-                        writer.WriteLine(Proxies[i].GetStringToSave());
-                    }
+                List<string> lines = new List<string>();
 
-                    writer.Close();
+                for (int i = 0; i < Proxies.Count; i++)
+                {
+                    lines.Add(Proxies[i].GetStringToSave());
                 }
+
+                SettingsManager.Save(
+                    ProxyHubPath,
+                    new ProxyHubSettings
+                    {
+                        ProxyLines = lines
+                    });
             }
             catch (Exception error)
             {
                 SendLogMessage(error.ToString(), LogMessageType.Error);
             }
+        }
+
+        private static ProxyHubSettings ParseLegacyProxyHubSettings(string content)
+        {
+            if (string.IsNullOrWhiteSpace(content))
+            {
+                return null;
+            }
+
+            string[] lines = content.Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries);
+
+            return new ProxyHubSettings
+            {
+                ProxyLines = new List<string>(lines)
+            };
         }
 
         public ProxyOsa CreateNewProxy()
