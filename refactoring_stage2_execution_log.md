@@ -652,3 +652,25 @@
   - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` succeeded (`150/150`).
 - **Commit:** `6c391aaf1`
 - **Push:** no (manual push by user)
+
+### Step 2.3 - JSON Settings Subsystem (Incremental Adoption #30)
+
+- **Status:** In Progress (increment completed)
+- **Plan item:** `refactoring_stage2_plan.md` -> Phase 2 / Step 2.3
+- **Changes:**
+  - Migrated ATP securities cache persistence to JSON with legacy fallback:
+    - `project/OsEngine/Market/Servers/Atp/AtpServer.cs` (`AtpServerRealization`)
+  - Covered persisted file:
+    - `Engine\\AtpSecurities.txt`
+  - Added dedicated persistence tests:
+    - `project/OsEngine.Tests/AtpServerSecuritiesPersistenceTests.cs`
+      - `SaveSecurities_ShouldPersistJson_AndLoadRoundTrip`
+      - `LoadSecurities_ShouldSupportLegacyLineBasedFormat`
+  - Stabilized localization persistence tests against parallel file races:
+    - `project/OsEngine.Tests/OsLocalizationPersistenceTests.cs` (`DisableParallelization` collection)
+  - Updated running progress journal:
+    - `refactoring_stage2_progress.md`
+- **Verification:**
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` succeeded (`152/152`).
+- **Commit:** `13857cc54`
+- **Push:** no (manual push by user)
