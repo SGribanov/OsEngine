@@ -1174,3 +1174,23 @@
   - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` succeeded (`202/202`).
 - **Commit:** `0d28735a0`
 - **Push:** no (manual push by user)
+
+### Step 2.3 - JSON Settings Subsystem (Incremental Adoption #56)
+
+- **Status:** In Progress (increment completed)
+- **Plan item:** `refactoring_stage2_plan.md` -> Phase 2 / Step 2.3
+- **Changes:**
+  - Migrated screener core settings persistence to JSON with legacy fallback:
+    - `project/OsEngine/OsTrader/Panels/Tab/BotTabScreener.cs`
+  - Covered persisted file:
+    - dynamic `Engine\\<TabName>ScreenerSet.txt` path
+  - Added dedicated persistence tests:
+    - `project/OsEngine.Tests/BotTabScreenerSettingsPersistenceTests.cs`
+      - `SaveSettings_ShouldPersistJson_AndLoadRoundTrip`
+      - `LoadSettings_ShouldSupportLegacyLineBasedFormat`
+  - Updated running progress journal:
+    - `refactoring_stage2_progress.md`
+- **Verification:**
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` succeeded (`204/204`).
+- **Commit:** `1002256b4`
+- **Push:** no (manual push by user)
