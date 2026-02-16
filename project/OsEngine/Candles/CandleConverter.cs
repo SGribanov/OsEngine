@@ -347,21 +347,21 @@ namespace OsEngine.Entity
 
         public void Load()
         {
-            if (!File.Exists("Engine\\CandleConverter.txt"))
-            {
-                return;
-            }
-
             try
             {
-                using (StreamReader reader = new StreamReader("Engine\\CandleConverter.txt"))
-                {
-                    Enum.TryParse(reader.ReadLine(), out TimeFrame);
-                    _sourceFile = reader.ReadLine();
-                    _exitFile = reader.ReadLine();
+                CandleConverterSettingsDto settings = SettingsManager.Load(
+                    GetSettingsPath(),
+                    defaultValue: null,
+                    legacyLoader: ParseLegacySettings);
 
-                    reader.Close();
+                if (settings == null)
+                {
+                    return;
                 }
+
+                TimeFrame = settings.TimeFrame;
+                _sourceFile = settings.SourceFile;
+                _exitFile = settings.ExitFile;
             }
             catch (Exception error)
             {
@@ -376,19 +376,62 @@ namespace OsEngine.Entity
         {
             try
             {
-                using (StreamWriter writer = new StreamWriter("Engine\\CandleConverter.txt", false))
-                {
-                    writer.WriteLine(TimeFrame);
-                    writer.WriteLine(_sourceFile);
-                    writer.WriteLine(_exitFile);
-
-                    writer.Close();
-                }
+                SettingsManager.Save(
+                    GetSettingsPath(),
+                    new CandleConverterSettingsDto
+                    {
+                        TimeFrame = TimeFrame,
+                        SourceFile = _sourceFile,
+                        ExitFile = _exitFile
+                    });
             }
             catch (Exception error)
             {
                 SendNewLogMessage(error.ToString(), LogMessageType.Error);
             }
+        }
+
+        private static string GetSettingsPath()
+        {
+            return "Engine\\CandleConverter.txt";
+        }
+
+        private static CandleConverterSettingsDto ParseLegacySettings(string content)
+        {
+            if (string.IsNullOrWhiteSpace(content))
+            {
+                return null;
+            }
+
+            string normalized = content.Replace("\r", string.Empty);
+            string[] lines = normalized.Split('\n');
+
+            if (lines.Length > 0 && lines[lines.Length - 1] == string.Empty)
+            {
+                Array.Resize(ref lines, lines.Length - 1);
+            }
+
+            TimeFrame timeFrame = TimeFrame.Sec1;
+            if (lines.Length > 0)
+            {
+                Enum.TryParse(lines[0], out timeFrame);
+            }
+
+            return new CandleConverterSettingsDto
+            {
+                TimeFrame = timeFrame,
+                SourceFile = lines.Length > 1 ? lines[1] : null,
+                ExitFile = lines.Length > 2 ? lines[2] : null
+            };
+        }
+
+        private sealed class CandleConverterSettingsDto
+        {
+            public TimeFrame TimeFrame { get; set; }
+
+            public string SourceFile { get; set; }
+
+            public string ExitFile { get; set; }
         }
 
         // logging

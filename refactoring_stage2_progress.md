@@ -313,3 +313,18 @@
 ### Verification
 
 - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` -> passed 120/120
+
+## 2026-02-16 - Step 2.3 (JSON settings subsystem) - Incremental adoption in CandleConverter settings
+
+- Migrated `project/OsEngine/Candles/CandleConverter.cs` persistence to `SettingsManager`:
+  - `Save()` now writes JSON into `Engine\\CandleConverter.txt`
+  - `Load()` now reads JSON and falls back to legacy line-based parser
+  - preserved existing `TimeFrame`/source/exit file model
+- Added tests `project/OsEngine.Tests/CandleConverterPersistenceTests.cs`:
+  - `Save_ShouldPersistJson_AndLoadRoundTrip`
+  - `Load_ShouldSupportLegacyLineBasedFormat`
+  - tests use uninitialized instance to avoid UI constructor dependencies
+
+### Verification
+
+- `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` -> passed 122/122
