@@ -727,17 +727,19 @@ namespace OsEngine.OsTrader.SystemAnalyze
         {
             try
             {
-                if (!File.Exists(@"Engine\SystemStress\CpuMemorySettings.txt"))
+                CpuUsageSettingsDto settings = OsEngine.Entity.SettingsManager.Load(
+                    GetSettingsPath(),
+                    defaultValue: null,
+                    legacyLoader: ParseLegacySettings);
+
+                if (settings == null)
                 {
                     return;
                 }
 
-                using (StreamReader reader = new StreamReader(@"Engine\SystemStress\CpuMemorySettings.txt"))
-                {
-                    _cpuCollectDataIsOn = Convert.ToBoolean(reader.ReadLine());
-                    Enum.TryParse(reader.ReadLine(), out _cpuPeriodSavePoint);
-                    _cpuPointsMax = Convert.ToInt32(reader.ReadLine());
-                }
+                _cpuCollectDataIsOn = settings.CpuCollectDataIsOn;
+                _cpuPeriodSavePoint = settings.CpuPeriodSavePoint;
+                _cpuPointsMax = settings.CpuPointsMax;
             }
             catch (Exception)
             {
@@ -754,17 +756,74 @@ namespace OsEngine.OsTrader.SystemAnalyze
                     Directory.CreateDirectory("Engine\\SystemStress");
                 }
 
-                using (StreamWriter writer = new StreamWriter(@"Engine\SystemStress\CpuMemorySettings.txt", false))
-                {
-                    writer.WriteLine(_cpuCollectDataIsOn);
-                    writer.WriteLine(_cpuPeriodSavePoint);
-                    writer.WriteLine(_cpuPointsMax);
-                }
+                OsEngine.Entity.SettingsManager.Save(
+                    GetSettingsPath(),
+                    new CpuUsageSettingsDto
+                    {
+                        CpuCollectDataIsOn = _cpuCollectDataIsOn,
+                        CpuPeriodSavePoint = _cpuPeriodSavePoint,
+                        CpuPointsMax = _cpuPointsMax
+                    });
             }
             catch (Exception)
             {
                 // ignore
             }
+        }
+
+        private static string GetSettingsPath()
+        {
+            return @"Engine\SystemStress\CpuMemorySettings.txt";
+        }
+
+        private static CpuUsageSettingsDto ParseLegacySettings(string content)
+        {
+            if (string.IsNullOrWhiteSpace(content))
+            {
+                return null;
+            }
+
+            string normalized = content.Replace("\r", string.Empty);
+            string[] lines = normalized.Split('\n');
+
+            if (lines.Length > 0 && lines[lines.Length - 1] == string.Empty)
+            {
+                Array.Resize(ref lines, lines.Length - 1);
+            }
+
+            bool collectDataIsOn = false;
+            if (lines.Length > 0)
+            {
+                bool.TryParse(lines[0], out collectDataIsOn);
+            }
+
+            SavePointPeriod period = SavePointPeriod.OneSecond;
+            if (lines.Length > 1)
+            {
+                Enum.TryParse(lines[1], out period);
+            }
+
+            int pointsMax = 100;
+            if (lines.Length > 2 && int.TryParse(lines[2], out int parsedPointsMax))
+            {
+                pointsMax = parsedPointsMax;
+            }
+
+            return new CpuUsageSettingsDto
+            {
+                CpuCollectDataIsOn = collectDataIsOn,
+                CpuPeriodSavePoint = period,
+                CpuPointsMax = pointsMax
+            };
+        }
+
+        private sealed class CpuUsageSettingsDto
+        {
+            public bool CpuCollectDataIsOn { get; set; }
+
+            public SavePointPeriod CpuPeriodSavePoint { get; set; }
+
+            public int CpuPointsMax { get; set; }
         }
 
         public bool CpuCollectDataIsOn
