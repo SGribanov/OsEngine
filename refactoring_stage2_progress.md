@@ -811,3 +811,18 @@
 ### Verification
 
 - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` -> passed 188/188
+
+## 2026-02-16 - Step 2.3 (JSON settings subsystem) - Incremental adoption in ServerMaster core settings
+
+- Migrated `project/OsEngine/Market/ServerMaster.cs` (`ServerMaster.txt`) persistence to `SettingsManager`:
+  - public `Save()` now writes JSON into `Engine\\ServerMaster.txt`
+  - public `Load()` now reads JSON and falls back to legacy line-based parser
+  - preserved existing single-flag contract for `NeedToConnectAuto`
+- Added tests `project/OsEngine.Tests/ServerMasterSettingsPersistenceTests.cs`:
+  - `Save_ShouldPersistJson_AndLoadRoundTrip`
+  - `Load_ShouldSupportLegacyLineBasedFormat`
+  - tests backup/restore `Engine\\ServerMaster.txt` and static flag value
+
+### Verification
+
+- `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` -> passed 190/190

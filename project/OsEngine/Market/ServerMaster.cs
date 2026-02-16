@@ -140,6 +140,7 @@ namespace OsEngine.Market
         }
 
         private static ServerMasterUi _ui;
+        private static readonly string ServerMasterSettingsPath = @"Engine\ServerMaster.txt";
 
         /// <summary>
         /// save settings
@@ -148,11 +149,12 @@ namespace OsEngine.Market
         {
             try
             {
-                using (StreamWriter writer = new StreamWriter(@"Engine\" + @"ServerMaster.txt", false))
-                {
-                    writer.WriteLine(NeedToConnectAuto);
-                    writer.Close();
-                }
+                SettingsManager.Save(
+                    ServerMasterSettingsPath,
+                    new ServerMasterSettings
+                    {
+                        NeedToConnectAuto = NeedToConnectAuto
+                    });
             }
             catch (Exception error)
             {
@@ -165,22 +167,53 @@ namespace OsEngine.Market
         /// </summary>
         public static void Load()
         {
-            if (!File.Exists(@"Engine\" + @"ServerMaster.txt"))
+            if (!File.Exists(ServerMasterSettingsPath))
             {
                 return;
             }
             try
             {
-                using (StreamReader reader = new StreamReader(@"Engine\" + @"ServerMaster.txt"))
+                ServerMasterSettings settings = SettingsManager.Load(
+                    ServerMasterSettingsPath,
+                    defaultValue: null,
+                    legacyLoader: ParseLegacyServerMasterSettings);
+
+                if (settings == null)
                 {
-                    NeedToConnectAuto = Convert.ToBoolean(reader.ReadLine());
-                    reader.Close();
+                    return;
                 }
+
+                NeedToConnectAuto = settings.NeedToConnectAuto;
             }
             catch (Exception error)
             {
                 SendNewLogMessage(error.ToString(), LogMessageType.Error);
             }
+        }
+
+        private static ServerMasterSettings ParseLegacyServerMasterSettings(string content)
+        {
+            if (string.IsNullOrWhiteSpace(content))
+            {
+                return null;
+            }
+
+            string[] lines = content.Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries);
+
+            if (lines.Length == 0)
+            {
+                return null;
+            }
+
+            return new ServerMasterSettings
+            {
+                NeedToConnectAuto = Convert.ToBoolean(lines[0])
+            };
+        }
+
+        private sealed class ServerMasterSettings
+        {
+            public bool NeedToConnectAuto { get; set; }
         }
 
         private static List<ServerType> _loadServerInstance = new List<ServerType>();
