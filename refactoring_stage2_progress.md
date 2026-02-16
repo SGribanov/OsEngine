@@ -372,3 +372,17 @@
 ### Verification
 
 - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` -> passed 128/128
+
+## 2026-02-16 - Step 2.3 (JSON settings subsystem) - Incremental adoption in ChartMasterColorKeeper settings
+
+- Migrated `project/OsEngine/Charts/ColorKeeper/ChartMasterColorKeeper.cs` persistence to `SettingsManager`:
+  - `Save()` now writes JSON into `Engine\\Color\\<name>Color.txt`
+  - `Load()` now reads JSON and falls back to legacy 10-line format parser
+  - preserved default color scheme behavior when settings file is missing
+- Added tests `project/OsEngine.Tests/ChartMasterColorKeeperPersistenceTests.cs`:
+  - `Save_ShouldPersistJson_AndLoadRoundTrip`
+  - `Load_ShouldSupportLegacyLineBasedFormat`
+
+### Verification
+
+- `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` -> passed 130/130

@@ -7,6 +7,7 @@ using System;
 using System.Drawing;
 using System.IO;
 using System.Threading;
+using OsEngine.Entity;
 using OsEngine.Logging;
 
 namespace OsEngine.Charts.ColorKeeper
@@ -47,26 +48,25 @@ namespace OsEngine.Charts.ColorKeeper
         {
             try
             {
-                if (!Directory.Exists(@"Engine\Color"))
-                {
-                    Directory.CreateDirectory(@"Engine\Color");
-                }
+                EnsureDirectoryExists();
 
-                if (File.Exists(@"Engine\Color\" + _name + "Color.txt"))
+                ChartColorKeeperSettingsDto settings = SettingsManager.Load(
+                    GetSettingsPath(),
+                    defaultValue: null,
+                    legacyLoader: ParseLegacySettings);
+
+                if (settings != null)
                 {
-                    using (StreamReader reader = new StreamReader(@"Engine\Color\" + _name + "Color.txt"))
-                    {
-                        ColorUpBodyCandle = Color.FromArgb(Convert.ToInt32(reader.ReadLine()));
-                        ColorUpBorderCandle = Color.FromArgb(Convert.ToInt32(reader.ReadLine()));
-                        ColorDownBodyCandle = Color.FromArgb(Convert.ToInt32(reader.ReadLine()));
-                        ColorDownBorderCandle = Color.FromArgb(Convert.ToInt32(reader.ReadLine()));
-                        ColorBackSecond = Color.FromArgb(Convert.ToInt32(reader.ReadLine()));
-                        ColorBackChart = Color.FromArgb(Convert.ToInt32(reader.ReadLine()));
-                        ColorBackCursor = Color.FromArgb(Convert.ToInt32(reader.ReadLine()));
-                        ColorText = Color.FromArgb(Convert.ToInt32(reader.ReadLine()));
-                        Enum.TryParse(reader.ReadLine(), true, out _pointType);
-                        Enum.TryParse(reader.ReadLine(), true, out _colorScheme);
-                    }
+                    ColorUpBodyCandle = Color.FromArgb(settings.ColorUpBodyCandleArgb);
+                    ColorUpBorderCandle = Color.FromArgb(settings.ColorUpBorderCandleArgb);
+                    ColorDownBodyCandle = Color.FromArgb(settings.ColorDownBodyCandleArgb);
+                    ColorDownBorderCandle = Color.FromArgb(settings.ColorDownBorderCandleArgb);
+                    ColorBackSecond = Color.FromArgb(settings.ColorBackSecondArgb);
+                    ColorBackChart = Color.FromArgb(settings.ColorBackChartArgb);
+                    ColorBackCursor = Color.FromArgb(settings.ColorBackCursorArgb);
+                    ColorText = Color.FromArgb(settings.ColorTextArgb);
+                    _pointType = settings.PointType;
+                    _colorScheme = settings.ColorScheme;
                 }
                 else
                 {
@@ -98,22 +98,23 @@ namespace OsEngine.Charts.ColorKeeper
         {
             try
             {
-                using (StreamWriter writer = new StreamWriter(@"Engine\Color\" + _name + "Color.txt"))
-                {
-                    writer.WriteLine(ColorUpBodyCandle.ToArgb());
-                    writer.WriteLine(ColorUpBorderCandle.ToArgb());
-                    writer.WriteLine(ColorDownBodyCandle.ToArgb());
-                    writer.WriteLine(ColorDownBorderCandle.ToArgb());
+                EnsureDirectoryExists();
 
-                    writer.WriteLine(ColorBackSecond.ToArgb());
-                    writer.WriteLine(ColorBackChart.ToArgb());
-                    writer.WriteLine(ColorBackCursor.ToArgb());
-                    writer.WriteLine(ColorText.ToArgb());
-
-                    writer.WriteLine(_pointType);
-
-                    writer.WriteLine(_colorScheme);
-                }
+                SettingsManager.Save(
+                    GetSettingsPath(),
+                    new ChartColorKeeperSettingsDto
+                    {
+                        ColorUpBodyCandleArgb = ColorUpBodyCandle.ToArgb(),
+                        ColorUpBorderCandleArgb = ColorUpBorderCandle.ToArgb(),
+                        ColorDownBodyCandleArgb = ColorDownBodyCandle.ToArgb(),
+                        ColorDownBorderCandleArgb = ColorDownBorderCandle.ToArgb(),
+                        ColorBackSecondArgb = ColorBackSecond.ToArgb(),
+                        ColorBackChartArgb = ColorBackChart.ToArgb(),
+                        ColorBackCursorArgb = ColorBackCursor.ToArgb(),
+                        ColorTextArgb = ColorText.ToArgb(),
+                        PointType = _pointType,
+                        ColorScheme = _colorScheme
+                    });
 
                 if (NeedToRePaintFormEvent != null)
                 {
@@ -133,9 +134,9 @@ namespace OsEngine.Charts.ColorKeeper
         {
             try
             {
-                if (File.Exists(@"Engine\Color\" + _name + "Color.txt"))
+                if (File.Exists(GetSettingsPath()))
                 {
-                    File.Delete(@"Engine\Color\" + _name + "Color.txt");
+                    File.Delete(GetSettingsPath());
                 }
             }
             catch (Exception error)
@@ -263,6 +264,75 @@ namespace OsEngine.Charts.ColorKeeper
         /// исходящее сообщение для лога
         /// </summary>
         public event Action<string,LogMessageType> LogMessageEvent;
+
+        private string GetSettingsPath()
+        {
+            return @"Engine\Color\" + _name + "Color.txt";
+        }
+
+        private static ChartColorKeeperSettingsDto ParseLegacySettings(string content)
+        {
+            if (string.IsNullOrWhiteSpace(content))
+            {
+                return null;
+            }
+
+            string normalized = content.Replace("\r", string.Empty);
+            string[] lines = normalized.Split('\n');
+
+            if (lines.Length > 0 && lines[lines.Length - 1] == string.Empty)
+            {
+                Array.Resize(ref lines, lines.Length - 1);
+            }
+
+            PointType pointType = PointType.Cross;
+            if (lines.Length > 8)
+            {
+                Enum.TryParse(lines[8], true, out pointType);
+            }
+
+            ChartColorScheme colorScheme = ChartColorScheme.Black;
+            if (lines.Length > 9)
+            {
+                Enum.TryParse(lines[9], true, out colorScheme);
+            }
+
+            return new ChartColorKeeperSettingsDto
+            {
+                ColorUpBodyCandleArgb = lines.Length > 0 ? Convert.ToInt32(lines[0]) : Color.FromArgb(57, 157, 54).ToArgb(),
+                ColorUpBorderCandleArgb = lines.Length > 1 ? Convert.ToInt32(lines[1]) : Color.FromArgb(57, 157, 54).ToArgb(),
+                ColorDownBodyCandleArgb = lines.Length > 2 ? Convert.ToInt32(lines[2]) : Color.FromArgb(17, 18, 23).ToArgb(),
+                ColorDownBorderCandleArgb = lines.Length > 3 ? Convert.ToInt32(lines[3]) : Color.FromArgb(255, 83, 0).ToArgb(),
+                ColorBackSecondArgb = lines.Length > 4 ? Convert.ToInt32(lines[4]) : Color.FromArgb(17, 18, 23).ToArgb(),
+                ColorBackChartArgb = lines.Length > 5 ? Convert.ToInt32(lines[5]) : Color.FromArgb(17, 18, 23).ToArgb(),
+                ColorBackCursorArgb = lines.Length > 6 ? Convert.ToInt32(lines[6]) : Color.FromArgb(255, 83, 0).ToArgb(),
+                ColorTextArgb = lines.Length > 7 ? Convert.ToInt32(lines[7]) : Color.FromArgb(255, 147, 147, 147).ToArgb(),
+                PointType = pointType,
+                ColorScheme = colorScheme
+            };
+        }
+
+        private static void EnsureDirectoryExists()
+        {
+            if (!Directory.Exists(@"Engine\Color"))
+            {
+                Directory.CreateDirectory(@"Engine\Color");
+            }
+        }
+
+        private sealed class ChartColorKeeperSettingsDto
+        {
+            public int ColorUpBodyCandleArgb { get; set; }
+            public int ColorDownBodyCandleArgb { get; set; }
+            public int ColorUpBorderCandleArgb { get; set; }
+            public int ColorDownBorderCandleArgb { get; set; }
+            public int ColorBackSecondArgb { get; set; }
+            public int ColorBackChartArgb { get; set; }
+            public int ColorBackCursorArgb { get; set; }
+            public int ColorTextArgb { get; set; }
+            public PointType PointType { get; set; }
+            public ChartColorScheme ColorScheme { get; set; }
+        }
 
     }
 
