@@ -5121,3 +5121,21 @@
   - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` succeeded (`343/343`).
 - **Commit:** `cf7fbbacf`
 - **Push:** yes (`origin/master`)
+
+### Step 0.3 - Silent Catch Visibility (Incremental Adoption #253)
+
+- **Status:** In Progress (increment completed)
+- **Plan item:** `refactoring_stage2_plan.md` -> Phase 0 / Step 0.3
+- **Changes:**
+  - Added explicit error visibility in:
+    - `project/OsEngine/Market/Servers/AServer.cs`
+  - Replaced silent catch in `SaveParam()` with:
+    - `catch (Exception ex) { SendLogMessage(ex.ToString(), LogMessageType.Error); }`
+  - Preserved existing behavior (parameter save flow remains non-throwing).
+  - Updated running progress journal:
+    - `refactoring_stage2_progress.md`
+- **Verification:**
+  - `csharp-ls --diagnose --solution project/OsEngine.sln` completed (with known NU1900 feed-access warnings).
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` succeeded (`343/343`).
+- **Commit:** `c02d8fca9`
+- **Push:** yes (`origin/master`)
