@@ -2839,3 +2839,17 @@
 ### Verification
 
 - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` -> passed 343/343
+
+## 2026-02-17 - Step 2.3 (JSON settings subsystem) - Path consistency cleanup in PayOfMarginBot storage prefix
+
+- Updated `project/OsEngine/Robots/Helpers/PayOfMarginBot.cs`:
+  - centralized PayOfMarginBot storage path prefix via helper:
+    - `GetStoragePathPrefix()`
+  - replaced duplicated path-prefix usage in:
+    - `GetTableSummPath()`
+    - `GetTablePeriodPath()`
+- No behavior changes intended; files remain `Engine\\<NameStrategyUniq>TableSumm.json` and `Engine\\<NameStrategyUniq>TablePeriod.json`.
+
+### Verification
+
+- `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` -> passed 343/343

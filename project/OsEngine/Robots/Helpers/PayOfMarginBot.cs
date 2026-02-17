@@ -548,12 +548,17 @@ namespace OsEngine.Robots.Helpers
 
         private string GetTableSummPath()
         {
-            return @"Engine\" + NameStrategyUniq + @"TableSumm.json";
+            return GetStoragePathPrefix() + @"TableSumm.json";
         }
 
         private string GetTablePeriodPath()
         {
-            return @"Engine\" + NameStrategyUniq + @"TablePeriod.json";
+            return GetStoragePathPrefix() + @"TablePeriod.json";
+        }
+
+        private string GetStoragePathPrefix()
+        {
+            return @"Engine\" + NameStrategyUniq;
         }
 
         private class ListTablePeriods
