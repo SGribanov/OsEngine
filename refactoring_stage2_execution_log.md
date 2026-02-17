@@ -3519,6 +3519,26 @@
 - **Commit:** `0ccb40fec`
 - **Push:** no (manual push by user)
 
+### Step 2.3 - JSON Settings Subsystem (Incremental Adoption #173)
+
+- **Status:** In Progress (increment completed)
+- **Plan item:** `refactoring_stage2_plan.md` -> Phase 2 / Step 2.3
+- **Changes:**
+  - Path consistency cleanup in:
+    - `project/OsEngine/Robots/TechSamples/CustomTableInTheParamWindowSample.cs`
+  - Centralized lines-storage file path via helper:
+    - `GetLinesPath()`
+  - Replaced duplicated inline path usage in:
+    - `DeleteBotEvent()`
+    - `SaveLines()`
+    - `LoadLines()`
+  - Updated running progress journal:
+    - `refactoring_stage2_progress.md`
+- **Verification:**
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` succeeded (`343/343`).
+- **Commit:** `16fe5fb57`
+- **Push:** no (manual push by user)
+
 ### Step 2.3 - JSON Settings Subsystem (Incremental Adoption #170)
 
 - **Status:** In Progress (increment completed)
