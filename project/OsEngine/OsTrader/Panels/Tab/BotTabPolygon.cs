@@ -19,6 +19,14 @@ using OsEngine.Market.Servers;
 
 namespace OsEngine.OsTrader.Panels.Tab
 {
+    internal static class BotTabPolygonPaths
+    {
+        public static string BuildEnginePath(string uniqueName, string fileName)
+        {
+            return @"Engine\" + uniqueName + fileName;
+        }
+    }
+
     public class BotTabPolygon : IIBotTab
     {
         #region Service. Constructor. Override for the interface
@@ -708,7 +716,7 @@ namespace OsEngine.OsTrader.Panels.Tab
 
         private string GetTabStoragePrefix()
         {
-            return @"Engine\" + TabName;
+            return BotTabPolygonPaths.BuildEnginePath(TabName, string.Empty);
         }
 
         private static BotTabPolygonNamesToLoadSettingsDto ParseLegacyPolygonNamesToLoadSettings(string content)
@@ -1911,7 +1919,7 @@ namespace OsEngine.OsTrader.Panels.Tab
 
         private string GetSettingsPath()
         {
-            return @"Engine\" + Name + @"PolygonSettings.txt";
+            return BotTabPolygonPaths.BuildEnginePath(Name, @"PolygonSettings.txt");
         }
 
         private static PolygonToTradeSettingsDto ParseLegacyPolygonToTradeSettings(string content)
