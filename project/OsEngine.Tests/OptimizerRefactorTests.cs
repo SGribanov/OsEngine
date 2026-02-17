@@ -1083,7 +1083,7 @@ public class OptimizerRefactorTests
     {
         BayesianCandidateSelector selector = new BayesianCandidateSelector(defaultBatchSize: 3);
         HashSet<int> evaluated = new HashSet<int> { 4 };
-        List<BayesianCandidateSelector.CandidateScore> scored = new List<BayesianCandidateSelector.CandidateScore>
+        List<BayesianCandidateSelector.CandidateScore?> scored = new List<BayesianCandidateSelector.CandidateScore?>
         {
             new BayesianCandidateSelector.CandidateScore { Index = 4, Score = 100m }
         };
@@ -1111,7 +1111,7 @@ public class OptimizerRefactorTests
     public void BayesianCandidateSelector_SelectNextBatch_WithNullEvaluated_ShouldTreatAsEmpty()
     {
         BayesianCandidateSelector selector = new BayesianCandidateSelector(defaultBatchSize: 3);
-        List<BayesianCandidateSelector.CandidateScore> scored = new List<BayesianCandidateSelector.CandidateScore>
+        List<BayesianCandidateSelector.CandidateScore?> scored = new List<BayesianCandidateSelector.CandidateScore?>
         {
             new BayesianCandidateSelector.CandidateScore { Index = 2, Score = 10m }
         };
@@ -1133,7 +1133,7 @@ public class OptimizerRefactorTests
         List<int> batch = policy.SelectNextBatch(
             totalCount: 10,
             evaluated,
-            scored: new List<BayesianCandidateSelector.CandidateScore>(),
+            scored: new List<BayesianCandidateSelector.CandidateScore?>(),
             batchSize: 3,
             fallbackSelector: selector,
             candidates: BuildIntCandidates(10, "X", 1, 10, 1),
@@ -1150,7 +1150,7 @@ public class OptimizerRefactorTests
         BayesianCandidateSelector selector = new BayesianCandidateSelector(defaultBatchSize: 2);
         BayesianAcquisitionPolicy policy = new BayesianAcquisitionPolicy(kappa: 1m);
         HashSet<int> evaluated = new HashSet<int> { 1, 2 };
-        List<BayesianCandidateSelector.CandidateScore> scored = new List<BayesianCandidateSelector.CandidateScore>
+        List<BayesianCandidateSelector.CandidateScore?> scored = new List<BayesianCandidateSelector.CandidateScore?>
         {
             new BayesianCandidateSelector.CandidateScore { Index = 1, Score = 10m },
             new BayesianCandidateSelector.CandidateScore { Index = 2, Score = 10m }
@@ -1177,7 +1177,7 @@ public class OptimizerRefactorTests
         BayesianCandidateSelector selector = new BayesianCandidateSelector(defaultBatchSize: 1);
         BayesianAcquisitionPolicy policy = new BayesianAcquisitionPolicy();
         HashSet<int> evaluated = new HashSet<int> { 0, 2 };
-        List<BayesianCandidateSelector.CandidateScore> scored = new List<BayesianCandidateSelector.CandidateScore>
+        List<BayesianCandidateSelector.CandidateScore?> scored = new List<BayesianCandidateSelector.CandidateScore?>
         {
             new BayesianCandidateSelector.CandidateScore { Index = 0, Score = 10m },
             new BayesianCandidateSelector.CandidateScore { Index = 2, Score = 0m }
@@ -1216,7 +1216,7 @@ public class OptimizerRefactorTests
         BayesianCandidateSelector selector = new BayesianCandidateSelector(defaultBatchSize: 1);
         BayesianAcquisitionPolicy policy = new BayesianAcquisitionPolicy();
         HashSet<int> evaluated = new HashSet<int> { 0, 2 };
-        List<BayesianCandidateSelector.CandidateScore> scored = new List<BayesianCandidateSelector.CandidateScore>
+        List<BayesianCandidateSelector.CandidateScore?> scored = new List<BayesianCandidateSelector.CandidateScore?>
         {
             new BayesianCandidateSelector.CandidateScore { Index = 0, Score = 1m },
             new BayesianCandidateSelector.CandidateScore { Index = 2, Score = 0m }
@@ -1243,7 +1243,7 @@ public class OptimizerRefactorTests
         BayesianCandidateSelector selector = new BayesianCandidateSelector(defaultBatchSize: 1);
         BayesianAcquisitionPolicy policy = new BayesianAcquisitionPolicy();
         HashSet<int> evaluated = new HashSet<int> { 0, 2 };
-        List<BayesianCandidateSelector.CandidateScore> scored = new List<BayesianCandidateSelector.CandidateScore>
+        List<BayesianCandidateSelector.CandidateScore?> scored = new List<BayesianCandidateSelector.CandidateScore?>
         {
             new BayesianCandidateSelector.CandidateScore { Index = 0, Score = 10m },
             new BayesianCandidateSelector.CandidateScore { Index = 2, Score = 0m }
@@ -1281,7 +1281,7 @@ public class OptimizerRefactorTests
         BayesianCandidateSelector selector = new BayesianCandidateSelector(defaultBatchSize: 2);
         BayesianAcquisitionPolicy policy = new BayesianAcquisitionPolicy();
         HashSet<int> evaluated = new HashSet<int> { 0 };
-        List<BayesianCandidateSelector.CandidateScore> scored = new List<BayesianCandidateSelector.CandidateScore>
+        List<BayesianCandidateSelector.CandidateScore?> scored = new List<BayesianCandidateSelector.CandidateScore?>
         {
             new BayesianCandidateSelector.CandidateScore { Index = 0, Score = 1m }
         };
@@ -1317,7 +1317,7 @@ public class OptimizerRefactorTests
     {
         BayesianCandidateSelector selector = new BayesianCandidateSelector(defaultBatchSize: 2);
         BayesianAcquisitionPolicy policy = new BayesianAcquisitionPolicy();
-        List<BayesianCandidateSelector.CandidateScore> scored = new List<BayesianCandidateSelector.CandidateScore>
+        List<BayesianCandidateSelector.CandidateScore?> scored = new List<BayesianCandidateSelector.CandidateScore?>
         {
             new BayesianCandidateSelector.CandidateScore { Index = 1, Score = 1m }
         };
@@ -1357,7 +1357,7 @@ public class OptimizerRefactorTests
     {
         BayesianCandidateSelector selector = new BayesianCandidateSelector(defaultBatchSize: 2);
         BayesianAcquisitionPolicy policy = new BayesianAcquisitionPolicy();
-        List<BayesianCandidateSelector.CandidateScore> scored = new List<BayesianCandidateSelector.CandidateScore>
+        List<BayesianCandidateSelector.CandidateScore?> scored = new List<BayesianCandidateSelector.CandidateScore?>
         {
             new BayesianCandidateSelector.CandidateScore { Index = 0, Score = 1m }
         };
@@ -1395,7 +1395,7 @@ public class OptimizerRefactorTests
         List<int> result = policy.SelectNextBatch(
             totalCount: 4,
             evaluated: new HashSet<int> { 0, 1, 2, 3 },
-            scored: new List<BayesianCandidateSelector.CandidateScore>
+            scored: new List<BayesianCandidateSelector.CandidateScore?>
             {
                 new BayesianCandidateSelector.CandidateScore { Index = 1, Score = 0.5m }
             },
@@ -1414,7 +1414,7 @@ public class OptimizerRefactorTests
         BayesianCandidateSelector selector = new BayesianCandidateSelector(defaultBatchSize: 2);
         BayesianAcquisitionPolicy policy = new BayesianAcquisitionPolicy();
         HashSet<int> evaluated = new HashSet<int> { 0 };
-        List<BayesianCandidateSelector.CandidateScore> invalidScored = new List<BayesianCandidateSelector.CandidateScore>
+        List<BayesianCandidateSelector.CandidateScore?> invalidScored = new List<BayesianCandidateSelector.CandidateScore?>
         {
             new BayesianCandidateSelector.CandidateScore { Index = -1, Score = 5m },
             new BayesianCandidateSelector.CandidateScore { Index = 999, Score = 6m }
@@ -1445,11 +1445,11 @@ public class OptimizerRefactorTests
         BayesianCandidateSelector selector = new BayesianCandidateSelector(defaultBatchSize: 2);
         BayesianAcquisitionPolicy policy = new BayesianAcquisitionPolicy();
         HashSet<int> evaluated = new HashSet<int> { 4 };
-        List<BayesianCandidateSelector.CandidateScore> validOnly = new List<BayesianCandidateSelector.CandidateScore>
+        List<BayesianCandidateSelector.CandidateScore?> validOnly = new List<BayesianCandidateSelector.CandidateScore?>
         {
             new BayesianCandidateSelector.CandidateScore { Index = 4, Score = 100m }
         };
-        List<BayesianCandidateSelector.CandidateScore> mixed = new List<BayesianCandidateSelector.CandidateScore>
+        List<BayesianCandidateSelector.CandidateScore?> mixed = new List<BayesianCandidateSelector.CandidateScore?>
         {
             new BayesianCandidateSelector.CandidateScore { Index = 4, Score = 100m }, // valid
             new BayesianCandidateSelector.CandidateScore { Index = 999, Score = 1000m } // invalid
@@ -1483,7 +1483,7 @@ public class OptimizerRefactorTests
     {
         BayesianAcquisitionPolicy policy = new BayesianAcquisitionPolicy();
         HashSet<int> evaluated = new HashSet<int> { 4 };
-        List<BayesianCandidateSelector.CandidateScore> scored = new List<BayesianCandidateSelector.CandidateScore>
+        List<BayesianCandidateSelector.CandidateScore?> scored = new List<BayesianCandidateSelector.CandidateScore?>
         {
             new BayesianCandidateSelector.CandidateScore { Index = 4, Score = 100m }
         };
@@ -1507,7 +1507,7 @@ public class OptimizerRefactorTests
         BayesianAcquisitionPolicy policy = new BayesianAcquisitionPolicy();
         BayesianCandidateSelector selector = new BayesianCandidateSelector(defaultBatchSize: 2);
         HashSet<int> evaluated = new HashSet<int> { 4 };
-        List<BayesianCandidateSelector.CandidateScore> scored = new List<BayesianCandidateSelector.CandidateScore>
+        List<BayesianCandidateSelector.CandidateScore?> scored = new List<BayesianCandidateSelector.CandidateScore?>
         {
             null!,
             new BayesianCandidateSelector.CandidateScore { Index = 4, Score = 100m }
@@ -1532,7 +1532,7 @@ public class OptimizerRefactorTests
         BayesianAcquisitionPolicy policy = new BayesianAcquisitionPolicy();
         BayesianCandidateSelector selector = new BayesianCandidateSelector(defaultBatchSize: 1);
         HashSet<int> evaluated = new HashSet<int> { 0, 9 };
-        List<BayesianCandidateSelector.CandidateScore> scored = new List<BayesianCandidateSelector.CandidateScore>
+        List<BayesianCandidateSelector.CandidateScore?> scored = new List<BayesianCandidateSelector.CandidateScore?>
         {
             new BayesianCandidateSelector.CandidateScore { Index = 0, Score = 0m },
             new BayesianCandidateSelector.CandidateScore { Index = 0, Score = 1m },
@@ -2343,3 +2343,4 @@ public class OptimizerRefactorTests
         return result;
     }
 }
+

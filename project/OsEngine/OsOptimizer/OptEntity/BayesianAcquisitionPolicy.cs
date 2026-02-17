@@ -8,6 +8,8 @@ using System.Collections.Generic;
 using System.Linq;
 using OsEngine.Entity;
 
+#nullable enable
+
 namespace OsEngine.OsOptimizer.OptEntity
 {
     /// <summary>
@@ -23,18 +25,18 @@ namespace OsEngine.OsOptimizer.OptEntity
 
         public List<int> SelectNextBatch(
             int totalCount,
-            HashSet<int> evaluated,
-            List<BayesianCandidateSelector.CandidateScore> scored,
+            HashSet<int>? evaluated,
+            List<BayesianCandidateSelector.CandidateScore?>? scored,
             int batchSize,
-            BayesianCandidateSelector fallbackSelector,
-            List<List<IIStrategyParameter>> candidates,
+            BayesianCandidateSelector? fallbackSelector,
+            List<List<IIStrategyParameter>>? candidates,
             BayesianAcquisitionModeType mode,
             decimal kappa)
         {
             decimal effectiveKappa = kappa < 0 ? 0 : kappa;
             HashSet<int> evaluatedSafe = evaluated ?? new HashSet<int>();
-            List<BayesianCandidateSelector.CandidateScore> scoredSafe =
-                scored ?? new List<BayesianCandidateSelector.CandidateScore>();
+            List<BayesianCandidateSelector.CandidateScore?> scoredSafe =
+                scored ?? new List<BayesianCandidateSelector.CandidateScore?>();
 
             if (batchSize <= 0 || totalCount <= 0)
             {
@@ -53,6 +55,7 @@ namespace OsEngine.OsOptimizer.OptEntity
 
             List<BayesianCandidateSelector.CandidateScore> validScored = scoredSafe
                 .Where(s => s != null)
+                .Select(s => s!)
                 .Where(s => s.Index >= 0 && s.Index < totalCount)
                 .GroupBy(s => s.Index)
                 .Select(g => new BayesianCandidateSelector.CandidateScore
@@ -69,7 +72,7 @@ namespace OsEngine.OsOptimizer.OptEntity
                     throw new ArgumentNullException(nameof(fallbackSelector));
                 }
 
-                return fallbackSelector.SelectNextBatch(totalCount, evaluatedSafe, validScored, batchSize);
+                return fallbackSelector.SelectNextBatch(totalCount, evaluatedSafe, validScored.Cast<BayesianCandidateSelector.CandidateScore?>().ToList(), batchSize);
             }
 
             if (candidates == null || candidates.Count != totalCount)
@@ -79,7 +82,7 @@ namespace OsEngine.OsOptimizer.OptEntity
                     throw new ArgumentNullException(nameof(fallbackSelector));
                 }
 
-                return fallbackSelector.SelectNextBatch(totalCount, evaluatedSafe, validScored, batchSize);
+                return fallbackSelector.SelectNextBatch(totalCount, evaluatedSafe, validScored.Cast<BayesianCandidateSelector.CandidateScore?>().ToList(), batchSize);
             }
 
             List<CandidateAcquisition> ranked = new List<CandidateAcquisition>();
@@ -92,7 +95,7 @@ namespace OsEngine.OsOptimizer.OptEntity
                     continue;
                 }
 
-                BayesianCandidateSelector.CandidateScore nearest = null;
+                BayesianCandidateSelector.CandidateScore? nearest = null;
                 decimal minDistance = decimal.MaxValue;
 
                 for (int j = 0; j < validScored.Count; j++)
@@ -143,7 +146,7 @@ namespace OsEngine.OsOptimizer.OptEntity
                 .ToList();
         }
 
-        private decimal CalculateParameterDistance(List<IIStrategyParameter> left, List<IIStrategyParameter> right)
+        private decimal CalculateParameterDistance(List<IIStrategyParameter>? left, List<IIStrategyParameter>? right)
         {
             if (left == null || right == null || left.Count == 0 || right.Count == 0)
             {
@@ -166,7 +169,7 @@ namespace OsEngine.OsOptimizer.OptEntity
             return sum / dim;
         }
 
-        private decimal GetParameterDelta(IIStrategyParameter a, IIStrategyParameter b)
+        private decimal GetParameterDelta(IIStrategyParameter? a, IIStrategyParameter? b)
         {
             if (a == null || b == null)
             {

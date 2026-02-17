@@ -12,7 +12,7 @@ namespace OsEngine.OsOptimizer.OptEntity
         public static IOptimizationStrategy CreateInSampleStrategy(
             OptimizationMethodType method,
             ParameterIterator parameterIterator,
-            IBotEvaluator evaluator,
+            IBotEvaluator? evaluator,
             int maxParallel,
             SortBotsType objectiveMetric,
             ObjectiveDirectionType objectiveDirection,

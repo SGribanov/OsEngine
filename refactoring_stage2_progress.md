@@ -3993,3 +3993,38 @@
 - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo` -> success (only known NU1900 warning)
 - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed 343/343
 - `csharp-ls --diagnose --solution project/OsEngine.sln` -> completed (known NU1900 network warning in diagnostics)
+
+## 2026-02-17 - Step 4.2 (nullable annotations) - Bayesian optimization block (larger pass)
+
+- Enabled nullable context and annotations in Bayesian optimization block:
+  - `project/OsEngine/OsOptimizer/OptEntity/BayesianAcquisitionPolicy.cs`
+    - added `#nullable enable`
+    - nullable-aware input contracts for optional collections and selectors
+    - preserved support for `null` entries in scored candidates
+  - `project/OsEngine/OsOptimizer/OptEntity/BayesianCandidateSelector.cs`
+    - added `#nullable enable`
+    - nullable-aware scored-list handling with safe filtering of `null` items
+  - `project/OsEngine/OsOptimizer/OptEntity/BayesianOptimizationStrategy.cs`
+    - added `#nullable enable`
+    - nullable-aware evaluator and score/report flow
+    - aligned scored-candidate list typing with acquisition/selector contracts
+  - `project/OsEngine/OsOptimizer/OptEntity/BruteForceStrategy.cs`
+    - added `#nullable enable`
+    - nullable-aware evaluator and optimization-flags handling
+  - `project/OsEngine/OsOptimizer/OptEntity/PhaseCalculator.cs`
+    - added `#nullable enable`
+    - annotated nullable return for invalid phase-calculation inputs
+    - annotated nullable log event
+  - `project/OsEngine/OsOptimizer/OptEntity/IOptimizationStrategy.cs`
+    - made optimization flag list parameter nullable in strategy contract methods
+  - `project/OsEngine/OsOptimizer/OptEntity/OptimizationStrategyFactory.cs`
+    - made `evaluator` input nullable (`IBotEvaluator?`) for factory-level compatibility
+- Updated tests for nullable-compatible Bayesian score collections:
+  - `project/OsEngine.Tests/OptimizerRefactorTests.cs`
+    - switched local scored collection declarations from `List<CandidateScore>` to `List<CandidateScore?>` in Bayesian selector/acquisition tests
+
+### Verification
+
+- `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo` -> success (only known NU1900 warning)
+- `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed 343/343
+- `csharp-ls --diagnose --solution project/OsEngine.sln` -> completed (known NU1900 network warning in diagnostics)

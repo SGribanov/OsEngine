@@ -8,6 +8,8 @@ using System.Collections.Generic;
 using OsEngine.Language;
 using OsEngine.Logging;
 
+#nullable enable
+
 namespace OsEngine.OsOptimizer.OptEntity
 {
     /// <summary>
@@ -16,7 +18,7 @@ namespace OsEngine.OsOptimizer.OptEntity
     /// </summary>
     public class PhaseCalculator
     {
-        public List<OptimizerFaze> CalculatePhases(
+        public List<OptimizerFaze>? CalculatePhases(
             DateTime timeStart,
             DateTime timeEnd,
             int iterationCount,
@@ -130,6 +132,6 @@ namespace OsEngine.OsOptimizer.OptEntity
             LogMessageEvent?.Invoke(message, type);
         }
 
-        public event Action<string, LogMessageType> LogMessageEvent;
+        public event Action<string, LogMessageType>? LogMessageEvent;
     }
 }

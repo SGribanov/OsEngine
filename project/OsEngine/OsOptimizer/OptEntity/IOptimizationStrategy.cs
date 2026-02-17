@@ -14,11 +14,11 @@ namespace OsEngine.OsOptimizer.OptEntity
 {
     public interface IOptimizationStrategy
     {
-        int EstimateBotCount(List<IIStrategyParameter> allParameters, List<bool> parametersToOptimization);
+        int EstimateBotCount(List<IIStrategyParameter> allParameters, List<bool>? parametersToOptimization);
 
         Task<List<OptimizerReport>> OptimizeInSampleAsync(
             List<IIStrategyParameter> allParameters,
-            List<bool> parametersToOptimization,
+            List<bool>? parametersToOptimization,
             CancellationToken cancellationToken = default);
     }
 }

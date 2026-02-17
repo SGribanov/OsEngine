@@ -7,6 +7,8 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 
+#nullable enable
+
 namespace OsEngine.OsOptimizer.OptEntity
 {
     /// <summary>
@@ -21,7 +23,7 @@ namespace OsEngine.OsOptimizer.OptEntity
             _defaultBatchSize = defaultBatchSize < 1 ? 1 : defaultBatchSize;
         }
 
-        public List<int> SelectInitialBatch(int totalCount, HashSet<int> evaluated, int take)
+        public List<int> SelectInitialBatch(int totalCount, HashSet<int>? evaluated, int take)
         {
             List<int> result = new List<int>();
             if (totalCount <= 0 || take <= 0)
@@ -69,8 +71,8 @@ namespace OsEngine.OsOptimizer.OptEntity
 
         public List<int> SelectNextBatch(
             int totalCount,
-            HashSet<int> evaluated,
-            List<CandidateScore> scored,
+            HashSet<int>? evaluated,
+            List<CandidateScore?>? scored,
             int batchSize)
         {
             List<int> result = new List<int>();
@@ -80,10 +82,11 @@ namespace OsEngine.OsOptimizer.OptEntity
             }
             HashSet<int> evaluatedSafe = evaluated ?? new HashSet<int>();
 
-            List<CandidateScore> scoredSafe = scored ?? new List<CandidateScore>();
+            List<CandidateScore?> scoredSafe = scored ?? new List<CandidateScore?>();
 
             List<CandidateScore> top = scoredSafe
                 .Where(s => s != null)
+                .Select(s => s!)
                 .OrderByDescending(s => s.Score)
                 .Take(Math.Max(1, Math.Min(10, _defaultBatchSize * 2)))
                 .ToList();

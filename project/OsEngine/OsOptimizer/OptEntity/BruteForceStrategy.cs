@@ -10,6 +10,8 @@ using OsEngine.Entity;
 using System;
 using System.Linq;
 
+#nullable enable
+
 namespace OsEngine.OsOptimizer.OptEntity
 {
     /// <summary>
@@ -18,28 +20,30 @@ namespace OsEngine.OsOptimizer.OptEntity
     public class BruteForceStrategy : IOptimizationStrategy
     {
         private readonly ParameterIterator _parameterIterator;
-        private readonly IBotEvaluator _botEvaluator;
+        private readonly IBotEvaluator? _botEvaluator;
         private readonly int _maxParallel;
 
-        public BruteForceStrategy(ParameterIterator parameterIterator, IBotEvaluator botEvaluator = null, int maxParallel = 1)
+        public BruteForceStrategy(ParameterIterator parameterIterator, IBotEvaluator? botEvaluator = null, int maxParallel = 1)
         {
             _parameterIterator = parameterIterator;
             _botEvaluator = botEvaluator;
             _maxParallel = maxParallel < 1 ? 1 : maxParallel;
         }
 
-        public int EstimateBotCount(List<IIStrategyParameter> allParameters, List<bool> parametersToOptimization)
+        public int EstimateBotCount(List<IIStrategyParameter> allParameters, List<bool>? parametersToOptimization)
         {
             ValidateInputs(allParameters, parametersToOptimization);
-            return _parameterIterator.CountCombinations(allParameters, parametersToOptimization);
+            List<bool> optimizationFlags = parametersToOptimization!;
+            return _parameterIterator.CountCombinations(allParameters, optimizationFlags);
         }
 
         public async Task<List<OptimizerReport>> OptimizeInSampleAsync(
             List<IIStrategyParameter> allParameters,
-            List<bool> parametersToOptimization,
+            List<bool>? parametersToOptimization,
             CancellationToken cancellationToken = default)
         {
             ValidateInputs(allParameters, parametersToOptimization);
+            List<bool> optimizationFlags = parametersToOptimization!;
 
             if (_botEvaluator == null)
             {
@@ -53,7 +57,7 @@ namespace OsEngine.OsOptimizer.OptEntity
 
             for (int i = 0; i < allParameters.Count; i++)
             {
-                if (parametersToOptimization[i])
+                if (optimizationFlags[i])
                 {
                     optimizedParametersStart.Add(allParameters[i]);
                 }
@@ -96,7 +100,7 @@ namespace OsEngine.OsOptimizer.OptEntity
             return result;
         }
 
-        private static void ValidateInputs(List<IIStrategyParameter> allParameters, List<bool> parametersToOptimization)
+        private static void ValidateInputs(List<IIStrategyParameter> allParameters, List<bool>? parametersToOptimization)
         {
             if (allParameters == null)
             {

@@ -11,6 +11,8 @@ using System.Threading.Tasks;
 using OsEngine.Entity;
 using OsEngine.OsOptimizer;
 
+#nullable enable
+
 namespace OsEngine.OsOptimizer.OptEntity
 {
     /// <summary>
@@ -21,14 +23,14 @@ namespace OsEngine.OsOptimizer.OptEntity
     public class BayesianOptimizationStrategy : IOptimizationStrategy
     {
         private readonly ParameterIterator _parameterIterator;
-        private readonly IBotEvaluator _botEvaluator;
+        private readonly IBotEvaluator? _botEvaluator;
         private readonly int _maxParallel;
         private readonly BayesianCandidateSelector _candidateSelector;
         private readonly BayesianAcquisitionPolicy _acquisitionPolicy;
 
         public BayesianOptimizationStrategy(
             ParameterIterator parameterIterator,
-            IBotEvaluator botEvaluator,
+            IBotEvaluator? botEvaluator,
             int maxParallel,
             SortBotsType objectiveMetric,
             ObjectiveDirectionType objectiveDirection,
@@ -76,15 +78,16 @@ namespace OsEngine.OsOptimizer.OptEntity
 
         public int LastTailBudgetPlanned { get; private set; }
 
-        public int EstimateBotCount(List<IIStrategyParameter> allParameters, List<bool> parametersToOptimization)
+        public int EstimateBotCount(List<IIStrategyParameter> allParameters, List<bool>? parametersToOptimization)
         {
             ValidateInputs(allParameters, parametersToOptimization);
-            if (!parametersToOptimization.Any(x => x))
+            List<bool> optimizationFlags = parametersToOptimization!;
+            if (!optimizationFlags.Any(x => x))
             {
                 return 1;
             }
 
-            int totalCombinations = _parameterIterator.CountCombinations(allParameters, parametersToOptimization);
+            int totalCombinations = _parameterIterator.CountCombinations(allParameters, optimizationFlags);
             int plannedBudget = InitialSamples + MaxIterations;
             if (plannedBudget < 1)
             {
@@ -96,7 +99,7 @@ namespace OsEngine.OsOptimizer.OptEntity
 
         public Task<List<OptimizerReport>> OptimizeInSampleAsync(
             List<IIStrategyParameter> allParameters,
-            List<bool> parametersToOptimization,
+            List<bool>? parametersToOptimization,
             CancellationToken cancellationToken = default)
         {
             ValidateInputs(allParameters, parametersToOptimization);
@@ -105,10 +108,11 @@ namespace OsEngine.OsOptimizer.OptEntity
 
         private async Task<List<OptimizerReport>> OptimizeStagedAsync(
             List<IIStrategyParameter> allParameters,
-            List<bool> parametersToOptimization,
+            List<bool>? parametersToOptimization,
             CancellationToken cancellationToken)
         {
             LastTailBudgetPlanned = 0;
+            List<bool> optimizationFlags = parametersToOptimization!;
 
             if (_botEvaluator == null)
             {
@@ -124,7 +128,7 @@ namespace OsEngine.OsOptimizer.OptEntity
             int maxCandidatePoolSize = Math.Min(50000, Math.Max(5000, plannedBudget * 10));
 
             List<List<IIStrategyParameter>> candidates =
-                BuildCandidatePool(allParameters, parametersToOptimization, cancellationToken, maxCandidatePoolSize);
+                BuildCandidatePool(allParameters, optimizationFlags, cancellationToken, maxCandidatePoolSize);
             if (candidates.Count == 0 || cancellationToken.IsCancellationRequested)
             {
                 return new List<OptimizerReport>();
@@ -144,7 +148,7 @@ namespace OsEngine.OsOptimizer.OptEntity
             while (!cancellationToken.IsCancellationRequested && iterationsLeft > 0 && evaluated.Count < candidates.Count)
             {
                 int targetBatchSize = Math.Min(BatchSize, iterationsLeft);
-                List<BayesianCandidateSelector.CandidateScore> scoredForSelector = BuildNormalizedScores(scored);
+                List<BayesianCandidateSelector.CandidateScore?> scoredForSelector = BuildNormalizedScores(scored);
                 decimal effectiveKappa = GetMetricAdjustedKappa();
 
                 List<int> nextBatch = _acquisitionPolicy.SelectNextBatch(
@@ -171,7 +175,7 @@ namespace OsEngine.OsOptimizer.OptEntity
                 && evaluated.Count < candidates.Count
                 && scored.Count > 0)
             {
-                List<BayesianCandidateSelector.CandidateScore> scoredForTail = BuildNormalizedScores(scored);
+                List<BayesianCandidateSelector.CandidateScore?> scoredForTail = BuildNormalizedScores(scored);
                 List<int> tailBatch = _acquisitionPolicy.SelectNextBatch(
                     candidates.Count,
                     evaluated,
@@ -191,9 +195,9 @@ namespace OsEngine.OsOptimizer.OptEntity
             return reports;
         }
 
-        private List<BayesianCandidateSelector.CandidateScore> BuildNormalizedScores(List<CandidateEvaluation> scored)
+        private List<BayesianCandidateSelector.CandidateScore?> BuildNormalizedScores(List<CandidateEvaluation> scored)
         {
-            List<BayesianCandidateSelector.CandidateScore> result = new List<BayesianCandidateSelector.CandidateScore>();
+            List<BayesianCandidateSelector.CandidateScore?> result = new List<BayesianCandidateSelector.CandidateScore?>();
             if (scored == null || scored.Count == 0)
             {
                 return result;
@@ -380,6 +384,7 @@ namespace OsEngine.OsOptimizer.OptEntity
             CancellationToken cancellationToken)
         {
             OptimizerReport report = await _botEvaluator
+                !
                 .EvaluateAsync(allParameters, optimizedParameters, cancellationToken)
                 .ConfigureAwait(false);
 
@@ -391,7 +396,7 @@ namespace OsEngine.OsOptimizer.OptEntity
             };
         }
 
-        private decimal GetObjectiveScore(OptimizerReport report)
+        private decimal GetObjectiveScore(OptimizerReport? report)
         {
             if (report == null)
             {
@@ -458,11 +463,11 @@ namespace OsEngine.OsOptimizer.OptEntity
         private class CandidateEvaluation
         {
             public int Index;
-            public OptimizerReport Report;
+            public OptimizerReport? Report;
             public decimal Score;
         }
 
-        private static void ValidateInputs(List<IIStrategyParameter> allParameters, List<bool> parametersToOptimization)
+        private static void ValidateInputs(List<IIStrategyParameter> allParameters, List<bool>? parametersToOptimization)
         {
             if (allParameters == null)
             {
