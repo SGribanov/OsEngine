@@ -2722,3 +2722,18 @@
 ### Verification
 
 - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` -> passed 343/343
+
+## 2026-02-17 - Step 2.3 (JSON settings subsystem) - Path consistency cleanup in Aindicator storage prefix
+
+- Updated `project/OsEngine/Indicators/Aindicator.cs`:
+  - centralized indicator storage path prefix via helper:
+    - `GetIndicatorStoragePrefix()`
+  - replaced duplicated path-prefix usage in:
+    - `GetParametersPath()`
+    - `GetValuesPath()`
+    - `GetBasePath()`
+- No behavior changes intended; files remain `Engine\\<Name>Parametrs.txt`, `Engine\\<Name>Values.txt`, and `Engine\\<Name>Base.txt`.
+
+### Verification
+
+- `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` -> passed 343/343

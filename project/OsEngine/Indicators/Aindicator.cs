@@ -589,17 +589,22 @@ namespace OsEngine.Indicators
 
         private string GetParametersPath()
         {
-            return @"Engine\" + Name + @"Parametrs.txt";
+            return GetIndicatorStoragePrefix() + @"Parametrs.txt";
         }
 
         private string GetValuesPath()
         {
-            return @"Engine\" + Name + @"Values.txt";
+            return GetIndicatorStoragePrefix() + @"Values.txt";
         }
 
         private string GetBasePath()
         {
-            return @"Engine\" + Name + @"Base.txt";
+            return GetIndicatorStoragePrefix() + @"Base.txt";
+        }
+
+        private string GetIndicatorStoragePrefix()
+        {
+            return @"Engine\" + Name;
         }
 
         private static AindicatorLinesSettingsDto ParseLegacyLinesSettings(string content)
