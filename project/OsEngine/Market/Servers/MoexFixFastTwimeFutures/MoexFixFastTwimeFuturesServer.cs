@@ -4569,16 +4569,16 @@ namespace OsEngine.Market.Servers.MoexFixFastTwimeFutures
 
         #region 11 Log
 
-        private readonly object _logLockTrade = new();
+        private readonly Lock _logLockTrade = new();
         private StreamWriter _logFileTrades = new StreamWriter(GetTradesLogPath());
 
-        private readonly object _logLockOrder = new();
+        private readonly Lock _logLockOrder = new();
         private StreamWriter _logFileOrders = new StreamWriter(GetOrdersLogPath());
 
-        private readonly object _logLockTrading = new();
+        private readonly Lock _logLockTrading = new();
         private StreamWriter _logTradingMsg = new StreamWriter(GetTradingServerLogPath(), false, Encoding.UTF8);
 
-        private readonly object _logLockRecover = new();
+        private readonly Lock _logLockRecover = new();
         private StreamWriter _logFileRecover = new StreamWriter(GetRecoveryLogPath());
 
         private static string GetTradesLogPath()

@@ -3333,16 +3333,16 @@ namespace OsEngine.Market.Servers.MoexFixFastCurrency
 
         #region 11 Log
 
-        private readonly object _logLockTrade = new();
+        private readonly Lock _logLockTrade = new();
         private StreamWriter _logFileTrades = new StreamWriter(GetTradesLogPath());
 
-        private readonly object _logLockOrder = new();
+        private readonly Lock _logLockOrder = new();
         private StreamWriter _logFileOrders = new StreamWriter(GetOrdersLogPath());
 
-        private readonly object _logLockMFIX = new();
+        private readonly Lock _logLockMFIX = new();
         private StreamWriter _logFXMFIXMsg = new StreamWriter(GetIncomingMfixLogPath(), true);
 
-        private readonly object _logLockRecover = new();
+        private readonly Lock _logLockRecover = new();
         private StreamWriter _logFileRecover = new StreamWriter(GetRecoveryLogPath());
 
         private static string GetLogDirectoryPath()

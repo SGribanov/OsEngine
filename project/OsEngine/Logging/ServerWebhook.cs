@@ -76,7 +76,7 @@ namespace OsEngine.Logging
         /// locker of multithreading access to server
         /// локер многопоточного доступа к серверу
         /// </summary>
-        public object LokerMessanger = new object();
+        public readonly Lock LokerMessanger = new();
 
         /// <summary>
         /// upload

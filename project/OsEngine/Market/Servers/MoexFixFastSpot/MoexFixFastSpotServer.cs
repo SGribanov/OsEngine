@@ -3853,7 +3853,7 @@ namespace OsEngine.Market.Servers.MoexFixFastSpot
 
         #region 11 Log
 
-        private readonly object _logLock = new();
+        private readonly Lock _logLock = new();
         private StreamWriter _logFile = new StreamWriter(GetUdpLogPath());
         private StreamWriter _logFileXOrders = new StreamWriter(GetXOrdersLogPath());
 

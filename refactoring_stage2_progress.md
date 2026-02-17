@@ -3917,3 +3917,27 @@
 
 - `csharp-ls --diagnose --solution project/OsEngine.sln` -> completed (known NU1900 network warning in diagnostics)
 - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed 343/343
+
+## 2026-02-17 - Step 4.1 (Lock migration) - Bulk migration of remaining object lock fields
+
+- Updated lock-field declarations in:
+  - `project/OsEngine/Entity/WebSocketOsEngine.cs`
+    - `_ctsLocker`: `object` -> `Lock`
+  - `project/OsEngine/Logging/ServerMail.cs`
+    - `LokerMessanger`: `object` -> `Lock`
+  - `project/OsEngine/Logging/ServerWebhook.cs`
+    - `LokerMessanger`: `object` -> `Lock`
+  - `project/OsEngine/Market/Servers/MoexFixFastSpot/MoexFixFastSpotServer.cs`
+    - `_logLock`: `object` -> `Lock`
+  - `project/OsEngine/Market/Servers/MoexFixFastCurrency/MoexFixFastCurrencyServer.cs`
+    - `_logLockTrade`, `_logLockOrder`, `_logLockMFIX`, `_logLockRecover`: `object` -> `Lock`
+  - `project/OsEngine/Market/Servers/MoexFixFastTwimeFutures/MoexFixFastTwimeFuturesServer.cs`
+    - `_logLockTrade`, `_logLockOrder`, `_logLockTrading`, `_logLockRecover`: `object` -> `Lock`
+- Lock usage (`lock (...)`) preserved in all touched files.
+- Remaining `new object()` occurrence in `project/OsEngine/Market/Servers/MFD/MfdServer.cs` is inside commented code only.
+
+### Verification
+
+- `rg -n "\\bobject\\b\\s+[_A-Za-z0-9]+\\s*=\\s*new\\s*object\\(\\)" project/OsEngine -S` -> only commented line in `MfdServer.cs`
+- `csharp-ls --diagnose --solution project/OsEngine.sln` -> completed (known NU1900 network warning in diagnostics)
+- `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed 343/343
