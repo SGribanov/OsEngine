@@ -929,12 +929,17 @@ namespace OsEngine.OsOptimizer
 
         private string GetStandardParametersPath()
         {
-            return @"Engine\" + Settings.StrategyName + @"_StandartOptimizerParameters.txt";
+            return GetStandardParametersPathPrefix() + @"_StandartOptimizerParameters.txt";
         }
 
         private string GetStandardParametersOnOffPath()
         {
-            return @"Engine\" + Settings.StrategyName + @"_StandartOptimizerParametersOnOff.txt";
+            return GetStandardParametersPathPrefix() + @"_StandartOptimizerParametersOnOff.txt";
+        }
+
+        private string GetStandardParametersPathPrefix()
+        {
+            return @"Engine\" + Settings.StrategyName;
         }
 
         private static OptimizerStandardParametersDto ParseLegacyStandardParameters(string content)
