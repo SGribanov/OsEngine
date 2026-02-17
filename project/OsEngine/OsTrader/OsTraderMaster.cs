@@ -365,9 +365,9 @@ namespace OsEngine.OsTrader
                         BotSettings = botSettings
                     });
             }
-            catch
+            catch (Exception error)
             {
-                // ignored
+                SendNewLogMessage(error.ToString(), LogMessageType.Error);
             }
         }
 
@@ -753,9 +753,9 @@ namespace OsEngine.OsTrader
                     aServer.CancelAllOrdersToSecurity(sec);
                 }
             }
-            catch
+            catch (Exception error)
             {
-                // ignore
+                SendNewLogMessage(error.ToString(), LogMessageType.Error);
             }
         }
 

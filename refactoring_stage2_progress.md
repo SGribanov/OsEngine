@@ -3494,3 +3494,17 @@
 ### Verification
 
 - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` -> passed 343/343
+
+## 2026-02-17 - Step 0.3 (silent-catch visibility) - Error logging in OsTraderMaster catch blocks
+
+- Updated `project/OsEngine/OsTrader/OsTraderMaster.cs`:
+  - replaced silent catches with explicit error logging via:
+    - `SendNewLogMessage(error.ToString(), LogMessageType.Error)`
+  - applied in:
+    - `Save()` catch (keeper settings persistence)
+    - `CancelOrdersWithSecurity(...)` catch (server-side cancel-all fallback)
+  - behavior preserved: control flow and fallback logic unchanged.
+
+### Verification
+
+- `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` -> passed 343/343
