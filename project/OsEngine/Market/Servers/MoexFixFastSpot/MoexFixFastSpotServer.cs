@@ -3854,10 +3854,30 @@ namespace OsEngine.Market.Servers.MoexFixFastSpot
         #region 11 Log
 
         private readonly object _logLock = new();
-        private StreamWriter _logFile = new StreamWriter("Engine\\Log\\FIXFAST_Multicast_UDP-log.txt");
-        private StreamWriter _logFileXOrders = new StreamWriter("Engine\\Log\\FIXFAST_Multicast_UDP-log-XOrders.txt");
+        private StreamWriter _logFile = new StreamWriter(GetUdpLogPath());
+        private StreamWriter _logFileXOrders = new StreamWriter(GetXOrdersLogPath());
 
-        private StreamWriter _logFileMFIX = new StreamWriter($"Engine\\Log\\MFIX_{DateTime.Now.ToString("yyyy-MM-dd")}.txt");              
+        private StreamWriter _logFileMFIX = new StreamWriter(GetMfixLogPath());
+
+        private static string GetLogDirectoryPath()
+        {
+            return Path.Combine("Engine", "Log");
+        }
+
+        private static string GetUdpLogPath()
+        {
+            return Path.Combine(GetLogDirectoryPath(), "FIXFAST_Multicast_UDP-log.txt");
+        }
+
+        private static string GetXOrdersLogPath()
+        {
+            return Path.Combine(GetLogDirectoryPath(), "FIXFAST_Multicast_UDP-log-XOrders.txt");
+        }
+
+        private static string GetMfixLogPath()
+        {
+            return Path.Combine(GetLogDirectoryPath(), $"MFIX_{DateTime.Now:yyyy-MM-dd}.txt");
+        }
 
         private void WriteLogOutgoingFIXMessage(string message)
         {

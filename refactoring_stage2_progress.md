@@ -2642,6 +2642,24 @@
 
 - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` -> passed 343/343
 
+## 2026-02-16 - Step 2.3 (JSON settings subsystem) - Path consistency cleanup in MoexFixFastSpot log paths
+
+- Updated `project/OsEngine/Market/Servers/MoexFixFastSpot/MoexFixFastSpotServer.cs`:
+  - centralized log directory and file path construction via helpers:
+    - `GetLogDirectoryPath()`
+    - `GetUdpLogPath()`
+    - `GetXOrdersLogPath()`
+    - `GetMfixLogPath()`
+  - replaced duplicated inline log file path construction for:
+    - UDP log
+    - XOrders log
+    - MFIX log
+- No behavior changes intended; log files remain under `Engine\\Log`.
+
+### Verification
+
+- `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` -> passed 343/343
+
 ## 2026-02-16 - Step 2.3 (JSON settings subsystem) - Path consistency cleanup in MoexFixFastTwimeFutures log paths
 
 - Updated `project/OsEngine/Market/Servers/MoexFixFastTwimeFutures/MoexFixFastTwimeFuturesServer.cs`:
