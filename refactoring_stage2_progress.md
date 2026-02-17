@@ -3659,3 +3659,18 @@
 ### Verification
 
 - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed 343/343
+
+## 2026-02-17 - Step 0.3 (silent-catch visibility) - Warning trace in GlobalPositionViewer return catches
+
+- Updated `project/OsEngine/OsTrader/GlobalPositionViewer.cs`:
+  - added `using System.Diagnostics;`
+  - replaced silent return catches with warning trace + preserved return:
+    - `catch (Exception ex) { Trace.TraceWarning(ex.ToString()); return; }`
+  - applied in:
+    - `PaintPos(DataGridView grid)` (bot tab extraction block)
+    - `ColoredRow(Color color)`
+  - behavior preserved: UI highlight flow still exits safely on invalid selection/paint state.
+
+### Verification
+
+- `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed 343/343
