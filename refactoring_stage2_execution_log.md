@@ -5285,3 +5285,28 @@
   - Note: one transient `CS2012` file-lock error occurred on first build attempt; rerun succeeded.
 - **Commit:** `0b84f0390`
 - **Push:** yes (`origin/master`)
+
+### Step 4.2 - Nullable Annotations (Incremental Adoption #260)
+
+- **Status:** In Progress (increment completed)
+- **Plan item:** `refactoring_stage2_plan.md` -> Phase 4 / Step 4.2
+- **Changes:**
+  - Enabled nullable context in optimizer strategy contract layer:
+    - `project/OsEngine/OsOptimizer/OptEntity/OptimizerEnums.cs`
+    - `project/OsEngine/OsOptimizer/OptEntity/IOptimizationStrategy.cs`
+    - `project/OsEngine/OsOptimizer/OptEntity/IBotEvaluator.cs`
+    - `project/OsEngine/OsOptimizer/OptEntity/OptimizationStrategyFactory.cs`
+  - Updated factory nullability behavior:
+    - `project/OsEngine/OsOptimizer/OptEntity/OptimizationStrategyFactory.cs`
+      - replaced `infoMessage = null;` with `infoMessage = string.Empty;`
+  - Updated test call sites for nullable-safe contract usage:
+    - `project/OsEngine.Tests/OptimizerRefactorTests.cs`
+      - replaced `evaluator: null` with explicit `IBotEvaluator` stub in two factory tests
+  - Updated running progress journal:
+    - `refactoring_stage2_progress.md`
+- **Verification:**
+  - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo` succeeded (only known NU1900 warning).
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` succeeded (`343/343`).
+  - `csharp-ls --diagnose --solution project/OsEngine.sln` completed (with known NU1900 feed-access warnings).
+- **Commit:** `0f49f40e3`
+- **Push:** yes (`origin/master`)
