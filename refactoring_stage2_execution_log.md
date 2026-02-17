@@ -4912,3 +4912,21 @@
   - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` succeeded (`343/343`).
 - **Commit:** `dbfcd2697`
 - **Push:** yes (`origin/master`)
+
+### Step 0.3 - Silent Catch Visibility (Incremental Adoption #243)
+
+- **Status:** In Progress (increment completed)
+- **Plan item:** `refactoring_stage2_plan.md` -> Phase 0 / Step 0.3
+- **Changes:**
+  - Added explicit warning visibility in:
+    - `project/OsEngine/OsTrader/GlobalPositionViewer.cs`
+  - Replaced silent watcher-loop catch with:
+    - `catch (Exception ex) { Trace.TraceWarning(ex.ToString()); continue; }`
+  - Applied in journals aggregation block inside watcher thread.
+  - Preserved existing behavior (`continue` fallback remains unchanged).
+  - Updated running progress journal:
+    - `refactoring_stage2_progress.md`
+- **Verification:**
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` succeeded (`343/343`).
+- **Commit:** `eeb8655d5`
+- **Push:** yes (`origin/master`)
