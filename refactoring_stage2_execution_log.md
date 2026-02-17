@@ -5164,3 +5164,27 @@
   - Note: one transient file-lock test failure occurred on first run; immediate rerun passed.
 - **Commit:** `27b06ca81`
 - **Push:** yes (`origin/master`)
+
+### Step 4.1 - Lock Migration (Incremental Adoption #255)
+
+- **Status:** In Progress (increment completed)
+- **Plan item:** `refactoring_stage2_plan.md` -> Phase 4 / Step 4.1
+- **Changes:**
+  - Migrated synchronization fields in:
+    - `project/OsEngine/OsOptimizer/OptimizerExecutor.cs`
+  - Replaced:
+    - `private readonly object _reportsSync = new object();`
+    - `private readonly object _testBotsTimeSync = new object();`
+    - `private readonly object _startSync = new object();`
+  - With:
+    - `private readonly Lock _reportsSync = new();`
+    - `private readonly Lock _testBotsTimeSync = new();`
+    - `private readonly Lock _startSync = new();`
+  - Preserved existing lock usage and synchronization behavior.
+  - Updated running progress journal:
+    - `refactoring_stage2_progress.md`
+- **Verification:**
+  - `csharp-ls --diagnose --solution project/OsEngine.sln` completed (with known NU1900 feed-access warnings).
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` succeeded (`343/343`).
+- **Commit:** `3def2b7e0`
+- **Push:** yes (`origin/master`)
