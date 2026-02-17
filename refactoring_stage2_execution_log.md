@@ -5208,3 +5208,25 @@
   - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` succeeded (`343/343`).
 - **Commit:** `14251b5a6`
 - **Push:** yes (`origin/master`)
+
+### Step 4.1 - Lock Migration (Incremental Adoption #257)
+
+- **Status:** In Progress (increment completed)
+- **Plan item:** `refactoring_stage2_plan.md` -> Phase 4 / Step 4.1
+- **Changes:**
+  - Migrated synchronization field in:
+    - `project/OsEngine/Entity/HorizontalVolume.cs`
+  - Replaced:
+    - `public object _tradesArrayLocker = new object();`
+  - With:
+    - `public readonly Lock _tradesArrayLocker = new();`
+  - Added:
+    - `using System.Threading;`
+  - Preserved existing `lock (_tradesArrayLocker)` usage in `Process(...)` and `ReloadLines()`.
+  - Updated running progress journal:
+    - `refactoring_stage2_progress.md`
+- **Verification:**
+  - `csharp-ls --diagnose --solution project/OsEngine.sln` completed (with known NU1900 feed-access warnings).
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` succeeded (`343/343`).
+- **Commit:** `70bbb526e`
+- **Push:** yes (`origin/master`)
