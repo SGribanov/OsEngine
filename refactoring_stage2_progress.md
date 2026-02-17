@@ -3578,3 +3578,15 @@
 ### Verification
 
 - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed 343/343
+
+## 2026-02-17 - Step 0.3 (silent-catch visibility) - Error logging in BotPanelChartUI cleanup catch
+
+- Updated `project/OsEngine/OsTrader/Panels/BotPanelChartUI.xaml.cs`:
+  - replaced silent cleanup catch block:
+    - from: `catch { // ignore }`
+    - to: `catch (Exception ex) { SendNewLogMessage(ex.ToString(), LogMessageType.Error); }`
+  - behavior preserved: cleanup method still remains exception-safe and non-throwing.
+
+### Verification
+
+- `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed 343/343

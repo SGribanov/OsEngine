@@ -135,9 +135,9 @@ namespace OsEngine.OsTrader.Panels
                     _stopLimitsViewer = null;
                 }
             }
-            catch
+            catch (Exception ex)
             {
-                // ignore
+                SendNewLogMessage(ex.ToString(), LogMessageType.Error);
             }
         }
 
