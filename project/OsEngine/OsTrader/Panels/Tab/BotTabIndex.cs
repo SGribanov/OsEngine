@@ -21,6 +21,14 @@ using OsEngine.Charts.CandleChart.Elements;
 
 namespace OsEngine.OsTrader.Panels.Tab
 {
+    internal static class BotTabIndexPaths
+    {
+        public static string BuildEnginePath(string uniqueName, string fileName)
+        {
+            return @"Engine\" + uniqueName + fileName;
+        }
+    }
+
     /// <summary>
     /// Tab - spread (or index) of candlestick data
     /// </summary>
@@ -697,7 +705,7 @@ namespace OsEngine.OsTrader.Panels.Tab
 
         private string GetSpreadSettingsPath()
         {
-            return @"Engine\" + TabName + @"SpreadSet.txt";
+            return BotTabIndexPaths.BuildEnginePath(TabName, @"SpreadSet.txt");
         }
 
         private static BotTabIndexSpreadSettingsDto ParseLegacySpreadSettings(string content)
@@ -2386,7 +2394,7 @@ namespace OsEngine.OsTrader.Panels.Tab
 
         private string GetSettingsPath()
         {
-            return @"Engine\" + _botUniqName + @"IndexAutoFormulaSettings.txt";
+            return BotTabIndexPaths.BuildEnginePath(_botUniqName, @"IndexAutoFormulaSettings.txt");
         }
 
         private static IndexFormulaBuilderSettingsDto ParseLegacySettings(string content)

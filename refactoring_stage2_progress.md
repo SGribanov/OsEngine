@@ -2869,3 +2869,17 @@
 ### Verification
 
 - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` -> passed 343/343
+
+## 2026-02-17 - Step 2.3 (JSON settings subsystem) - Path consistency cleanup in BotTabIndex storage path builder
+
+- Updated `project/OsEngine/OsTrader/Panels/Tab/BotTabIndex.cs`:
+  - centralized Engine storage-path construction via helper:
+    - `BotTabIndexPaths.BuildEnginePath(string uniqueName, string fileName)`
+  - replaced direct path construction in:
+    - `GetSpreadSettingsPath()`
+    - `IndexFormulaBuilder.GetSettingsPath()`
+- No behavior changes intended; files remain under `Engine\\<uniqueName>...`.
+
+### Verification
+
+- `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` -> passed 343/343
