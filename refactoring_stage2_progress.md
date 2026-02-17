@@ -2316,3 +2316,17 @@
 ### Verification
 
 - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` -> passed 343/343
+
+## 2026-02-16 - Step 2.3 (JSON settings subsystem) - Path consistency cleanup in SecuritiesUi server dop-settings paths
+
+- Updated `project/OsEngine/Entity/SecuritiesUi.xaml.cs`:
+  - centralized ServerDopSettings path construction via helper methods:
+    - `GetServerDopSettingsDirectoryPath()`
+    - `GetServerTypeDopSettingsDirectoryPath()`
+    - `GetSecurityDopSettingsFilePath(string fileName)`
+  - replaced duplicated inline path usage in security override save flow.
+- No behavior changes intended; files are still saved under `Engine\\ServerDopSettings\\<ServerType>\\*.txt`.
+
+### Verification
+
+- `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` -> passed 343/343

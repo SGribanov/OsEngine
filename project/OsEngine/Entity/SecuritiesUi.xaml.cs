@@ -629,14 +629,16 @@ namespace OsEngine.Entity
             mySecurity.Strike = strike;
             mySecurity.VolumeStep = volumeStep;
 
-            if (Directory.Exists(@"Engine\ServerDopSettings") == false)
+            string serverDopSettingsDirectoryPath = GetServerDopSettingsDirectoryPath();
+            if (Directory.Exists(serverDopSettingsDirectoryPath) == false)
             {
-                Directory.CreateDirectory(@"Engine\ServerDopSettings");
+                Directory.CreateDirectory(serverDopSettingsDirectoryPath);
             }
 
-            if (Directory.Exists(@"Engine\ServerDopSettings\" + _server.ServerType) == false)
+            string serverTypeDopSettingsDirectoryPath = GetServerTypeDopSettingsDirectoryPath();
+            if (Directory.Exists(serverTypeDopSettingsDirectoryPath) == false)
             {
-                Directory.CreateDirectory(@"Engine\ServerDopSettings\" + _server.ServerType);
+                Directory.CreateDirectory(serverTypeDopSettingsDirectoryPath);
             }
 
             string fileName = mySecurity.Name.RemoveExcessFromSecurityName();
@@ -654,7 +656,7 @@ namespace OsEngine.Entity
             fileName += "_" + mySecurity.SecurityType.ToString().RemoveExcessFromSecurityName();
 
 
-            string filePath = @"Engine\ServerDopSettings\" + _server.ServerType + "\\" + fileName + ".txt";
+            string filePath = GetSecurityDopSettingsFilePath(fileName);
 
             try
             {
@@ -669,6 +671,21 @@ namespace OsEngine.Entity
             {
 
             }
+        }
+
+        private static string GetServerDopSettingsDirectoryPath()
+        {
+            return @"Engine\ServerDopSettings";
+        }
+
+        private string GetServerTypeDopSettingsDirectoryPath()
+        {
+            return Path.Combine(GetServerDopSettingsDirectoryPath(), _server.ServerType.ToString());
+        }
+
+        private string GetSecurityDopSettingsFilePath(string fileName)
+        {
+            return Path.Combine(GetServerTypeDopSettingsDirectoryPath(), fileName + ".txt");
         }
 
         #region Search in securities grid
