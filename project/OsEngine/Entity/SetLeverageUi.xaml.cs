@@ -1124,10 +1124,8 @@ namespace OsEngine.Entity
         private void LoadLeverageFromFile()
         {
             try
-            {              
-                string fileName = _serverNameUnique + "_SecuritiesLeverage";
-
-                string filePath = @"Engine\ServerDopSettings\" + fileName + ".json";
+            {
+                string filePath = GetSecuritiesLeveragePath();
 
                 if (!File.Exists(filePath))
                 {
@@ -1144,6 +1142,11 @@ namespace OsEngine.Entity
             {
                 ServerMaster.SendNewLogMessage(ex.ToString(), Logging.LogMessageType.Error);
             }
+        }
+
+        private string GetSecuritiesLeveragePath()
+        {
+            return Path.Combine(@"Engine\ServerDopSettings", _serverNameUnique + "_SecuritiesLeverage.json");
         }
 
         #endregion

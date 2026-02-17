@@ -2330,3 +2330,15 @@
 ### Verification
 
 - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` -> passed 343/343
+
+## 2026-02-16 - Step 2.3 (JSON settings subsystem) - Path consistency cleanup in SetLeverageUi leverage file path
+
+- Updated `project/OsEngine/Entity/SetLeverageUi.xaml.cs`:
+  - centralized leverage settings file path via helper:
+    - `GetSecuritiesLeveragePath()`
+  - replaced inline `Engine\\ServerDopSettings\\...json` path construction in `LoadLeverageFromFile()`.
+- No behavior changes intended; file location remains `Engine\\ServerDopSettings\\<ServerNameUnique>_SecuritiesLeverage.json`.
+
+### Verification
+
+- `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` -> passed 343/343
