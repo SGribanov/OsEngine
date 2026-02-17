@@ -5036,3 +5036,24 @@
   - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` succeeded (`343/343`).
 - **Commit:** `c3dcc077b`
 - **Push:** yes (`origin/master`)
+
+### Step 0.3 - Silent Catch Visibility (Incremental Adoption #249)
+
+- **Status:** In Progress (increment completed)
+- **Plan item:** `refactoring_stage2_plan.md` -> Phase 0 / Step 0.3
+- **Changes:**
+  - Added explicit error visibility in:
+    - `project/OsEngine/Market/Servers/MoexFixFastSpot/MoexFixFastSpotServer.cs`
+  - Replaced empty catches in `Dispose()` log-file cleanup with:
+    - `catch (Exception ex) { SendLogMessage(ex.ToString(), LogMessageType.Error); }`
+  - Applied in:
+    - `_logFile?.Close()`
+    - `_logFileXOrders?.Close()`
+    - `_logFileMFIX?.Close()`
+  - Preserved existing behavior (dispose remains non-throwing and disconnect sequence unchanged).
+  - Updated running progress journal:
+    - `refactoring_stage2_progress.md`
+- **Verification:**
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` succeeded (`343/343`).
+- **Commit:** `1a31286ae`
+- **Push:** yes (`origin/master`)
