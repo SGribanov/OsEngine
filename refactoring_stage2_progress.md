@@ -3242,3 +3242,16 @@
 ### Verification
 
 - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` -> passed 343/343
+
+## 2026-02-17 - Step 0.3 (silent-catch visibility) - Warning trace in BotTabNews static thread catch
+
+- Updated `project/OsEngine/OsTrader/Panels/Tab/BotTabNews.cs`:
+  - added `using System.Diagnostics;`
+  - replaced silent static-thread catch with warning trace:
+    - `catch (Exception ex) { Thread.Sleep(5000); Trace.TraceWarning(ex.ToString()); }`
+  - behavior preserved: throttle sleep in catch remains unchanged.
+
+### Verification
+
+- `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` -> transient 1/343 fail (`Collection was modified` in WinForms log init)
+- immediate rerun: `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` -> passed 343/343

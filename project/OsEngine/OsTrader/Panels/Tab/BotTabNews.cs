@@ -9,6 +9,7 @@ using OsEngine.Logging;
 using OsEngine.Market.Connectors;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Threading;
 using System.Windows.Forms;
 using System.Windows.Forms.Integration;
@@ -115,10 +116,10 @@ namespace OsEngine.OsTrader.Panels.Tab
                         }
                     }
                 }
-                catch
+                catch (Exception ex)
                 {
                     Thread.Sleep(5000);
-                    // ignore
+                    Trace.TraceWarning(ex.ToString());
                 }
             }
         }
