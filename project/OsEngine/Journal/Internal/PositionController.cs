@@ -398,7 +398,7 @@ namespace OsEngine.Journal.Internal
 
         private string GetDealsPath()
         {
-            return @"Engine\" + _name + @"DealController.txt";
+            return GetStoragePathPrefix() + @"DealController.txt";
         }
 
         private static PositionControllerDealsSettingsDto ParseLegacyDealsSettings(string content)
@@ -1049,7 +1049,12 @@ namespace OsEngine.Journal.Internal
 
         private string GetStopLimitsPath()
         {
-            return @"Engine\" + _name + @"DealControllerStopLimits.txt";
+            return GetStoragePathPrefix() + @"DealControllerStopLimits.txt";
+        }
+
+        private string GetStoragePathPrefix()
+        {
+            return @"Engine\" + _name;
         }
 
         private static PositionControllerStopLimitsSettingsDto ParseLegacyStopLimitsSettings(string content)

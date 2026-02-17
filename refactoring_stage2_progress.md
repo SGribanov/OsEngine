@@ -2811,3 +2811,17 @@
 ### Verification
 
 - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` -> passed 343/343
+
+## 2026-02-17 - Step 2.3 (JSON settings subsystem) - Path consistency cleanup in PositionController storage prefix
+
+- Updated `project/OsEngine/Journal/Internal/PositionController.cs`:
+  - centralized position-controller storage path prefix via helper:
+    - `GetStoragePathPrefix()`
+  - replaced duplicated path-prefix usage in:
+    - `GetDealsPath()`
+    - `GetStopLimitsPath()`
+- No behavior changes intended; files remain under `Engine\\<_name>...`.
+
+### Verification
+
+- `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` -> passed 343/343
