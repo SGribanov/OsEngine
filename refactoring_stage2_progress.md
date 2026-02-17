@@ -3285,3 +3285,14 @@
 ### Verification
 
 - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` -> passed 343/343
+
+## 2026-02-17 - Step 0.3 (silent-catch visibility) - Error logging in BotTabIndexUi percent-normalization catch
+
+- Updated `project/OsEngine/OsTrader/Panels/Tab/BotTabIndexUi.xaml.cs`:
+  - replaced silent catch in `CheckBoxPercentNormalization_Click(...)` with explicit error logging:
+    - `ServerMaster.SendNewLogMessage(ex.ToString(), Logging.LogMessageType.Error)`
+  - behavior preserved: no exception rethrow added.
+
+### Verification
+
+- `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` -> passed 343/343

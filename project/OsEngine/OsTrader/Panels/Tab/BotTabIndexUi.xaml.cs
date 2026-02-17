@@ -232,9 +232,9 @@ namespace OsEngine.OsTrader.Panels.Tab
                     }
                 }
             }
-            catch
+            catch (Exception ex)
             {
-                // ignore
+                ServerMaster.SendNewLogMessage(ex.ToString(), Logging.LogMessageType.Error);
             }
         }
 
