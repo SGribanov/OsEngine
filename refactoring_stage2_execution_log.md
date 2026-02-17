@@ -3040,3 +3040,22 @@
   - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` succeeded (`343/343`).
 - **Commit:** `702af20db`
 - **Push:** no (manual push by user)
+
+### Step 2.3 - JSON Settings Subsystem (Incremental Adoption #148)
+
+- **Status:** In Progress (increment completed)
+- **Plan item:** `refactoring_stage2_plan.md` -> Phase 2 / Step 2.3
+- **Changes:**
+  - Path consistency cleanup in:
+    - `project/OsEngine/MainWindow.xaml.cs`
+  - Centralized current-directory executable path via helper:
+    - `GetCurrentDirectoryExecutablePath()`
+  - Replaced remaining inline `...\\OsEngine.exe` path construction in:
+    - single-instance check flow
+    - reboot flow
+  - Updated running progress journal:
+    - `refactoring_stage2_progress.md`
+- **Verification:**
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` succeeded (`343/343`).
+- **Commit:** `d7d67765c`
+- **Push:** no (manual push by user)
