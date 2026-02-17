@@ -4433,3 +4433,24 @@
   - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` succeeded (`343/343`).
 - **Commit:** `690960d03`
 - **Push:** no (will be included in next periodic push)
+
+### Step 0.3 - Silent Catch Visibility (Incremental Adoption #219)
+
+- **Status:** In Progress (increment completed)
+- **Plan item:** `refactoring_stage2_plan.md` -> Phase 0 / Step 0.3
+- **Changes:**
+  - Added explicit error visibility in:
+    - `project/OsEngine/OsTrader/Panels/Tab/BotTabPairAutoSelectPairsUi.xaml.cs`
+  - Added `using System.Diagnostics;`.
+  - Replaced silent parse catches with:
+    - `catch (Exception ex) { Trace.TraceWarning(ex.ToString()); }`
+  - Applied in:
+    - `CreatePairNames()` (`maxOneNamePairsCount` parsing)
+    - `ButtonAccept_Click(...)` (commission parsing)
+  - Preserved existing behavior and fallback defaults (`maxOneNamePairsCount = 5`, `commissionValue = 0`).
+  - Updated running progress journal:
+    - `refactoring_stage2_progress.md`
+- **Verification:**
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` succeeded (`343/343`).
+- **Commit:** `14cd34d06`
+- **Push:** yes (`origin/master`)
