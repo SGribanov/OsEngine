@@ -3034,3 +3034,15 @@
 ### Verification
 
 - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` -> passed 343/343
+
+## 2026-02-17 - Step 0.3 (silent-catch visibility) - Trace logging in PrimeSettingsMaster catch blocks
+
+- Updated `project/OsEngine/PrimeSettings/PrimeSettingsMaster.cs`:
+  - added `System.Diagnostics.Trace` warnings in silent catch blocks:
+    - `Save()`
+    - `Load()`
+  - preserved existing fallback behavior in `Load()` (`_reportCriticalErrors = true` on failure).
+
+### Verification
+
+- `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` -> passed 343/343

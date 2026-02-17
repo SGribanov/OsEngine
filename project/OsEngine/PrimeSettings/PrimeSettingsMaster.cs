@@ -4,6 +4,7 @@
 */
 
 using System;
+using System.Diagnostics;
 using System.IO;
 using OsEngine.Entity;
 
@@ -155,9 +156,9 @@ namespace OsEngine.PrimeSettings
                         MemoryCleanerRegime = _memoryCleanerRegime
                     });
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                // ignore
+                Trace.TraceWarning(ex.ToString());
             }
         }
 
@@ -185,10 +186,10 @@ namespace OsEngine.PrimeSettings
                     _memoryCleanerRegime = settings.MemoryCleanerRegime;
                 }
             }
-            catch (Exception)
+            catch (Exception ex)
             {
                 _reportCriticalErrors = true;
-                // ignore
+                Trace.TraceWarning(ex.ToString());
             }
         }
 
