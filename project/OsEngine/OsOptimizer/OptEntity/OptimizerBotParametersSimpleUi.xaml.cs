@@ -10,6 +10,8 @@ using System.Windows.Forms.Integration;
 using System.Windows.Forms;
 using System;
 
+#nullable enable
+
 namespace OsEngine.OsOptimizer.OptEntity
 {
     public partial class OptimizerBotParametersSimpleUi : Window
@@ -59,15 +61,15 @@ namespace OsEngine.OsOptimizer.OptEntity
             Closing += OptimizerBotParametersSimpleUi_Closing;
         }
 
-        private void OptimizerBotParametersSimpleUi_Closing(object sender, System.ComponentModel.CancelEventArgs e)
+        private void OptimizerBotParametersSimpleUi_Closing(object? sender, System.ComponentModel.CancelEventArgs e)
         {
             _report = null;
             _faze = null;
         }
 
-        private OptimizerReport _report;
+        private OptimizerReport? _report;
 
-        private OptimizerFazeReport _faze;
+        private OptimizerFazeReport? _faze;
 
         private void PaintParameters(List<IIStrategyParameter> parameters, WindowsFormsHost host)
         {

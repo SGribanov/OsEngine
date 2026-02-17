@@ -4094,3 +4094,22 @@
 - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo` -> success (only known NU1900 warning)
 - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed 343/343
 - `csharp-ls --diagnose --solution project/OsEngine.sln` -> completed (known NU1900 network warning in diagnostics)
+
+## 2026-02-17 - Step 4.2 (nullable annotations) - Final OptEntity settings/UI block
+
+- Completed nullable migration for remaining OptEntity C# files:
+  - `project/OsEngine/OsOptimizer/OptEntity/OptimizerSettings.cs`
+    - added `#nullable enable`
+    - nullable-safe event annotations
+    - nullable-safe `StreamReader.ReadLine()` handling in settings load and list loaders
+    - nullable-safe helper signatures for parse utilities (`string?` inputs)
+  - `project/OsEngine/OsOptimizer/OptEntity/OptimizerBotParametersSimpleUi.xaml.cs`
+    - added `#nullable enable`
+    - nullable field annotations for `_report` and `_faze`
+    - nullable-compatible closing handler signature (`object? sender`)
+
+### Verification
+
+- `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo` -> success (only known NU1900 warning)
+- `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed 343/343
+- `csharp-ls --diagnose --solution project/OsEngine.sln` -> completed (known NU1900 network warning in diagnostics)

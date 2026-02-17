@@ -12,6 +12,8 @@ using OsEngine.Logging;
 using OsEngine.Market.Servers.Tester;
 using OsEngine.OsOptimizer;
 
+#nullable enable
+
 namespace OsEngine.OsOptimizer.OptEntity
 {
     /// <summary>
@@ -56,7 +58,7 @@ namespace OsEngine.OsOptimizer.OptEntity
             get => _strategyName;
             set { _strategyName = value; Save(); }
         }
-        private string _strategyName;
+        private string _strategyName = string.Empty;
 
         public bool IsScript
         {
@@ -136,7 +138,7 @@ namespace OsEngine.OsOptimizer.OptEntity
         /// <summary>
         /// Fired when CommissionType or CommissionValue changes.
         /// </summary>
-        public event Action CommissionChanged;
+        public event Action? CommissionChanged;
 
         #endregion
 
@@ -265,7 +267,7 @@ namespace OsEngine.OsOptimizer.OptEntity
         }
         private bool _lastInSample;
 
-        public event Action DateTimeStartEndChange;
+        public event Action? DateTimeStartEndChange;
 
         #endregion
 
@@ -304,9 +306,9 @@ namespace OsEngine.OsOptimizer.OptEntity
                 {
                     while (reader.EndOfStream == false)
                     {
-                        string str = reader.ReadLine();
+                        string? str = reader.ReadLine();
 
-                        if (str != "")
+                        if (!string.IsNullOrEmpty(str))
                         {
                             OrderClearing clearings = new OrderClearing();
                             clearings.SetFromString(str);
@@ -377,9 +379,9 @@ namespace OsEngine.OsOptimizer.OptEntity
                 {
                     while (reader.EndOfStream == false)
                     {
-                        string str = reader.ReadLine();
+                        string? str = reader.ReadLine();
 
-                        if (str != "")
+                        if (!string.IsNullOrEmpty(str))
                         {
                             NonTradePeriod period = new NonTradePeriod();
                             period.SetFromString(str);
@@ -575,41 +577,41 @@ namespace OsEngine.OsOptimizer.OptEntity
             {
                 using (StreamReader reader = new StreamReader(GetSettingsPath()))
                 {
-                    _threadsCount = Convert.ToInt32(reader.ReadLine());
-                    _strategyName = reader.ReadLine();
-                    _startDeposit = reader.ReadLine().ToDecimal();
-                    _filterProfitValue = reader.ReadLine().ToDecimal();
-                    _filterProfitIsOn = Convert.ToBoolean(reader.ReadLine());
-                    _filterMaxDrawDownValue = reader.ReadLine().ToDecimal();
-                    _filterMaxDrawDownIsOn = Convert.ToBoolean(reader.ReadLine());
-                    _filterMiddleProfitValue = reader.ReadLine().ToDecimal();
-                    _filterMiddleProfitIsOn = Convert.ToBoolean(reader.ReadLine());
-                    _filterProfitFactorValue = reader.ReadLine().ToDecimal();
-                    _filterProfitFactorIsOn = Convert.ToBoolean(reader.ReadLine());
+                    _threadsCount = Convert.ToInt32(reader.ReadLine() ?? "0");
+                    _strategyName = reader.ReadLine() ?? string.Empty;
+                    _startDeposit = (reader.ReadLine() ?? "0").ToDecimal();
+                    _filterProfitValue = (reader.ReadLine() ?? "0").ToDecimal();
+                    _filterProfitIsOn = Convert.ToBoolean(reader.ReadLine() ?? bool.FalseString);
+                    _filterMaxDrawDownValue = (reader.ReadLine() ?? "0").ToDecimal();
+                    _filterMaxDrawDownIsOn = Convert.ToBoolean(reader.ReadLine() ?? bool.FalseString);
+                    _filterMiddleProfitValue = (reader.ReadLine() ?? "0").ToDecimal();
+                    _filterMiddleProfitIsOn = Convert.ToBoolean(reader.ReadLine() ?? bool.FalseString);
+                    _filterProfitFactorValue = (reader.ReadLine() ?? "0").ToDecimal();
+                    _filterProfitFactorIsOn = Convert.ToBoolean(reader.ReadLine() ?? bool.FalseString);
 
-                    _timeStart = Convert.ToDateTime(reader.ReadLine(), CultureInfo.InvariantCulture);
-                    _timeEnd = Convert.ToDateTime(reader.ReadLine(), CultureInfo.InvariantCulture);
-                    _percentOnFiltration = reader.ReadLine().ToDecimal();
+                    _timeStart = Convert.ToDateTime(reader.ReadLine() ?? DateTime.MinValue.ToString(CultureInfo.InvariantCulture), CultureInfo.InvariantCulture);
+                    _timeEnd = Convert.ToDateTime(reader.ReadLine() ?? DateTime.MinValue.ToString(CultureInfo.InvariantCulture), CultureInfo.InvariantCulture);
+                    _percentOnFiltration = (reader.ReadLine() ?? "0").ToDecimal();
 
-                    _filterDealsCountValue = Convert.ToInt32(reader.ReadLine());
-                    _filterDealsCountIsOn = Convert.ToBoolean(reader.ReadLine());
-                    _isScript = Convert.ToBoolean(reader.ReadLine());
-                    _iterationCount = ClampPositiveInt(Convert.ToInt32(reader.ReadLine()));
+                    _filterDealsCountValue = Convert.ToInt32(reader.ReadLine() ?? "0");
+                    _filterDealsCountIsOn = Convert.ToBoolean(reader.ReadLine() ?? bool.FalseString);
+                    _isScript = Convert.ToBoolean(reader.ReadLine() ?? bool.FalseString);
+                    _iterationCount = ClampPositiveInt(Convert.ToInt32(reader.ReadLine() ?? "1"));
                     _commissionType = (CommissionType)Enum.Parse(typeof(CommissionType),
                         reader.ReadLine() ?? CommissionType.None.ToString());
-                    _commissionValue = reader.ReadLine().ToDecimal();
-                    _lastInSample = Convert.ToBoolean(reader.ReadLine());
+                    _commissionValue = (reader.ReadLine() ?? "0").ToDecimal();
+                    _lastInSample = Convert.ToBoolean(reader.ReadLine() ?? bool.FalseString);
 
-                    string orderExecutionLine = reader.ReadLine();
+                    string? orderExecutionLine = reader.ReadLine();
                     if (TryParseDefinedEnum(orderExecutionLine, out OrderExecutionType orderExecutionType))
                     {
                         _orderExecutionType = orderExecutionType;
                     }
-                    _slippageToSimpleOrder = Convert.ToInt32(reader.ReadLine());
-                    _slippageToStopOrder = Convert.ToInt32(reader.ReadLine());
+                    _slippageToSimpleOrder = Convert.ToInt32(reader.ReadLine() ?? "0");
+                    _slippageToStopOrder = Convert.ToInt32(reader.ReadLine() ?? "0");
 
                     // V2 fields - optional for backward compatibility
-                    string line = reader.ReadLine();
+                    string? line = reader.ReadLine();
                     if (line != null)
                     {
                         if (TryParseDefinedEnum(line, out OptimizationMethodType optimizationMethod))
@@ -690,7 +692,7 @@ namespace OsEngine.OsOptimizer.OptEntity
             return @"Engine\Optimizer" + suffix;
         }
 
-        public event Action<string, LogMessageType> LogMessageEvent;
+        public event Action<string, LogMessageType>? LogMessageEvent;
 
         private static int ClampPositiveInt(int value)
         {
@@ -717,7 +719,7 @@ namespace OsEngine.OsOptimizer.OptEntity
             return value;
         }
 
-        private static bool TryParseDefinedEnum<TEnum>(string value, out TEnum result)
+        private static bool TryParseDefinedEnum<TEnum>(string? value, out TEnum result)
             where TEnum : struct, Enum
         {
             if (Enum.TryParse(value, out result) && Enum.IsDefined(typeof(TEnum), result))
@@ -729,17 +731,17 @@ namespace OsEngine.OsOptimizer.OptEntity
             return false;
         }
 
-        private static bool TryParseInt(string value, out int result)
+        private static bool TryParseInt(string? value, out int result)
         {
             return int.TryParse(value, out result);
         }
 
-        private static bool TryParseBool(string value, out bool result)
+        private static bool TryParseBool(string? value, out bool result)
         {
             return bool.TryParse(value, out result);
         }
 
-        private static bool TryParseDecimal(string value, out decimal result)
+        private static bool TryParseDecimal(string? value, out decimal result)
         {
             if (string.IsNullOrWhiteSpace(value))
             {
