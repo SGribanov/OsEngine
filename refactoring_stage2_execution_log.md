@@ -4947,3 +4947,21 @@
   - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` succeeded (`343/343`).
 - **Commit:** `2c8a552e2`
 - **Push:** yes (`origin/master`)
+
+### Step 0.3 - Silent Catch Visibility (Incremental Adoption #245)
+
+- **Status:** In Progress (increment completed)
+- **Plan item:** `refactoring_stage2_plan.md` -> Phase 0 / Step 0.3
+- **Changes:**
+  - Added explicit warning visibility in:
+    - `project/OsEngine/OsTrader/AvailabilityServer/ServerAvailabilityMaster.cs`
+  - Added `using System.Diagnostics;`.
+  - Replaced silent ping fallback catch with:
+    - `catch (Exception ex) { Trace.TraceWarning(ex.ToString()); return null; }`
+  - Preserved existing behavior (`null` ping fallback remains unchanged).
+  - Updated running progress journal:
+    - `refactoring_stage2_progress.md`
+- **Verification:**
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` succeeded (`343/343`).
+- **Commit:** `8127cf144`
+- **Push:** yes (`origin/master`)
