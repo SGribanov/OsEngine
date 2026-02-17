@@ -4028,3 +4028,27 @@
 - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo` -> success (only known NU1900 warning)
 - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed 343/343
 - `csharp-ls --diagnose --solution project/OsEngine.sln` -> completed (known NU1900 network warning in diagnostics)
+
+## 2026-02-17 - Step 4.2 (nullable annotations) - Optimizer runtime orchestration block
+
+- Enabled nullable context and annotations in optimizer runtime orchestration:
+  - `project/OsEngine/OsOptimizer/OptEntity/AsyncBotFactory.cs`
+    - added `#nullable enable`
+    - nullable-safe contracts for input keys and queued bot retrieval (`BotPanel?`)
+    - nullable-safe concurrent waiter dictionary access and cancellation paths
+    - nullable event annotation for logging callback
+  - `project/OsEngine/OsOptimizer/OptEntity/BotConfigurator.cs`
+    - added `#nullable enable`
+    - nullable-safe input contracts for `botName`, `parameters`, `parametersOptimized`, `server`
+    - nullable annotations for `BotToTest` and `CreateAndConfigureBot(...)` result
+    - nullable event annotation for logging callback
+  - `project/OsEngine/OsOptimizer/OptEntity/ServerLifecycleManager.cs`
+    - added `#nullable enable`
+    - nullable annotations for `BotToTest`, temporary `bot/server` references and events
+    - nullable-safe security lookup variable annotations in server initialization loops
+
+### Verification
+
+- `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo` -> success (only known NU1900 warning)
+- `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed 343/343
+- `csharp-ls --diagnose --solution project/OsEngine.sln` -> completed (known NU1900 network warning in diagnostics)

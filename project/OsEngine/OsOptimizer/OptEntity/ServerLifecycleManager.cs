@@ -14,6 +14,8 @@ using OsEngine.Market.Servers.Tester;
 using OsEngine.OsTrader.Panels;
 using OsEngine.OsTrader.Panels.Tab;
 
+#nullable enable
+
 namespace OsEngine.OsOptimizer.OptEntity
 {
     /// <summary>
@@ -34,7 +36,7 @@ namespace OsEngine.OsOptimizer.OptEntity
         /// <summary>
         /// Reference bot whose tab configuration is used to set up data on servers.
         /// </summary>
-        public BotPanel BotToTest { get; set; }
+        public BotPanel? BotToTest { get; set; }
 
         public List<OptimizerServer> Servers { get; } = new List<OptimizerServer>();
 
@@ -75,7 +77,7 @@ namespace OsEngine.OsOptimizer.OptEntity
             server.TypeTesterData = _storage.TypeTesterData;
             server.TestingProgressChangeEvent += OnTestingProgressChange;
 
-            List<IIBotTab> sources = BotToTest.GetTabs();
+            List<IIBotTab> sources = BotToTest!.GetTabs();
 
             for (int i = 0; i < sources.Count; i++)
             {
@@ -83,7 +85,7 @@ namespace OsEngine.OsOptimizer.OptEntity
                 {
                     BotTabSimple simple = (BotTabSimple)sources[i];
 
-                    Security secToStart =
+                    Security? secToStart =
                     _storage.Securities.Find(s => s.Name == simple.Connector.SecurityName);
 
                     server.GetDataToSecurity(secToStart, simple.Connector.TimeFrame, report.Faze.TimeStart,
@@ -95,7 +97,7 @@ namespace OsEngine.OsOptimizer.OptEntity
 
                     for (int i2 = 0; i2 < index.Tabs.Count; i2++)
                     {
-                        Security secToStart =
+                        Security? secToStart =
                           _storage.Securities.Find(s => s.Name == index.Tabs[i2].SecurityName);
 
                         server.GetDataToSecurity(secToStart, index.Tabs[i2].TimeFrame, report.Faze.TimeStart,
@@ -108,7 +110,7 @@ namespace OsEngine.OsOptimizer.OptEntity
 
                     for (int i2 = 0; i2 < screener.Tabs.Count; i2++)
                     {
-                        Security secToStart =
+                        Security? secToStart =
                           _storage.Securities.Find(s => s.Name == screener.Tabs[i2].Connector.SecurityName);
 
                         server.GetDataToSecurity(secToStart, screener.Tabs[i2].Connector.TimeFrame, report.Faze.TimeStart,
@@ -136,8 +138,8 @@ namespace OsEngine.OsOptimizer.OptEntity
             CountAllServersEndTest++;
             PrimeProgressChangeEvent?.Invoke(CountAllServersEndTest, CountAllServersMax);
 
-            BotPanel bot = null;
-            OptimizerServer server = null;
+            BotPanel? bot = null;
+            OptimizerServer? server = null;
 
             lock (ServerRemoveLocker)
             {
@@ -237,19 +239,19 @@ namespace OsEngine.OsOptimizer.OptEntity
         /// Fired when a bot's test is completed and the bot has been extracted from BotsInTest.
         /// The subscriber should call ReportsToFazes[last].Load(bot).
         /// </summary>
-        public event Action<BotPanel> BotTestCompleted;
+        public event Action<BotPanel>? BotTestCompleted;
 
-        public event Action<int, int> PrimeProgressChangeEvent;
+        public event Action<int, int>? PrimeProgressChangeEvent;
 
-        public event Action<TimeSpan> TimeToEndChangeEvent;
+        public event Action<TimeSpan>? TimeToEndChangeEvent;
 
-        public event Action<int, int, int> TestingProgressChangeEvent;
+        public event Action<int, int, int>? TestingProgressChangeEvent;
 
         private void SendLogMessage(string message, LogMessageType type)
         {
             LogMessageEvent?.Invoke(message, type);
         }
 
-        public event Action<string, LogMessageType> LogMessageEvent;
+        public event Action<string, LogMessageType>? LogMessageEvent;
     }
 }

@@ -17,6 +17,8 @@ using OsEngine.OsTrader.Panels;
 using OsEngine.OsTrader.Panels.Tab;
 using OsEngine.OsTrader.Panels.Tab.Internal;
 
+#nullable enable
+
 namespace OsEngine.OsOptimizer.OptEntity
 {
     /// <summary>
@@ -39,13 +41,13 @@ namespace OsEngine.OsOptimizer.OptEntity
         /// <summary>
         /// Reference bot whose tab configuration is copied to each new bot.
         /// </summary>
-        public BotPanel BotToTest { get; set; }
+        public BotPanel? BotToTest { get; set; }
 
-        public BotPanel CreateAndConfigureBot(
-            string botName,
-            List<IIStrategyParameter> parameters,
-            List<IIStrategyParameter> parametersOptimized,
-            OptimizerServer server,
+        public BotPanel? CreateAndConfigureBot(
+            string? botName,
+            List<IIStrategyParameter>? parameters,
+            List<IIStrategyParameter>? parametersOptimized,
+            OptimizerServer? server,
             StartProgram regime,
             CancellationToken cancellationToken = default)
         {
@@ -66,7 +68,7 @@ namespace OsEngine.OsOptimizer.OptEntity
                 return null;
             }
 
-            BotPanel bot = null;
+            BotPanel? bot = null;
 
             try
             {
@@ -110,11 +112,11 @@ namespace OsEngine.OsOptimizer.OptEntity
             }
         }
 
-        private void ApplyParameters(BotPanel bot, List<IIStrategyParameter> parameters, List<IIStrategyParameter> parametersOptimized)
+        private void ApplyParameters(BotPanel bot, List<IIStrategyParameter> parameters, List<IIStrategyParameter>? parametersOptimized)
         {
             for (int i = 0; i < parameters.Count; i++)
             {
-                IIStrategyParameter par = null;
+                IIStrategyParameter? par = null;
 
                 if (parametersOptimized != null)
                 {
@@ -187,7 +189,7 @@ namespace OsEngine.OsOptimizer.OptEntity
 
         private void CopyTabSources(BotPanel bot, OptimizerServer server)
         {
-            List<IIBotTab> sourcesFrom = BotToTest.GetTabs();
+            List<IIBotTab> sourcesFrom = BotToTest!.GetTabs();
             List<IIBotTab> sourcesTo = bot.GetTabs();
 
             for (int i = 0; i < sourcesFrom.Count; i++)
@@ -372,6 +374,6 @@ namespace OsEngine.OsOptimizer.OptEntity
             LogMessageEvent?.Invoke(message, type);
         }
 
-        public event Action<string, LogMessageType> LogMessageEvent;
+        public event Action<string, LogMessageType>? LogMessageEvent;
     }
 }

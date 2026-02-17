@@ -13,6 +13,8 @@ using OsEngine.Robots;
 using System;
 using OsEngine.Logging;
 
+#nullable enable
+
 namespace OsEngine.OsOptimizer.OptimizerEntity
 {
     public class AsyncBotFactory
@@ -35,9 +37,9 @@ namespace OsEngine.OsOptimizer.OptimizerEntity
 
         private readonly SemaphoreSlim _queueSignal = new(0);
 
-        private readonly ConcurrentDictionary<string, TaskCompletionSource<BotPanel>> _botWaiters = new();
+        private readonly ConcurrentDictionary<string, TaskCompletionSource<BotPanel?>> _botWaiters = new();
 
-        public BotPanel GetBot(string botType, string botName, CancellationToken cancellationToken = default)
+        public BotPanel? GetBot(string? botType, string? botName, CancellationToken cancellationToken = default)
         {
             if (string.IsNullOrWhiteSpace(botType) || string.IsNullOrWhiteSpace(botName))
             {
@@ -50,8 +52,8 @@ namespace OsEngine.OsOptimizer.OptimizerEntity
             }
 
             string key = GetKey(botType, botName);
-            TaskCompletionSource<BotPanel> waiter = _botWaiters.GetOrAdd(key, _ =>
-                new TaskCompletionSource<BotPanel>(TaskCreationOptions.RunContinuationsAsynchronously));
+            TaskCompletionSource<BotPanel?> waiter = _botWaiters.GetOrAdd(key, _ =>
+                new TaskCompletionSource<BotPanel?>(TaskCreationOptions.RunContinuationsAsynchronously));
 
             try
             {
@@ -70,7 +72,7 @@ namespace OsEngine.OsOptimizer.OptimizerEntity
             }
             finally
             {
-                if (_botWaiters.TryGetValue(key, out TaskCompletionSource<BotPanel> current)
+                if (_botWaiters.TryGetValue(key, out TaskCompletionSource<BotPanel?>? current)
                     && ReferenceEquals(current, waiter))
                 {
                     _botWaiters.TryRemove(key, out _);
@@ -78,7 +80,7 @@ namespace OsEngine.OsOptimizer.OptimizerEntity
             }
         }
 
-        public void CreateNewBots(List<string> botsName, string botType, bool isScript, StartProgram startProgram)
+        public void CreateNewBots(List<string>? botsName, string? botType, bool isScript, StartProgram startProgram)
         {
             if (botsName == null
                 || botsName.Count == 0
@@ -97,8 +99,8 @@ namespace OsEngine.OsOptimizer.OptimizerEntity
 
                 string key = GetKey(botType, botName);
 
-                TaskCompletionSource<BotPanel> freshWaiter =
-                    new TaskCompletionSource<BotPanel>(TaskCreationOptions.RunContinuationsAsynchronously);
+                TaskCompletionSource<BotPanel?> freshWaiter =
+                    new TaskCompletionSource<BotPanel?>(TaskCreationOptions.RunContinuationsAsynchronously);
 
                 _botWaiters.AddOrUpdate(key,
                     _ => freshWaiter,
@@ -125,7 +127,7 @@ namespace OsEngine.OsOptimizer.OptimizerEntity
         {
             while (!_stopFactory.Token.IsCancellationRequested)
             {
-                BotCreateRequest request = null;
+                BotCreateRequest? request = null;
                 try
                 {
                     if (!_queueSignal.Wait(100, _stopFactory.Token))
@@ -144,15 +146,15 @@ namespace OsEngine.OsOptimizer.OptimizerEntity
                         continue;
                     }
 
-                    BotPanel bot = BotFactory.GetStrategyForName(
+                    BotPanel? bot = BotFactory.GetStrategyForName(
                         request.BotType,
                         request.BotName,
                         request.StartProgram,
                         request.IsScript);
 
-                    if (_botWaiters.TryGetValue(request.Key, out TaskCompletionSource<BotPanel> waiter))
+                    if (_botWaiters.TryGetValue(request.Key, out TaskCompletionSource<BotPanel?>? waiter))
                     {
-                        waiter.TrySetResult(bot);
+                        waiter!.TrySetResult(bot);
                     }
                 }
                 catch (OperationCanceledException)
@@ -163,9 +165,9 @@ namespace OsEngine.OsOptimizer.OptimizerEntity
                 catch (Exception e)
                 {
                     if (request != null
-                        && _botWaiters.TryRemove(request.Key, out TaskCompletionSource<BotPanel> waiter))
+                        && _botWaiters.TryRemove(request.Key, out TaskCompletionSource<BotPanel?>? waiter))
                     {
-                        waiter.TrySetCanceled();
+                        waiter!.TrySetCanceled();
                     }
 
                     SendLogMessage("Optimizer critical error. \n Can`t create bot. Error: " + e.ToString(), LogMessageType.Error);
@@ -181,11 +183,11 @@ namespace OsEngine.OsOptimizer.OptimizerEntity
             {
                 bool removedAny = false;
 
-                foreach (KeyValuePair<string, TaskCompletionSource<BotPanel>> waiter in _botWaiters)
+                foreach (KeyValuePair<string, TaskCompletionSource<BotPanel?>> waiter in _botWaiters)
                 {
-                    if (_botWaiters.TryRemove(waiter.Key, out TaskCompletionSource<BotPanel> pending))
+                    if (_botWaiters.TryRemove(waiter.Key, out TaskCompletionSource<BotPanel?>? pending))
                     {
-                        pending.TrySetCanceled();
+                        pending!.TrySetCanceled();
                         removedAny = true;
                     }
                 }
@@ -217,15 +219,15 @@ namespace OsEngine.OsOptimizer.OptimizerEntity
             }
         }
 
-        public event Action<string, LogMessageType> LogMessageEvent;
+        public event Action<string, LogMessageType>? LogMessageEvent;
 
         private class BotCreateRequest
         {
-            public string BotType;
-            public string BotName;
+            public string BotType = string.Empty;
+            public string BotName = string.Empty;
             public bool IsScript;
             public StartProgram StartProgram;
-            public string Key;
+            public string Key = string.Empty;
         }
     }
 }
