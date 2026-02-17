@@ -5254,3 +5254,34 @@
   - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` succeeded (`343/343`).
 - **Commit:** `efc5ab840`
 - **Push:** yes (`origin/master`)
+
+### Step 4.2 - Nullable Annotations (Incremental Adoption #259)
+
+- **Status:** In Progress (increment completed)
+- **Plan item:** `refactoring_stage2_plan.md` -> Phase 4 / Step 4.2
+- **Changes:**
+  - Enabled nullable context and annotations in core settings infrastructure:
+    - `project/OsEngine/Entity/SafeFileWriter.cs`
+      - added `#nullable enable`
+      - nullable annotations for optional encoding/content parameters
+      - nullable-safe handling for `Path.GetDirectoryName(...)`
+    - `project/OsEngine/Entity/SettingsManager.cs`
+      - added `#nullable enable`
+      - nullable annotations for optional options/default/legacy loader
+      - `Load<T>(...)` now returns `T?`
+    - `project/OsEngine/Entity/CredentialProtector.cs`
+      - added `#nullable enable`
+      - nullable input annotations for `Protect(...)` and `TryUnprotect(...)`
+  - Updated test compatibility:
+    - `project/OsEngine.Tests/SettingsManagerTests.cs`
+      - switched loaded models to nullable
+      - added explicit `Assert.NotNull(...)` before dereference
+  - Updated running progress journal:
+    - `refactoring_stage2_progress.md`
+- **Verification:**
+  - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo` succeeded (only known NU1900 warning).
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` succeeded (`343/343`).
+  - `csharp-ls --diagnose --solution project/OsEngine.sln` completed (with known NU1900 feed-access warnings).
+  - Note: one transient `CS2012` file-lock error occurred on first build attempt; rerun succeeded.
+- **Commit:** `0b84f0390`
+- **Push:** yes (`origin/master`)
