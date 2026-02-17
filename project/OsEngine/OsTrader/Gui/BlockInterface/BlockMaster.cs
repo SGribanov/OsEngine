@@ -114,12 +114,17 @@ namespace OsEngine.OsTrader.Gui.BlockInterface
 
         private static string GetPasswordPath()
         {
-            return @"Engine\PrimeSettingss.txt";
+            return GetPrimeSettingsPath("PrimeSettingss.txt");
         }
 
         private static string GetIsBlockedPath()
         {
-            return @"Engine\PrimeSettingsss.txt";
+            return GetPrimeSettingsPath("PrimeSettingsss.txt");
+        }
+
+        private static string GetPrimeSettingsPath(string fileName)
+        {
+            return @"Engine\" + fileName;
         }
 
         private static EncryptedValueSettingsDto ParseLegacyEncryptedValueSettings(string content)

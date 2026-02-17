@@ -2963,3 +2963,19 @@
 ### Verification
 
 - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` -> passed 343/343
+
+## 2026-02-17 - Step 2.3 (JSON settings subsystem) - Path consistency cleanup in BlockMaster prime-settings paths
+
+- Updated `project/OsEngine/OsTrader/Gui/BlockInterface/BlockMaster.cs`:
+  - centralized prime-settings file path construction via helper:
+    - `GetPrimeSettingsPath(string fileName)`
+  - replaced direct path usage in:
+    - `GetPasswordPath()`
+    - `GetIsBlockedPath()`
+- No behavior changes intended; files remain:
+  - `Engine\\PrimeSettingss.txt`
+  - `Engine\\PrimeSettingsss.txt`
+
+### Verification
+
+- `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` -> passed 343/343
