@@ -3471,6 +3471,31 @@
 - **Commit:** `7f378d8c6`
 - **Push:** no (manual push by user)
 
+### Step 2.3 - JSON Settings Subsystem (Incremental Adoption #171)
+
+- **Status:** In Progress (increment completed)
+- **Plan item:** `refactoring_stage2_plan.md` -> Phase 2 / Step 2.3
+- **Changes:**
+  - Path consistency cleanup in:
+    - `project/OsEngine/Market/Servers/MoexFixFastCurrency/MoexFixFastCurrencyServer.cs`
+  - Centralized log directory and file path construction via helpers:
+    - `GetLogDirectoryPath()`
+    - `GetTradesLogPath()`
+    - `GetOrdersLogPath()`
+    - `GetIncomingMfixLogPath()`
+    - `GetRecoveryLogPath()`
+  - Replaced duplicated inline log file path construction for:
+    - trades log
+    - orders log
+    - incoming MFIX log
+    - recovery log
+  - Updated running progress journal:
+    - `refactoring_stage2_progress.md`
+- **Verification:**
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` succeeded (`343/343`).
+- **Commit:** `2c68cd253`
+- **Push:** no (manual push by user)
+
 ### Step 2.3 - JSON Settings Subsystem (Incremental Adoption #170)
 
 - **Status:** In Progress (increment completed)
