@@ -111,7 +111,7 @@ namespace OsEngine.Robots.Patterns
         {
             try
             {
-                using (StreamWriter writer = new StreamWriter(@"Engine\" + NameStrategyUniq + @"SettingsBot.txt", false)
+                using (StreamWriter writer = new StreamWriter(GetSettingsPath(), false)
                     )
                 {
                     writer.WriteLine(_volumeType);
@@ -133,13 +133,13 @@ namespace OsEngine.Robots.Patterns
         // Load settings
         private void Load()
         {
-            if (!File.Exists(@"Engine\" + NameStrategyUniq + @"SettingsBot.txt"))
+            if (!File.Exists(GetSettingsPath()))
             {
                 return;
             }
             try
             {
-                using (StreamReader reader = new StreamReader(@"Engine\" + NameStrategyUniq + @"SettingsBot.txt"))
+                using (StreamReader reader = new StreamReader(GetSettingsPath()))
                 {
                     _volumeType = Convert.ToString(reader.ReadLine());
                     _tradeAssetInPortfolio = Convert.ToString(reader.ReadLine());
@@ -160,10 +160,15 @@ namespace OsEngine.Robots.Patterns
         // Delete save file
         void Strategy_DeleteEvent()
         {
-            if (File.Exists(@"Engine\" + NameStrategyUniq + @"SettingsBot.txt"))
+            if (File.Exists(GetSettingsPath()))
             {
-                File.Delete(@"Engine\" + NameStrategyUniq + @"SettingsBot.txt");
+                File.Delete(GetSettingsPath());
             }
+        }
+
+        private string GetSettingsPath()
+        {
+            return @"Engine\" + NameStrategyUniq + @"SettingsBot.txt";
         }
 
         // logic
