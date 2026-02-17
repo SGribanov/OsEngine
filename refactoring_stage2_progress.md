@@ -2302,3 +2302,17 @@
 ### Verification
 
 - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` -> passed 343/343
+
+## 2026-02-16 - Step 2.3 (JSON settings subsystem) - Path consistency cleanup in MainWindow executable path usage
+
+- Updated `project/OsEngine/MainWindow.xaml.cs`:
+  - centralized current-directory executable path via helper:
+    - `GetCurrentDirectoryExecutablePath()`
+  - replaced remaining inline `...\\OsEngine.exe` path construction in:
+    - single-instance check flow
+    - reboot flow
+- No behavior changes intended; executable path still resolves to current working directory.
+
+### Verification
+
+- `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` -> passed 343/343

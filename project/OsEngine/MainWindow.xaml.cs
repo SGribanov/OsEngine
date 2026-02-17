@@ -470,6 +470,11 @@ namespace OsEngine
             return "Engine\\checkFile.txt";
         }
 
+        private static string GetCurrentDirectoryExecutablePath()
+        {
+            return Path.Combine(Directory.GetCurrentDirectory(), "OsEngine.exe");
+        }
+
         private bool CheckAlreadyWorkEngine()
         {
             try
@@ -507,7 +512,7 @@ namespace OsEngine
 
                 int osEngineCount = 0;
 
-                string myProgramPath = myDirectory + "\\OsEngine.exe";
+                string myProgramPath = GetCurrentDirectoryExecutablePath();
 
                 for (int i = 0; i < process.Count; i++)
                 {
@@ -606,7 +611,7 @@ namespace OsEngine
 
             App.app.Shutdown();
             Process process = new Process();
-            process.StartInfo.FileName = Directory.GetCurrentDirectory() + "\\OsEngine.exe";
+            process.StartInfo.FileName = GetCurrentDirectoryExecutablePath();
             process.StartInfo.Arguments = " -error " + message;
             process.Start();
 
