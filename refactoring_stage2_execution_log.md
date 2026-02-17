@@ -4965,3 +4965,21 @@
   - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` succeeded (`343/343`).
 - **Commit:** `8127cf144`
 - **Push:** yes (`origin/master`)
+
+### Step 0.3 - Silent Catch Visibility (Incremental Adoption #246)
+
+- **Status:** In Progress (increment completed)
+- **Plan item:** `refactoring_stage2_plan.md` -> Phase 0 / Step 0.3
+- **Changes:**
+  - Added explicit warning visibility in:
+    - `project/OsEngine/OsTrader/Panels/Tab/BotTabScreener.cs`
+  - Replaced silent indicator cleanup catch with:
+    - `catch (Exception ex) { Trace.TraceWarning(ex.ToString()); ... }`
+  - Applied in `BotTabScreener_IndicatorManuallyCreateEvent(...)` while removing legacy non-`Aindicator` items.
+  - Preserved existing behavior (cleanup and resync fallback unchanged).
+  - Updated running progress journal:
+    - `refactoring_stage2_progress.md`
+- **Verification:**
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` succeeded (`343/343`).
+- **Commit:** `b24769094`
+- **Push:** yes (`origin/master`)
