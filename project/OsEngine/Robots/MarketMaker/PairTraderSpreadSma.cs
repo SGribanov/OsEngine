@@ -120,7 +120,7 @@ namespace OsEngine.Robots.MarketMaker
         {
             try
             {
-                using (StreamWriter writer = new StreamWriter(@"Engine\" + NameStrategyUniq + @"SettingsBot.txt", false)
+                using (StreamWriter writer = new StreamWriter(GetSettingsPath(), false)
                     )
                 {
                     writer.WriteLine(VolumeType1);
@@ -147,13 +147,13 @@ namespace OsEngine.Robots.MarketMaker
         // Load settins from .txt file
         private void Load()
         {
-            if (!File.Exists(@"Engine\" + NameStrategyUniq + @"SettingsBot.txt"))
+            if (!File.Exists(GetSettingsPath()))
             {
                 return;
             }
             try
             {
-                using (StreamReader reader = new StreamReader(@"Engine\" + NameStrategyUniq + @"SettingsBot.txt"))
+                using (StreamReader reader = new StreamReader(GetSettingsPath()))
                 {
                     VolumeType1 = Convert.ToString(reader.ReadLine());
                     TradeAssetInPortfolio1 = Convert.ToString(reader.ReadLine());
@@ -180,10 +180,15 @@ namespace OsEngine.Robots.MarketMaker
         // Delete save file
         void Strategy_DeleteEvent()
         {
-            if (File.Exists(@"Engine\" + NameStrategyUniq + @"SettingsBot.txt"))
+            if (File.Exists(GetSettingsPath()))
             {
-                File.Delete(@"Engine\" + NameStrategyUniq + @"SettingsBot.txt");
+                File.Delete(GetSettingsPath());
             }
+        }
+
+        private string GetSettingsPath()
+        {
+            return @"Engine\" + NameStrategyUniq + @"SettingsBot.txt";
         }
 
         // Logic tab 1
