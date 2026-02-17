@@ -4993,3 +4993,23 @@
 - **Tracked docs synchronized:** 
   - `refactoring_stage2_progress.md`
   - `refactoring_stage2_execution_log.md`
+
+### Step 0.3 - Silent Catch Visibility (Incremental Adoption #247)
+
+- **Status:** In Progress (increment completed)
+- **Plan item:** `refactoring_stage2_plan.md` -> Phase 0 / Step 0.3
+- **Changes:**
+  - Added explicit error visibility in:
+    - `project/OsEngine/OsData/OsDataSet.cs`
+  - Replaced empty fallback catches in `GetDataStream(FileStream fs, byte[] prefix)` with:
+    - `catch (Exception ex) { SendNewLogMessage(ex.ToString(), LogMessageType.Error); }`
+  - Applied in:
+    - `GZipStream` probe block
+    - `DeflateStream` probe block
+  - Preserved existing behavior (stream-format probing fallback and `null` return path remain unchanged).
+  - Updated running progress journal:
+    - `refactoring_stage2_progress.md`
+- **Verification:**
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` succeeded (`343/343`).
+- **Commit:** `a185dded0`
+- **Push:** yes (`origin/master`)
