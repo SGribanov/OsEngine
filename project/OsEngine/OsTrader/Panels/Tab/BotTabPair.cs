@@ -19,6 +19,14 @@ using System.Windows.Forms.Integration;
 
 namespace OsEngine.OsTrader.Panels.Tab
 {
+    internal static class BotTabPairPaths
+    {
+        public static string BuildEnginePath(string uniqueName, string fileName)
+        {
+            return @"Engine\" + uniqueName + fileName;
+        }
+    }
+
     /// <summary>
     ///  tab - for trading pairs
     /// </summary>
@@ -477,7 +485,7 @@ namespace OsEngine.OsTrader.Panels.Tab
 
         private string GetTabStoragePrefix()
         {
-            return @"Engine\" + TabName;
+            return BotTabPairPaths.BuildEnginePath(TabName, string.Empty);
         }
 
         private static BotTabPairStandartSettingsDto ParseLegacyStandartSettings(string content)
@@ -2480,7 +2488,7 @@ namespace OsEngine.OsTrader.Panels.Tab
 
         private string GetPairSettingsPath()
         {
-            return @"Engine\" + Name + @"PairsSettings.txt";
+            return BotTabPairPaths.BuildEnginePath(Name, @"PairsSettings.txt");
         }
 
         private static PairToTradeSettingsDto ParseLegacySettings(string content)
