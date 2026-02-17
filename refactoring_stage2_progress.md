@@ -4073,3 +4073,24 @@
 - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo` -> success (only known NU1900 warning)
 - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed 343/343
 - `csharp-ls --diagnose --solution project/OsEngine.sln` -> completed (known NU1900 network warning in diagnostics)
+
+## 2026-02-17 - Step 4.2 (nullable annotations) - Optimizer visualization and report serialization block
+
+- Enabled nullable context and annotations in visualization/serialization helpers:
+  - `project/OsEngine/OsOptimizer/OptEntity/OptimizerReportSerializer.cs`
+    - added `#nullable enable`
+    - nullable-aware input for serialized payload (`string? saveStr`)
+  - `project/OsEngine/OsOptimizer/OptEntity/ChartPainterLine.cs`
+    - added `#nullable enable`
+    - nullable-aware line input and safe chart/series null guards
+    - safe remove/replace flow in series repaint logic when target series is missing
+  - `project/OsEngine/OsOptimizer/OptEntity/WalkForwardPeriodsPainter.cs`
+    - added `#nullable enable`
+    - nullable-aware faze input and safe chart/series null guards
+    - safe remove/replace flow in series repaint logic when target series is missing
+
+### Verification
+
+- `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo` -> success (only known NU1900 warning)
+- `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed 343/343
+- `csharp-ls --diagnose --solution project/OsEngine.sln` -> completed (known NU1900 network warning in diagnostics)

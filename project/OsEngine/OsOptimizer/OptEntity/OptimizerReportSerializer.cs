@@ -8,6 +8,8 @@ using System.Diagnostics;
 using System.Text;
 using OsEngine.Entity;
 
+#nullable enable
+
 namespace OsEngine.OsOptimizer.OptEntity
 {
     /// <summary>
@@ -22,7 +24,7 @@ namespace OsEngine.OsOptimizer.OptEntity
             return new StringBuilder(V2Prefix + SerializeLegacyBody(report));
         }
 
-        public static void Deserialize(OptimizerReport report, string saveStr)
+        public static void Deserialize(OptimizerReport report, string? saveStr)
         {
             if (string.IsNullOrEmpty(saveStr))
             {

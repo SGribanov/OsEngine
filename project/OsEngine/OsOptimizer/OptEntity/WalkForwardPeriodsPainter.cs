@@ -11,21 +11,28 @@ using System.Windows.Forms.Integration;
 using OsEngine.Charts.ColorKeeper;
 using Color = System.Drawing.Color;
 
+#nullable enable
+
 namespace OsEngine.OsOptimizer.OptEntity
 {
     public static class WalkForwardPeriodsPainter
     {
-        public static void PaintForwards(WindowsFormsHost host, List<OptimizerFaze> fazes)
+        public static void PaintForwards(WindowsFormsHost host, List<OptimizerFaze>? fazes)
         {
-            Chart chart = CreateChart();
+            Chart? chart = CreateChart();
+            if (chart == null)
+            {
+                return;
+            }
+
             host.Child = chart;
 
             PaintLines(fazes, chart);
         }
 
-        private static Chart CreateChart()
+        private static Chart? CreateChart()
         {
-            Chart _chart = null;
+            Chart? _chart = null;
 
             try
             {
@@ -82,7 +89,7 @@ namespace OsEngine.OsOptimizer.OptEntity
             return _chart;
         }
 
-        private static void PaintLines(List<OptimizerFaze> fazes, Chart _chart)
+        private static void PaintLines(List<OptimizerFaze>? fazes, Chart _chart)
         {
             if (fazes == null
                 || fazes.Count == 0)
@@ -92,7 +99,11 @@ namespace OsEngine.OsOptimizer.OptEntity
 
             ChartMasterColorKeeper _colorKeeper = new ChartMasterColorKeeper("walkForward");
 
-            Series candleSeries = FindSeriesByNameSafe("SeriesCluster",_chart);
+            Series? candleSeries = FindSeriesByNameSafe("SeriesCluster",_chart);
+            if (candleSeries == null)
+            {
+                return;
+            }
 
             DateTime firstTime = fazes[0].TimeStart;
 
@@ -140,7 +151,11 @@ namespace OsEngine.OsOptimizer.OptEntity
                 {
                     if (series.Name == _chart.Series[i].Name)
                     {
-                        _chart.Series.Remove(FindSeriesByNameSafe(series.Name, _chart));
+                        Series? existing = FindSeriesByNameSafe(series.Name, _chart);
+                        if (existing != null)
+                        {
+                            _chart.Series.Remove(existing);
+                        }
                         _chart.Series.Insert(i, series);
                         break;
                     }
@@ -153,7 +168,7 @@ namespace OsEngine.OsOptimizer.OptEntity
             }
         }
 
-        private static Series FindSeriesByNameSafe(string name, Chart _chart)
+        private static Series? FindSeriesByNameSafe(string name, Chart _chart)
         {
             Series mySeries;
             try
