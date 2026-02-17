@@ -448,7 +448,7 @@ namespace OsEngine.Robots.Trend
         {
             try
             {
-                using var writer = new StreamWriter(@"Engine\" + NameStrategyUniq + @"SettingsBot.txt", false);
+                using var writer = new StreamWriter(GetSettingsPath(), false);
                 writer.WriteLine(Regime);
                 writer.WriteLine(KTake);
                 writer.WriteLine(Comiss);
@@ -470,12 +470,12 @@ namespace OsEngine.Robots.Trend
 
         private void Load()
         {
-            if (!File.Exists(@"Engine\" + NameStrategyUniq + @"SettingsBot.txt"))
+            if (!File.Exists(GetSettingsPath()))
                 return;
 
             try
             {
-                using var reader = new StreamReader(@"Engine\" + NameStrategyUniq + @"SettingsBot.txt");
+                using var reader = new StreamReader(GetSettingsPath());
                 Enum.TryParse(reader.ReadLine(), true, out Regime);
                 KTake = Convert.ToDecimal(reader.ReadLine());
                 Comiss = Convert.ToDecimal(reader.ReadLine());
@@ -497,10 +497,15 @@ namespace OsEngine.Robots.Trend
 
         private void Strategy_DeleteEvent()
         {
-            if (File.Exists(@"Engine\" + NameStrategyUniq + @"SettingsBot.txt"))
+            if (File.Exists(GetSettingsPath()))
             {
-                File.Delete(@"Engine\" + NameStrategyUniq + @"SettingsBot.txt");
+                File.Delete(GetSettingsPath());
             }
+        }
+
+        private string GetSettingsPath()
+        {
+            return @"Engine\" + NameStrategyUniq + @"SettingsBot.txt";
         }
     }
 
