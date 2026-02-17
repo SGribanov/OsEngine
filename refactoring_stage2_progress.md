@@ -3702,3 +3702,14 @@
 ### Verification
 
 - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed 343/343
+
+## 2026-02-17 - Step 0.3 (silent-catch visibility) - Error logging in BotTabOptionsUi close cleanup catch
+
+- Updated `project/OsEngine/OsTrader/Panels/Tab/BotTabOptionsUi.xaml.cs`:
+  - replaced empty catch in `BotTabOptionsUi_Closed(...)` with:
+    - `catch (Exception ex) { ServerMaster.SendNewLogMessage(ex.ToString(), Logging.LogMessageType.Error); }`
+  - behavior preserved: cleanup remains exception-safe and non-throwing.
+
+### Verification
+
+- `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed 343/343

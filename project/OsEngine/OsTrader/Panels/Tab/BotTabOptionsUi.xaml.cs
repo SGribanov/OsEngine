@@ -79,9 +79,9 @@ namespace OsEngine.OsTrader.Panels.Tab
                     _gridSecurities = null;
                 }
             }
-            catch
+            catch (Exception ex)
             {
-
+                ServerMaster.SendNewLogMessage(ex.ToString(), Logging.LogMessageType.Error);
             }
         }
 
