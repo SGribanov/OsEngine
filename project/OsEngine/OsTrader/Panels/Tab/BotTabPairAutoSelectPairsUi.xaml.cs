@@ -12,6 +12,7 @@ using OsEngine.Market.Servers;
 using OsEngine.Market.Servers.Tester;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Windows;
 using System.Windows.Forms;
 using System.Windows.Input;
@@ -949,9 +950,9 @@ namespace OsEngine.OsTrader.Panels.Tab
             {
                 maxOneNamePairsCount = Convert.ToInt32(TextBoxMaxPairsToSecurity.Text);
             }
-            catch
+            catch (Exception ex)
             {
-                // ignore
+                Trace.TraceWarning(ex.ToString());
             }
 
             if (maxOneNamePairsCount == 0)
@@ -1145,9 +1146,9 @@ namespace OsEngine.OsTrader.Panels.Tab
                 {
                     commissionValue = TextBoxCommissionValue.Text.ToDecimal();
                 }
-                catch
+                catch (Exception ex)
                 {
-                    // ignore
+                    Trace.TraceWarning(ex.ToString());
                 }
 
                 string secClass = ComboBoxClass.Text;

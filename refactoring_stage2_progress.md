@@ -3346,3 +3346,18 @@
 ### Verification
 
 - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` -> passed 343/343
+
+## 2026-02-17 - Step 0.3 (silent-catch visibility) - Warning trace in BotTabPairAutoSelectPairsUi parse catches
+
+- Updated `project/OsEngine/OsTrader/Panels/Tab/BotTabPairAutoSelectPairsUi.xaml.cs`:
+  - added `using System.Diagnostics;`
+  - replaced silent parse catches with:
+    - `catch (Exception ex) { Trace.TraceWarning(ex.ToString()); }`
+  - applied in:
+    - `CreatePairNames()` for `maxOneNamePairsCount` parsing
+    - `ButtonAccept_Click(...)` for commission value parsing
+  - behavior preserved: fallback defaults retained (`maxOneNamePairsCount = 5`, `commissionValue = 0`).
+
+### Verification
+
+- `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` -> passed 343/343
