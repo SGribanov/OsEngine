@@ -3296,3 +3296,15 @@
 ### Verification
 
 - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` -> passed 343/343
+
+## 2026-02-17 - Step 0.3 (silent-catch visibility) - Warning trace in BotManualControl list-access catch
+
+- Updated `project/OsEngine/OsTrader/Panels/Tab/Internal/BotManualControl.cs`:
+  - added `using System.Diagnostics;`
+  - replaced silent catch in `CheckManualControlPositionEvents(...)` (when reading `openDeals[i]`) with:
+    - `catch (Exception ex) { Trace.TraceWarning(ex.ToString()); continue; }`
+  - behavior preserved: `continue` flow retained.
+
+### Verification
+
+- `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` -> passed 343/343

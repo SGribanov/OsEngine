@@ -10,6 +10,7 @@ using OsEngine.Market;
 using OsEngine.Market.Servers;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
@@ -659,10 +660,10 @@ namespace OsEngine.OsTrader.Panels.Tab.Internal
                     {
                         position = openDeals[i];
                     }
-                    catch
+                    catch (Exception ex)
                     {
+                        Trace.TraceWarning(ex.ToString());
                         continue;
-                        // ignore
                     }
 
                     if(position == null)
