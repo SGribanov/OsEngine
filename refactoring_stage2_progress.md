@@ -3792,3 +3792,20 @@
 ### Verification
 
 - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed 343/343
+
+## 2026-02-17 - Step 0.3 (silent-catch visibility) - Error logging in MoexFixFastCurrency dispose log-close catches
+
+- Updated `project/OsEngine/Market/Servers/MoexFixFastCurrency/MoexFixFastCurrencyServer.cs`:
+  - replaced four empty catches in `Dispose()` with:
+    - `catch (Exception ex) { SendLogMessage(ex.ToString(), LogMessageType.Error); }`
+  - applied in log file close calls:
+    - `_logFileTrades?.Close()`
+    - `_logFileOrders?.Close()`
+    - `_logFXMFIXMsg?.Close()`
+    - `_logFileRecover?.Close()`
+  - behavior preserved: dispose flow remains non-throwing and continues disconnect sequence.
+
+### Verification
+
+- `csharp-ls --diagnose --solution project/OsEngine.sln` -> completed (known NU1900 network warning in diagnostics)
+- `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed 343/343
