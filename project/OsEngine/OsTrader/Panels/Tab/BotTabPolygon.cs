@@ -359,12 +359,12 @@ namespace OsEngine.OsTrader.Panels.Tab
 
         private string GetStandartPolygonSettingsPath()
         {
-            return @"Engine\" + TabName + @"StandartPolygonSettings.txt";
+            return GetTabStoragePrefix() + @"StandartPolygonSettings.txt";
         }
 
         private string GetLegacyStrategSettingsPath()
         {
-            return @"Engine\" + TabName + @"StrategSettings.txt";
+            return GetTabStoragePrefix() + @"StrategSettings.txt";
         }
 
         private static BotTabPolygonStandartSettingsDto ParseLegacyStandartPolygonSettings(string content)
@@ -703,7 +703,12 @@ namespace OsEngine.OsTrader.Panels.Tab
 
         private string GetPolygonsNamesToLoadPath()
         {
-            return @"Engine\" + TabName + @"PolygonsNamesToLoad.txt";
+            return GetTabStoragePrefix() + @"PolygonsNamesToLoad.txt";
+        }
+
+        private string GetTabStoragePrefix()
+        {
+            return @"Engine\" + TabName;
         }
 
         private static BotTabPolygonNamesToLoadSettingsDto ParseLegacyPolygonNamesToLoadSettings(string content)
