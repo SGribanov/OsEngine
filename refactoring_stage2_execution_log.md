@@ -4009,3 +4009,21 @@
   - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` succeeded (`343/343`).
 - **Commit:** `81401dff1`
 - **Push:** no (manual push by user)
+
+### Step 0.3 - Silent Catch Visibility (Incremental Adoption #197)
+
+- **Status:** In Progress (increment completed)
+- **Plan item:** `refactoring_stage2_plan.md` -> Phase 0 / Step 0.3
+- **Changes:**
+  - Added trace-based error visibility in:
+    - `project/OsEngine/PrimeSettings/PrimeSettingsMaster.cs`
+  - Replaced silent catch blocks with `Trace.TraceWarning(ex.ToString())` in:
+    - `Save()`
+    - `Load()`
+  - Preserved existing fallback behavior (`_reportCriticalErrors = true` on load failure).
+  - Updated running progress journal:
+    - `refactoring_stage2_progress.md`
+- **Verification:**
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` succeeded (`343/343`).
+- **Commit:** `a0fce1fd7`
+- **Push:** no (manual push by user)
