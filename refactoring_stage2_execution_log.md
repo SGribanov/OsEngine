@@ -3913,3 +3913,22 @@
   - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` succeeded (`343/343`).
 - **Commit:** `c63e32199`
 - **Push:** no (manual push by user)
+
+### Step 2.3 - JSON Settings Subsystem (Incremental Adoption #192)
+
+- **Status:** In Progress (increment completed)
+- **Plan item:** `refactoring_stage2_plan.md` -> Phase 2 / Step 2.3
+- **Changes:**
+  - Path consistency cleanup in:
+    - `project/OsEngine/OsTrader/Gui/BlockInterface/BlockMaster.cs`
+  - Centralized prime-settings file path construction via helper:
+    - `GetPrimeSettingsPath(string fileName)`
+  - Replaced direct path usage in:
+    - `GetPasswordPath()`
+    - `GetIsBlockedPath()`
+  - Updated running progress journal:
+    - `refactoring_stage2_progress.md`
+- **Verification:**
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` succeeded (`343/343`).
+- **Commit:** `c6c5da1e3`
+- **Push:** no (manual push by user)
