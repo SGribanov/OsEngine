@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.NetworkInformation;
+using System.Diagnostics;
 using System.Threading;
 
 namespace OsEngine.OsTrader.ServerAvailability
@@ -148,8 +149,9 @@ namespace OsEngine.OsTrader.ServerAvailability
                     return reply.RoundtripTime.ToString();
                 }
             }
-            catch
+            catch (Exception ex)
             {
+                Trace.TraceWarning(ex.ToString());
                 return null;
             }
         }

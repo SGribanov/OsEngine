@@ -3713,3 +3713,15 @@
 ### Verification
 
 - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed 343/343
+
+## 2026-02-17 - Step 0.3 (silent-catch visibility) - Warning trace in ServerAvailabilityMaster ping catch
+
+- Updated `project/OsEngine/OsTrader/AvailabilityServer/ServerAvailabilityMaster.cs`:
+  - added `using System.Diagnostics;`
+  - replaced silent ping catch with warning trace + preserved fallback:
+    - `catch (Exception ex) { Trace.TraceWarning(ex.ToString()); return null; }`
+  - behavior preserved: ping failures still degrade gracefully to `null`.
+
+### Verification
+
+- `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed 343/343
