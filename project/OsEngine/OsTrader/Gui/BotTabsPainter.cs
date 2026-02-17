@@ -1227,8 +1227,9 @@ colum9.HeaderText = "Journal";
                     _grid.Rows[_rowToPaintInOpenPoses].Cells[i].Style.BackColor = color;
                 }
             }
-            catch
+            catch (Exception ex)
             {
+                Trace.TraceWarning(ex.ToString());
                 return;
             }
         }

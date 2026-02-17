@@ -3632,3 +3632,14 @@
 ### Verification
 
 - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed 343/343
+
+## 2026-02-17 - Step 0.3 (silent-catch visibility) - Warning trace in BotTabsPainter ColoredRow catch
+
+- Updated `project/OsEngine/OsTrader/Gui/BotTabsPainter.cs`:
+  - replaced silent `catch { return; }` in `ColoredRow(...)` with:
+    - `catch (Exception ex) { Trace.TraceWarning(ex.ToString()); return; }`
+  - behavior preserved: method still exits safely on row-paint failures.
+
+### Verification
+
+- `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed 343/343
