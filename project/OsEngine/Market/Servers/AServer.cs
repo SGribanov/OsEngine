@@ -705,9 +705,9 @@ namespace OsEngine.Market.Servers
                         Parameters = lines
                     });
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                // send to the log / отправить в лог
+                SendLogMessage(ex.ToString(), LogMessageType.Error);
             }
         }
 

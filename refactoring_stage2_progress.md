@@ -3839,3 +3839,15 @@
 
 - `csharp-ls --diagnose --solution project/OsEngine.sln` -> completed (known NU1900 network warning in diagnostics)
 - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed 343/343
+
+## 2026-02-17 - Step 0.3 (silent-catch visibility) - Error log in AServer.SaveParam catch
+
+- Updated `project/OsEngine/Market/Servers/AServer.cs`:
+  - replaced silent catch in `SaveParam()` with:
+    - `catch (Exception ex) { SendLogMessage(ex.ToString(), LogMessageType.Error); }`
+  - behavior preserved: save flow remains non-throwing; exception is now visible in logs.
+
+### Verification
+
+- `csharp-ls --diagnose --solution project/OsEngine.sln` -> completed (known NU1900 network warning in diagnostics)
+- `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed 343/343
