@@ -4412,3 +4412,24 @@
   - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` succeeded (`343/343`).
 - **Commit:** `019cb5eea`
 - **Push:** yes (`origin/master`)
+
+### Step 0.3 - Silent Catch Visibility (Incremental Adoption #218)
+
+- **Status:** In Progress (increment completed)
+- **Plan item:** `refactoring_stage2_plan.md` -> Phase 0 / Step 0.3
+- **Changes:**
+  - Added explicit error visibility in:
+    - `project/OsEngine/OsTrader/Panels/Tab/BotTabPoligonSecurityAddUi.xaml.cs`
+  - Added `using System.Diagnostics;`.
+  - Replaced silent catches in `ConnectorCandlesUi_Closing(...)` with:
+    - `catch (Exception ex) { Trace.TraceWarning(ex.ToString()); }`
+  - Applied in:
+    - server events unsubscription block
+    - UI events/grid cleanup block
+  - Preserved existing behavior (cleanup flow unchanged).
+  - Updated running progress journal:
+    - `refactoring_stage2_progress.md`
+- **Verification:**
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` succeeded (`343/343`).
+- **Commit:** `690960d03`
+- **Push:** no (will be included in next periodic push)
