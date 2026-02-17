@@ -3762,3 +3762,18 @@
 ### Verification
 
 - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed 343/343
+
+## 2026-02-17 - Step 0.3 (silent-catch visibility) - Error logging in TesterServer stream-decompression fallback catches
+
+- Updated `project/OsEngine/Market/Servers/Tester/TesterServer.cs`:
+  - replaced four empty catches in stream probing with explicit logging:
+    - in `TesterServer.GetDataStream(FileStream fs, byte[] prefix)`:
+      - `catch (Exception ex) { SendLogMessage(ex.ToString(), LogMessageType.Error); }`
+    - in `SecurityTester.GetDataStream(FileStream fs, byte[] prefix)`:
+      - `catch (Exception ex) { SendLogMessage(ex.ToString()); }`
+  - applied in both `GZipStream` and `DeflateStream` probe blocks for each method.
+  - behavior preserved: stream-format fallback sequence and `null` return on probe failure unchanged.
+
+### Verification
+
+- `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed 343/343

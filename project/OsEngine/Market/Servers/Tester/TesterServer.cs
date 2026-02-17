@@ -4178,7 +4178,10 @@ namespace OsEngine.Market.Servers.Tester
                 if (CheckPrefix(stream, buffer, prefix))
                     return stream;
             }
-            catch { }
+            catch (Exception ex)
+            {
+                SendLogMessage(ex.ToString(), LogMessageType.Error);
+            }
 
             if (stream != null)
             {
@@ -4194,7 +4197,10 @@ namespace OsEngine.Market.Servers.Tester
                 if (CheckPrefix(stream, buffer, prefix))
                     return stream;
             }
-            catch { }
+            catch (Exception ex)
+            {
+                SendLogMessage(ex.ToString(), LogMessageType.Error);
+            }
 
             if (stream != null)
             {
@@ -5837,7 +5843,10 @@ namespace OsEngine.Market.Servers.Tester
                 if (CheckPrefix(stream, buffer, prefix))
                     return stream;
             }
-            catch { }
+            catch (Exception ex)
+            {
+                SendLogMessage(ex.ToString());
+            }
 
             if (stream != null)
             {
@@ -5853,7 +5862,10 @@ namespace OsEngine.Market.Servers.Tester
                 if (CheckPrefix(stream, buffer, prefix))
                     return stream;
             }
-            catch { }
+            catch (Exception ex)
+            {
+                SendLogMessage(ex.ToString());
+            }
 
             if (stream != null)
             {
