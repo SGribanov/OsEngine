@@ -128,7 +128,7 @@ namespace OsEngine.Robots.CounterTrend
         {
             try
             {
-                using (StreamWriter writer = new StreamWriter(@"Engine\" + NameStrategyUniq + @"SettingsBot.txt", false))
+                using (StreamWriter writer = new StreamWriter(GetSettingsPath(), false))
                 {
                     writer.WriteLine(_regime);
                     writer.WriteLine(_volumeType);
@@ -150,13 +150,13 @@ namespace OsEngine.Robots.CounterTrend
         // load settins from .txt file
         private void Load()
         {
-            if (!File.Exists(@"Engine\" + NameStrategyUniq + @"SettingsBot.txt"))
+            if (!File.Exists(GetSettingsPath()))
             {
                 return;
             }
             try
             {
-                using (StreamReader reader = new StreamReader(@"Engine\" + NameStrategyUniq + @"SettingsBot.txt"))
+                using (StreamReader reader = new StreamReader(GetSettingsPath()))
                 {
                     Enum.TryParse(reader.ReadLine(), true, out _regime);
                     _volumeType =Convert.ToString(reader.ReadLine());
@@ -177,10 +177,15 @@ namespace OsEngine.Robots.CounterTrend
         // delete save file
         void Strategy_DeleteEvent()
         {
-            if (File.Exists(@"Engine\" + NameStrategyUniq + @"SettingsBot.txt"))
+            if (File.Exists(GetSettingsPath()))
             {
-                File.Delete(@"Engine\" + NameStrategyUniq + @"SettingsBot.txt");
+                File.Delete(GetSettingsPath());
             }
+        }
+
+        private string GetSettingsPath()
+        {
+            return @"Engine\" + NameStrategyUniq + @"SettingsBot.txt";
         }
 
         // logic
