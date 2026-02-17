@@ -1129,7 +1129,12 @@ namespace OsEngine.Market.Servers
 
         private string GetServerStoragePrefix()
         {
-            return @"Engine\" + ServerNameUnique;
+            return BuildEnginePath(ServerNameUnique);
+        }
+
+        private static string BuildEnginePath(string fileOrFolderName)
+        {
+            return @"Engine\" + fileOrFolderName;
         }
 
         private ServerSettingsDto ParseLegacyServerSettings(string content)
@@ -5345,7 +5350,7 @@ namespace OsEngine.Market.Servers
 
         private static string GetServerDopSettingsDirectoryPath()
         {
-            return @"Engine\ServerDopSettings";
+            return BuildEnginePath("ServerDopSettings");
         }
 
         private string GetServerDopSettingsDirectoryPathForCurrentServerType()
