@@ -2660,6 +2660,21 @@
 
 - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` -> passed 343/343
 
+## 2026-02-16 - Step 2.3 (JSON settings subsystem) - Path consistency cleanup in CustomTableInParamWindowSample lines path
+
+- Updated `project/OsEngine/Robots/TechSamples/CustomTableInTheParamWindowSample.cs`:
+  - centralized lines-storage file path via helper:
+    - `GetLinesPath()`
+  - replaced duplicated inline path usage in:
+    - `DeleteBotEvent()`
+    - `SaveLines()`
+    - `LoadLines()`
+- No behavior changes intended; lines file remains `Engine\\<NameStrategyUniq>Lines.txt`.
+
+### Verification
+
+- `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` -> passed 343/343
+
 ## 2026-02-16 - Step 2.3 (JSON settings subsystem) - Path consistency cleanup in MoexFixFastTwimeFutures log paths
 
 - Updated `project/OsEngine/Market/Servers/MoexFixFastTwimeFutures/MoexFixFastTwimeFuturesServer.cs`:

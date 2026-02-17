@@ -147,9 +147,9 @@ namespace OsEngine.Robots.TechSamples
         // Delete Bot Event
         private void DeleteBotEvent()
         {
-            if (File.Exists(@"Engine\" + NameStrategyUniq + @"Lines.txt"))
+            if (File.Exists(GetLinesPath()))
             {
-                File.Delete(@"Engine\" + NameStrategyUniq + @"Lines.txt");
+                File.Delete(GetLinesPath());
             }
         }
 
@@ -158,7 +158,7 @@ namespace OsEngine.Robots.TechSamples
         {
             try
             {
-                using (StreamWriter writer = new StreamWriter(@"Engine\" + NameStrategyUniq + @"Lines.txt", false))
+                using (StreamWriter writer = new StreamWriter(GetLinesPath(), false))
                 {
                     for (int i = 0; i < Lines.Count; i++)
                     {
@@ -177,14 +177,14 @@ namespace OsEngine.Robots.TechSamples
         // Loading saved table data
         public void LoadLines()
         {
-            if (!File.Exists(@"Engine\" + NameStrategyUniq + @"Lines.txt"))
+            if (!File.Exists(GetLinesPath()))
             {
                 return;
             }
 
             try
             {
-                using (StreamReader reader = new StreamReader(@"Engine\" + NameStrategyUniq + @"Lines.txt"))
+                using (StreamReader reader = new StreamReader(GetLinesPath()))
                 {
                     while (reader.EndOfStream == false)
                     {
@@ -208,6 +208,11 @@ namespace OsEngine.Robots.TechSamples
             {
                 SendNewLogMessage(ex.ToString(), OsEngine.Logging.LogMessageType.Error);
             }
+        }
+
+        private string GetLinesPath()
+        {
+            return @"Engine\" + NameStrategyUniq + @"Lines.txt";
         }
 
         #endregion
