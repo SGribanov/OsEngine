@@ -3056,7 +3056,10 @@ namespace OsEngine.OsData
                 if (CheckPrefix(stream, buffer, prefix))
                     return stream;
             }
-            catch { }
+            catch (Exception ex)
+            {
+                SendNewLogMessage(ex.ToString(), LogMessageType.Error);
+            }
 
             if (stream != null)
             {
@@ -3072,7 +3075,10 @@ namespace OsEngine.OsData
                 if (CheckPrefix(stream, buffer, prefix))
                     return stream;
             }
-            catch { }
+            catch (Exception ex)
+            {
+                SendNewLogMessage(ex.ToString(), LogMessageType.Error);
+            }
 
             if (stream != null)
             {

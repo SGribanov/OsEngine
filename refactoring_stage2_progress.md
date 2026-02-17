@@ -3748,3 +3748,17 @@
 - Journals are up to date:
   - `refactoring_stage2_progress.md`
   - `refactoring_stage2_execution_log.md`
+
+## 2026-02-17 - Step 0.3 (silent-catch visibility) - Error logging in OsDataSet stream-decompression fallback catches
+
+- Updated `project/OsEngine/OsData/OsDataSet.cs`:
+  - replaced two empty catches in `GetDataStream(FileStream fs, byte[] prefix)` with:
+    - `catch (Exception ex) { SendNewLogMessage(ex.ToString(), LogMessageType.Error); }`
+  - applied in:
+    - `GZipStream` probe block
+    - `DeflateStream` probe block
+  - behavior preserved: method still falls back safely across stream formats and returns `null` when probe fails.
+
+### Verification
+
+- `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed 343/343
