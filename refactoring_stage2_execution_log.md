@@ -3680,3 +3680,23 @@
   - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` succeeded (`343/343`).
 - **Commit:** `e5c82e4c7`
 - **Push:** no (manual push by user)
+
+### Step 2.3 - JSON Settings Subsystem (Incremental Adoption #180)
+
+- **Status:** In Progress (increment completed)
+- **Plan item:** `refactoring_stage2_plan.md` -> Phase 2 / Step 2.3
+- **Changes:**
+  - Path consistency cleanup in:
+    - `project/OsEngine/Market/Servers/AServer.cs`
+  - Centralized server-storage path prefix via helper:
+    - `GetServerStoragePrefix()`
+  - Replaced duplicated path-prefix usage in:
+    - `GetServerParamsPath()`
+    - `GetServerSettingsPath()`
+    - `GetNonTradePeriodsPath()`
+  - Updated running progress journal:
+    - `refactoring_stage2_progress.md`
+- **Verification:**
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` succeeded (`343/343`).
+- **Commit:** `cb470b2e5`
+- **Push:** no (manual push by user)
