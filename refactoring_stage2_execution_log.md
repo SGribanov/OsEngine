@@ -3136,3 +3136,23 @@
   - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` succeeded (`343/343`).
 - **Commit:** `f546e7862`
 - **Push:** no (manual push by user)
+
+### Step 2.3 - JSON Settings Subsystem (Incremental Adoption #153)
+
+- **Status:** In Progress (increment completed)
+- **Plan item:** `refactoring_stage2_plan.md` -> Phase 2 / Step 2.3
+- **Changes:**
+  - Path consistency cleanup in:
+    - `project/OsEngine/Robots/AlgoStart/AlgoStart2Soldiers.cs`
+  - Centralized bot settings file path via helper:
+    - `GetTradeSettingsPath()`
+  - Replaced duplicated inline path usage in:
+    - `SaveTradeSettings()`
+    - `LoadTradeSettings()`
+    - `AlgoStart2ScreenerSoldiers_DeleteEvent()`
+  - Updated running progress journal:
+    - `refactoring_stage2_progress.md`
+- **Verification:**
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` succeeded (`343/343`).
+- **Commit:** `7754eae34`
+- **Push:** no (manual push by user)
