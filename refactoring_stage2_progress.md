@@ -3555,3 +3555,14 @@
 ### Verification
 
 - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` -> passed 343/343
+
+## 2026-02-17 - Step 0.3 (silent-catch visibility) - Error logging in BotPanel chart-close catch
+
+- Updated `project/OsEngine/OsTrader/Panels/BotPanel.cs`:
+  - replaced silent catch in `Delete()` chart close block with explicit logging via:
+    - `SendNewLogMessage(error.ToString(), LogMessageType.Error)`
+  - behavior preserved: delete pipeline continues after catch.
+
+### Verification
+
+- `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` -> passed 343/343

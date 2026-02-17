@@ -151,9 +151,9 @@ namespace OsEngine.OsTrader.Panels
                 {
                     _chartUi?.Close();
                 }
-                catch
+                catch (Exception error)
                 {
-                    // ignore
+                    SendNewLogMessage(error.ToString(), LogMessageType.Error);
                 }
 
                 OsTraderMaster.CriticalErrorEvent -= OsTraderMaster_CriticalErrorEvent;
