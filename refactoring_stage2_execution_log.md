@@ -5230,3 +5230,27 @@
   - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` succeeded (`343/343`).
 - **Commit:** `70bbb526e`
 - **Push:** yes (`origin/master`)
+
+### Step 4.1 - Lock Migration (Incremental Adoption #258)
+
+- **Status:** In Progress (increment completed)
+- **Plan item:** `refactoring_stage2_plan.md` -> Phase 4 / Step 4.1
+- **Changes:**
+  - Bulk-migrated remaining runtime `object`-based lock fields to `Lock` in:
+    - `project/OsEngine/Entity/WebSocketOsEngine.cs` (`_ctsLocker`)
+    - `project/OsEngine/Logging/ServerMail.cs` (`LokerMessanger`)
+    - `project/OsEngine/Logging/ServerWebhook.cs` (`LokerMessanger`)
+    - `project/OsEngine/Market/Servers/MoexFixFastSpot/MoexFixFastSpotServer.cs` (`_logLock`)
+    - `project/OsEngine/Market/Servers/MoexFixFastCurrency/MoexFixFastCurrencyServer.cs` (`_logLockTrade`, `_logLockOrder`, `_logLockMFIX`, `_logLockRecover`)
+    - `project/OsEngine/Market/Servers/MoexFixFastTwimeFutures/MoexFixFastTwimeFuturesServer.cs` (`_logLockTrade`, `_logLockOrder`, `_logLockTrading`, `_logLockRecover`)
+  - Preserved all existing `lock (...)` call sites and synchronization behavior.
+  - Confirmed remaining `new object()` occurrence is commented code only in:
+    - `project/OsEngine/Market/Servers/MFD/MfdServer.cs`
+  - Updated running progress journal:
+    - `refactoring_stage2_progress.md`
+- **Verification:**
+  - `rg -n "\\bobject\\b\\s+[_A-Za-z0-9]+\\s*=\\s*new\\s*object\\(\\)" project/OsEngine -S` returned only commented code in `MfdServer.cs`.
+  - `csharp-ls --diagnose --solution project/OsEngine.sln` completed (with known NU1900 feed-access warnings).
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` succeeded (`343/343`).
+- **Commit:** `efc5ab840`
+- **Push:** yes (`origin/master`)
