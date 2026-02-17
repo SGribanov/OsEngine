@@ -4769,3 +4769,21 @@
   - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` succeeded (`343/343`).
 - **Commit:** `387e07190`
 - **Push:** yes (`origin/master`)
+
+### Step 0.3 - Silent Catch Visibility (Incremental Adoption #236)
+
+- **Status:** In Progress (increment completed)
+- **Plan item:** `refactoring_stage2_plan.md` -> Phase 0 / Step 0.3
+- **Changes:**
+  - Added explicit warning visibility in:
+    - `project/OsEngine/OsTrader/Gui/BotTabsPainter.cs`
+  - Added `using System.Diagnostics;`.
+  - Replaced silent `PaintPos()` catch block with:
+    - `catch (Exception ex) { Trace.TraceWarning(ex.ToString()); }`
+  - Preserved existing behavior (async highlight flow stays exception-safe).
+  - Updated running progress journal:
+    - `refactoring_stage2_progress.md`
+- **Verification:**
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` succeeded (`343/343`).
+- **Commit:** `769cd09ff`
+- **Push:** yes (`origin/master`)
