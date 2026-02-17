@@ -3737,3 +3737,14 @@
 ### Verification
 
 - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed 343/343
+
+## 2026-02-17 - Resume Checkpoint
+
+- Snapshot saved for safe resume after session interruption.
+- Current branch/head at checkpoint creation:
+  - `master` / `f8a1eac43`
+- Last fully completed increment:
+  - Step 0.3 / Incremental Adoption `#246`
+- Journals are up to date:
+  - `refactoring_stage2_progress.md`
+  - `refactoring_stage2_execution_log.md`

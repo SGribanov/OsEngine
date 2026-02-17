@@ -4983,3 +4983,13 @@
   - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` succeeded (`343/343`).
 - **Commit:** `b24769094`
 - **Push:** yes (`origin/master`)
+
+### Resume Checkpoint (Post #246)
+
+- **Status:** Saved
+- **Purpose:** fast recovery point if session/MCP hangs or disconnects.
+- **Branch/Head at checkpoint creation:** `master` / `f8a1eac43`
+- **Last completed increment:** Step 0.3 / `#246`
+- **Tracked docs synchronized:** 
+  - `refactoring_stage2_progress.md`
+  - `refactoring_stage2_execution_log.md`
