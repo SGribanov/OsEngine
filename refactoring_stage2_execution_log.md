@@ -4208,3 +4208,21 @@
   - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` succeeded (`343/343`).
 - **Commit:** `26cd47240`
 - **Push:** no (will be included in next periodic push)
+
+### Step 0.3 - Silent Catch Visibility (Incremental Adoption #207)
+
+- **Status:** In Progress (increment completed)
+- **Plan item:** `refactoring_stage2_plan.md` -> Phase 0 / Step 0.3
+- **Changes:**
+  - Added explicit error visibility in:
+    - `project/OsEngine/OsTrader/Panels/Tab/BotTabPolygon.cs`
+  - Replaced silent `catch { return; }` blocks with logging + preserved return:
+    - `catch (Exception ex) { SendNewLogMessage(ex.ToString(), LogMessageType.Error); return; }`
+  - Applied in grid click handling paths where sequence index is parsed from selected row.
+  - Preserved existing behavior (early return remains unchanged).
+  - Updated running progress journal:
+    - `refactoring_stage2_progress.md`
+- **Verification:**
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` succeeded (`343/343`).
+- **Commit:** `b73b6043e`
+- **Push:** no (will be included in next periodic push)
