@@ -2353,9 +2353,9 @@ namespace OsEngine.OsTrader.Panels.Tab
                 _lastTimeUpdateIndex = settings.LastTimeUpdateIndex;
                 _writeLogMessageOnRebuild = settings.WriteLogMessageOnRebuild;
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                // ignore
+                SendNewLogMessage(ex.ToString(), LogMessageType.Error);
             }
         }
 
@@ -2386,9 +2386,9 @@ namespace OsEngine.OsTrader.Panels.Tab
                         WriteLogMessageOnRebuild = _writeLogMessageOnRebuild
                     });
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                // ignore
+                SendNewLogMessage(ex.ToString(), LogMessageType.Error);
             }
         }
 
