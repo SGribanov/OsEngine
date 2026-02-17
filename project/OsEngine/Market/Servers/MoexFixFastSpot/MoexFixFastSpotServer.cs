@@ -263,9 +263,9 @@ namespace OsEngine.Market.Servers.MoexFixFastSpot
 
             SendLogMessage("Connection Closed by MoexFixFastSpot. Socket Data Closed Event", LogMessageType.System);
 
-            try { _logFile?.Close(); } catch { }
-            try { _logFileXOrders?.Close(); } catch { }
-            try { _logFileMFIX?.Close(); } catch { }
+            try { _logFile?.Close(); } catch (Exception ex) { SendLogMessage(ex.ToString(), LogMessageType.Error); }
+            try { _logFileXOrders?.Close(); } catch (Exception ex) { SendLogMessage(ex.ToString(), LogMessageType.Error); }
+            try { _logFileMFIX?.Close(); } catch (Exception ex) { SendLogMessage(ex.ToString(), LogMessageType.Error); }
 
             if (ServerStatus != ServerConnectStatus.Disconnect)
             {

@@ -3777,3 +3777,18 @@
 ### Verification
 
 - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed 343/343
+
+## 2026-02-17 - Step 0.3 (silent-catch visibility) - Error logging in MoexFixFastSpot dispose log-close catches
+
+- Updated `project/OsEngine/Market/Servers/MoexFixFastSpot/MoexFixFastSpotServer.cs`:
+  - replaced three empty catches in `Dispose()` with:
+    - `catch (Exception ex) { SendLogMessage(ex.ToString(), LogMessageType.Error); }`
+  - applied in log file close calls:
+    - `_logFile?.Close()`
+    - `_logFileXOrders?.Close()`
+    - `_logFileMFIX?.Close()`
+  - behavior preserved: dispose flow remains non-throwing and continues disconnect sequence.
+
+### Verification
+
+- `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed 343/343
