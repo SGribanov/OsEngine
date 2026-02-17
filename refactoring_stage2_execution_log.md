@@ -3719,3 +3719,22 @@
   - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` succeeded (`343/343`).
 - **Commit:** `975310d73`
 - **Push:** no (manual push by user)
+
+### Step 2.3 - JSON Settings Subsystem (Incremental Adoption #182)
+
+- **Status:** In Progress (increment completed)
+- **Plan item:** `refactoring_stage2_plan.md` -> Phase 2 / Step 2.3
+- **Changes:**
+  - Path consistency cleanup in:
+    - `project/OsEngine/Journal/Internal/PositionController.cs`
+  - Centralized position-controller storage path prefix via helper:
+    - `GetStoragePathPrefix()`
+  - Replaced duplicated path-prefix usage in:
+    - `GetDealsPath()`
+    - `GetStopLimitsPath()`
+  - Updated running progress journal:
+    - `refactoring_stage2_progress.md`
+- **Verification:**
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` succeeded (`343/343`).
+- **Commit:** `f8feac292`
+- **Push:** no (manual push by user)
