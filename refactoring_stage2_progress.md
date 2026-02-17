@@ -3884,3 +3884,18 @@
 
 - `csharp-ls --diagnose --solution project/OsEngine.sln` -> completed (known NU1900 network warning in diagnostics)
 - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed 343/343
+
+## 2026-02-17 - Step 4.1 (Lock migration) - Migrate PositionController worker lock to Lock
+
+- Updated `project/OsEngine/Journal/Internal/PositionController.cs`:
+  - replaced static legacy lock field:
+    - `private static readonly object _workerLocker = new object();`
+  - with:
+    - `private static readonly Lock _workerLocker = new();`
+  - lock usage sites preserved (`lock (_workerLocker)` in activation path).
+  - behavior preserved: worker start synchronization unchanged.
+
+### Verification
+
+- `csharp-ls --diagnose --solution project/OsEngine.sln` -> completed (known NU1900 network warning in diagnostics)
+- `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed 343/343

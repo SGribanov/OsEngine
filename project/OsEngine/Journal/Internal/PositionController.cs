@@ -44,7 +44,7 @@ namespace OsEngine.Journal.Internal
         }
 
         private static Task _worker;
-        private static readonly object _workerLocker = new object();
+        private static readonly Lock _workerLocker = new();
 
         private static CultureInfo _currentCulture;
 
