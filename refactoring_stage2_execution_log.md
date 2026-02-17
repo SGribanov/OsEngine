@@ -3096,3 +3096,22 @@
   - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` succeeded (`343/343`).
 - **Commit:** `98661e07e`
 - **Push:** no (manual push by user)
+
+### Step 2.3 - JSON Settings Subsystem (Incremental Adoption #151)
+
+- **Status:** In Progress (increment completed)
+- **Plan item:** `refactoring_stage2_plan.md` -> Phase 2 / Step 2.3
+- **Changes:**
+  - Path consistency cleanup in:
+    - `project/OsEngine/Market/Servers/AstsBridge/AstsBridgeServer.cs`
+  - Centralized settings file path via helper:
+    - `GetSettingsPath()`
+  - Replaced duplicated inline `Engine\\AstsServer.txt` path usage in:
+    - `Load()`
+    - `Save()`
+  - Updated running progress journal:
+    - `refactoring_stage2_progress.md`
+- **Verification:**
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` succeeded (`343/343`).
+- **Commit:** `eed3c7982`
+- **Push:** no (manual push by user)
