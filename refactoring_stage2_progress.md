@@ -2911,3 +2911,21 @@
 ### Verification
 
 - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` -> passed 343/343
+
+## 2026-02-17 - Step 2.3 (JSON settings subsystem) - Path consistency cleanup in TesterServer test-settings paths
+
+- Updated `project/OsEngine/Market/Servers/Tester/TesterServer.cs`:
+  - centralized tester settings file path construction via helper:
+    - `GetTesterSettingsFilePath(string suffix)`
+  - replaced direct path usage in:
+    - `GetTesterSettingsPath()`
+    - `GetClearingSettingsPath()`
+    - `GetNonTradePeriodsPath()`
+- No behavior changes intended; files remain:
+  - `Engine\\TestServer.txt`
+  - `Engine\\TestServerClearings.txt`
+  - `Engine\\TestServerNonTradePeriods.txt`
+
+### Verification
+
+- `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` -> passed 343/343

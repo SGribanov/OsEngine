@@ -225,7 +225,12 @@ namespace OsEngine.Market.Servers.Tester
 
         private static string GetTesterSettingsPath()
         {
-            return @"Engine\TestServer.txt";
+            return GetTesterSettingsFilePath(".txt");
+        }
+
+        private static string GetTesterSettingsFilePath(string suffix)
+        {
+            return @"Engine\TestServer" + suffix;
         }
 
         private static TesterServerSettingsDto ParseLegacyTesterServerSettings(string content)
@@ -2228,7 +2233,7 @@ namespace OsEngine.Market.Servers.Tester
 
         private static string GetClearingSettingsPath()
         {
-            return @"Engine\TestServerClearings.txt";
+            return GetTesterSettingsFilePath("Clearings.txt");
         }
 
         private static TesterClearingsSettingsDto ParseLegacyClearingsSettings(string content)
@@ -2436,7 +2441,7 @@ namespace OsEngine.Market.Servers.Tester
 
         private static string GetNonTradePeriodsPath()
         {
-            return @"Engine\TestServerNonTradePeriods.txt";
+            return GetTesterSettingsFilePath("NonTradePeriods.txt");
         }
 
         private static TesterNonTradePeriodsSettingsDto ParseLegacyNonTradePeriodsSettings(string content)
