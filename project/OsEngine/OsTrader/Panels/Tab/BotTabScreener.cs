@@ -24,6 +24,7 @@ using OsEngine.Candles.Factory;
 using OsEngine.OsTrader.Panels.Tab.Internal;
 using System.Drawing;
 using OsEngine.Market.Servers.Tester;
+using System.Diagnostics;
 
 namespace OsEngine.OsTrader.Panels.Tab
 {
@@ -138,9 +139,9 @@ namespace OsEngine.OsTrader.Panels.Tab
                         }
                     }
                 }
-                catch
+                catch (Exception ex)
                 {
-                    // ignore
+                    Trace.TraceWarning(ex.ToString());
                 }
 
             }
@@ -450,9 +451,9 @@ namespace OsEngine.OsTrader.Panels.Tab
                         Tabs[i].EventsIsOn = value;
                     }
                 }
-                catch
+                catch (Exception ex)
                 {
-                    // ignore
+                    SendNewLogMessage(ex.ToString(), LogMessageType.Error);
                 }
 
                 SaveSettings();
@@ -870,9 +871,9 @@ namespace OsEngine.OsTrader.Panels.Tab
                     {
                         Tabs[i].EmulatorIsOn = value;
                     }
-                    catch
+                    catch (Exception ex)
                     {
-                        // ignore. Не все вкладки запустились
+                        SendNewLogMessage(ex.ToString(), LogMessageType.Error);
                     }
                 }
 

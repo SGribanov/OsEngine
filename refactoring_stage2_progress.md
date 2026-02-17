@@ -3214,3 +3214,17 @@
 ### Verification
 
 - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` -> passed 343/343
+
+## 2026-02-17 - Step 0.3 (silent-catch visibility) - Error logging in BotTabScreener remaining silent catches
+
+- Updated `project/OsEngine/OsTrader/Panels/Tab/BotTabScreener.cs`:
+  - added `using System.Diagnostics;`
+  - replaced remaining silent catches with explicit visibility:
+    - static draw thread catch -> `Trace.TraceWarning(ex.ToString())`
+    - `EventsIsOn` setter catch -> `SendNewLogMessage(ex.ToString(), LogMessageType.Error)`
+    - `EmulatorIsOn` setter per-tab catch -> `SendNewLogMessage(ex.ToString(), LogMessageType.Error)`
+  - behavior preserved: no exception rethrow added.
+
+### Verification
+
+- `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` -> passed 343/343
