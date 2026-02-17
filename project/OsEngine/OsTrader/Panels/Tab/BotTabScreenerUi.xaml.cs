@@ -17,6 +17,7 @@ using OsEngine.Market.Servers.Tester;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
+using System.Diagnostics;
 using System.Globalization;
 using System.IO;
 using System.Windows;
@@ -213,9 +214,9 @@ namespace OsEngine.OsTrader.Panels.Tab
                     serversAll[i].PortfoliosChangeEvent -= server_PortfoliosChangeEvent;
                 }
             }
-            catch
+            catch (Exception ex)
             {
-                // ignore
+                Trace.TraceWarning(ex.ToString());
             }
 
             try
@@ -237,9 +238,9 @@ namespace OsEngine.OsTrader.Panels.Tab
                 DeleteCandleRealizationGrid();
                 DeleteGridSecurities();
             }
-            catch
+            catch (Exception ex)
             {
-                // ignore
+                Trace.TraceWarning(ex.ToString());
             }
 
             try
@@ -251,9 +252,9 @@ namespace OsEngine.OsTrader.Panels.Tab
                 _searchResults.Clear();
                 _searchResults = null;
             }
-            catch
+            catch (Exception ex)
             {
-                // ignore
+                Trace.TraceWarning(ex.ToString());
             }
         }
 
@@ -1111,9 +1112,9 @@ namespace OsEngine.OsTrader.Panels.Tab
                     _gridSecurities.DataError -= _gridSecurities_DataError;
                 }
             }
-            catch
+            catch (Exception ex)
             {
-                // ignore
+                Trace.TraceWarning(ex.ToString());
             }
         }
 
@@ -1800,9 +1801,9 @@ namespace OsEngine.OsTrader.Panels.Tab
             {
                 curCreator.CommissionValue = TextBoxCommissionValue.Text.ToDecimal();
             }
-            catch
+            catch (Exception ex)
             {
-                // ignore
+                Trace.TraceWarning(ex.ToString());
             }
 
             curCreator.CandleCreateMethodType = ComboBoxCandleCreateMethodType.Text;

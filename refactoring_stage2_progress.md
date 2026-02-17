@@ -3389,3 +3389,19 @@
 ### Verification
 
 - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` -> passed 343/343
+
+## 2026-02-17 - Step 0.3 (silent-catch visibility) - Warning trace in BotTabScreenerUi cleanup catches
+
+- Updated `project/OsEngine/OsTrader/Panels/Tab/BotTabScreenerUi.xaml.cs`:
+  - added `using System.Diagnostics;`
+  - replaced cleanup silent catches with:
+    - `catch (Exception ex) { Trace.TraceWarning(ex.ToString()); }`
+  - applied in:
+    - three cleanup catches inside `BotTabScreenerUi_Closed(...)`
+    - `DeleteGridSecurities()` catch
+    - `DeleteCandleRealizationGrid()` catch
+  - behavior preserved: cleanup flow unchanged.
+
+### Verification
+
+- `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` -> passed 343/343
