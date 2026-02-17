@@ -2797,3 +2797,17 @@
 ### Verification
 
 - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` -> passed 343/343
+
+## 2026-02-17 - Step 2.3 (JSON settings subsystem) - Path consistency cleanup in ComparePositionsModule settings prefix
+
+- Updated `project/OsEngine/Market/Servers/ComparePositionsModule.cs`:
+  - centralized compare-module settings path prefix via helper:
+    - `GetSettingsPathPrefix()`
+  - replaced duplicated path-prefix usage in:
+    - `GetSettingsPath()`
+    - `GetIgnoredSettingsPath()`
+- No behavior changes intended; files remain under `Engine\\<ServerNameUnique>...`.
+
+### Verification
+
+- `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` -> passed 343/343

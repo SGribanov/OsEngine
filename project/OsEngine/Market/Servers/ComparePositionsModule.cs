@@ -113,12 +113,17 @@ namespace OsEngine.Market.Servers
 
         private string GetSettingsPath()
         {
-            return @"Engine\" + Server.ServerNameUnique + @"CompareModule.txt";
+            return GetSettingsPathPrefix() + @"CompareModule.txt";
         }
 
         private string GetIgnoredSettingsPath()
         {
-            return @"Engine\" + Server.ServerNameUnique + @"CompareModule_IgnoreSec.txt";
+            return GetSettingsPathPrefix() + @"CompareModule_IgnoreSec.txt";
+        }
+
+        private string GetSettingsPathPrefix()
+        {
+            return @"Engine\" + Server.ServerNameUnique;
         }
 
         private ComparePositionsModuleSettingsDto ParseLegacySettings(string content)
