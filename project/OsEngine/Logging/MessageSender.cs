@@ -4,6 +4,7 @@
 */
 
 using System;
+using System.Diagnostics;
 using System.IO;
 using OsEngine.Entity;
 
@@ -140,9 +141,9 @@ namespace OsEngine.Logging
                 TelegramNoNameSendOn = settings.TelegramNoNameSendOn;
                 TelegramUserSendOn = settings.TelegramUserSendOn;
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                // ignore
+                Trace.TraceWarning(ex.ToString());
             }
 
         }
@@ -157,9 +158,9 @@ namespace OsEngine.Logging
             {
                 SettingsManager.Save(GetSettingsPath(), BuildSettings());
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                // ignore
+                Trace.TraceWarning(ex.ToString());
             }
         }
 

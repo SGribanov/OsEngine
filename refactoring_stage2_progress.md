@@ -3046,3 +3046,15 @@
 ### Verification
 
 - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` -> passed 343/343
+
+## 2026-02-17 - Step 0.3 (silent-catch visibility) - Trace logging in MessageSender catch blocks
+
+- Updated `project/OsEngine/Logging/MessageSender.cs`:
+  - added `System.Diagnostics.Trace` warnings in silent catch blocks:
+    - `ApplySettings(...)`
+    - `Save()`
+  - behavior preserved: exceptions are still swallowed (no rethrow).
+
+### Verification
+
+- `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` -> passed 343/343
