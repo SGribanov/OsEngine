@@ -4617,3 +4617,21 @@
   - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` succeeded (`343/343`).
 - **Commit:** `40d037e83`
 - **Push:** no (will be included in next periodic push)
+
+### Step 0.3 - Silent Catch Visibility (Incremental Adoption #228)
+
+- **Status:** In Progress (increment completed)
+- **Plan item:** `refactoring_stage2_plan.md` -> Phase 0 / Step 0.3
+- **Changes:**
+  - Added explicit error visibility in:
+    - `project/OsEngine/OsTrader/Grids/TradeGridAutoStarter.cs`
+  - Added `using System.Diagnostics;`.
+  - Replaced silent catch in `LoadFromString(...)` (legacy optional fields parse) with:
+    - `catch (Exception ex) { Trace.TraceWarning(ex.ToString()); }`
+  - Preserved existing behavior (best-effort legacy parsing, no rethrow).
+  - Updated running progress journal:
+    - `refactoring_stage2_progress.md`
+- **Verification:**
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` succeeded (`343/343`).
+- **Commit:** `1e5007e8c`
+- **Push:** yes (`origin/master`)
