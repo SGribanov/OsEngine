@@ -5356,3 +5356,23 @@
   - `csharp-ls --diagnose --solution project/OsEngine.sln` completed (with known NU1900 feed-access warnings).
 - **Commit:** `f567be269`
 - **Push:** yes (`origin/master`)
+
+### Step 4.2 - Nullable Annotations (Incremental Adoption #263)
+
+- **Status:** In Progress (increment completed)
+- **Plan item:** `refactoring_stage2_plan.md` -> Phase 4 / Step 4.2
+- **Changes:**
+  - Completed nullable pass for optimizer core utilities:
+    - `project/OsEngine/OsOptimizer/OptEntity/BotEvaluator.cs`
+    - `project/OsEngine/OsOptimizer/OptEntity/ParameterIterator.cs`
+    - `project/OsEngine/OsOptimizer/OptEntity/OptimizerFilterManager.cs`
+  - Added `#nullable enable` and nullable-safe annotations/guards for filter inputs and logging events.
+  - Preserved utility behavior and iteration/filter algorithms.
+  - Updated running progress journal:
+    - `refactoring_stage2_progress.md`
+- **Verification:**
+  - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo` succeeded (only known NU1900 warning).
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` succeeded (`343/343`).
+  - `csharp-ls --diagnose --solution project/OsEngine.sln` completed (with known NU1900 feed-access warnings).
+- **Commit:** `c98b5f3a8`
+- **Push:** yes (`origin/master`)
