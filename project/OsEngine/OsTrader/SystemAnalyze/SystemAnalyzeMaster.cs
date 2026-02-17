@@ -471,6 +471,16 @@ namespace OsEngine.OsTrader.SystemAnalyze
 
     }
 
+    internal static class SystemUsageAnalyzePaths
+    {
+        private const string SettingsDirectoryPath = @"Engine\SystemStress\";
+
+        public static string GetSettingsPath(string fileName)
+        {
+            return SettingsDirectoryPath + fileName;
+        }
+    }
+
     public class RamMemoryUsageAnalyze
     {
         public List<SystemUsagePointRam> Values = new List<SystemUsagePointRam>();
@@ -532,7 +542,7 @@ namespace OsEngine.OsTrader.SystemAnalyze
 
         private static string GetSettingsPath()
         {
-            return @"Engine\SystemStress\RamMemorySettings.txt";
+            return SystemUsageAnalyzePaths.GetSettingsPath("RamMemorySettings.txt");
         }
 
         private static RamMemoryUsageSettingsDto ParseLegacySettings(string content)
@@ -777,7 +787,7 @@ namespace OsEngine.OsTrader.SystemAnalyze
 
         private static string GetSettingsPath()
         {
-            return @"Engine\SystemStress\CpuMemorySettings.txt";
+            return SystemUsageAnalyzePaths.GetSettingsPath("CpuMemorySettings.txt");
         }
 
         private static CpuUsageSettingsDto ParseLegacySettings(string content)
@@ -1022,7 +1032,7 @@ namespace OsEngine.OsTrader.SystemAnalyze
 
         private static string GetSettingsPath()
         {
-            return @"Engine\SystemStress\EcqMemorySettings.txt";
+            return SystemUsageAnalyzePaths.GetSettingsPath("EcqMemorySettings.txt");
         }
 
         private static EcqUsageSettingsDto ParseLegacySettings(string content)
@@ -1277,7 +1287,7 @@ namespace OsEngine.OsTrader.SystemAnalyze
 
         private static string GetSettingsPath()
         {
-            return @"Engine\SystemStress\MoqMemorySettings.txt";
+            return SystemUsageAnalyzePaths.GetSettingsPath("MoqMemorySettings.txt");
         }
 
         private static MoqUsageSettingsDto ParseLegacySettings(string content)
