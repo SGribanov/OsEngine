@@ -3419,3 +3419,22 @@
 ### Verification
 
 - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` -> passed 343/343
+
+## 2026-02-17 - Step 0.3 (silent-catch visibility) - Warning trace in BotTabPolygonCommonSettingsUi save catches
+
+- Updated `project/OsEngine/OsTrader/Panels/Tab/BotTabPolygonCommonSettingsUi.xaml.cs`:
+  - added `using System.Diagnostics;`
+  - replaced silent catches in `SaveSettingsFromUiToBot()` with:
+    - `catch (Exception ex) { Trace.TraceWarning(ex.ToString()); }`
+  - applied to all parse/apply blocks for:
+    - order price type
+    - action on signal type
+    - profit/slippage/qty/delay values
+    - delay type
+    - commission flags/values/type
+    - separator value
+  - behavior preserved: save pipeline and fallback semantics unchanged.
+
+### Verification
+
+- `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` -> passed 343/343

@@ -1,4 +1,4 @@
-﻿/*
+/*
  * Your rights to use code governed by this license https://github.com/AlexWan/OsEngine/blob/master/LICENSE
  * Ваши права на использование кода регулируются данной лицензией http://o-s-a.net/doc/license_simple_engine.pdf
 */
@@ -6,6 +6,7 @@
 using OsEngine.Entity;
 using OsEngine.Language;
 using System;
+using System.Diagnostics;
 using System.Windows;
 
 namespace OsEngine.OsTrader.Panels.Tab
@@ -113,99 +114,99 @@ namespace OsEngine.OsTrader.Panels.Tab
             {
                 Enum.TryParse(ComboBoxOrderPriceType.SelectedItem.ToString(), out _polygon.OrderPriceType);
             }
-            catch
+            catch (Exception ex)
             {
-                // ignore
+                Trace.TraceWarning(ex.ToString());
             }
 
             try
             {
                 Enum.TryParse(ComboBoxActionOnSignalType.SelectedItem.ToString(), out _polygon.ActionOnSignalType);
             }
-            catch
+            catch (Exception ex)
             {
-                // ignore
+                Trace.TraceWarning(ex.ToString());
             }
 
             try
             {
                 _polygon.ProfitToSignal = TextBoxProfitToSignal.Text.ToString().ToDecimal();
             }
-            catch
+            catch (Exception ex)
             {
-                // ignore
+                Trace.TraceWarning(ex.ToString());
             }
 
             try
             {
                 _polygon.SlippagePercent = TextBoxLimitSlippage.Text.ToString().ToDecimal();
             }
-            catch
+            catch (Exception ex)
             {
-                // ignore
+                Trace.TraceWarning(ex.ToString());
             }
 
             try
             {
                 _polygon.QtyStart = TextBoxLimitQtyStart.Text.ToString().ToDecimal();
             }
-            catch
+            catch (Exception ex)
             {
-                // ignore
+                Trace.TraceWarning(ex.ToString());
             }
 
             try
             {
                 _polygon.DelayMls = Convert.ToInt32(TextBoxDelayMls.Text.ToString());
             }
-            catch
+            catch (Exception ex)
             {
-                // ignore
+                Trace.TraceWarning(ex.ToString());
             }
 
             try
             {
                 Enum.TryParse(ComboBoxDelayType.SelectedItem.ToString(), out _polygon.DelayType);
             }
-            catch
+            catch (Exception ex)
             {
-                // ignore
+                Trace.TraceWarning(ex.ToString());
             }
 
             try
             {
                 _polygon.CommissionIsSubstract = CheckBoxCommisionIsSubstract.IsChecked.Value;
             }
-            catch
+            catch (Exception ex)
             {
-                // ignore
+                Trace.TraceWarning(ex.ToString());
             }
 
             try
             {
                 _polygon.CommissionValue = TextBoxCommissionValue.Text.ToString().ToDecimal();
             }
-            catch
+            catch (Exception ex)
             {
-                // ignore
+                Trace.TraceWarning(ex.ToString());
             }
 
             try
             {
                 Enum.TryParse(ComboBoxCommissionType.SelectedItem.ToString(), out _polygon.CommissionType);
             }
-            catch
+            catch (Exception ex)
             {
-                // ignore
+                Trace.TraceWarning(ex.ToString());
             }
 
             try
             {
                 _polygon.SeparatorToSecurities = TextBoxSeparatorToSecurities.Text;
             }
-            catch
+            catch (Exception ex)
             {
-                // ignore
+                Trace.TraceWarning(ex.ToString());
             }
 
             _polygon.SaveStandartSettings();
