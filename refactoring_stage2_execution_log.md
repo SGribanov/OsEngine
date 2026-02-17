@@ -4083,3 +4083,21 @@
   - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` succeeded (`343/343`).
 - **Commit:** `f8cd05418`
 - **Push:** no (manual push by user)
+
+### Step 0.3 - Silent Catch Visibility (Incremental Adoption #201)
+
+- **Status:** In Progress (increment completed)
+- **Plan item:** `refactoring_stage2_plan.md` -> Phase 0 / Step 0.3
+- **Changes:**
+  - Added explicit error visibility in:
+    - `project/OsEngine/OsTrader/Panels/Tab/BotTabIndex.cs`
+  - Replaced silent catch blocks with `SendNewLogMessage(ex.ToString(), LogMessageType.Error)` in `IndexFormulaBuilder`:
+    - settings `Load()`
+    - settings `Save()`
+  - Preserved existing behavior (no exception rethrow).
+  - Updated running progress journal:
+    - `refactoring_stage2_progress.md`
+- **Verification:**
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` succeeded (`343/343`).
+- **Commit:** `569b03b11`
+- **Push:** no (manual push by user)
