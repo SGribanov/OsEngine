@@ -462,17 +462,22 @@ namespace OsEngine.OsTrader.Panels.Tab
 
         private string GetStandartSettingsPath()
         {
-            return @"Engine\" + TabName + @"StandartPairsSettings.txt";
+            return GetTabStoragePrefix() + @"StandartPairsSettings.txt";
         }
 
         private string GetLegacyStrategSettingsPath()
         {
-            return @"Engine\" + TabName + @"StrategSettings.txt";
+            return GetTabStoragePrefix() + @"StrategSettings.txt";
         }
 
         private string GetPairsNamesToLoadPath()
         {
-            return @"Engine\" + TabName + @"PairsNamesToLoad.txt";
+            return GetTabStoragePrefix() + @"PairsNamesToLoad.txt";
+        }
+
+        private string GetTabStoragePrefix()
+        {
+            return @"Engine\" + TabName;
         }
 
         private static BotTabPairStandartSettingsDto ParseLegacyStandartSettings(string content)

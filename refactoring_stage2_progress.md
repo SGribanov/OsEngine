@@ -2737,3 +2737,18 @@
 ### Verification
 
 - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` -> passed 343/343
+
+## 2026-02-17 - Step 2.3 (JSON settings subsystem) - Path consistency cleanup in BotTabPair tab-settings prefix
+
+- Updated `project/OsEngine/OsTrader/Panels/Tab/BotTabPair.cs`:
+  - centralized BotTabPair tab-settings path prefix via helper:
+    - `GetTabStoragePrefix()`
+  - replaced duplicated path-prefix usage in:
+    - `GetStandartSettingsPath()`
+    - `GetLegacyStrategSettingsPath()`
+    - `GetPairsNamesToLoadPath()`
+- No behavior changes intended; files remain under `Engine\\<TabName>...`.
+
+### Verification
+
+- `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` -> passed 343/343
