@@ -3826,3 +3826,16 @@
 
 - `csharp-ls --diagnose --solution project/OsEngine.sln` -> completed (known NU1900 network warning in diagnostics)
 - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed 343/343
+
+## 2026-02-17 - Step 0.3 (silent-catch visibility) - System log in BinanceSpot trade-tail update catch
+
+- Updated `project/OsEngine/Market/Servers/Binance/Spot/BinanceServerSpot.cs`:
+  - replaced empty catch in trade-history loading loop with:
+    - `catch (Exception ex) { SendLogMessage($"Binance Spot trade history pagination skipped tail update: {ex.Message}", LogMessageType.System); }`
+  - applied in `GetTickDataToSecurity(...)` around `lastId` tail update from `newTrades`.
+  - behavior preserved: catch still suppresses exception and keeps existing "ignore future-date tail" flow.
+
+### Verification
+
+- `csharp-ls --diagnose --solution project/OsEngine.sln` -> completed (known NU1900 network warning in diagnostics)
+- `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed 343/343

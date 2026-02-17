@@ -1013,7 +1013,10 @@ namespace OsEngine.Market.Servers.Binance.Spot
                     {
                         lastId = Convert.ToInt64(newTrades[newTrades.Count - 1].Id);
                     }
-                    catch { } // If the date for which we download the candles is greater than today: Ignore
+                    catch (Exception ex) // If the date for which we download the candles is greater than today: Ignore
+                    {
+                        SendLogMessage($"Binance Spot trade history pagination skipped tail update: {ex.Message}", LogMessageType.System);
+                    }
                 }
 
                 if (newTrades != null && newTrades.Count != 0)
