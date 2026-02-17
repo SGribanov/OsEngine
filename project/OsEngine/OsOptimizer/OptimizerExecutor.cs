@@ -44,7 +44,7 @@ namespace OsEngine.OsOptimizer
         private readonly ParameterIterator _parameterIterator;
 
         private readonly BotConfigurator _botConfigurator;
-        private readonly object _reportsSync = new object();
+        private readonly Lock _reportsSync = new();
 
         private SemaphoreSlim _serverSlots;
 
@@ -55,8 +55,8 @@ namespace OsEngine.OsOptimizer
         private readonly ConcurrentDictionary<int, TaskCompletionSource<OptimizerReport>> _pendingEvaluationByServer =
             new ConcurrentDictionary<int, TaskCompletionSource<OptimizerReport>>();
 
-        private readonly object _testBotsTimeSync = new object();
-        private readonly object _startSync = new object();
+        private readonly Lock _testBotsTimeSync = new();
+        private readonly Lock _startSync = new();
 
         private bool IsPrimeWorkerActive()
         {
