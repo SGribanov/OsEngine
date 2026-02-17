@@ -12,6 +12,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Forms.DataVisualization.Charting;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Drawing;
 using OsEngine.Charts;
 using OsEngine.Market;
@@ -337,9 +338,9 @@ namespace OsEngine.OsTrader.Panels.Tab
 
 
             }
-            catch
+            catch (Exception ex)
             {
-                // ignore
+                Trace.TraceWarning(ex.ToString());
             }
         }
 
