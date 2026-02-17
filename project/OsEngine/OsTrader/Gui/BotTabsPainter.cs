@@ -16,6 +16,7 @@ using OsEngine.Journal;
 using OsEngine.Logging;
 using OsEngine.OsTrader.Panels.Tab;
 using OsEngine.Market;
+using System.Diagnostics;
 
 namespace OsEngine.OsTrader.Gui
 {
@@ -1203,9 +1204,9 @@ colum9.HeaderText = "Journal";
                 ColoredRow(_lastBackColor);
                 _rowToPaintInOpenPoses = -1;
             }
-            catch
+            catch (Exception ex)
             {
-               // ignore
+                Trace.TraceWarning(ex.ToString());
             }
         }
 
