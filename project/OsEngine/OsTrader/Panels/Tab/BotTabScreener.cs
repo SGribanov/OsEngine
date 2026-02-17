@@ -417,9 +417,9 @@ namespace OsEngine.OsTrader.Panels.Tab
                         TabNames = tabNames
                     });
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                // ignore
+                SendNewLogMessage(ex.ToString(), LogMessageType.Error);
             }
         }
 
@@ -571,9 +571,9 @@ namespace OsEngine.OsTrader.Panels.Tab
                         Securities = securities
                     });
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                // ignore
+                SendNewLogMessage(ex.ToString(), LogMessageType.Error);
             }
         }
 
@@ -646,13 +646,12 @@ namespace OsEngine.OsTrader.Panels.Tab
                     }
                 }
             }
-            catch (Exception)
+            catch (Exception ex)
             {
                 _candleCreateMethodType = "Simple";
                 CandleSeriesRealization = CandleFactory.CreateCandleSeriesRealization("Simple");
                 CandleSeriesRealization.Init(_startProgram);
-
-                // ignore
+                SendNewLogMessage(ex.ToString(), LogMessageType.Error);
             }
         }
 
@@ -1988,9 +1987,9 @@ namespace OsEngine.OsTrader.Panels.Tab
                     _indicators.Add(ind);
                 }
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                // ignore
+                SendNewLogMessage(ex.ToString(), LogMessageType.Error);
             }
         }
 
@@ -2015,9 +2014,9 @@ namespace OsEngine.OsTrader.Panels.Tab
                         Indicators = indicators
                     });
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                // ignore
+                SendNewLogMessage(ex.ToString(), LogMessageType.Error);
             }
         }
 
