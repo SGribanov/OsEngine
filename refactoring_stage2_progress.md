@@ -2622,6 +2622,26 @@
 
 - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` -> passed 343/343
 
+## 2026-02-16 - Step 2.3 (JSON settings subsystem) - Path consistency cleanup in MoexFixFastCurrency log paths
+
+- Updated `project/OsEngine/Market/Servers/MoexFixFastCurrency/MoexFixFastCurrencyServer.cs`:
+  - centralized log directory and file path construction via helpers:
+    - `GetLogDirectoryPath()`
+    - `GetTradesLogPath()`
+    - `GetOrdersLogPath()`
+    - `GetIncomingMfixLogPath()`
+    - `GetRecoveryLogPath()`
+  - replaced duplicated inline log file path construction for:
+    - trades log
+    - orders log
+    - incoming MFIX log
+    - recovery log
+- No behavior changes intended; log files remain under `Engine\\Log`.
+
+### Verification
+
+- `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` -> passed 343/343
+
 ## 2026-02-16 - Step 2.3 (JSON settings subsystem) - Path consistency cleanup in MoexFixFastTwimeFutures log paths
 
 - Updated `project/OsEngine/Market/Servers/MoexFixFastTwimeFutures/MoexFixFastTwimeFuturesServer.cs`:

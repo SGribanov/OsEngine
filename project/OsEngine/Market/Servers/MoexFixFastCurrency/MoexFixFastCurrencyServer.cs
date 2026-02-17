@@ -3334,16 +3334,41 @@ namespace OsEngine.Market.Servers.MoexFixFastCurrency
         #region 11 Log
 
         private readonly object _logLockTrade = new();
-        private StreamWriter _logFileTrades = new StreamWriter($"Engine\\Log\\FAST_Trades_{DateTime.Now:dd-MM-yyyy}.txt");
+        private StreamWriter _logFileTrades = new StreamWriter(GetTradesLogPath());
 
         private readonly object _logLockOrder = new();
-        private StreamWriter _logFileOrders = new StreamWriter($"Engine\\Log\\FAST_Orders_{DateTime.Now:dd-MM-yyyy}.txt");
+        private StreamWriter _logFileOrders = new StreamWriter(GetOrdersLogPath());
 
         private readonly object _logLockMFIX = new();
-        private StreamWriter _logFXMFIXMsg = new StreamWriter($"Engine\\Log\\IncomingMFIX_{DateTime.Now:dd-MM-yyyy}.txt", true);
+        private StreamWriter _logFXMFIXMsg = new StreamWriter(GetIncomingMfixLogPath(), true);
 
         private readonly object _logLockRecover = new();
-        private StreamWriter _logFileRecover = new StreamWriter($"Engine\\Log\\DataRecoveryLog_{DateTime.Now:dd-MM-yyyy}.txt");
+        private StreamWriter _logFileRecover = new StreamWriter(GetRecoveryLogPath());
+
+        private static string GetLogDirectoryPath()
+        {
+            return Path.Combine("Engine", "Log");
+        }
+
+        private static string GetTradesLogPath()
+        {
+            return Path.Combine(GetLogDirectoryPath(), $"FAST_Trades_{DateTime.Now:dd-MM-yyyy}.txt");
+        }
+
+        private static string GetOrdersLogPath()
+        {
+            return Path.Combine(GetLogDirectoryPath(), $"FAST_Orders_{DateTime.Now:dd-MM-yyyy}.txt");
+        }
+
+        private static string GetIncomingMfixLogPath()
+        {
+            return Path.Combine(GetLogDirectoryPath(), $"IncomingMFIX_{DateTime.Now:dd-MM-yyyy}.txt");
+        }
+
+        private static string GetRecoveryLogPath()
+        {
+            return Path.Combine(GetLogDirectoryPath(), $"DataRecoveryLog_{DateTime.Now:dd-MM-yyyy}.txt");
+        }
 
         private void WriteLogTrades(string message)
         {
