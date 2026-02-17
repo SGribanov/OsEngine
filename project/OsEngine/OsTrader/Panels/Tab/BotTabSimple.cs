@@ -6,6 +6,7 @@
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Globalization;
 using System.IO;
 using System.Threading;
@@ -489,9 +490,9 @@ namespace OsEngine.OsTrader.Panels.Tab
                             }
                         }
                     }
-                    catch
+                    catch (Exception ex)
                     {
-                        // ignore
+                        SetNewLogMessage(ex.ToString(), LogMessageType.Error);
                     }
                 }
 
@@ -6696,9 +6697,9 @@ namespace OsEngine.OsTrader.Panels.Tab
                     {
                         _lastTradeTime = trade.Time;
                     }
-                    catch
+                    catch (Exception ex)
                     {
-                        // ignore
+                        SetNewLogMessage(ex.ToString(), LogMessageType.Error);
                     }
 
                     return;
@@ -7004,9 +7005,9 @@ namespace OsEngine.OsTrader.Panels.Tab
                         _tabsToCheckPositionEvent[i].CheckAwaitPositionsArea();
                     }
                 }
-                catch
+                catch (Exception ex)
                 {
-                    // ignore
+                    Trace.TraceWarning(ex.ToString());
                 }
             }
         }

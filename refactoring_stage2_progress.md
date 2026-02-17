@@ -3255,3 +3255,17 @@
 
 - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` -> transient 1/343 fail (`Collection was modified` in WinForms log init)
 - immediate rerun: `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` -> passed 343/343
+
+## 2026-02-17 - Step 0.3 (silent-catch visibility) - Error visibility in BotTabSimple remaining silent catches
+
+- Updated `project/OsEngine/OsTrader/Panels/Tab/BotTabSimple.cs`:
+  - added `using System.Diagnostics;`
+  - replaced remaining silent catches with explicit visibility:
+    - `_tabsToCheckPositionEvent` cleanup catch in `Delete()` -> `SetNewLogMessage(ex.ToString(), LogMessageType.Error)`
+    - `_lastTradeTime` initialization catch in tick processing -> `SetNewLogMessage(ex.ToString(), LogMessageType.Error)`
+    - static `PositionsSenderThreadArea()` catch -> `Trace.TraceWarning(ex.ToString())`
+  - behavior preserved: no exception rethrow added.
+
+### Verification
+
+- `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` -> passed 343/343
