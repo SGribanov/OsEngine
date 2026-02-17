@@ -1,5 +1,6 @@
 ﻿#pragma warning disable SYSLIB0060 // Rfc2898DeriveBytes constructor is obsolete
 using System;
+using System.Diagnostics;
 using System.IO;
 using System.Security.Cryptography;
 using System.Text;
@@ -28,9 +29,9 @@ namespace OsEngine.OsTrader.Gui.BlockInterface
                     string decrypted = Decrypt(settings.EncryptedValue);
                     return decrypted ?? string.Empty;
                 }
-                catch (Exception)
+                catch (Exception ex)
                 {
-                    // ignore
+                    Trace.TraceWarning(ex.ToString());
                 }
 
                 return "";
@@ -48,9 +49,9 @@ namespace OsEngine.OsTrader.Gui.BlockInterface
                             EncryptedValue = saveStr
                         });
                 }
-                catch (Exception)
+                catch (Exception ex)
                 {
-                    // ignore
+                    Trace.TraceWarning(ex.ToString());
                 }
             }
         }
@@ -85,9 +86,9 @@ namespace OsEngine.OsTrader.Gui.BlockInterface
 
                     return false;
                 }
-                catch (Exception)
+                catch (Exception ex)
                 {
-                    // ignore
+                    Trace.TraceWarning(ex.ToString());
                 }
 
                 return false;
@@ -105,9 +106,9 @@ namespace OsEngine.OsTrader.Gui.BlockInterface
                             EncryptedValue = saveStr
                         });
                 }
-                catch (Exception)
+                catch (Exception ex)
                 {
-                    // ignore
+                    Trace.TraceWarning(ex.ToString());
                 }
             }
         }

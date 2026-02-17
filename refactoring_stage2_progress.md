@@ -3538,3 +3538,20 @@
 ### Verification
 
 - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` -> passed 343/343
+
+## 2026-02-17 - Step 0.3 (silent-catch visibility) - Warning trace in BlockMaster encrypted-settings catches
+
+- Updated `project/OsEngine/OsTrader/Gui/BlockInterface/BlockMaster.cs`:
+  - added `using System.Diagnostics;`
+  - replaced silent catches with:
+    - `catch (Exception ex) { Trace.TraceWarning(ex.ToString()); }`
+  - applied in:
+    - `Password` getter
+    - `Password` setter
+    - `IsBlocked` getter
+    - `IsBlocked` setter
+  - behavior preserved: existing fallback return values unchanged.
+
+### Verification
+
+- `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` -> passed 343/343
