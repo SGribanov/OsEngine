@@ -4846,3 +4846,25 @@
   - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` succeeded (`343/343`).
 - **Commit:** `c786ea31d`
 - **Push:** yes (`origin/master`)
+
+### Step 0.3 - Silent Catch Visibility (Incremental Adoption #240)
+
+- **Status:** In Progress (increment completed)
+- **Plan item:** `refactoring_stage2_plan.md` -> Phase 0 / Step 0.3
+- **Changes:**
+  - Added explicit warning visibility in:
+    - `project/OsEngine/OsTrader/BuyAtStopPositionsViewer.cs`
+  - Added `using System.Diagnostics;`.
+  - Replaced silent return catches with:
+    - `catch (Exception ex) { Trace.TraceWarning(ex.ToString()); return; }`
+  - Applied in:
+    - `PaintPos(DataGridView grid)`
+    - `ColoredRow(Color color)`
+    - inner row-number parse catch in `PositionCloseForNumber_Click(...)`
+  - Preserved existing behavior (`return` fallback on selection/paint failures).
+  - Updated running progress journal:
+    - `refactoring_stage2_progress.md`
+- **Verification:**
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` succeeded (`343/343`).
+- **Commit:** `f4d38e55c`
+- **Push:** yes (`origin/master`)
