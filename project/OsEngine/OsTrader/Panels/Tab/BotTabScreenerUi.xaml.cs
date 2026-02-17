@@ -309,9 +309,9 @@ namespace OsEngine.OsTrader.Panels.Tab
                 {
                     _screener.CommissionValue = TextBoxCommissionValue.Text.ToDecimal();
                 }
-                catch
+                catch (Exception ex)
                 {
-                    // ignore
+                    Trace.TraceWarning(ex.ToString());
                 }
 
                 string methodType = ComboBoxCandleCreateMethodType.Text;
@@ -2349,9 +2349,9 @@ namespace OsEngine.OsTrader.Panels.Tab
                     _candlesRealizationGrid = null;
                 }
             }
-            catch
+            catch (Exception ex)
             {
-                // ignore
+                Trace.TraceWarning(ex.ToString());
             }
         }
 

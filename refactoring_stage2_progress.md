@@ -3405,3 +3405,17 @@
 ### Verification
 
 - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` -> passed 343/343
+
+## 2026-02-17 - Step 0.3 (silent-catch visibility) - Final trace updates in BotTabScreenerUi
+
+- Updated `project/OsEngine/OsTrader/Panels/Tab/BotTabScreenerUi.xaml.cs`:
+  - replaced two remaining silent catches with:
+    - `catch (Exception ex) { Trace.TraceWarning(ex.ToString()); }`
+  - applied in:
+    - commission value parse fallback in `ButtonAccept_Click(...)`
+    - `DeleteCandleRealizationGrid()` catch
+  - behavior preserved: fallback/default behavior remains unchanged.
+
+### Verification
+
+- `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` -> passed 343/343
