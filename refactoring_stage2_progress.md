@@ -3021,3 +3021,16 @@
 ### Verification
 
 - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` -> passed 343/343
+
+## 2026-02-17 - Step 0.3 (silent-catch visibility) - Trace logging in GlobalGUILayout catch blocks
+
+- Updated `project/OsEngine/Layout/GlobalGUILayout.cs`:
+  - added `System.Diagnostics.Trace` warnings in silent catch blocks where no local logging bus is available:
+    - `Save()`
+    - `Load()`
+    - `SaveResolution(...)`
+  - behavior preserved: methods still swallow exceptions and continue flow.
+
+### Verification
+
+- `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` -> passed 343/343

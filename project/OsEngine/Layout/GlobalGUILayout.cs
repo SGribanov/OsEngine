@@ -5,6 +5,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Threading;
 using OsEngine.Entity;
 using System.IO;
@@ -252,9 +253,9 @@ namespace OsEngine.Layout
                         Windows = windowsToSave.ToArray()
                     });
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                // ignore
+                Trace.TraceWarning(ex.ToString());
             }
         }
 
@@ -291,9 +292,9 @@ namespace OsEngine.Layout
                     UiOpenWindows.Add(window);
                 }
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                // ignore
+                Trace.TraceWarning(ex.ToString());
             }
         }
 
@@ -381,9 +382,9 @@ namespace OsEngine.Layout
                         MonitorCount = monitorCountCur
                     });
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                // ignore
+                Trace.TraceWarning(ex.ToString());
             }
         }
 
