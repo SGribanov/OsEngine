@@ -3691,3 +3691,14 @@
 ### Verification
 
 - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed 343/343
+
+## 2026-02-17 - Step 0.3 (silent-catch visibility) - Warning trace in GlobalPositionViewer journals-loop catch
+
+- Updated `project/OsEngine/OsTrader/GlobalPositionViewer.cs`:
+  - replaced silent `catch { continue; }` in journals aggregation loop with:
+    - `catch (Exception ex) { Trace.TraceWarning(ex.ToString()); continue; }`
+  - behavior preserved: watcher loop still skips faulty iteration and continues processing.
+
+### Verification
+
+- `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed 343/343

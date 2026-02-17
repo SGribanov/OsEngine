@@ -599,8 +599,9 @@ namespace OsEngine.OsTrader
                             }
                         }
                     }
-                    catch
+                    catch (Exception ex)
                     {
+                        Trace.TraceWarning(ex.ToString());
                         continue;
                     }
 
