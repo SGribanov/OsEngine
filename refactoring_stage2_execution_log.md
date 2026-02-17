@@ -3970,3 +3970,23 @@
   - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` succeeded (`343/343`).
 - **Commit:** `fad8879a8`
 - **Push:** no (manual push by user)
+
+### Step 0.3 - Silent Catch Visibility (Incremental Adoption #195)
+
+- **Status:** In Progress (increment completed)
+- **Plan item:** `refactoring_stage2_plan.md` -> Phase 0 / Step 0.3
+- **Changes:**
+  - Added explicit error logging in:
+    - `project/OsEngine/Market/Servers/Optimizer/OptimizerDataStorage.cs`
+  - Replaced silent catch blocks with `SendLogMessage(ex.ToString(), LogMessageType.Error)` in:
+    - security loading catch (candle scan)
+    - security loading catch (trade scan)
+    - `LoadSecurityDopSettings(...)`
+    - `SaveSecurityDopSettings(...)`
+  - Preserved existing behavior (no exception rethrow).
+  - Updated running progress journal:
+    - `refactoring_stage2_progress.md`
+- **Verification:**
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` succeeded (`343/343`).
+- **Commit:** `e05d9882f`
+- **Push:** no (manual push by user)
