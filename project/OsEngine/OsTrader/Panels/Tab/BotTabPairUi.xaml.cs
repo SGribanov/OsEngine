@@ -531,9 +531,9 @@ namespace OsEngine.OsTrader.Panels.Tab
                 _pair.Sec2Slippage = TextBoxSec2Slippage.Text.ToString().ToDecimal();
                 _pair.Save();
             }
-            catch
+            catch (Exception ex)
             {
-                // ignore
+                Trace.TraceWarning(ex.ToString());
             }
         }
 
@@ -544,9 +544,9 @@ namespace OsEngine.OsTrader.Panels.Tab
                 _pair.Sec2Volume = TextBoxSec2Volume.Text.ToString().ToDecimal();
                 _pair.Save();
             }
-            catch
+            catch (Exception ex)
             {
-                // ignore
+                Trace.TraceWarning(ex.ToString());
             }
         }
 
@@ -557,9 +557,9 @@ namespace OsEngine.OsTrader.Panels.Tab
                 _pair.Sec1Slippage = TextBoxSec1Slippage.Text.ToString().ToDecimal();
                 _pair.Save();
             }
-            catch
+            catch (Exception ex)
             {
-                // ignore
+                Trace.TraceWarning(ex.ToString());
             }
         }
 
@@ -570,9 +570,9 @@ namespace OsEngine.OsTrader.Panels.Tab
                 _pair.Sec1Volume = TextBoxSec1Volume.Text.ToString().ToDecimal();
                 _pair.Save();
             }
-            catch
+            catch (Exception ex)
             {
-                // ignore
+                Trace.TraceWarning(ex.ToString());
             }
         }
 
