@@ -5103,3 +5103,21 @@
   - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` succeeded (`343/343`).
 - **Commit:** `7e7c90f70`
 - **Push:** yes (`origin/master`)
+
+### Step 0.3 - Silent Catch Visibility (Incremental Adoption #252)
+
+- **Status:** In Progress (increment completed)
+- **Plan item:** `refactoring_stage2_plan.md` -> Phase 0 / Step 0.3
+- **Changes:**
+  - Added explicit visibility in:
+    - `project/OsEngine/Market/Servers/Binance/Spot/BinanceServerSpot.cs`
+  - Replaced empty catch in `GetTickDataToSecurity(...)` trade-tail id update block with:
+    - `catch (Exception ex) { SendLogMessage($"Binance Spot trade history pagination skipped tail update: {ex.Message}", LogMessageType.System); }`
+  - Preserved existing behavior (exception still ignored for control flow, loader loop behavior unchanged).
+  - Updated running progress journal:
+    - `refactoring_stage2_progress.md`
+- **Verification:**
+  - `csharp-ls --diagnose --solution project/OsEngine.sln` completed (with known NU1900 feed-access warnings).
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` succeeded (`343/343`).
+- **Commit:** `cf7fbbacf`
+- **Push:** yes (`origin/master`)
