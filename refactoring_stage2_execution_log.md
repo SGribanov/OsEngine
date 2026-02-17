@@ -4359,3 +4359,21 @@
   - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` succeeded (`343/343`).
 - **Commit:** `e8381b976`
 - **Push:** yes (`origin/master`)
+
+### Step 0.3 - Silent Catch Visibility (Incremental Adoption #215)
+
+- **Status:** In Progress (increment completed)
+- **Plan item:** `refactoring_stage2_plan.md` -> Phase 0 / Step 0.3
+- **Changes:**
+  - Added explicit error visibility in:
+    - `project/OsEngine/OsTrader/Panels/Tab/Internal/BotManualControl.cs`
+  - Added `using System.Diagnostics;`.
+  - Replaced silent catch in `CheckManualControlPositionEvents(...)` list-access (`openDeals[i]`) with:
+    - `catch (Exception ex) { Trace.TraceWarning(ex.ToString()); continue; }`
+  - Preserved existing behavior (`continue` flow retained).
+  - Updated running progress journal:
+    - `refactoring_stage2_progress.md`
+- **Verification:**
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` succeeded (`343/343`).
+- **Commit:** `0a7711fde`
+- **Push:** yes (`origin/master`)
