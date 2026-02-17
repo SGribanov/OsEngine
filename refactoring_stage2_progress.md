@@ -3199,3 +3199,18 @@
 ### Verification
 
 - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` -> passed 343/343
+
+## 2026-02-17 - Step 0.3 (silent-catch visibility) - Error logging in BotTabIndex remaining silent catches
+
+- Updated `project/OsEngine/OsTrader/Panels/Tab/BotTabIndex.cs`:
+  - replaced remaining silent catches with explicit error logging via:
+    - `SendNewLogMessage(ex.ToString(), LogMessageType.Error)`
+  - applied in:
+    - duplicate-last-candle trimming (`Candles.RemoveAt(...)` guard)
+    - candle merge loop in `ConcateCandleAndCandle(...)`
+    - `_lastTimeUpdate` parsing in `TryRebuidFormula(...)`
+  - behavior preserved: control flow (`return`/loop continuation) unchanged.
+
+### Verification
+
+- `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` -> passed 343/343

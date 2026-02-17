@@ -1041,9 +1041,9 @@ namespace OsEngine.OsTrader.Panels.Tab
                         {
                             Candles.RemoveAt(Candles.Count - 1);
                         }
-                        catch
+                        catch (Exception ex)
                         {
-                            // ignore
+                            SendNewLogMessage(ex.ToString(), LogMessageType.Error);
                         }
                     }
 
@@ -1630,9 +1630,9 @@ namespace OsEngine.OsTrader.Panels.Tab
                             i2--;
                         }
                     }
-                    catch
+                    catch (Exception ex)
                     {
-                        // ignore
+                        SendNewLogMessage(ex.ToString(), LogMessageType.Error);
                     }
                 }
                 exitVal.ValueCandles = exitCandles;
@@ -2764,9 +2764,9 @@ namespace OsEngine.OsTrader.Panels.Tab
                     {
                         _lastTimeUpdate = Convert.ToDateTime(_lastTimeUpdateIndex);
                     }
-                    catch
+                    catch (Exception ex)
                     {
-
+                        SendNewLogMessage(ex.ToString(), LogMessageType.Error);
                     }
                 }
 
