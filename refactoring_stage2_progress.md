@@ -2782,3 +2782,18 @@
 ### Verification
 
 - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` -> passed 343/343
+
+## 2026-02-17 - Step 2.3 (JSON settings subsystem) - Path consistency cleanup in AServer storage prefix
+
+- Updated `project/OsEngine/Market/Servers/AServer.cs`:
+  - centralized server-storage path prefix via helper:
+    - `GetServerStoragePrefix()`
+  - replaced duplicated path-prefix usage in:
+    - `GetServerParamsPath()`
+    - `GetServerSettingsPath()`
+    - `GetNonTradePeriodsPath()`
+- No behavior changes intended; files remain under `Engine\\<ServerNameUnique>...`.
+
+### Verification
+
+- `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` -> passed 343/343

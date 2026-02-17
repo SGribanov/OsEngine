@@ -815,7 +815,7 @@ namespace OsEngine.Market.Servers
 
         private string GetServerParamsPath()
         {
-            return @"Engine\" + ServerNameUnique + @"Params.txt";
+            return GetServerStoragePrefix() + @"Params.txt";
         }
 
         private static ServerParamsSettingsDto ParseLegacyServerParamsSettings(string content)
@@ -1119,12 +1119,17 @@ namespace OsEngine.Market.Servers
 
         private string GetServerSettingsPath()
         {
-            return @"Engine\" + ServerNameUnique + @"ServerSettings.txt";
+            return GetServerStoragePrefix() + @"ServerSettings.txt";
         }
 
         private string GetNonTradePeriodsPath()
         {
-            return @"Engine\" + ServerNameUnique + @"nonTradePeriod.txt";
+            return GetServerStoragePrefix() + @"nonTradePeriod.txt";
+        }
+
+        private string GetServerStoragePrefix()
+        {
+            return @"Engine\" + ServerNameUnique;
         }
 
         private ServerSettingsDto ParseLegacyServerSettings(string content)
