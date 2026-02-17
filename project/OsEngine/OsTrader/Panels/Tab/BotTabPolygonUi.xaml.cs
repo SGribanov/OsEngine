@@ -8,6 +8,7 @@ using OsEngine.Language;
 using OsEngine.Layout;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Windows;
 using System.Windows.Controls;
 using OsEngine.Market.Servers;
@@ -231,9 +232,9 @@ namespace OsEngine.OsTrader.Panels.Tab
                 HostSec2.Child = null;
                 HostSec3.Child = null;
             }
-            catch
+            catch (Exception ex)
             {
-                // ignore
+                Trace.TraceWarning(ex.ToString());
             }
         }
 
@@ -823,9 +824,9 @@ namespace OsEngine.OsTrader.Panels.Tab
                     TryRePaintRow(_grid.Rows[i], rows[i]);
                 }
             }
-            catch
+            catch (Exception ex)
             {
-                // ignore
+                Trace.TraceWarning(ex.ToString());
             }
         }
 
@@ -895,9 +896,9 @@ namespace OsEngine.OsTrader.Panels.Tab
                     rowInGrid.Cells[8].Value = rowInArray.Cells[8].Value.ToString();
                 }
             }
-            catch
+            catch (Exception ex)
             {
-                // ignore
+                Trace.TraceWarning(ex.ToString());
             }
         }
 
