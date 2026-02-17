@@ -4889,3 +4889,26 @@
   - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` succeeded (`343/343`).
 - **Commit:** `167e64796`
 - **Push:** yes (`origin/master`)
+
+### Step 0.3 - Silent Catch Visibility (Incremental Adoption #242)
+
+- **Status:** In Progress (increment completed)
+- **Plan item:** `refactoring_stage2_plan.md` -> Phase 0 / Step 0.3
+- **Changes:**
+  - Added explicit warning visibility in:
+    - `project/OsEngine/OsTrader/GlobalPositionViewer.cs`
+  - Replaced silent row-number parse catches with:
+    - `catch (Exception ex) { Trace.TraceWarning(ex.ToString()); return; }`
+  - Applied in:
+    - `ClosePositionClearDelete_Click(...)`
+    - `PositionCloseForNumber_Click(...)`
+    - `PositionNewStop_Click(...)`
+    - `PositionNewProfit_Click(...)`
+    - `PositionClearDelete_Click(...)`
+  - Preserved existing behavior (`return` fallback on invalid current-row state).
+  - Updated running progress journal:
+    - `refactoring_stage2_progress.md`
+- **Verification:**
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` succeeded (`343/343`).
+- **Commit:** `dbfcd2697`
+- **Push:** yes (`origin/master`)
