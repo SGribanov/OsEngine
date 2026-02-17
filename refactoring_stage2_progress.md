@@ -3970,3 +3970,26 @@
 - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo` -> success (only known NU1900 warning)
 - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed 343/343
 - `csharp-ls --diagnose --solution project/OsEngine.sln` -> completed (known NU1900 network warning in diagnostics)
+
+## 2026-02-17 - Step 4.2 (nullable annotations) - Enable nullable in optimizer strategy contracts
+
+- Updated nullable context in optimizer strategy contract layer:
+  - `project/OsEngine/OsOptimizer/OptEntity/OptimizerEnums.cs`
+    - added `#nullable enable`
+  - `project/OsEngine/OsOptimizer/OptEntity/IOptimizationStrategy.cs`
+    - added `#nullable enable`
+  - `project/OsEngine/OsOptimizer/OptEntity/IBotEvaluator.cs`
+    - added `#nullable enable`
+  - `project/OsEngine/OsOptimizer/OptEntity/OptimizationStrategyFactory.cs`
+    - added `#nullable enable`
+    - replaced `infoMessage = null;` with `infoMessage = string.Empty;`
+- Updated nullable-safe tests:
+  - `project/OsEngine.Tests/OptimizerRefactorTests.cs`
+    - in factory tests, replaced `evaluator: null` with explicit `IBotEvaluator` stub instance
+    - removed nullable warnings at call sites while preserving test intent
+
+### Verification
+
+- `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo` -> success (only known NU1900 warning)
+- `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed 343/343
+- `csharp-ls --diagnose --solution project/OsEngine.sln` -> completed (known NU1900 network warning in diagnostics)

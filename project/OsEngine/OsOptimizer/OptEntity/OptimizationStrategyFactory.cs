@@ -3,6 +3,8 @@
  * Ваши права на использование кода регулируются данной лицензией http://o-s-a.net/doc/license_simple_engine.pdf
 */
 
+#nullable enable
+
 namespace OsEngine.OsOptimizer.OptEntity
 {
     public static class OptimizationStrategyFactory
@@ -52,7 +54,7 @@ namespace OsEngine.OsOptimizer.OptEntity
                     bayesianTailSharePercent);
             }
 
-            infoMessage = null;
+            infoMessage = string.Empty;
             return new BruteForceStrategy(parameterIterator, evaluator, maxParallel);
         }
     }

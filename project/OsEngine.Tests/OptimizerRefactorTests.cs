@@ -444,11 +444,12 @@ public class OptimizerRefactorTests
     public void OptimizationStrategyFactory_BruteForce_ShouldReturnBruteForceWithoutMessage()
     {
         ParameterIterator iterator = new ParameterIterator();
+        IBotEvaluator evaluator = new BotEvaluator((all, optimized, ct) => Task.FromResult(new OptimizerReport()));
 
         IOptimizationStrategy strategy = OptimizationStrategyFactory.CreateInSampleStrategy(
             OptimizationMethodType.BruteForce,
             iterator,
-            evaluator: null,
+            evaluator: evaluator,
             maxParallel: 1,
             objectiveMetric: SortBotsType.TotalProfit,
             objectiveDirection: ObjectiveDirectionType.Maximize,
@@ -469,11 +470,12 @@ public class OptimizerRefactorTests
     public void OptimizationStrategyFactory_Bayesian_ShouldReturnBayesianSkeletonWithMessage()
     {
         ParameterIterator iterator = new ParameterIterator();
+        IBotEvaluator evaluator = new BotEvaluator((all, optimized, ct) => Task.FromResult(new OptimizerReport()));
 
         IOptimizationStrategy strategy = OptimizationStrategyFactory.CreateInSampleStrategy(
             OptimizationMethodType.Bayesian,
             iterator,
-            evaluator: null,
+            evaluator: evaluator,
             maxParallel: 2,
             objectiveMetric: SortBotsType.SharpRatio,
             objectiveDirection: ObjectiveDirectionType.Maximize,
