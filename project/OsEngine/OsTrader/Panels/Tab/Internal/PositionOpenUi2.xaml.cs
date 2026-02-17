@@ -3,6 +3,7 @@ using OsEngine.Language;
 using OsEngine.Layout;
 using OsEngine.Market;
 using System;
+using System.Diagnostics;
 using System.Windows;
 
 /*
@@ -155,9 +156,9 @@ namespace OsEngine.OsTrader.Panels.Tab.Internal
                     _marketDepthPainter = null;
                 }
             }
-            catch
+            catch (Exception ex)
             {
-                // ignore
+                Trace.TraceWarning(ex.ToString());
             }
         }
 

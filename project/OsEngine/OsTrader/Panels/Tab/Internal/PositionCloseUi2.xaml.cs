@@ -3,6 +3,7 @@ using OsEngine.Language;
 using OsEngine.Layout;
 using OsEngine.Market;
 using System;
+using System.Diagnostics;
 using System.Windows;
 using System.Threading.Tasks;
 using System.Windows.Media;
@@ -190,9 +191,9 @@ namespace OsEngine.OsTrader.Panels.Tab.Internal
 
                 Position = null;
             }
-            catch
+            catch (Exception ex)
             {
-                // ignore
+                Trace.TraceWarning(ex.ToString());
             }
 
             _isDeleted = true;
