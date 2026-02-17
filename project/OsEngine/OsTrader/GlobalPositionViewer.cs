@@ -854,8 +854,9 @@ namespace OsEngine.OsTrader
                     }
                     number = Convert.ToInt32(_gridClosePoses.Rows[_gridClosePoses.CurrentCell.RowIndex].Cells[0].Value);
                 }
-                catch (Exception)
+                catch (Exception ex)
                 {
+                    Trace.TraceWarning(ex.ToString());
                     return;
                 }
 
@@ -966,8 +967,9 @@ namespace OsEngine.OsTrader
                     }
                     number = Convert.ToInt32(_gridOpenPoses.Rows[_gridOpenPoses.CurrentCell.RowIndex].Cells[0].Value);
                 }
-                catch (Exception)
+                catch (Exception ex)
                 {
+                    Trace.TraceWarning(ex.ToString());
                     return;
                 }
 
@@ -996,8 +998,9 @@ namespace OsEngine.OsTrader
                     }
                     number = Convert.ToInt32(_gridOpenPoses.Rows[_gridOpenPoses.CurrentCell.RowIndex].Cells[0].Value);
                 }
-                catch (Exception)
+                catch (Exception ex)
                 {
+                    Trace.TraceWarning(ex.ToString());
                     return;
                 }
 
@@ -1025,8 +1028,9 @@ namespace OsEngine.OsTrader
                     }
                     number = Convert.ToInt32(_gridOpenPoses.Rows[_gridOpenPoses.CurrentCell.RowIndex].Cells[0].Value);
                 }
-                catch (Exception)
+                catch (Exception ex)
                 {
+                    Trace.TraceWarning(ex.ToString());
                     return;
                 }
 
@@ -1062,8 +1066,9 @@ namespace OsEngine.OsTrader
                     }
                     number = Convert.ToInt32(_gridOpenPoses.Rows[_gridOpenPoses.CurrentCell.RowIndex].Cells[0].Value);
                 }
-                catch (Exception)
+                catch (Exception ex)
                 {
+                    Trace.TraceWarning(ex.ToString());
                     return;
                 }
 

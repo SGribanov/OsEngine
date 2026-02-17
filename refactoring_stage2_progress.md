@@ -3674,3 +3674,20 @@
 ### Verification
 
 - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed 343/343
+
+## 2026-02-17 - Step 0.3 (silent-catch visibility) - Warning trace in GlobalPositionViewer row-number parse catches
+
+- Updated `project/OsEngine/OsTrader/GlobalPositionViewer.cs`:
+  - replaced silent row-number parse catches with warning trace + preserved return:
+    - `catch (Exception ex) { Trace.TraceWarning(ex.ToString()); return; }`
+  - applied in:
+    - `ClosePositionClearDelete_Click(...)`
+    - `PositionCloseForNumber_Click(...)`
+    - `PositionNewStop_Click(...)`
+    - `PositionNewProfit_Click(...)`
+    - `PositionClearDelete_Click(...)`
+  - behavior preserved: event handlers still stop safely on invalid current-row state.
+
+### Verification
+
+- `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed 343/343
