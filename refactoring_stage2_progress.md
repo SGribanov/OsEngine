@@ -3566,3 +3566,15 @@
 ### Verification
 
 - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` -> passed 343/343
+
+## 2026-02-17 - Step 0.3 (silent-catch visibility) - Error logging in BotPanelChartUI layout-settings load catch
+
+- Updated `project/OsEngine/OsTrader/Panels/BotPanelChartUI.xaml.cs`:
+  - replaced silent inner catch in `CheckPanels()` layout settings load block:
+    - from: `catch (Exception) { // ignore }`
+    - to: `catch (Exception ex) { SendNewLogMessage(ex.ToString(), LogMessageType.Error); }`
+  - behavior preserved: on layout load failure method continues with current/default panel flags.
+
+### Verification
+
+- `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed 343/343

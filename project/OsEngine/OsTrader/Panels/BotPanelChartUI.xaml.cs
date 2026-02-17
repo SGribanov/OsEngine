@@ -940,9 +940,9 @@ namespace OsEngine.OsTrader.Panels
                     _informPanelIsHide = settings.InformPanelIsHide;
                     _lowPanelIsBig = settings.LowPanelIsBig;
                 }
-                catch (Exception)
+                catch (Exception ex)
                 {
-                    // ignore
+                    SendNewLogMessage(ex.ToString(), LogMessageType.Error);
                 }
 
                 if (_settingsPanelIsHide)
