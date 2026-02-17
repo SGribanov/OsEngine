@@ -23,9 +23,10 @@ namespace OsEngine.Market.Servers.MoexFixFastTwimeFutures
     {
         public MoexFixFastTwimeFuturesServer()
         {
-            if (!Directory.Exists(@"Engine\Log\MoexFixFastTwimeConnectorLogs\"))
+            string connectorLogDirectoryPath = GetConnectorLogDirectoryPath();
+            if (!Directory.Exists(connectorLogDirectoryPath))
             {
-                Directory.CreateDirectory(@"Engine\Log\MoexFixFastTwimeConnectorLogs\");
+                Directory.CreateDirectory(connectorLogDirectoryPath);
             }
 
             MoexFixFastTwimeFuturesServerRealization realization = new MoexFixFastTwimeFuturesServerRealization();
@@ -44,6 +45,11 @@ namespace OsEngine.Market.Servers.MoexFixFastTwimeFutures
             CreateParameterPath("Multicast Config Directory");
             CreateParameterInt("Limit of requests to the server (per second)", 30);
             CreateParameterBoolean("Use Options", false);
+        }
+
+        internal static string GetConnectorLogDirectoryPath()
+        {
+            return @"Engine\Log\MoexFixFastTwimeConnectorLogs\";
         }
     }
     public class MoexFixFastTwimeFuturesServerRealization : IServerRealization
@@ -4564,16 +4570,36 @@ namespace OsEngine.Market.Servers.MoexFixFastTwimeFutures
         #region 11 Log
 
         private readonly object _logLockTrade = new();
-        private StreamWriter _logFileTrades = new StreamWriter($"Engine\\Log\\MoexFixFastTwimeConnectorLogs\\FAST_Trades_{DateTime.Now:dd-MM-yyyy}.txt");
+        private StreamWriter _logFileTrades = new StreamWriter(GetTradesLogPath());
 
         private readonly object _logLockOrder = new();
-        private StreamWriter _logFileOrders = new StreamWriter($"Engine\\Log\\MoexFixFastTwimeConnectorLogs\\FAST_Orders_{DateTime.Now:dd-MM-yyyy}.txt");
+        private StreamWriter _logFileOrders = new StreamWriter(GetOrdersLogPath());
 
         private readonly object _logLockTrading = new();
-        private StreamWriter _logTradingMsg = new StreamWriter($"Engine\\Log\\MoexFixFastTwimeConnectorLogs\\TradingServerLog_{DateTime.Now:dd-MM-yyyy}.txt", false, Encoding.UTF8);
+        private StreamWriter _logTradingMsg = new StreamWriter(GetTradingServerLogPath(), false, Encoding.UTF8);
 
         private readonly object _logLockRecover = new();
-        private StreamWriter _logFileRecover = new StreamWriter($"Engine\\Log\\MoexFixFastTwimeConnectorLogs\\DataRecoveryLog_{DateTime.Now:dd-MM-yyyy}.txt");
+        private StreamWriter _logFileRecover = new StreamWriter(GetRecoveryLogPath());
+
+        private static string GetTradesLogPath()
+        {
+            return Path.Combine(MoexFixFastTwimeFuturesServer.GetConnectorLogDirectoryPath(), $"FAST_Trades_{DateTime.Now:dd-MM-yyyy}.txt");
+        }
+
+        private static string GetOrdersLogPath()
+        {
+            return Path.Combine(MoexFixFastTwimeFuturesServer.GetConnectorLogDirectoryPath(), $"FAST_Orders_{DateTime.Now:dd-MM-yyyy}.txt");
+        }
+
+        private static string GetTradingServerLogPath()
+        {
+            return Path.Combine(MoexFixFastTwimeFuturesServer.GetConnectorLogDirectoryPath(), $"TradingServerLog_{DateTime.Now:dd-MM-yyyy}.txt");
+        }
+
+        private static string GetRecoveryLogPath()
+        {
+            return Path.Combine(MoexFixFastTwimeFuturesServer.GetConnectorLogDirectoryPath(), $"DataRecoveryLog_{DateTime.Now:dd-MM-yyyy}.txt");
+        }
 
         private void WriteLogTrades(string message)
         {

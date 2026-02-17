@@ -2621,3 +2621,20 @@
 ### Verification
 
 - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` -> passed 343/343
+
+## 2026-02-16 - Step 2.3 (JSON settings subsystem) - Path consistency cleanup in MoexFixFastTwimeFutures log paths
+
+- Updated `project/OsEngine/Market/Servers/MoexFixFastTwimeFutures/MoexFixFastTwimeFuturesServer.cs`:
+  - centralized connector log directory via:
+    - `MoexFixFastTwimeFuturesServer.GetConnectorLogDirectoryPath()`
+  - replaced duplicated inline log file path construction for:
+    - trades log
+    - orders log
+    - trading server log
+    - recovery log
+  - constructor directory-create check now uses centralized helper path.
+- No behavior changes intended; log files remain in `Engine\\Log\\MoexFixFastTwimeConnectorLogs`.
+
+### Verification
+
+- `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` -> passed 343/343
