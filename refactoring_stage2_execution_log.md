@@ -4302,3 +4302,23 @@
   - Immediate rerun passed (`343/343`).
 - **Commit:** `d25fccb64`
 - **Push:** no (will be included in next periodic push)
+
+### Step 0.3 - Silent Catch Visibility (Incremental Adoption #212)
+
+- **Status:** In Progress (increment completed)
+- **Plan item:** `refactoring_stage2_plan.md` -> Phase 0 / Step 0.3
+- **Changes:**
+  - Added explicit error visibility in:
+    - `project/OsEngine/OsTrader/Panels/Tab/BotTabSimple.cs`
+  - Added `using System.Diagnostics;`.
+  - Replaced remaining silent catches with:
+    - `SetNewLogMessage(ex.ToString(), LogMessageType.Error)` in `_tabsToCheckPositionEvent` cleanup catch (`Delete()`)
+    - `SetNewLogMessage(ex.ToString(), LogMessageType.Error)` in `_lastTradeTime` init catch
+    - `Trace.TraceWarning(ex.ToString())` in static `PositionsSenderThreadArea()` catch
+  - Preserved existing behavior (no exception rethrow).
+  - Updated running progress journal:
+    - `refactoring_stage2_progress.md`
+- **Verification:**
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` succeeded (`343/343`).
+- **Commit:** `3f8562653`
+- **Push:** yes (`origin/master`)
