@@ -5310,3 +5310,29 @@
   - `csharp-ls --diagnose --solution project/OsEngine.sln` completed (with known NU1900 feed-access warnings).
 - **Commit:** `0f49f40e3`
 - **Push:** yes (`origin/master`)
+
+### Step 4.2 - Nullable Annotations (Incremental Adoption #261)
+
+- **Status:** In Progress (increment completed)
+- **Plan item:** `refactoring_stage2_plan.md` -> Phase 4 / Step 4.2
+- **Changes:**
+  - Completed larger nullable pass for Bayesian optimization block:
+    - `project/OsEngine/OsOptimizer/OptEntity/BayesianAcquisitionPolicy.cs`
+    - `project/OsEngine/OsOptimizer/OptEntity/BayesianCandidateSelector.cs`
+    - `project/OsEngine/OsOptimizer/OptEntity/BayesianOptimizationStrategy.cs`
+    - `project/OsEngine/OsOptimizer/OptEntity/BruteForceStrategy.cs`
+    - `project/OsEngine/OsOptimizer/OptEntity/PhaseCalculator.cs`
+  - Updated strategy contracts/factory to nullable-aware optimization flags/evaluator:
+    - `project/OsEngine/OsOptimizer/OptEntity/IOptimizationStrategy.cs`
+    - `project/OsEngine/OsOptimizer/OptEntity/OptimizationStrategyFactory.cs`
+  - Preserved Bayesian selector/acquisition behavior for null scored entries while making contracts nullable-safe.
+  - Updated nullable-compatible test typing for Bayesian scored collections:
+    - `project/OsEngine.Tests/OptimizerRefactorTests.cs`
+  - Updated running progress journal:
+    - `refactoring_stage2_progress.md`
+- **Verification:**
+  - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo` succeeded (only known NU1900 warning).
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` succeeded (`343/343`).
+  - `csharp-ls --diagnose --solution project/OsEngine.sln` completed (with known NU1900 feed-access warnings).
+- **Commit:** `13bded3da`
+- **Push:** yes (`origin/master`)
