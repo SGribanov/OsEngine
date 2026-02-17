@@ -3854,3 +3854,23 @@
   - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` succeeded (`343/343`).
 - **Commit:** `f153b8892`
 - **Push:** no (manual push by user)
+
+### Step 2.3 - JSON Settings Subsystem (Incremental Adoption #189)
+
+- **Status:** In Progress (increment completed)
+- **Plan item:** `refactoring_stage2_plan.md` -> Phase 2 / Step 2.3
+- **Changes:**
+  - Path consistency cleanup in:
+    - `project/OsEngine/Market/Servers/Tester/TesterServer.cs`
+  - Centralized tester settings file path construction via helper:
+    - `GetTesterSettingsFilePath(string suffix)`
+  - Replaced direct path usage in:
+    - `GetTesterSettingsPath()`
+    - `GetClearingSettingsPath()`
+    - `GetNonTradePeriodsPath()`
+  - Updated running progress journal:
+    - `refactoring_stage2_progress.md`
+- **Verification:**
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` succeeded (`343/343`).
+- **Commit:** `4de26c07c`
+- **Push:** no (manual push by user)
