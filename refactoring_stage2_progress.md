@@ -2356,3 +2356,19 @@
 ### Verification
 
 - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` -> passed 343/343
+
+## 2026-02-16 - Step 2.3 (JSON settings subsystem) - Path consistency cleanup in TelegramNewsServer log/session paths
+
+- Updated `project/OsEngine/Market/Servers/TelegramNews/TelegramNewsServer.cs`:
+  - centralized Telegram log/session paths via helper methods:
+    - `GetTelegramLogsDirectoryPath()`
+    - `GetTelegramLogFilePath()`
+    - `GetTelegramSessionPath()`
+  - replaced duplicated inline path usage in:
+    - constructor log setup
+    - `Config("session_pathname")`
+- No behavior changes intended; paths remain under `Engine\\Log\\TelegramLogs`.
+
+### Verification
+
+- `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` -> passed 343/343

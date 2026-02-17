@@ -37,10 +37,10 @@ namespace OsEngine.Market.Servers.TelegramNews
         {
             ServerStatus = ServerConnectStatus.Disconnect;
 
-            string logDir = @"Engine\Log\TelegramLogs";
+            string logDir = GetTelegramLogsDirectoryPath();
             Directory.CreateDirectory(logDir);
 
-            FileInfo logFile = new FileInfo(Path.Combine(logDir, "wteleg.log"));
+            FileInfo logFile = new FileInfo(GetTelegramLogFilePath());
 
             if (logFile.Exists && logFile.Length > 1024 * 1024)
                 File.WriteAllText(logFile.FullName, "");
@@ -53,7 +53,7 @@ namespace OsEngine.Market.Servers.TelegramNews
                     SendLogMessage(message, LogMessageType.Error);
                 }
 
-                string logPath = Path.Combine(logDir, "wteleg.log");
+                string logPath = GetTelegramLogFilePath();
                 File.AppendAllText(logPath, $"[{DateTime.Now:HH:mm:ss}] LogEvent : {message}\n");
             };
         }
@@ -221,7 +221,7 @@ namespace OsEngine.Market.Servers.TelegramNews
                 case "api_id": return _apiID.ToString();
                 case "api_hash": return _apiHash;
                 case "phone_number": return _phoneNumber;
-                case "session_pathname": return @"Engine\Log\TelegramLogs\WTelegram.session";
+                case "session_pathname": return GetTelegramSessionPath();
                 case "device_model": return "Desktop";
                 case "system_version": return "Windows 10";
                 case "app_version": return "4.8.1";
@@ -232,6 +232,21 @@ namespace OsEngine.Market.Servers.TelegramNews
                 case "password": return GetPassword();     // if user has enabled 2FA
                 default: return null;                  // let WTelegramClient decide the default config
             }
+        }
+
+        private static string GetTelegramLogsDirectoryPath()
+        {
+            return @"Engine\Log\TelegramLogs";
+        }
+
+        private static string GetTelegramLogFilePath()
+        {
+            return Path.Combine(GetTelegramLogsDirectoryPath(), "wteleg.log");
+        }
+
+        private static string GetTelegramSessionPath()
+        {
+            return Path.Combine(GetTelegramLogsDirectoryPath(), "WTelegram.session");
         }
 
         private static string GetPassword()
