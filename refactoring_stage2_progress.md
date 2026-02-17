@@ -3616,3 +3616,19 @@
 ### Verification
 
 - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed 343/343
+
+## 2026-02-17 - Step 0.3 (silent-catch visibility) - Error logging in SystemAnalyze checkbox catches
+
+- Updated `project/OsEngine/OsTrader/SystemAnalyze/SystemAnalizeUi.xaml.cs`:
+  - replaced silent catches in checkbox toggle handlers with explicit error logging:
+    - `catch (Exception ex) { ServerMaster.SendNewLogMessage(ex.ToString(), LogMessageType.Error); }`
+  - applied in:
+    - `CheckBoxCpuCollectDataIsOn_Checked(...)`
+    - `CheckBoxRamCollectDataIsOn_Checked(...)`
+    - `CheckBoxEcqCollectDataIsOn_Checked(...)`
+    - `CheckBoxMoqCollectDataIsOn_Checked(...)`
+  - behavior preserved: checkbox handlers remain exception-safe.
+
+### Verification
+
+- `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed 343/343

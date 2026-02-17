@@ -197,9 +197,9 @@ namespace OsEngine.OsTrader.SystemAnalyze
             {
                 SystemUsageAnalyzeMaster.EcqCollectDataIsOn = CheckBoxEcqCollectDataIsOn.IsChecked.Value;
             }
-            catch
+            catch (Exception ex)
             {
-                // ignore
+                ServerMaster.SendNewLogMessage(ex.ToString(), LogMessageType.Error);
             }
         }
 
@@ -209,9 +209,9 @@ namespace OsEngine.OsTrader.SystemAnalyze
             {
                 SystemUsageAnalyzeMaster.MoqCollectDataIsOn = CheckBoxMoqCollectDataIsOn.IsChecked.Value;
             }
-            catch
+            catch (Exception ex)
             {
-                // ignore
+                ServerMaster.SendNewLogMessage(ex.ToString(), LogMessageType.Error);
             }
         }
 
@@ -325,9 +325,9 @@ namespace OsEngine.OsTrader.SystemAnalyze
 
                 SystemUsageAnalyzeMaster.CpuPointsMax = result;
             }
-            catch
+            catch (Exception ex)
             {
-                // ignore
+                ServerMaster.SendNewLogMessage(ex.ToString(), LogMessageType.Error);
             }
         }
 
@@ -349,9 +349,9 @@ namespace OsEngine.OsTrader.SystemAnalyze
 
                 SystemUsageAnalyzeMaster.EcqPointsMax = result;
             }
-            catch
+            catch (Exception ex)
             {
-                // ignore
+                ServerMaster.SendNewLogMessage(ex.ToString(), LogMessageType.Error);
             }
         }
 
