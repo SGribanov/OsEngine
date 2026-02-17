@@ -5139,3 +5139,28 @@
   - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` succeeded (`343/343`).
 - **Commit:** `c02d8fca9`
 - **Push:** yes (`origin/master`)
+
+### Step 0.3 - Silent Catch Visibility (Incremental Adoption #254)
+
+- **Status:** In Progress (increment completed)
+- **Plan item:** `refactoring_stage2_plan.md` -> Phase 0 / Step 0.3
+- **Changes:**
+  - Per user request, executed one-pass bulk replacement for all remaining empty catches under:
+    - `project/OsEngine/**/*.cs`
+  - Replaced forms:
+    - `catch { }`
+    - `catch (Exception) { }`
+  - With:
+    - `catch (System.Exception ex) { System.Diagnostics.Trace.TraceWarning(ex.ToString()); }`
+  - Result:
+    - `38` empty catches replaced in `28` files.
+  - Preserved existing control flow (no rethrow added); improved exception visibility via trace warnings.
+  - Updated running progress journal:
+    - `refactoring_stage2_progress.md`
+- **Verification:**
+  - `rg -n -U "catch\\s*(\\(\\s*Exception\\s*\\))?\\s*\\{\\s*\\}" project/OsEngine -S` returned no matches.
+  - `csharp-ls --diagnose --solution project/OsEngine.sln` completed (with known NU1900 feed-access warnings).
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` succeeded (`343/343`).
+  - Note: one transient file-lock test failure occurred on first run; immediate rerun passed.
+- **Commit:** `27b06ca81`
+- **Push:** yes (`origin/master`)
