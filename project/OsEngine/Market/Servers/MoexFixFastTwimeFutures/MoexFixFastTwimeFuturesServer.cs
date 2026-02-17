@@ -234,10 +234,10 @@ namespace OsEngine.Market.Servers.MoexFixFastTwimeFutures
 
             SendLogMessage("Connection Closed by TwimeFast. WebSocket Data Closed Event", LogMessageType.System);
 
-            try { _logFileTrades?.Close(); } catch { }
-            try { _logFileOrders?.Close(); } catch { }
-            try { _logTradingMsg?.Close(); } catch { }
-            try { _logFileRecover?.Close(); } catch { }
+            try { _logFileTrades?.Close(); } catch (Exception ex) { SendLogMessage(ex.ToString(), LogMessageType.Error); }
+            try { _logFileOrders?.Close(); } catch (Exception ex) { SendLogMessage(ex.ToString(), LogMessageType.Error); }
+            try { _logTradingMsg?.Close(); } catch (Exception ex) { SendLogMessage(ex.ToString(), LogMessageType.Error); }
+            try { _logFileRecover?.Close(); } catch (Exception ex) { SendLogMessage(ex.ToString(), LogMessageType.Error); }
 
             if (ServerStatus != ServerConnectStatus.Disconnect)
             {
