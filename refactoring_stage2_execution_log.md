@@ -4322,3 +4322,23 @@
   - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` succeeded (`343/343`).
 - **Commit:** `3f8562653`
 - **Push:** yes (`origin/master`)
+
+### Step 0.3 - Silent Catch Visibility (Incremental Adoption #213)
+
+- **Status:** In Progress (increment completed)
+- **Plan item:** `refactoring_stage2_plan.md` -> Phase 0 / Step 0.3
+- **Changes:**
+  - Added explicit error visibility in:
+    - `project/OsEngine/OsTrader/Panels/Tab/Internal/PositionOpenUi2.xaml.cs`
+    - `project/OsEngine/OsTrader/Panels/Tab/Internal/PositionCloseUi2.xaml.cs`
+  - Added `using System.Diagnostics;` in both files.
+  - Replaced silent close-handler catches with:
+    - `catch (Exception ex) { Trace.TraceWarning(ex.ToString()); }`
+  - Applied in window close cleanup handlers (`PositionOpenUi2_Closed(...)`).
+  - Preserved existing behavior (cleanup flow unchanged, no rethrow).
+  - Updated running progress journal:
+    - `refactoring_stage2_progress.md`
+- **Verification:**
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` succeeded (`343/343`).
+- **Commit:** `8ed6d3499`
+- **Push:** yes (`origin/master`)
