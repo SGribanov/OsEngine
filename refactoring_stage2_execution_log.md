@@ -4635,3 +4635,23 @@
   - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` succeeded (`343/343`).
 - **Commit:** `1e5007e8c`
 - **Push:** yes (`origin/master`)
+
+### Step 0.3 - Silent Catch Visibility (Incremental Adoption #229)
+
+- **Status:** In Progress (increment completed)
+- **Plan item:** `refactoring_stage2_plan.md` -> Phase 0 / Step 0.3
+- **Changes:**
+  - Added explicit error visibility in:
+    - `project/OsEngine/OsTrader/OsTraderMaster.cs`
+  - Replaced silent catches with:
+    - `SendNewLogMessage(error.ToString(), LogMessageType.Error)`
+  - Applied in:
+    - `Save()` catch (keeper settings persistence)
+    - `CancelOrdersWithSecurity(...)` catch (server-side cancel-all fallback)
+  - Preserved existing behavior (control flow/fallback unchanged).
+  - Updated running progress journal:
+    - `refactoring_stage2_progress.md`
+- **Verification:**
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` succeeded (`343/343`).
+- **Commit:** `596e5809c`
+- **Push:** yes (`origin/master`)
