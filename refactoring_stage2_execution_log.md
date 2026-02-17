@@ -3797,3 +3797,22 @@
   - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` succeeded (`343/343`).
 - **Commit:** `c2062cbea`
 - **Push:** no (manual push by user)
+
+### Step 2.3 - JSON Settings Subsystem (Incremental Adoption #186)
+
+- **Status:** In Progress (increment completed)
+- **Plan item:** `refactoring_stage2_plan.md` -> Phase 2 / Step 2.3
+- **Changes:**
+  - Path consistency cleanup in:
+    - `project/OsEngine/OsTrader/Panels/Tab/BotTabIndex.cs`
+  - Centralized Engine storage-path construction via helper:
+    - `BotTabIndexPaths.BuildEnginePath(string uniqueName, string fileName)`
+  - Replaced direct path construction in:
+    - `GetSpreadSettingsPath()`
+    - `IndexFormulaBuilder.GetSettingsPath()`
+  - Updated running progress journal:
+    - `refactoring_stage2_progress.md`
+- **Verification:**
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` succeeded (`343/343`).
+- **Commit:** `243b94e9a`
+- **Push:** no (manual push by user)
