@@ -591,9 +591,9 @@ namespace OsEngine.OsTrader.Panels.Tab.Internal
                     LabelFakeAllOpenVolume.Content = curPosAll;
                 }
             }
-            catch
+            catch (Exception ex)
             {
-                // ignore
+                Trace.TraceWarning(ex.ToString());
             }
 
         }

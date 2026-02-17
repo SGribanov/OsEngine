@@ -3308,3 +3308,14 @@
 ### Verification
 
 - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` -> passed 343/343
+
+## 2026-02-17 - Step 0.3 (silent-catch visibility) - Warning trace in PositionCloseUi2 status repaint catch
+
+- Updated `project/OsEngine/OsTrader/Panels/Tab/Internal/PositionCloseUi2.xaml.cs`:
+  - replaced silent catch in `RepaintCurPosStatus()` with:
+    - `catch (Exception ex) { Trace.TraceWarning(ex.ToString()); }`
+  - behavior preserved: no exception rethrow added.
+
+### Verification
+
+- `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` -> passed 343/343
