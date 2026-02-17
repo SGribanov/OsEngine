@@ -69,9 +69,9 @@ namespace OsEngine.OsTrader.Grids
                     File.Delete(GetGridsSettingsPath());
                 }
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                // ignore
+                SendNewLogMessage(ex.ToString(), LogMessageType.Error);
             }
         }
 
@@ -145,9 +145,9 @@ namespace OsEngine.OsTrader.Grids
                                     return;
                                 }
                             }
-                            catch
+                            catch (Exception ex)
                             {
-                                // ignore
+                                SendNewLogMessage(ex.ToString(), LogMessageType.Error);
                             }
                         }
                     }
@@ -284,9 +284,9 @@ namespace OsEngine.OsTrader.Grids
                         GridSaveStrings = gridSaveStrings
                     });
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                // ignore
+                SendNewLogMessage(ex.ToString(), LogMessageType.Error);
             }
         }
 
@@ -336,9 +336,9 @@ namespace OsEngine.OsTrader.Grids
                     TradeGrids.Add(newGrid);
                 }
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                // ignore
+                SendNewLogMessage(ex.ToString(), LogMessageType.Error);
             }
         }
 

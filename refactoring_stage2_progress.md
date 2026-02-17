@@ -3466,3 +3466,19 @@
 ### Verification
 
 - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` -> passed 343/343
+
+## 2026-02-17 - Step 0.3 (silent-catch visibility) - Error logging in TradeGridsMaster catch blocks
+
+- Updated `project/OsEngine/OsTrader/Grids/TradeGridsMaster.cs`:
+  - replaced silent catches with explicit error logging via:
+    - `SendNewLogMessage(ex.ToString(), LogMessageType.Error)`
+  - applied in:
+    - settings-file delete catch in `Delete()`
+    - confirmation-dialog catch in `DeleteAtNum(...)`
+    - `SaveGrids()` catch
+    - `LoadGrids()` catch
+  - behavior preserved: control flow and fallback logic unchanged.
+
+### Verification
+
+- `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` -> passed 343/343
