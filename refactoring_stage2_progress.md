@@ -4052,3 +4052,24 @@
 - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo` -> success (only known NU1900 warning)
 - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed 343/343
 - `csharp-ls --diagnose --solution project/OsEngine.sln` -> completed (known NU1900 network warning in diagnostics)
+
+## 2026-02-17 - Step 4.2 (nullable annotations) - Optimizer core utilities block
+
+- Enabled nullable context and annotations in optimizer core utility layer:
+  - `project/OsEngine/OsOptimizer/OptEntity/BotEvaluator.cs`
+    - added `#nullable enable`
+  - `project/OsEngine/OsOptimizer/OptEntity/ParameterIterator.cs`
+    - added `#nullable enable`
+    - nullable-safe temporary variable annotation in parameter copy routine
+    - nullable event annotation for logging callback
+  - `project/OsEngine/OsOptimizer/OptEntity/OptimizerFilterManager.cs`
+    - added `#nullable enable`
+    - nullable-aware filter input (`OptimizerReport?`) and phase-filter input (`OptimizerFazeReport?`)
+    - added null guard in phase filtration entry point
+    - nullable event annotation for logging callback
+
+### Verification
+
+- `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo` -> success (only known NU1900 warning)
+- `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed 343/343
+- `csharp-ls --diagnose --solution project/OsEngine.sln` -> completed (known NU1900 network warning in diagnostics)

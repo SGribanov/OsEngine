@@ -8,6 +8,8 @@ using System.Collections.Generic;
 using OsEngine.Entity;
 using OsEngine.Logging;
 
+#nullable enable
+
 namespace OsEngine.OsOptimizer.OptEntity
 {
     /// <summary>
@@ -307,7 +309,7 @@ namespace OsEngine.OsOptimizer.OptEntity
 
             for (int i = 0; i < parametersToCopy.Count; i++)
             {
-                IIStrategyParameter newParam = null;
+                IIStrategyParameter? newParam = null;
 
                 if (parametersToCopy[i].Type == StrategyParameterType.Bool)
                 {
@@ -347,7 +349,7 @@ namespace OsEngine.OsOptimizer.OptEntity
                     ((StrategyParameterDecimalCheckBox)newParam).ValueDecimal = ((StrategyParameterDecimalCheckBox)parametersToCopy[i]).ValueDecimalStart;
                 }
 
-                newParameters.Add(newParam);
+                newParameters.Add(newParam!);
             }
             return newParameters;
         }
@@ -357,6 +359,6 @@ namespace OsEngine.OsOptimizer.OptEntity
             LogMessageEvent?.Invoke(message, type);
         }
 
-        public event Action<string, LogMessageType> LogMessageEvent;
+        public event Action<string, LogMessageType>? LogMessageEvent;
     }
 }

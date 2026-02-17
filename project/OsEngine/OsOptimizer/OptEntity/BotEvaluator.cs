@@ -9,6 +9,8 @@ using System.Threading;
 using System.Threading.Tasks;
 using OsEngine.Entity;
 
+#nullable enable
+
 namespace OsEngine.OsOptimizer.OptEntity
 {
     /// <summary>

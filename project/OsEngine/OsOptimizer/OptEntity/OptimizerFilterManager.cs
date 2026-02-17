@@ -6,6 +6,8 @@
 using System;
 using OsEngine.Logging;
 
+#nullable enable
+
 namespace OsEngine.OsOptimizer.OptEntity
 {
     /// <summary>
@@ -21,7 +23,7 @@ namespace OsEngine.OsOptimizer.OptEntity
             _settings = settings;
         }
 
-        public bool IsAcceptedByFilter(OptimizerReport report)
+        public bool IsAcceptedByFilter(OptimizerReport? report)
         {
             if (report == null)
             {
@@ -56,10 +58,15 @@ namespace OsEngine.OsOptimizer.OptEntity
             return true;
         }
 
-        public void ApplyEndOfFazeFiltration(OptimizerFazeReport bots)
+        public void ApplyEndOfFazeFiltration(OptimizerFazeReport? bots)
         {
             try
             {
+                if (bots == null)
+                {
+                    return;
+                }
+
                 if (bots.Reports == null || bots.Reports.Count == 0)
                 {
                     return;
@@ -95,6 +102,6 @@ namespace OsEngine.OsOptimizer.OptEntity
             LogMessageEvent?.Invoke(message, type);
         }
 
-        public event Action<string, LogMessageType> LogMessageEvent;
+        public event Action<string, LogMessageType>? LogMessageEvent;
     }
 }
