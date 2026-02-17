@@ -3133,3 +3133,23 @@
 ### Verification
 
 - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` -> passed 343/343
+
+## 2026-02-17 - Step 0.3 (silent-catch visibility) - Error logging in BotTabPair catch blocks
+
+- Updated `project/OsEngine/OsTrader/Panels/Tab/BotTabPair.cs`:
+  - replaced silent catch blocks with explicit error logging via:
+    - `SendNewLogMessage(ex.ToString(), LogMessageType.Error)`
+  - applied in:
+    - tab-level `Delete()` cleanup catches for settings file deletions
+    - `SaveStandartSettings()`
+    - `LoadStandartSettings()`
+    - `SavePairs()`
+    - `TryRePaintRow(...)`
+    - `PairToTrade.Load()`
+    - `PairToTrade.Save()`
+    - `PairToTrade.Delete()`
+  - behavior preserved: no exception rethrow added.
+
+### Verification
+
+- `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` -> passed 343/343

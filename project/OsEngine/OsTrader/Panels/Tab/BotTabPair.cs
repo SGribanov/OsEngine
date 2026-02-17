@@ -154,9 +154,9 @@ namespace OsEngine.OsTrader.Panels.Tab
                         File.Delete(GetStandartSettingsPath());
                     }
                 }
-                catch
+                catch (Exception ex)
                 {
-                    // ignore
+                    SendNewLogMessage(ex.ToString(), LogMessageType.Error);
                 }
 
                 try
@@ -166,9 +166,9 @@ namespace OsEngine.OsTrader.Panels.Tab
                         File.Delete(GetLegacyStrategSettingsPath());
                     }
                 }
-                catch
+                catch (Exception ex)
                 {
-                    // ignore
+                    SendNewLogMessage(ex.ToString(), LogMessageType.Error);
                 }
 
                 try
@@ -178,9 +178,9 @@ namespace OsEngine.OsTrader.Panels.Tab
                         File.Delete(GetPairsNamesToLoadPath());
                     }
                 }
-                catch
+                catch (Exception ex)
                 {
-                    // ignore
+                    SendNewLogMessage(ex.ToString(), LogMessageType.Error);
                 }
 
                 for (int i = 0; i < Pairs.Count; i++)
@@ -416,9 +416,9 @@ namespace OsEngine.OsTrader.Panels.Tab
                         AutoRebuildCorrelation = AutoRebuildCorrelation
                     });
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                // ignore
+                SendNewLogMessage(ex.ToString(), LogMessageType.Error);
             }
         }
 
@@ -462,9 +462,9 @@ namespace OsEngine.OsTrader.Panels.Tab
                 AutoRebuildCointegration = settings.AutoRebuildCointegration;
                 AutoRebuildCorrelation = settings.AutoRebuildCorrelation;
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                // ignore
+                SendNewLogMessage(ex.ToString(), LogMessageType.Error);
             }
         }
 
@@ -733,9 +733,9 @@ namespace OsEngine.OsTrader.Panels.Tab
                         PairNames = pairNames
                     });
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                // ignore
+                SendNewLogMessage(ex.ToString(), LogMessageType.Error);
             }
         }
 
@@ -1813,9 +1813,9 @@ namespace OsEngine.OsTrader.Panels.Tab
                     rowInGrid.Cells[4].Value = rowInArray.Cells[4].Value.ToString();
                 }
             }
-            catch
+            catch (Exception ex)
             {
-                // ignore
+                SendNewLogMessage(ex.ToString(), LogMessageType.Error);
             }
         }
 
@@ -2401,9 +2401,9 @@ namespace OsEngine.OsTrader.Panels.Tab
                 AutoRebuildCointegration = settings.AutoRebuildCointegration;
                 AutoRebuildCorrelation = settings.AutoRebuildCorrelation;
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                // ignore
+                SendNewLogMessage(ex.ToString(), LogMessageType.Error);
             }
         }
 
@@ -2438,9 +2438,9 @@ namespace OsEngine.OsTrader.Panels.Tab
                         AutoRebuildCorrelation = AutoRebuildCorrelation
                     });
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                // ignore
+                SendNewLogMessage(ex.ToString(), LogMessageType.Error);
             }
         }
 
@@ -2456,9 +2456,9 @@ namespace OsEngine.OsTrader.Panels.Tab
                     File.Delete(GetPairSettingsPath());
                 }
             }
-            catch
+            catch (Exception ex)
             {
-                // ignore
+                SendNewLogMessage(ex.ToString(), LogMessageType.Error);
             }
 
 
