@@ -2708,3 +2708,17 @@
 ### Verification
 
 - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` -> passed 343/343
+
+## 2026-02-17 - Step 2.3 (JSON settings subsystem) - Path consistency cleanup in TaxPayer table-period path
+
+- Updated `project/OsEngine/Robots/Helpers/TaxPayer.cs`:
+  - centralized table-period file path via helper:
+    - `GetTablePeriodPath()`
+  - replaced duplicated inline path usage in:
+    - `LoadTable()`
+    - `SaveTable()`
+- No behavior changes intended; file remains `Engine\\<NameStrategyUniq>TablePeriod.json`.
+
+### Verification
+
+- `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` -> passed 343/343

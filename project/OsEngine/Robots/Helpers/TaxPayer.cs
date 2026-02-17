@@ -280,7 +280,7 @@ namespace OsEngine.Robots.Helpers
         {
             try
             {
-                string fileName = @"Engine\" + NameStrategyUniq + @"TablePeriod.json";
+                string fileName = GetTablePeriodPath();
 
                 if (!File.Exists(fileName))
                 {
@@ -335,12 +335,17 @@ namespace OsEngine.Robots.Helpers
             try
             {
                 string json = JsonConvert.SerializeObject(_listTable, Formatting.Indented);
-                File.WriteAllText(@"Engine\" + NameStrategyUniq + @"TablePeriod.json", json);
+                File.WriteAllText(GetTablePeriodPath(), json);
             }
             catch (Exception ex)
             {
                 SendNewLogMessage(ex.ToString(), Logging.LogMessageType.Error);
             }
+        }
+
+        private string GetTablePeriodPath()
+        {
+            return @"Engine\" + NameStrategyUniq + @"TablePeriod.json";
         }
 
         #endregion
