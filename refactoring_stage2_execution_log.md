@@ -5188,3 +5188,23 @@
   - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` succeeded (`343/343`).
 - **Commit:** `3def2b7e0`
 - **Push:** yes (`origin/master`)
+
+### Step 4.1 - Lock Migration (Incremental Adoption #256)
+
+- **Status:** In Progress (increment completed)
+- **Plan item:** `refactoring_stage2_plan.md` -> Phase 4 / Step 4.1
+- **Changes:**
+  - Migrated synchronization field in:
+    - `project/OsEngine/Journal/Internal/PositionController.cs`
+  - Replaced:
+    - `private static readonly object _workerLocker = new object();`
+  - With:
+    - `private static readonly Lock _workerLocker = new();`
+  - Preserved existing `lock (_workerLocker)` usage and activation behavior.
+  - Updated running progress journal:
+    - `refactoring_stage2_progress.md`
+- **Verification:**
+  - `csharp-ls --diagnose --solution project/OsEngine.sln` completed (with known NU1900 feed-access warnings).
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` succeeded (`343/343`).
+- **Commit:** `14251b5a6`
+- **Push:** yes (`origin/master`)
