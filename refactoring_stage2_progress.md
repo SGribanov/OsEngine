@@ -3602,3 +3602,17 @@
 ### Verification
 
 - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed 343/343
+
+## 2026-02-17 - Step 0.3 (silent-catch visibility) - Error logging in SystemAnalyze tooltip catches
+
+- Updated `project/OsEngine/OsTrader/SystemAnalyze/SystemAnalizeUi.xaml.cs`:
+  - replaced silent catches in tooltip button handlers with explicit error logging:
+    - `catch (Exception ex) { ServerMaster.SendNewLogMessage(ex.ToString(), LogMessageType.Error); }`
+  - applied in:
+    - `ButtonEcq_Click(...)`
+    - `ButtonMoqToolTip_Click(...)`
+  - behavior preserved: tooltip handlers remain exception-safe.
+
+### Verification
+
+- `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed 343/343

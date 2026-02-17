@@ -173,9 +173,9 @@ namespace OsEngine.OsTrader.SystemAnalyze
             {
                 SystemUsageAnalyzeMaster.CpuCollectDataIsOn = CheckBoxCpuCollectDataIsOn.IsChecked.Value;
             }
-            catch
+            catch (Exception ex)
             {
-                // ignore
+                ServerMaster.SendNewLogMessage(ex.ToString(), LogMessageType.Error);
             }
         } 
 
@@ -185,9 +185,9 @@ namespace OsEngine.OsTrader.SystemAnalyze
             {
                 SystemUsageAnalyzeMaster.RamCollectDataIsOn = CheckBoxRamCollectDataIsOn.IsChecked.Value;
             }
-            catch
+            catch (Exception ex)
             {
-                // ignore
+                ServerMaster.SendNewLogMessage(ex.ToString(), LogMessageType.Error);
             }
         }
 
