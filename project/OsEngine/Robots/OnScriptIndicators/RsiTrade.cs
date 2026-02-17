@@ -148,10 +148,15 @@ public class RsiTrade : BotPanel
     // Delete save file
     void Strategy_DeleteEvent()
     {
-        if (File.Exists(@"Engine\" + NameStrategyUniq + @"SettingsBot.txt"))
+        if (File.Exists(GetSettingsPath()))
         {
-            File.Delete(@"Engine\" + NameStrategyUniq + @"SettingsBot.txt");
+            File.Delete(GetSettingsPath());
         }
+    }
+
+    private string GetSettingsPath()
+    {
+        return @"Engine\" + NameStrategyUniq + @"SettingsBot.txt";
     }
 
     // Logic
