@@ -4595,3 +4595,25 @@
   - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` succeeded (`343/343`).
 - **Commit:** `907ae7b3d`
 - **Push:** yes (`origin/master`)
+
+### Step 0.3 - Silent Catch Visibility (Incremental Adoption #227)
+
+- **Status:** In Progress (increment completed)
+- **Plan item:** `refactoring_stage2_plan.md` -> Phase 0 / Step 0.3
+- **Changes:**
+  - Added explicit error visibility in:
+    - `project/OsEngine/OsTrader/Grids/TradeGridsMaster.cs`
+  - Replaced silent catches with:
+    - `SendNewLogMessage(ex.ToString(), LogMessageType.Error)`
+  - Applied in:
+    - `Delete()` settings-file delete catch
+    - confirmation-dialog catch in `DeleteAtNum(...)`
+    - `SaveGrids()` catch
+    - `LoadGrids()` catch
+  - Preserved existing behavior (control flow/fallback unchanged).
+  - Updated running progress journal:
+    - `refactoring_stage2_progress.md`
+- **Verification:**
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` succeeded (`343/343`).
+- **Commit:** `40d037e83`
+- **Push:** no (will be included in next periodic push)
