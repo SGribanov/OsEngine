@@ -3331,3 +3331,18 @@
 ### Verification
 
 - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` -> passed 343/343
+
+## 2026-02-17 - Step 0.3 (silent-catch visibility) - Warning trace in BotTabPoligonSecurityAddUi closing catches
+
+- Updated `project/OsEngine/OsTrader/Panels/Tab/BotTabPoligonSecurityAddUi.xaml.cs`:
+  - added `using System.Diagnostics;`
+  - replaced silent catches in `ConnectorCandlesUi_Closing(...)` with:
+    - `catch (Exception ex) { Trace.TraceWarning(ex.ToString()); }`
+  - applied in:
+    - server events unsubscription block
+    - UI events/grid cleanup block
+  - behavior preserved: cleanup flow unchanged.
+
+### Verification
+
+- `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` -> passed 343/343

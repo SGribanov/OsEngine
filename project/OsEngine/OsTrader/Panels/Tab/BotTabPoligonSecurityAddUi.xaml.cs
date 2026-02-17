@@ -14,6 +14,7 @@ using OsEngine.Language;
 using System.Windows.Forms;
 using OsEngine.Market.Connectors;
 using OsEngine.Market;
+using System.Diagnostics;
 
 namespace OsEngine.OsTrader.Panels.Tab
 {
@@ -173,9 +174,9 @@ namespace OsEngine.OsTrader.Panels.Tab
                 }
 
             }
-            catch
+            catch (Exception ex)
             {
-                // ignore
+                Trace.TraceWarning(ex.ToString());
             }
 
             try
@@ -193,9 +194,9 @@ namespace OsEngine.OsTrader.Panels.Tab
 
                 DeleteGridSecurities();
             }
-            catch
+            catch (Exception ex)
             {
-                // ignore
+                Trace.TraceWarning(ex.ToString());
             }
 
             _connectorBot = null;
