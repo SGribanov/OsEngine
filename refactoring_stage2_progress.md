@@ -3102,3 +3102,17 @@
 ### Verification
 
 - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` -> passed 343/343
+
+## 2026-02-17 - Step 0.3 (silent-catch visibility) - Error logging in BotTabIndex spread-settings catch blocks
+
+- Updated `project/OsEngine/OsTrader/Panels/Tab/BotTabIndex.cs`:
+  - replaced silent catch blocks with explicit error logging via:
+    - `SendNewLogMessage(ex.ToString(), LogMessageType.Error)`
+  - applied in main `BotTabIndex`:
+    - spread settings `Save()`
+    - spread settings `Load()`
+  - preserved existing fallback behavior for flags/defaults in catch blocks.
+
+### Verification
+
+- `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` -> passed 343/343

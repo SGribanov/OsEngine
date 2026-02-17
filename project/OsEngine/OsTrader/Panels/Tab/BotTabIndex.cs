@@ -624,10 +624,10 @@ namespace OsEngine.OsTrader.Panels.Tab
                         PercentNormalization = PercentNormalization
                     });
             }
-            catch (Exception)
+            catch (Exception ex)
             {
                 EventsIsOn = true;
-                // ignore
+                SendNewLogMessage(ex.ToString(), LogMessageType.Error);
             }
         }
 
@@ -687,12 +687,12 @@ namespace OsEngine.OsTrader.Panels.Tab
                 CalculationDepth = settings.CalculationDepth;
                 PercentNormalization = settings.PercentNormalization;
             }
-            catch (Exception)
+            catch (Exception ex)
             {
                 _eventsIsOn = true;
                 _isLoaded = false;
                 CalculationDepth = 1000;
-                // ignore
+                SendNewLogMessage(ex.ToString(), LogMessageType.Error);
             }
 
             if (CalculationDepth == 0)
