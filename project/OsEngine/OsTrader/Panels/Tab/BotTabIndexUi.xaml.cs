@@ -10,6 +10,7 @@ using OsEngine.Entity;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
+using System.Diagnostics;
 using System.Threading;
 using OsEngine.Market;
 
@@ -751,9 +752,9 @@ namespace OsEngine.OsTrader.Panels.Tab
                     }
                 }
             }
-            catch
+            catch (Exception ex)
             {
-                // ignore
+                Trace.TraceWarning(ex.ToString());
             }
         }
 

@@ -3319,3 +3319,15 @@
 ### Verification
 
 - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` -> passed 343/343
+
+## 2026-02-17 - Step 0.3 (silent-catch visibility) - Warning trace in BotTabIndexUi price painter catch
+
+- Updated `project/OsEngine/OsTrader/Panels/Tab/BotTabIndexUi.xaml.cs`:
+  - added `using System.Diagnostics;`
+  - replaced silent catch in `PaintPrices()` with:
+    - `catch (Exception ex) { Trace.TraceWarning(ex.ToString()); }`
+  - behavior preserved: no exception rethrow added.
+
+### Verification
+
+- `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` -> passed 343/343
