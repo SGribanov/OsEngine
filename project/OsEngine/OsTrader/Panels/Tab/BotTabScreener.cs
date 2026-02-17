@@ -2023,12 +2023,12 @@ namespace OsEngine.OsTrader.Panels.Tab
 
         private string GetScreenerSettingsPath()
         {
-            return @"Engine\" + TabName + @"ScreenerSet.txt";
+            return GetScreenerStoragePrefix() + @"ScreenerSet.txt";
         }
 
         private string GetScreenerTabSetPath()
         {
-            return @"Engine\" + TabName + @"ScreenerTabSet.txt";
+            return GetScreenerStoragePrefix() + @"ScreenerTabSet.txt";
         }
 
         private static BotTabScreenerTabSetSettingsDto ParseLegacyScreenerTabSetSettings(string content)
@@ -2168,7 +2168,12 @@ namespace OsEngine.OsTrader.Panels.Tab
 
         private string GetIndicatorsPath()
         {
-            return @"Engine\" + TabName + @"ScreenerIndicators.txt";
+            return GetScreenerStoragePrefix() + @"ScreenerIndicators.txt";
+        }
+
+        private string GetScreenerStoragePrefix()
+        {
+            return @"Engine\" + TabName;
         }
 
         private static ScreenerIndicatorsSettingsDto ParseLegacyIndicatorsSettings(string content)

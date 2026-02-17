@@ -2767,3 +2767,18 @@
 ### Verification
 
 - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` -> passed 343/343
+
+## 2026-02-17 - Step 2.3 (JSON settings subsystem) - Path consistency cleanup in BotTabScreener storage prefix
+
+- Updated `project/OsEngine/OsTrader/Panels/Tab/BotTabScreener.cs`:
+  - centralized screener storage path prefix via helper:
+    - `GetScreenerStoragePrefix()`
+  - replaced duplicated path-prefix usage in:
+    - `GetScreenerSettingsPath()`
+    - `GetScreenerTabSetPath()`
+    - `GetIndicatorsPath()`
+- No behavior changes intended; files remain under `Engine\\<TabName>...`.
+
+### Verification
+
+- `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` -> passed 343/343
