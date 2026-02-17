@@ -3600,3 +3600,23 @@
   - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` succeeded (`343/343`).
 - **Commit:** `386d736f0`
 - **Push:** no (manual push by user)
+
+### Step 2.3 - JSON Settings Subsystem (Incremental Adoption #176)
+
+- **Status:** In Progress (increment completed)
+- **Plan item:** `refactoring_stage2_plan.md` -> Phase 2 / Step 2.3
+- **Changes:**
+  - Path consistency cleanup in:
+    - `project/OsEngine/Indicators/Aindicator.cs`
+  - Centralized indicator storage path prefix via helper:
+    - `GetIndicatorStoragePrefix()`
+  - Replaced duplicated path-prefix usage in:
+    - `GetParametersPath()`
+    - `GetValuesPath()`
+    - `GetBasePath()`
+  - Updated running progress journal:
+    - `refactoring_stage2_progress.md`
+- **Verification:**
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` succeeded (`343/343`).
+- **Commit:** `1cee4b529`
+- **Push:** no (manual push by user)
