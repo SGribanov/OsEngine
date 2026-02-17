@@ -4555,3 +4555,25 @@
   - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` succeeded (`343/343`).
 - **Commit:** `76ab09d79`
 - **Push:** yes (`origin/master`)
+
+### Step 0.3 - Silent Catch Visibility (Incremental Adoption #225)
+
+- **Status:** In Progress (increment completed)
+- **Plan item:** `refactoring_stage2_plan.md` -> Phase 0 / Step 0.3
+- **Changes:**
+  - Added explicit error visibility in:
+    - `project/OsEngine/OsTrader/Panels/Tab/BotTabPairUi.xaml.cs`
+  - Replaced remaining silent catches in text-change handlers with:
+    - `catch (Exception ex) { Trace.TraceWarning(ex.ToString()); }`
+  - Applied in:
+    - `TextBoxSec2Slippage_TextChanged(...)`
+    - `TextBoxSec2Volume_TextChanged(...)`
+    - `TextBoxSec1Slippage_TextChanged(...)`
+    - `TextBoxSec1Volume_TextChanged(...)`
+  - Preserved existing behavior (assignment + `Save()` flow unchanged).
+  - Updated running progress journal:
+    - `refactoring_stage2_progress.md`
+- **Verification:**
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` succeeded (`343/343`).
+- **Commit:** `128a849af`
+- **Push:** yes (`origin/master`)
