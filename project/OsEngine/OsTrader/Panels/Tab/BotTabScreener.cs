@@ -2634,8 +2634,9 @@ namespace OsEngine.OsTrader.Panels.Tab
                 {
                     Aindicator ind = (Aindicator)Tabs[0].Indicators[i];
                 }
-                catch
+                catch (Exception ex)
                 {
+                    Trace.TraceWarning(ex.ToString());
                     Tabs[0].DeleteCandleIndicator(Tabs[0].Indicators[i]);
                     i--;
                     oldIndicatorInArray = true;

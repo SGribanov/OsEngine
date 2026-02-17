@@ -3725,3 +3725,15 @@
 ### Verification
 
 - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed 343/343
+
+## 2026-02-17 - Step 0.3 (silent-catch visibility) - Warning trace in BotTabScreener indicator-sync catch
+
+- Updated `project/OsEngine/OsTrader/Panels/Tab/BotTabScreener.cs`:
+  - replaced silent catch in indicator synchronization cleanup loop with:
+    - `catch (Exception ex) { Trace.TraceWarning(ex.ToString()); ... }`
+  - applied in `BotTabScreener_IndicatorManuallyCreateEvent(...)` while removing non-`Aindicator` legacy entries.
+  - behavior preserved: old indicator entry cleanup and fallback flow unchanged.
+
+### Verification
+
+- `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed 343/343
