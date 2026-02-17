@@ -3454,3 +3454,15 @@
 ### Verification
 
 - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` -> passed 343/343
+
+## 2026-02-17 - Step 0.3 (silent-catch visibility) - Warning trace in RiskManager watcher catch
+
+- Updated `project/OsEngine/OsTrader/RiskManager/RiskManager.cs`:
+  - added `using System.Diagnostics;`
+  - replaced silent catch in static `WatcherHome()` loop with:
+    - `catch (Exception ex) { Trace.TraceWarning(ex.ToString()); }`
+  - behavior preserved: loop resilience and control flow unchanged.
+
+### Verification
+
+- `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` -> passed 343/343
