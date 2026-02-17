@@ -4283,3 +4283,22 @@
   - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` succeeded (`343/343`).
 - **Commit:** `0d1bf3a36`
 - **Push:** yes (`origin/master`)
+
+### Step 0.3 - Silent Catch Visibility (Incremental Adoption #211)
+
+- **Status:** In Progress (increment completed)
+- **Plan item:** `refactoring_stage2_plan.md` -> Phase 0 / Step 0.3
+- **Changes:**
+  - Added explicit error visibility in:
+    - `project/OsEngine/OsTrader/Panels/Tab/BotTabNews.cs`
+  - Added `using System.Diagnostics;`.
+  - Replaced silent static-thread catch with:
+    - `catch (Exception ex) { Thread.Sleep(5000); Trace.TraceWarning(ex.ToString()); }`
+  - Preserved existing behavior (catch throttle sleep remains).
+  - Updated running progress journal:
+    - `refactoring_stage2_progress.md`
+- **Verification:**
+  - First run `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` had transient single failure (`Collection was modified` in WinForms log init).
+  - Immediate rerun passed (`343/343`).
+- **Commit:** `d25fccb64`
+- **Push:** no (will be included in next periodic push)
