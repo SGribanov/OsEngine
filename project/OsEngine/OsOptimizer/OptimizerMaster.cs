@@ -811,9 +811,9 @@ namespace OsEngine.OsOptimizer
                     }
                 }
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                // ignore
+                SendLogMessage(ex.ToString(), LogMessageType.Error);
             }
         }
 
@@ -840,9 +840,9 @@ namespace OsEngine.OsOptimizer
                         ParameterLines = parameterLines
                     });
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                // ignore
+                SendLogMessage(ex.ToString(), LogMessageType.Error);
             }
 
             SaveParametersOnOffByStrategy();
@@ -895,9 +895,9 @@ namespace OsEngine.OsOptimizer
 
                 result = settings.ParametersOn;
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                // ignore
+                SendLogMessage(ex.ToString(), LogMessageType.Error);
             }
 
             return result;
@@ -920,9 +920,9 @@ namespace OsEngine.OsOptimizer
                         ParametersOn = new List<bool>(_parametersOn)
                     });
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                // ignore
+                SendLogMessage(ex.ToString(), LogMessageType.Error);
             }
 
         }

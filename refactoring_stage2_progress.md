@@ -3072,3 +3072,19 @@
 ### Verification
 
 - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` -> passed 343/343
+
+## 2026-02-17 - Step 0.3 (silent-catch visibility) - Error logging in OptimizerMaster catch blocks
+
+- Updated `project/OsEngine/OsOptimizer/OptimizerMaster.cs`:
+  - replaced silent catch blocks with explicit optimizer error logging via:
+    - `SendLogMessage(ex.ToString(), LogMessageType.Error)`
+  - applied in:
+    - standard parameter load
+    - standard parameter save
+    - parameters-on/off load
+    - parameters-on/off save
+  - behavior preserved: no exception rethrow added.
+
+### Verification
+
+- `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` -> passed 343/343
