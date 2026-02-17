@@ -209,9 +209,9 @@ namespace OsEngine.OsTrader.Panels.Tab
                         EventsIsOn = _eventsIsOn
                     });
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                // ignore
+                SendNewLogMessage(ex.ToString(), LogMessageType.Error);
             }
         }
 
@@ -231,10 +231,10 @@ namespace OsEngine.OsTrader.Panels.Tab
 
                 _eventsIsOn = settings.EventsIsOn;
             }
-            catch (Exception)
+            catch (Exception ex)
             {
                 _eventsIsOn = true;
-                // ignore
+                SendNewLogMessage(ex.ToString(), LogMessageType.Error);
             }
         }
 

@@ -3228,3 +3228,17 @@
 ### Verification
 
 - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` -> passed 343/343
+
+## 2026-02-17 - Step 0.3 (silent-catch visibility) - Error logging in BotTabCluster settings catch blocks
+
+- Updated `project/OsEngine/OsTrader/Panels/Tab/BotTabCluster.cs`:
+  - replaced silent catch blocks with explicit error logging via:
+    - `SendNewLogMessage(ex.ToString(), LogMessageType.Error)`
+  - applied in:
+    - `Save()`
+    - `Load()`
+  - preserved existing fallback behavior in `Load()` catch (`_eventsIsOn = true`).
+
+### Verification
+
+- `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` -> passed 343/343
