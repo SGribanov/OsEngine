@@ -3007,3 +3007,17 @@
 ### Verification
 
 - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` -> passed 343/343
+
+## 2026-02-17 - Step 0.3 (silent-catch visibility) - Logging in OptimizerDataStorage catch blocks
+
+- Updated `project/OsEngine/Market/Servers/Optimizer/OptimizerDataStorage.cs`:
+  - replaced silent exception swallowing with explicit error logging in 4 places:
+    - security loading catch in candle-based scan
+    - security loading catch in trades-based scan
+    - `LoadSecurityDopSettings(...)`
+    - `SaveSecurityDopSettings(...)`
+  - behavior preserved: methods still continue/return as before (no rethrow added).
+
+### Verification
+
+- `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` -> passed 343/343

@@ -769,9 +769,10 @@ namespace OsEngine.Market.Servers.Optimizer
                         reader.Close();
                         continue;
                     }
-                    catch (Exception)
+                    catch (Exception ex)
                     {
                         security.Remove(security[security.Count - 1]);
+                        SendLogMessage(ex.ToString(), LogMessageType.Error);
                     }
 
                     reader.Close();
@@ -1000,9 +1001,10 @@ namespace OsEngine.Market.Servers.Optimizer
                     security[security.Count - 1].TimeEnd = trade2.Time;
                     security[security.Count - 1].Security.Expiration = trade2.Time;
                 }
-                catch (Exception)
+                catch (Exception ex)
                 {
                     security.Remove(security[security.Count - 1]);
+                    SendLogMessage(ex.ToString(), LogMessageType.Error);
                 }
 
 
@@ -1639,9 +1641,9 @@ namespace OsEngine.Market.Servers.Optimizer
                     return array;
                 }
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                // send to log / отправить в лог
+                SendLogMessage(ex.ToString(), LogMessageType.Error);
             }
             return null;
         }
@@ -1764,9 +1766,9 @@ namespace OsEngine.Market.Servers.Optimizer
                     }
                 }
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                // send to the log / отправить в лог
+                SendLogMessage(ex.ToString(), LogMessageType.Error);
             }
         }
 
