@@ -3482,3 +3482,15 @@
 ### Verification
 
 - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` -> passed 343/343
+
+## 2026-02-17 - Step 0.3 (silent-catch visibility) - Warning trace in TradeGridAutoStarter legacy-parse catch
+
+- Updated `project/OsEngine/OsTrader/Grids/TradeGridAutoStarter.cs`:
+  - added `using System.Diagnostics;`
+  - replaced silent legacy-parse catch in `LoadFromString(...)` with:
+    - `catch (Exception ex) { Trace.TraceWarning(ex.ToString()); }`
+  - behavior preserved: optional legacy fields remain best-effort (no rethrow).
+
+### Verification
+
+- `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` -> passed 343/343

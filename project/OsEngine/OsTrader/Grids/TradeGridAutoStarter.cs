@@ -9,6 +9,7 @@ using OsEngine.Market;
 using OsEngine.OsTrader.Panels.Tab;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using static System.Windows.Forms.VisualStyles.VisualStyleElement;
 
 namespace OsEngine.OsTrader.Grids
@@ -77,9 +78,9 @@ namespace OsEngine.OsTrader.Grids
                     StartGridByTimeOfDaySecond = Convert.ToInt32(values[7]);
                     SingleActivationMode = Convert.ToBoolean(values[8]);
                 }
-                catch
+                catch (Exception ex)
                 {
-                    // ignore
+                    Trace.TraceWarning(ex.ToString());
                 }
             }
             catch (Exception e)
