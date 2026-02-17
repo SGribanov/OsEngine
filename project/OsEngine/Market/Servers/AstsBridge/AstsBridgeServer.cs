@@ -223,14 +223,14 @@ namespace OsEngine.Market.Servers.AstsBridge
         /// </summary>
         public void Load()
         {
-            if (!File.Exists(@"Engine\" + @"AstsServer.txt"))
+            if (!File.Exists(GetSettingsPath()))
             {
                 return;
             }
 
             try
             {
-                using (StreamReader reader = new StreamReader(@"Engine\" + @"AstsServer.txt"))
+                using (StreamReader reader = new StreamReader(GetSettingsPath()))
                 {
                     ServerAdress = reader.ReadLine();
                     UserLogin = reader.ReadLine();
@@ -258,7 +258,7 @@ namespace OsEngine.Market.Servers.AstsBridge
         {
             try
             {
-                using (StreamWriter writer = new StreamWriter(@"Engine\" + @"AstsServer.txt", false))
+                using (StreamWriter writer = new StreamWriter(GetSettingsPath(), false))
                 {
                     writer.WriteLine(ServerAdress);
                     writer.WriteLine(UserLogin);
@@ -276,6 +276,11 @@ namespace OsEngine.Market.Servers.AstsBridge
             {
                 // ignored
             }
+        }
+
+        private static string GetSettingsPath()
+        {
+            return @"Engine\AstsServer.txt";
         }
 
         private ServerTickStorage _tickStorage = null;

@@ -2342,3 +2342,17 @@
 ### Verification
 
 - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` -> passed 343/343
+
+## 2026-02-16 - Step 2.3 (JSON settings subsystem) - Path consistency cleanup in AstsBridgeServer settings path
+
+- Updated `project/OsEngine/Market/Servers/AstsBridge/AstsBridgeServer.cs`:
+  - centralized settings file path via helper:
+    - `GetSettingsPath()`
+  - replaced duplicated inline `Engine\\AstsServer.txt` path usage in:
+    - `Load()`
+    - `Save()`
+- No behavior changes intended; settings file location remains unchanged.
+
+### Verification
+
+- `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` -> passed 343/343
