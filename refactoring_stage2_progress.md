@@ -3899,3 +3899,21 @@
 
 - `csharp-ls --diagnose --solution project/OsEngine.sln` -> completed (known NU1900 network warning in diagnostics)
 - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed 343/343
+
+## 2026-02-17 - Step 4.1 (Lock migration) - Migrate HorizontalVolume trades lock to Lock
+
+- Updated `project/OsEngine/Entity/HorizontalVolume.cs`:
+  - replaced legacy lock field:
+    - `public object _tradesArrayLocker = new object();`
+  - with:
+    - `public readonly Lock _tradesArrayLocker = new();`
+  - added `using System.Threading;` for `Lock`.
+  - lock usage sites preserved:
+    - `lock (_tradesArrayLocker)` in `Process(...)`
+    - `lock (_tradesArrayLocker)` in `ReloadLines()`
+  - behavior preserved: synchronization scope and ordering unchanged.
+
+### Verification
+
+- `csharp-ls --diagnose --solution project/OsEngine.sln` -> completed (known NU1900 network warning in diagnostics)
+- `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed 343/343

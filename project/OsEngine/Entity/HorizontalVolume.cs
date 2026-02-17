@@ -8,6 +8,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Text;
+using System.Threading;
 using OsEngine.Logging;
 using OsEngine.OsTrader.Panels.Tab;
 
@@ -969,7 +970,7 @@ namespace OsEngine.Entity
         /// multi-threaded trade array blocker for updating
         /// блокировщик многопоточного доступа к массиву трейдов для обновления
         /// </summary>
-        public object _tradesArrayLocker = new object();
+        public readonly Lock _tradesArrayLocker = new();
 
         /// <summary>
         /// update trades by volume
