@@ -2979,3 +2979,17 @@
 ### Verification
 
 - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` -> passed 343/343
+
+## 2026-02-17 - Step 2.3 (JSON settings subsystem) - Path consistency cleanup in JournalUi2 engine-path construction
+
+- Updated `project/OsEngine/Journal/JournalUi2.xaml.cs`:
+  - centralized journal UI engine path construction via helper:
+    - `BuildEnginePath(string fileName)`
+  - replaced direct path construction in:
+    - `GetLayoutSettingsPath()`
+    - `GetJournalGroupsSettingsPath()`
+- No behavior changes intended; files remain under `Engine\\...`.
+
+### Verification
+
+- `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` -> passed 343/343

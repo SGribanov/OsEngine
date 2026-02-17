@@ -4293,7 +4293,12 @@ namespace OsEngine.Journal
 
         private string GetLayoutSettingsPath()
         {
-            return @"Engine\LayoutJournal" + JournalName + ".txt";
+            return BuildEnginePath("LayoutJournal" + JournalName + ".txt");
+        }
+
+        private static string BuildEnginePath(string fileName)
+        {
+            return @"Engine\" + fileName;
         }
 
         private static JournalUiLayoutSettingsDto ParseLegacyLayoutSettings(string content)
@@ -4629,7 +4634,7 @@ namespace OsEngine.Journal
 
         private string GetJournalGroupsSettingsPath()
         {
-            return @"Engine\" + _startProgram + @"JournalSettings.txt";
+            return BuildEnginePath(_startProgram + "JournalSettings.txt");
         }
 
         private static JournalGroupsSettingsDto ParseLegacyJournalGroupsSettings(string content)
