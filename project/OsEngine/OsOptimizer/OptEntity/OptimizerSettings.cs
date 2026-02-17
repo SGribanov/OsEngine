@@ -672,17 +672,22 @@ namespace OsEngine.OsOptimizer.OptEntity
 
         private static string GetClearingsPath()
         {
-            return @"Engine\OptimizerMasterClearings.txt";
+            return GetOptimizerSettingsFilePath("MasterClearings.txt");
         }
 
         private static string GetNonTradePeriodsPath()
         {
-            return @"Engine\OptimizerMasterNonTradePeriods.txt";
+            return GetOptimizerSettingsFilePath("MasterNonTradePeriods.txt");
         }
 
         private static string GetSettingsPath()
         {
-            return @"Engine\OptimizerSettings.txt";
+            return GetOptimizerSettingsFilePath("Settings.txt");
+        }
+
+        private static string GetOptimizerSettingsFilePath(string suffix)
+        {
+            return @"Engine\Optimizer" + suffix;
         }
 
         public event Action<string, LogMessageType> LogMessageEvent;
