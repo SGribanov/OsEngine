@@ -4577,3 +4577,21 @@
   - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` succeeded (`343/343`).
 - **Commit:** `128a849af`
 - **Push:** yes (`origin/master`)
+
+### Step 0.3 - Silent Catch Visibility (Incremental Adoption #226)
+
+- **Status:** In Progress (increment completed)
+- **Plan item:** `refactoring_stage2_plan.md` -> Phase 0 / Step 0.3
+- **Changes:**
+  - Added explicit error visibility in:
+    - `project/OsEngine/OsTrader/RiskManager/RiskManager.cs`
+  - Added `using System.Diagnostics;`.
+  - Replaced silent catch in static `WatcherHome()` with:
+    - `catch (Exception ex) { Trace.TraceWarning(ex.ToString()); }`
+  - Preserved existing behavior (loop resilience/control flow unchanged).
+  - Updated running progress journal:
+    - `refactoring_stage2_progress.md`
+- **Verification:**
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` succeeded (`343/343`).
+- **Commit:** `907ae7b3d`
+- **Push:** yes (`origin/master`)
