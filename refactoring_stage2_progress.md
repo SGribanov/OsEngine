@@ -3508,3 +3508,17 @@
 ### Verification
 
 - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` -> passed 343/343
+
+## 2026-02-17 - Step 0.3 (silent-catch visibility) - Error logging in GlobalPositionViewer double-click catches
+
+- Updated `project/OsEngine/OsTrader/GlobalPositionViewer.cs`:
+  - replaced silent catches in double-click handlers with explicit error logging via:
+    - `SendNewLogMessage(ex.ToString(), LogMessageType.Error)`
+  - applied in:
+    - `_gridClosePoses_DoubleClick(...)`
+    - `_gridOpenPoses_DoubleClick(...)`
+  - behavior preserved: handlers still remain exception-safe.
+
+### Verification
+
+- `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` -> passed 343/343

@@ -794,9 +794,9 @@ namespace OsEngine.OsTrader
             {
                 PaintPos(_gridClosePoses);
             }
-            catch
+            catch (Exception ex)
             {
-                // ignore
+                SendNewLogMessage(ex.ToString(), LogMessageType.Error);
             }
         }
 
@@ -879,9 +879,9 @@ namespace OsEngine.OsTrader
             {
                 PaintPos(_gridOpenPoses);
             }
-            catch
+            catch (Exception ex)
             {
-                // ignore
+                SendNewLogMessage(ex.ToString(), LogMessageType.Error);
             }
         }
 
