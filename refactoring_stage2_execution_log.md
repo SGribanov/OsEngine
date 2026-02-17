@@ -4807,3 +4807,25 @@
   - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` succeeded (`343/343`).
 - **Commit:** `8d482b291`
 - **Push:** yes (`origin/master`)
+
+### Step 0.3 - Silent Catch Visibility (Incremental Adoption #238)
+
+- **Status:** In Progress (increment completed)
+- **Plan item:** `refactoring_stage2_plan.md` -> Phase 0 / Step 0.3
+- **Changes:**
+  - Added explicit error visibility in:
+    - `project/OsEngine/OsTrader/SystemAnalyze/SystemAnalizeUi.xaml.cs`
+  - Replaced silent catches in checkbox toggle handlers with:
+    - `catch (Exception ex) { ServerMaster.SendNewLogMessage(ex.ToString(), LogMessageType.Error); }`
+  - Applied in:
+    - `CheckBoxCpuCollectDataIsOn_Checked(...)`
+    - `CheckBoxRamCollectDataIsOn_Checked(...)`
+    - `CheckBoxEcqCollectDataIsOn_Checked(...)`
+    - `CheckBoxMoqCollectDataIsOn_Checked(...)`
+  - Preserved existing behavior (handlers remain exception-safe).
+  - Updated running progress journal:
+    - `refactoring_stage2_progress.md`
+- **Verification:**
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` succeeded (`343/343`).
+- **Commit:** `2a9fe06b9`
+- **Push:** yes (`origin/master`)
