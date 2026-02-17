@@ -40,10 +40,9 @@ namespace OsEngine.Charts.ClusterChart
                         ChartType = _chartType
                     });
             }
-            catch (Exception)
+            catch (Exception error)
             {
-                // send to log
-                // отправить в лог
+                SendErrorMessage(error);
             }
         }
 
@@ -71,10 +70,9 @@ namespace OsEngine.Charts.ClusterChart
                     _chart.ChartType = _chartType;
                 }
             }
-            catch (Exception)
+            catch (Exception error)
             {
-                // send to log
-                // отправить в лог
+                SendErrorMessage(error);
             }
         }
 
