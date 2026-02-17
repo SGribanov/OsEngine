@@ -4655,3 +4655,23 @@
   - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` succeeded (`343/343`).
 - **Commit:** `596e5809c`
 - **Push:** yes (`origin/master`)
+
+### Step 0.3 - Silent Catch Visibility (Incremental Adoption #230)
+
+- **Status:** In Progress (increment completed)
+- **Plan item:** `refactoring_stage2_plan.md` -> Phase 0 / Step 0.3
+- **Changes:**
+  - Added explicit error visibility in:
+    - `project/OsEngine/OsTrader/GlobalPositionViewer.cs`
+  - Replaced silent catches with:
+    - `SendNewLogMessage(ex.ToString(), LogMessageType.Error)`
+  - Applied in:
+    - `_gridClosePoses_DoubleClick(...)`
+    - `_gridOpenPoses_DoubleClick(...)`
+  - Preserved existing behavior (handlers remain exception-safe).
+  - Updated running progress journal:
+    - `refactoring_stage2_progress.md`
+- **Verification:**
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` succeeded (`343/343`).
+- **Commit:** `c175dabc4`
+- **Push:** yes (`origin/master`)
