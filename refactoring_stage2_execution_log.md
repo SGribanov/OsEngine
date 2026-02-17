@@ -4184,3 +4184,27 @@
   - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` succeeded (`343/343`).
 - **Commit:** `82c56183f`
 - **Push:** no (will be included in next periodic push)
+
+### Step 0.3 - Silent Catch Visibility (Incremental Adoption #206)
+
+- **Status:** In Progress (increment completed)
+- **Plan item:** `refactoring_stage2_plan.md` -> Phase 0 / Step 0.3
+- **Changes:**
+  - Added explicit error visibility in:
+    - `project/OsEngine/OsTrader/Panels/Tab/BotTabPolygon.cs`
+  - Replaced silent catch blocks with `SendNewLogMessage(ex.ToString(), LogMessageType.Error)` in:
+    - tab-level `Delete()` cleanup catches for settings file deletions
+    - `SaveStandartSettings()`
+    - `LoadStandartSettings()`
+    - `SaveSequences()`
+    - `TryRePaintRow(...)`
+    - `PolygonToTrade.Load()`
+    - `PolygonToTrade.Save()`
+    - `PolygonToTrade.Delete()`
+  - Preserved existing behavior (no exception rethrow).
+  - Updated running progress journal:
+    - `refactoring_stage2_progress.md`
+- **Verification:**
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` succeeded (`343/343`).
+- **Commit:** `26cd47240`
+- **Push:** no (will be included in next periodic push)
