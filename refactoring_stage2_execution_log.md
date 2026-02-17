@@ -4787,3 +4787,23 @@
   - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` succeeded (`343/343`).
 - **Commit:** `769cd09ff`
 - **Push:** yes (`origin/master`)
+
+### Step 0.3 - Silent Catch Visibility (Incremental Adoption #237)
+
+- **Status:** In Progress (increment completed)
+- **Plan item:** `refactoring_stage2_plan.md` -> Phase 0 / Step 0.3
+- **Changes:**
+  - Added explicit error visibility in:
+    - `project/OsEngine/OsTrader/SystemAnalyze/SystemAnalizeUi.xaml.cs`
+  - Replaced silent catches in tooltip handlers with:
+    - `catch (Exception ex) { ServerMaster.SendNewLogMessage(ex.ToString(), LogMessageType.Error); }`
+  - Applied in:
+    - `ButtonEcq_Click(...)`
+    - `ButtonMoqToolTip_Click(...)`
+  - Preserved existing behavior (tooltip handlers remain exception-safe).
+  - Updated running progress journal:
+    - `refactoring_stage2_progress.md`
+- **Verification:**
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` succeeded (`343/343`).
+- **Commit:** `8d482b291`
+- **Push:** yes (`origin/master`)
