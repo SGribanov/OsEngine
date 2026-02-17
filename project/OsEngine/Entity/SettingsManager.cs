@@ -7,6 +7,8 @@ using System;
 using System.IO;
 using System.Text.Json;
 
+#nullable enable
+
 namespace OsEngine.Entity
 {
     /// <summary>
@@ -19,7 +21,7 @@ namespace OsEngine.Entity
             WriteIndented = true
         };
 
-        public static void Save<T>(string path, T settings, JsonSerializerOptions options = null)
+        public static void Save<T>(string path, T settings, JsonSerializerOptions? options = null)
         {
             if (string.IsNullOrWhiteSpace(path))
             {
@@ -30,11 +32,11 @@ namespace OsEngine.Entity
             SafeFileWriter.WriteAllText(path, json);
         }
 
-        public static T Load<T>(
+        public static T? Load<T>(
             string path,
-            T defaultValue = default(T),
-            Func<string, T> legacyLoader = null,
-            JsonSerializerOptions options = null)
+            T? defaultValue = default,
+            Func<string, T?>? legacyLoader = null,
+            JsonSerializerOptions? options = null)
         {
             if (string.IsNullOrWhiteSpace(path))
             {
@@ -64,7 +66,7 @@ namespace OsEngine.Entity
 
             try
             {
-                T model = JsonSerializer.Deserialize<T>(content, options ?? DefaultOptions);
+                T? model = JsonSerializer.Deserialize<T>(content, options ?? DefaultOptions);
 
                 if (model == null)
                 {

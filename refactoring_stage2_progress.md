@@ -3941,3 +3941,32 @@
 - `rg -n "\\bobject\\b\\s+[_A-Za-z0-9]+\\s*=\\s*new\\s*object\\(\\)" project/OsEngine -S` -> only commented line in `MfdServer.cs`
 - `csharp-ls --diagnose --solution project/OsEngine.sln` -> completed (known NU1900 network warning in diagnostics)
 - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed 343/343
+
+## 2026-02-17 - Step 4.2 (nullable annotations) - Enable nullable in core settings infrastructure
+
+- Updated nullable context in:
+  - `project/OsEngine/Entity/SafeFileWriter.cs`
+    - added `#nullable enable`
+    - annotated optional `Encoding` parameters as nullable
+    - annotated `content` as nullable in `WriteAllText(...)`
+    - fixed nullable handling for `Path.GetDirectoryName(...)` result
+  - `project/OsEngine/Entity/SettingsManager.cs`
+    - added `#nullable enable`
+    - annotated optional parameters:
+      - `JsonSerializerOptions?`
+      - `Func<string, T?>? legacyLoader`
+      - `T? defaultValue`
+    - made `Load<T>(...)` return `T?` and updated deserialization variable annotations
+  - `project/OsEngine/Entity/CredentialProtector.cs`
+    - added `#nullable enable`
+    - annotated nullable input parameters in `Protect(...)` and `TryUnprotect(...)`
+- Updated tests to match nullable-aware API:
+  - `project/OsEngine.Tests/SettingsManagerTests.cs`
+    - changed `loaded` variables to nullable (`TestSettings?`)
+    - added `Assert.NotNull(...)` before dereference
+
+### Verification
+
+- `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo` -> success (only known NU1900 warning)
+- `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed 343/343
+- `csharp-ls --diagnose --solution project/OsEngine.sln` -> completed (known NU1900 network warning in diagnostics)

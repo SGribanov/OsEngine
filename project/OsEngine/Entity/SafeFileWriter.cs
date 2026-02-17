@@ -8,6 +8,8 @@ using System.Collections.Generic;
 using System.IO;
 using System.Text;
 
+#nullable enable
+
 namespace OsEngine.Entity
 {
     /// <summary>
@@ -17,7 +19,7 @@ namespace OsEngine.Entity
     {
         private static readonly Encoding Utf8NoBom = new UTF8Encoding(false);
 
-        public static void WriteAllLines(string path, IEnumerable<string> lines, Encoding encoding = null)
+        public static void WriteAllLines(string path, IEnumerable<string> lines, Encoding? encoding = null)
         {
             if (lines == null)
             {
@@ -38,7 +40,7 @@ namespace OsEngine.Entity
             });
         }
 
-        public static void WriteAllText(string path, string content, Encoding encoding = null)
+        public static void WriteAllText(string path, string? content, Encoding? encoding = null)
         {
             WriteAtomically(path, stream =>
             {
@@ -58,7 +60,7 @@ namespace OsEngine.Entity
             }
 
             string fullPath = Path.GetFullPath(path);
-            string directory = Path.GetDirectoryName(fullPath);
+            string? directory = Path.GetDirectoryName(fullPath);
 
             if (string.IsNullOrWhiteSpace(directory))
             {

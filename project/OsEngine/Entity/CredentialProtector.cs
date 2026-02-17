@@ -2,6 +2,8 @@ using System;
 using System.Security.Cryptography;
 using System.Text;
 
+#nullable enable
+
 namespace OsEngine.Entity
 {
     /// <summary>
@@ -11,7 +13,7 @@ namespace OsEngine.Entity
     {
         public const string Prefix = "dpapi:";
 
-        public static string Protect(string plainText)
+        public static string Protect(string? plainText)
         {
             if (string.IsNullOrEmpty(plainText))
             {
@@ -31,7 +33,7 @@ namespace OsEngine.Entity
             }
         }
 
-        public static bool TryUnprotect(string storedValue, out string plainText)
+        public static bool TryUnprotect(string? storedValue, out string plainText)
         {
             plainText = string.Empty;
 

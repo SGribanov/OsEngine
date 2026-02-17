@@ -19,9 +19,10 @@ public class SettingsManagerTests
             TestSettings source = new TestSettings { Name = "alpha", Value = 42 };
 
             SettingsManager.Save(path, source);
-            TestSettings loaded = SettingsManager.Load(path, new TestSettings());
+            TestSettings? loaded = SettingsManager.Load(path, new TestSettings());
 
-            Assert.Equal("alpha", loaded.Name);
+            Assert.NotNull(loaded);
+            Assert.Equal("alpha", loaded!.Name);
             Assert.Equal(42, loaded.Value);
             Assert.True(File.Exists(path + ".bak") == false || File.Exists(path));
         }
@@ -45,12 +46,13 @@ public class SettingsManagerTests
             string path = Path.Combine(root, "legacy.txt");
             File.WriteAllText(path, "name=beta;value=7");
 
-            TestSettings loaded = SettingsManager.Load(
+            TestSettings? loaded = SettingsManager.Load(
                 path,
                 new TestSettings(),
                 legacyLoader: LegacyParser);
 
-            Assert.Equal("beta", loaded.Name);
+            Assert.NotNull(loaded);
+            Assert.Equal("beta", loaded!.Name);
             Assert.Equal(7, loaded.Value);
         }
         finally
@@ -68,9 +70,10 @@ public class SettingsManagerTests
         string path = Path.Combine(Path.GetTempPath(), "osengine-settings-missing-" + Guid.NewGuid(), "none.json");
         TestSettings fallback = new TestSettings { Name = "fallback", Value = 1 };
 
-        TestSettings loaded = SettingsManager.Load(path, fallback);
+        TestSettings? loaded = SettingsManager.Load(path, fallback);
 
-        Assert.Equal("fallback", loaded.Name);
+        Assert.NotNull(loaded);
+        Assert.Equal("fallback", loaded!.Name);
         Assert.Equal(1, loaded.Value);
     }
 
