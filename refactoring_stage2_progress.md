@@ -3153,3 +3153,17 @@
 ### Verification
 
 - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` -> passed 343/343
+
+## 2026-02-17 - Step 0.3 (silent-catch visibility) - Error logging in BotTabPair grid-click catch blocks
+
+- Updated `project/OsEngine/OsTrader/Panels/Tab/BotTabPair.cs`:
+  - replaced silent `catch { return; }` blocks with explicit logging + preserved return:
+    - `catch (Exception ex) { SendNewLogMessage(ex.ToString(), LogMessageType.Error); return; }`
+  - applied in grid click handling paths where tab number is parsed from selected row:
+    - delete path (`column == 5`)
+    - open/settings path (`column == 4`)
+  - behavior preserved: early return logic remains unchanged.
+
+### Verification
+
+- `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` -> passed 343/343

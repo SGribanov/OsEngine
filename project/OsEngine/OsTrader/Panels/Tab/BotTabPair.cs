@@ -2073,8 +2073,9 @@ namespace OsEngine.OsTrader.Panels.Tab
 
                         tabNum = Convert.ToInt32(_grid.Rows[row].Cells[0].Value.ToString());
                     }
-                    catch
+                    catch (Exception ex)
                     {
+                        SendNewLogMessage(ex.ToString(), LogMessageType.Error);
                         return;
                     }
 
@@ -2195,8 +2196,9 @@ namespace OsEngine.OsTrader.Panels.Tab
 
                         tabNum = Convert.ToInt32(_grid.Rows[row].Cells[0].Value.ToString());
                     }
-                    catch
+                    catch (Exception ex)
                     {
+                        SendNewLogMessage(ex.ToString(), LogMessageType.Error);
                         return;
                     }
 
