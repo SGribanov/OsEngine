@@ -111,7 +111,7 @@ namespace OsEngine.Robots.Screeners
         {
             try
             {
-                using (StreamWriter writer = new StreamWriter(@"Engine\" + NameStrategyUniq + @"SettingsBot.txt", false)
+                using (StreamWriter writer = new StreamWriter(GetTradeSettingsPath(), false)
                     )
                 {
                     for (int i = 0; i < _tradeSettings.Count; i++)
@@ -131,13 +131,13 @@ namespace OsEngine.Robots.Screeners
         // Load settins from .txt file
         private void LoadTradeSettings()
         {
-            if (!File.Exists(@"Engine\" + NameStrategyUniq + @"SettingsBot.txt"))
+            if (!File.Exists(GetTradeSettingsPath()))
             {
                 return;
             }
             try
             {
-                using (StreamReader reader = new StreamReader(@"Engine\" + NameStrategyUniq + @"SettingsBot.txt"))
+                using (StreamReader reader = new StreamReader(GetTradeSettingsPath()))
                 {
                     while (reader.EndOfStream == false)
                     {
@@ -167,15 +167,20 @@ namespace OsEngine.Robots.Screeners
         {
             try
             {
-                if (File.Exists(@"Engine\" + NameStrategyUniq + @"SettingsBot.txt"))
+                if (File.Exists(GetTradeSettingsPath()))
                 {
-                    File.Delete(@"Engine\" + NameStrategyUniq + @"SettingsBot.txt");
+                    File.Delete(GetTradeSettingsPath());
                 }
             }
             catch (Exception)
             {
                 // ignore
             }
+        }
+
+        private string GetTradeSettingsPath()
+        {
+            return @"Engine\" + NameStrategyUniq + @"SettingsBot.txt";
         }
 
         private void AdaptSoldiersHeight(List<Candle> candles, SecuritiesTradeSettings settings)
