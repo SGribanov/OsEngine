@@ -2691,3 +2691,20 @@
 ### Verification
 
 - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` -> passed 343/343
+
+## 2026-02-17 - Step 2.3 (JSON settings subsystem) - Path consistency cleanup in PayOfMarginBot table paths
+
+- Updated `project/OsEngine/Robots/Helpers/PayOfMarginBot.cs`:
+  - centralized table-storage file paths via helpers:
+    - `GetTableSummPath()`
+    - `GetTablePeriodPath()`
+  - replaced duplicated inline path usage in:
+    - `LoadTableSumm()`
+    - `SaveTableSumm()`
+    - `LoadTable()`
+    - `SaveTable()`
+- No behavior changes intended; files remain `Engine\\<NameStrategyUniq>TableSumm.json` and `Engine\\<NameStrategyUniq>TablePeriod.json`.
+
+### Verification
+
+- `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` -> passed 343/343
