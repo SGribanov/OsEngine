@@ -3643,3 +3643,19 @@
 ### Verification
 
 - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed 343/343
+
+## 2026-02-17 - Step 0.3 (silent-catch visibility) - Warning trace in BuyAtStopPositionsViewer return catches
+
+- Updated `project/OsEngine/OsTrader/BuyAtStopPositionsViewer.cs`:
+  - added `using System.Diagnostics;`
+  - replaced silent return catches with warning trace + preserved return:
+    - `catch (Exception ex) { Trace.TraceWarning(ex.ToString()); return; }`
+  - applied in:
+    - `PaintPos(DataGridView grid)`
+    - `ColoredRow(Color color)`
+    - inner row-number parse catch in `PositionCloseForNumber_Click(...)`
+  - behavior preserved: handlers still exit safely on invalid selection/paint state.
+
+### Verification
+
+- `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed 343/343

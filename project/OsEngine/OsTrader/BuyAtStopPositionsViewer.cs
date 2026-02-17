@@ -16,6 +16,7 @@ using System.Drawing;
 using OsEngine.Alerts;
 using System.Globalization;
 using OsEngine.Market;
+using System.Diagnostics;
 
 namespace OsEngine.OsTrader
 {
@@ -166,8 +167,9 @@ namespace OsEngine.OsTrader
 
                 botTabName = grid.Rows[grid.CurrentCell.RowIndex].Cells[2].Value.ToString();
             }
-            catch (Exception)
+            catch (Exception ex)
             {
+                Trace.TraceWarning(ex.ToString());
                 return;
             }
 
@@ -205,8 +207,9 @@ namespace OsEngine.OsTrader
             {
                 _lastClickGrid.Rows[_rowToPaintInOpenPoses].DefaultCellStyle.SelectionBackColor = color;
             }
-            catch
+            catch (Exception ex)
             {
+                Trace.TraceWarning(ex.ToString());
                 return;
             }
         }
@@ -295,8 +298,9 @@ namespace OsEngine.OsTrader
                     }
                     number = Convert.ToInt32(_grid.Rows[_grid.CurrentCell.RowIndex].Cells[0].Value);
                 }
-                catch (Exception)
+                catch (Exception ex)
                 {
+                    Trace.TraceWarning(ex.ToString());
                     return;
                 }
 
