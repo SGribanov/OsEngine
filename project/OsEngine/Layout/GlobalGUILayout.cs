@@ -299,7 +299,12 @@ namespace OsEngine.Layout
 
         private static string GetLayoutSettingsPath()
         {
-            return @"Engine\LayoutGui.txt";
+            return GetLayoutFilePath("LayoutGui.txt");
+        }
+
+        private static string GetLayoutFilePath(string fileName)
+        {
+            return @"Engine\" + fileName;
         }
 
         private static GlobalLayoutSettingsDto ParseLegacyLayoutSettings(string content)
@@ -384,7 +389,7 @@ namespace OsEngine.Layout
 
         private static string GetScreenResolutionPath()
         {
-            return @"Engine\ScreenResolution.txt";
+            return GetLayoutFilePath("ScreenResolution.txt");
         }
 
         private static ScreenResolutionSettingsDto ParseLegacyScreenResolutionSettings(string content)

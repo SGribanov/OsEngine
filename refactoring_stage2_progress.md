@@ -2947,3 +2947,19 @@
 ### Verification
 
 - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` -> passed 343/343
+
+## 2026-02-17 - Step 2.3 (JSON settings subsystem) - Path consistency cleanup in GlobalGUILayout engine-file paths
+
+- Updated `project/OsEngine/Layout/GlobalGUILayout.cs`:
+  - centralized layout-related engine file path construction via helper:
+    - `GetLayoutFilePath(string fileName)`
+  - replaced direct path usage in:
+    - `GetLayoutSettingsPath()`
+    - `GetScreenResolutionPath()`
+- No behavior changes intended; files remain:
+  - `Engine\\LayoutGui.txt`
+  - `Engine\\ScreenResolution.txt`
+
+### Verification
+
+- `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` -> passed 343/343
