@@ -1,4 +1,4 @@
-﻿/*
+/*
  *Your rights to use the code are governed by this license https://github.com/AlexWan/OsEngine/blob/master/LICENSE
  *Ваши права на использование кода регулируются данной лицензией http://o-s-a.net/doc/license_simple_engine.pdf
 */
@@ -493,7 +493,7 @@ namespace OsEngine.Market.Servers.Transaq
 
                 Dispose();
             }
-            catch (Exception ex)
+            catch (System.Exception ex)
             {
                 window.TextInfo.Text = ex.ToString();
             }
@@ -589,7 +589,7 @@ namespace OsEngine.Market.Servers.Transaq
                         Thread.Sleep(1000);
                     }
                 }
-                catch (Exception ex)
+                catch (System.Exception ex)
                 {
                     SendLogMessage("ThreadUpdateAndSubscribeSecurity error: " + ex.ToString(), LogMessageType.Error);
                     Thread.Sleep(5000);
@@ -1361,9 +1361,9 @@ namespace OsEngine.Market.Servers.Transaq
                         lastTickTime = DateTime.Parse(ticks.Last().Tradetime);
                     }
                 }
-                catch
+                catch (System.Exception ex)
                 {
-
+                    System.Diagnostics.Trace.TraceWarning(ex.ToString());
                 }
 
                 if (lastTickTime >= actualTime)
@@ -1523,7 +1523,7 @@ namespace OsEngine.Market.Servers.Transaq
 
                 return null;
             }
-            catch (Exception ex)
+            catch (System.Exception ex)
             {
                 SendLogMessage("Error GetCandles  " + ex.ToString(), LogMessageType.Error);
                 return null;
@@ -2005,7 +2005,7 @@ namespace OsEngine.Market.Servers.Transaq
 
                 order.TimeCallBack = ServerTime;
             }
-            catch (Exception ex)
+            catch (System.Exception ex)
             {
                 SendLogMessage(ex.ToString(), LogMessageType.Error);
             }
@@ -2046,7 +2046,7 @@ namespace OsEngine.Market.Servers.Transaq
                     return true;
                 }
             }
-            catch (Exception ex)
+            catch (System.Exception ex)
             {
                 SendLogMessage(ex.ToString(), LogMessageType.Error);
             }
@@ -2098,7 +2098,7 @@ namespace OsEngine.Market.Servers.Transaq
 
                 order.TimeCallBack = ServerTime;
             }
-            catch (Exception ex)
+            catch (System.Exception ex)
             {
                 SendLogMessage(ex.ToString(), LogMessageType.Error);
             }

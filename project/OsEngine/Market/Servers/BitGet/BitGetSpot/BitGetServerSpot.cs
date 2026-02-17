@@ -1,4 +1,4 @@
-﻿/*
+/*
  *Your rights to use the code are governed by this license https://github.com/AlexWan/OsEngine/blob/master/LICENSE
  *Ваши права на использование кода регулируются данной лицензией http://o-s-a.net/doc/license_simple_engine.pdf
 */
@@ -292,7 +292,7 @@ namespace OsEngine.Market.Servers.BitGet.BitGetSpot
                     SendLogMessage($"Securities error. Code: {response.StatusCode} || msg: {response.Content}", LogMessageType.Error);
                 }
             }
-            catch (Exception ex)
+            catch (System.Exception ex)
             {
                 SendLogMessage($"Securities request error: {ex.Message} {ex.StackTrace}" + ex.ToString(), LogMessageType.Error);
             }
@@ -405,7 +405,7 @@ namespace OsEngine.Market.Servers.BitGet.BitGetSpot
                     SendLogMessage($"Portfolio error. Code: {response.StatusCode} || msg: {response.Content}", LogMessageType.Error);
                 }
             }
-            catch (Exception ex)
+            catch (System.Exception ex)
             {
                 SendLogMessage($"Portfolio request error: {ex.Message} {ex.StackTrace}" + ex.ToString(), LogMessageType.Error);
             }
@@ -830,7 +830,7 @@ namespace OsEngine.Market.Servers.BitGet.BitGetSpot
 
                 _webSocketPublic.Add(CreateNewPublicSocket());
             }
-            catch (Exception ex)
+            catch (System.Exception ex)
             {
                 SendLogMessage($"{ex.Message} {ex.StackTrace}", LogMessageType.Error);
             }
@@ -1004,7 +1004,7 @@ namespace OsEngine.Market.Servers.BitGet.BitGetSpot
 
                 _webSocketPrivate.SendAsync(AuthJson);
             }
-            catch (Exception ex)
+            catch (System.Exception ex)
             {
                 SendLogMessage(ex.Message, LogMessageType.Error);
             }
@@ -1024,7 +1024,7 @@ namespace OsEngine.Market.Servers.BitGet.BitGetSpot
                     CheckSocketsActivate();
                 }
             }
-            catch (Exception ex)
+            catch (System.Exception ex)
             {
                 SendLogMessage(ex.ToString(), LogMessageType.Error);
             }
@@ -1044,7 +1044,7 @@ namespace OsEngine.Market.Servers.BitGet.BitGetSpot
                     DisconnectEvent();
                 }
             }
-            catch (Exception ex)
+            catch (System.Exception ex)
             {
                 SendLogMessage(ex.ToString(), LogMessageType.Error);
             }
@@ -1104,7 +1104,7 @@ namespace OsEngine.Market.Servers.BitGet.BitGetSpot
                     }
                 }
             }
-            catch (Exception ex)
+            catch (System.Exception ex)
             {
                 SendLogMessage("Data socket error" + ex.ToString(), LogMessageType.Error);
             }
@@ -1138,7 +1138,7 @@ namespace OsEngine.Market.Servers.BitGet.BitGetSpot
                     DisconnectEvent();
                 }
             }
-            catch (Exception ex)
+            catch (System.Exception ex)
             {
                 SendLogMessage(ex.ToString(), LogMessageType.Error);
             }
@@ -1202,7 +1202,7 @@ namespace OsEngine.Market.Servers.BitGet.BitGetSpot
                     }
                 }
             }
-            catch (Exception ex)
+            catch (System.Exception ex)
             {
                 SendLogMessage("Data socket error" + ex.ToString(), LogMessageType.Error);
             }
@@ -1257,7 +1257,7 @@ namespace OsEngine.Market.Servers.BitGet.BitGetSpot
                         Disconnect();
                     }
                 }
-                catch (Exception ex)
+                catch (System.Exception ex)
                 {
                     SendLogMessage(ex.ToString(), LogMessageType.Error);
                     Thread.Sleep(3000);
@@ -1358,7 +1358,7 @@ namespace OsEngine.Market.Servers.BitGet.BitGetSpot
                     _webSocketPrivate.SendAsync($"{{\"op\": \"subscribe\",\"args\": [{{\"instType\": \"SPOT\",\"channel\": \"orders\",\"instId\": \"{security.Name}\"}}]}}");
                 }
             }
-            catch (Exception ex)
+            catch (System.Exception ex)
             {
                 SendLogMessage(ex.Message, LogMessageType.Error);
             }
@@ -1417,7 +1417,7 @@ namespace OsEngine.Market.Servers.BitGet.BitGetSpot
                                 }
                             }
                         }
-                        catch (Exception ex)
+                        catch (System.Exception ex)
                         {
                             SendLogMessage($"{ex.Message} {ex.StackTrace}", LogMessageType.Error);
                         }
@@ -1721,7 +1721,7 @@ namespace OsEngine.Market.Servers.BitGet.BitGetSpot
 
                 PortfolioEvent?.Invoke(new List<Portfolio> { portfolio });
             }
-            catch (Exception ex)
+            catch (System.Exception ex)
             {
                 SendLogMessage(ex.Message, LogMessageType.Error);
             }
@@ -1778,7 +1778,7 @@ namespace OsEngine.Market.Servers.BitGet.BitGetSpot
                     MyTradeEvent?.Invoke(myTrade);
                 }
             }
-            catch (Exception ex)
+            catch (System.Exception ex)
             {
                 SendLogMessage(ex.Message, LogMessageType.Error);
             }
@@ -1831,7 +1831,7 @@ namespace OsEngine.Market.Servers.BitGet.BitGetSpot
                     MyOrderEvent?.Invoke(newOrder);
                 }
             }
-            catch (Exception ex)
+            catch (System.Exception ex)
             {
                 SendLogMessage(ex.Message, LogMessageType.Error);
             }
@@ -1884,7 +1884,7 @@ namespace OsEngine.Market.Servers.BitGet.BitGetSpot
                     NewTradesEvent?.Invoke(trade);
                 }
             }
-            catch (Exception ex)
+            catch (System.Exception ex)
             {
                 SendLogMessage(ex.Message, LogMessageType.Error);
             }
@@ -1968,7 +1968,7 @@ namespace OsEngine.Market.Servers.BitGet.BitGetSpot
 
                 return marketDepth;
             }
-            catch (Exception ex)
+            catch (System.Exception ex)
             {
                 SendLogMessage(ex.Message, LogMessageType.Error);
                 return null;
@@ -2002,7 +2002,7 @@ namespace OsEngine.Market.Servers.BitGet.BitGetSpot
                     Volume24hUpdateEvent?.Invoke(volume);
                 }
             }
-            catch (Exception ex)
+            catch (System.Exception ex)
             {
                 SendLogMessage(ex.Message, LogMessageType.Error);
             }
@@ -2070,7 +2070,7 @@ namespace OsEngine.Market.Servers.BitGet.BitGetSpot
                     SendLogMessage($"Order Fail. Code: {responseMessage.StatusCode} || {responseMessage.Content}", LogMessageType.Error);
                 }
             }
-            catch (Exception ex)
+            catch (System.Exception ex)
             {
                 SendLogMessage(ex.Message, LogMessageType.Error);
             }
@@ -2130,7 +2130,7 @@ namespace OsEngine.Market.Servers.BitGet.BitGetSpot
                     }
                 }
             }
-            catch (Exception ex)
+            catch (System.Exception ex)
             {
                 SendLogMessage(ex.Message, LogMessageType.Error);
             }
@@ -2244,9 +2244,9 @@ namespace OsEngine.Market.Servers.BitGet.BitGetSpot
                             {
                                 newOrder.NumberUser = Convert.ToInt32(item.clientOid);
                             }
-                            catch
+                            catch (System.Exception ex)
                             {
-
+                                System.Diagnostics.Trace.TraceWarning(ex.ToString());
                             }
 
                             newOrder.NumberMarket = item.orderId.ToString();
@@ -2360,7 +2360,7 @@ namespace OsEngine.Market.Servers.BitGet.BitGetSpot
 
                 return myOrder.State;
             }
-            catch (Exception ex)
+            catch (System.Exception ex)
             {
                 SendLogMessage($"GetOrderStatus>. Order error. {ex.Message} {ex.StackTrace}", LogMessageType.Error);
             }
@@ -2590,9 +2590,9 @@ namespace OsEngine.Market.Servers.BitGet.BitGetSpot
                             {
                                 newOrder.NumberUser = Convert.ToInt32(item.clientOid);
                             }
-                            catch
+                            catch (System.Exception ex)
                             {
-
+                                System.Diagnostics.Trace.TraceWarning(ex.ToString());
                             }
 
                             newOrder.NumberMarket = item.orderId.ToString();
@@ -2685,7 +2685,7 @@ namespace OsEngine.Market.Servers.BitGet.BitGetSpot
 
                 return response;
             }
-            catch (Exception ex)
+            catch (System.Exception ex)
             {
                 SendLogMessage(ex.Message, LogMessageType.Error);
                 return null;
@@ -2731,7 +2731,7 @@ namespace OsEngine.Market.Servers.BitGet.BitGetSpot
 
                 return response;
             }
-            catch (Exception ex)
+            catch (System.Exception ex)
             {
                 SendLogMessage(ex.Message, LogMessageType.Error);
                 return null;

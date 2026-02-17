@@ -1,4 +1,4 @@
-﻿/*
+/*
  *Your rights to use the code are governed by this license https://github.com/AlexWan/OsEngine/blob/master/LICENSE
  *Ваши права на использование кода регулируются данной лицензией http://o-s-a.net/doc/license_simple_engine.pdf
 */
@@ -178,7 +178,7 @@ namespace OsEngine.Market.Servers.MoexFixFastSpot
                 LoadFASTTemplates();                              
                 CreateSocketConnections();                
             }
-            catch (Exception ex)
+            catch (System.Exception ex)
             {
                 SendLogMessage(ex.Message.ToString(), LogMessageType.Error);
                 SendLogMessage("Connection cannot be open to MOEX FIX/FAST servers. Error request", LogMessageType.Error);
@@ -263,9 +263,9 @@ namespace OsEngine.Market.Servers.MoexFixFastSpot
 
             SendLogMessage("Connection Closed by MoexFixFastSpot. Socket Data Closed Event", LogMessageType.System);
 
-            try { _logFile?.Close(); } catch (Exception ex) { SendLogMessage(ex.ToString(), LogMessageType.Error); }
-            try { _logFileXOrders?.Close(); } catch (Exception ex) { SendLogMessage(ex.ToString(), LogMessageType.Error); }
-            try { _logFileMFIX?.Close(); } catch (Exception ex) { SendLogMessage(ex.ToString(), LogMessageType.Error); }
+            try { _logFile?.Close(); } catch (System.Exception ex) { SendLogMessage(ex.ToString(), LogMessageType.Error); }
+            try { _logFileXOrders?.Close(); } catch (System.Exception ex) { SendLogMessage(ex.ToString(), LogMessageType.Error); }
+            try { _logFileMFIX?.Close(); } catch (System.Exception ex) { SendLogMessage(ex.ToString(), LogMessageType.Error); }
 
             if (ServerStatus != ServerConnectStatus.Disconnect)
             {
@@ -566,7 +566,7 @@ namespace OsEngine.Market.Servers.MoexFixFastSpot
                     ServerStatus = ServerConnectStatus.Connect;
                     ConnectEvent();
                 }
-                catch (Exception ex)
+                catch (System.Exception ex)
                 {
                     SendLogMessage(ex.ToString(), LogMessageType.Error);
                 }
@@ -591,7 +591,7 @@ namespace OsEngine.Market.Servers.MoexFixFastSpot
             {
                 socket.Send(Encoding.UTF8.GetBytes(fullFIXMessage));
             }
-            catch (Exception ex)
+            catch (System.Exception ex)
             {
                 SendLogMessage("Error sending FIX Message " + ex.ToString(), LogMessageType.Error);
                 if (ServerStatus != ServerConnectStatus.Disconnect)
@@ -666,7 +666,7 @@ namespace OsEngine.Market.Servers.MoexFixFastSpot
                     try
                     {
                         bytesRec = _MFIXTradeSocket.Receive(bytes);
-                    } catch (Exception ex)
+                    } catch (System.Exception ex)
                     {
                         SendLogMessage("Error receiving FIX Message " + ex.ToString(), LogMessageType.Error);
                         if (ServerStatus != ServerConnectStatus.Disconnect)
@@ -1092,9 +1092,9 @@ namespace OsEngine.Market.Servers.MoexFixFastSpot
 
                 CloseMFIXTradeConnection();                
             }
-            catch
+            catch (System.Exception ex)
             {
-
+                System.Diagnostics.Trace.TraceWarning(ex.ToString());
             }
             finally
             {
@@ -1208,7 +1208,7 @@ namespace OsEngine.Market.Servers.MoexFixFastSpot
                         {
                             break;
                         }
-                        catch (Exception ex)
+                        catch (System.Exception ex)
                         {
                             SendLogMessage("Error receiving FAST Message " + ex.ToString(), LogMessageType.Error);
                             if (ServerStatus != ServerConnectStatus.Disconnect)
@@ -1469,7 +1469,7 @@ namespace OsEngine.Market.Servers.MoexFixFastSpot
                             // обычно возникает если мы прерываем блокирующую операцию
                             break;                            
                         }
-                        catch (Exception ex)
+                        catch (System.Exception ex)
                         {
                             SendLogMessage("Error receiving FAST Message " + ex.ToString(), LogMessageType.Error);
                             if (ServerStatus != ServerConnectStatus.Disconnect)
@@ -1602,7 +1602,7 @@ namespace OsEngine.Market.Servers.MoexFixFastSpot
                             // обычно возникает если мы прерываем блокирующую операцию
                             break;
                         }
-                        catch (Exception ex)
+                        catch (System.Exception ex)
                         {
                             SendLogMessage("Error receiving FAST Message " + ex.ToString(), LogMessageType.Error);
                             if (ServerStatus != ServerConnectStatus.Disconnect)
@@ -1715,7 +1715,7 @@ namespace OsEngine.Market.Servers.MoexFixFastSpot
                         // обычно возникает если мы прерываем блокирующую операцию
                         break;
                     }
-                    catch (Exception ex)
+                    catch (System.Exception ex)
                     {
                         SendLogMessage("Error receiving FAST Message " + ex.ToString(), LogMessageType.Error);
                         if (ServerStatus != ServerConnectStatus.Disconnect)
@@ -1844,7 +1844,7 @@ namespace OsEngine.Market.Servers.MoexFixFastSpot
                         // обычно возникает если мы прерываем блокирующую операцию
                         break;
                     }
-                    catch (Exception ex)
+                    catch (System.Exception ex)
                     {
                         SendLogMessage("Error receiving FAST Message " + ex.ToString(), LogMessageType.Error);
                         if (ServerStatus != ServerConnectStatus.Disconnect)
@@ -1954,7 +1954,7 @@ namespace OsEngine.Market.Servers.MoexFixFastSpot
                             // обычно возникает если мы прерываем блокирующую операцию
                             break;
                         }
-                        catch (Exception ex)
+                        catch (System.Exception ex)
                         {
                             SendLogMessage("Error receiving FAST Message " + ex.ToString(), LogMessageType.Error);
                             if (ServerStatus != ServerConnectStatus.Disconnect)
@@ -2088,7 +2088,7 @@ namespace OsEngine.Market.Servers.MoexFixFastSpot
                         {
                             length = _historicalReplaySocket.Receive(sizeBuffer, 4, SocketFlags.None);
                         }
-                        catch (Exception ex)
+                        catch (System.Exception ex)
                         {
                             SendLogMessage("Error receiving Data " + ex.ToString(), LogMessageType.Error);
                             if (ServerStatus != ServerConnectStatus.Disconnect)
@@ -2104,7 +2104,7 @@ namespace OsEngine.Market.Servers.MoexFixFastSpot
                             {
                                 length += _historicalReplaySocket.Receive(sizeBuffer, length, 4 - length, SocketFlags.None);
                             }
-                            catch (Exception ex)
+                            catch (System.Exception ex)
                             {
                                 SendLogMessage("Error receiving Data Message " + ex.ToString(), LogMessageType.Error);
                                 if (ServerStatus != ServerConnectStatus.Disconnect)
@@ -2126,7 +2126,7 @@ namespace OsEngine.Market.Servers.MoexFixFastSpot
                             {
                                 bytesRead = _historicalReplaySocket.Receive(buffer, msgSize - totalBytesReceived, SocketFlags.None);
                             }
-                            catch (Exception ex)
+                            catch (System.Exception ex)
                             {
                                 SendLogMessage("Error receiving Data Message " + ex.ToString(), LogMessageType.Error);
                                 if (ServerStatus != ServerConnectStatus.Disconnect)
@@ -2194,7 +2194,7 @@ namespace OsEngine.Market.Servers.MoexFixFastSpot
                             {
                                 length = _historicalReplaySocket.Receive(sizeBuffer, 4, SocketFlags.None);
                             }
-                            catch (Exception ex)
+                            catch (System.Exception ex)
                             {
                                 SendLogMessage("Error receiving Data Message " + ex.ToString(), LogMessageType.Error);
                                 if (ServerStatus != ServerConnectStatus.Disconnect)
@@ -2210,7 +2210,7 @@ namespace OsEngine.Market.Servers.MoexFixFastSpot
                                 {
                                     length += _historicalReplaySocket.Receive(sizeBuffer, length, 4 - length, SocketFlags.None);
                                 }
-                                catch (Exception ex)
+                                catch (System.Exception ex)
                                 {
                                     SendLogMessage("Error receiving Data Message " + ex.ToString(), LogMessageType.Error);
                                     if (ServerStatus != ServerConnectStatus.Disconnect)
@@ -2232,7 +2232,7 @@ namespace OsEngine.Market.Servers.MoexFixFastSpot
                                 {
                                     bytesRead = _historicalReplaySocket.Receive(buffer, msgSize - totalBytesReceived, SocketFlags.None);
                                 }
-                                catch (Exception ex)
+                                catch (System.Exception ex)
                                 {
                                     SendLogMessage("Error receiving Data Message " + ex.ToString(), LogMessageType.Error);
                                     if (ServerStatus != ServerConnectStatus.Disconnect)
@@ -3337,7 +3337,7 @@ namespace OsEngine.Market.Servers.MoexFixFastSpot
                     {
                         bytesRec = _MFIXTradeSocket.Receive(bytes);
                     }
-                    catch (Exception ex)
+                    catch (System.Exception ex)
                     {
                         SendLogMessage("Error receiving FIX Message " + ex.ToString(), LogMessageType.Error);
                         if (ServerStatus != ServerConnectStatus.Disconnect)

@@ -1,4 +1,4 @@
-﻿/*
+/*
  * Your rights to use code governed by this license http://o-s-a.net/doc/license_simple_engine.pdf
  * Ваши права на использование кода регулируются данной лицензией http://o-s-a.net/doc/license_simple_engine.pdf
 */
@@ -84,9 +84,9 @@ namespace OsEngine.Entity
                 ButtonRightInSearchResults.Click -= ButtonRightInSearchResults_Click;
                 ButtonLeftInSearchResults.Click -= ButtonLeftInSearchResults_Click;
             }
-            catch
+            catch (System.Exception ex)
             {
-
+                System.Diagnostics.Trace.TraceWarning(ex.ToString());
             }
         }
 
@@ -166,7 +166,7 @@ namespace OsEngine.Entity
                     ComboBoxClass.SelectedItem = classes[1];
                 }
             }
-            catch (Exception ex)
+            catch (System.Exception ex)
             {
                 ServerMaster.SendNewLogMessage(ex.ToString(), Logging.LogMessageType.Error);
             }
@@ -348,7 +348,7 @@ namespace OsEngine.Entity
             {
                 SaveFromTable(e.RowIndex);
             }
-            catch (Exception ex)
+            catch (System.Exception ex)
             {
                 ServerMaster.SendNewLogMessage(ex.ToString(), Logging.LogMessageType.Error);
             }
@@ -361,7 +361,7 @@ namespace OsEngine.Entity
                 UpdateClassComboBox(securities);
                 PaintSecurities(securities);
             }
-            catch (Exception ex)
+            catch (System.Exception ex)
             {
                 ServerMaster.SendNewLogMessage(ex.ToString(), Logging.LogMessageType.Error);
             }
@@ -524,7 +524,7 @@ namespace OsEngine.Entity
                 HostSecurities.Child = _gridSecurities;
 
             }
-            catch (Exception ex)
+            catch (System.Exception ex)
             {
                 ServerMaster.SendNewLogMessage(ex.ToString(), Logging.LogMessageType.Error);
             }
@@ -667,9 +667,9 @@ namespace OsEngine.Entity
                     writer.Close();
                 }
             }
-            catch (Exception)
+            catch (System.Exception ex)
             {
-
+                System.Diagnostics.Trace.TraceWarning(ex.ToString());
             }
         }
 
@@ -700,7 +700,7 @@ namespace OsEngine.Entity
                     TextBoxSearchSecurity.Text = OsLocalization.Market.Label64;
                 }
             }
-            catch (Exception ex)
+            catch (System.Exception ex)
             {
                 ServerMaster.SendNewLogMessage(ex.ToString(), LogMessageType.Error);
             }
@@ -715,7 +715,7 @@ namespace OsEngine.Entity
                     TextBoxSearchSecurity.Text = "";
                 }
             }
-            catch (Exception ex)
+            catch (System.Exception ex)
             {
                 ServerMaster.SendNewLogMessage(ex.ToString(), LogMessageType.Error);
             }
@@ -730,7 +730,7 @@ namespace OsEngine.Entity
                     TextBoxSearchSecurity.Text = OsLocalization.Market.Label64;
                 }
             }
-            catch (Exception ex)
+            catch (System.Exception ex)
             {
                 ServerMaster.SendNewLogMessage(ex.ToString(), LogMessageType.Error);
             }
@@ -803,7 +803,7 @@ namespace OsEngine.Entity
                     _searchResults.Insert(0, indexFirstSec);
                 }
             }
-            catch (Exception ex)
+            catch (System.Exception ex)
             {
                 ServerMaster.SendNewLogMessage(ex.ToString(), LogMessageType.Error);
             }
@@ -847,7 +847,7 @@ namespace OsEngine.Entity
                 LabelCommasResultShow.Visibility = Visibility.Visible;
                 LabelCountResultsShow.Visibility = Visibility.Visible;
             }
-            catch (Exception ex)
+            catch (System.Exception ex)
             {
                 ServerMaster.SendNewLogMessage(ex.ToString(), LogMessageType.Error);
             }
@@ -876,7 +876,7 @@ namespace OsEngine.Entity
                 _gridSecurities.Rows[realInd].Selected = true;
                 _gridSecurities.FirstDisplayedScrollingRowIndex = realInd;
             }
-            catch (Exception ex)
+            catch (System.Exception ex)
             {
                 ServerMaster.SendNewLogMessage(ex.ToString(), LogMessageType.Error);
             }
@@ -905,7 +905,7 @@ namespace OsEngine.Entity
                 _gridSecurities.Rows[realInd].Selected = true;
                 _gridSecurities.FirstDisplayedScrollingRowIndex = realInd;
             }
-            catch (Exception ex)
+            catch (System.Exception ex)
             {
                 ServerMaster.SendNewLogMessage(ex.ToString(), LogMessageType.Error);
             }

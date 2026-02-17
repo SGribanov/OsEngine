@@ -1,4 +1,4 @@
-﻿/*
+/*
  *Your rights to use the code are governed by this license https://github.com/AlexWan/OsEngine/blob/master/LICENSE
  *Ваши права на использование кода регулируются данной лицензией http://o-s-a.net/doc/license_simple_engine.pdf
 */
@@ -113,7 +113,7 @@ namespace OsEngine.Market.Servers.Alor
                 CreateWebSocketConnection();
                 
             }
-            catch (Exception ex)
+            catch (System.Exception ex)
             {
                 SendLogMessage(ex.Message.ToString(), LogMessageType.Error);
             }
@@ -1180,9 +1180,9 @@ namespace OsEngine.Market.Servers.Alor
                     }
                 }
             }
-            catch
+            catch (System.Exception ex)
             {
-
+                System.Diagnostics.Trace.TraceWarning(ex.ToString());
             }
             finally
             {
@@ -1221,7 +1221,7 @@ namespace OsEngine.Market.Servers.Alor
                     }
                 }
             }
-            catch (Exception ex)
+            catch (System.Exception ex)
             {
                 SendLogMessage(ex.ToString(), LogMessageType.Error);
             }
@@ -1373,7 +1373,7 @@ namespace OsEngine.Market.Servers.Alor
                     DisconnectEvent();
                 }
             }
-            catch (Exception ex)
+            catch (System.Exception ex)
             {
                 SendLogMessage(ex.ToString(), LogMessageType.Error);
             }
@@ -1402,7 +1402,7 @@ namespace OsEngine.Market.Servers.Alor
                     }  
                 }
             }
-            catch (Exception ex)
+            catch (System.Exception ex)
             {
                 SendLogMessage("Data socket error" + ex.ToString(), LogMessageType.Error);
             }
@@ -1469,7 +1469,7 @@ namespace OsEngine.Market.Servers.Alor
                     DisconnectEvent();
                 }
             }
-            catch (Exception ex)
+            catch (System.Exception ex)
             {
                 SendLogMessage(ex.ToString(), LogMessageType.Error);
             }
@@ -1498,7 +1498,7 @@ namespace OsEngine.Market.Servers.Alor
                     }
                 }
             }
-            catch (Exception ex)
+            catch (System.Exception ex)
             {
                 SendLogMessage("Data socket error" + ex.ToString(), LogMessageType.Error);
             }

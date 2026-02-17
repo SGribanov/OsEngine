@@ -1,4 +1,4 @@
-﻿/*
+/*
  * Your rights to use code governed by this license https://github.com/AlexWan/OsEngine/blob/master/LICENSE
  * Ваши права на использование кода регулируются данной лицензией http://o-s-a.net/doc/license_simple_engine.pdf
 */
@@ -76,9 +76,9 @@ namespace OsEngine.OsOptimizer
                     ReLoad(_reports);
                 }
             }
-            catch
+            catch (System.Exception ex)
             {
-
+                System.Diagnostics.Trace.TraceWarning(ex.ToString());
             }
         }
 
@@ -424,7 +424,7 @@ namespace OsEngine.OsOptimizer
                     _gridStepsOfOptimization.Rows.Add(row);
                 }
             }
-            catch (Exception ex)
+            catch (System.Exception ex)
             {
                 SendLogMessage(ex.ToString(), LogMessageType.Error);
             }
@@ -644,7 +644,7 @@ namespace OsEngine.OsOptimizer
                     _chartRobustness.ChartAreas[0].AxisY.Minimum = 0;
                 }
             }
-            catch (Exception ex)
+            catch (System.Exception ex)
             {
                 SendLogMessage(ex.ToString(), LogMessageType.Error);
             }
@@ -900,7 +900,7 @@ namespace OsEngine.OsOptimizer
                     }
                 }
             }
-            catch (Exception ex)
+            catch (System.Exception ex)
             {
                 SendLogMessage(ex.ToString(), LogMessageType.Error);
             }
@@ -1130,7 +1130,7 @@ namespace OsEngine.OsOptimizer
                 }
 
             }
-            catch (Exception ex)
+            catch (System.Exception ex)
             {
                 SendLogMessage(ex.ToString(), LogMessageType.Error);
             }
@@ -1354,7 +1354,7 @@ namespace OsEngine.OsOptimizer
                     }
                 }
             }
-            catch (Exception ex)
+            catch (System.Exception ex)
             {
                 SendLogMessage(ex.ToString(), LogMessageType.Error);
             }

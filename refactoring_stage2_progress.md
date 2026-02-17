@@ -3851,3 +3851,21 @@
 
 - `csharp-ls --diagnose --solution project/OsEngine.sln` -> completed (known NU1900 network warning in diagnostics)
 - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed 343/343
+
+## 2026-02-17 - Step 0.3 (silent-catch visibility) - Bulk pass for all remaining empty catches
+
+- Updated `project/OsEngine` (one-pass bulk cleanup):
+  - replaced all remaining empty catches of forms:
+    - `catch { }`
+    - `catch (Exception) { }`
+  - replacement pattern:
+    - `catch (System.Exception ex) { System.Diagnostics.Trace.TraceWarning(ex.ToString()); }`
+  - result:
+    - `38` empty catches replaced in `28` files.
+  - behavior preserved: exception handling remains non-throwing; now warnings are visible in trace output.
+
+### Verification
+
+- `rg -n -U "catch\\s*(\\(\\s*Exception\\s*\\))?\\s*\\{\\s*\\}" project/OsEngine -S` -> no matches
+- `csharp-ls --diagnose --solution project/OsEngine.sln` -> completed (known NU1900 network warning in diagnostics)
+- `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed 343/343

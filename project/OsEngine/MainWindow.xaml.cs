@@ -1,4 +1,4 @@
-﻿/*
+/*
  * Your rights to use code governed by this license https://github.com/AlexWan/OsEngine/blob/master/LICENSE
  * Ваши права на использование кода регулируются данной лицензией http://o-s-a.net/doc/license_simple_engine.pdf
 */
@@ -504,9 +504,9 @@ namespace OsEngine
                             process.Add(p);
                         }
                     }
-                    catch
+                    catch (System.Exception ex)
                     {
-
+                        System.Diagnostics.Trace.TraceWarning(ex.ToString());
                     }
                 }
 
@@ -971,7 +971,7 @@ namespace OsEngine
                     _instructionsUi.Activate();
                 }
             }
-            catch (Exception ex)
+            catch (System.Exception ex)
             {
                 ServerMaster.SendNewLogMessage(ex.ToString(), Logging.LogMessageType.Error);
             }

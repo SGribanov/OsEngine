@@ -1,4 +1,4 @@
-﻿/*
+/*
  *Your rights to use the code are governed by this license https://github.com/AlexWan/OsEngine/blob/master/LICENSE
  *Ваши права на использование кода регулируются данной лицензией http://o-s-a.net/doc/license_simple_engine.pdf
 */
@@ -194,7 +194,7 @@ namespace OsEngine.Market.Servers.Atp
                     {
                         _socketMarketData.Connect(ipEndPoint);
                     }
-                    catch (Exception ex)
+                    catch (System.Exception ex)
                     {
                         SendLogMessage("Atp market server is not responding" + ex.ToString(),
 
@@ -233,7 +233,7 @@ namespace OsEngine.Market.Servers.Atp
                     {
                         _socketToTrade.Connect(ipEndPoint);
                     }
-                    catch (Exception ex)
+                    catch (System.Exception ex)
                     {
                         SendLogMessage("Atp trade server is not responding" + ex.ToString(),
 
@@ -398,9 +398,9 @@ namespace OsEngine.Market.Servers.Atp
                         process.Add(p);
                     }
                 }
-                catch
+                catch (System.Exception ex)
                 {
-
+                    System.Diagnostics.Trace.TraceWarning(ex.ToString());
                 }
             }
 

@@ -1,4 +1,4 @@
-﻿/*
+/*
  * Your rights to use code governed by this license http://o-s-a.net/doc/license_simple_engine.pdf
  * Ваши права на использование кода регулируются данной лицензией http://o-s-a.net/doc/license_simple_engine.pdf
 */
@@ -184,9 +184,9 @@ namespace OsEngine.Language
                         ShortDatePattern = _shortDatePattern
                     });
             }
-            catch
+            catch (System.Exception ex)
             {
-               
+                System.Diagnostics.Trace.TraceWarning(ex.ToString());
             }
         }
 
@@ -218,9 +218,9 @@ namespace OsEngine.Language
                 // System.Threading.Thread.CurrentThread.CurrentUICulture = OsLocalization.CurCulture;
                 // System.Threading.Thread.CurrentThread.CurrentCulture = OsLocalization.CurCulture;
             }
-            catch 
+            catch (System.Exception ex)
             {
-               
+                System.Diagnostics.Trace.TraceWarning(ex.ToString());
             }
 
             if(string.IsNullOrEmpty(_longTimePattern))

@@ -1,4 +1,4 @@
-﻿/*
+/*
  * Your rights to use code governed by this license https://github.com/AlexWan/OsEngine/blob/master/LICENSE
  * Ваши права на использование кода регулируются данной лицензией http://o-s-a.net/doc/license_simple_engine.pdf
 */
@@ -207,9 +207,9 @@ namespace OsEngine.Robots
                         _hLevelOne = methodsH[methodsH.Count - 1];
                     }
                 }
-                catch
+                catch (System.Exception ex)
                 {
-
+                    System.Diagnostics.Trace.TraceWarning(ex.ToString());
                 }
             }
         }

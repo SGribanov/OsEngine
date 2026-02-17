@@ -1,4 +1,4 @@
-﻿/*
+/*
  * Your rights to use code governed by this license https://github.com/AlexWan/OsEngine/blob/master/LICENSE
  * Ваши права на использование кода регулируются данной лицензией http://o-s-a.net/doc/license_simple_engine.pdf
 */
@@ -327,7 +327,7 @@ namespace OsEngine.Market.Servers.BitGet.BitGetFutures
                     }
 
                 }
-                catch (Exception ex)
+                catch (System.Exception ex)
                 {
                     SendLogMessage($"Securities request error: {ex.Message} {ex.StackTrace}" + ex.ToString(), LogMessageType.Error);
                 }
@@ -399,7 +399,7 @@ namespace OsEngine.Market.Servers.BitGet.BitGetFutures
 
                     GetUSDTMasterPortfolio(false);
                 }
-                catch (Exception ex)
+                catch (System.Exception ex)
                 {
                     SendLogMessage($"{ex.Message} {ex.StackTrace}", LogMessageType.Error);
                 }
@@ -504,7 +504,7 @@ namespace OsEngine.Market.Servers.BitGet.BitGetFutures
                     SendLogMessage($"Portfolio error. Code: {responseMessage.StatusCode} || msg: {responseMessage.Content}", LogMessageType.Error);
                 }
             }
-            catch (Exception ex)
+            catch (System.Exception ex)
             {
                 SendLogMessage($"Portfolio request error: {ex.Message} {ex.StackTrace}" + ex.ToString(), LogMessageType.Error);
             }
@@ -653,7 +653,7 @@ namespace OsEngine.Market.Servers.BitGet.BitGetFutures
                     SendLogMessage($"Positions error. Code: {responseMessage.StatusCode} || msg: {responseMessage.Content}", LogMessageType.Error);
                 }
             }
-            catch (Exception ex)
+            catch (System.Exception ex)
             {
                 SendLogMessage($"Positions request error: {ex.Message} {ex.StackTrace}" + ex.ToString(), LogMessageType.Error);
             }
@@ -1124,7 +1124,7 @@ namespace OsEngine.Market.Servers.BitGet.BitGetFutures
 
                 _webSocketPublic.Add(CreateNewPublicSocket());
             }
-            catch (Exception ex)
+            catch (System.Exception ex)
             {
                 SendLogMessage($"{ex.Message} {ex.StackTrace}", LogMessageType.Error);
             }
@@ -1301,7 +1301,7 @@ namespace OsEngine.Market.Servers.BitGet.BitGetFutures
 
                 _webSocketPrivate.SendAsync(AuthJson);
             }
-            catch (Exception ex)
+            catch (System.Exception ex)
             {
                 SendLogMessage(ex.Message, LogMessageType.Error);
             }
@@ -1321,7 +1321,7 @@ namespace OsEngine.Market.Servers.BitGet.BitGetFutures
                     CheckSocketsActivate();
                 }
             }
-            catch (Exception ex)
+            catch (System.Exception ex)
             {
                 SendLogMessage(ex.ToString(), LogMessageType.Error);
             }
@@ -1341,7 +1341,7 @@ namespace OsEngine.Market.Servers.BitGet.BitGetFutures
                     DisconnectEvent();
                 }
             }
-            catch (Exception ex)
+            catch (System.Exception ex)
             {
                 SendLogMessage(ex.ToString(), LogMessageType.Error);
             }
@@ -1402,7 +1402,7 @@ namespace OsEngine.Market.Servers.BitGet.BitGetFutures
                     }
                 }
             }
-            catch (Exception ex)
+            catch (System.Exception ex)
             {
                 SendLogMessage("Data socket error" + ex.ToString(), LogMessageType.Error);
             }
@@ -1436,7 +1436,7 @@ namespace OsEngine.Market.Servers.BitGet.BitGetFutures
                     DisconnectEvent();
                 }
             }
-            catch (Exception ex)
+            catch (System.Exception ex)
             {
                 SendLogMessage(ex.ToString(), LogMessageType.Error);
             }
@@ -1502,7 +1502,7 @@ namespace OsEngine.Market.Servers.BitGet.BitGetFutures
                     }
                 }
             }
-            catch (Exception ex)
+            catch (System.Exception ex)
             {
                 SendLogMessage("Data socket error" + ex.ToString(), LogMessageType.Error);
             }
@@ -1557,7 +1557,7 @@ namespace OsEngine.Market.Servers.BitGet.BitGetFutures
                         Disconnect();
                     }
                 }
-                catch (Exception ex)
+                catch (System.Exception ex)
                 {
                     SendLogMessage(ex.ToString(), LogMessageType.Error);
                     Thread.Sleep(3000);
@@ -1654,7 +1654,7 @@ namespace OsEngine.Market.Servers.BitGet.BitGetFutures
                     }
                 }
             }
-            catch (Exception ex)
+            catch (System.Exception ex)
             {
                 SendLogMessage(ex.Message, LogMessageType.Error);
             }
@@ -1706,7 +1706,7 @@ namespace OsEngine.Market.Servers.BitGet.BitGetFutures
                     SendLogMessage($"Funding data error. Code: {response.StatusCode} || msg: {response.Content}", LogMessageType.Error);
                 }
             }
-            catch (Exception ex)
+            catch (System.Exception ex)
             {
                 SendLogMessage($"Funding data error {ex.Message} {ex.StackTrace}", LogMessageType.Error);
             }
@@ -1754,7 +1754,7 @@ namespace OsEngine.Market.Servers.BitGet.BitGetFutures
                     SendLogMessage($"Funding history error. Code: {response.StatusCode} || msg: {response.Content}", LogMessageType.Error);
                 }
             }
-            catch (Exception ex)
+            catch (System.Exception ex)
             {
                 SendLogMessage($"Funding history error {ex.Message} {ex.StackTrace}", LogMessageType.Error);
             }
@@ -1819,7 +1819,7 @@ namespace OsEngine.Market.Servers.BitGet.BitGetFutures
                                 }
                             }
                         }
-                        catch (Exception ex)
+                        catch (System.Exception ex)
                         {
                             SendLogMessage($"{ex.Message} {ex.StackTrace}", LogMessageType.Error);
                         }
@@ -2215,7 +2215,7 @@ namespace OsEngine.Market.Servers.BitGet.BitGetFutures
 
                 PortfolioEvent?.Invoke(_portfolios);
             }
-            catch (Exception ex)
+            catch (System.Exception ex)
             {
                 SendLogMessage(ex.Message, LogMessageType.Error);
             }
@@ -2259,7 +2259,7 @@ namespace OsEngine.Market.Servers.BitGet.BitGetFutures
 
                 PortfolioEvent?.Invoke(_portfolios);
             }
-            catch (Exception ex)
+            catch (System.Exception ex)
             {
                 SendLogMessage(ex.Message, LogMessageType.Error);
             }
@@ -2361,7 +2361,7 @@ namespace OsEngine.Market.Servers.BitGet.BitGetFutures
                     }
                 }
             }
-            catch (Exception ex)
+            catch (System.Exception ex)
             {
                 SendLogMessage(ex.Message, LogMessageType.Error);
             }
@@ -2412,7 +2412,7 @@ namespace OsEngine.Market.Servers.BitGet.BitGetFutures
                     NewTradesEvent?.Invoke(trade);
                 }
             }
-            catch (Exception ex)
+            catch (System.Exception ex)
             {
                 SendLogMessage(ex.Message, LogMessageType.Error);
             }
@@ -2517,7 +2517,7 @@ namespace OsEngine.Market.Servers.BitGet.BitGetFutures
 
                 return marketDepth;
             }
-            catch (Exception ex)
+            catch (System.Exception ex)
             {
                 SendLogMessage(ex.Message, LogMessageType.Error);
                 return null;
@@ -2556,7 +2556,7 @@ namespace OsEngine.Market.Servers.BitGet.BitGetFutures
 
                 Volume24hUpdateEvent?.Invoke(volume);
             }
-            catch (Exception ex)
+            catch (System.Exception ex)
             {
                 SendLogMessage(ex.Message, LogMessageType.Error);
             }
@@ -2664,7 +2664,7 @@ namespace OsEngine.Market.Servers.BitGet.BitGetFutures
                     SendLogMessage($"Order Fail. Status: {responseMessage.StatusCode} || msg:{responseMessage.Content}", LogMessageType.Error);
                 }
             }
-            catch (Exception ex)
+            catch (System.Exception ex)
             {
                 SendLogMessage($"Order send error {ex.Message} {ex.StackTrace}", LogMessageType.Error);
             }
@@ -2725,7 +2725,7 @@ namespace OsEngine.Market.Servers.BitGet.BitGetFutures
                     }
                 }
             }
-            catch (Exception ex)
+            catch (System.Exception ex)
             {
                 SendLogMessage($"Cancel order error {ex.Message} {ex.StackTrace}", LogMessageType.Error);
             }
@@ -2822,7 +2822,7 @@ namespace OsEngine.Market.Servers.BitGet.BitGetFutures
                     SendLogMessage($"Order status error. Code: {responseMessage.StatusCode} || msg: {responseMessage.Content}", LogMessageType.Error);
                 }
             }
-            catch (Exception ex)
+            catch (System.Exception ex)
             {
                 SendLogMessage($"Order status error {ex.Message} {ex.StackTrace}", LogMessageType.Error);
             }
@@ -2872,7 +2872,7 @@ namespace OsEngine.Market.Servers.BitGet.BitGetFutures
                     SendLogMessage($"My trades to order error: {responseMessage.StatusCode} || msg: {responseMessage.Content}", LogMessageType.Error);
                 }
             }
-            catch (Exception ex)
+            catch (System.Exception ex)
             {
                 SendLogMessage($"My trades to order error {ex.Message} {ex.StackTrace}", LogMessageType.Error);
             }
@@ -2898,7 +2898,7 @@ namespace OsEngine.Market.Servers.BitGet.BitGetFutures
 
                 CreatePrivateQueryOrders("/api/v2/mix/order/cancel-all-orders", Method.POST, null, jsonRequest);
             }
-            catch (Exception ex)
+            catch (System.Exception ex)
             {
                 SendLogMessage($"Cancel all orders to security error {ex.Message} {ex.StackTrace}", LogMessageType.Error);
             }
@@ -2920,7 +2920,7 @@ namespace OsEngine.Market.Servers.BitGet.BitGetFutures
                     CreatePrivateQueryOrders("/api/v2/mix/order/cancel-all-orders", Method.POST, null, jsonRequest);
                 }
             }
-            catch (Exception ex)
+            catch (System.Exception ex)
             {
                 SendLogMessage($"Cancel all orders error {ex.Message} {ex.StackTrace}", LogMessageType.Error);
             }
@@ -2997,7 +2997,7 @@ namespace OsEngine.Market.Servers.BitGet.BitGetFutures
 
                 return;
             }
-            catch (Exception ex)
+            catch (System.Exception ex)
             {
                 SendLogMessage($"All open orders error {ex.Message} {ex.StackTrace}", LogMessageType.Error);
                 return;
@@ -3030,9 +3030,9 @@ namespace OsEngine.Market.Servers.BitGet.BitGetFutures
             {
                 newOrder.NumberUser = Convert.ToInt32(item.clientOid);
             }
-            catch
+            catch (System.Exception ex)
             {
-
+                System.Diagnostics.Trace.TraceWarning(ex.ToString());
             }
 
             newOrder.NumberMarket = item.orderId.ToString();
@@ -3221,7 +3221,7 @@ namespace OsEngine.Market.Servers.BitGet.BitGetFutures
 
                 return;
             }
-            catch (Exception ex)
+            catch (System.Exception ex)
             {
                 SendLogMessage($"All historical orders error {ex.Message} {ex.StackTrace}", LogMessageType.Error);
                 return;
@@ -3258,7 +3258,7 @@ namespace OsEngine.Market.Servers.BitGet.BitGetFutures
 
                 return response;
             }
-            catch (Exception ex)
+            catch (System.Exception ex)
             {
                 SendLogMessage($"Create private query error {ex.Message} {ex.StackTrace}", LogMessageType.Error);
                 return null;
@@ -3298,7 +3298,7 @@ namespace OsEngine.Market.Servers.BitGet.BitGetFutures
 
                 return response;
             }
-            catch (Exception ex)
+            catch (System.Exception ex)
             {
                 SendLogMessage($"Create private query orders error {ex.Message} {ex.StackTrace}", LogMessageType.Error);
                 return null;
@@ -3362,7 +3362,7 @@ namespace OsEngine.Market.Servers.BitGet.BitGetFutures
                         Thread.Sleep(1000);
                     }
                 }
-                catch (Exception ex)
+                catch (System.Exception ex)
                 {
                     Thread.Sleep(5000);
                     SendLogMessage(ex.Message, LogMessageType.Error);
@@ -3436,7 +3436,7 @@ namespace OsEngine.Market.Servers.BitGet.BitGetFutures
                     }
                 }
             }
-            catch (Exception ex)
+            catch (System.Exception ex)
             {
                 SendLogMessage($"Open interest error {ex.Message} {ex.StackTrace}", LogMessageType.Error);
             }

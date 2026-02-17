@@ -1,4 +1,4 @@
-﻿/*
+/*
  *Your rights to use the code are governed by this license https://github.com/AlexWan/OsEngine/blob/master/LICENSE
  *Ваши права на использование кода регулируются данной лицензией http://o-s-a.net/doc/license_simple_engine.pdf
 */
@@ -155,7 +155,7 @@ namespace OsEngine.Entity
             {
                 RepaintTable();
             }
-            catch (Exception ex)
+            catch (System.Exception ex)
             {
                 ServerMaster.SendNewLogMessage(ex.ToString(), Logging.LogMessageType.Error);
             }
@@ -249,7 +249,7 @@ namespace OsEngine.Entity
                
                 RepaintTable();
             }
-            catch (Exception ex)
+            catch (System.Exception ex)
             {
                 ServerMaster.SendNewLogMessage(ex.ToString(), Logging.LogMessageType.Error);
             }
@@ -309,7 +309,7 @@ namespace OsEngine.Entity
 
                 RepaintTable();
             }
-            catch (Exception ex)
+            catch (System.Exception ex)
             {
                 ServerMaster.SendNewLogMessage(ex.ToString(), Logging.LogMessageType.Error);
             }
@@ -330,7 +330,7 @@ namespace OsEngine.Entity
 
                 _server.SetCommonMarginMode(selectedClass, marginMode);
             }
-            catch (Exception ex)
+            catch (System.Exception ex)
             {
                 ServerMaster.SendNewLogMessage(ex.ToString(), Logging.LogMessageType.Error);
             }
@@ -351,7 +351,7 @@ namespace OsEngine.Entity
 
                 _server.SetCommonLeverage(selectedClass, leverage);
             }
-            catch (Exception ex)
+            catch (System.Exception ex)
             {
                 ServerMaster.SendNewLogMessage(ex.ToString(), Logging.LogMessageType.Error);
             }
@@ -372,7 +372,7 @@ namespace OsEngine.Entity
 
                 _server.SetCommonHedgeMode(selectedClass, hedgeMode);
             }
-            catch (Exception ex)
+            catch (System.Exception ex)
             {
                 ServerMaster.SendNewLogMessage(ex.ToString(), Logging.LogMessageType.Error);
             }
@@ -411,7 +411,7 @@ namespace OsEngine.Entity
                     }
                 }          
             }
-            catch (Exception ex)
+            catch (System.Exception ex)
             {
                 ServerMaster.SendNewLogMessage(ex.ToString(), Logging.LogMessageType.Error);
             }
@@ -428,7 +428,7 @@ namespace OsEngine.Entity
                     _dgv.Rows[i].Cells["MarginModeColumn"].Value = value;
                 }
             }
-            catch (Exception ex)
+            catch (System.Exception ex)
             {
                 ServerMaster.SendNewLogMessage(ex.ToString(), Logging.LogMessageType.Error);
             }
@@ -445,7 +445,7 @@ namespace OsEngine.Entity
                     _dgv.Rows[i].Cells["HedgeModeColumn"].Value = value;
                 }
             }
-            catch (Exception ex)
+            catch (System.Exception ex)
             {
                 ServerMaster.SendNewLogMessage(ex.ToString(), Logging.LogMessageType.Error);
             }
@@ -485,7 +485,7 @@ namespace OsEngine.Entity
                     SecurityLeverageDataEvent(data);
                 }
             }
-            catch (Exception ex)
+            catch (System.Exception ex)
             {
                 ServerMaster.SendNewLogMessage(ex.ToString(), Logging.LogMessageType.Error);
             }
@@ -502,7 +502,7 @@ namespace OsEngine.Entity
 
                 LoadLeverageFromFile();
             }
-            catch (Exception ex)
+            catch (System.Exception ex)
             {
                 ServerMaster.SendNewLogMessage(ex.ToString(), Logging.LogMessageType.Error);
             }
@@ -573,8 +573,9 @@ namespace OsEngine.Entity
                 _dgv.DataError += _dgv_DataError;
                 _dgv.CellClick += _dgv_CellClick;
             }
-            catch
-            {                
+            catch (System.Exception ex)
+            {
+                System.Diagnostics.Trace.TraceWarning(ex.ToString());
             }
         }
 
@@ -616,7 +617,7 @@ namespace OsEngine.Entity
                     SecurityLeverageDataEvent(data);
                 }
             }
-            catch (Exception ex)
+            catch (System.Exception ex)
             {
                 ServerMaster.SendNewLogMessage(ex.ToString(), Logging.LogMessageType.Error);
             }
@@ -786,7 +787,7 @@ namespace OsEngine.Entity
                     }
                 }
             }
-            catch (Exception ex)
+            catch (System.Exception ex)
             {
                 ServerMaster.SendNewLogMessage(ex.ToString(), Logging.LogMessageType.Error);
             }
@@ -950,7 +951,7 @@ namespace OsEngine.Entity
                 UpdateSearchResults();
                 UpdateSearchPanel();
             }
-            catch (Exception ex)
+            catch (System.Exception ex)
             {
                 ServerMaster.SendNewLogMessage(ex.ToString(), Logging.LogMessageType.Error);
             }
@@ -1115,7 +1116,7 @@ namespace OsEngine.Entity
                     ComboBoxClass.SelectedItem = startClass;
                 }
             }
-            catch (Exception ex)
+            catch (System.Exception ex)
             {
                 ServerMaster.SendNewLogMessage(ex.ToString(), Logging.LogMessageType.Error);
             }
@@ -1138,7 +1139,7 @@ namespace OsEngine.Entity
 
                 RepaintTable();
             }
-            catch (Exception ex)
+            catch (System.Exception ex)
             {
                 ServerMaster.SendNewLogMessage(ex.ToString(), Logging.LogMessageType.Error);
             }
@@ -1176,7 +1177,7 @@ namespace OsEngine.Entity
                 _dgv.Rows[realInd].Selected = true;
                 _dgv.FirstDisplayedScrollingRowIndex = realInd;
             }
-            catch (Exception ex)
+            catch (System.Exception ex)
             {
                 ServerMaster.SendNewLogMessage(ex.ToString(), LogMessageType.Error);
             }
@@ -1205,7 +1206,7 @@ namespace OsEngine.Entity
                 _dgv.Rows[realInd].Selected = true;
                 _dgv.FirstDisplayedScrollingRowIndex = realInd;
             }
-            catch (Exception ex)
+            catch (System.Exception ex)
             {
                 ServerMaster.SendNewLogMessage(ex.ToString(), LogMessageType.Error);
             }
@@ -1279,7 +1280,7 @@ namespace OsEngine.Entity
                     TextBoxSearchLeverage.Text = OsLocalization.Market.Label64;
                 }
             }
-            catch (Exception ex)
+            catch (System.Exception ex)
             {
                 ServerMaster.SendNewLogMessage(ex.ToString(), LogMessageType.Error);
             }
@@ -1295,7 +1296,7 @@ namespace OsEngine.Entity
                     TextBoxSearchLeverage.Text = OsLocalization.Market.Label64;
                 }
             }
-            catch (Exception ex)
+            catch (System.Exception ex)
             {
                 ServerMaster.SendNewLogMessage(ex.ToString(), LogMessageType.Error);
             }
@@ -1368,7 +1369,7 @@ namespace OsEngine.Entity
                     _searchResults.Insert(0, indexFirstSec);
                 }
             }
-            catch (Exception ex)
+            catch (System.Exception ex)
             {
                 ServerMaster.SendNewLogMessage(ex.ToString(), LogMessageType.Error);
             }
@@ -1412,7 +1413,7 @@ namespace OsEngine.Entity
                 LabelCommasResultShow.Visibility = Visibility.Visible;
                 LabelCountResultsShow.Visibility = Visibility.Visible;
             }
-            catch (Exception ex)
+            catch (System.Exception ex)
             {
                 ServerMaster.SendNewLogMessage(ex.ToString(), LogMessageType.Error);
             }
@@ -1427,7 +1428,7 @@ namespace OsEngine.Entity
                     TextBoxSearchLeverage.Text = "";
                 }
             }
-            catch (Exception ex)
+            catch (System.Exception ex)
             {
                 ServerMaster.SendNewLogMessage(ex.ToString(), LogMessageType.Error);
             }

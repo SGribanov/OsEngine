@@ -1,4 +1,4 @@
-﻿/*
+/*
  *Your rights to use the code are governed by this license https://github.com/AlexWan/OsEngine/blob/master/LICENSE
  *Ваши права на использование кода регулируются данной лицензией http://o-s-a.net/doc/license_simple_engine.pdf
 */
@@ -1169,7 +1169,7 @@ namespace OsEngine.Market.Servers.OKX
 
                 _webSocketPublic.Add(CreateNewPublicSocket());
             }
-            catch (Exception ex)
+            catch (System.Exception ex)
             {
                 SendLogMessage($"{ex.Message} {ex.StackTrace}", LogMessageType.Error);
             }
@@ -1340,7 +1340,7 @@ namespace OsEngine.Market.Servers.OKX
                     }
                 }
             }
-            catch (Exception ex)
+            catch (System.Exception ex)
             {
                 SendLogMessage(ex.Message, LogMessageType.Error);
             }
@@ -1352,7 +1352,7 @@ namespace OsEngine.Market.Servers.OKX
             {
                 _webSocketPrivate.SendAsync(Encryptor.MakeAuthRequest(_publicKey, _secretKey, _password));
             }
-            catch (Exception ex)
+            catch (System.Exception ex)
             {
                 SendLogMessage(ex.Message, LogMessageType.Error);
             }
@@ -1421,7 +1421,7 @@ namespace OsEngine.Market.Servers.OKX
                     CheckSocketsActivate();
                 }
             }
-            catch (Exception ex)
+            catch (System.Exception ex)
             {
                 SendLogMessage(ex.ToString(), LogMessageType.Error);
             }
@@ -1441,7 +1441,7 @@ namespace OsEngine.Market.Servers.OKX
                     DisconnectEvent();
                 }
             }
-            catch (Exception ex)
+            catch (System.Exception ex)
             {
                 SendLogMessage(ex.ToString(), LogMessageType.Error);
             }
@@ -1500,7 +1500,7 @@ namespace OsEngine.Market.Servers.OKX
                     }
                 }
             }
-            catch (Exception ex)
+            catch (System.Exception ex)
             {
                 SendLogMessage("Data socket error" + ex.ToString(), LogMessageType.Error);
             }
@@ -1535,7 +1535,7 @@ namespace OsEngine.Market.Servers.OKX
                     DisconnectEvent();
                 }
             }
-            catch (Exception ex)
+            catch (System.Exception ex)
             {
                 SendLogMessage(ex.ToString(), LogMessageType.Error);
             }
@@ -1604,7 +1604,7 @@ namespace OsEngine.Market.Servers.OKX
                     }
                 }
             }
-            catch (Exception ex)
+            catch (System.Exception ex)
             {
                 SendLogMessage("Data socket error" + ex.ToString(), LogMessageType.Error);
             }
@@ -1656,7 +1656,7 @@ namespace OsEngine.Market.Servers.OKX
                         Disconnect();
                     }
                 }
-                catch (Exception ex)
+                catch (System.Exception ex)
                 {
                     SendLogMessage(ex.ToString(), LogMessageType.Error);
                     Thread.Sleep(3000);
@@ -1778,7 +1778,7 @@ namespace OsEngine.Market.Servers.OKX
                     _subscribedSecurities.Add(securityName, false);
                 }
             }
-            catch (Exception ex)
+            catch (System.Exception ex)
             {
                 SendLogMessage(ex.Message, LogMessageType.Error);
             }
@@ -1923,7 +1923,7 @@ namespace OsEngine.Market.Servers.OKX
                                 }
                             }
                         }
-                        catch (Exception ex)
+                        catch (System.Exception ex)
                         {
                             SendLogMessage($"{ex.Message} {ex.StackTrace}", LogMessageType.Error);
                         }
@@ -2261,7 +2261,7 @@ namespace OsEngine.Market.Servers.OKX
 
                 PortfolioEvent?.Invoke(Portfolios);
             }
-            catch (Exception ex)
+            catch (System.Exception ex)
             {
                 SendLogMessage(ex.Message, LogMessageType.Error);
             }
@@ -2337,7 +2337,7 @@ namespace OsEngine.Market.Servers.OKX
 
                 PortfolioEvent?.Invoke(Portfolios);
             }
-            catch (Exception ex)
+            catch (System.Exception ex)
             {
                 SendLogMessage(ex.Message, LogMessageType.Error);
             }
@@ -2368,7 +2368,7 @@ namespace OsEngine.Market.Servers.OKX
                         }
                     }
                 }
-                catch (Exception ex)
+                catch (System.Exception ex)
                 {
                     Thread.Sleep(5000);
                     SendLogMessage(ex.Message, LogMessageType.Error);
@@ -2401,7 +2401,7 @@ namespace OsEngine.Market.Servers.OKX
                         }
                     }
                 }
-                catch (Exception ex)
+                catch (System.Exception ex)
                 {
                     Thread.Sleep(5000);
                     SendLogMessage(ex.Message, LogMessageType.Error);
@@ -2434,7 +2434,7 @@ namespace OsEngine.Market.Servers.OKX
                         }
                     }
                 }
-                catch (Exception ex)
+                catch (System.Exception ex)
                 {
                     Thread.Sleep(5000);
                     SendLogMessage(ex.Message, LogMessageType.Error);
@@ -2467,7 +2467,7 @@ namespace OsEngine.Market.Servers.OKX
                         }
                     }
                 }
-                catch (Exception ex)
+                catch (System.Exception ex)
                 {
                     Thread.Sleep(5000);
                     SendLogMessage(ex.Message, LogMessageType.Error);
@@ -2500,7 +2500,7 @@ namespace OsEngine.Market.Servers.OKX
                         }
                     }
                 }
-                catch (Exception ex)
+                catch (System.Exception ex)
                 {
                     Thread.Sleep(5000);
                     SendLogMessage(ex.Message, LogMessageType.Error);
@@ -2533,7 +2533,7 @@ namespace OsEngine.Market.Servers.OKX
                         }
                     }
                 }
-                catch (Exception ex)
+                catch (System.Exception ex)
                 {
                     Thread.Sleep(5000);
                     SendLogMessage(ex.Message, LogMessageType.Error);
@@ -2566,7 +2566,7 @@ namespace OsEngine.Market.Servers.OKX
                         }
                     }
                 }
-                catch (Exception ex)
+                catch (System.Exception ex)
                 {
                     Thread.Sleep(5000);
                     SendLogMessage(ex.Message, LogMessageType.Error);
@@ -2599,7 +2599,7 @@ namespace OsEngine.Market.Servers.OKX
                         }
                     }
                 }
-                catch (Exception ex)
+                catch (System.Exception ex)
                 {
                     Thread.Sleep(5000);
                     SendLogMessage(ex.Message, LogMessageType.Error);
@@ -2728,7 +2728,7 @@ namespace OsEngine.Market.Servers.OKX
 
                 NewTradesEvent?.Invoke(trade);
             }
-            catch (Exception ex)
+            catch (System.Exception ex)
             {
                 SendLogMessage(ex.Message, LogMessageType.Error);
             }
@@ -2855,7 +2855,7 @@ namespace OsEngine.Market.Servers.OKX
                     }
                 }
             }
-            catch (Exception ex)
+            catch (System.Exception ex)
             {
                 SendLogMessage(ex.Message, LogMessageType.Error);
             }
@@ -2885,9 +2885,9 @@ namespace OsEngine.Market.Servers.OKX
             {
                 newOrder.NumberUser = Convert.ToInt32(item.clOrdId);
             }
-            catch
+            catch (System.Exception ex)
             {
-
+                System.Diagnostics.Trace.TraceWarning(ex.ToString());
             }
 
             newOrder.NumberMarket = item.ordId.ToString();
@@ -3242,7 +3242,7 @@ namespace OsEngine.Market.Servers.OKX
                     CreateOrderFail(order);
                 }
             }
-            catch (Exception ex)
+            catch (System.Exception ex)
             {
                 SendLogMessage($"SendOrderSpot - {ex.Message}", LogMessageType.Error);
             }
@@ -3306,7 +3306,7 @@ namespace OsEngine.Market.Servers.OKX
                     CreateOrderFail(order);
                 }
             }
-            catch (Exception ex)
+            catch (System.Exception ex)
             {
                 SendLogMessage($"SendOrderSwap - {ex.Message}", LogMessageType.Error);
             }
@@ -3396,7 +3396,7 @@ namespace OsEngine.Market.Servers.OKX
                     }
                 }
             }
-            catch (Exception ex)
+            catch (System.Exception ex)
             {
                 SendLogMessage($"CancelOrder - {ex.Message}", LogMessageType.Error);
             }
@@ -3521,7 +3521,7 @@ namespace OsEngine.Market.Servers.OKX
 
                 return myOrder.State;
             }
-            catch (Exception ex)
+            catch (System.Exception ex)
             {
                 SendLogMessage($"GetOrderStatus>. Order error. {ex.Message} {ex.StackTrace}", LogMessageType.Error);
             }
@@ -3601,7 +3601,7 @@ namespace OsEngine.Market.Servers.OKX
                     return;
                 }
             }
-            catch (Exception ex)
+            catch (System.Exception ex)
             {
                 SendLogMessage($"GetActivOrders - {ex.Message}", LogMessageType.Error);
                 return;
@@ -3727,7 +3727,7 @@ namespace OsEngine.Market.Servers.OKX
                     SendLogMessage($"Get my trades by security error: {res.StatusCode} || {contentStr}", LogMessageType.Error);
                 }
             }
-            catch (Exception ex)
+            catch (System.Exception ex)
             {
                 SendLogMessage($"GenerateTradesToOrder - {ex.Message}", LogMessageType.Error);
 
@@ -3896,7 +3896,7 @@ namespace OsEngine.Market.Servers.OKX
                     return;
                 }
             }
-            catch (Exception ex)
+            catch (System.Exception ex)
             {
                 SendLogMessage($"GetAllHistoricalOrders - {ex.Message}", LogMessageType.Error);
                 return;

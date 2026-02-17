@@ -1,4 +1,4 @@
-﻿/*
+/*
  *Your rights to use the code are governed by this license https://github.com/AlexWan/OsEngine/blob/master/LICENSE
  *Ваши права на использование кода регулируются данной лицензией http://o-s-a.net/doc/license_simple_engine.pdf
 */
@@ -98,7 +98,7 @@ namespace OsEngine.Market.Servers.CoinEx.Spot
                     DisconnectEvent();
                 }
             }
-            catch (Exception ex)
+            catch (System.Exception ex)
             {
                 SendLogMessage(ex.Message.ToString(), LogMessageType.Error);
             }
@@ -113,7 +113,7 @@ namespace OsEngine.Market.Servers.CoinEx.Spot
 
                 SendLogMessage("Dispose. Connection Closed by CoinExSpot. WebSocket Closed Event", LogMessageType.System);
             }
-            catch (Exception ex)
+            catch (System.Exception ex)
             {
                 SendLogMessage(ex.ToString(), LogMessageType.Error);
             }
@@ -638,7 +638,7 @@ namespace OsEngine.Market.Servers.CoinEx.Spot
                     SendLogMessage($"Candles request error. Code: {response.StatusCode} || msg: {response.Content}", LogMessageType.Error);
                 }
             }
-            catch (Exception ex)
+            catch (System.Exception ex)
             {
                 SendLogMessage("Candles request error:" + ex.ToString(), LogMessageType.Error);
             }
@@ -677,7 +677,7 @@ namespace OsEngine.Market.Servers.CoinEx.Spot
 
                  return trades;
              }
-             catch (Exception ex)
+             catch (System.Exception ex)
              {
                  SendLogMessage("Trades request error:" + ex.ToString(), LogMessageType.Error);
              }
@@ -705,7 +705,7 @@ namespace OsEngine.Market.Servers.CoinEx.Spot
 
                 _webSocketPublic.Add(CreateNewPublicSocket());
             }
-            catch (Exception ex)
+            catch (System.Exception ex)
             {
                 SendLogMessage($"{ex.Message} {ex.StackTrace}", LogMessageType.Error);
             }
@@ -885,7 +885,7 @@ namespace OsEngine.Market.Servers.CoinEx.Spot
                     DisconnectEvent();
                 }
             }
-            catch (Exception ex)
+            catch (System.Exception ex)
             {
                 SendLogMessage(ex.ToString(), LogMessageType.Error);
             }
@@ -914,7 +914,7 @@ namespace OsEngine.Market.Servers.CoinEx.Spot
                     }
                 }
             }
-            catch (Exception ex)
+            catch (System.Exception ex)
             {
                 SendLogMessage("Data socket error" + ex.ToString(), LogMessageType.Error);
             }
@@ -996,7 +996,7 @@ namespace OsEngine.Market.Servers.CoinEx.Spot
                     }
                 }
             }
-            catch (Exception ex)
+            catch (System.Exception ex)
             {
                 SendLogMessage("Data socket error" + ex.ToString(), LogMessageType.Error);
             }
@@ -1058,7 +1058,7 @@ namespace OsEngine.Market.Servers.CoinEx.Spot
                     DisconnectEvent();
                 }
             }
-            catch (Exception ex)
+            catch (System.Exception ex)
             {
                 SendLogMessage(ex.ToString(), LogMessageType.Error);
             }
@@ -1122,7 +1122,7 @@ namespace OsEngine.Market.Servers.CoinEx.Spot
                         Disconnect();
                     }
                 }
-                catch (Exception ex)
+                catch (System.Exception ex)
                 {
                     SendLogMessage(ex.ToString(), LogMessageType.Error);
                     Thread.Sleep(3000);
@@ -1256,7 +1256,7 @@ namespace OsEngine.Market.Servers.CoinEx.Spot
                                 }
                             }
                         }
-                        catch (Exception ex)
+                        catch (System.Exception ex)
                         {
                             SendLogMessage($"{ex.Message} {ex.StackTrace}", LogMessageType.Error);
                         }
@@ -1479,7 +1479,7 @@ namespace OsEngine.Market.Servers.CoinEx.Spot
                 }
 
             }
-            catch (Exception ex)
+            catch (System.Exception ex)
             {
                 SendLogMessage($"{ex.Message} {ex.StackTrace}", LogMessageType.Error);
             }
@@ -1541,7 +1541,7 @@ namespace OsEngine.Market.Servers.CoinEx.Spot
                     MarketDepthEvent(depth);
                 }
             }
-            catch (Exception ex)
+            catch (System.Exception ex)
             {
                 SendLogMessage($"{ex.Message} {ex.StackTrace}", LogMessageType.Error);
             }
@@ -1569,9 +1569,9 @@ namespace OsEngine.Market.Servers.CoinEx.Spot
                 {
                     order.NumberUser = Convert.ToInt32(cexOrder.client_id);
                 }
-                catch
+                catch (System.Exception ex)
                 {
-
+                    System.Diagnostics.Trace.TraceWarning(ex.ToString());
                 }
 
                 order.SecurityNameCode = cexOrder.market;
@@ -1670,7 +1670,7 @@ namespace OsEngine.Market.Servers.CoinEx.Spot
                 MyOrderEvent?.Invoke(order);
 
             }
-            catch (Exception ex)
+            catch (System.Exception ex)
             {
                 SendLogMessage($"{ex.Message} {ex.StackTrace}", LogMessageType.Error);
             }
@@ -1693,7 +1693,7 @@ namespace OsEngine.Market.Servers.CoinEx.Spot
 
                 MyTradeEvent(newTrade);
             }
-            catch (Exception ex)
+            catch (System.Exception ex)
             {
                 SendLogMessage($"{ex.Message} {ex.StackTrace}", LogMessageType.Error);
             }
@@ -2437,7 +2437,7 @@ namespace OsEngine.Market.Servers.CoinEx.Spot
 
                 return response;
             }
-            catch (Exception ex)
+            catch (System.Exception ex)
             {
                 SendLogMessage(ex.Message, LogMessageType.Error);
                 return null;

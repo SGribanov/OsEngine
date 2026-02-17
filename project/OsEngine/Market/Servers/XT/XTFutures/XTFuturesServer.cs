@@ -1,4 +1,4 @@
-﻿/*
+/*
  *Your rights to use the code are governed by this license https://github.com/AlexWan/OsEngine/blob/master/LICENSE
  *Ваши права на использование кода регулируются данной лицензией http://o-s-a.net/doc/license_simple_engine.pdf
 */
@@ -489,7 +489,7 @@ namespace OsEngine.Market.Servers.XT.XTFutures
 
                     PortfolioEvent?.Invoke(_portfolios);
                 }
-                catch (Exception ex)
+                catch (System.Exception ex)
                 {
                     SendLogMessage("CreateQueryPositions error: " + ex, LogMessageType.Error);
                 }
@@ -766,7 +766,7 @@ namespace OsEngine.Market.Servers.XT.XTFutures
 
                     _webSocketPublic.Add(CreateNewPublicSocket());
                 }
-                catch (Exception ex)
+                catch (System.Exception ex)
                 {
                     SendLogMessage($"{ex.Message} {ex.StackTrace}", LogMessageType.Error);
                 }
@@ -937,7 +937,7 @@ namespace OsEngine.Market.Servers.XT.XTFutures
                         DisconnectEvent();
                     }
                 }
-                catch (Exception ex)
+                catch (System.Exception ex)
                 {
                     SendLogMessage(ex.ToString(), LogMessageType.Error);
                 }
@@ -1020,7 +1020,7 @@ namespace OsEngine.Market.Servers.XT.XTFutures
                         SendLogMessage("XTFutures WebSocket Public connection open", LogMessageType.System);
                     }
                 }
-                catch (Exception ex)
+                catch (System.Exception ex)
                 {
                     SendLogMessage(ex.ToString(), LogMessageType.Error);
                 }
@@ -1280,7 +1280,7 @@ namespace OsEngine.Market.Servers.XT.XTFutures
                                     }
                                 }
                             }
-                            catch (Exception ex)
+                            catch (System.Exception ex)
                             {
                                 SendLogMessage($"{ex.Message} {ex.StackTrace}", LogMessageType.Error);
                             }
@@ -2291,9 +2291,9 @@ namespace OsEngine.Market.Servers.XT.XTFutures
                                 {
                                     activeOrder.NumberUser = Convert.ToInt32(item.clientOrderId);
                                 }
-                                catch
+                                catch (System.Exception ex)
                                 {
-
+                                    System.Diagnostics.Trace.TraceWarning(ex.ToString());
                                 }
 
                                 activeOrder.NumberMarket = item.orderId;

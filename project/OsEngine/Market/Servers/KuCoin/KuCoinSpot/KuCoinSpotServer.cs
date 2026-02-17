@@ -1,4 +1,4 @@
-﻿/*
+/*
  * Your rights to use code governed by this license https://github.com/AlexWan/OsEngine/blob/master/LICENSE
  * Ваши права на использование кода регулируются данной лицензией http://o-s-a.net/doc/license_simple_engine.pdf
 */
@@ -280,7 +280,7 @@ namespace OsEngine.Market.Servers.KuCoin.KuCoinSpot
                     SendLogMessage($"Securities request error: {responseMessage.Content}", LogMessageType.Error);
                 }
             }
-            catch (Exception ex)
+            catch (System.Exception ex)
             {
                 SendLogMessage($"Securities request error: {ex.Message} {ex.StackTrace}" + ex.ToString(), LogMessageType.Error);
             }
@@ -599,7 +599,7 @@ namespace OsEngine.Market.Servers.KuCoin.KuCoinSpot
 
                 _webSocketPublic.Add(CreateNewPublicSocket());
             }
-            catch (Exception ex)
+            catch (System.Exception ex)
             {
                 SendLogMessage($"{ex.Message} {ex.StackTrace}", LogMessageType.Error);
             }
@@ -796,7 +796,7 @@ namespace OsEngine.Market.Servers.KuCoin.KuCoinSpot
                     DisconnectEvent();
                 }
             }
-            catch (Exception ex)
+            catch (System.Exception ex)
             {
                 SendLogMessage(ex.ToString(), LogMessageType.Error);
             }
@@ -825,7 +825,7 @@ namespace OsEngine.Market.Servers.KuCoin.KuCoinSpot
                     }
                 }
             }
-            catch (Exception ex)
+            catch (System.Exception ex)
             {
                 SendLogMessage("Data socket error" + ex.ToString(), LogMessageType.Error);
             }
@@ -881,7 +881,7 @@ namespace OsEngine.Market.Servers.KuCoin.KuCoinSpot
                     DisconnectEvent();
                 }
             }
-            catch (Exception ex)
+            catch (System.Exception ex)
             {
                 SendLogMessage(ex.ToString(), LogMessageType.Error);
             }
@@ -910,7 +910,7 @@ namespace OsEngine.Market.Servers.KuCoin.KuCoinSpot
                     }
                 }
             }
-            catch (Exception ex)
+            catch (System.Exception ex)
             {
                 SendLogMessage("Data socket error" + ex.ToString(), LogMessageType.Error);
             }
@@ -1129,7 +1129,7 @@ namespace OsEngine.Market.Servers.KuCoin.KuCoinSpot
                                 }
                             }
                         }
-                        catch (Exception ex)
+                        catch (System.Exception ex)
                         {
                             SendLogMessage($"{ex.Message} {ex.StackTrace}", LogMessageType.Error);
                         }
@@ -1401,7 +1401,7 @@ namespace OsEngine.Market.Servers.KuCoin.KuCoinSpot
 
                 NewTradesEvent?.Invoke(trade);
             }
-            catch (Exception ex)
+            catch (System.Exception ex)
             {
                 SendLogMessage($"{ex.Message} {ex.StackTrace}", LogMessageType.Error);
             }
@@ -1431,7 +1431,7 @@ namespace OsEngine.Market.Servers.KuCoin.KuCoinSpot
 
                 Volume24hUpdateEvent?.Invoke(volume);
             }
-            catch (Exception ex)
+            catch (System.Exception ex)
             {
                 SendLogMessage($"{ex.Message} {ex.StackTrace}", LogMessageType.Error);
             }
@@ -1491,7 +1491,7 @@ namespace OsEngine.Market.Servers.KuCoin.KuCoinSpot
 
                 return marketDepth;
             }
-            catch (Exception ex)
+            catch (System.Exception ex)
             {
                 SendLogMessage($"{ex.Message} {ex.StackTrace}", LogMessageType.Error);
                 return null;
@@ -1527,7 +1527,7 @@ namespace OsEngine.Market.Servers.KuCoin.KuCoinSpot
 
                 PortfolioEvent?.Invoke(new List<Portfolio> { portfolio });
             }
-            catch (Exception ex)
+            catch (System.Exception ex)
             {
                 SendLogMessage($"{ex.Message} {ex.StackTrace}", LogMessageType.Error);
             }
@@ -1612,7 +1612,7 @@ namespace OsEngine.Market.Servers.KuCoin.KuCoinSpot
 
                 MyOrderEvent?.Invoke(newOrder);
             }
-            catch (Exception ex)
+            catch (System.Exception ex)
             {
                 SendLogMessage($"{ex.Message} {ex.StackTrace}", LogMessageType.Error);
             }
@@ -1713,7 +1713,7 @@ namespace OsEngine.Market.Servers.KuCoin.KuCoinSpot
                     SendLogMessage($"Order Fail. Status: {responseMessage.StatusCode} || {responseMessage.Content}", LogMessageType.Error);
                 }
             }
-            catch (Exception ex)
+            catch (System.Exception ex)
             {
                 SendLogMessage($"{ex.Message} {ex.StackTrace}", LogMessageType.Error);
             }
@@ -1766,7 +1766,7 @@ namespace OsEngine.Market.Servers.KuCoin.KuCoinSpot
                     }
                 }
             }
-            catch (Exception ex)
+            catch (System.Exception ex)
             {
                 SendLogMessage($"{ex.Message} {ex.StackTrace}", LogMessageType.Error);
             }
@@ -1828,7 +1828,7 @@ namespace OsEngine.Market.Servers.KuCoin.KuCoinSpot
                     }
                 }
             }
-            catch (Exception ex)
+            catch (System.Exception ex)
             {
                 SendLogMessage($"{ex.Message} {ex.StackTrace}", LogMessageType.Error);
             }
@@ -1912,9 +1912,9 @@ namespace OsEngine.Market.Servers.KuCoin.KuCoinSpot
                                 {
                                     newOrder.NumberUser = Convert.ToInt32(order.data.items[i].clientOid);
                                 }
-                                catch
+                                catch (System.Exception ex)
                                 {
-
+                                    System.Diagnostics.Trace.TraceWarning(ex.ToString());
                                 }
 
                                 newOrder.NumberMarket = order.data.items[i].id;
@@ -1950,7 +1950,7 @@ namespace OsEngine.Market.Servers.KuCoin.KuCoinSpot
 
                 return orders;
             }
-            catch (Exception ex)
+            catch (System.Exception ex)
             {
                 SendLogMessage($"{ex.Message} {ex.StackTrace}", LogMessageType.Error);
             }
@@ -1993,7 +1993,7 @@ namespace OsEngine.Market.Servers.KuCoin.KuCoinSpot
                     SendLogMessage($"Get active order symbols error. {responseMessage.StatusCode} || Message: {responseMessage.Content}", LogMessageType.Error);
                 }
             }
-            catch (Exception ex)
+            catch (System.Exception ex)
             {
                 SendLogMessage($"{ex.Message} {ex.StackTrace}", LogMessageType.Error);
             }
@@ -2088,9 +2088,9 @@ namespace OsEngine.Market.Servers.KuCoin.KuCoinSpot
                             {
                                 newOrder.NumberUser = Convert.ToInt32(order.data.clientOid);
                             }
-                            catch
+                            catch (System.Exception ex)
                             {
-
+                                System.Diagnostics.Trace.TraceWarning(ex.ToString());
                             }
 
                             newOrder.NumberMarket = order.data.id;
@@ -2123,7 +2123,7 @@ namespace OsEngine.Market.Servers.KuCoin.KuCoinSpot
                     SendLogMessage($"Get order from exchange error: {responseMessage.StatusCode} || Message: {responseMessage.Content}", LogMessageType.Error);
                 }
             }
-            catch (Exception ex)
+            catch (System.Exception ex)
             {
                 SendLogMessage($"{ex.Message} {ex.StackTrace}", LogMessageType.Error);
             }
@@ -2184,7 +2184,7 @@ namespace OsEngine.Market.Servers.KuCoin.KuCoinSpot
                     SendLogMessage($"Get my trades by security error: {responseMessage.StatusCode} || {responseMessage.Content}", LogMessageType.Error);
                 }
             }
-            catch (Exception ex)
+            catch (System.Exception ex)
             {
                 SendLogMessage($"{ex.Message} {ex.StackTrace}", LogMessageType.Error);
             }
@@ -2240,7 +2240,7 @@ namespace OsEngine.Market.Servers.KuCoin.KuCoinSpot
 
                 return response;
             }
-            catch (Exception ex)
+            catch (System.Exception ex)
             {
                 SendLogMessage(ex.Message, LogMessageType.Error);
                 return null;
@@ -2278,7 +2278,7 @@ namespace OsEngine.Market.Servers.KuCoin.KuCoinSpot
 
                 return response;
             }
-            catch (Exception ex)
+            catch (System.Exception ex)
             {
                 SendLogMessage(ex.Message, LogMessageType.Error);
                 return null;

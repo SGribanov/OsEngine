@@ -1,4 +1,4 @@
-﻿/*
+/*
  *Your rights to use code governed by this license http://o-s-a.net/doc/license_simple_engine.pdf
  *Ваши права на использования кода регулируются данной лицензией http://o-s-a.net/doc/license_simple_engine.pdf
 */
@@ -171,9 +171,9 @@ namespace OsEngine.Alerts
                     _grid.Dispose();
                     _grid = null;
                 }
-                catch
+                catch (System.Exception ex)
                 {
-
+                    System.Diagnostics.Trace.TraceWarning(ex.ToString());
                 }
             }
         }

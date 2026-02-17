@@ -1,4 +1,4 @@
-﻿/*
+/*
  * Your rights to use code governed by this license https://github.com/AlexWan/OsEngine/blob/master/LICENSE
  * Ваши права на использование кода регулируются данной лицензией http://o-s-a.net/doc/license_simple_engine.pdf
 */
@@ -412,9 +412,9 @@ namespace OsEngine.OsOptimizer
                     _gridResults = null;
                 }
             }
-            catch
-            { 
-
+            catch (System.Exception ex)
+            {
+                System.Diagnostics.Trace.TraceWarning(ex.ToString());
             }
         }
 
@@ -821,7 +821,7 @@ namespace OsEngine.OsOptimizer
                     }
                 }
             }
-            catch (Exception ex)
+            catch (System.Exception ex)
             {
                 _master?.SendLogMessage(ex.ToString(), LogMessageType.Error);
             }
@@ -1100,7 +1100,7 @@ namespace OsEngine.OsOptimizer
                     PaintTableSources();
                 }
             }
-            catch (Exception ex)
+            catch (System.Exception ex)
             {
                 _master?.SendLogMessage(ex.ToString(), LogMessageType.Error);
             }
@@ -1127,7 +1127,7 @@ namespace OsEngine.OsOptimizer
                     Task.Run(PaintCountBotsInOptimization);
                 }
             }
-            catch (Exception ex)
+            catch (System.Exception ex)
             {
                 _master?.SendLogMessage(ex.ToString(), LogMessageType.Error);
                 ComboBoxOptimizationMethod.SelectedItem = _master.OptimizationMethod.ToString();
@@ -1148,7 +1148,7 @@ namespace OsEngine.OsOptimizer
                     _master.ObjectiveMetric = metric;
                 }
             }
-            catch (Exception ex)
+            catch (System.Exception ex)
             {
                 _master?.SendLogMessage(ex.ToString(), LogMessageType.Error);
                 ComboBoxObjectiveMetric.SelectedItem = _master.ObjectiveMetric.ToString();
@@ -1169,7 +1169,7 @@ namespace OsEngine.OsOptimizer
                     _master.ObjectiveDirection = direction;
                 }
             }
-            catch (Exception ex)
+            catch (System.Exception ex)
             {
                 _master?.SendLogMessage(ex.ToString(), LogMessageType.Error);
                 ComboBoxObjectiveDirection.SelectedItem = _master.ObjectiveDirection.ToString();
@@ -1190,7 +1190,7 @@ namespace OsEngine.OsOptimizer
                     _master.BayesianAcquisitionMode = mode;
                 }
             }
-            catch (Exception ex)
+            catch (System.Exception ex)
             {
                 _master?.SendLogMessage(ex.ToString(), LogMessageType.Error);
                 ComboBoxBayesianAcquisitionMode.SelectedItem = _master.BayesianAcquisitionMode.ToString();
@@ -1800,7 +1800,7 @@ namespace OsEngine.OsOptimizer
                     };
                 }
             }
-            catch (Exception ex)
+            catch (System.Exception ex)
             {
                 _master?.SendLogMessage(ex.ToString(), LogMessageType.Error);
             }
@@ -2124,7 +2124,7 @@ namespace OsEngine.OsOptimizer
                 _gridParameters.CellValueChanged += _gridParameters_CellValueChanged;
                 _gridParameters.CellClick += _gridParameters_CellClick;
             }
-            catch (Exception ex)
+            catch (System.Exception ex)
             {
                 _master?.SendLogMessage(ex.ToString(), LogMessageType.Error);
             }
@@ -2200,7 +2200,7 @@ namespace OsEngine.OsOptimizer
 
                 _gridParameters.Rows[_lastRowClickParamGridNum].Cells[1].Selected = true;
             }
-            catch (Exception ex)
+            catch (System.Exception ex)
             {
                 MessageBox.Show(ex.ToString());
             }
@@ -2857,7 +2857,7 @@ namespace OsEngine.OsOptimizer
                 }
                 _master.SaveStandardParameters();
             }
-            catch (Exception ex)
+            catch (System.Exception ex)
             {
                 _master?.SendLogMessage(ex.ToString(), LogMessageType.Error);
                 PaintTableParameters();
@@ -2940,7 +2940,7 @@ namespace OsEngine.OsOptimizer
                 _parameters = par;
                 ReloadStrategy();
             }
-            catch (Exception ex)
+            catch (System.Exception ex)
             {
                 _master?.SendLogMessage(ex.Message.ToString(), LogMessageType.Error);
             }
@@ -3386,7 +3386,7 @@ namespace OsEngine.OsOptimizer
                 _gridResults.SelectionChanged += _gridResults_SelectionChanged;
                 _gridResults.CellMouseClick += _gridResults_CellMouseClick;
             }
-            catch (Exception ex)
+            catch (System.Exception ex)
             {
                 _master?.SendLogMessage(ex.ToString(),LogMessageType.Error);
             }
@@ -3714,7 +3714,7 @@ namespace OsEngine.OsOptimizer
                     PaintBotInTable(" ");
                 }
             }
-            catch (Exception ex)
+            catch (System.Exception ex)
             {
                 _master?.SendLogMessage(ex.ToString(), LogMessageType.Error);
             }
@@ -3978,7 +3978,7 @@ namespace OsEngine.OsOptimizer
                 //_master.SendLogMessage("Reload bots type time: " + resultTime.ToString(), LogMessageType.System);
 
             }
-            catch (Exception ex)
+            catch (System.Exception ex)
             {
                 _master?.SendLogMessage(ex.ToString(), LogMessageType.Error);
             }

@@ -1,4 +1,4 @@
-﻿/*
+/*
  *Your rights to use the code are governed by this license https://github.com/AlexWan/OsEngine/blob/master/LICENSE
  *Ваши права на использование кода регулируются данной лицензией http://o-s-a.net/doc/license_simple_engine.pdf
 */
@@ -372,7 +372,7 @@ namespace OsEngine.Market.Servers.HTX.Swap
                     SendLogMessage($"Position Mode error. Code: {responseMessage.StatusCode} || msg: {responseMessage.Content}", LogMessageType.Error);
                 }
             }
-            catch (Exception ex)
+            catch (System.Exception ex)
             {
                 SendLogMessage(ex.ToString(), LogMessageType.Error);
             }
@@ -1113,7 +1113,7 @@ namespace OsEngine.Market.Servers.HTX.Swap
 
                 _webSocketPublic.Add(CreateNewPublicSocket());
             }
-            catch (Exception ex)
+            catch (System.Exception ex)
             {
                 SendLogMessage($"{ex.Message} {ex.StackTrace}", LogMessageType.Error);
             }
@@ -1292,7 +1292,7 @@ namespace OsEngine.Market.Servers.HTX.Swap
                     }
                 }
             }
-            catch (Exception ex)
+            catch (System.Exception ex)
             {
                 SendLogMessage("Data socket error" + ex.ToString(), LogMessageType.Error);
             }
@@ -1346,7 +1346,7 @@ namespace OsEngine.Market.Servers.HTX.Swap
                     DisconnectEvent();
                 }
             }
-            catch (Exception ex)
+            catch (System.Exception ex)
             {
                 SendLogMessage(ex.ToString(), LogMessageType.Error);
             }
@@ -1362,7 +1362,7 @@ namespace OsEngine.Market.Servers.HTX.Swap
                     CheckActivationSockets();
                 }
             }
-            catch (Exception ex)
+            catch (System.Exception ex)
             {
                 SendLogMessage(ex.ToString(), LogMessageType.Error);
             }
@@ -1391,7 +1391,7 @@ namespace OsEngine.Market.Servers.HTX.Swap
                     }
                 }
             }
-            catch (Exception ex)
+            catch (System.Exception ex)
             {
                 SendLogMessage("Data socket error" + ex.ToString(), LogMessageType.Error);
             }
@@ -1445,7 +1445,7 @@ namespace OsEngine.Market.Servers.HTX.Swap
                     DisconnectEvent();
                 }
             }
-            catch (Exception ex)
+            catch (System.Exception ex)
             {
                 SendLogMessage(ex.ToString(), LogMessageType.Error);
             }
@@ -1518,7 +1518,7 @@ namespace OsEngine.Market.Servers.HTX.Swap
                         }
                     }
                 }
-                catch (Exception ex)
+                catch (System.Exception ex)
                 {
                     SendLogMessage($"{ex.Message} {ex.StackTrace}", LogMessageType.Error);
                     Thread.Sleep(5000);
@@ -1721,7 +1721,7 @@ namespace OsEngine.Market.Servers.HTX.Swap
                             webSocketPublic.SendAsync($"{{\"pong\": \"{response.ping}\"}}");
                         }
                     }
-                    catch (Exception ex)
+                    catch (System.Exception ex)
                     {
                         SendLogMessage($"{ex.Message} {ex.StackTrace}", LogMessageType.Error);
                     }
@@ -1742,7 +1742,7 @@ namespace OsEngine.Market.Servers.HTX.Swap
                     ResponsePingPrivate response = JsonConvert.DeserializeObject<ResponsePingPrivate>(message);
                     _webSocketPrivate.SendAsync($"{{\"op\": \"pong\",\"ts\": \"{response.ts}\"}}");
                 }
-                catch (Exception ex)
+                catch (System.Exception ex)
                 {
                     SendLogMessage($"{ex.Message} {ex.StackTrace}", LogMessageType.Error);
                 }
@@ -1777,7 +1777,7 @@ namespace OsEngine.Market.Servers.HTX.Swap
                             }
                         }
                     }
-                    catch (Exception ex)
+                    catch (System.Exception ex)
                     {
                         SendLogMessage($"{ex.Message} {ex.StackTrace}", LogMessageType.Error);
                     }
@@ -1862,7 +1862,7 @@ namespace OsEngine.Market.Servers.HTX.Swap
                         Thread.Sleep(1000);
                     }
                 }
-                catch (Exception ex)
+                catch (System.Exception ex)
                 {
                     Thread.Sleep(5000);
                     SendLogMessage(ex.Message, LogMessageType.Error);
@@ -2146,7 +2146,7 @@ namespace OsEngine.Market.Servers.HTX.Swap
                         }
                     }
                 }
-                catch (Exception ex)
+                catch (System.Exception ex)
                 {
                     Thread.Sleep(5000);
                     SendLogMessage(ex.Message, LogMessageType.Error);
@@ -2179,7 +2179,7 @@ namespace OsEngine.Market.Servers.HTX.Swap
                         }
                     }
                 }
-                catch (Exception ex)
+                catch (System.Exception ex)
                 {
                     Thread.Sleep(5000);
                     SendLogMessage(ex.Message, LogMessageType.Error);
@@ -2209,7 +2209,7 @@ namespace OsEngine.Market.Servers.HTX.Swap
                     FundingUpdateEvent?.Invoke(funding);
                 }
             }
-            catch (Exception ex)
+            catch (System.Exception ex)
             {
                 SendLogMessage(ex.Message, LogMessageType.Error);
             }
@@ -2251,7 +2251,7 @@ namespace OsEngine.Market.Servers.HTX.Swap
                     NewTradesEvent?.Invoke(trade);
                 }
             }
-            catch (Exception ex)
+            catch (System.Exception ex)
             {
                 SendLogMessage(ex.Message, LogMessageType.Error);
             }
@@ -2372,7 +2372,7 @@ namespace OsEngine.Market.Servers.HTX.Swap
 
                 MarketDepthEvent?.Invoke(marketDepth);
             }
-            catch (Exception ex)
+            catch (System.Exception ex)
             {
                 SendLogMessage(ex.Message, LogMessageType.Error);
             }
@@ -2438,8 +2438,9 @@ namespace OsEngine.Market.Servers.HTX.Swap
                 {
                     newOrder.NumberUser = Convert.ToInt32(response.client_order_id);
                 }
-                catch
+                catch (System.Exception ex)
                 {
+                    System.Diagnostics.Trace.TraceWarning(ex.ToString());
                 }
 
                 newOrder.NumberMarket = response.order_id.ToString();
@@ -2469,7 +2470,7 @@ namespace OsEngine.Market.Servers.HTX.Swap
                     UpdateMyTrade(response);
                 }
             }
-            catch (Exception ex)
+            catch (System.Exception ex)
             {
                 SendLogMessage(ex.Message, LogMessageType.Error);
             }
@@ -2590,7 +2591,7 @@ namespace OsEngine.Market.Servers.HTX.Swap
 
                 PortfolioEvent?.Invoke(Portfolios);
             }
-            catch (Exception ex)
+            catch (System.Exception ex)
             {
                 SendLogMessage(ex.Message, LogMessageType.Error);
             }
@@ -2716,7 +2717,7 @@ namespace OsEngine.Market.Servers.HTX.Swap
 
                 PortfolioEvent?.Invoke(Portfolios);
             }
-            catch (Exception ex)
+            catch (System.Exception ex)
             {
                 SendLogMessage(ex.Message, LogMessageType.Error);
             }
@@ -3083,9 +3084,9 @@ namespace OsEngine.Market.Servers.HTX.Swap
                             {
                                 newOrder.NumberUser = Convert.ToInt32(item.client_order_id);
                             }
-                            catch
+                            catch (System.Exception ex)
                             {
-
+                                System.Diagnostics.Trace.TraceWarning(ex.ToString());
                             }
 
                             newOrder.NumberMarket = item.order_id.ToString();
@@ -3284,8 +3285,9 @@ namespace OsEngine.Market.Servers.HTX.Swap
                             {
                                 newOrder.NumberUser = Convert.ToInt32(item.client_order_id);
                             }
-                            catch
+                            catch (System.Exception ex)
                             {
+                                System.Diagnostics.Trace.TraceWarning(ex.ToString());
                             }
 
                             newOrder.NumberMarket = item.order_id.ToString();

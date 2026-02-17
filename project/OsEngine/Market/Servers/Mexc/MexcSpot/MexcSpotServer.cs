@@ -1,4 +1,4 @@
-﻿/*
+/*
  *Your rights to use the code are governed by this license https://github.com/AlexWan/OsEngine/blob/master/LICENSE
  *Ваши права на использование кода регулируются данной лицензией http://o-s-a.net/doc/license_simple_engine.pdf
 */
@@ -111,7 +111,7 @@ namespace OsEngine.Market.Servers.Mexc
                     Disconnect();
                 }
             }
-            catch (Exception ex)
+            catch (System.Exception ex)
             {
                 SendLogMessage(ex.Message.ToString(), LogMessageType.Error);
             }
@@ -590,7 +590,7 @@ namespace OsEngine.Market.Servers.Mexc
                     newCandle.Close = curCandle[4].ToString().ToDecimal();
                     newCandle.Volume = curCandle[5].ToString().ToDecimal();
                 }
-                catch (Exception ex)
+                catch (System.Exception ex)
                 {
                     SendLogMessage("Candles conversion error:" + ex.ToString(), LogMessageType.Error);
                 }
@@ -895,7 +895,7 @@ namespace OsEngine.Market.Servers.Mexc
                     }
                 }
             }
-            catch (Exception ex)
+            catch (System.Exception ex)
             {
                 SendLogMessage("Data socket error" + ex.ToString(), LogMessageType.Error);
             }
@@ -972,7 +972,7 @@ namespace OsEngine.Market.Servers.Mexc
                     DisconnectEvent();
                 }
             }
-            catch (Exception ex)
+            catch (System.Exception ex)
             {
                 SendLogMessage(ex.ToString(), LogMessageType.Error);
             }
@@ -988,7 +988,7 @@ namespace OsEngine.Market.Servers.Mexc
                     CheckActivationSockets();
                 }
             }
-            catch (Exception ex)
+            catch (System.Exception ex)
             {
                 SendLogMessage(ex.ToString(), LogMessageType.Error);
             }
@@ -1017,7 +1017,7 @@ namespace OsEngine.Market.Servers.Mexc
                     }
                 }
             }
-            catch (Exception ex)
+            catch (System.Exception ex)
             {
                 SendLogMessage("Data socket error" + ex.ToString(), LogMessageType.Error);
             }
@@ -1093,7 +1093,7 @@ namespace OsEngine.Market.Servers.Mexc
                     DisconnectEvent();
                 }
             }
-            catch (Exception ex)
+            catch (System.Exception ex)
             {
                 SendLogMessage(ex.ToString(), LogMessageType.Error);
             }
@@ -1331,7 +1331,7 @@ namespace OsEngine.Market.Servers.Mexc
                                 }
                             }
                         }
-                        catch (Exception ex)
+                        catch (System.Exception ex)
                         {
                             SendLogMessage($"{ex.Message} {ex.StackTrace}", LogMessageType.Error);
                         }
@@ -1344,7 +1344,7 @@ namespace OsEngine.Market.Servers.Mexc
                     }
                 }
             }
-            catch (Exception ex)
+            catch (System.Exception ex)
             {
                 SendLogMessage($"{ex.Message} {ex.StackTrace}", LogMessageType.Error);
             }
@@ -1444,7 +1444,7 @@ namespace OsEngine.Market.Servers.Mexc
                         }
                     }
                 }
-                catch (Exception ex)
+                catch (System.Exception ex)
                 {
                     Thread.Sleep(5000);
                     SendLogMessage(ex.Message, LogMessageType.Error);
@@ -1488,7 +1488,7 @@ namespace OsEngine.Market.Servers.Mexc
                     NewTradesEvent?.Invoke(trade);
                 }
             }
-            catch (Exception ex)
+            catch (System.Exception ex)
             {
                 SendLogMessage($"{ex.Message} {ex.StackTrace}", LogMessageType.Error);
             }
@@ -1519,7 +1519,7 @@ namespace OsEngine.Market.Servers.Mexc
                         }
                     }
                 }
-                catch (Exception ex)
+                catch (System.Exception ex)
                 {
                     Thread.Sleep(5000);
                     SendLogMessage(ex.Message, LogMessageType.Error);
@@ -1569,7 +1569,7 @@ namespace OsEngine.Market.Servers.Mexc
 
                 MarketDepthEvent?.Invoke(depth);
             }
-            catch (Exception ex)
+            catch (System.Exception ex)
             {
                 if (ex.Message.Contains("Value was either too large or too small for a Decimal."))
                 {
@@ -1672,7 +1672,7 @@ namespace OsEngine.Market.Servers.Mexc
 
                 MyTradeEvent?.Invoke(myTrade);
             }
-            catch (Exception ex)
+            catch (System.Exception ex)
             {
                 SendLogMessage($"{ex.Message} {ex.StackTrace}", LogMessageType.Error);
             }
@@ -1700,9 +1700,9 @@ namespace OsEngine.Market.Servers.Mexc
                 {
                     order.NumberUser = Convert.ToInt32(item.clientId);
                 }
-                catch
+                catch (System.Exception ex)
                 {
-
+                    System.Diagnostics.Trace.TraceWarning(ex.ToString());
                 }
 
                 order.SecurityNameCode = baseOrder.symbol;
@@ -1767,7 +1767,7 @@ namespace OsEngine.Market.Servers.Mexc
                 //    UpdateTrades(order);
                 //}
             }
-            catch (Exception ex)
+            catch (System.Exception ex)
             {
                 SendLogMessage($"{ex.Message} {ex.StackTrace}", LogMessageType.Error);
             }
@@ -1806,7 +1806,7 @@ namespace OsEngine.Market.Servers.Mexc
 
                 PortfolioEvent?.Invoke(_myPortfolios);
             }
-            catch (Exception ex)
+            catch (System.Exception ex)
             {
                 SendLogMessage($"{ex.Message} {ex.StackTrace}", LogMessageType.Error);
             }
