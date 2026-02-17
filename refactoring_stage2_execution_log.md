@@ -4536,3 +4536,22 @@
   - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` succeeded (`343/343`).
 - **Commit:** `b7f1eca6e`
 - **Push:** yes (`origin/master`)
+
+### Step 0.3 - Silent Catch Visibility (Incremental Adoption #224)
+
+- **Status:** In Progress (increment completed)
+- **Plan item:** `refactoring_stage2_plan.md` -> Phase 0 / Step 0.3
+- **Changes:**
+  - Added explicit error visibility in:
+    - `project/OsEngine/OsTrader/Panels/Tab/BotTabPolygonCommonSettingsUi.xaml.cs`
+  - Added `using System.Diagnostics;`.
+  - Replaced silent catches in `SaveSettingsFromUiToBot()` with:
+    - `catch (Exception ex) { Trace.TraceWarning(ex.ToString()); }`
+  - Applied to all parse/apply blocks (order/action/commission/delay/separator and numeric settings).
+  - Preserved existing behavior (save pipeline and fallback semantics unchanged).
+  - Updated running progress journal:
+    - `refactoring_stage2_progress.md`
+- **Verification:**
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` succeeded (`343/343`).
+- **Commit:** `76ab09d79`
+- **Push:** yes (`origin/master`)
