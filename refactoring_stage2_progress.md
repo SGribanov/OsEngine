@@ -2387,3 +2387,18 @@
 ### Verification
 
 - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` -> passed 343/343
+
+## 2026-02-16 - Step 2.3 (JSON settings subsystem) - Path consistency cleanup in StrategyBollinger settings path
+
+- Updated `project/OsEngine/Robots/CounterTrend/StrategyBollinger.cs`:
+  - centralized bot settings file path via helper:
+    - `GetSettingsPath()`
+  - replaced duplicated inline path usage in:
+    - `Save()`
+    - `Load()`
+    - `Strategy_DeleteEvent()`
+- No behavior changes intended; settings file remains `Engine\\<NameStrategyUniq>SettingsBot.txt`.
+
+### Verification
+
+- `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` -> passed 343/343
