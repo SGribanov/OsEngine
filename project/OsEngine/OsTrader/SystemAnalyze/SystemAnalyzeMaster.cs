@@ -1,4 +1,4 @@
-﻿/*
+/*
  * Your rights to use code governed by this license https://github.com/AlexWan/OsEngine/blob/master/LICENSE
  * Ваши права на использование кода регулируются данной лицензией http://o-s-a.net/doc/license_simple_engine.pdf
 */
@@ -508,9 +508,9 @@ namespace OsEngine.OsTrader.SystemAnalyze
                 _ramPeriodSavePoint = settings.RamPeriodSavePoint;
                 _ramPointsMax = settings.RamPointsMax;
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                // ignore
+                ServerMaster.SendNewLogMessage(ex.ToString(), Logging.LogMessageType.Error);
             }
         }
 
@@ -534,9 +534,9 @@ namespace OsEngine.OsTrader.SystemAnalyze
                         RamPointsMax = _ramPointsMax
                     });
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                // ignore
+                ServerMaster.SendNewLogMessage(ex.ToString(), Logging.LogMessageType.Error);
             }
         }
 
@@ -753,9 +753,9 @@ namespace OsEngine.OsTrader.SystemAnalyze
                 _cpuPeriodSavePoint = settings.CpuPeriodSavePoint;
                 _cpuPointsMax = settings.CpuPointsMax;
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                // ignore
+                ServerMaster.SendNewLogMessage(ex.ToString(), Logging.LogMessageType.Error);
             }
         }
 
@@ -779,9 +779,9 @@ namespace OsEngine.OsTrader.SystemAnalyze
                         CpuPointsMax = _cpuPointsMax
                     });
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                // ignore
+                ServerMaster.SendNewLogMessage(ex.ToString(), Logging.LogMessageType.Error);
             }
         }
 
@@ -998,9 +998,9 @@ namespace OsEngine.OsTrader.SystemAnalyze
                 _ecqPeriodSavePoint = settings.EcqPeriodSavePoint;
                 _ecqPointsMax = settings.EcqPointsMax;
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                // ignore
+                ServerMaster.SendNewLogMessage(ex.ToString(), Logging.LogMessageType.Error);
             }
         }
 
@@ -1024,9 +1024,9 @@ namespace OsEngine.OsTrader.SystemAnalyze
                         EcqPointsMax = _ecqPointsMax
                     });
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                // ignore
+                ServerMaster.SendNewLogMessage(ex.ToString(), Logging.LogMessageType.Error);
             }
         }
 
@@ -1253,9 +1253,9 @@ namespace OsEngine.OsTrader.SystemAnalyze
                 _moqPeriodSavePoint = settings.MoqPeriodSavePoint;
                 _moqPointsMax = settings.MoqPointsMax;
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                // ignore
+                ServerMaster.SendNewLogMessage(ex.ToString(), Logging.LogMessageType.Error);
             }
         }
 
@@ -1279,9 +1279,9 @@ namespace OsEngine.OsTrader.SystemAnalyze
                         MoqPointsMax = _moqPointsMax
                     });
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                // ignore
+                ServerMaster.SendNewLogMessage(ex.ToString(), Logging.LogMessageType.Error);
             }
         }
 

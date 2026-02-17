@@ -3522,3 +3522,19 @@
 ### Verification
 
 - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` -> passed 343/343
+
+## 2026-02-17 - Step 0.3 (silent-catch visibility) - Error logging in SystemAnalyze analyzers load/save catches
+
+- Updated `project/OsEngine/OsTrader/SystemAnalyze/SystemAnalyzeMaster.cs`:
+  - replaced silent `catch (Exception) { // ignore }` blocks with explicit logging:
+    - `catch (Exception ex) { ServerMaster.SendNewLogMessage(ex.ToString(), Logging.LogMessageType.Error); }`
+  - applied in `Load()`/`Save()` blocks of:
+    - `RamMemoryUsageAnalyze`
+    - `CpuUsageAnalyze`
+    - `EcqUsageAnalyze`
+    - `MoqUsageAnalyze`
+  - behavior preserved: load/save fallback control flow unchanged.
+
+### Verification
+
+- `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` -> passed 343/343
