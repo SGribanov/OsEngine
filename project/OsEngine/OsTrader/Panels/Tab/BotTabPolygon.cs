@@ -161,9 +161,9 @@ namespace OsEngine.OsTrader.Panels.Tab
                         File.Delete(GetStandartPolygonSettingsPath());
                     }
                 }
-                catch
+                catch (Exception ex)
                 {
-                    // ignore
+                    SendNewLogMessage(ex.ToString(), LogMessageType.Error);
                 }
 
                 try
@@ -173,9 +173,9 @@ namespace OsEngine.OsTrader.Panels.Tab
                         File.Delete(GetLegacyStrategSettingsPath());
                     }
                 }
-                catch
+                catch (Exception ex)
                 {
-                    // ignore
+                    SendNewLogMessage(ex.ToString(), LogMessageType.Error);
                 }
 
                 try
@@ -185,9 +185,9 @@ namespace OsEngine.OsTrader.Panels.Tab
                         File.Delete(GetPolygonsNamesToLoadPath());
                     }
                 }
-                catch
+                catch (Exception ex)
                 {
-                    // ignore
+                    SendNewLogMessage(ex.ToString(), LogMessageType.Error);
                 }
 
                 for (int i = 0; i < Sequences.Count; i++)
@@ -315,9 +315,9 @@ namespace OsEngine.OsTrader.Panels.Tab
                         SortingOnOff = SortingOnOff
                     });
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                // ignore
+                SendNewLogMessage(ex.ToString(), LogMessageType.Error);
             }
         }
 
@@ -359,9 +359,9 @@ namespace OsEngine.OsTrader.Panels.Tab
                 AutoCreatorSequenceSeparator = settings.AutoCreatorSequenceSeparator;
                 SortingOnOff = settings.SortingOnOff;
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                // ignore
+                SendNewLogMessage(ex.ToString(), LogMessageType.Error);
             }
         }
 
@@ -659,9 +659,9 @@ namespace OsEngine.OsTrader.Panels.Tab
                         SequenceNames = sequenceNames
                     });
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                // ignore
+                SendNewLogMessage(ex.ToString(), LogMessageType.Error);
             }
         }
 
@@ -1268,9 +1268,9 @@ namespace OsEngine.OsTrader.Panels.Tab
                     rowInGrid.Cells[5].Value = rowInArray.Cells[5].Value.ToString();
                 }
             }
-            catch
+            catch (Exception ex)
             {
-                // ignore
+                SendNewLogMessage(ex.ToString(), LogMessageType.Error);
             }
         }
 
@@ -1837,9 +1837,9 @@ namespace OsEngine.OsTrader.Panels.Tab
                 ActionOnSignalType = settings.ActionOnSignalType;
                 OrderPriceType = settings.OrderPriceType;
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                // ignore
+                SendNewLogMessage(ex.ToString(), LogMessageType.Error);
             }
         }
 
@@ -1873,9 +1873,9 @@ namespace OsEngine.OsTrader.Panels.Tab
                         OrderPriceType = OrderPriceType
                     });
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                // ignore
+                SendNewLogMessage(ex.ToString(), LogMessageType.Error);
             }
         }
 
@@ -1891,9 +1891,9 @@ namespace OsEngine.OsTrader.Panels.Tab
                     File.Delete(GetSettingsPath());
                 }
             }
-            catch
+            catch (Exception ex)
             {
-                // ignore
+                SendNewLogMessage(ex.ToString(), LogMessageType.Error);
             }
 
             Tab1.MarketDepthUpdateEvent -= Tab1_MarketDepthUpdateEvent;

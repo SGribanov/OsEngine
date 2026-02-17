@@ -3167,3 +3167,23 @@
 ### Verification
 
 - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` -> passed 343/343
+
+## 2026-02-17 - Step 0.3 (silent-catch visibility) - Error logging in BotTabPolygon catch blocks
+
+- Updated `project/OsEngine/OsTrader/Panels/Tab/BotTabPolygon.cs`:
+  - replaced silent catch blocks with explicit error logging via:
+    - `SendNewLogMessage(ex.ToString(), LogMessageType.Error)`
+  - applied in:
+    - tab-level `Delete()` cleanup catches for settings file deletions
+    - `SaveStandartSettings()`
+    - `LoadStandartSettings()`
+    - `SaveSequences()`
+    - `TryRePaintRow(...)`
+    - `PolygonToTrade.Load()`
+    - `PolygonToTrade.Save()`
+    - `PolygonToTrade.Delete()`
+  - behavior preserved: no exception rethrow added.
+
+### Verification
+
+- `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore` -> passed 343/343
