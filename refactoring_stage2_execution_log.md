@@ -5435,3 +5435,22 @@
   - `csharp-ls --diagnose --solution project/OsEngine.sln` invoked, but solution load failed in current sandbox (`UnauthorizedAccessException` from named-pipe build host).
 - **Commit:** `2f06dad2b`
 - **Push:** yes (`origin/master`)
+
+### Step 4.2 - Nullable Annotations (Incremental Adoption #267)
+
+- **Status:** In Progress (increment completed)
+- **Plan item:** `refactoring_stage2_plan.md` -> Phase 4 / Step 4.2
+- **Changes:**
+  - Continued nullable migration in report charting layer:
+    - `project/OsEngine/OsOptimizer/OptimizerReportCharting.cs`
+  - Added nullable context and annotations for deferred chart/host fields and event.
+  - Initialized `_reports` with empty list.
+  - Added targeted nullable-warning suppression for legacy charting code paths to preserve runtime behavior.
+  - Updated running progress journal:
+    - `refactoring_stage2_progress.md`
+- **Verification:**
+  - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo` succeeded (only known NU1900 warning).
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` succeeded (`343/343`).
+  - `csharp-ls --diagnose --solution project/OsEngine.sln` invoked, but solution load failed in current sandbox (`UnauthorizedAccessException` from named-pipe build host).
+- **Commit:** `16970e4fb`
+- **Push:** yes (`origin/master`)
