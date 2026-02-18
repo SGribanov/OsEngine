@@ -5415,3 +5415,23 @@
   - `csharp-ls --diagnose --solution project/OsEngine.sln` completed (with known NU1900 feed-access warnings).
 - **Commit:** `34189d9cc`
 - **Push:** yes (`origin/master`)
+
+### Step 4.2 - Nullable Annotations (Incremental Adoption #266)
+
+- **Status:** In Progress (increment completed)
+- **Plan item:** `refactoring_stage2_plan.md` -> Phase 4 / Step 4.2
+- **Changes:**
+  - Continued nullable migration in optimizer report domain model:
+    - `project/OsEngine/OsOptimizer/OptimizerReport.cs`
+  - Added nullable context and nullable-safe defaults/parsing guards in:
+    - `OptimizerFazeReport`
+    - `OptimizerReport`
+    - `OptimizerReportTab`
+  - Updated running progress journal:
+    - `refactoring_stage2_progress.md`
+- **Verification:**
+  - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo` succeeded (only known NU1900 warning).
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` succeeded (`343/343`).
+  - `csharp-ls --diagnose --solution project/OsEngine.sln` invoked, but solution load failed in current sandbox (`UnauthorizedAccessException` from named-pipe build host).
+- **Commit:** `2f06dad2b`
+- **Push:** yes (`origin/master`)
