@@ -12,11 +12,13 @@ using OsEngine.OsOptimizer.OptEntity;
 using OsEngine.OsTrader.Panels;
 using OsEngine.OsTrader.Panels.Tab;
 
+#nullable enable
+
 namespace OsEngine.OsOptimizer
 {
     public class OptimizerFazeReport
     {
-        public OptimizerFaze Faze;
+        public OptimizerFaze Faze = new OptimizerFaze();
 
         public List<OptimizerReport> Reports = new List<OptimizerReport>();
 
@@ -142,14 +144,14 @@ namespace OsEngine.OsOptimizer
 
         }
 
-        public string BotName;
+        public string BotName = string.Empty;
 
         public int BotNum
         {
             get
             {
                 string num = BotName.Replace(" OpT OutOfSample", "").Replace(" OpT InSample", "");
-                return Convert.ToInt32(num);
+                return int.TryParse(num, out int parsed) ? parsed : 0;
             }
 
         }
@@ -214,7 +216,7 @@ namespace OsEngine.OsOptimizer
 
                 string name = StrategyParameters[i].Split('$')[2];
 
-                IIStrategyParameter param = null;
+                IIStrategyParameter? param = null;
                 if (type == StrategyParameterType.Bool)
                 {
                     param = new StrategyParameterBool(name, false);
@@ -261,7 +263,10 @@ namespace OsEngine.OsOptimizer
                     param.LoadParamFromString(StrategyParameters[i].Split('$')[1].Split('#'));
                 }
 
-                par.Add(param);
+                if (param != null)
+                {
+                    par.Add(param);
+                }
             }
 
             return par;
@@ -328,7 +333,7 @@ namespace OsEngine.OsOptimizer
 
                 Position[] posesArray = positions.ToArray();
 
-                tab.SecurityName = tabsSimple[i].Security.Name;
+                tab.SecurityName = tabsSimple[i].Security?.Name ?? string.Empty;
                 tab.PositionsCount = positions.Count;
                 tab.TotalProfit = PositionStatisticGenerator.GetAllProfitInAbsolute(posesArray, false);
                 tab.TotalProfitPercent = PositionStatisticGenerator.GetAllProfitPercent(posesArray, false);
@@ -410,7 +415,7 @@ namespace OsEngine.OsOptimizer
             return OptimizerReportSerializer.Serialize(this);
         }
 
-        public void LoadFromString(string saveStr)
+        public void LoadFromString(string? saveStr)
         {
             OptimizerReportSerializer.Deserialize(this, saveStr);
         }
@@ -418,9 +423,9 @@ namespace OsEngine.OsOptimizer
 
     public class OptimizerReportTab
     {
-        public string TabType;
+        public string TabType = string.Empty;
 
-        public string SecurityName;
+        public string SecurityName = string.Empty;
 
         public int PositionsCount;
 

@@ -4113,3 +4113,20 @@
 - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo` -> success (only known NU1900 warning)
 - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed 343/343
 - `csharp-ls --diagnose --solution project/OsEngine.sln` -> completed (known NU1900 network warning in diagnostics)
+
+## 2026-02-18 - Step 4.2 (nullable annotations) - Optimizer report domain model block
+
+- Updated nullable context in:
+  - `project/OsEngine/OsOptimizer/OptimizerReport.cs`
+    - added `#nullable enable`
+    - initialized nullable-sensitive string/reference fields with safe defaults
+    - added nullable-aware parsing in `BotNum` (`TryParse` fallback)
+    - made `LoadFromString(...)` input nullable-aware
+    - added nullable-safe guards while rebuilding strategy parameters
+    - nullable-safe tab security-name extraction
+
+### Verification
+
+- `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo` -> success (only known NU1900 warning)
+- `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed 343/343
+- `csharp-ls --diagnose --solution project/OsEngine.sln` -> invoked, but solution load failed in current sandbox (`UnauthorizedAccessException` from named-pipe build host)
