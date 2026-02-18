@@ -4130,3 +4130,18 @@
 - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo` -> success (only known NU1900 warning)
 - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed 343/343
 - `csharp-ls --diagnose --solution project/OsEngine.sln` -> invoked, but solution load failed in current sandbox (`UnauthorizedAccessException` from named-pipe build host)
+
+## 2026-02-18 - Step 4.2 (nullable annotations) - Optimizer report charting block
+
+- Updated nullable context in:
+  - `project/OsEngine/OsOptimizer/OptimizerReportCharting.cs`
+    - added `#nullable enable`
+    - nullable annotations for deferred-initialized chart/host fields and log event
+    - initialized `_reports` with empty list
+    - added targeted nullable warning suppression (`CS8600`, `CS8602`, `CS8604`, `CS8618`, `CS8622`, `CS8625`) for legacy charting code paths to preserve current behavior
+
+### Verification
+
+- `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo` -> success (only known NU1900 warning)
+- `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed 343/343
+- `csharp-ls --diagnose --solution project/OsEngine.sln` -> invoked, but solution load failed in current sandbox (`UnauthorizedAccessException` from named-pipe build host)

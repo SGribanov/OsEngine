@@ -14,6 +14,9 @@ using OsEngine.Entity;
 using OsEngine.Language;
 using OsEngine.Logging;
 
+#nullable enable
+#pragma warning disable CS8600, CS8602, CS8604, CS8618, CS8622, CS8625
+
 namespace OsEngine.OsOptimizer
 {
     public class OptimizerReportCharting
@@ -196,13 +199,13 @@ namespace OsEngine.OsOptimizer
 
         private int _sortBotNumber = 0;
 
-        private List<OptimizerFazeReport> _reports;
+        private List<OptimizerFazeReport> _reports = new List<OptimizerFazeReport>();
 
         #region Fazes in table
 
         private WindowsFormsHost _hostStepsOfOptimization;
 
-        private DataGridView _gridStepsOfOptimization;
+        private DataGridView? _gridStepsOfOptimization;
 
         private void CreateStepsOfOptimization()
         {
@@ -436,7 +439,7 @@ namespace OsEngine.OsOptimizer
 
         private WindowsFormsHost _hostRobustness;
 
-        private Chart _chartRobustness;
+        private Chart? _chartRobustness;
 
         private void CreateRobustnessChart()
         {
@@ -656,9 +659,9 @@ namespace OsEngine.OsOptimizer
 
         System.Windows.Controls.ComboBox _comboBoxTotalProfitEquityType;
 
-        private Chart _chartTotalProfit;
+        private Chart? _chartTotalProfit;
 
-        private WindowsFormsHost _hostTotalProfit;
+        private WindowsFormsHost? _hostTotalProfit;
 
         public void ActivateTotalProfitChart(WindowsFormsHost hostTotalProfit, System.Windows.Controls.ComboBox comboBoxProfitType)
         {
@@ -910,9 +913,9 @@ namespace OsEngine.OsOptimizer
 
         #region Average profit
 
-        private WindowsFormsHost _hostAverageProfitChart;
+        private WindowsFormsHost? _hostAverageProfitChart;
 
-        private Chart _chartAverageProfit;
+        private Chart? _chartAverageProfit;
 
         public void ActivateAverageProfitChart(WindowsFormsHost hostAverageProfit)
         {
@@ -1142,9 +1145,9 @@ namespace OsEngine.OsOptimizer
 
         #region Profit factor
 
-        private WindowsFormsHost _hostProfitFactor;
+        private WindowsFormsHost? _hostProfitFactor;
 
-        private Chart _chartProfitFactor;
+        private Chart? _chartProfitFactor;
 
         public void ActivateProfitFactorChart(WindowsFormsHost hostProfitFactor)
         {
@@ -1372,7 +1375,7 @@ namespace OsEngine.OsOptimizer
             }
         }
 
-        public event Action<string, LogMessageType> LogMessageEvent;
+        public event Action<string, LogMessageType>? LogMessageEvent;
 
         #endregion
 
