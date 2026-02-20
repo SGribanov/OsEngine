@@ -94,10 +94,6 @@
     <Reference Include="Jayrock.Json">
       <HintPath>bin\Debug\Jayrock.Json.dll</HintPath>
     </Reference>
-    <Reference Include="LiteDB, Version=5.0.19.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>bin\Debug\LiteDB.dll</HintPath>
-    </Reference>
     <Reference Include="MtApi5">
       <HintPath>bin\Debug\MtApi5.dll</HintPath>
       <Private>True</Private>
@@ -123,6 +119,7 @@
     </Reference>
     <PackageReference Include="Google.Api.CommonProtos" Version="2.17.0" />
     <PackageReference Include="Grpc.Net.Client" Version="2.76.0" />
+    <PackageReference Include="LiteDB" Version="5.0.19" />
     <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="5.0.0" />
     <PackageReference Include="Google.Protobuf" Version="3.33.5" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.4" />

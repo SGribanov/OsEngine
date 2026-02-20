@@ -6462,3 +6462,24 @@
   - `dotnet restore project/OsEngine/OsEngine.csproj --nologo --ignore-failed-sources` failed with `NU1101/NU1102` (required packages unavailable from offline feeds).
 - **Commit:** n/a (not committed in this session)
 - **Push:** n/a
+
+### Step 4.3 - Legacy DLL to NuGet Migration (Incremental Adoption #314)
+
+- **Status:** In Progress (increment completed)
+- **Plan item:** `refactoring_stage2_plan.md` -> Phase 4 / Step 4.3
+- **Changes:**
+  - Migrated `LiteDB` from legacy DLL `HintPath` reference to NuGet package reference in `project/OsEngine/OsEngine.csproj`.
+  - Removed:
+    - `Reference Include="LiteDB, Version=5.0.19.0..."`
+    - `HintPath>bin\\Debug\\LiteDB.dll</HintPath>`
+  - Added:
+    - `PackageReference Include="LiteDB" Version="5.0.19"`
+  - Updated dependency governance document:
+    - `DEPENDENCIES.md` (LiteDB status changed to migrated).
+- **Verification:**
+  - `dotnet restore project/OsEngine/OsEngine.csproj --nologo` succeeded.
+  - `dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo` succeeded.
+  - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` succeeded (0 warnings).
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` succeeded (`343/343`).
+- **Commit:** n/a (not committed in this session)
+- **Push:** n/a

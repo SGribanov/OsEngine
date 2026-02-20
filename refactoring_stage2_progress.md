@@ -5191,3 +5191,21 @@
 
 - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` -> success (0 warnings)
 - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed 343/343 (with known NU1900 feed warning)
+
+## 2026-02-20 - Step 4.3 (dependency migration) - LiteDB package migration
+
+- Migrated LiteDB from local binary reference to NuGet package in:
+  - `project/OsEngine/OsEngine.csproj`
+- Changes applied:
+  - Removed legacy `Reference Include="LiteDB, Version=5.0.19.0..."` with `HintPath` to `bin\Debug\LiteDB.dll`
+  - Added `PackageReference Include="LiteDB" Version="5.0.19"`
+- Updated dependency inventory status:
+  - `DEPENDENCIES.md` now marks LiteDB as migrated to PackageReference
+- Scope: Step 4.3 first concrete package migration without behavior changes.
+
+### Verification
+
+- `dotnet restore project/OsEngine/OsEngine.csproj --nologo` -> success
+- `dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo` -> success
+- `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` -> success (0 warnings)
+- `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed 343/343
