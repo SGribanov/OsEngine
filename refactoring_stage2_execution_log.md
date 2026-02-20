@@ -6598,3 +6598,23 @@
   - Metadata checks performed against NuGet flat-container/registration endpoints for each package candidate.
 - **Commit:** n/a (not committed in this session)
 - **Push:** n/a
+
+### Step 4.3 - Legacy DLL to NuGet/ProjectReference Migration (Incremental Adoption #321)
+
+- **Status:** In Progress (increment completed)
+- **Plan item:** `refactoring_stage2_plan.md` -> Phase 4 / Step 4.3
+- **Changes:**
+  - Removed migrated legacy DLL files from git tracking:
+    - `project/OsEngine/bin/Debug/Jayrock.Json.dll`
+    - `project/OsEngine/bin/Debug/LiteDB.dll`
+    - `project/OsEngine/bin/Debug/RestSharp.dll`
+    - `project/OsEngine/bin/Debug/TInvestApi.dll`
+  - Updated dependency governance document:
+    - `DEPENDENCIES.md` now explicitly marks these legacy binaries as removed from repo tracking.
+- **Verification:**
+  - `dotnet restore project/OsEngine/OsEngine.csproj --nologo` succeeded.
+  - `dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo` succeeded.
+  - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` succeeded (0 warnings).
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` succeeded (`343/343`).
+- **Commit:** n/a (not committed in this session)
+- **Push:** n/a

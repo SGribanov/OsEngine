@@ -5317,3 +5317,22 @@
 - Updated dependency governance document with these findings:
   - `DEPENDENCIES.md`
 - Scope: completed migration-feasibility justification for remaining non-migrated DLLs.
+
+## 2026-02-20 - Step 4.3 (dependency migration) - Remove migrated legacy DLLs from repo tracking
+
+- Removed migrated legacy DLL artifacts from git tracking in `project/OsEngine/bin/Debug`:
+  - `Jayrock.Json.dll`
+  - `LiteDB.dll`
+  - `RestSharp.dll`
+  - `TInvestApi.dll`
+- Purpose: finalize Step 4.3 action item to stop versioning obsolete binary copies after migration to PackageReference/ProjectReference.
+- Updated dependency inventory to reflect removal status:
+  - `DEPENDENCIES.md`
+- Scope: repository hygiene cleanup only; runtime behavior unchanged.
+
+### Verification
+
+- `dotnet restore project/OsEngine/OsEngine.csproj --nologo` -> success
+- `dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo` -> success
+- `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` -> success (0 warnings)
+- `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed 343/343
