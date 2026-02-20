@@ -8,6 +8,8 @@ using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
 
+#nullable enable
+
 namespace OsEngine.Entity
 {
     /// <summary>
@@ -152,7 +154,7 @@ namespace OsEngine.Entity
             return result;
         }
 
-        private static string _dayOfYear;
+        private static string _dayOfYear = string.Empty;
 
         private static int GetNumberOrderForTesting()
         {
@@ -164,7 +166,7 @@ namespace OsEngine.Entity
         {
             try
             {
-                NumberGenSettings settings = SettingsManager.Load(
+                NumberGenSettings? settings = SettingsManager.Load(
                     GetSettingsPath(),
                     defaultValue: null,
                     legacyLoader: ParseLegacySettings);
@@ -206,7 +208,7 @@ namespace OsEngine.Entity
             return @"Engine\" + @"NumberGen.txt";
         }
 
-        private static NumberGenSettings ParseLegacySettings(string content)
+        private static NumberGenSettings? ParseLegacySettings(string content)
         {
             if (string.IsNullOrWhiteSpace(content))
             {

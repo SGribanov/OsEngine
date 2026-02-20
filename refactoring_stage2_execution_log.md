@@ -5783,3 +5783,26 @@
   - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` succeeded (`343/343`, with known NU1900 feed warning).
 - **Commit:** n/a (not committed in this session)
 - **Push:** n/a
+
+### Step 4.2 - Nullable Annotations (Incremental Adoption #284)
+
+- **Status:** In Progress (increment completed)
+- **Plan item:** `refactoring_stage2_plan.md` -> Phase 4 / Step 4.2
+- **Changes:**
+  - Continued nullable migration in Entity analytics/helper layer:
+    - `project/OsEngine/Entity/VolatilityStageClusters.cs`
+    - `project/OsEngine/Entity/CorrelationBuilder.cs`
+    - `project/OsEngine/Entity/NumberGen.cs`
+  - Added `#nullable enable` for incremental adoption in these files.
+  - Added nullable-safe annotations/defaults while preserving behavior:
+    - `VolatilityStageClusters`: nullable-aware candle local and deferred-member annotations for `SourceVolatility`
+    - `CorrelationBuilder`: `ReloadCorrelationLast(...)` return marked nullable (`PairIndicatorValue?`) to match existing null-return behavior
+    - `NumberGen`: `_dayOfYear` initialized with `string.Empty`; nullable-aware settings load/parsing (`NumberGenSettings?`, nullable legacy parser return)
+  - Preserved existing runtime behavior; change scope is nullability context/safety adoption.
+  - Updated running progress journal:
+    - `refactoring_stage2_progress.md`
+- **Verification:**
+  - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` succeeded.
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` succeeded (`343/343`, with known NU1900 feed warning).
+- **Commit:** n/a (not committed in this session)
+- **Push:** n/a

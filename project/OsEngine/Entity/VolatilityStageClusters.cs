@@ -8,6 +8,8 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 
+#nullable enable
+
 namespace OsEngine.Entity
 {
     public class VolatilityStageClusters
@@ -93,7 +95,7 @@ namespace OsEngine.Entity
 
             for(int i = 0;i < sources.Count;i++)
             {
-                List<Candle> candles = sources[i].CandlesFinishedOnly;
+                List<Candle>? candles = sources[i].CandlesFinishedOnly;
 
                 if(candles == null 
                     || candles.Count == 0)
@@ -140,9 +142,9 @@ namespace OsEngine.Entity
 
     public class SourceVolatility
     {
-        public BotTabSimple Tab;
+        public BotTabSimple Tab = null!;
 
-        public List<Candle> Candles;
+        public List<Candle>? Candles;
 
         public decimal Volatility;
 

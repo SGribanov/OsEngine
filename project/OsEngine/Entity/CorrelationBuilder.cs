@@ -6,6 +6,8 @@
 using System;
 using System.Collections.Generic;
 
+#nullable enable
+
 namespace OsEngine.Entity
 {
     /// <summary>
@@ -50,7 +52,7 @@ namespace OsEngine.Entity
         /// <param name="candles2">Candles security 2</param>
         /// <param name="correlationLookBack">For how many candles the correlation is calculated</param>
         /// <returns>An array containing correlation values. The last one is the actual</returns>
-        public PairIndicatorValue ReloadCorrelationLast(List<Candle> candles1, List<Candle> candles2, int correlationLookBack)
+        public PairIndicatorValue? ReloadCorrelationLast(List<Candle> candles1, List<Candle> candles2, int correlationLookBack)
         {
             _correlationList = new List<PairIndicatorValue>();
 

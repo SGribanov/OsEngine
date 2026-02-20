@@ -4395,3 +4395,21 @@
 
 - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` -> success
 - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed 343/343 (with known NU1900 feed warning)
+
+## 2026-02-20 - Step 4.2 (nullable annotations) - Entity analytics helpers block
+
+- Updated nullable context in:
+  - `project/OsEngine/Entity/VolatilityStageClusters.cs`
+  - `project/OsEngine/Entity/CorrelationBuilder.cs`
+  - `project/OsEngine/Entity/NumberGen.cs`
+- Added `#nullable enable` to incremental-adoption files.
+- Added nullable-safe annotations/defaults while preserving behavior:
+  - `VolatilityStageClusters`: nullable-aware candle snapshot local (`List<Candle>?`) and `SourceVolatility` deferred members (`Tab = null!`, `Candles` nullable)
+  - `CorrelationBuilder`: `ReloadCorrelationLast(...)` return type marked nullable (`PairIndicatorValue?`) for existing null-return contract
+  - `NumberGen`: `_dayOfYear` initialized with `string.Empty`; nullable-aware settings load/parsing (`NumberGenSettings?`, `ParseLegacySettings(...)` returns nullable)
+- Scope: larger nullable adoption pass for helper/calculation entities without behavior changes.
+
+### Verification
+
+- `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` -> success
+- `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed 343/343 (with known NU1900 feed warning)
