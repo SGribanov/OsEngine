@@ -5851,3 +5851,26 @@
   - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` succeeded (`343/343`, with known NU1900 feed warning).
 - **Commit:** n/a (not committed in this session)
 - **Push:** n/a
+
+### Step 4.2 - Nullable Annotations (Incremental Adoption #287)
+
+- **Status:** In Progress (increment completed)
+- **Plan item:** `refactoring_stage2_plan.md` -> Phase 4 / Step 4.2
+- **Changes:**
+  - Continued nullable migration in Entity infra primitives:
+    - `project/OsEngine/Entity/Extensions.cs`
+    - `project/OsEngine/Entity/MarketDepth.cs`
+    - `project/OsEngine/Entity/Order.cs`
+  - Added `#nullable enable` for incremental adoption in these files.
+  - Added nullable-safe annotations/defaults while preserving behavior:
+    - `Extensions`: nullable-aware extension method signatures for legacy null inputs and safe grid-cell string formatting
+    - `MarketDepth`: `SecurityNameCode` initialized with `string.Empty`; `GetSlippagePercentToEntry(...)` now accepts `Security?` consistent with existing guard
+    - `Order`: targeted nullable-warning suppression for legacy order lifecycle/state machine paths; nullable `_trades` and `_saveString`; safe constructor defaults for string fields
+  - Preserved existing runtime behavior; change scope is nullability context/safety adoption.
+  - Updated running progress journal:
+    - `refactoring_stage2_progress.md`
+- **Verification:**
+  - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` succeeded (0 warnings).
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` succeeded (`343/343`, with known NU1900 feed warning).
+- **Commit:** n/a (not committed in this session)
+- **Push:** n/a

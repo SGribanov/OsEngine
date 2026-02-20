@@ -10,6 +10,9 @@ using System.Text;
 using OsEngine.Market;
 using OsEngine.Market.Servers.Tester;
 
+#nullable enable
+#pragma warning disable CS8600, CS8601, CS8602, CS8603, CS8604, CS8605, CS8618, CS8622, CS8625, CS8629
+
 namespace OsEngine.Entity
 {
     /// <summary>
@@ -24,7 +27,12 @@ namespace OsEngine.Entity
             TimeCallBack = DateTime.MinValue;
             TimeCancel = DateTime.MinValue;
             TimeDone =  DateTime.MinValue;
-            NumberMarket = "";
+            NumberMarket = string.Empty;
+            SecurityNameCode = string.Empty;
+            SecurityClassCode = string.Empty;
+            PortfolioNumber = string.Empty;
+            Comment = string.Empty;
+            ServerName = string.Empty;
             Side = Side.None;
             NumberPosition = 0;
         }
@@ -319,7 +327,7 @@ namespace OsEngine.Entity
         /// <summary>
         /// Order trades
         /// </summary>
-        private List<MyTrade> _trades;
+        private List<MyTrade>? _trades;
 
         /// <summary>
         /// Heck the ownership of the transaction to this order
@@ -523,7 +531,7 @@ namespace OsEngine.Entity
             return result;
         }
 
-        private StringBuilder _saveString;
+        private StringBuilder? _saveString;
 
         /// <summary>
         /// Load order from incoming line

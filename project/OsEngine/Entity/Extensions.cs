@@ -8,6 +8,8 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Windows.Forms;
 
+#nullable enable
+
 namespace OsEngine.Entity
 {
     public static class Extensions
@@ -17,7 +19,7 @@ namespace OsEngine.Entity
         /// <summary>
         /// remove dangerous characters from the name of the security
         /// </summary>
-        public static string RemoveExcessFromSecurityName(this string value)
+        public static string? RemoveExcessFromSecurityName(this string? value)
         {
             if (value == null)
             {
@@ -44,7 +46,7 @@ namespace OsEngine.Entity
         /// <summary>
         /// whether the string includes dangerous symbols.
         /// </summary>
-        public static bool HaveExcessInString(this string value)
+        public static bool HaveExcessInString(this string? value)
         {
             if (value == null)
             {
@@ -72,7 +74,7 @@ namespace OsEngine.Entity
         /// <summary>
         /// culture-neutral conversion of string to Decimal type
         /// </summary>
-        public static decimal ToDecimal(this string value)
+        public static decimal ToDecimal(this string? value)
         {
             if(value == null)
             {
@@ -97,7 +99,7 @@ namespace OsEngine.Entity
         /// <summary>
         /// culture-neutral conversion of string to Double type
         /// </summary>
-        public static double ToDouble(this string value)
+        public static double ToDouble(this string? value)
         {
             if (string.IsNullOrEmpty(value))
             {
@@ -178,8 +180,13 @@ namespace OsEngine.Entity
         /// <summary>
         /// get decimal point from double ro decimal values
         /// </summary>
-        public static int DecimalsCount(this string value)
+        public static int DecimalsCount(this string? value)
         {
+            if (string.IsNullOrEmpty(value))
+            {
+                return 0;
+            }
+
             if (value.Contains("E"))
             {
                 value = value.ToDecimal().ToString();
@@ -314,7 +321,7 @@ namespace OsEngine.Entity
 
             if (newCandles.Count != 0)
             {
-                Candle lastCandle = null;
+                Candle? lastCandle = null;
 
                 for(int i = 0;i < candlesToMerge.Count;i++)
                 {
@@ -435,7 +442,7 @@ namespace OsEngine.Entity
 
             if (newTrades.Count != 0)
             {
-                Trade lastTrade = tradesToMerge.Find(c => c.Time == newTrades[newTrades.Count - 1].Time);
+                Trade? lastTrade = tradesToMerge.Find(c => c.Time == newTrades[newTrades.Count - 1].Time);
 
                 if (lastTrade != null)
                 {
@@ -534,12 +541,15 @@ namespace OsEngine.Entity
 
             for(int i = 0; row.Cells != null && i < row.Cells.Count;i++)
             {
-                if(row.Cells[i].Value == null)
+                object? cellObject = row.Cells[i]?.Value;
+
+                if(cellObject == null)
                 {
                     result +=  ";";
                     continue;
                 }
-                result += row.Cells[i].Value.ToString().Replace("\n"," ").Replace("\r"," ").Replace(",",".") + ";";
+                string cellValue = cellObject.ToString() ?? string.Empty;
+                result += cellValue.Replace("\n"," ").Replace("\r"," ").Replace(",",".") + ";";
             }
 
             return result;

@@ -4450,3 +4450,21 @@
 
 - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` -> success
 - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed 343/343 (with known NU1900 feed warning)
+
+## 2026-02-20 - Step 4.2 (nullable annotations) - Entity infra primitives block
+
+- Updated nullable context in:
+  - `project/OsEngine/Entity/Extensions.cs`
+  - `project/OsEngine/Entity/MarketDepth.cs`
+  - `project/OsEngine/Entity/Order.cs`
+- Added `#nullable enable` to incremental-adoption files.
+- Added nullable-safe annotations/defaults while preserving behavior:
+  - `Extensions`: nullable-aware string extension signatures for legacy null inputs and safe grid-cell formatting path
+  - `MarketDepth`: `SecurityNameCode` initialized with `string.Empty`, `GetSlippagePercentToEntry(...)` accepts `Security?` (existing null-check path preserved)
+  - `Order`: targeted nullable suppression for legacy state-machine/order lifecycle paths; nullable `_trades`/`_saveString`; safe string defaults in constructor
+- Scope: larger nullable adoption pass for entity primitives and order/depth infrastructure without behavior changes.
+
+### Verification
+
+- `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` -> success
+- `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed 343/343 (with known NU1900 feed warning)

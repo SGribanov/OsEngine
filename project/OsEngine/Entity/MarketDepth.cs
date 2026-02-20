@@ -8,6 +8,8 @@ using OsEngine.OsData.BinaryEntity;
 using System;
 using System.Collections.Generic;
 
+#nullable enable
+
 namespace OsEngine.Entity
 {
     public class MarketDepth
@@ -89,7 +91,7 @@ namespace OsEngine.Entity
         /// <summary>
         /// Security name that owns to market depth
         /// </summary>
-        public string SecurityNameCode;
+        public string SecurityNameCode = string.Empty;
 
         /// <summary>
         /// Price of the center of market depth
@@ -215,7 +217,7 @@ namespace OsEngine.Entity
         /// <param name="direction">Direction for transaction</param>
         /// <param name="security">Class of security that wields the market depth</param>
         /// <param name="money">Amount for which the transaction is expected</param>
-        public double GetSlippagePercentToEntry(Side direction, Security security, decimal money)
+        public double GetSlippagePercentToEntry(Side direction, Security? security, decimal money)
         {
             if(direction == Side.None
                 || security == null
