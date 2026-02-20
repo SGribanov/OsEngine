@@ -29,6 +29,9 @@ namespace OsEngine.Robots.TechSamples
         // Simple tab
         private BotTabSimple _tab;
 
+        // Internal calculation setting
+        private StrategyParameterInt _customAverageLength;
+
         // Indicator
         private Aindicator _indicatorEmpty;
 
@@ -41,6 +44,8 @@ namespace OsEngine.Robots.TechSamples
             // Subscribe to the candle finished event
             _tab.CandleFinishedEvent += _tab_CandleFinishedEvent;
 
+            _customAverageLength = CreateParameter("Custom average length", 20, 2, 400, 1, "Base");
+
             // Create indicator EmptyIndicator
             _indicatorEmpty = IndicatorsFactory.CreateIndicatorByName("EmptyIndicator", name + "EmptyIndicator", false);
             _indicatorEmpty = (Aindicator)_tab.CreateCandleIndicator(_indicatorEmpty, "SecondArea");
@@ -51,10 +56,46 @@ namespace OsEngine.Robots.TechSamples
         // Candle finished event
         private void _tab_CandleFinishedEvent(List<Candle> candles)
         {
-            decimal dataPoint = candles[candles.Count - 1].Close / 2;
+            if (candles == null || candles.Count == 0)
+            {
+                return;
+            }
+
+            decimal dataPoint = GetCachedHalfCloseAverage(candles);
 
             _indicatorEmpty.DataSeries[0].Values[_indicatorEmpty.DataSeries[0].Values.Count-1] = dataPoint;
             _indicatorEmpty.RePaint();
+        }
+
+        private decimal GetCachedHalfCloseAverage(List<Candle> candles)
+        {
+            int actualLength = _customAverageLength.ValueInt;
+
+            if (actualLength > candles.Count)
+            {
+                actualLength = candles.Count;
+            }
+
+            string parametersHash = BuildOptimizerMethodCacheParameterHash(actualLength);
+
+            // During optimizer runs this calculation is memoized by candle window + method parameters.
+            return GetOrCreateOptimizerMethodCacheValue(
+                _tab,
+                "CustomDataInIndicatorSample.HalfCloseAverage",
+                parametersHash,
+                candles,
+                () =>
+                {
+                    decimal sum = 0;
+                    int startIndex = candles.Count - actualLength;
+
+                    for (int i = startIndex; i < candles.Count; i++)
+                    {
+                        sum += candles[i].Close / 2m;
+                    }
+
+                    return sum / actualLength;
+                });
         }
 
         // The name of the robot in OsEngine

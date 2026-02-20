@@ -46,7 +46,7 @@ namespace OsEngine.OsTrader.Gui
 
             CheckBoxPaintOnOff.IsChecked = true;
             CheckBoxPaintOnOff.Click += CheckBoxPaintOnOff_Click;
-            LabelOsa.Content = "V_" + System.Reflection.Assembly.GetExecutingAssembly().GetName().Version;
+            LabelOsa.Content = "V_" + OsEngine.AppVersionInfo.DisplayVersion;
 
             TabControlBotsName.SizeChanged += TabControlBotsName_SizeChanged;
             Local();

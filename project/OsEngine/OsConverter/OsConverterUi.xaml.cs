@@ -20,7 +20,7 @@ namespace OsEngine.OsConverter
             OsEngine.Layout.StickyBorders.Listen(this);
             OsEngine.Layout.StartupLocation.Start_MouseInCentre(this);
 
-            LabelOsa.Content = "V " + System.Reflection.Assembly.GetExecutingAssembly().GetName().Version;
+            LabelOsa.Content = "V " + OsEngine.AppVersionInfo.DisplayVersion;
 
             _master = new OsConverterMaster(TextBoxSource, TextBoxExit, ComboBoxTimeFrame, HostLog);
 

@@ -1,0 +1,10 @@
+<Project>
+  <PropertyGroup>
+    <UnifiedDisplayVersion>3.0 AB</UnifiedDisplayVersion>
+    <UnifiedAssemblyVersion>3.0.0.0</UnifiedAssemblyVersion>
+    <AssemblyVersion>$(UnifiedAssemblyVersion)</AssemblyVersion>
+    <FileVersion>$(UnifiedAssemblyVersion)</FileVersion>
+    <InformationalVersion>$(UnifiedDisplayVersion)</InformationalVersion>
+    <IncludeSourceRevisionInInformationalVersion>false</IncludeSourceRevisionInInformationalVersion>
+  </PropertyGroup>
+</Project>

@@ -41,7 +41,7 @@ namespace OsEngine.OsTrader.Gui
             _strategyKeeper.CreateGlobalPositionController(HostAllPosition);
 
             LocationChanged += TesterUi_LocationChanged;
-            LabelOsa.Content = "V_" + System.Reflection.Assembly.GetExecutingAssembly().GetName().Version;
+            LabelOsa.Content = "V_" + OsEngine.AppVersionInfo.DisplayVersion;
 
             TabControlBotsName.SizeChanged += TabControlBotsName_SizeChanged;
 

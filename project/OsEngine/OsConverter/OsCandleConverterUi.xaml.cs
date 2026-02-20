@@ -23,7 +23,7 @@ namespace OsEngine.OsConverter
             InitializeComponent();
             OsEngine.Layout.StickyBorders.Listen(this);
             OsEngine.Layout.StartupLocation.Start_MouseInCentre(this);
-            LabelOsa.Content = "V " + System.Reflection.Assembly.GetExecutingAssembly().GetName().Version;
+            LabelOsa.Content = "V " + OsEngine.AppVersionInfo.DisplayVersion;
 
             _candleConverter = new CandleConverter(TextBoxSource, TextBoxExit, ComboBoxTimeFrame, HostLog);
 

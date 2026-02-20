@@ -31,7 +31,7 @@ namespace OsEngine.OsData
                 HostSet, LabelSetNameValue, LabelTimeStartValue,
                 LabelTimeEndValue, ProgressBarLoadProgress, TextBoxSearchSource);
 
-            LabelOsa.Content = "V_" + System.Reflection.Assembly.GetExecutingAssembly().GetName().Version;
+            LabelOsa.Content = "V_" + OsEngine.AppVersionInfo.DisplayVersion;
             Closing += OsDataUi_Closing;
             Label4.Content = OsLocalization.Data.Label4;
             Label24.Content = OsLocalization.Data.Label24;

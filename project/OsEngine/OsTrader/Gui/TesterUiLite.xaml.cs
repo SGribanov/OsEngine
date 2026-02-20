@@ -37,7 +37,7 @@ namespace OsEngine.OsTrader.Gui
             _strategyKeeper.CreateGlobalPositionController(HostActivePoses, HostHistoricalPoses);
             _strategyKeeper.CreateBuyAtStopPosViewer(HostStopLimitPoses);
 
-            LabelOsa.Content = "V_" + System.Reflection.Assembly.GetExecutingAssembly().GetName().Version;
+            LabelOsa.Content = "V_" + OsEngine.AppVersionInfo.DisplayVersion;
 
             Closing += TesterUi_Closing;
             Local();
