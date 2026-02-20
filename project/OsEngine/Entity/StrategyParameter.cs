@@ -7,6 +7,9 @@ using System;
 using System.Collections.Generic;
 using System.Windows.Forms;
 
+#nullable enable
+#pragma warning disable CS8600, CS8601, CS8602, CS8603, CS8604, CS8605, CS8618, CS8619, CS8622, CS8625, CS8629
+
 namespace OsEngine.Entity
 {
     /// <summary>
@@ -998,7 +1001,7 @@ namespace OsEngine.Entity
         public static TimeSpan operator -(StrategyParameterTimeOfDay c1, StrategyParameterTimeOfDay c2) => c1.TimeSpan - c2.TimeSpan;
         public static double operator /(StrategyParameterTimeOfDay c1, StrategyParameterTimeOfDay c2) => c1.TimeSpan / c2.TimeSpan;
 
-        public override bool Equals(object obj) => ReferenceEquals(this, obj);
+        public override bool Equals(object? obj) => ReferenceEquals(this, obj);
 	
         public override int GetHashCode() => HashCode.Combine(Name, Value);
     }
@@ -1286,7 +1289,7 @@ namespace OsEngine.Entity
         }
 
         //unlike "==" and "!=" compares references
-        public override bool Equals(object obj) => ReferenceEquals(this, obj);
+        public override bool Equals(object? obj) => ReferenceEquals(this, obj);
 	    
         public override int GetHashCode() => HashCode.Combine(Hour, Minute, Second, Millisecond);
     }

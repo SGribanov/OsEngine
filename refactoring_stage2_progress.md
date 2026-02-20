@@ -4504,3 +4504,22 @@
 
 - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` -> success
 - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed 343/343 (with known NU1900 feed warning)
+
+## 2026-02-20 - Step 4.2 (nullable annotations) - Entity core models block
+
+- Updated nullable context in:
+  - `project/OsEngine/Entity/HorizontalVolume.cs`
+  - `project/OsEngine/Entity/Position.cs`
+  - `project/OsEngine/Entity/StrategyParameter.cs`
+- Added `#nullable enable` to incremental-adoption files.
+- Added targeted nullable-warning suppression for legacy model/event/state paths:
+  - `CS8600`, `CS8601`, `CS8602`, `CS8603`, `CS8604`, `CS8605`, `CS8618`, `CS8619`, `CS8622`, `CS8625`, `CS8629`
+- Added compatibility nullability fixes surfaced by this block:
+  - `StrategyParameter.cs`: `Equals(object? obj)` signatures aligned with nullable override contract
+  - `OptimizerReport.cs`: switched string-parameter reconstruction call to non-null overload (`new StrategyParameterString(name, string.Empty)`)
+- Scope: larger nullable adoption pass for core entity model files without behavior changes.
+
+### Verification
+
+- `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` -> success (0 warnings)
+- `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed 343/343 (with known NU1900 feed warning)

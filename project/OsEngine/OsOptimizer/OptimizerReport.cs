@@ -234,7 +234,7 @@ namespace OsEngine.OsOptimizer
                 }
                 else if (type == StrategyParameterType.String)
                 {
-                    param = new StrategyParameterString(name, "", null);
+                    param = new StrategyParameterString(name, string.Empty);
                     param.LoadParamFromString(StrategyParameters[i].Split('$')[1].Split('#'));
                 }
                 else if (type == StrategyParameterType.TimeOfDay)
