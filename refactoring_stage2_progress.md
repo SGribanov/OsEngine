@@ -4947,3 +4947,35 @@
 
 - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` -> success (0 warnings)
 - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed 343/343 (with known NU1900 feed warning)
+
+## 2026-02-20 - Step 4.2 (nullable annotations) - XT and AscendEX server connector blocks
+
+- Updated nullable context in XT:
+  - `project/OsEngine/Market/Servers/XT/XTFutures/XTFuturesServer.cs`
+  - `project/OsEngine/Market/Servers/XT/XTFutures/XTFuturesServerPermission.cs`
+  - `project/OsEngine/Market/Servers/XT/XTFutures/Entity/XTFuturesResponseRest.cs`
+  - `project/OsEngine/Market/Servers/XT/XTFutures/Entity/XTFuturesResponseWebSocket.cs`
+  - `project/OsEngine/Market/Servers/XT/XTSpot/XTServerSpot.cs`
+  - `project/OsEngine/Market/Servers/XT/XTSpot/XTSpotServerPermission.cs`
+  - `project/OsEngine/Market/Servers/XT/XTSpot/Entity/RequestMessagesRest.cs`
+  - `project/OsEngine/Market/Servers/XT/XTSpot/Entity/ResponseMessageRest.cs`
+  - `project/OsEngine/Market/Servers/XT/XTSpot/Entity/ResponseWebSocketMessageAction.cs`
+- Updated nullable context in AscendEX:
+  - `project/OsEngine/Market/Servers/AscendEX/AscendEXSpot/AscendexSpotServer.cs`
+  - `project/OsEngine/Market/Servers/AscendEX/AscendEXSpot/AscendexSpotServerPermission.cs`
+  - `project/OsEngine/Market/Servers/AscendEX/AscendEXSpot/Entity/AscendexSpotAccountInfo.cs`
+  - `project/OsEngine/Market/Servers/AscendEX/AscendEXSpot/Entity/AscendexSpotCandle.cs`
+  - `project/OsEngine/Market/Servers/AscendEX/AscendEXSpot/Entity/AscendexSpotDepth.cs`
+  - `project/OsEngine/Market/Servers/AscendEX/AscendEXSpot/Entity/AscendexSpotOrderAndPortfolioWebsocket.cs`
+  - `project/OsEngine/Market/Servers/AscendEX/AscendEXSpot/Entity/AscendexSpotOrderRest.cs`
+  - `project/OsEngine/Market/Servers/AscendEX/AscendEXSpot/Entity/AscendexSpotPublicTrades.cs`
+  - `project/OsEngine/Market/Servers/AscendEX/AscendEXSpot/Entity/AscendexSpotSecurity.cs`
+- Added `#nullable enable` to incremental-adoption files.
+- Added targeted nullable-warning suppression for legacy connector/DTO/event code paths:
+  - `CS8600`, `CS8601`, `CS8602`, `CS8603`, `CS8604`, `CS8605`, `CS8618`, `CS8619`, `CS8622`, `CS8625`, `CS8629`
+- Scope: combined large nullable adoption pass for XT and AscendEX connectors and transport DTO layers without behavior changes.
+
+### Verification
+
+- `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` -> success (0 warnings)
+- `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed 343/343 (with known NU1900 feed warning)
