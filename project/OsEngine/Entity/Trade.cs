@@ -6,6 +6,8 @@
 using System;
 using System.Globalization;
 
+#nullable enable
+
 namespace OsEngine.Entity
 {
     /// <summary>
@@ -27,12 +29,12 @@ namespace OsEngine.Entity
 
             }
         }
-        private string name;
+        private string name = string.Empty;
 
         /// <summary>
         /// Transaction number in the system
         /// </summary>
-        public string Id;
+        public string Id = string.Empty;
 
         /// <summary>
         /// Transaction number in the system. In Tester and Optimizer
@@ -196,7 +198,7 @@ namespace OsEngine.Entity
             }
         }
 
-        private Random _rand = null;
+        private Random? _rand;
 
         /// <summary>
         /// direction generation for transactions from IqFeed

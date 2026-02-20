@@ -4413,3 +4413,21 @@
 
 - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` -> success
 - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed 343/343 (with known NU1900 feed warning)
+
+## 2026-02-20 - Step 4.2 (nullable annotations) - Entity trade/UI block
+
+- Updated nullable context in:
+  - `project/OsEngine/Entity/Trade.cs`
+  - `project/OsEngine/Entity/SecurityUi.xaml.cs`
+  - `project/OsEngine/Entity/ColorCustomDialog.xaml.cs`
+- Added `#nullable enable` to incremental-adoption files.
+- Added nullable-safe defaults and annotations while preserving behavior:
+  - `Trade`: initialized `name` and `Id` with `string.Empty`, marked `_rand` nullable
+  - UI files: added targeted nullable-warning suppression for legacy WPF/WinForms-host paths:
+    - `CS8600`, `CS8601`, `CS8602`, `CS8604`, `CS8618`, `CS8622`, `CS8625`
+- Scope: larger nullable adoption pass for trade model + UI code-behind without behavior changes.
+
+### Verification
+
+- `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` -> success
+- `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed 343/343 (with known NU1900 feed warning)
