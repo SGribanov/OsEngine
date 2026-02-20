@@ -20,7 +20,7 @@ public class OkxHttpInterceptorTests
         string passPhrase = "pass";
         string body = "{\"instId\":\"BTC-USDT\"}";
 
-        var interceptor = new HttpInterceptor(apiKey, secret, passPhrase, demoMode: true, myProxy: null);
+        var interceptor = new HttpInterceptor(apiKey, secret, passPhrase, demoMode: true, myProxy: null!);
         var probe = new ProbeHandler();
         interceptor.InnerHandler = probe;
 
@@ -54,7 +54,7 @@ public class OkxHttpInterceptorTests
         string secret = "secret2";
         string passPhrase = "pass2";
 
-        var interceptor = new HttpInterceptor(apiKey, secret, passPhrase, demoMode: false, myProxy: null);
+        var interceptor = new HttpInterceptor(apiKey, secret, passPhrase, demoMode: false, myProxy: null!);
         var probe = new ProbeHandler();
         interceptor.InnerHandler = probe;
 

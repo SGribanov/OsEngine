@@ -4829,3 +4829,29 @@
 
 - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` -> success (0 warnings)
 - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed 343/343 (with known NU1900 feed warning)
+
+## 2026-02-20 - Step 4.2 (nullable annotations) - OKX server connector block
+
+- Updated nullable context in:
+  - `project/OsEngine/Market/Servers/OKX/OkxServer.cs`
+  - `project/OsEngine/Market/Servers/OKX/OkxServerPermission.cs`
+  - `project/OsEngine/Market/Servers/OKX/Entity/CandlesResponse.cs`
+  - `project/OsEngine/Market/Servers/OKX/Entity/Encryptor.cs`
+  - `project/OsEngine/Market/Servers/OKX/Entity/HttpInterceptor.cs`
+  - `project/OsEngine/Market/Servers/OKX/Entity/RequestSubscribe.cs`
+  - `project/OsEngine/Market/Servers/OKX/Entity/ResponseRestMessage.cs`
+  - `project/OsEngine/Market/Servers/OKX/Entity/ResponseWsMessageAction.cs`
+  - `project/OsEngine/Market/Servers/OKX/Entity/SecurityResponse.cs`
+  - `project/OsEngine/Market/Servers/OKX/Entity/TradeDetailsResponse.cs`
+  - `project/OsEngine/Market/Servers/OKX/Entity/TradesDataResponse.cs`
+- Added `#nullable enable` to incremental-adoption files.
+- Added targeted nullable-warning suppression for legacy connector/DTO/event code paths:
+  - `CS8600`, `CS8601`, `CS8602`, `CS8603`, `CS8604`, `CS8605`, `CS8618`, `CS8619`, `CS8622`, `CS8625`, `CS8629`
+- Adjusted nullable usage in tests for new constructor contract:
+  - `project/OsEngine.Tests/OkxHttpInterceptorTests.cs` (`myProxy: null!` in two ctor calls)
+- Scope: large nullable adoption pass for OKX connector and transport DTO layers without behavior changes.
+
+### Verification
+
+- `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` -> success (0 warnings)
+- `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed 343/343 (with known NU1900 feed warning)

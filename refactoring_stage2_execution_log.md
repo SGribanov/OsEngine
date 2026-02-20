@@ -6131,3 +6131,26 @@
   - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` succeeded (`343/343`, with known NU1900 feed warning).
 - **Commit:** n/a (not committed in this session)
 - **Push:** n/a
+
+### Step 4.2 - Nullable Annotations (Incremental Adoption #300)
+
+- **Status:** In Progress (increment completed)
+- **Plan item:** `refactoring_stage2_plan.md` -> Phase 4 / Step 4.2
+- **Changes:**
+  - Continued nullable migration in OKX connector block:
+    - `project/OsEngine/Market/Servers/OKX/OkxServer.cs`
+    - `project/OsEngine/Market/Servers/OKX/OkxServerPermission.cs`
+    - `project/OsEngine/Market/Servers/OKX/Entity/...` (9 files)
+  - Added `#nullable enable` for incremental adoption in these 11 files.
+  - Added targeted nullable-warning suppression for legacy connector/DTO/event code paths:
+    - `CS8600`, `CS8601`, `CS8602`, `CS8603`, `CS8604`, `CS8605`, `CS8618`, `CS8619`, `CS8622`, `CS8625`, `CS8629`
+  - Synchronized unit test nullability usage with updated nullable context:
+    - `project/OsEngine.Tests/OkxHttpInterceptorTests.cs` (`myProxy: null!` in 2 places)
+  - Preserved existing runtime behavior; change scope is nullability context/safety adoption.
+  - Updated running progress journal:
+    - `refactoring_stage2_progress.md`
+- **Verification:**
+  - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` succeeded (0 warnings).
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` succeeded (`343/343`, with known NU1900 feed warning).
+- **Commit:** n/a (not committed in this session)
+- **Push:** n/a
