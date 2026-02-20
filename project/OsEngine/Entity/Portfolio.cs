@@ -6,6 +6,8 @@
 using OsEngine.Market;
 using System.Collections.Generic;
 
+#nullable enable
+
 namespace OsEngine.Entity
 {
     /// <summary>
@@ -16,7 +18,7 @@ namespace OsEngine.Entity
         /// <summary>
         /// Account number
         /// </summary>
-        public string Number;
+        public string Number = string.Empty;
 
         /// <summary>
         /// Deposit at the beginning of the session
@@ -46,16 +48,16 @@ namespace OsEngine.Entity
         /// <summary>
         /// Connector unique name in multi-connection mode
         /// </summary>
-        public string ServerUniqueName = "";
+        public string ServerUniqueName = string.Empty;
 
         // then goes the storage of open positions in the system by portfolio
 
-        public List<PositionOnBoard> PositionOnBoard;
+        public List<PositionOnBoard>? PositionOnBoard;
 
         /// <summary>
         /// Take positions on the portfolio in the trading system
         /// </summary>
-        public List<PositionOnBoard> GetPositionOnBoard()
+        public List<PositionOnBoard>? GetPositionOnBoard()
         {
             return PositionOnBoard;
         }
