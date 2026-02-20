@@ -18,7 +18,7 @@ Date: 2026-02-20
 | `MtClient.dll` | `1.0.0.0` | `project/OsEngine/bin/Debug/MtClient.dll` | `FFEB1E00F6F339BDECD6B3992494610825FF4E6997757C557235F71BA9A6E330` | No direct migration planned; MetaTrader adapter dependency |
 | `OpenFAST.dll` | `1.1.3.0` | `project/OsEngine/bin/Debug/OpenFAST.dll` | `CECEC518ACAB25001796BE36C071340A0E1BE58EA7B492D246B506FBBFCDD89B` | Keep as legacy binary for now; candidate package not yet validated in this environment |
 | `QuikSharp.dll` | `2.0.0.0` | `project/OsEngine/bin/Debug/QuikSharp.dll` | `206CE0B13E1E2D750308042F2E67A44C474EC26BE2FB9F17F39BD3F98DB7E2DB` | Local modified fork noted in `related projects/QuikSharp/README.txt`; keep binary reference |
-| `RestSharp.dll` | `105.2.3.0` | `project/OsEngine/bin/Debug/RestSharp.dll` | `0A74D75DFBF2193390969008EC0F6ECEB29C8B20363E05192C959B0FAC12F231` | NuGet candidate (`RestSharp`), but API/major-version compatibility must be validated in dedicated pass |
+| `RestSharp.dll` | `105.2.3.0` | `project/OsEngine/bin/Debug/RestSharp.dll` | `0A74D75DFBF2193390969008EC0F6ECEB29C8B20363E05192C959B0FAC12F231` | Migrated: `RestSharp` now comes from `<PackageReference Include="RestSharp" Version="106.15.0" />` |
 | `TInvestApi.dll` | `1.0.0.0` | `project/OsEngine/bin/Debug/TInvestApi.dll` | `8D85C05E17C2ED7E60E4EFBD5BA33D2ACABB51150D42FBB701E1504356CE1105` | Local project source exists: `related projects/TInvestApi/TInvestApi.csproj`; keep binary reference for now |
 
 ## Environment Notes
@@ -28,6 +28,6 @@ Date: 2026-02-20
 
 ## Planned Migration Order (when online restore works)
 
-1. `RestSharp` via `<PackageReference>` pinned to a compatible API version; run connector smoke checks after migration.
+1. `RestSharp` major-version upgrade planning (`106.15.0` -> modern `11x/113x`) with explicit API-compatibility refactor and connector smoke tests.
 2. `Jayrock.Json` replacement analysis in code paths that still require `Jayrock.Json`.
 3. Keep vendor/custom assemblies (`cgate_net64`, `MtApi5`, `MtClient`, `QuikSharp`, `FinamApi`, `TInvestApi`) as binary or switch to local project references in a separate decision.

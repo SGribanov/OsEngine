@@ -5226,3 +5226,23 @@
 - `dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo` -> success
 - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` -> success (0 warnings)
 - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed 343/343
+
+## 2026-02-20 - Step 4.3 (dependency migration) - RestSharp package migration
+
+- Migrated RestSharp from local binary reference to NuGet package in:
+  - `project/OsEngine/OsEngine.csproj`
+- Final package version selected:
+  - `RestSharp` `106.15.0`
+- Notes on version choice:
+  - Initial parity attempt with `105.2.3` produced `NU1903` (known vulnerability) and `NU1701` (framework compatibility warning).
+  - Upgraded to `106.15.0` to keep compatibility and remove those warnings.
+- Updated dependency inventory status:
+  - `DEPENDENCIES.md` now marks RestSharp as migrated to `PackageReference` (`106.15.0`).
+- Scope: Step 4.3 migration block with dependency source change only; no behavioral code edits.
+
+### Verification
+
+- `dotnet restore project/OsEngine/OsEngine.csproj --nologo` -> success
+- `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` -> success (0 warnings)
+- `dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo` -> success
+- `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed 343/343

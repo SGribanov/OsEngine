@@ -6501,3 +6501,26 @@
   - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` succeeded (`343/343`).
 - **Commit:** n/a (not committed in this session)
 - **Push:** n/a
+
+### Step 4.3 - Legacy DLL to NuGet Migration (Incremental Adoption #316)
+
+- **Status:** In Progress (increment completed)
+- **Plan item:** `refactoring_stage2_plan.md` -> Phase 4 / Step 4.3
+- **Changes:**
+  - Migrated `RestSharp` from legacy DLL `HintPath` reference to NuGet package reference in `project/OsEngine/OsEngine.csproj`.
+  - Removed:
+    - `Reference Include="RestSharp"`
+    - `HintPath>bin\\Debug\\RestSharp.dll</HintPath>`
+  - Added:
+    - `PackageReference Include="RestSharp" Version="106.15.0"`
+  - Version selection rationale:
+    - `105.2.3` produced `NU1903` and `NU1701`; finalized on `106.15.0` with clean build/test warnings profile.
+  - Updated dependency governance document:
+    - `DEPENDENCIES.md` (RestSharp status changed to migrated, version `106.15.0`).
+- **Verification:**
+  - `dotnet restore project/OsEngine/OsEngine.csproj --nologo` succeeded.
+  - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` succeeded (0 warnings).
+  - `dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo` succeeded.
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` succeeded (`343/343`).
+- **Commit:** n/a (not committed in this session)
+- **Push:** n/a
