@@ -17,6 +17,9 @@ using OsEngine.Logging;
 using OsEngine.Market;
 using OsEngine.Market.Connectors;
 
+#nullable enable
+#pragma warning disable CS8600, CS8601, CS8602, CS8603, CS8604, CS8618, CS8622, CS8625
+
 namespace OsEngine.Entity
 {
     /// <summary>

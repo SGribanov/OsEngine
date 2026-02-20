@@ -9,6 +9,8 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 
+#nullable enable
+
 namespace OsEngine.Entity
 {
     public class NonTradePeriods
@@ -51,7 +53,7 @@ namespace OsEngine.Entity
         {
             try
             {
-                NonTradePeriodsSettingsDto settings = SettingsManager.Load(
+                NonTradePeriodsSettingsDto? settings = SettingsManager.Load(
                     GetStoragePath(),
                     defaultValue: null,
                     legacyLoader: ParseLegacySettings);
@@ -85,7 +87,7 @@ namespace OsEngine.Entity
             };
         }
 
-        private NonTradePeriodsSettingsDto ParseLegacySettings(string content)
+        private NonTradePeriodsSettingsDto? ParseLegacySettings(string content)
         {
             if (string.IsNullOrWhiteSpace(content))
             {
@@ -120,7 +122,7 @@ namespace OsEngine.Entity
             };
         }
 
-        private void ApplySettings(NonTradePeriodsSettingsDto settings)
+        private void ApplySettings(NonTradePeriodsSettingsDto? settings)
         {
             if (settings == null)
             {
@@ -175,23 +177,23 @@ namespace OsEngine.Entity
 
         private class NonTradePeriodsSettingsDto
         {
-            public string DaysLine { get; set; }
+            public string? DaysLine { get; set; }
 
-            public string GeneralLine { get; set; }
+            public string? GeneralLine { get; set; }
 
-            public string MondayLine { get; set; }
+            public string? MondayLine { get; set; }
 
-            public string TuesdayLine { get; set; }
+            public string? TuesdayLine { get; set; }
 
-            public string WednesdayLine { get; set; }
+            public string? WednesdayLine { get; set; }
 
-            public string ThursdayLine { get; set; }
+            public string? ThursdayLine { get; set; }
 
-            public string FridayLine { get; set; }
+            public string? FridayLine { get; set; }
 
-            public string SaturdayLine { get; set; }
+            public string? SaturdayLine { get; set; }
 
-            public string SundayLine { get; set; }
+            public string? SundayLine { get; set; }
         }
 
         public List<string> GetFullSaveArray()
@@ -562,7 +564,7 @@ namespace OsEngine.Entity
 
         #region Dialog window
 
-        private NonTradePeriodsUi _ui;
+        private NonTradePeriodsUi? _ui;
 
         public void ShowDialog()
         {
@@ -583,7 +585,7 @@ namespace OsEngine.Entity
 
         }
 
-        private void _ui_Closed(object sender, EventArgs e)
+        private void _ui_Closed(object? sender, EventArgs e)
         {
             _ui = null;
         }
@@ -785,7 +787,7 @@ namespace OsEngine.Entity
             }
         }
 
-        public event Action<string, LogMessageType> LogMessageEvent;
+        public event Action<string, LogMessageType>? LogMessageEvent;
 
         #endregion
     }

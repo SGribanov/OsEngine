@@ -4468,3 +4468,21 @@
 
 - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` -> success
 - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed 343/343 (with known NU1900 feed warning)
+
+## 2026-02-20 - Step 4.2 (nullable annotations) - Entity market tools UI block
+
+- Updated nullable context in:
+  - `project/OsEngine/Entity/MarketDepthPainter.cs`
+  - `project/OsEngine/Entity/NonTradePeriods.cs`
+  - `project/OsEngine/Entity/SecuritiesUi.xaml.cs`
+- Added `#nullable enable` to incremental-adoption files.
+- Added nullable-safe annotations while preserving behavior:
+  - `MarketDepthPainter`: targeted nullable-warning suppression for legacy WinForms/WPF-host painting/event paths
+  - `NonTradePeriods`: nullable-aware settings DTO/loader signatures, nullable `_ui` dialog reference, nullable log event annotation
+  - `SecuritiesUi.xaml.cs`: targeted nullable-warning suppression for legacy WPF/UI binding/event paths
+- Scope: larger nullable adoption pass for market depth/non-trade periods/securities UI toolchain without behavior changes.
+
+### Verification
+
+- `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` -> success
+- `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed 343/343 (with known NU1900 feed warning)
