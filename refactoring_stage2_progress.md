@@ -4381,3 +4381,17 @@
 
 - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` -> success
 - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed 343/343 (with known NU1900 feed warning)
+
+## 2026-02-20 - Step 4.2 (nullable annotations) - Entity stop-opener block
+
+- Updated nullable context in:
+  - `project/OsEngine/Entity/PositionOpenerToStop.cs`
+- Added `#nullable enable` to incremental-adoption file.
+- Added nullable-safe string defaults while preserving behavior:
+  - `Security`, `TabName`, `SignalType` initialized with `string.Empty`
+- Scope: nullable adoption for stop-opener entity without behavior changes.
+
+### Verification
+
+- `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` -> success
+- `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed 343/343 (with known NU1900 feed warning)

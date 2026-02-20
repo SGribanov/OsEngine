@@ -6,6 +6,8 @@
 using System;
 using System.Globalization;
 
+#nullable enable
+
 namespace OsEngine.Entity
 {
     /// <summary>
@@ -18,9 +20,9 @@ namespace OsEngine.Entity
             ExpiresBars = 0;
         }
 
-        public string Security;
+        public string Security = string.Empty;
 
-        public string TabName;
+        public string TabName = string.Empty;
 
         public int Number;
 
@@ -85,7 +87,7 @@ namespace OsEngine.Entity
         /// <summary>
         /// type of opening signal to be written to the position
         /// </summary>
-        public string SignalType;
+        public string SignalType = string.Empty;
 
         /// <summary>
         /// time of order creation
