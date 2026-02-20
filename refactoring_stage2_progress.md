@@ -5426,3 +5426,39 @@
   - `dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo` -> success
   - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` -> success (0 warnings)
   - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed `343/343`
+
+## 2026-02-20 - Step 3.1 (optimizer performance) - Internal method cache API for robots
+
+- Added dedicated optimizer runtime cache for deterministic internal robot methods:
+  - `project/OsEngine/OsOptimizer/OptEntity/OptimizerMethodCache.cs`
+  - introduced:
+    - `OptimizerMethodCacheKey`
+    - `OptimizerMethodCache`
+    - `OptimizerMethodCacheStatistics`
+- Exposed protected API in robot base class for selective forced caching in strategies:
+  - `project/OsEngine/OsTrader/Panels/BotPanel.cs`
+  - new helpers:
+    - `GetOrCreateOptimizerMethodCacheValue<T>(...)` (with overload for `BotTabSimple`)
+    - `BuildOptimizerMethodCacheParameterHash(...)`
+  - key material for method cache includes:
+    - security name
+    - timeframe
+    - candle range and count
+    - method name
+    - parameter hash
+    - source id and candle data fingerprint
+    - result type name
+- Integrated method-cache lifecycle into optimizer execution:
+  - `project/OsEngine/OsOptimizer/OptimizerExecutor.cs`
+  - cache is created/attached only when optimizer cache setting is enabled
+  - cache is disposed at run cleanup
+  - runtime stats are logged (`hits/misses/writes/evictions/hit-rate`).
+- Existing optimizer setting `UseIndicatorCache` now governs both indicator-cache and internal method-cache runtime activation.
+
+### Verification
+
+- Host-context verification (outside sandbox due intermittent sandbox TLS/NuGet issue):
+  - `dotnet restore project/OsEngine/OsEngine.csproj --nologo` -> success
+  - `dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo` -> success
+  - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` -> success (0 warnings)
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed `343/343`

@@ -7,9 +7,12 @@
 */
 
 using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
@@ -25,6 +28,7 @@ using OsEngine.Logging;
 using OsEngine.Market;
 using OsEngine.Market.Servers;
 using OsEngine.Market.Servers.Tester;
+using OsEngine.OsOptimizer.OptEntity;
 using OsEngine.OsTrader.Panels.Tab;
 using OsEngine.OsTrader.RiskManager;
 
@@ -271,6 +275,242 @@ namespace OsEngine.OsTrader.Panels
         /// the program that launched the robot. Tester  Robot  Optimizer
         /// </summary>
         public StartProgram StartProgram;
+
+        private static OptimizerMethodCache _optimizerMethodCache;
+
+        internal static void SetOptimizerMethodCache(OptimizerMethodCache cache)
+        {
+            Volatile.Write(ref _optimizerMethodCache, cache);
+        }
+
+        internal static void ClearOptimizerMethodCache()
+        {
+            OptimizerMethodCache cache = Interlocked.Exchange(ref _optimizerMethodCache, null);
+            cache?.Clear();
+        }
+
+        /// <summary>
+        /// Builds a stable parameter hash for optimizer method-cache keys.
+        /// </summary>
+        protected static string BuildOptimizerMethodCacheParameterHash(params object[] parts)
+        {
+            unchecked
+            {
+                int hash = 17;
+
+                if (parts != null)
+                {
+                    for (int i = 0; i < parts.Length; i++)
+                    {
+                        string normalized = NormalizeMethodCachePart(parts[i]);
+                        hash = hash * 31 + StringComparer.Ordinal.GetHashCode(normalized);
+                    }
+                }
+
+                return hash.ToString("X8", CultureInfo.InvariantCulture);
+            }
+        }
+
+        /// <summary>
+        /// Returns cached method result or computes/stores it for optimizer runs.
+        /// </summary>
+        protected T GetOrCreateOptimizerMethodCacheValue<T>(
+            BotTabSimple tab,
+            string calculationName,
+            string parametersHash,
+            List<Candle> candles,
+            Func<T> valueFactory,
+            Func<T, T> cloneValue = null)
+        {
+            string securityName = string.Empty;
+            TimeSpan timeframe = TimeSpan.Zero;
+
+            if (tab != null)
+            {
+                securityName = tab.Security?.Name ?? string.Empty;
+                timeframe = tab.TimeFrame;
+            }
+
+            return GetOrCreateOptimizerMethodCacheValue(
+                securityName,
+                timeframe,
+                calculationName,
+                parametersHash,
+                candles,
+                valueFactory,
+                cloneValue);
+        }
+
+        /// <summary>
+        /// Returns cached method result or computes/stores it for optimizer runs.
+        /// Use for deterministic internal calculations bound to security/timeframe candle windows.
+        /// </summary>
+        protected T GetOrCreateOptimizerMethodCacheValue<T>(
+            string securityName,
+            TimeSpan timeframe,
+            string calculationName,
+            string parametersHash,
+            List<Candle> candles,
+            Func<T> valueFactory,
+            Func<T, T> cloneValue = null)
+        {
+            if (valueFactory == null)
+            {
+                throw new ArgumentNullException(nameof(valueFactory));
+            }
+
+            if (StartProgram != StartProgram.IsOsOptimizer
+                || candles == null
+                || candles.Count == 0
+                || string.IsNullOrWhiteSpace(calculationName))
+            {
+                return valueFactory();
+            }
+
+            OptimizerMethodCache cache = Volatile.Read(ref _optimizerMethodCache);
+
+            if (cache == null)
+            {
+                return valueFactory();
+            }
+
+            OptimizerMethodCacheKey key = BuildOptimizerMethodCacheKey(
+                securityName,
+                timeframe,
+                calculationName,
+                parametersHash,
+                candles,
+                typeof(T).FullName ?? typeof(T).Name);
+
+            if (cache.TryGet(key, out T cachedValue))
+            {
+                if (cloneValue != null && !ReferenceEquals(cachedValue, null))
+                {
+                    return cloneValue(cachedValue);
+                }
+
+                return cachedValue;
+            }
+
+            T value = valueFactory();
+
+            if (cloneValue != null && !ReferenceEquals(value, null))
+            {
+                cache.Set(key, cloneValue(value));
+            }
+            else
+            {
+                cache.Set(key, value);
+            }
+
+            return value;
+        }
+
+        private static OptimizerMethodCacheKey BuildOptimizerMethodCacheKey(
+            string securityName,
+            TimeSpan timeframe,
+            string calculationName,
+            string parametersHash,
+            List<Candle> candles,
+            string resultTypeName)
+        {
+            int candlesCount = candles.Count;
+            Candle first = candles[0];
+            Candle last = candles[candlesCount - 1];
+
+            long timeframeTicks = timeframe.Ticks;
+            if (timeframeTicks <= 0 && candlesCount > 1)
+            {
+                timeframeTicks = candles[1].TimeStart.Ticks - candles[0].TimeStart.Ticks;
+            }
+
+            int dataFingerprint = BuildMethodCacheCandlesFingerprint(candles);
+            string sourceId = RuntimeHelpers.GetHashCode(candles).ToString(CultureInfo.InvariantCulture);
+
+            return new OptimizerMethodCacheKey(
+                securityName: securityName ?? string.Empty,
+                timeframeTicks: timeframeTicks,
+                firstTimeTicks: first.TimeStart.Ticks,
+                lastTimeTicks: last.TimeStart.Ticks,
+                candleCount: candlesCount,
+                calculationName: calculationName,
+                parametersHash: parametersHash ?? string.Empty,
+                sourceId: sourceId,
+                dataFingerprint: dataFingerprint,
+                resultTypeName: resultTypeName);
+        }
+
+        private static int BuildMethodCacheCandlesFingerprint(List<Candle> candles)
+        {
+            unchecked
+            {
+                int count = candles.Count;
+                Candle first = candles[0];
+                Candle middle = candles[count / 2];
+                Candle last = candles[count - 1];
+
+                long timeframeTicks = 0;
+                if (count > 1)
+                {
+                    timeframeTicks = candles[1].TimeStart.Ticks - candles[0].TimeStart.Ticks;
+                }
+
+                int hash = 17;
+                hash = hash * 31 + count;
+                hash = hash * 31 + timeframeTicks.GetHashCode();
+                hash = MixMethodCacheCandleHash(hash, first);
+                hash = MixMethodCacheCandleHash(hash, middle);
+                hash = MixMethodCacheCandleHash(hash, last);
+                return hash;
+            }
+        }
+
+        private static int MixMethodCacheCandleHash(int currentHash, Candle candle)
+        {
+            unchecked
+            {
+                int hash = currentHash;
+                hash = hash * 31 + candle.TimeStart.Ticks.GetHashCode();
+                hash = hash * 31 + candle.Open.GetHashCode();
+                hash = hash * 31 + candle.High.GetHashCode();
+                hash = hash * 31 + candle.Low.GetHashCode();
+                hash = hash * 31 + candle.Close.GetHashCode();
+                hash = hash * 31 + candle.Volume.GetHashCode();
+                return hash;
+            }
+        }
+
+        private static string NormalizeMethodCachePart(object part)
+        {
+            if (part == null)
+            {
+                return "<null>";
+            }
+
+            if (part is string text)
+            {
+                return text;
+            }
+
+            if (part is IEnumerable enumerable && part is not string)
+            {
+                List<string> items = new List<string>();
+
+                foreach (object item in enumerable)
+                {
+                    items.Add(NormalizeMethodCachePart(item));
+                }
+
+                return string.Join("|", items);
+            }
+
+            if (part is IFormattable formattable)
+            {
+                return formattable.ToString(null, CultureInfo.InvariantCulture);
+            }
+
+            return part.ToString() ?? string.Empty;
+        }
 
         /// <summary>
         /// indicates if the robot is an included script

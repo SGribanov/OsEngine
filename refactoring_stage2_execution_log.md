@@ -6695,3 +6695,29 @@
   - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` succeeded (`343/343`).
 - **Commit:** n/a (not committed in this session)
 - **Push:** n/a
+
+### Step 3.1 - Optimizer Performance (Internal Method Cache API) (Incremental Adoption #325)
+
+- **Status:** In Progress (increment completed)
+- **Plan item:** `refactoring_stage2_plan.md` -> Phase 3 / Step 3.1
+- **Changes:**
+  - Added new cache module for deterministic internal method results:
+    - `project/OsEngine/OsOptimizer/OptEntity/OptimizerMethodCache.cs`
+    - key struct, cache store, and runtime statistics snapshot model.
+  - Added selective cache API for robot authors in base class:
+    - `project/OsEngine/OsTrader/Panels/BotPanel.cs`
+    - protected helper `GetOrCreateOptimizerMethodCacheValue<T>(...)` with `BotTabSimple` overload
+    - helper `BuildOptimizerMethodCacheParameterHash(...)` for stable parameter key parts.
+  - Integrated method cache lifecycle to optimizer executor:
+    - `project/OsEngine/OsOptimizer/OptimizerExecutor.cs`
+    - create/attach on run start when cache setting enabled
+    - cleanup + stat logging at run finalization.
+  - Activation contract:
+    - existing setting `UseIndicatorCache` now controls both indicator and internal-method caches.
+- **Verification:**
+  - `dotnet restore project/OsEngine/OsEngine.csproj --nologo` succeeded.
+  - `dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo` succeeded.
+  - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` succeeded (0 warnings).
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` succeeded (`343/343`).
+- **Commit:** n/a (not committed in this session)
+- **Push:** n/a

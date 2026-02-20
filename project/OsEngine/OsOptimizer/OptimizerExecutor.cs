@@ -51,6 +51,7 @@ namespace OsEngine.OsOptimizer
         private readonly BotConfigurator _botConfigurator;
         private readonly Lock _reportsSync = new();
         private IndicatorCache _indicatorCache;
+        private OptimizerMethodCache _optimizerMethodCache;
 
         private SemaphoreSlim _serverSlots;
 
@@ -1843,28 +1844,36 @@ namespace OsEngine.OsOptimizer
 
             if (!useIndicatorCache)
             {
-                SendLogMessage("Optimizer indicator cache is disabled in settings.", LogMessageType.System);
+                SendLogMessage("Optimizer indicator/method caches are disabled in settings.", LogMessageType.System);
                 return;
             }
 
-            int maxEntries = Math.Max(256, threadsCount * 128);
-            IndicatorCache cache = new IndicatorCache(maxEntries);
-            Interlocked.Exchange(ref _indicatorCache, cache);
-            Aindicator.SetOptimizerIndicatorCache(cache);
+            int indicatorMaxEntries = Math.Max(256, threadsCount * 128);
+            int methodMaxEntries = Math.Max(512, threadsCount * 256);
+            IndicatorCache indicatorCache = new IndicatorCache(indicatorMaxEntries);
+            OptimizerMethodCache methodCache = new OptimizerMethodCache(methodMaxEntries);
+            Interlocked.Exchange(ref _indicatorCache, indicatorCache);
+            Interlocked.Exchange(ref _optimizerMethodCache, methodCache);
+            Aindicator.SetOptimizerIndicatorCache(indicatorCache);
+            BotPanel.SetOptimizerMethodCache(methodCache);
             SendLogMessage(
-                "Optimizer indicator cache enabled (max entries: " + maxEntries.ToString(CultureInfo.InvariantCulture) + ").",
+                "Optimizer indicator cache enabled (max entries: " + indicatorMaxEntries.ToString(CultureInfo.InvariantCulture) + ").",
+                LogMessageType.System);
+            SendLogMessage(
+                "Optimizer method cache enabled (max entries: " + methodMaxEntries.ToString(CultureInfo.InvariantCulture) + ").",
                 LogMessageType.System);
         }
 
         private void DisposeIndicatorCache()
         {
-            IndicatorCache cache = Interlocked.Exchange(ref _indicatorCache, null);
+            IndicatorCache indicatorCache = Interlocked.Exchange(ref _indicatorCache, null);
+            OptimizerMethodCache methodCache = Interlocked.Exchange(ref _optimizerMethodCache, null);
 
             try
             {
-                if (cache != null)
+                if (indicatorCache != null)
                 {
-                    IndicatorCacheStatistics stats = cache.GetStatisticsSnapshot();
+                    IndicatorCacheStatistics stats = indicatorCache.GetStatisticsSnapshot();
                     SendLogMessage(
                         "Optimizer indicator cache stats: hits=" + stats.Hits.ToString(CultureInfo.InvariantCulture)
                         + ", misses=" + stats.Misses.ToString(CultureInfo.InvariantCulture)
@@ -1875,14 +1884,29 @@ namespace OsEngine.OsOptimizer
                         LogMessageType.System);
                 }
 
-                cache?.Clear();
+                if (methodCache != null)
+                {
+                    OptimizerMethodCacheStatistics stats = methodCache.GetStatisticsSnapshot();
+                    SendLogMessage(
+                        "Optimizer method cache stats: hits=" + stats.Hits.ToString(CultureInfo.InvariantCulture)
+                        + ", misses=" + stats.Misses.ToString(CultureInfo.InvariantCulture)
+                        + ", writes=" + stats.Writes.ToString(CultureInfo.InvariantCulture)
+                        + ", evictions=" + stats.Evictions.ToString(CultureInfo.InvariantCulture)
+                        + ", entries=" + stats.EntriesCount.ToString(CultureInfo.InvariantCulture)
+                        + ", hit-rate=" + stats.HitRate.ToString("P2", CultureInfo.InvariantCulture) + ".",
+                        LogMessageType.System);
+                }
+
+                indicatorCache?.Clear();
+                methodCache?.Clear();
             }
             catch (Exception ex)
             {
-                SendLogMessage("Optimizer indicator cache cleanup failed: " + ex, LogMessageType.Error);
+                SendLogMessage("Optimizer cache cleanup failed: " + ex, LogMessageType.Error);
             }
 
             Aindicator.SetOptimizerIndicatorCache(null);
+            BotPanel.SetOptimizerMethodCache(null);
         }
 
         private void CancelPendingEvaluations(string messagePrefix)
