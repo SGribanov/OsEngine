@@ -4804,3 +4804,28 @@
 
 - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` -> success (0 warnings)
 - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed 343/343 (with known NU1900 feed warning)
+
+## 2026-02-20 - Step 4.2 (nullable annotations) - MoexFixFastTwimeFutures server block
+
+- Updated nullable context in:
+  - `project/OsEngine/Market/Servers/MoexFixFastTwimeFutures/MoexFixFastTwimeFuturesServer.cs`
+  - `project/OsEngine/Market/Servers/MoexFixFastTwimeFutures/MoexFixFastTwimeFuturesServerPermission.cs`
+  - `project/OsEngine/Market/Servers/MoexFixFastTwimeFutures/Entity/ControlFastDepth.cs`
+  - `project/OsEngine/Market/Servers/MoexFixFastTwimeFutures/Entity/FixMessageConstructor.cs`
+  - `project/OsEngine/Market/Servers/MoexFixFastTwimeFutures/Entity/IDsModifiedFixOrders.cs`
+  - `project/OsEngine/Market/Servers/MoexFixFastTwimeFutures/Entity/MarketDataGroup.cs`
+  - `project/OsEngine/Market/Servers/MoexFixFastTwimeFutures/Entity/NumbersMD.cs`
+  - `project/OsEngine/Market/Servers/MoexFixFastTwimeFutures/Entity/OrderChange.cs`
+  - `project/OsEngine/Market/Servers/MoexFixFastTwimeFutures/Entity/ReplyTwimeMessage.cs`
+  - `project/OsEngine/Market/Servers/MoexFixFastTwimeFutures/Entity/Snapshot.cs`
+  - `project/OsEngine/Market/Servers/MoexFixFastTwimeFutures/Entity/TwimeMessageConstructor.cs`
+  - `project/OsEngine/Market/Servers/MoexFixFastTwimeFutures/Entity/TwimeOrderReport.cs`
+- Added `#nullable enable` to incremental-adoption files.
+- Added targeted nullable-warning suppression for legacy connector/DTO/event code paths:
+  - `CS8600`, `CS8601`, `CS8602`, `CS8603`, `CS8604`, `CS8605`, `CS8618`, `CS8619`, `CS8622`, `CS8625`, `CS8629`
+- Scope: large nullable adoption pass for MoexFixFastTwimeFutures connector and message model layer without behavior changes.
+
+### Verification
+
+- `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` -> success (0 warnings)
+- `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed 343/343 (with known NU1900 feed warning)
