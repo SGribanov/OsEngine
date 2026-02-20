@@ -4347,3 +4347,20 @@
 
 - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` -> success
 - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed 343/343 (with known NU1900 feed warning)
+
+## 2026-02-20 - Step 4.2 (nullable annotations) - Entity MyTrade block
+
+- Updated nullable context in:
+  - `project/OsEngine/Entity/MyTrade.cs`
+- Added `#nullable enable` to incremental-adoption file.
+- Added nullable-safe string defaults to preserve runtime behavior:
+  - `NumberTrade`, `NumberOrderParent`, `NumberPosition`, `SecurityNameCode` initialized with `string.Empty`
+- Added nullable-safe tooltip cache handling:
+  - `_toolTip` marked as nullable cache field
+  - lazy initialization now starts from empty string and keeps original output flow
+- Scope: nullable adoption for `MyTrade` entity without behavior changes.
+
+### Verification
+
+- `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` -> success
+- `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed 343/343 (with known NU1900 feed warning)

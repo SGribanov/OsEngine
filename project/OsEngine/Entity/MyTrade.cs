@@ -6,6 +6,8 @@
 using System;
 using System.Globalization;
 
+#nullable enable
+
 namespace OsEngine.Entity
 {
     /// <summary>
@@ -26,22 +28,22 @@ namespace OsEngine.Entity
         /// <summary>
         /// Trade number
         /// </summary>
-        public string NumberTrade;
+        public string NumberTrade = string.Empty;
 
         /// <summary>
         /// Parent's warrant number
         /// </summary>
-        public string NumberOrderParent;
+        public string NumberOrderParent = string.Empty;
 
         /// <summary>
         /// The robot's position number in OsEngine
         /// </summary>
-        public string NumberPosition;
+        public string NumberPosition = string.Empty;
 
         /// <summary>
         /// Instrument code
         /// </summary>
-        public string SecurityNameCode;
+        public string SecurityNameCode = string.Empty;
 
         /// <summary>
         /// Time
@@ -109,7 +111,9 @@ namespace OsEngine.Entity
                     return _toolTip;
                 }
 
-                if (NumberPosition != null)
+                _toolTip = string.Empty;
+
+                if (!string.IsNullOrEmpty(NumberPosition))
                 {
                     _toolTip = "Pos. num: " + NumberPosition + "\r\n";
                 }
@@ -128,7 +132,7 @@ namespace OsEngine.Entity
                 return _toolTip;
             }
         }
-        private string _toolTip;
+        private string? _toolTip;
 
         private static DateTime ParseDateTimeInvariantWithRuFallback(string value)
         {
