@@ -5379,3 +5379,50 @@
 - Result:
   - existing implementation already shares candle list references across optimizer bots for identical data keys.
   - no code changes required for this verification increment.
+
+## 2026-02-20 - Step 3.1 (optimizer performance) - Cache key hardening, toggle, and metrics
+
+- Refined optimizer indicator cache architecture:
+  - `project/OsEngine/OsOptimizer/OptEntity/IndicatorCache.cs`
+  - introduced strong key type `IndicatorCacheKey` (replacing plain string keys)
+  - key now includes:
+    - data identity/range (`sourceId`, `timeframeTicks`, `first/last time`, `candleCount`)
+    - calculation identity (`calculationName`, `parametersHash`)
+    - output shape (`outputSeriesCount`, `includeIndicatorsCount`)
+    - candle data fingerprint (`dataFingerprint`)
+  - added runtime cache statistics:
+    - hits, misses, writes, evictions, entries, hit-rate (`IndicatorCacheStatistics`)
+  - retained deterministic bounded policy (`clear-all` on entry limit) and clone-on-read/write safety.
+
+- Added deterministic-cache guard in indicator base:
+  - `project/OsEngine/Indicators/Aindicator.cs`
+  - new virtual switch `IsDeterministicForOptimizerCache` (default `true`)
+  - optimizer cache path is now executed only when this flag is true.
+
+- Added optimizer setting toggle for cache:
+  - `project/OsEngine/OsOptimizer/OptEntity/OptimizerSettings.cs`
+  - `UseIndicatorCache` persisted in optimizer settings (`Engine/OptimizerSettings.txt`)
+  - backward compatibility with existing settings files preserved.
+
+- Exposed new setting in optimizer orchestration and UI:
+  - `project/OsEngine/OsOptimizer/OptimizerMaster.cs` (forwarding property)
+  - `project/OsEngine/OsOptimizer/OptimizerUi.xaml`
+  - `project/OsEngine/OsOptimizer/OptimizerUi.xaml.cs`
+  - added checkbox: "Use indicator cache / Использовать кэш индикаторов".
+
+- Added cache lifecycle and telemetry logging:
+  - `project/OsEngine/OsOptimizer/OptimizerExecutor.cs`
+  - cache now created only when `UseIndicatorCache == true`
+  - enable/disable messages logged at run start
+  - cache stats logged on run cleanup.
+
+- Updated optimizer settings tests for V3 settings-tail layout and added roundtrip assert for cache-toggle:
+  - `project/OsEngine.Tests/OptimizerRefactorTests.cs`
+
+### Verification
+
+- Host-context verification (outside sandbox due intermittent sandbox TLS/NuGet issue):
+  - `dotnet restore project/OsEngine/OsEngine.csproj --nologo` -> success
+  - `dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo` -> success
+  - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` -> success (0 warnings)
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed `343/343`

@@ -508,6 +508,17 @@ namespace OsEngine.OsOptimizer.OptEntity
         }
         private int _bayesianTailSharePercent = 20;
 
+        public bool UseIndicatorCache
+        {
+            get => _useIndicatorCache;
+            set
+            {
+                _useIndicatorCache = value;
+                Save();
+            }
+        }
+        private bool _useIndicatorCache = true;
+
         #endregion
 
         #region Save / Load
@@ -556,7 +567,10 @@ namespace OsEngine.OsOptimizer.OptEntity
                     _bayesianAcquisitionMode.ToString(),
                     _bayesianAcquisitionKappa.ToString(),
                     _bayesianUseTailPass.ToString(),
-                    _bayesianTailSharePercent.ToString()
+                    _bayesianTailSharePercent.ToString(),
+
+                    // V3 fields
+                    _useIndicatorCache.ToString()
                 };
 
                 SafeFileWriter.WriteAllLines(GetSettingsPath(), lines);
@@ -662,6 +676,11 @@ namespace OsEngine.OsOptimizer.OptEntity
                         if (TryParseInt(line, out int bayesianTailSharePercent))
                         {
                             _bayesianTailSharePercent = ClampTailSharePercent(bayesianTailSharePercent);
+                        }
+                        line = reader.ReadLine();
+                        if (TryParseBool(line, out bool useIndicatorCache))
+                        {
+                            _useIndicatorCache = useIndicatorCache;
                         }
                     }
                 }

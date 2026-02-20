@@ -1574,7 +1574,8 @@ public class OptimizerRefactorTests
                 BayesianAcquisitionMode = BayesianAcquisitionModeType.ExpectedImprovement,
                 BayesianAcquisitionKappa = 0.9m,
                 BayesianUseTailPass = false,
-                BayesianTailSharePercent = 33
+                BayesianTailSharePercent = 33,
+                UseIndicatorCache = false
             };
 
             OptimizerSettings reader = new OptimizerSettings();
@@ -1589,6 +1590,7 @@ public class OptimizerRefactorTests
             Assert.Equal(0.9m, reader.BayesianAcquisitionKappa);
             Assert.False(reader.BayesianUseTailPass);
             Assert.Equal(33, reader.BayesianTailSharePercent);
+            Assert.False(reader.UseIndicatorCache);
         }
     }
 
@@ -1618,7 +1620,7 @@ public class OptimizerRefactorTests
             Assert.True(fullLines.Length >= 5);
 
             // Simulate legacy file by removing appended method-setting lines from the tail.
-            string[] legacyLines = fullLines.Take(fullLines.Length - 10).ToArray();
+            string[] legacyLines = fullLines.Take(fullLines.Length - 11).ToArray();
             File.WriteAllLines(scope.SettingsPath, legacyLines);
 
             OptimizerSettings reader = new OptimizerSettings();
@@ -1633,6 +1635,7 @@ public class OptimizerRefactorTests
             Assert.Equal(0.25m, reader.BayesianAcquisitionKappa);
             Assert.True(reader.BayesianUseTailPass);
             Assert.Equal(20, reader.BayesianTailSharePercent);
+            Assert.True(reader.UseIndicatorCache);
         }
     }
 
@@ -1686,14 +1689,14 @@ public class OptimizerRefactorTests
             };
 
             string[] lines = File.ReadAllLines(scope.SettingsPath);
-            Assert.True(lines.Length >= 10);
+            Assert.True(lines.Length >= 11);
 
             // Patch last settings block with invalid numeric values.
-            lines[^8] = "0";     // BayesianInitialSamples
-            lines[^7] = "-10";   // BayesianMaxIterations
-            lines[^6] = "0";     // BayesianBatchSize
-            lines[^3] = "-7.5";  // BayesianAcquisitionKappa
-            lines[^1] = "999";   // BayesianTailSharePercent
+            lines[^9] = "0";     // BayesianInitialSamples
+            lines[^8] = "-10";   // BayesianMaxIterations
+            lines[^7] = "0";     // BayesianBatchSize
+            lines[^4] = "-7.5";  // BayesianAcquisitionKappa
+            lines[^2] = "999";   // BayesianTailSharePercent
             File.WriteAllLines(scope.SettingsPath, lines);
 
             OptimizerSettings reader = new OptimizerSettings();
@@ -1728,12 +1731,12 @@ public class OptimizerRefactorTests
             };
 
             string[] lines = File.ReadAllLines(scope.SettingsPath);
-            Assert.True(lines.Length >= 10);
+            Assert.True(lines.Length >= 11);
 
-            lines[^10] = "999"; // OptimizationMethod
-            lines[^9] = "999";  // ObjectiveMetric
-            lines[^5] = "999";  // ObjectiveDirection
-            lines[^4] = "999";  // BayesianAcquisitionMode
+            lines[^11] = "999"; // OptimizationMethod
+            lines[^10] = "999"; // ObjectiveMetric
+            lines[^6] = "999";  // ObjectiveDirection
+            lines[^5] = "999";  // BayesianAcquisitionMode
             File.WriteAllLines(scope.SettingsPath, lines);
 
             OptimizerSettings reader = new OptimizerSettings();
@@ -1767,16 +1770,16 @@ public class OptimizerRefactorTests
             };
 
             string[] lines = File.ReadAllLines(scope.SettingsPath);
-            Assert.True(lines.Length >= 10);
+            Assert.True(lines.Length >= 11);
 
-            lines[^8] = "broken-int"; // BayesianInitialSamples
-            lines[^7] = "33";         // BayesianMaxIterations
-            lines[^6] = "4";          // BayesianBatchSize
-            lines[^5] = "Minimize";   // ObjectiveDirection
-            lines[^4] = "Greedy";     // BayesianAcquisitionMode
-            lines[^3] = "0.9";        // BayesianAcquisitionKappa
-            lines[^2] = "False";      // BayesianUseTailPass
-            lines[^1] = "17";         // BayesianTailSharePercent
+            lines[^9] = "broken-int"; // BayesianInitialSamples
+            lines[^8] = "33";         // BayesianMaxIterations
+            lines[^7] = "4";          // BayesianBatchSize
+            lines[^6] = "Minimize";   // ObjectiveDirection
+            lines[^5] = "Greedy";     // BayesianAcquisitionMode
+            lines[^4] = "0.9";        // BayesianAcquisitionKappa
+            lines[^3] = "False";      // BayesianUseTailPass
+            lines[^2] = "17";         // BayesianTailSharePercent
             File.WriteAllLines(scope.SettingsPath, lines);
 
             OptimizerSettings reader = new OptimizerSettings();
@@ -1814,9 +1817,9 @@ public class OptimizerRefactorTests
             };
 
             string[] lines = File.ReadAllLines(scope.SettingsPath);
-            Assert.True(lines.Length >= 10);
+            Assert.True(lines.Length >= 11);
 
-            lines[^3] = "0,9"; // BayesianAcquisitionKappa
+            lines[^4] = "0,9"; // BayesianAcquisitionKappa
             File.WriteAllLines(scope.SettingsPath, lines);
 
             OptimizerSettings reader = new OptimizerSettings();
@@ -1847,10 +1850,10 @@ public class OptimizerRefactorTests
             };
 
             string[] lines = File.ReadAllLines(scope.SettingsPath);
-            Assert.True(lines.Length >= 10);
+            Assert.True(lines.Length >= 11);
 
-            lines[^2] = "not-a-bool"; // BayesianUseTailPass
-            lines[^1] = "17";         // BayesianTailSharePercent
+            lines[^3] = "not-a-bool"; // BayesianUseTailPass
+            lines[^2] = "17";         // BayesianTailSharePercent
             File.WriteAllLines(scope.SettingsPath, lines);
 
             OptimizerSettings reader = new OptimizerSettings();

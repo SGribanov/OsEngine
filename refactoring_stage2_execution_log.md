@@ -6661,3 +6661,37 @@
   - Structural code audit completed; no regressions introduced (read-only verification).
 - **Commit:** n/a (not committed in this session)
 - **Push:** n/a
+
+### Step 3.1 - Optimizer Performance (Indicator Cache Hardening + Toggle + Metrics) (Incremental Adoption #324)
+
+- **Status:** In Progress (increment completed)
+- **Plan item:** `refactoring_stage2_plan.md` -> Phase 3 / Step 3.1
+- **Changes:**
+  - Reworked cache keying to typed key model:
+    - `IndicatorCacheKey` added in `project/OsEngine/OsOptimizer/OptEntity/IndicatorCache.cs`
+    - includes source/range, timeframe, calc identity, params hash, output shape, and data fingerprint.
+  - Added cache telemetry in same module:
+    - `IndicatorCacheStatistics` with hit/miss/write/eviction counters and hit-rate snapshot.
+  - Strengthened cache safety in indicator layer:
+    - `project/OsEngine/Indicators/Aindicator.cs`
+    - virtual deterministic gate `IsDeterministicForOptimizerCache` (default true)
+    - cache path active only for optimizer mode + deterministic indicators.
+  - Added runtime toggle for cache:
+    - `project/OsEngine/OsOptimizer/OptEntity/OptimizerSettings.cs` -> `UseIndicatorCache` (persisted)
+    - `project/OsEngine/OsOptimizer/OptimizerMaster.cs` -> forwarding property.
+  - Added UI control for toggle:
+    - `project/OsEngine/OsOptimizer/OptimizerUi.xaml`
+    - `project/OsEngine/OsOptimizer/OptimizerUi.xaml.cs`
+    - checkbox binding/handler/localization and activity-state integration.
+  - Added executor lifecycle logging:
+    - `project/OsEngine/OsOptimizer/OptimizerExecutor.cs`
+    - cache enable/disable at start and summary stats on cleanup.
+  - Updated optimizer settings tests for new persisted tail layout and new field roundtrip:
+    - `project/OsEngine.Tests/OptimizerRefactorTests.cs`.
+- **Verification:**
+  - `dotnet restore project/OsEngine/OsEngine.csproj --nologo` succeeded.
+  - `dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo` succeeded.
+  - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` succeeded (0 warnings).
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` succeeded (`343/343`).
+- **Commit:** n/a (not committed in this session)
+- **Push:** n/a

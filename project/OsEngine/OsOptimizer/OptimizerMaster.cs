@@ -361,6 +361,12 @@ namespace OsEngine.OsOptimizer
             set => Settings.BayesianTailSharePercent = value;
         }
 
+        public bool UseIndicatorCache
+        {
+            get => Settings.UseIndicatorCache;
+            set => Settings.UseIndicatorCache = value;
+        }
+
         public List<OrderClearing> ClearingTimes => Settings.ClearingTimes;
 
         public List<NonTradePeriod> NonTradePeriods => Settings.NonTradePeriods;

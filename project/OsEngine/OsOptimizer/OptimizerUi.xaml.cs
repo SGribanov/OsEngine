@@ -178,12 +178,14 @@ namespace OsEngine.OsOptimizer
             TextBoxBayesianAcquisitionKappa.Text = _master.BayesianAcquisitionKappa.ToString(CultureInfo.InvariantCulture);
             TextBoxBayesianTailSharePercent.Text = _master.BayesianTailSharePercent.ToString();
             CheckBoxBayesianTailPass.IsChecked = _master.BayesianUseTailPass;
+            CheckBoxUseIndicatorCache.IsChecked = _master.UseIndicatorCache;
             TextBoxBayesianInitialSamples.TextChanged += TextBoxBayesianSettings_TextChanged;
             TextBoxBayesianMaxIterations.TextChanged += TextBoxBayesianSettings_TextChanged;
             TextBoxBayesianBatchSize.TextChanged += TextBoxBayesianSettings_TextChanged;
             TextBoxBayesianAcquisitionKappa.TextChanged += TextBoxBayesianAcquisitionKappa_TextChanged;
             TextBoxBayesianTailSharePercent.TextChanged += TextBoxBayesianTailSharePercent_TextChanged;
             CheckBoxBayesianTailPass.Click += CheckBoxBayesianTailPass_Click;
+            CheckBoxUseIndicatorCache.Click += CheckBoxUseIndicatorCache_Click;
             SyncOptimizationMethodControlsState();
 
             _master.NeedToMoveUiToEvent += _master_NeedToMoveUiToEvent;
@@ -253,6 +255,9 @@ namespace OsEngine.OsOptimizer
             CheckBoxBayesianTailPass.Content = OsLocalization.ConvertToLocString(
                 "Eng:Tail pass_" +
                 "Ru:Tail pass_");
+            CheckBoxUseIndicatorCache.Content = OsLocalization.ConvertToLocString(
+                "Eng:Use indicator cache_" +
+                "Ru:Использовать кэш индикаторов_");
             ButtonPositionSupport.Content = OsLocalization.Trader.Label47;
             ButtonStrategyReload.Content = OsLocalization.Optimizer.Label48;
             TabControlResultsSeries.Header = OsLocalization.Optimizer.Label37;
@@ -343,6 +348,7 @@ namespace OsEngine.OsOptimizer
                 TextBoxBayesianAcquisitionKappa.TextChanged -= TextBoxBayesianAcquisitionKappa_TextChanged;
                 TextBoxBayesianTailSharePercent.TextChanged -= TextBoxBayesianTailSharePercent_TextChanged;
                 CheckBoxBayesianTailPass.Click -= CheckBoxBayesianTailPass_Click;
+                CheckBoxUseIndicatorCache.Click -= CheckBoxUseIndicatorCache_Click;
 
                 _master.NewSecurityEvent -= _master_NewSecurityEvent;
                 _master.DateTimeStartEndChange -= _master_DateTimeStartEndChange;
@@ -459,6 +465,7 @@ namespace OsEngine.OsOptimizer
             TextBoxBayesianAcquisitionKappa.IsEnabled = false;
             TextBoxBayesianTailSharePercent.IsEnabled = false;
             CheckBoxBayesianTailPass.IsEnabled = false;
+            CheckBoxUseIndicatorCache.IsEnabled = false;
         }
 
         private void StartUserActivity()
@@ -492,6 +499,7 @@ namespace OsEngine.OsOptimizer
             ComboBoxObjectiveMetric.IsEnabled = true;
             ComboBoxObjectiveDirection.IsEnabled = true;
             SyncOptimizationMethodControlsState();
+            CheckBoxUseIndicatorCache.IsEnabled = true;
         }
 
         private DateTime _lastTestEndEventTime = DateTime.MinValue;
@@ -1277,6 +1285,11 @@ namespace OsEngine.OsOptimizer
         private void CheckBoxBayesianTailPass_Click(object sender, RoutedEventArgs e)
         {
             _master.BayesianUseTailPass = CheckBoxBayesianTailPass.IsChecked == true;
+        }
+
+        private void CheckBoxUseIndicatorCache_Click(object sender, RoutedEventArgs e)
+        {
+            _master.UseIndicatorCache = CheckBoxUseIndicatorCache.IsChecked == true;
         }
 
         private void ButtonResults_Click(object sender, RoutedEventArgs e)

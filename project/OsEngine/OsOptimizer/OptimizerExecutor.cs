@@ -6,6 +6,7 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.Concurrent;
+using System.Globalization;
 using System.Threading;
 using System.Threading.Tasks;
 using OsEngine.Entity;
@@ -260,7 +261,7 @@ namespace OsEngine.OsOptimizer
                     SendLogMessage("Optimizer start cleanup failed: previous server slots dispose. " + ex, LogMessageType.Error);
                 }
 
-                PrepareIndicatorCache(threadsCount);
+                PrepareIndicatorCache(threadsCount, _master.UseIndicatorCache);
 
                 Thread primeWorker = new Thread(PrimeThreadWorkerPlace);
                 primeWorker.Name = "OptimizerExecutorThread";
@@ -1836,14 +1837,23 @@ namespace OsEngine.OsOptimizer
             }
         }
 
-        private void PrepareIndicatorCache(int threadsCount)
+        private void PrepareIndicatorCache(int threadsCount, bool useIndicatorCache)
         {
             DisposeIndicatorCache();
+
+            if (!useIndicatorCache)
+            {
+                SendLogMessage("Optimizer indicator cache is disabled in settings.", LogMessageType.System);
+                return;
+            }
 
             int maxEntries = Math.Max(256, threadsCount * 128);
             IndicatorCache cache = new IndicatorCache(maxEntries);
             Interlocked.Exchange(ref _indicatorCache, cache);
             Aindicator.SetOptimizerIndicatorCache(cache);
+            SendLogMessage(
+                "Optimizer indicator cache enabled (max entries: " + maxEntries.ToString(CultureInfo.InvariantCulture) + ").",
+                LogMessageType.System);
         }
 
         private void DisposeIndicatorCache()
@@ -1852,6 +1862,19 @@ namespace OsEngine.OsOptimizer
 
             try
             {
+                if (cache != null)
+                {
+                    IndicatorCacheStatistics stats = cache.GetStatisticsSnapshot();
+                    SendLogMessage(
+                        "Optimizer indicator cache stats: hits=" + stats.Hits.ToString(CultureInfo.InvariantCulture)
+                        + ", misses=" + stats.Misses.ToString(CultureInfo.InvariantCulture)
+                        + ", writes=" + stats.Writes.ToString(CultureInfo.InvariantCulture)
+                        + ", evictions=" + stats.Evictions.ToString(CultureInfo.InvariantCulture)
+                        + ", entries=" + stats.EntriesCount.ToString(CultureInfo.InvariantCulture)
+                        + ", hit-rate=" + stats.HitRate.ToString("P2", CultureInfo.InvariantCulture) + ".",
+                        LogMessageType.System);
+                }
+
                 cache?.Clear();
             }
             catch (Exception ex)

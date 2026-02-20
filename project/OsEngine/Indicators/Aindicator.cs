@@ -41,6 +41,12 @@ namespace OsEngine.Indicators
 
         public abstract void OnProcess(List<Candle> source, int index);
 
+        /// <summary>
+        /// Set to false for indicators that depend on external mutable state
+        /// and must not be cached between optimizer bot runs.
+        /// </summary>
+        public virtual bool IsDeterministicForOptimizerCache => true;
+
         #endregion
 
         #region Service
@@ -772,6 +778,7 @@ namespace OsEngine.Indicators
         private bool TryRestoreSeriesFromOptimizerCache(List<Candle> candles)
         {
             if (StartProgram != StartProgram.IsOsOptimizer
+                || !IsDeterministicForOptimizerCache
                 || candles == null
                 || candles.Count == 0
                 || DataSeries == null
@@ -787,7 +794,7 @@ namespace OsEngine.Indicators
                 return false;
             }
 
-            string cacheKey = BuildOptimizerIndicatorCacheKey(candles);
+            IndicatorCacheKey cacheKey = BuildOptimizerIndicatorCacheKey(candles);
 
             if (!cache.TryGet(cacheKey, out List<decimal>[] cachedSeries)
                 || cachedSeries == null
@@ -823,6 +830,7 @@ namespace OsEngine.Indicators
         private void SaveSeriesToOptimizerCache(List<Candle> candles)
         {
             if (StartProgram != StartProgram.IsOsOptimizer
+                || !IsDeterministicForOptimizerCache
                 || candles == null
                 || candles.Count == 0
                 || DataSeries == null
@@ -848,15 +856,32 @@ namespace OsEngine.Indicators
             cache.Set(BuildOptimizerIndicatorCacheKey(candles), valuesSnapshot);
         }
 
-        private string BuildOptimizerIndicatorCacheKey(List<Candle> candles)
+        private IndicatorCacheKey BuildOptimizerIndicatorCacheKey(List<Candle> candles)
         {
-            string typeName = GetType().FullName ?? GetType().Name;
-            string parameterHash = BuildOptimizerParameterHash();
-            string candlesFingerprint = BuildCandlesFingerprint(candles);
-            int sourceId = RuntimeHelpers.GetHashCode(candles);
+            int candlesCount = candles.Count;
+            Candle first = candles[0];
+            Candle last = candles[candlesCount - 1];
+            long timeframeTicks = candlesCount > 1
+                ? candles[1].TimeStart.Ticks - candles[0].TimeStart.Ticks
+                : 0L;
 
-            return typeName + "|" + parameterHash + "|" + DataSeries.Count + "|" + IncludeIndicators.Count + "|"
-                + sourceId.ToString(CultureInfo.InvariantCulture) + "|" + candlesFingerprint;
+            string calculationName = GetType().FullName ?? GetType().Name;
+            string parameterHash = BuildOptimizerParameterHash();
+            int sourceId = RuntimeHelpers.GetHashCode(candles);
+            int dataFingerprint = BuildCandlesDataFingerprint(candles);
+
+            return new IndicatorCacheKey(
+                securityName: string.Empty,
+                timeframeTicks: timeframeTicks,
+                firstTimeTicks: first.TimeStart.Ticks,
+                lastTimeTicks: last.TimeStart.Ticks,
+                candleCount: candlesCount,
+                calculationName: calculationName,
+                parametersHash: parameterHash,
+                sourceId: sourceId.ToString(CultureInfo.InvariantCulture),
+                outputSeriesCount: DataSeries.Count,
+                includeIndicatorsCount: IncludeIndicators.Count,
+                dataFingerprint: dataFingerprint);
         }
 
         private string BuildOptimizerParameterHash()
@@ -877,7 +902,7 @@ namespace OsEngine.Indicators
             }
         }
 
-        private static string BuildCandlesFingerprint(List<Candle> candles)
+        private static int BuildCandlesDataFingerprint(List<Candle> candles)
         {
             int count = candles.Count;
             Candle first = candles[0];
@@ -899,14 +924,7 @@ namespace OsEngine.Indicators
                 hash = MixCandleHash(hash, first);
                 hash = MixCandleHash(hash, middle);
                 hash = MixCandleHash(hash, last);
-
-                return hash.ToString("X8", CultureInfo.InvariantCulture)
-                    + ":"
-                    + first.TimeStart.Ticks.ToString(CultureInfo.InvariantCulture)
-                    + ":"
-                    + last.TimeStart.Ticks.ToString(CultureInfo.InvariantCulture)
-                    + ":"
-                    + count.ToString(CultureInfo.InvariantCulture);
+                return hash;
             }
         }
 
