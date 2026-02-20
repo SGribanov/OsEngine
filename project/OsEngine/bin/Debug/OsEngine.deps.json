@@ -11,8 +11,10 @@
           "Google.Api.CommonProtos": "2.17.0",
           "Google.Protobuf": "3.33.5",
           "Grpc.Net.Client": "2.76.0",
+          "LiteDB": "5.0.21",
           "Microsoft.CodeAnalysis.CSharp": "5.0.0",
           "Newtonsoft.Json": "13.0.4",
+          "RestSharp": "106.15.0",
           "System.ServiceModel.Federation": "10.0.652802",
           "System.ServiceModel.Http": "10.0.652802",
           "System.ServiceModel.NetTcp": "10.0.652802",
@@ -24,13 +26,10 @@
           "BytesRoad.Net.Sockets": "2.0.0.0",
           "cgate_net64": "5.10.0.36987",
           "FinamApi": "1.0.0.0",
-          "Jayrock.Json": "0.9.16530.0",
-          "LiteDB": "5.0.19.0",
           "MtApi5": "2.0.1.0",
           "MtClient": "1.0.0.0",
           "OpenFAST": "1.1.3.0",
           "QuikSharp": "2.0.0.0",
-          "RestSharp": "105.2.3.0",
           "TInvestApi": "1.0.0.0"
         },
         "runtime": {
@@ -84,6 +83,14 @@
           "lib/net10.0/Grpc.Net.Common.dll": {
             "assemblyVersion": "2.0.0.0",
             "fileVersion": "2.76.0.0"
+          }
+        }
+      },
+      "LiteDB/5.0.21": {
+        "runtime": {
+          "lib/netstandard2.0/LiteDB.dll": {
+            "assemblyVersion": "5.0.21.0",
+            "fileVersion": "5.0.21.0"
           }
         }
       },
@@ -204,6 +211,14 @@
           "lib/net6.0/Newtonsoft.Json.dll": {
             "assemblyVersion": "13.0.0.0",
             "fileVersion": "13.0.4.30916"
+          }
+        }
+      },
+      "RestSharp/106.15.0": {
+        "runtime": {
+          "lib/netstandard2.0/RestSharp.dll": {
+            "assemblyVersion": "106.15.0.0",
+            "fileVersion": "106.15.0.0"
           }
         }
       },
@@ -339,22 +354,6 @@
           }
         }
       },
-      "Jayrock.Json/0.9.16530.0": {
-        "runtime": {
-          "Jayrock.Json.dll": {
-            "assemblyVersion": "0.9.16530.0",
-            "fileVersion": "0.9.17418.1141"
-          }
-        }
-      },
-      "LiteDB/5.0.19.0": {
-        "runtime": {
-          "LiteDB.dll": {
-            "assemblyVersion": "5.0.19.0",
-            "fileVersion": "5.0.19.0"
-          }
-        }
-      },
       "MtApi5/2.0.1.0": {
         "runtime": {
           "MtApi5.dll": {
@@ -384,14 +383,6 @@
           "QuikSharp.dll": {
             "assemblyVersion": "2.0.0.0",
             "fileVersion": "2.0.0.0"
-          }
-        }
-      },
-      "RestSharp/105.2.3.0": {
-        "runtime": {
-          "RestSharp.dll": {
-            "assemblyVersion": "105.2.3.0",
-            "fileVersion": "105.2.3.0"
           }
         }
       },
@@ -445,6 +436,13 @@
       "sha512": "sha512-bZpiMVYgvpB44/wBh1RotrkqC7bg2FOasLri2GhR3hMKyzsiTxCoDE49YjPrJeFc4RW0wS8u+EInI09sjxVFRA==",
       "path": "grpc.net.common/2.76.0",
       "hashPath": "grpc.net.common.2.76.0.nupkg.sha512"
+    },
+    "LiteDB/5.0.21": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-ykJ7ffFl7P9YQKR/PLci6zupiLrsSCNkOTiw6OtzntH7d2kCYp5L1+3a/pksKgTEHcJBoPXFtg7VZSGVBseN9w==",
+      "path": "litedb/5.0.21",
+      "hashPath": "litedb.5.0.21.nupkg.sha512"
     },
     "Microsoft.CodeAnalysis.Common/5.0.0": {
       "type": "package",
@@ -530,6 +528,13 @@
       "path": "newtonsoft.json/13.0.4",
       "hashPath": "newtonsoft.json.13.0.4.nupkg.sha512"
     },
+    "RestSharp/106.15.0": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-HM7ohR6AscxedNenrrl93DSZG6hvdnA7O+NHyCl/6ZKTfn8psQ9rRmUpcb9eWr+140vmfxoVemql0bUoeGEW3A==",
+      "path": "restsharp/106.15.0",
+      "hashPath": "restsharp.106.15.0.nupkg.sha512"
+    },
     "System.ServiceModel.Federation/10.0.652802": {
       "type": "package",
       "serviceable": true,
@@ -606,16 +611,6 @@
       "serviceable": false,
       "sha512": ""
     },
-    "Jayrock.Json/0.9.16530.0": {
-      "type": "reference",
-      "serviceable": false,
-      "sha512": ""
-    },
-    "LiteDB/5.0.19.0": {
-      "type": "reference",
-      "serviceable": false,
-      "sha512": ""
-    },
     "MtApi5/2.0.1.0": {
       "type": "reference",
       "serviceable": false,
@@ -632,11 +627,6 @@
       "sha512": ""
     },
     "QuikSharp/2.0.0.0": {
-      "type": "reference",
-      "serviceable": false,
-      "sha512": ""
-    },
-    "RestSharp/105.2.3.0": {
       "type": "reference",
       "serviceable": false,
       "sha512": ""
