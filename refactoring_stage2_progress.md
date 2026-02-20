@@ -4524,6 +4524,25 @@
 - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` -> success (0 warnings)
 - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed 343/343 (with known NU1900 feed warning)
 
+## 2026-02-20 - Step 4.3 (dependency migration) - Legacy DLL inventory and provenance
+
+- Added repository-wide dependency inventory document:
+  - `DEPENDENCIES.md`
+- Captured all legacy `HintPath` DLL references from `project/OsEngine/OsEngine.csproj`:
+  - `BytesRoad.Net.Ftp.dll`, `BytesRoad.Net.Sockets.dll`, `cgate_net64.dll`, `FinamApi.dll`, `Jayrock.Json.dll`, `LiteDB.dll`, `MtApi5.dll`, `MtClient.dll`, `OpenFAST.dll`, `QuikSharp.dll`, `RestSharp.dll`, `TInvestApi.dll`
+- Recorded for each dependency:
+  - assembly version
+  - source path in repo
+  - SHA256 hash
+  - migration status / notes
+- Added provenance links/notes for local related projects:
+  - `related projects/FinamApi/FinamApi.csproj`
+  - `related projects/TInvestApi/TInvestApi.csproj`
+  - `related projects/QuikSharp/README.txt`
+- Documented current environment blocker for package migration validation:
+  - `dotnet restore ...` fails to reach `https://api.nuget.org/v3/index.json` (`NU1301`, SSL/authentication chain)
+- Scope: completed Step 4.3 baseline governance/inventory work without runtime behavior changes.
+
 ## 2026-02-20 - Step 4.2 (nullable annotations) - Entity position/non-trade UI block
 
 - Updated nullable context in:

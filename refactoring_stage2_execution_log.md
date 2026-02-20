@@ -6442,3 +6442,23 @@
 - **Commit:** `b568494b1` (`refactor(stage2): complete nullable adoption across all project C# files (#312)`)
 - **Push:** `origin/master` updated (`2135763e8 -> b568494b1`)
 - **Post-check:** `project/*.cs` missing `#nullable enable` -> `0`
+
+### Step 4.3 - Legacy DLL to NuGet Migration (Inventory/Preparation #313)
+
+- **Status:** In Progress (inventory completed)
+- **Plan item:** `refactoring_stage2_plan.md` -> Phase 4 / Step 4.3
+- **Changes:**
+  - Added `DEPENDENCIES.md` with full inventory of `HintPath`-based legacy DLL dependencies from `project/OsEngine/OsEngine.csproj`.
+  - Recorded per dependency:
+    - version
+    - source path
+    - SHA256
+    - migration status
+  - Added provenance notes for local related projects (`FinamApi`, `TInvestApi`, modified `QuikSharp` fork reference).
+  - Documented environment constraint blocking safe package migration validation:
+    - `dotnet restore` cannot access nuget.org (`NU1301`, SSL/authentication chain)
+- **Verification:**
+  - `dotnet restore project/OsEngine/OsEngine.csproj --nologo` failed with `NU1301` due nuget.org SSL/auth constraints in this environment.
+  - `dotnet restore project/OsEngine/OsEngine.csproj --nologo --ignore-failed-sources` failed with `NU1101/NU1102` (required packages unavailable from offline feeds).
+- **Commit:** n/a (not committed in this session)
+- **Push:** n/a
