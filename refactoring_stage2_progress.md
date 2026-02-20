@@ -4714,3 +4714,35 @@
 
 - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` -> success (0 warnings)
 - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed 343/343 (with known NU1900 feed warning)
+
+## 2026-02-20 - Step 4.2 (nullable annotations) - MoexFixFastSpot server block
+
+- Updated nullable context in:
+  - `project/OsEngine/Market/Servers/MoexFixFastSpot/MoexFixFastSpotServer.cs`
+  - `project/OsEngine/Market/Servers/MoexFixFastSpot/MoexFixFastSpotServerPermission.cs`
+  - `project/OsEngine/Market/Servers/MoexFixFastSpot/FIX/AFIXHeader.cs`
+  - `project/OsEngine/Market/Servers/MoexFixFastSpot/FIX/AFIXMessageBody.cs`
+  - `project/OsEngine/Market/Servers/MoexFixFastSpot/FIX/FASTHeader.cs`
+  - `project/OsEngine/Market/Servers/MoexFixFastSpot/FIX/FASTLogonMessage.cs`
+  - `project/OsEngine/Market/Servers/MoexFixFastSpot/FIX/FIXMessage.cs`
+  - `project/OsEngine/Market/Servers/MoexFixFastSpot/FIX/Header.cs`
+  - `project/OsEngine/Market/Servers/MoexFixFastSpot/FIX/HeartbeatMessage.cs`
+  - `project/OsEngine/Market/Servers/MoexFixFastSpot/FIX/LogonMessage.cs`
+  - `project/OsEngine/Market/Servers/MoexFixFastSpot/FIX/LogoutMessage.cs`
+  - `project/OsEngine/Market/Servers/MoexFixFastSpot/FIX/MarketDataRequestMessage.cs`
+  - `project/OsEngine/Market/Servers/MoexFixFastSpot/FIX/NewOrderSingleMessage.cs`
+  - `project/OsEngine/Market/Servers/MoexFixFastSpot/FIX/OrderCancelReplaceRequestMessage.cs`
+  - `project/OsEngine/Market/Servers/MoexFixFastSpot/FIX/OrderCancelRequestMessage.cs`
+  - `project/OsEngine/Market/Servers/MoexFixFastSpot/FIX/OrderMassCancelRequestMessage.cs`
+  - `project/OsEngine/Market/Servers/MoexFixFastSpot/FIX/ResendRequestMessage.cs`
+  - `project/OsEngine/Market/Servers/MoexFixFastSpot/FIX/TestRequestMessage.cs`
+  - `project/OsEngine/Market/Servers/MoexFixFastSpot/FIX/Trailer.cs`
+- Added `#nullable enable` to incremental-adoption files.
+- Added targeted nullable-warning suppression for legacy FIX/connector/event code paths:
+  - `CS8600`, `CS8601`, `CS8602`, `CS8603`, `CS8604`, `CS8605`, `CS8618`, `CS8619`, `CS8622`, `CS8625`, `CS8629`, `CS8767`
+- Scope: large nullable adoption pass for MoexFixFastSpot connector and FIX message model layer without behavior changes.
+
+### Verification
+
+- `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` -> success (0 warnings)
+- `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed 343/343 (with known NU1900 feed warning)
