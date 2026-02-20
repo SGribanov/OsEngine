@@ -88,9 +88,6 @@
     <Reference Include="cgate_net64">
       <HintPath>bin\Debug\cgate_net64.dll</HintPath>
     </Reference>
-    <Reference Include="FinamApi">
-      <HintPath>bin\Debug\FinamApi.dll</HintPath>
-    </Reference>
     <Reference Include="MtApi5">
       <HintPath>bin\Debug\MtApi5.dll</HintPath>
       <Private>True</Private>
@@ -125,6 +122,14 @@
     <PackageReference Include="RestSharp" Version="106.15.0" />
     <PackageReference Include="WinForms.DataVisualization" Version="1.10.0" />
     <PackageReference Include="WTelegramClient" Version="4.4.1" />
+  </ItemGroup>
+  <ItemGroup Condition="Exists('..\..\related projects\FinamApi\finam-trade-api\proto\grpc\tradeapi\v1')">
+    <ProjectReference Include="..\..\related projects\FinamApi\FinamApi.csproj" />
+  </ItemGroup>
+  <ItemGroup Condition="!Exists('..\..\related projects\FinamApi\finam-trade-api\proto\grpc\tradeapi\v1')">
+    <Reference Include="FinamApi">
+      <HintPath>bin\Debug\FinamApi.dll</HintPath>
+    </Reference>
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\related projects\TInvestApi\TInvestApi.csproj" />

@@ -5285,3 +5285,22 @@
 - `dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo` -> success
 - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` -> success (0 warnings)
 - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed 343/343
+
+## 2026-02-20 - Step 4.3 (dependency migration) - FinamApi conditional ProjectReference fallback
+
+- Added robust dual-mode dependency wiring for Finam API in:
+  - `project/OsEngine/OsEngine.csproj`
+- Changes applied:
+  - Replaced unconditional binary `Reference Include="FinamApi"` with conditional item groups:
+    - If proto tree exists (`related projects/FinamApi/finam-trade-api/proto/grpc/tradeapi/v1`) -> use `ProjectReference` to `related projects/FinamApi/FinamApi.csproj`
+    - Otherwise -> keep binary fallback (`HintPath` to `bin\\Debug\\FinamApi.dll`)
+- Updated dependency inventory:
+  - `DEPENDENCIES.md` marks FinamApi as hybrid (projectref with binary fallback).
+- Scope: Step 4.3 resilience improvement; no runtime behavior changes.
+
+### Verification
+
+- `dotnet restore project/OsEngine/OsEngine.csproj --nologo` -> success
+- `dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo` -> success
+- `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` -> success (0 warnings)
+- `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed 343/343

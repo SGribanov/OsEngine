@@ -6565,3 +6565,21 @@
   - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` succeeded (`343/343`).
 - **Commit:** n/a (not committed in this session)
 - **Push:** n/a
+
+### Step 4.3 - Legacy DLL to NuGet/ProjectReference Migration (Incremental Adoption #319)
+
+- **Status:** In Progress (increment completed)
+- **Plan item:** `refactoring_stage2_plan.md` -> Phase 4 / Step 4.3
+- **Changes:**
+  - Added conditional dependency wiring for `FinamApi` in `project/OsEngine/OsEngine.csproj`:
+    - `ProjectReference` to `..\\..\\related projects\\FinamApi\\FinamApi.csproj` when proto subtree exists.
+    - Binary fallback `Reference + HintPath` to `bin\\Debug\\FinamApi.dll` when proto subtree is absent.
+  - Updated dependency governance document:
+    - `DEPENDENCIES.md` marks `FinamApi` as hybrid (projectref/fallback).
+- **Verification:**
+  - `dotnet restore project/OsEngine/OsEngine.csproj --nologo` succeeded.
+  - `dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo` succeeded.
+  - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` succeeded (0 warnings).
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` succeeded (`343/343`).
+- **Commit:** n/a (not committed in this session)
+- **Push:** n/a
