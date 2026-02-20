@@ -1,4 +1,7 @@
-﻿#pragma warning disable SYSLIB0060 // Rfc2898DeriveBytes constructor is obsolete
+#nullable enable
+#pragma warning disable CS8600, CS8601, CS8602, CS8603, CS8604, CS8605, CS8618, CS8619, CS8620, CS8622, CS8625, CS8629, CS8765, CS8767
+
+#pragma warning disable SYSLIB0060 // Rfc2898DeriveBytes constructor is obsolete
 using System;
 using System.Diagnostics;
 using System.IO;
@@ -205,3 +208,4 @@ namespace OsEngine.OsTrader.Gui.BlockInterface
         }
     }
 }
+

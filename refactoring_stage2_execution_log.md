@@ -6419,3 +6419,19 @@
   - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` succeeded (`343/343`, with known NU1900 feed warning).
 - **Commit:** n/a (not committed in this session)
 - **Push:** n/a
+
+### Step 4.2 - Nullable Annotations (Incremental Adoption #312)
+
+- **Status:** In Progress (increment completed)
+- **Plan item:** `refactoring_stage2_plan.md` -> Phase 4 / Step 4.2
+- **Changes:**
+  - Completed nullable migration for all remaining C# files under `project` by finishing `project/OsEngine.Tests` coverage (132 files).
+  - Added `#nullable enable` for incremental adoption in this final tests block.
+  - Preserved existing runtime behavior; change scope is nullability context/safety adoption.
+  - Updated running progress journal:
+    - `refactoring_stage2_progress.md`
+- **Verification:**
+  - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` succeeded (0 warnings).
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` succeeded (`343/343`, with known NU1900 feed warning).
+- **Commit:** n/a (not committed in this session)
+- **Push:** n/a

@@ -5158,3 +5158,17 @@
 
 - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` -> success (0 warnings)
 - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed 343/343 (with known NU1900 feed warning)
+
+## 2026-02-20 - Step 4.2 (nullable annotations) - Full project coverage
+
+- Completed nullable context adoption for all remaining C# files in `project`, including full `project/OsEngine.Tests` inventory (132 files).
+- Applied `#nullable enable` and staged nullable-warning suppression for legacy behavior-preserving migration in the final block.
+- Final repository-level nullable coverage check for `project/*.cs`:
+  - Total files checked: 1113
+  - Files missing `#nullable enable`: 0
+- Scope: completed broad nullable migration pass across runtime and test projects without behavior changes.
+
+### Verification
+
+- `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` -> success (0 warnings)
+- `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed 343/343 (with known NU1900 feed warning)
