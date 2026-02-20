@@ -4600,3 +4600,40 @@
 
 - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` -> success (0 warnings)
 - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed 343/343 (with known NU1900 feed warning)
+
+## 2026-02-20 - Step 4.2 (nullable annotations) - Binance server connector block
+
+- Updated nullable context in:
+  - `project/OsEngine/Market/Servers/Binance/Futures/BinanceFuturesServerPermission.cs`
+  - `project/OsEngine/Market/Servers/Binance/Futures/BinanceServerFutures.cs`
+  - `project/OsEngine/Market/Servers/Binance/Futures/Entity/AccountResponseFutures.cs`
+  - `project/OsEngine/Market/Servers/Binance/Futures/Entity/AgregatedHistoryTrade.cs`
+  - `project/OsEngine/Market/Servers/Binance/Futures/Entity/BinanceFutureseDepthResponse.cs`
+  - `project/OsEngine/Market/Servers/Binance/Futures/Entity/OrderUpdResponse.cs`
+  - `project/OsEngine/Market/Servers/Binance/Futures/Entity/PublicMarketDataResponse.cs`
+  - `project/OsEngine/Market/Servers/Binance/Futures/Entity/ResponceFutures.cs`
+  - `project/OsEngine/Market/Servers/Binance/Futures/Entity/TradesResponseReserches.cs`
+  - `project/OsEngine/Market/Servers/Binance/Spot/BinanceServerSpot.cs`
+  - `project/OsEngine/Market/Servers/Binance/Spot/BinanceSpotServerPermission.cs`
+  - `project/OsEngine/Market/Servers/Binance/Spot/BinanceSpotEntity/AccountResponse.cs`
+  - `project/OsEngine/Market/Servers/Binance/Spot/BinanceSpotEntity/AccountResponseMargin.cs`
+  - `project/OsEngine/Market/Servers/Binance/Spot/BinanceSpotEntity/BinanceTime.cs`
+  - `project/OsEngine/Market/Servers/Binance/Spot/BinanceSpotEntity/DepthResponse.cs`
+  - `project/OsEngine/Market/Servers/Binance/Spot/BinanceSpotEntity/ErrorMessage.cs`
+  - `project/OsEngine/Market/Servers/Binance/Spot/BinanceSpotEntity/ExecutionReport.cs`
+  - `project/OsEngine/Market/Servers/Binance/Spot/BinanceSpotEntity/HistoryOrderReport.cs`
+  - `project/OsEngine/Market/Servers/Binance/Spot/BinanceSpotEntity/HistoryTrade.cs`
+  - `project/OsEngine/Market/Servers/Binance/Spot/BinanceSpotEntity/ListenKey.cs`
+  - `project/OsEngine/Market/Servers/Binance/Spot/BinanceSpotEntity/MiniTickerResponse.cs`
+  - `project/OsEngine/Market/Servers/Binance/Spot/BinanceSpotEntity/OutboundAccountInfo.cs`
+  - `project/OsEngine/Market/Servers/Binance/Spot/BinanceSpotEntity/SecurityResponce.cs`
+  - `project/OsEngine/Market/Servers/Binance/Spot/BinanceSpotEntity/TradeResponse.cs`
+- Added `#nullable enable` to incremental-adoption files.
+- Added targeted nullable-warning suppression for legacy connector/DTO/event code paths:
+  - `CS8600`, `CS8601`, `CS8602`, `CS8603`, `CS8604`, `CS8605`, `CS8618`, `CS8619`, `CS8622`, `CS8625`, `CS8629`
+- Scope: large nullable adoption pass for Binance futures/spot connector and transport DTO layers without behavior changes.
+
+### Verification
+
+- `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` -> success (0 warnings)
+- `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed 343/343 (with known NU1900 feed warning)
