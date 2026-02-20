@@ -5246,3 +5246,23 @@
 - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` -> success (0 warnings)
 - `dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo` -> success
 - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed 343/343
+
+## 2026-02-20 - Step 4.3 (dependency migration) - Jayrock.Json removal
+
+- Replaced Jayrock usage in Alor socket DTO:
+  - `project/OsEngine/Market/Servers/Alor/Json/SocketMessageBase.cs`
+- Code change:
+  - `using Jayrock.Json` -> `using Newtonsoft.Json.Linq`
+  - `JsonObject data` -> `JObject data`
+- Removed legacy binary reference from project file:
+  - deleted `Reference Include="Jayrock.Json"` with `HintPath` from `project/OsEngine/OsEngine.csproj`
+- Updated dependency inventory:
+  - `DEPENDENCIES.md` marks `Jayrock.Json` as removed from project references.
+- Scope: Step 4.3 dependency cleanup; runtime behavior preserved (data payload still forwarded via `ToString()`).
+
+### Verification
+
+- `dotnet restore project/OsEngine/OsEngine.csproj --nologo` -> success
+- `dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo` -> success
+- `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` -> success (0 warnings)
+- `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed 343/343

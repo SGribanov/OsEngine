@@ -91,9 +91,6 @@
     <Reference Include="FinamApi">
       <HintPath>bin\Debug\FinamApi.dll</HintPath>
     </Reference>
-    <Reference Include="Jayrock.Json">
-      <HintPath>bin\Debug\Jayrock.Json.dll</HintPath>
-    </Reference>
     <Reference Include="MtApi5">
       <HintPath>bin\Debug\MtApi5.dll</HintPath>
       <Private>True</Private>

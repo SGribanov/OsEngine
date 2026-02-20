@@ -6524,3 +6524,22 @@
   - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` succeeded (`343/343`).
 - **Commit:** n/a (not committed in this session)
 - **Push:** n/a
+
+### Step 4.3 - Legacy DLL to NuGet Migration (Incremental Adoption #317)
+
+- **Status:** In Progress (increment completed)
+- **Plan item:** `refactoring_stage2_plan.md` -> Phase 4 / Step 4.3
+- **Changes:**
+  - Removed `Jayrock.Json` binary reference from `project/OsEngine/OsEngine.csproj`.
+  - Replaced remaining code dependency in Alor DTO:
+    - `project/OsEngine/Market/Servers/Alor/Json/SocketMessageBase.cs`
+    - `JsonObject` -> `Newtonsoft.Json.Linq.JObject`
+  - Updated dependency governance document:
+    - `DEPENDENCIES.md` marks `Jayrock.Json` as removed from project references.
+- **Verification:**
+  - `dotnet restore project/OsEngine/OsEngine.csproj --nologo` succeeded.
+  - `dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo` succeeded.
+  - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` succeeded (0 warnings).
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` succeeded (`343/343`).
+- **Commit:** n/a (not committed in this session)
+- **Push:** n/a
