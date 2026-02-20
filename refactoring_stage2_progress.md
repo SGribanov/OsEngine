@@ -5028,3 +5028,37 @@
 
 - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` -> success (0 warnings)
 - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed 343/343 (with known NU1900 feed warning)
+
+## 2026-02-20 - Step 4.2 (nullable annotations) - MoexAlgopack, TraderNet and Plaza blocks
+
+- Updated nullable context in MoexAlgopack:
+  - `project/OsEngine/Market/Servers/MoexAlgopack/MoexAlgopackServer.cs`
+  - `project/OsEngine/Market/Servers/MoexAlgopack/MoexAlgopackServerPermission.cs`
+  - `project/OsEngine/Market/Servers/MoexAlgopack/Entity/MoexAlgopackAuth.cs`
+  - `project/OsEngine/Market/Servers/MoexAlgopack/Entity/ResponseCandles.cs`
+  - `project/OsEngine/Market/Servers/MoexAlgopack/Entity/ResponseDepth.cs`
+  - `project/OsEngine/Market/Servers/MoexAlgopack/Entity/ResponseSecurities.cs`
+  - `project/OsEngine/Market/Servers/MoexAlgopack/Entity/ResponseTrades.cs`
+- Updated nullable context in TraderNet:
+  - `project/OsEngine/Market/Servers/TraderNet/TraderNetServer.cs`
+  - `project/OsEngine/Market/Servers/TraderNet/TraderNetServerPermission.cs`
+  - `project/OsEngine/Market/Servers/TraderNet/Entity/RequestCandle.cs`
+  - `project/OsEngine/Market/Servers/TraderNet/Entity/RequestSecurity.cs`
+  - `project/OsEngine/Market/Servers/TraderNet/Entity/ResponseRestMessage.cs`
+  - `project/OsEngine/Market/Servers/TraderNet/Entity/ResponseWebSocketMessageAction.cs`
+- Updated nullable context in Plaza:
+  - `project/OsEngine/Market/Servers/Plaza/PlazaServer.cs`
+  - `project/OsEngine/Market/Servers/Plaza/PlazaServerPermission.cs`
+  - `project/OsEngine/Market/Servers/Plaza/Entity/BitMask.cs`
+  - `project/OsEngine/Market/Servers/Plaza/Entity/PlazaChangePriceOrderEntity.cs`
+  - `project/OsEngine/Market/Servers/Plaza/Entity/PositionOnBoardSander.cs`
+  - `project/OsEngine/Market/Servers/Plaza/Entity/RevisionInfo.cs`
+- Added `#nullable enable` to incremental-adoption files.
+- Added targeted nullable-warning suppression for legacy connector/DTO/event code paths:
+  - `CS8600`, `CS8601`, `CS8602`, `CS8603`, `CS8604`, `CS8605`, `CS8618`, `CS8619`, `CS8622`, `CS8625`, `CS8629`
+- Scope: combined nullable adoption pass for MoexAlgopack, TraderNet and Plaza connectors and DTO layers without behavior changes.
+
+### Verification
+
+- `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` -> success (0 warnings)
+- `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed 343/343 (with known NU1900 feed warning)
