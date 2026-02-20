@@ -4637,3 +4637,40 @@
 
 - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` -> success (0 warnings)
 - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed 343/343 (with known NU1900 feed warning)
+
+## 2026-02-20 - Step 4.2 (nullable annotations) - GateIo server connector block
+
+- Updated nullable context in:
+  - `project/OsEngine/Market/Servers/GateIo/ResponseWebsocketMessage.cs`
+  - `project/OsEngine/Market/Servers/GateIo/GateIoFutures/GateIoServerFutures.cs`
+  - `project/OsEngine/Market/Servers/GateIo/GateIoFutures/GateIoServerFuturesPermission.cs`
+  - `project/OsEngine/Market/Servers/GateIo/GateIoFutures/Entities/BalanceResponse.cs`
+  - `project/OsEngine/Market/Servers/GateIo/GateIoFutures/Entities/CancelOrderResponse.cs`
+  - `project/OsEngine/Market/Servers/GateIo/GateIoFutures/Entities/CreateOrderRequest.cs`
+  - `project/OsEngine/Market/Servers/GateIo/GateIoFutures/Entities/CreateOrderResponse.cs`
+  - `project/OsEngine/Market/Servers/GateIo/GateIoFutures/Entities/DataCandle.cs`
+  - `project/OsEngine/Market/Servers/GateIo/GateIoFutures/Entities/DataTrade.cs`
+  - `project/OsEngine/Market/Servers/GateIo/GateIoFutures/Entities/FuturesPing.cs`
+  - `project/OsEngine/Market/Servers/GateIo/GateIoFutures/Entities/GfAccount.cs`
+  - `project/OsEngine/Market/Servers/GateIo/GateIoFutures/Entities/GfContractStat.cs`
+  - `project/OsEngine/Market/Servers/GateIo/GateIoFutures/Entities/GfPosition.cs`
+  - `project/OsEngine/Market/Servers/GateIo/GateIoFutures/Entities/GfSecurity.cs`
+  - `project/OsEngine/Market/Servers/GateIo/GateIoFutures/Entities/GfTicker.cs`
+  - `project/OsEngine/Market/Servers/GateIo/GateIoFutures/Entities/GfTrades.cs`
+  - `project/OsEngine/Market/Servers/GateIo/GateIoFutures/Entities/MdResponse.cs`
+  - `project/OsEngine/Market/Servers/GateIo/GateIoFutures/Entities/PositionResponseSwap.cs`
+  - `project/OsEngine/Market/Servers/GateIo/GateIoFutures/Entities/UserTradeResponse.cs`
+  - `project/OsEngine/Market/Servers/GateIo/GateIoFutures/Entities/WsRequestBuilder.cs`
+  - `project/OsEngine/Market/Servers/GateIo/GateIoSpot/GateIoServerSpot.cs`
+  - `project/OsEngine/Market/Servers/GateIo/GateIoSpot/GateIoSpotServerPermission.cs`
+  - `project/OsEngine/Market/Servers/GateIo/GateIoSpot/Entities/ApiEntities.cs`
+  - `project/OsEngine/Market/Servers/GateIo/GateIoSpot/Entities/PortfolioUpdateEvent.cs`
+- Added `#nullable enable` to incremental-adoption files.
+- Added targeted nullable-warning suppression for legacy connector/DTO/event code paths:
+  - `CS8600`, `CS8601`, `CS8602`, `CS8603`, `CS8604`, `CS8605`, `CS8618`, `CS8619`, `CS8622`, `CS8625`, `CS8629`
+- Scope: large nullable adoption pass for GateIo futures/spot connector and transport DTO layers without behavior changes.
+
+### Verification
+
+- `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` -> success (0 warnings)
+- `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed 343/343 (with known NU1900 feed warning)
