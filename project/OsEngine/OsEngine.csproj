@@ -105,9 +105,6 @@
     <Reference Include="QUIKSharp">
       <HintPath>bin\Debug\QuikSharp.dll</HintPath>
     </Reference>
-    <Reference Include="TInvestApi">
-      <HintPath>bin\Debug\TInvestApi.dll</HintPath>
-    </Reference>
     <Reference Update="System.Runtime.Serialization">
       <Private>True</Private>
     </Reference>
@@ -128,6 +125,9 @@
     <PackageReference Include="RestSharp" Version="106.15.0" />
     <PackageReference Include="WinForms.DataVisualization" Version="1.10.0" />
     <PackageReference Include="WTelegramClient" Version="4.4.1" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\related projects\TInvestApi\TInvestApi.csproj" />
   </ItemGroup>
   <ItemGroup Condition=" '$(Platform)' == 'AnyCPU' ">
     <Content Include="bin\$(Configuration)\libcrypto-3-x64.dll">

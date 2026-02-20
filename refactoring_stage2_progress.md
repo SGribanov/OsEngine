@@ -5266,3 +5266,22 @@
 - `dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo` -> success
 - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` -> success (0 warnings)
 - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed 343/343
+
+## 2026-02-20 - Step 4.3 (dependency migration) - TInvestApi ProjectReference
+
+- Migrated TInvest API dependency from binary `HintPath` reference to project reference in:
+  - `project/OsEngine/OsEngine.csproj`
+- Changes applied:
+  - Removed legacy `Reference Include="TInvestApi"` with `HintPath` to `bin\Debug\TInvestApi.dll`
+  - Added `ProjectReference Include="..\\..\\related projects\\TInvestApi\\TInvestApi.csproj"`
+- Dependency governance update:
+  - `DEPENDENCIES.md` marks `TInvestApi` as migrated to `ProjectReference`.
+  - `FinamApi` remains binary-referenced for now because required proto source tree (`related projects/FinamApi/finam-trade-api/proto/...`) is not present in current checkout.
+- Scope: Step 4.3 dependency source migration without runtime behavior changes.
+
+### Verification
+
+- `dotnet restore project/OsEngine/OsEngine.csproj --nologo` -> success
+- `dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo` -> success
+- `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` -> success (0 warnings)
+- `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed 343/343
