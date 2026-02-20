@@ -4746,3 +4746,33 @@
 
 - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` -> success (0 warnings)
 - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed 343/343 (with known NU1900 feed warning)
+
+## 2026-02-20 - Step 4.2 (nullable annotations) - Alor server connector block
+
+- Updated nullable context in:
+  - `project/OsEngine/Market/Servers/Alor/AlorServer.cs`
+  - `project/OsEngine/Market/Servers/Alor/AlorServerPermission.cs`
+  - `project/OsEngine/Market/Servers/Alor/Json/AlorPortfolioRest.cs`
+  - `project/OsEngine/Market/Servers/Alor/Json/AlorPortfolioSocket.cs`
+  - `project/OsEngine/Market/Servers/Alor/Json/AlorSecurity.cs`
+  - `project/OsEngine/Market/Servers/Alor/Json/CandlesHistoryAlor.cs`
+  - `project/OsEngine/Market/Servers/Alor/Json/MarketDepthAlor.cs`
+  - `project/OsEngine/Market/Servers/Alor/Json/MyTradeAlor.cs`
+  - `project/OsEngine/Market/Servers/Alor/Json/OrderAlor.cs`
+  - `project/OsEngine/Market/Servers/Alor/Json/OrdersAlorRequest.cs`
+  - `project/OsEngine/Market/Servers/Alor/Json/PositionOnBoardAlor.cs`
+  - `project/OsEngine/Market/Servers/Alor/Json/QuotesAlor.cs`
+  - `project/OsEngine/Market/Servers/Alor/Json/RequestSocketSubscribe.cs`
+  - `project/OsEngine/Market/Servers/Alor/Json/RequestSocketUnsubscribe.cs`
+  - `project/OsEngine/Market/Servers/Alor/Json/SocketMessageBase.cs`
+  - `project/OsEngine/Market/Servers/Alor/Json/TokenResponse.cs`
+  - `project/OsEngine/Market/Servers/Alor/Json/TradesHistoryAlor.cs`
+- Added `#nullable enable` to incremental-adoption files.
+- Added targeted nullable-warning suppression for legacy connector/DTO/event code paths:
+  - `CS8600`, `CS8601`, `CS8602`, `CS8603`, `CS8604`, `CS8605`, `CS8618`, `CS8619`, `CS8622`, `CS8625`, `CS8629`
+- Scope: large nullable adoption pass for Alor connector and transport DTO layers without behavior changes.
+
+### Verification
+
+- `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` -> success (0 warnings)
+- `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed 343/343 (with known NU1900 feed warning)
