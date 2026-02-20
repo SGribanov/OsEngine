@@ -4855,3 +4855,26 @@
 
 - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` -> success (0 warnings)
 - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed 343/343 (with known NU1900 feed warning)
+
+## 2026-02-20 - Step 4.2 (nullable annotations) - KuCoin server connector block
+
+- Updated nullable context in:
+  - `project/OsEngine/Market/Servers/KuCoin/KuCoinFutures/KuCoinFuturesServer.cs`
+  - `project/OsEngine/Market/Servers/KuCoin/KuCoinFutures/KuCoinFuturesServerPermission.cs`
+  - `project/OsEngine/Market/Servers/KuCoin/KuCoinFutures/Json/RequestMessagesRest.cs`
+  - `project/OsEngine/Market/Servers/KuCoin/KuCoinFutures/Json/ResponseMessageRest.cs`
+  - `project/OsEngine/Market/Servers/KuCoin/KuCoinFutures/Json/ResponseWebSocketMessageAction.cs`
+  - `project/OsEngine/Market/Servers/KuCoin/KuCoinSpot/KuCoinSpotServer.cs`
+  - `project/OsEngine/Market/Servers/KuCoin/KuCoinSpot/KuCoinSpotServerPermission.cs`
+  - `project/OsEngine/Market/Servers/KuCoin/KuCoinSpot/Json/RequestMessagesRest.cs`
+  - `project/OsEngine/Market/Servers/KuCoin/KuCoinSpot/Json/ResponseMessageRest.cs`
+  - `project/OsEngine/Market/Servers/KuCoin/KuCoinSpot/Json/ResponseWebSocketMessageAction.cs`
+- Added `#nullable enable` to incremental-adoption files.
+- Added targeted nullable-warning suppression for legacy connector/DTO/event code paths:
+  - `CS8600`, `CS8601`, `CS8602`, `CS8603`, `CS8604`, `CS8605`, `CS8618`, `CS8619`, `CS8622`, `CS8625`, `CS8629`
+- Scope: large nullable adoption pass for KuCoin futures/spot connector and transport DTO layers without behavior changes.
+
+### Verification
+
+- `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` -> success (0 warnings)
+- `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed 343/343 (with known NU1900 feed warning)
