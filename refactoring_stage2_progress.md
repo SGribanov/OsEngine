@@ -4674,3 +4674,43 @@
 
 - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` -> success (0 warnings)
 - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed 343/343 (with known NU1900 feed warning)
+
+## 2026-02-20 - Step 4.2 (nullable annotations) - Mexc server connector block
+
+- Updated nullable context in:
+  - `project/OsEngine/Market/Servers/Mexc/MexcSpot/MexcSpotServer.cs`
+  - `project/OsEngine/Market/Servers/Mexc/MexcSpot/MexcSpotServerPermission.cs`
+  - `project/OsEngine/Market/Servers/Mexc/MexcSpot/Entity/AccountWebSocket.cs`
+  - `project/OsEngine/Market/Servers/Mexc/MexcSpot/Entity/DealsWebSocket.cs`
+  - `project/OsEngine/Market/Servers/Mexc/MexcSpot/Entity/DepthsWebSocket.cs`
+  - `project/OsEngine/Market/Servers/Mexc/MexcSpot/Entity/MexcOrdersRest.cs`
+  - `project/OsEngine/Market/Servers/Mexc/MexcSpot/Entity/MexcPortfolioRest.cs`
+  - `project/OsEngine/Market/Servers/Mexc/MexcSpot/Entity/MexcPrivateSocket.cs`
+  - `project/OsEngine/Market/Servers/Mexc/MexcSpot/Entity/MexcSecurityRest.cs`
+  - `project/OsEngine/Market/Servers/Mexc/MexcSpot/Entity/MyTradeWebSocket.cs`
+  - `project/OsEngine/Market/Servers/Mexc/MexcSpot/Entity/OrderWebSocket.cs`
+  - `project/OsEngine/Market/Servers/Mexc/MexcSpot/Entity/PrivateAccountV3Api.cs`
+  - `project/OsEngine/Market/Servers/Mexc/MexcSpot/Entity/PrivateDealsV3Api.cs`
+  - `project/OsEngine/Market/Servers/Mexc/MexcSpot/Entity/PrivateOrdersV3Api.cs`
+  - `project/OsEngine/Market/Servers/Mexc/MexcSpot/Entity/PublicAggreBookTickerV3Api.cs`
+  - `project/OsEngine/Market/Servers/Mexc/MexcSpot/Entity/PublicAggreDealsV3Api.cs`
+  - `project/OsEngine/Market/Servers/Mexc/MexcSpot/Entity/PublicAggreDepthsV3Api.cs`
+  - `project/OsEngine/Market/Servers/Mexc/MexcSpot/Entity/PublicBookTickerBatchV3Api.cs`
+  - `project/OsEngine/Market/Servers/Mexc/MexcSpot/Entity/PublicBookTickerV3Api.cs`
+  - `project/OsEngine/Market/Servers/Mexc/MexcSpot/Entity/PublicDealsV3Api.cs`
+  - `project/OsEngine/Market/Servers/Mexc/MexcSpot/Entity/PublicIncreaseDepthsBatchV3Api.cs`
+  - `project/OsEngine/Market/Servers/Mexc/MexcSpot/Entity/PublicIncreaseDepthsV3Api.cs`
+  - `project/OsEngine/Market/Servers/Mexc/MexcSpot/Entity/PublicLimitDepthsV3Api.cs`
+  - `project/OsEngine/Market/Servers/Mexc/MexcSpot/Entity/PublicMiniTickersV3Api.cs`
+  - `project/OsEngine/Market/Servers/Mexc/MexcSpot/Entity/PublicMiniTickerV3Api.cs`
+  - `project/OsEngine/Market/Servers/Mexc/MexcSpot/Entity/PublicSpotKlineV3Api.cs`
+  - `project/OsEngine/Market/Servers/Mexc/MexcSpot/Entity/PushDataV3ApiWrapper.cs`
+- Added `#nullable enable` to incremental-adoption files.
+- Added targeted nullable-warning suppression for legacy connector/DTO/event code paths:
+  - `CS8600`, `CS8601`, `CS8602`, `CS8603`, `CS8604`, `CS8605`, `CS8618`, `CS8619`, `CS8622`, `CS8625`, `CS8629`, `CS8765`, `CS8767`
+- Scope: large nullable adoption pass for Mexc spot connector and transport DTO layers without behavior changes.
+
+### Verification
+
+- `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` -> success (0 warnings)
+- `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed 343/343 (with known NU1900 feed warning)
