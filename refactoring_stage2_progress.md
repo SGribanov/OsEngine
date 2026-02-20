@@ -5000,3 +5000,31 @@
 
 - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` -> success (0 warnings)
 - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed 343/343 (with known NU1900 feed warning)
+
+## 2026-02-20 - Step 4.2 (nullable annotations) - Transaq and server Entity blocks
+
+- Updated nullable context in Transaq:
+  - `project/OsEngine/Market/Servers/Transaq/TransaqServer.cs`
+  - `project/OsEngine/Market/Servers/Transaq/TransaqServerPermission.cs`
+  - `project/OsEngine/Market/Servers/Transaq/ChangeTransaqPassword.xaml.cs`
+  - `project/OsEngine/Market/Servers/Transaq/TransaqEntity/InfoActiveOrder.cs`
+  - `project/OsEngine/Market/Servers/Transaq/TransaqEntity/TransaqEntities.cs`
+  - `project/OsEngine/Market/Servers/Transaq/TransaqEntity/TransaqPortfolio.cs`
+  - `project/OsEngine/Market/Servers/Transaq/TransaqEntity/TransaqPositions.cs`
+- Updated nullable context in server Entity helpers:
+  - `project/OsEngine/Market/Servers/Entity/BidAskSender.cs`
+  - `project/OsEngine/Market/Servers/Entity/MarshalUTF8.cs`
+  - `project/OsEngine/Market/Servers/Entity/OrderSender.cs`
+  - `project/OsEngine/Market/Servers/Entity/RateGate.cs`
+  - `project/OsEngine/Market/Servers/Entity/ServerParameter.cs`
+  - `project/OsEngine/Market/Servers/Entity/ServerWorkingTimeSettings.cs`
+  - `project/OsEngine/Market/Servers/Entity/TimeManager.cs`
+- Added `#nullable enable` to incremental-adoption files.
+- Added targeted nullable-warning suppression for legacy connector/DTO/event code paths:
+  - `CS8600`, `CS8601`, `CS8602`, `CS8603`, `CS8604`, `CS8605`, `CS8618`, `CS8619`, `CS8622`, `CS8625`, `CS8629`
+- Scope: combined nullable adoption pass for Transaq connector and shared server Entity primitives without behavior changes.
+
+### Verification
+
+- `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` -> success (0 warnings)
+- `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed 343/343 (with known NU1900 feed warning)
