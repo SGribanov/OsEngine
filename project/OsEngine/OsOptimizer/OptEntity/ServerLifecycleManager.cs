@@ -15,6 +15,7 @@ using OsEngine.OsTrader.Panels;
 using OsEngine.OsTrader.Panels.Tab;
 
 #nullable enable
+#pragma warning disable CS8604
 
 namespace OsEngine.OsOptimizer.OptEntity
 {

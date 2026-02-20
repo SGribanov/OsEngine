@@ -5124,3 +5124,37 @@
 
 - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` -> success (0 warnings)
 - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed 343/343 (with known NU1900 feed warning)
+
+## 2026-02-20 - Step 4.2 (nullable annotations) - Remaining Market/Servers final block
+
+- Updated nullable context in remaining `Market/Servers` files (53 files total):
+  - Root server infrastructure (`project/OsEngine/Market/Servers/*.cs`) — 11 files
+  - `Atp` — 3 files
+  - `BitGetData` — 3 files
+  - `BybitData` — 3 files
+  - `FinamGrpc` — 2 files
+  - `FixProtocolEntities` — 3 files
+  - `MetaTrader5` — 2 files
+  - `MFD` — 2 files
+  - `MOEX` — 2 files
+  - `NinjaTrader` — 2 files
+  - `Optimizer` — 3 files
+  - `Polygon` — 3 files
+  - `QscalpMarketDepth` — 2 files
+  - `QuikLua` — 3 files
+  - `RSSNews` — 2 files
+  - `SmartLabNews` — 2 files
+  - `Tester` — 3 files
+  - `TInvest` — 2 files
+- Added `#nullable enable` to incremental-adoption files.
+- Added targeted nullable-warning suppression for legacy connector/DTO/event code paths:
+  - `CS8600`, `CS8601`, `CS8602`, `CS8603`, `CS8604`, `CS8605`, `CS8618`, `CS8619`, `CS8620`, `CS8622`, `CS8625`, `CS8629`, `CS8767`
+- Added compatibility warning handling surfaced by this block:
+  - `project/OsEngine/Market/Servers/QuikLua/Entity/CustomTraceListener.cs`: added `CS8765` to local nullable-suppression set
+  - `project/OsEngine/OsOptimizer/OptEntity/ServerLifecycleManager.cs`: added local `#pragma warning disable CS8604` to preserve existing behavior in nullable context
+- Scope: final nullable adoption pass for remaining server infrastructure and connectors without behavior changes.
+
+### Verification
+
+- `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` -> success (0 warnings)
+- `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed 343/343 (with known NU1900 feed warning)
