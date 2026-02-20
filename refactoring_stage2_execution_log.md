@@ -6583,3 +6583,18 @@
   - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` succeeded (`343/343`).
 - **Commit:** n/a (not committed in this session)
 - **Push:** n/a
+
+### Step 4.3 - Legacy DLL to NuGet/ProjectReference Migration (Incremental Adoption #320)
+
+- **Status:** In Progress (increment completed)
+- **Plan item:** `refactoring_stage2_plan.md` -> Phase 4 / Step 4.3
+- **Changes:**
+  - Completed feasibility audit for remaining legacy DLLs.
+  - Updated `DEPENDENCIES.md` with explicit per-dependency migration rationale:
+    - no NuGet package found for `BytesRoad.Net.Ftp`, `BytesRoad.Net.Sockets`, `MtApi5`, `cgate_net64`
+    - `OpenFAST` NuGet available but older (`1.0.0` vs in-repo `1.1.3.0`)
+    - `QUIKSharp` NuGet available but project uses modified fork
+- **Verification:**
+  - Metadata checks performed against NuGet flat-container/registration endpoints for each package candidate.
+- **Commit:** n/a (not committed in this session)
+- **Push:** n/a

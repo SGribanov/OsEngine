@@ -5304,3 +5304,16 @@
 - `dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo` -> success
 - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` -> success (0 warnings)
 - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed 343/343
+
+## 2026-02-20 - Step 4.3 (dependency migration) - Remaining DLL migration feasibility audit
+
+- Audited remaining legacy DLL references for NuGet migration feasibility:
+  - `BytesRoad.Net.Ftp` -> no package found (`BlobNotFound`)
+  - `BytesRoad.Net.Sockets` -> no package found (`BlobNotFound`)
+  - `MtApi5` -> no package found (`BlobNotFound`)
+  - `cgate_net64` -> no package found (`BlobNotFound`)
+  - `OpenFAST` -> package exists, but latest `1.0.0` is older than in-repo binary `1.1.3.0`
+  - `QUIKSharp` -> package exists, but current project dependency is a modified fork (see `related projects/QuikSharp/README.txt`)
+- Updated dependency governance document with these findings:
+  - `DEPENDENCIES.md`
+- Scope: completed migration-feasibility justification for remaining non-migrated DLLs.

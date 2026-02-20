@@ -8,16 +8,16 @@ Date: 2026-02-20
 
 | Assembly | Version | Source in repo | SHA256 | NuGet migration status |
 |---|---:|---|---|---|
-| `BytesRoad.Net.Ftp.dll` | `2.0.0.0` | `project/OsEngine/bin/Debug/BytesRoad.Net.Ftp.dll` | `EEF0951B171193A61E06007A55EF3EAEA63D443CC0F0DB4C489954055AEA80F5` | Keep as legacy binary for now; candidate package not yet validated in this environment |
-| `BytesRoad.Net.Sockets.dll` | `2.0.0.0` | `project/OsEngine/bin/Debug/BytesRoad.Net.Sockets.dll` | `465BB997A38C5A2433F71F73C9DFE89CD788E9E57671E897FF60A6CFE47508E8` | Keep as legacy binary for now; candidate package not yet validated in this environment |
+| `BytesRoad.Net.Ftp.dll` | `2.0.0.0` | `project/OsEngine/bin/Debug/BytesRoad.Net.Ftp.dll` | `EEF0951B171193A61E06007A55EF3EAEA63D443CC0F0DB4C489954055AEA80F5` | Keep as legacy binary: no matching NuGet package found (`BlobNotFound` for `bytesroad.net.ftp`) |
+| `BytesRoad.Net.Sockets.dll` | `2.0.0.0` | `project/OsEngine/bin/Debug/BytesRoad.Net.Sockets.dll` | `465BB997A38C5A2433F71F73C9DFE89CD788E9E57671E897FF60A6CFE47508E8` | Keep as legacy binary: no matching NuGet package found (`BlobNotFound` for `bytesroad.net.sockets`) |
 | `cgate_net64.dll` | `5.10.0.36987` | `project/OsEngine/bin/Debug/cgate_net64.dll` | `B13E5CC7CED255AA0A693268A1232B34BB4F341BABA110A2BCD978C1AA1914E0` | No direct migration planned; vendor SDK dependency |
 | `FinamApi.dll` | `1.0.0.0` | `project/OsEngine/bin/Debug/FinamApi.dll` | `6E303A34921EA0F6C87E4986455CB7D4ED66D66368D7E950C996C917FA3CBE78` | Hybrid mode: use `ProjectReference` when `related projects/FinamApi/finam-trade-api/proto/...` exists, otherwise fallback to binary `HintPath` |
 | `Jayrock.Json.dll` | `0.9.16530.0` | `project/OsEngine/bin/Debug/Jayrock.Json.dll` | `052EF799BBA47DACD3D7FAAC4F9D629BDD3D50C3FB3BCBF402101A07BEE3976B` | Removed from `OsEngine.csproj`; replaced in code by `Newtonsoft.Json.Linq.JObject` |
 | `LiteDB.dll` | `5.0.19.0` | `project/OsEngine/bin/Debug/LiteDB.dll` | `032548393720FC372BD5FD25EE755D6080975E3B27BB94DC9A5BF3DDF2F41C5F` | Migrated: `LiteDB` now comes from `<PackageReference Include="LiteDB" Version="5.0.21" />` |
-| `MtApi5.dll` | `2.0.1.0` | `project/OsEngine/bin/Debug/MtApi5.dll` | `27D5C861C18A84D5A8C5FA0E8A478C42AB22103B79A823AF4C2393EB49FA51BC` | No direct migration planned; MetaTrader adapter dependency |
+| `MtApi5.dll` | `2.0.1.0` | `project/OsEngine/bin/Debug/MtApi5.dll` | `27D5C861C18A84D5A8C5FA0E8A478C42AB22103B79A823AF4C2393EB49FA51BC` | Keep as legacy binary: no matching NuGet package found (`BlobNotFound` for `mtapi5`) |
 | `MtClient.dll` | `1.0.0.0` | `project/OsEngine/bin/Debug/MtClient.dll` | `FFEB1E00F6F339BDECD6B3992494610825FF4E6997757C557235F71BA9A6E330` | No direct migration planned; MetaTrader adapter dependency |
-| `OpenFAST.dll` | `1.1.3.0` | `project/OsEngine/bin/Debug/OpenFAST.dll` | `CECEC518ACAB25001796BE36C071340A0E1BE58EA7B492D246B506FBBFCDD89B` | Keep as legacy binary for now; candidate package not yet validated in this environment |
-| `QuikSharp.dll` | `2.0.0.0` | `project/OsEngine/bin/Debug/QuikSharp.dll` | `206CE0B13E1E2D750308042F2E67A44C474EC26BE2FB9F17F39BD3F98DB7E2DB` | Local modified fork noted in `related projects/QuikSharp/README.txt`; keep binary reference |
+| `OpenFAST.dll` | `1.1.3.0` | `project/OsEngine/bin/Debug/OpenFAST.dll` | `CECEC518ACAB25001796BE36C071340A0E1BE58EA7B492D246B506FBBFCDD89B` | Keep as legacy binary: NuGet `OpenFAST` exists, but latest is `1.0.0` (older than in-repo `1.1.3.0`) |
+| `QuikSharp.dll` | `2.0.0.0` | `project/OsEngine/bin/Debug/QuikSharp.dll` | `206CE0B13E1E2D750308042F2E67A44C474EC26BE2FB9F17F39BD3F98DB7E2DB` | Keep binary reference: NuGet `QUIKSharp` exists, but project uses modified fork (`related projects/QuikSharp/README.txt`) |
 | `RestSharp.dll` | `105.2.3.0` | `project/OsEngine/bin/Debug/RestSharp.dll` | `0A74D75DFBF2193390969008EC0F6ECEB29C8B20363E05192C959B0FAC12F231` | Migrated: `RestSharp` now comes from `<PackageReference Include="RestSharp" Version="106.15.0" />` |
 | `TInvestApi.dll` | `1.0.0.0` | `project/OsEngine/bin/Debug/TInvestApi.dll` | `8D85C05E17C2ED7E60E4EFBD5BA33D2ACABB51150D42FBB701E1504356CE1105` | Migrated: now linked via `<ProjectReference Include="..\\..\\related projects\\TInvestApi\\TInvestApi.csproj" />` |
 
