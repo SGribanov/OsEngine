@@ -4538,3 +4538,65 @@
 
 - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` -> success (0 warnings)
 - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed 343/343 (with known NU1900 feed warning)
+
+## 2026-02-20 - Step 4.2 (nullable annotations) - Market servers exchange connectors block
+
+- Updated nullable context in:
+  - `project/OsEngine/Market/Servers/BitMart/BitMartFutures/BitMartFutures.cs`
+  - `project/OsEngine/Market/Servers/BitMart/BitMartFutures/BitMartFuturesServerPermission.cs`
+  - `project/OsEngine/Market/Servers/BitMart/BitMartFutures/Entity/BitMartOrdersRest.cs`
+  - `project/OsEngine/Market/Servers/BitMart/BitMartFutures/Entity/BitMartOrdersSocket.cs`
+  - `project/OsEngine/Market/Servers/BitMart/BitMartFutures/Entity/BitMartPortfolioRest.cs`
+  - `project/OsEngine/Market/Servers/BitMart/BitMartFutures/Entity/BitMartPortfolioSocket.cs`
+  - `project/OsEngine/Market/Servers/BitMart/BitMartFutures/Entity/BitMartSecurityRest.cs`
+  - `project/OsEngine/Market/Servers/BitMart/BitMartFutures/Entity/BitMartSecuritySocket.cs`
+  - `project/OsEngine/Market/Servers/BitMart/BitMartSpot/BitMartSpotServer.cs`
+  - `project/OsEngine/Market/Servers/BitMart/BitMartSpot/BitMartSpotServerPermission.cs`
+  - `project/OsEngine/Market/Servers/BitMart/BitMartSpot/Entity/BitMartOrdersRest.cs`
+  - `project/OsEngine/Market/Servers/BitMart/BitMartSpot/Entity/BitMartPortfolioRest.cs`
+  - `project/OsEngine/Market/Servers/BitMart/BitMartSpot/Entity/BitMartPortfolioSocket.cs`
+  - `project/OsEngine/Market/Servers/BitMart/BitMartSpot/Entity/BitMartSecurityRest.cs`
+  - `project/OsEngine/Market/Servers/BitMart/BitMartSpot/Entity/BitMartSecuritySocket.cs`
+  - `project/OsEngine/Market/Servers/BitGet/BitGetFutures/BitGetFuturesServerPermission.cs`
+  - `project/OsEngine/Market/Servers/BitGet/BitGetFutures/BitGetServerFutures.cs`
+  - `project/OsEngine/Market/Servers/BitGet/BitGetFutures/Entity/RequestWebsocketAuth.cs`
+  - `project/OsEngine/Market/Servers/BitGet/BitGetFutures/Entity/ResponseRestMessage.cs`
+  - `project/OsEngine/Market/Servers/BitGet/BitGetFutures/Entity/ResponseWebSocketMessageAction.cs`
+  - `project/OsEngine/Market/Servers/BitGet/BitGetSpot/BitGetServerSpot.cs`
+  - `project/OsEngine/Market/Servers/BitGet/BitGetSpot/BitGetSpotServerPermission.cs`
+  - `project/OsEngine/Market/Servers/BitGet/BitGetSpot/Entity/RequestWebsocketAuth.cs`
+  - `project/OsEngine/Market/Servers/BitGet/BitGetSpot/Entity/ResponseMessageRest.cs`
+  - `project/OsEngine/Market/Servers/BitGet/BitGetSpot/Entity/ResponseWebSocketMessageAction.cs`
+  - `project/OsEngine/Market/Servers/BloFin/BloFinFutures/BloFinFuturesServer.cs`
+  - `project/OsEngine/Market/Servers/BloFin/BloFinFutures/BloFinFuturesServerPermission.cs`
+  - `project/OsEngine/Market/Servers/BloFin/BloFinFutures/Entity/ResponseRestMessage.cs`
+  - `project/OsEngine/Market/Servers/BloFin/BloFinFutures/Entity/ResponseWebSocketMessage.cs`
+  - `project/OsEngine/Market/Servers/HTX/Futures/HTXFuturesServer.cs`
+  - `project/OsEngine/Market/Servers/HTX/Futures/HTXFuturesServerPermission.cs`
+  - `project/OsEngine/Market/Servers/HTX/Futures/Entity/RequestWebsocketMessage.cs`
+  - `project/OsEngine/Market/Servers/HTX/Futures/Entity/ResponseMessageRest.cs`
+  - `project/OsEngine/Market/Servers/HTX/Futures/Entity/ResponseWebSocketMessage.cs`
+  - `project/OsEngine/Market/Servers/HTX/Spot/HTXSpotServer.cs`
+  - `project/OsEngine/Market/Servers/HTX/Spot/HTXSpotServerPermission.cs`
+  - `project/OsEngine/Market/Servers/HTX/Spot/Entity/RequestWebsocketMessage.cs`
+  - `project/OsEngine/Market/Servers/HTX/Spot/Entity/ResponseMessageRest.cs`
+  - `project/OsEngine/Market/Servers/HTX/Spot/Entity/ResponseWebSocketMessage.cs`
+  - `project/OsEngine/Market/Servers/HTX/Swap/HTXSwapServer.cs`
+  - `project/OsEngine/Market/Servers/HTX/Swap/HTXSwapServerPermission.cs`
+  - `project/OsEngine/Market/Servers/HTX/Swap/Entity/RequestWebsocketMessage.cs`
+  - `project/OsEngine/Market/Servers/HTX/Swap/Entity/ResponseMessageRest.cs`
+  - `project/OsEngine/Market/Servers/HTX/Swap/Entity/ResponseWebSocketMessage.cs`
+  - `project/OsEngine/Market/Servers/KiteConnect/KiteConnectServer.cs`
+  - `project/OsEngine/Market/Servers/KiteConnect/KiteConnectServerPermission.cs`
+  - `project/OsEngine/Market/Servers/KiteConnect/Json/DepthItem.cs`
+  - `project/OsEngine/Market/Servers/KiteConnect/Json/ResponseRestKite.cs`
+  - `project/OsEngine/Market/Servers/KiteConnect/Json/ResponseWebSocketKiteConnect.cs`
+- Added `#nullable enable` to incremental-adoption files.
+- Added targeted nullable-warning suppression for legacy connector/DTO/event code paths:
+  - `CS8600`, `CS8601`, `CS8602`, `CS8603`, `CS8604`, `CS8605`, `CS8618`, `CS8619`, `CS8622`, `CS8625`, `CS8629`
+- Scope: large nullable adoption pass for exchange connectors and transport DTO layers without behavior changes.
+
+### Verification
+
+- `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` -> success (0 warnings)
+- `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed 343/343 (with known NU1900 feed warning)
