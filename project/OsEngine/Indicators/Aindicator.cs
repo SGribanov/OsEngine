@@ -9,9 +9,12 @@
 using System;
 using System.Collections.Generic;
 using System.Drawing;
+using System.Globalization;
 using System.IO;
+using System.Runtime.CompilerServices;
 using OsEngine.Entity;
 using OsEngine.Attributes;
+using OsEngine.OsOptimizer.OptEntity;
 using static System.Runtime.InteropServices.JavaScript.JSType;
 using System.Threading;
 
@@ -19,6 +22,19 @@ namespace OsEngine.Indicators
 {
     public abstract class Aindicator : IIndicator
     {
+        private static IndicatorCache _optimizerIndicatorCache;
+
+        public static void SetOptimizerIndicatorCache(IndicatorCache cache)
+        {
+            Volatile.Write(ref _optimizerIndicatorCache, cache);
+        }
+
+        public static void ClearOptimizerIndicatorCache()
+        {
+            IndicatorCache cache = Interlocked.Exchange(ref _optimizerIndicatorCache, null);
+            cache?.Clear();
+        }
+
         #region Mandatory overload members
 
         public abstract void OnStateChange(IndicatorState state);
@@ -729,6 +745,11 @@ namespace OsEngine.Indicators
 
         private void ProcessAll(List<Candle> candles)
         {
+            if (TryRestoreSeriesFromOptimizerCache(candles))
+            {
+                return;
+            }
+
             for (int i = 0; i < IncludeIndicators.Count; i++)
             {
                 IncludeIndicators[i].Clear();
@@ -743,6 +764,164 @@ namespace OsEngine.Indicators
             for (int i = 0; i < candles.Count; i++)
             {
                 ProcessNew(candles, i);
+            }
+
+            SaveSeriesToOptimizerCache(candles);
+        }
+
+        private bool TryRestoreSeriesFromOptimizerCache(List<Candle> candles)
+        {
+            if (StartProgram != StartProgram.IsOsOptimizer
+                || candles == null
+                || candles.Count == 0
+                || DataSeries == null
+                || DataSeries.Count == 0)
+            {
+                return false;
+            }
+
+            IndicatorCache cache = Volatile.Read(ref _optimizerIndicatorCache);
+
+            if (cache == null)
+            {
+                return false;
+            }
+
+            string cacheKey = BuildOptimizerIndicatorCacheKey(candles);
+
+            if (!cache.TryGet(cacheKey, out List<decimal>[] cachedSeries)
+                || cachedSeries == null
+                || cachedSeries.Length != DataSeries.Count)
+            {
+                return false;
+            }
+
+            for (int i = 0; i < DataSeries.Count; i++)
+            {
+                if (cachedSeries[i] == null
+                    || cachedSeries[i].Count != candles.Count)
+                {
+                    return false;
+                }
+            }
+
+            for (int i = 0; i < DataSeries.Count; i++)
+            {
+                DataSeries[i].Values.Clear();
+                DataSeries[i].Values.AddRange(cachedSeries[i]);
+            }
+
+            for (int i = 0; i < IncludeIndicators.Count; i++)
+            {
+                IncludeIndicators[i].Clear();
+                IncludeIndicators[i].Process(candles);
+            }
+
+            return true;
+        }
+
+        private void SaveSeriesToOptimizerCache(List<Candle> candles)
+        {
+            if (StartProgram != StartProgram.IsOsOptimizer
+                || candles == null
+                || candles.Count == 0
+                || DataSeries == null
+                || DataSeries.Count == 0)
+            {
+                return;
+            }
+
+            IndicatorCache cache = Volatile.Read(ref _optimizerIndicatorCache);
+
+            if (cache == null)
+            {
+                return;
+            }
+
+            List<decimal>[] valuesSnapshot = new List<decimal>[DataSeries.Count];
+
+            for (int i = 0; i < DataSeries.Count; i++)
+            {
+                valuesSnapshot[i] = new List<decimal>(DataSeries[i].Values);
+            }
+
+            cache.Set(BuildOptimizerIndicatorCacheKey(candles), valuesSnapshot);
+        }
+
+        private string BuildOptimizerIndicatorCacheKey(List<Candle> candles)
+        {
+            string typeName = GetType().FullName ?? GetType().Name;
+            string parameterHash = BuildOptimizerParameterHash();
+            string candlesFingerprint = BuildCandlesFingerprint(candles);
+            int sourceId = RuntimeHelpers.GetHashCode(candles);
+
+            return typeName + "|" + parameterHash + "|" + DataSeries.Count + "|" + IncludeIndicators.Count + "|"
+                + sourceId.ToString(CultureInfo.InvariantCulture) + "|" + candlesFingerprint;
+        }
+
+        private string BuildOptimizerParameterHash()
+        {
+            unchecked
+            {
+                int hash = 17;
+
+                for (int i = 0; i < _parameters.Count; i++)
+                {
+                    string parameterSave = _parameters[i]?.GetStringToSave();
+                    hash = hash * 31 + (parameterSave == null
+                        ? 0
+                        : StringComparer.Ordinal.GetHashCode(parameterSave));
+                }
+
+                return hash.ToString("X8", CultureInfo.InvariantCulture);
+            }
+        }
+
+        private static string BuildCandlesFingerprint(List<Candle> candles)
+        {
+            int count = candles.Count;
+            Candle first = candles[0];
+            Candle middle = candles[count / 2];
+            Candle last = candles[count - 1];
+
+            long timeframeTicks = 0;
+
+            if (count > 1)
+            {
+                timeframeTicks = candles[1].TimeStart.Ticks - candles[0].TimeStart.Ticks;
+            }
+
+            unchecked
+            {
+                int hash = 17;
+                hash = hash * 31 + count;
+                hash = hash * 31 + timeframeTicks.GetHashCode();
+                hash = MixCandleHash(hash, first);
+                hash = MixCandleHash(hash, middle);
+                hash = MixCandleHash(hash, last);
+
+                return hash.ToString("X8", CultureInfo.InvariantCulture)
+                    + ":"
+                    + first.TimeStart.Ticks.ToString(CultureInfo.InvariantCulture)
+                    + ":"
+                    + last.TimeStart.Ticks.ToString(CultureInfo.InvariantCulture)
+                    + ":"
+                    + count.ToString(CultureInfo.InvariantCulture);
+            }
+        }
+
+        private static int MixCandleHash(int currentHash, Candle candle)
+        {
+            unchecked
+            {
+                int hash = currentHash;
+                hash = hash * 31 + candle.TimeStart.Ticks.GetHashCode();
+                hash = hash * 31 + candle.Open.GetHashCode();
+                hash = hash * 31 + candle.High.GetHashCode();
+                hash = hash * 31 + candle.Low.GetHashCode();
+                hash = hash * 31 + candle.Close.GetHashCode();
+                hash = hash * 31 + candle.Volume.GetHashCode();
+                return hash;
             }
         }
 

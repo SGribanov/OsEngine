@@ -6618,3 +6618,46 @@
   - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` succeeded (`343/343`).
 - **Commit:** n/a (not committed in this session)
 - **Push:** n/a
+
+### Step 3.1 - Optimizer Performance (Indicator Result Cache) (Incremental Adoption #322)
+
+- **Status:** In Progress (increment completed)
+- **Plan item:** `refactoring_stage2_plan.md` -> Phase 3 / Step 3.1
+- **Changes:**
+  - Added `project/OsEngine/OsOptimizer/OptEntity/IndicatorCache.cs` with:
+    - thread-safe dictionary-backed storage
+    - clone-on-read/write behavior for `List<decimal>[]` snapshots
+    - deterministic capacity policy (clear-all on max entries)
+  - Updated `project/OsEngine/Indicators/Aindicator.cs`:
+    - added optimizer cache context API (`SetOptimizerIndicatorCache` / `ClearOptimizerIndicatorCache`)
+    - wired cache restore/store around `ProcessAll(List<Candle>)`
+    - cache key hardened with indicator type + parameter hash + series shape + source identity/range fingerprint
+    - cache logic explicitly guarded by `StartProgram.IsOsOptimizer`
+  - Updated `project/OsEngine/OsOptimizer/OptimizerExecutor.cs`:
+    - per-run cache initialization before prime worker start
+    - per-run cache disposal in synchronization cleanup/finalization
+- **Verification:**
+  - `dotnet restore project/OsEngine/OsEngine.csproj --nologo` succeeded.
+  - `dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo` succeeded.
+  - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` succeeded (0 warnings).
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` succeeded (`343/343`).
+  - Note: sandbox build path reproduced intermittent `NU1301` (TLS credential package issue); verification completed in host context (same command set) and passed.
+- **Commit:** n/a (not committed in this session)
+- **Push:** n/a
+
+### Step 3.2 - Optimizer Performance (Candle Data Reference Sharing) (Verification #323)
+
+- **Status:** In Progress (verification increment completed)
+- **Plan item:** `refactoring_stage2_plan.md` -> Phase 3 / Step 3.2
+- **Changes:**
+  - Audited candle data flow in optimizer runtime:
+    - `project/OsEngine/Market/Servers/Optimizer/OptimizerServer.cs`
+    - `project/OsEngine/Market/Servers/Optimizer/OptimizerDataStorage.cs`
+  - Confirmed shared-reference behavior already present:
+    - `securityOpt.Candles` receives cached `DataStorage.Candles` reference
+    - `GetStorageToSecurity(...)` returns cached storage for identical keys, enabling cross-bot list reuse
+  - No code modifications required for this increment.
+- **Verification:**
+  - Structural code audit completed; no regressions introduced (read-only verification).
+- **Commit:** n/a (not committed in this session)
+- **Push:** n/a

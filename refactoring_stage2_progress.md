@@ -5336,3 +5336,46 @@
 - `dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo` -> success
 - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` -> success (0 warnings)
 - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed 343/343
+
+## 2026-02-20 - Step 3.1 (optimizer performance) - Indicator result cache implementation
+
+- Added shared optimizer indicator cache class:
+  - `project/OsEngine/OsOptimizer/OptEntity/IndicatorCache.cs`
+- Integrated indicator cache lifecycle into optimizer executor:
+  - `project/OsEngine/OsOptimizer/OptimizerExecutor.cs`
+  - initialize per optimization run (`PrepareIndicatorCache`) with bounded capacity (`maxEntries = max(256, threads*128)`)
+  - deterministic eviction policy in cache: clear-all when entry limit is reached
+  - cleanup on run finalization (`DisposeIndicatorCache`)
+- Integrated cache hit/miss flow into indicator full recalculation path:
+  - `project/OsEngine/Indicators/Aindicator.cs`
+  - `ProcessAll(List<Candle>)` now:
+    - tries cache restore first in optimizer mode only (`StartProgram.IsOsOptimizer`)
+    - computes normally on miss and stores `DataSeries` snapshot on completion
+  - cache key includes:
+    - indicator type
+    - parameter hash
+    - data-series/include-indicator shape
+    - source identity (`RuntimeHelpers.GetHashCode(candles)`) + candle range fingerprint (count, timeframe step, first/middle/last OHLCV + time range)
+  - cached values are cloned on set/get to prevent shared mutable state between bots.
+- Scope guard preserved:
+  - cache branch is active only for optimizer mode; non-optimizer execution path remains unchanged.
+
+### Verification
+
+- Host-context verification (outside sandbox due intermittent sandbox TLS/NuGet issue):
+  - `dotnet restore project/OsEngine/OsEngine.csproj --nologo` -> success
+  - `dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo` -> success
+  - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` -> success (0 warnings)
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed `343/343`
+
+## 2026-02-20 - Step 3.2 (optimizer performance) - Candle reference-sharing verification
+
+- Reviewed optimizer candle data flow in:
+  - `project/OsEngine/Market/Servers/Optimizer/OptimizerServer.cs`
+  - `project/OsEngine/Market/Servers/Optimizer/OptimizerDataStorage.cs`
+- Confirmed that optimizer server binds candle data by reference:
+  - `securityOpt.Candles = dataStorage.Candles`
+  - storage cache returns shared `DataStorage` for identical `(security, timeframe, range, type)` lookups.
+- Result:
+  - existing implementation already shares candle list references across optimizer bots for identical data keys.
+  - no code changes required for this verification increment.

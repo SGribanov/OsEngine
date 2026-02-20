@@ -14,6 +14,7 @@ using OsEngine.Logging;
 using OsEngine.Market;
 using OsEngine.Market.Servers.Optimizer;
 using OsEngine.Market.Servers.Tester;
+using OsEngine.Indicators;
 using OsEngine.OsTrader.Panels;
 using OsEngine.OsOptimizer.OptimizerEntity;
 using OsEngine.OsOptimizer.OptEntity;
@@ -48,6 +49,7 @@ namespace OsEngine.OsOptimizer
 
         private readonly BotConfigurator _botConfigurator;
         private readonly Lock _reportsSync = new();
+        private IndicatorCache _indicatorCache;
 
         private SemaphoreSlim _serverSlots;
 
@@ -257,6 +259,8 @@ namespace OsEngine.OsOptimizer
                 {
                     SendLogMessage("Optimizer start cleanup failed: previous server slots dispose. " + ex, LogMessageType.Error);
                 }
+
+                PrepareIndicatorCache(threadsCount);
 
                 Thread primeWorker = new Thread(PrimeThreadWorkerPlace);
                 primeWorker.Name = "OptimizerExecutorThread";
@@ -1797,6 +1801,8 @@ namespace OsEngine.OsOptimizer
 
         private void DisposeRunSynchronization()
         {
+            DisposeIndicatorCache();
+
             CancelPendingEvaluations("Optimizer cleanup canceled pending evaluations: ");
 
             CountdownEvent phaseCompletion = Interlocked.Exchange(ref _phaseCompletion, null);
@@ -1828,6 +1834,32 @@ namespace OsEngine.OsOptimizer
             {
                 SendLogMessage("Optimizer sync cleanup failed: stop token source dispose. " + ex, LogMessageType.Error);
             }
+        }
+
+        private void PrepareIndicatorCache(int threadsCount)
+        {
+            DisposeIndicatorCache();
+
+            int maxEntries = Math.Max(256, threadsCount * 128);
+            IndicatorCache cache = new IndicatorCache(maxEntries);
+            Interlocked.Exchange(ref _indicatorCache, cache);
+            Aindicator.SetOptimizerIndicatorCache(cache);
+        }
+
+        private void DisposeIndicatorCache()
+        {
+            IndicatorCache cache = Interlocked.Exchange(ref _indicatorCache, null);
+
+            try
+            {
+                cache?.Clear();
+            }
+            catch (Exception ex)
+            {
+                SendLogMessage("Optimizer indicator cache cleanup failed: " + ex, LogMessageType.Error);
+            }
+
+            Aindicator.SetOptimizerIndicatorCache(null);
         }
 
         private void CancelPendingEvaluations(string messagePrefix)
