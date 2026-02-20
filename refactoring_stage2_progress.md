@@ -5209,3 +5209,20 @@
 - `dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo` -> success
 - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` -> success (0 warnings)
 - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed 343/343
+
+## 2026-02-20 - Step 4.3 (dependency migration) - LiteDB upgrade to latest stable
+
+- Upgraded LiteDB PackageReference in:
+  - `project/OsEngine/OsEngine.csproj`
+- Version change:
+  - `LiteDB` `5.0.19` -> `5.0.21` (latest stable on NuGet at the time of update)
+- Updated dependency inventory note:
+  - `DEPENDENCIES.md` now reflects `PackageReference Include="LiteDB" Version="5.0.21"`
+- Scope: dependency version update only; no behavioral code changes.
+
+### Verification
+
+- `dotnet restore project/OsEngine/OsEngine.csproj --nologo` -> success
+- `dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo` -> success
+- `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` -> success (0 warnings)
+- `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed 343/343
