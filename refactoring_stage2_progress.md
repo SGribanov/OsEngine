@@ -4431,3 +4431,22 @@
 
 - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` -> success
 - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed 343/343 (with known NU1900 feed warning)
+
+## 2026-02-20 - Step 4.2 (nullable annotations) - Entity core/network block
+
+- Updated nullable context in:
+  - `project/OsEngine/Entity/Security.cs`
+  - `project/OsEngine/Entity/WebSocketOsEngine.cs`
+  - `project/OsEngine/Entity/CointegrationBuilder.cs`
+- Added `#nullable enable` to incremental-adoption files.
+- Added nullable-safe defaults and annotations while preserving behavior:
+  - `Security`: initialized core string identifiers (`Name`, `NameFull`, `NameClass`, `NameId`, `Exchange`, `UnderlyingAsset`) with `string.Empty`
+  - `WebSocketOsEngine`: added targeted nullable-warning suppression for legacy async/event socket paths:
+    - `CS8600`, `CS8601`, `CS8602`, `CS8603`, `CS8604`, `CS8618`, `CS8622`, `CS8625`
+  - `CointegrationBuilder`: nullable context enabled without behavioral changes
+- Scope: larger nullable adoption pass for core entity/network helpers without behavior changes.
+
+### Verification
+
+- `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` -> success
+- `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed 343/343 (with known NU1900 feed warning)

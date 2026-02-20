@@ -6,6 +6,8 @@
 using System;
 using System.Globalization;
 
+#nullable enable
+
 namespace OsEngine.Entity
 {
     /// <summary>
@@ -28,19 +30,19 @@ namespace OsEngine.Entity
         /// securuty name
         /// название инструмена
         /// </summary>
-        public string Name;
+        public string Name = string.Empty;
 
         /// <summary>
         /// full name
         /// полное название
         /// </summary>
-        public string NameFull;
+        public string NameFull = string.Empty;
 
         /// <summary>
         /// class code
         /// код класса
         /// </summary>
-        public string NameClass;
+        public string NameClass = string.Empty;
 
         /// <summary>
         /// Unique tool identifier.
@@ -48,12 +50,12 @@ namespace OsEngine.Entity
         /// Уникальный идентификатор инструмента.
         ///  Используется в некоторых платформах как главный ключ инструмента в торговой системе.
         /// </summary>
-        public string NameId;
+        public string NameId = string.Empty;
 
         /// <summary>
         /// Биржа на которой торгуется инструмент
         /// </summary>
-        public string Exchange;
+        public string Exchange = string.Empty;
 
         /// <summary>
         /// the trading status of this instrument on the stock exchange
@@ -330,7 +332,7 @@ namespace OsEngine.Entity
         /// Underlying asset (for Options)
         /// Базовый актив (для опционов)
         /// </summary>
-        public string UnderlyingAsset;
+        public string UnderlyingAsset = string.Empty;
 
     }
 
