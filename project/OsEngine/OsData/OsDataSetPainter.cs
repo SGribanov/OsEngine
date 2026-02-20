@@ -27,26 +27,31 @@ namespace OsEngine.OsData
 
         private static void AddPainterInArray(OsDataSetPainter painter)
         {
-            _painters.Add(painter);
-
-            if (_worker == null)
+            lock (_locker)
             {
-                _worker = new Thread(PainterThreadArea);
-                _worker.IsBackground = true;
-                _worker.Start();
+                _painters.Add(painter);
+
+                if (_worker == null)
+                {
+                    _worker = new Thread(PainterThreadArea);
+                    _worker.IsBackground = true;
+                    _worker.Start();
+                }
             }
         }
 
         private static void DeletePainterFromArray(OsDataSetPainter painter)
         {
-            for (int i = 0; i < _painters.Count; i++)
+            lock (_locker)
             {
-                if (_painters[i].UID == painter.UID)
+                for (int i = 0; i < _painters.Count; i++)
                 {
-                    _painters.RemoveAt(i);
-                    break;
+                    if (_painters[i].UID == painter.UID)
+                    {
+                        _painters.RemoveAt(i);
+                        break;
+                    }
                 }
-
             }
         }
 
@@ -68,10 +73,18 @@ namespace OsEngine.OsData
                 }
                 catch(Exception ex)
                 {
-                    if(_painters != null &&
-                        _painters.Count > 0)
+                    OsDataSetPainter firstPainter = null;
+                    lock (_locker)
                     {
-                        _painters[0].SendNewLogMessage(ex.ToString(),LogMessageType.Error);
+                        if (_painters != null && _painters.Count > 0)
+                        {
+                            firstPainter = _painters[0];
+                        }
+                    }
+
+                    if (firstPainter != null)
+                    {
+                        firstPainter.SendNewLogMessage(ex.ToString(),LogMessageType.Error);
                     }
 
                     Thread.Sleep(5000);

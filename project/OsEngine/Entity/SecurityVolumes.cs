@@ -1,10 +1,12 @@
-﻿using System;
+using System;
+
+#nullable enable
 
 namespace OsEngine.Entity
 {
     public class SecurityVolumes
     {
-        public string SecurityNameCode;
+        public string SecurityNameCode = string.Empty;
 
         /// <summary>
         /// volume in currency
@@ -19,3 +21,4 @@ namespace OsEngine.Entity
         public DateTime TimeUpdate;
     }
 }
+

@@ -143,6 +143,7 @@ namespace OsEngine.Candles
         }
 
         private static readonly List<ACandlesSeriesRealization> _compiledScriptInstancesCache = new List<ACandlesSeriesRealization>();
+        private static readonly Lock _compiledScriptInstancesCacheLock = new();
         private static List<MetadataReference> _baseReferences;
         private static readonly Lock _referencesLock = new();
 
@@ -197,7 +198,7 @@ namespace OsEngine.Candles
         private static ACandlesSeriesRealization CompileAndInstantiateScript(string scriptPath, string nameClass)
         {
             // 1. Try to clone from previously compiled and cached instances
-            lock (_compiledScriptInstancesCache) // Ensure thread safety for cache access
+            lock (_compiledScriptInstancesCacheLock)
             {
                 foreach (var cachedInstance in _compiledScriptInstancesCache)
                 {
@@ -315,7 +316,7 @@ namespace OsEngine.Candles
                 ACandlesSeriesRealization newInstance = (ACandlesSeriesRealization)Activator.CreateInstance(typeToInstantiate);
 
                 // Cache the successfully compiled instance for future cloning
-                lock (_compiledScriptInstancesCache)
+                lock (_compiledScriptInstancesCacheLock)
                 {
                     // Check again to prevent adding duplicates if another thread just compiled it
                     if (!_compiledScriptInstancesCache.Any(ci => ci.GetType().FullName == newInstance.GetType().FullName))
@@ -349,7 +350,8 @@ namespace OsEngine.Candles
             return File.ReadAllText(path);
         }
 
-        private static List<NamesFilesFromFolder> _filesInDir = new List<NamesFilesFromFolder>();
+        private static readonly List<NamesFilesFromFolder> _filesInDir = new List<NamesFilesFromFolder>();
+        private static readonly Lock _filesInDirLock = new();
 
         private static List<string> GetFullNamesFromFolder(string directory)
         {
@@ -359,7 +361,7 @@ namespace OsEngine.Candles
             // It's removed here as it wouldn't correctly filter a "Dlls" folder path.
             // If filtering out "Dlls" subdirectories is intended, it needs different logic.
 
-            lock (_filesInDir) // Basic thread safety for the cache
+            lock (_filesInDirLock)
             {
                 var existingEntry = _filesInDir.FirstOrDefault(f => f != null && f.Folder == directory);
                 if (existingEntry != null)
@@ -391,7 +393,7 @@ namespace OsEngine.Candles
                 return results; // Return whatever was collected so far or an empty list
             }
 
-            lock (_filesInDir)
+            lock (_filesInDirLock)
             {
                 // Ensure no duplicate entry is added if multiple threads call concurrently for the same new folder
                 if (!_filesInDir.Any(f => f != null && f.Folder == directory))

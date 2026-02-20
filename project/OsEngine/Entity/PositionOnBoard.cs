@@ -3,6 +3,8 @@
  * Ваши права на использование кода регулируются данной лицензией http://o-s-a.net/doc/license_simple_engine.pdf
 */
 
+#nullable enable
+
 namespace OsEngine.Entity
 {
     /// <summary>
@@ -33,11 +35,11 @@ namespace OsEngine.Entity
         /// <summary>
         /// Tool for which the position is open
         /// </summary>
-        public string SecurityNameCode;
+        public string SecurityNameCode = string.Empty;
 
         /// <summary>
         /// Portfolio on which the position is open
         /// </summary>
-        public string PortfolioName;
+        public string PortfolioName = string.Empty;
     }
 }

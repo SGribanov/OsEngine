@@ -1,10 +1,12 @@
-﻿using System;
+using System;
+
+#nullable enable
 
 namespace OsEngine.Entity
 {   
     public class Funding
     {
-        public string SecurityNameCode;
+        public string SecurityNameCode = string.Empty;
 
         public decimal CurrentValue;
 
@@ -23,3 +25,4 @@ namespace OsEngine.Entity
         public decimal MinFundingRate;
     }    
 }
+

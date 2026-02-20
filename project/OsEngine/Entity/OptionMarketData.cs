@@ -1,9 +1,11 @@
-﻿using System;
+using System;
+
+#nullable enable
 
 namespace OsEngine.Entity
 {
     public class OptionMarketData
-    {       
+    {
         public double Delta;
 
         public double Vega;
@@ -18,49 +20,49 @@ namespace OsEngine.Entity
 
         public double MarkPrice;
 
-        public string SecurityName;
+        public string SecurityName = string.Empty;
 
         public DateTime TimeCreate;
 
         public double OpenInterest;
-                
+
         public double BidIV;
 
         public double AskIV;
 
         public double UnderlyingPrice;
 
-        public string UnderlyingAsset;
+        public string UnderlyingAsset = string.Empty;
     }
 
     public class OptionMarketDataForConnector
     {
-        public string Delta;
+        public string Delta = string.Empty;
 
-        public string Vega;
+        public string Vega = string.Empty;
 
-        public string Gamma;
+        public string Gamma = string.Empty;
 
-        public string Theta;
+        public string Theta = string.Empty;
 
-        public string Rho;
+        public string Rho = string.Empty;
 
-        public string MarkIV;
+        public string MarkIV = string.Empty;
 
-        public string MarkPrice;
+        public string MarkPrice = string.Empty;
 
-        public string SecurityName;
+        public string SecurityName = string.Empty;
 
-        public string TimeCreate;
+        public string TimeCreate = string.Empty;
 
-        public string OpenInterest;
+        public string OpenInterest = string.Empty;
 
-        public string BidIV;
+        public string BidIV = string.Empty;
 
-        public string AskIV;
+        public string AskIV = string.Empty;
 
-        public string UnderlyingPrice;
+        public string UnderlyingPrice = string.Empty;
 
-        public string UnderlyingAsset;
+        public string UnderlyingAsset = string.Empty;
     }
 }

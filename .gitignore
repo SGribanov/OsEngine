@@ -318,3 +318,4 @@ __pycache__/
 # tools/**
 # !tools/packages.config
 /.dotnet_home/.dotnet
+.claude/session-memory/

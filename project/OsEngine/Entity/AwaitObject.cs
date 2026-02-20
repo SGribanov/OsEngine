@@ -6,6 +6,8 @@
 using System;
 using System.Threading;
 
+#nullable enable
+
 namespace OsEngine.Entity
 {
     public class AwaitObject
@@ -28,10 +30,7 @@ namespace OsEngine.Entity
         {
             _isDisposed = true;
 
-            if (DisposedEvent != null)
-            {
-                DisposedEvent();
-            }
+            DisposedEvent?.Invoke();
         }
 
         public bool IsDisposed
@@ -75,10 +74,7 @@ namespace OsEngine.Entity
                 }
                 _label = value;
 
-                if(LabelChangedEvent != null)
-                {
-                    LabelChangedEvent(_label);
-                }
+                LabelChangedEvent?.Invoke(_label);
             }
         }
         private string _label;
@@ -95,10 +91,7 @@ namespace OsEngine.Entity
 
                 _valueCurrent = value;
 
-                if(ValueCurrentChangedEvent != null)
-                {
-                    ValueCurrentChangedEvent(_valueCurrent);
-                }
+                ValueCurrentChangedEvent?.Invoke(_valueCurrent);
             }
         }
         private decimal _valueCurrent;
@@ -115,21 +108,18 @@ namespace OsEngine.Entity
 
                 _valueMaximum = value;
 
-                if(ValueMaximumChangedEvent != null)
-                {
-                    ValueMaximumChangedEvent(_valueMaximum);
-                }
+                ValueMaximumChangedEvent?.Invoke(_valueMaximum);
             }
         }
 
         private decimal _valueMaximum;
 
-        public event Action<string> LabelChangedEvent;
+        public event Action<string>? LabelChangedEvent;
 
-        public event Action<decimal> ValueCurrentChangedEvent;
+        public event Action<decimal>? ValueCurrentChangedEvent;
 
-        public event Action<decimal> ValueMaximumChangedEvent;
+        public event Action<decimal>? ValueMaximumChangedEvent;
 
-        public event Action DisposedEvent;
+        public event Action? DisposedEvent;
     }
 }

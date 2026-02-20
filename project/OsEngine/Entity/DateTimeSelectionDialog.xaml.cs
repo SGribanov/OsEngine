@@ -7,6 +7,9 @@ using System;
 using System.Windows;
 using OsEngine.Language;
 
+#nullable enable
+#pragma warning disable CS8629
+
 namespace OsEngine.Entity
 {
     public partial class DateTimeSelectionDialog : Window

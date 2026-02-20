@@ -5454,3 +5454,269 @@
   - `csharp-ls --diagnose --solution project/OsEngine.sln` invoked, but solution load failed in current sandbox (`UnauthorizedAccessException` from named-pipe build host).
 - **Commit:** `16970e4fb`
 - **Push:** yes (`origin/master`)
+
+### Step 4.1 - Lock Migration (Incremental Adoption #268)
+
+- **Status:** In Progress (increment completed)
+- **Plan item:** `refactoring_stage2_plan.md` -> Phase 4 / Step 4.1
+- **Changes:**
+  - Hardened lock targets in:
+    - `project/OsEngine/Candles/Factory/CandleFactory.cs`
+  - Replaced collection-object lock targets with dedicated lock fields:
+    - `_compiledScriptInstancesCacheLock` for script-instance cache synchronization
+    - `_filesInDirLock` for file-list cache synchronization
+  - Preserved lock scope and call-site behavior (`lock (...)` blocks remain in the same logical locations).
+  - Updated running progress journal:
+    - `refactoring_stage2_progress.md`
+- **Verification:**
+  - `dotnet build project/OsEngine.sln --no-restore -v minimal` failed in the current sandbox at WPF `GenerateTemporaryTargetAssembly` stage with no compiler diagnostics (`0 errors / 0 warnings`), so full compile validation could not be completed in this environment.
+- **Commit:** n/a (not committed in this session)
+- **Push:** n/a
+
+### Step 4.2 - Nullable Annotations (Incremental Adoption #269)
+
+- **Status:** In Progress (increment completed)
+- **Plan item:** `refactoring_stage2_plan.md` -> Phase 4 / Step 4.2
+- **Changes:**
+  - Continued nullable migration in optimizer UI layer:
+    - `project/OsEngine/OsOptimizer/OptimizerReportUi.xaml.cs`
+  - Added `#nullable enable` and targeted nullable-warning suppression for legacy UI paths:
+    - `CS8600`, `CS8601`, `CS8602`, `CS8604`, `CS8618`, `CS8622`, `CS8625`
+  - Added nullable-safe field defaults and annotations while preserving behavior:
+    - initialized `_reports` and `_lastValues`
+    - deferred UI fields use null-forgiving initialization (`_gridFazesEnd`, `_gridResults`, `_chartSeriesResult`)
+    - readonly field annotations for `_master` and `_resultsCharting`
+    - nullable-aware `ReadLine()` local (`string? str`)
+    - non-null defaults for `ChartOptimizationResultValue` string fields
+  - Updated running progress journal:
+    - `refactoring_stage2_progress.md`
+- **Verification:**
+  - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` succeeded.
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` succeeded (`343/343`, with known NU1900 feed warning).
+- **Commit:** n/a (not committed in this session)
+- **Push:** n/a
+
+### Step 4.1 - Lock Migration (Incremental Adoption #270)
+
+- **Status:** In Progress (increment completed)
+- **Plan item:** `refactoring_stage2_plan.md` -> Phase 4 / Step 4.1
+- **Changes:**
+  - Hardened synchronization for shared painter list in:
+    - `project/OsEngine/OsData/OsDataSetPainter.cs`
+  - Added lock coverage for shared static list mutation/read paths:
+    - `AddPainterInArray(...)` now mutates `_painters` and starts `_worker` under `_locker`
+    - `DeletePainterFromArray(...)` now mutates `_painters` under `_locker`
+    - catch-path access to first painter moved under `_locker` with post-lock logging call
+  - Preserved runtime behavior; changes are synchronization-only.
+  - Updated running progress journal:
+    - `refactoring_stage2_progress.md`
+- **Verification:**
+  - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` succeeded.
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` succeeded (`343/343`, with known NU1900 feed warning).
+- **Commit:** n/a (not committed in this session)
+- **Push:** n/a
+
+### Step 4.1 - Lock Migration (Incremental Adoption #271)
+
+- **Status:** In Progress (increment completed)
+- **Plan item:** `refactoring_stage2_plan.md` -> Phase 4 / Step 4.1
+- **Changes:**
+  - Hardened synchronization in global layout manager:
+    - `project/OsEngine/Layout/GlobalGUILayout.cs`
+  - Added lock coverage for shared static state access:
+    - existing-window lookup/update path in `Listen(...)`
+    - `_needToSave` read in `SaveWorkerPlace()`
+    - `UiOpenWindows` iteration in `Save()`
+  - Preserved existing save/load semantics and event model.
+  - Updated running progress journal:
+    - `refactoring_stage2_progress.md`
+- **Verification:**
+  - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` succeeded.
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` succeeded (`343/343`) after one retry.
+  - Note: first test attempt failed with transient `CS2012` file-lock on `obj\\Release\\OsEngine.dll` in WPF temporary project; immediate rerun passed.
+- **Commit:** n/a (not committed in this session)
+- **Push:** n/a
+
+### Step 4.2 - Nullable Annotations (Incremental Adoption #272)
+
+- **Status:** In Progress (increment completed)
+- **Plan item:** `refactoring_stage2_plan.md` -> Phase 4 / Step 4.2
+- **Changes:**
+  - Continued nullable migration in optimizer orchestration layer:
+    - `project/OsEngine/OsOptimizer/OptimizerMaster.cs`
+  - Added `#nullable enable` and targeted nullable-warning suppression:
+    - `CS8600`, `CS8601`, `CS8602`, `CS8603`, `CS8604`, `CS8618`, `CS8622`, `CS8625`
+  - Added nullable-safe defaults/annotations while preserving behavior:
+    - readonly annotations for ctor-initialized members (`Storage`, `ManualControl`, `_optimizerExecutor`, `_log`)
+    - initialized progress status members with safe defaults
+    - initialized DTO list properties (`ParameterLines`, `ParametersOn`)
+    - initialized DTO string fields (`NameSecurity`, `Formula`)
+  - Updated running progress journal:
+    - `refactoring_stage2_progress.md`
+- **Verification:**
+  - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` succeeded after one retry.
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` succeeded (`343/343`, with known NU1900 feed warning).
+  - Note: first build attempt failed with transient `CS2012` file-lock on `obj\\Release\\OsEngine.dll`; immediate rerun passed.
+- **Commit:** n/a (not committed in this session)
+- **Push:** n/a
+
+### Step 4.2 - Nullable Annotations (Incremental Adoption #273)
+
+- **Status:** In Progress (increment completed)
+- **Plan item:** `refactoring_stage2_plan.md` -> Phase 4 / Step 4.2
+- **Changes:**
+  - Continued nullable migration in optimizer UI shell:
+    - `project/OsEngine/OsOptimizer/OptimizerUi.xaml.cs`
+  - Added `#nullable enable` and targeted nullable-warning suppression:
+    - `CS8600`, `CS8601`, `CS8602`, `CS8603`, `CS8604`, `CS8605`, `CS8618`, `CS8622`, `CS8625`, `CS8629`
+  - Preserved legacy null-sensitive WPF/UI paths without behavior changes.
+  - Updated running progress journal:
+    - `refactoring_stage2_progress.md`
+- **Verification:**
+  - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` succeeded.
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` succeeded (`343/343`) after one retry.
+  - Note: first test attempt failed with transient `CS2012` file-lock on `obj\\Release\\OsEngine.dll` in WPF temporary project; immediate rerun passed.
+- **Commit:** n/a (not committed in this session)
+- **Push:** n/a
+
+### Step 4.2 - Nullable Annotations (Incremental Adoption #274)
+
+- **Status:** In Progress (increment completed)
+- **Plan item:** `refactoring_stage2_plan.md` -> Phase 4 / Step 4.2
+- **Changes:**
+  - Continued nullable migration in optimizer execution layer:
+    - `project/OsEngine/OsOptimizer/OptimizerExecutor.cs`
+  - Added `#nullable enable` and targeted nullable-warning suppression:
+    - `CS8600`, `CS8601`, `CS8602`, `CS8603`, `CS8604`, `CS8605`, `CS8618`, `CS8622`, `CS8625`, `CS8629`
+  - Preserved existing optimizer runtime behavior; change scope is nullable context adoption only.
+  - Updated running progress journal:
+    - `refactoring_stage2_progress.md`
+- **Verification:**
+  - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` succeeded.
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` succeeded (`343/343`, with known NU1900 feed warning).
+- **Commit:** n/a (not committed in this session)
+- **Push:** n/a
+
+### Step 4.2 - Nullable Annotations (Incremental Adoption #275)
+
+- **Status:** In Progress (increment completed)
+- **Plan item:** `refactoring_stage2_plan.md` -> Phase 4 / Step 4.2
+- **Changes:**
+  - Continued nullable migration in compact Entity primitives:
+    - `project/OsEngine/Entity/News.cs`
+    - `project/OsEngine/Entity/SecurityVolumes.cs`
+    - `project/OsEngine/Entity/StartProgram.cs`
+  - Added `#nullable enable` for incremental adoption in these files.
+  - Added nullable-safe defaults for string members:
+    - `News.Source`, `News.Value` -> `string.Empty`
+    - `SecurityVolumes.SecurityNameCode` -> `string.Empty`
+  - Preserved existing runtime behavior; change scope is nullability safety metadata/default initialization.
+  - Updated running progress journal:
+    - `refactoring_stage2_progress.md`
+- **Verification:**
+  - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` succeeded.
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` succeeded (`343/343`, with known NU1900 feed warning).
+- **Commit:** n/a (not committed in this session)
+- **Push:** n/a
+
+### Step 4.2 - Nullable Annotations (Incremental Adoption #276)
+
+- **Status:** In Progress (increment completed)
+- **Plan item:** `refactoring_stage2_plan.md` -> Phase 4 / Step 4.2
+- **Changes:**
+  - Continued nullable migration in compact Entity DTOs:
+    - `project/OsEngine/Entity/Funding.cs`
+    - `project/OsEngine/Entity/PositionOnBoard.cs`
+  - Added `#nullable enable` for incremental adoption in these files.
+  - Added nullable-safe defaults for string members:
+    - `Funding.SecurityNameCode` -> `string.Empty`
+    - `PositionOnBoard.SecurityNameCode`, `PositionOnBoard.PortfolioName` -> `string.Empty`
+  - Preserved existing runtime behavior; change scope is nullability safety metadata/default initialization.
+  - Updated running progress journal:
+    - `refactoring_stage2_progress.md`
+- **Verification:**
+  - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` succeeded.
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` succeeded (`343/343`, with known NU1900 feed warning).
+- **Commit:** n/a (not committed in this session)
+- **Push:** n/a
+
+### Step 4.2 - Nullable Annotations (Incremental Adoption #277)
+
+- **Status:** In Progress (increment completed)
+- **Plan item:** `refactoring_stage2_plan.md` -> Phase 4 / Step 4.2
+- **Changes:**
+  - Continued nullable migration in compact Entity option/utility layer:
+    - `project/OsEngine/Entity/OptionMarketData.cs`
+    - `project/OsEngine/Entity/Utils/CompressionUtils.cs`
+  - Added `#nullable enable` for incremental adoption in these files.
+  - Added nullable-safe defaults for option DTO string members:
+    - `OptionMarketData.SecurityName`, `OptionMarketData.UnderlyingAsset` -> `string.Empty`
+    - `OptionMarketDataForConnector` string fields -> `string.Empty`
+  - Preserved existing runtime behavior; change scope is nullability safety metadata/default initialization.
+  - Updated running progress journal:
+    - `refactoring_stage2_progress.md`
+- **Verification:**
+  - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` succeeded.
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` succeeded (`343/343`, with known NU1900 feed warning).
+- **Commit:** n/a (not committed in this session)
+- **Push:** n/a
+
+### Step 4.2 - Nullable Annotations (Incremental Adoption #278)
+
+- **Status:** In Progress (increment completed)
+- **Plan item:** `refactoring_stage2_plan.md` -> Phase 4 / Step 4.2
+- **Changes:**
+  - Continued nullable migration in compact Entity dialog UI layer:
+    - `project/OsEngine/Entity/CustomMessageBoxUi.xaml.cs`
+    - `project/OsEngine/Entity/AcceptDialogUi.xaml.cs`
+  - Added `#nullable enable` for incremental adoption in these files.
+  - Preserved existing runtime behavior; change scope is nullability context adoption only.
+  - Updated running progress journal:
+    - `refactoring_stage2_progress.md`
+- **Verification:**
+  - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` succeeded.
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` succeeded (`343/343`, with known NU1900 feed warning).
+- **Commit:** n/a (not committed in this session)
+- **Push:** n/a
+
+### Step 4.2 - Nullable Annotations (Incremental Adoption #279)
+
+- **Status:** In Progress (increment completed)
+- **Plan item:** `refactoring_stage2_plan.md` -> Phase 4 / Step 4.2
+- **Changes:**
+  - Continued nullable migration in compact Entity dialog UI layer:
+    - `project/OsEngine/Entity/DateTimeSelectionDialog.xaml.cs`
+  - Added `#nullable enable` for incremental adoption in this file.
+  - Added targeted nullable-warning suppression:
+    - `CS8629` for existing `SelectedDate.Value` usage path.
+  - Preserved existing runtime behavior; change scope is nullability context adoption only.
+  - Updated running progress journal:
+    - `refactoring_stage2_progress.md`
+- **Verification:**
+  - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` succeeded.
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` succeeded (`343/343`, with known NU1900 feed warning).
+- **Commit:** n/a (not committed in this session)
+- **Push:** n/a
+
+### Step 4.2 - Nullable Annotations (Incremental Adoption #280)
+
+- **Status:** In Progress (increment completed)
+- **Plan item:** `refactoring_stage2_plan.md` -> Phase 4 / Step 4.2
+- **Changes:**
+  - Continued nullable migration in compact Entity await layer:
+    - `project/OsEngine/Entity/AwaitObject.cs`
+    - `project/OsEngine/Entity/AwaitUi.xaml.cs`
+  - Added `#nullable enable` for incremental adoption in these files.
+  - Applied nullable-safe event invocation/annotations in `AwaitObject`:
+    - replaced manual null checks with `?.Invoke(...)`
+    - marked events nullable (`Action?` / `Action<T>?`)
+  - Added targeted nullable-warning suppression in `AwaitUi.xaml.cs`:
+    - `CS8600`, `CS8601`, `CS8602`, `CS8604`, `CS8618`, `CS8622`, `CS8625`
+  - Preserved existing runtime behavior; change scope is nullability safety/context adoption.
+  - Updated running progress journal:
+    - `refactoring_stage2_progress.md`
+- **Verification:**
+  - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` succeeded.
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` succeeded (`343/343`, with known NU1900 feed warning).
+- **Commit:** n/a (not committed in this session)
+- **Push:** n/a

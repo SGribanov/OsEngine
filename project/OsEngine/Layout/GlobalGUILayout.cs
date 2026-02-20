@@ -41,15 +41,18 @@ namespace OsEngine.Layout
                 }
             }
 
-            for (int i = 0; i < UiOpenWindows.Count; i++)
+            lock (_lockerArrayWithWindows)
             {
-                if (UiOpenWindows[i].Name == name)
+                for (int i = 0; i < UiOpenWindows.Count; i++)
                 {
-                    SetLayoutInWindow(ui, UiOpenWindows[i].Layout);
-                    UiOpenWindows[i].WindowCreateTime = DateTime.Now;
-                    UiOpenWindows[i].IsActivate = false;
-                    UiOpenWindows[i].Ui = ui;
-                    return;
+                    if (UiOpenWindows[i].Name == name)
+                    {
+                        SetLayoutInWindow(ui, UiOpenWindows[i].Layout);
+                        UiOpenWindows[i].WindowCreateTime = DateTime.Now;
+                        UiOpenWindows[i].IsActivate = false;
+                        UiOpenWindows[i].Ui = ui;
+                        return;
+                    }
                 }
             }
 
@@ -201,7 +204,13 @@ namespace OsEngine.Layout
             {
                 Thread.Sleep(1000);
 
-                if(_needToSave == false)
+                bool needToSave;
+                lock (_lockerArrayWithWindows)
+                {
+                    needToSave = _needToSave;
+                }
+
+                if (needToSave == false)
                 {
                     continue;
                 }
@@ -221,29 +230,32 @@ namespace OsEngine.Layout
             {
                 List<string> windowsToSave = new List<string>();
 
-                for(int i = 0;i < UiOpenWindows.Count;i++)
+                lock (_lockerArrayWithWindows)
                 {
-                    if (UiOpenWindows[i].Layout.Height == 0 ||
-                        UiOpenWindows[i].Layout.Widht == 0 ||
-                        UiOpenWindows[i].Layout.Left == 0 ||
-                        UiOpenWindows[i].Layout.Top == 0)
+                    for(int i = 0;i < UiOpenWindows.Count;i++)
                     {
-                        continue;
+                        if (UiOpenWindows[i].Layout.Height == 0 ||
+                            UiOpenWindows[i].Layout.Widht == 0 ||
+                            UiOpenWindows[i].Layout.Left == 0 ||
+                            UiOpenWindows[i].Layout.Top == 0)
+                        {
+                            continue;
+                        }
+
+                        if (UiOpenWindows[i].Layout.Left == -32000 ||
+                            UiOpenWindows[i].Layout.Top == -32000)
+                        {//свернутое значение окна пропускаем при сохранение
+                            continue;
+                        }
+
+
+                        if (UiOpenWindows[i].Layout.Height < 0 || UiOpenWindows[i].Layout.Widht < 0)
+                        {
+                            continue;
+                        }
+
+                        windowsToSave.Add(UiOpenWindows[i].GetSaveString());
                     }
-
-                    if (UiOpenWindows[i].Layout.Left == -32000 ||
-                        UiOpenWindows[i].Layout.Top == -32000)
-                    {//свернутое значение окна пропускаем при сохранение
-                        continue;
-                    }
-
-
-                    if (UiOpenWindows[i].Layout.Height < 0 || UiOpenWindows[i].Layout.Widht < 0)
-                    {
-                        continue;
-                    }
-
-                    windowsToSave.Add(UiOpenWindows[i].GetSaveString());
                 }
 
                 SettingsManager.Save(

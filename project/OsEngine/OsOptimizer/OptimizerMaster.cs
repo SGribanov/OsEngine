@@ -22,6 +22,9 @@ using OsEngine.OsTrader.Panels.Tab;
 using OsEngine.Market;
 using OsEngine.OsOptimizer.OptEntity;
 
+#nullable enable
+#pragma warning disable CS8600, CS8601, CS8602, CS8603, CS8604, CS8618, CS8622, CS8625
+
 namespace OsEngine.OsOptimizer
 {
     public class OptimizerMaster
@@ -433,9 +436,9 @@ namespace OsEngine.OsOptimizer
             status.MaxValue = maxVal;
         }
 
-        public List<ProgressBarStatus> ProgressBarStatuses;
+        public List<ProgressBarStatus> ProgressBarStatuses = new List<ProgressBarStatus>();
 
-        public ProgressBarStatus PrimeProgressBarStatus;
+        public ProgressBarStatus PrimeProgressBarStatus = new ProgressBarStatus();
 
         #endregion
 
@@ -461,7 +464,7 @@ namespace OsEngine.OsOptimizer
             return false;
         }
 
-        public OptimizerDataStorage Storage;
+        public readonly OptimizerDataStorage Storage;
 
         private void _storage_TimeChangeEvent(DateTime timeStart, DateTime timeEnd)
         {
@@ -488,7 +491,7 @@ namespace OsEngine.OsOptimizer
             get { return Storage.SecuritiesTester; }
         }
 
-        public BotManualControl ManualControl;
+        public readonly BotManualControl ManualControl;
 
         public BotPanel BotToTest;
 
@@ -984,19 +987,19 @@ namespace OsEngine.OsOptimizer
 
         private sealed class OptimizerStandardParametersDto
         {
-            public List<string> ParameterLines { get; set; }
+            public List<string> ParameterLines { get; set; } = new List<string>();
         }
 
         private sealed class OptimizerStandardParametersOnOffDto
         {
-            public List<bool> ParametersOn { get; set; }
+            public List<bool> ParametersOn { get; set; } = new List<bool>();
         }
 
         #endregion
 
         #region Start optimization algorithm
 
-        public OptimizerExecutor _optimizerExecutor;
+        public readonly OptimizerExecutor _optimizerExecutor;
 
         public bool Start()
         {
@@ -1452,7 +1455,7 @@ namespace OsEngine.OsOptimizer
 
         #region Log
 
-        private Log _log;
+        private readonly Log _log;
 
         public void StartPaintLog(WindowsFormsHost logHost)
         {
@@ -1549,7 +1552,7 @@ namespace OsEngine.OsOptimizer
     {
         public int NumberOfTab;
 
-        public string NameSecurity;
+        public string NameSecurity = string.Empty;
 
         public TimeFrame TimeFrame;
 
@@ -1581,7 +1584,7 @@ namespace OsEngine.OsOptimizer
 
         public TimeFrame TimeFrame;
 
-        public string Formula;
+        public string Formula = string.Empty;
 
         public string GetSaveString()
         {

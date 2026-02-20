@@ -3,6 +3,8 @@ using System.IO;
 using System.IO.Compression;
 using System.Text;
 
+#nullable enable
+
 namespace OsEngine.Entity.Utils
 {
     public static class CompressionUtils

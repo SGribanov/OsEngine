@@ -19,6 +19,9 @@ using System.Windows.Forms.DataVisualization.Charting;
 using System.Drawing;
 using System.Linq;
 
+#nullable enable
+#pragma warning disable CS8600, CS8601, CS8602, CS8604, CS8618, CS8622, CS8625
+
 namespace OsEngine.OsOptimizer
 {
     /// <summary>
@@ -89,14 +92,14 @@ namespace OsEngine.OsOptimizer
                     _gridFazesEnd.CellClick -= _gridFazesEnd_CellClick;
                     _gridFazesEnd.DataError -= _gridFazesEnd_DataError;
                     DataGridFactory.ClearLinks(_gridFazesEnd);
-                    _gridFazesEnd = null;
+                    _gridFazesEnd = null!;
                 }
 
                 if (_gridResults != null)
                 {
                     _gridResults.DataError -= _gridFazesEnd_DataError;
                     DataGridFactory.ClearLinks(_gridResults);
-                    _gridResults = null;
+                    _gridResults = null!;
                 }
             }
             catch
@@ -122,11 +125,11 @@ namespace OsEngine.OsOptimizer
             RepaintResults();
         }
 
-        OptimizerMaster _master;
+        private readonly OptimizerMaster _master;
 
-        private List<OptimizerFazeReport> _reports;
+        private List<OptimizerFazeReport> _reports = new List<OptimizerFazeReport>();
 
-        private OptimizerReportCharting _resultsCharting;
+        private readonly OptimizerReportCharting _resultsCharting;
 
         private void RepaintResults()
         {
@@ -326,7 +329,7 @@ namespace OsEngine.OsOptimizer
                 {
                     while (reader.EndOfStream == false)
                     {
-                        string str = reader.ReadLine();
+                        string? str = reader.ReadLine();
 
                         if (string.IsNullOrEmpty(str))
                         {
@@ -349,7 +352,7 @@ namespace OsEngine.OsOptimizer
 
         #region Phase table for switching after testing
 
-        private DataGridView _gridFazesEnd;
+        private DataGridView _gridFazesEnd = null!;
 
         private void CreateTableFazes()
         {
@@ -470,7 +473,7 @@ namespace OsEngine.OsOptimizer
 
         #region Optimization results table
 
-        private DataGridView _gridResults;
+        private DataGridView _gridResults = null!;
 
         private void CreateTableResults()
         {
@@ -937,7 +940,7 @@ namespace OsEngine.OsOptimizer
 
         #region Series results chart
 
-        private Chart _chartSeriesResult;
+        private Chart _chartSeriesResult = null!;
 
         public void CreateChartSeriesResults()
         {
@@ -1216,7 +1219,7 @@ namespace OsEngine.OsOptimizer
             }
         }
 
-        List<ChartOptimizationResultValue> _lastValues;
+        private List<ChartOptimizationResultValue> _lastValues = new List<ChartOptimizationResultValue>();
 
         private void SetColorInOptimizationResultValues(List<ChartOptimizationResultValue> resultValues)
         {
@@ -1265,11 +1268,11 @@ namespace OsEngine.OsOptimizer
     {
         public decimal Value;
 
-        public string BotName;
+        public string BotName = string.Empty;
 
         public int BotNum;
 
-        public string Parameters;
+        public string Parameters = string.Empty;
 
         public Color Color;
 

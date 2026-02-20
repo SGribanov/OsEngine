@@ -4145,3 +4145,205 @@
 - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo` -> success (only known NU1900 warning)
 - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed 343/343
 - `csharp-ls --diagnose --solution project/OsEngine.sln` -> invoked, but solution load failed in current sandbox (`UnauthorizedAccessException` from named-pipe build host)
+
+## 2026-02-20 - Step 4.1 (lock migration) - CandleFactory lock-target hardening
+
+- Updated lock usage in:
+  - `project/OsEngine/Candles/Factory/CandleFactory.cs`
+- Replaced collection-targeted locks with dedicated `System.Threading.Lock` fields:
+  - added `_compiledScriptInstancesCacheLock` and switched cache lock sites to this lock
+  - added `_filesInDirLock` and switched directory-cache lock sites to this lock
+- Preserved synchronization scope and behavior; only lock target objects were changed.
+
+### Verification
+
+- `dotnet build project/OsEngine.sln --no-restore -v minimal` -> failed in current sandbox at WPF `GenerateTemporaryTargetAssembly` stage with no compiler diagnostics emitted (`0 errors / 0 warnings`).
+
+## 2026-02-20 - Step 4.2 (nullable annotations) - Optimizer report UI block
+
+- Updated nullable context in:
+  - `project/OsEngine/OsOptimizer/OptimizerReportUi.xaml.cs`
+- Added nullable context and legacy-safe suppression set for incremental adoption:
+  - added `#nullable enable`
+  - added targeted warning suppression: `CS8600`, `CS8601`, `CS8602`, `CS8604`, `CS8618`, `CS8622`, `CS8625`
+- Added nullable-safe field initialization/annotations to preserve runtime behavior:
+  - non-null initializers for `_reports`, `_lastValues`
+  - null-forgiving deferred UI fields (`_gridFazesEnd`, `_gridResults`, `_chartSeriesResult`)
+  - readonly annotations for `_master`, `_resultsCharting`
+  - nullable-safe `ReadLine()` local (`string? str`)
+  - initialized `ChartOptimizationResultValue` string fields with empty defaults
+
+### Verification
+
+- `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` -> success
+- `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed 343/343 (with known NU1900 feed warning)
+
+## 2026-02-20 - Step 4.1 (lock migration) - OsDataSetPainter static-list synchronization hardening
+
+- Updated lock usage in:
+  - `project/OsEngine/OsData/OsDataSetPainter.cs`
+- Hardened synchronization around shared static `_painters` list:
+  - wrapped `AddPainterInArray(...)` mutate + worker-start check in `_locker`
+  - wrapped `DeletePainterFromArray(...)` mutate path in `_locker`
+  - wrapped catch-path read of `_painters[0]` in `_locker` and moved logging call outside lock
+- Preserved existing behavior and thread model; only synchronization scope for shared list access was tightened.
+
+### Verification
+
+- `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` -> success
+- `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed 343/343 (with known NU1900 feed warning)
+
+## 2026-02-20 - Step 4.1 (lock migration) - GlobalGUILayout shared-state synchronization hardening
+
+- Updated lock usage in:
+  - `project/OsEngine/Layout/GlobalGUILayout.cs`
+- Hardened synchronization for shared static layout state:
+  - wrapped existing-window lookup/update in `Listen(...)` under `_lockerArrayWithWindows`
+  - wrapped `_needToSave` read in `SaveWorkerPlace()` under `_lockerArrayWithWindows`
+  - wrapped `UiOpenWindows` iteration in `Save()` under `_lockerArrayWithWindows`
+- Preserved layout save/load behavior and threading model; changes are synchronization-only.
+
+### Verification
+
+- `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` -> success
+- `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed 343/343 after one retry (first run had transient `CS2012` file-lock on `obj\\Release\\OsEngine.dll` in WPF temp project)
+
+## 2026-02-20 - Step 4.2 (nullable annotations) - Optimizer master orchestration block
+
+- Updated nullable context in:
+  - `project/OsEngine/OsOptimizer/OptimizerMaster.cs`
+- Added nullable context and targeted suppression set for incremental adoption:
+  - added `#nullable enable`
+  - added targeted warning suppression: `CS8600`, `CS8601`, `CS8602`, `CS8603`, `CS8604`, `CS8618`, `CS8622`, `CS8625`
+- Added nullable-safe defaults/annotations without changing logic:
+  - readonly annotations for ctor-initialized fields: `Storage`, `ManualControl`, `_optimizerExecutor`, `_log`
+  - initialized progress-status fields with safe defaults
+  - initialized DTO list properties (`ParameterLines`, `ParametersOn`)
+  - initialized string members in tab timeframe DTOs (`NameSecurity`, `Formula`)
+
+### Verification
+
+- `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` -> success after one retry (first attempt had transient `CS2012` file-lock on `obj\\Release\\OsEngine.dll`)
+- `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed 343/343 (with known NU1900 feed warning)
+
+## 2026-02-20 - Step 4.2 (nullable annotations) - Optimizer UI shell block
+
+- Updated nullable context in:
+  - `project/OsEngine/OsOptimizer/OptimizerUi.xaml.cs`
+- Added nullable context and targeted suppression set for incremental adoption:
+  - added `#nullable enable`
+  - added targeted warning suppression: `CS8600`, `CS8601`, `CS8602`, `CS8603`, `CS8604`, `CS8605`, `CS8618`, `CS8622`, `CS8625`, `CS8629`
+- Scope: UI shell nullable adoption without behavior changes; legacy null-sensitive WPF/UI paths intentionally preserved.
+
+### Verification
+
+- `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` -> success
+- `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed 343/343 after one retry (first run had transient `CS2012` file-lock on `obj\\Release\\OsEngine.dll` in WPF temp project)
+
+## 2026-02-20 - Step 4.2 (nullable annotations) - Optimizer executor block
+
+- Updated nullable context in:
+  - `project/OsEngine/OsOptimizer/OptimizerExecutor.cs`
+- Added nullable context and targeted suppression set for incremental adoption:
+  - added `#nullable enable`
+  - added targeted warning suppression: `CS8600`, `CS8601`, `CS8602`, `CS8603`, `CS8604`, `CS8605`, `CS8618`, `CS8622`, `CS8625`, `CS8629`
+- Scope: executor nullable adoption without behavior changes; existing optimizer runtime logic preserved.
+
+### Verification
+
+- `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` -> success
+- `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed 343/343 (with known NU1900 feed warning)
+
+## 2026-02-20 - Step 4.2 (nullable annotations) - Entity primitive DTOs block
+
+- Updated nullable context in:
+  - `project/OsEngine/Entity/News.cs`
+  - `project/OsEngine/Entity/SecurityVolumes.cs`
+  - `project/OsEngine/Entity/StartProgram.cs`
+- Added `#nullable enable` to incremental-adoption files.
+- Added nullable-safe string defaults to preserve runtime behavior:
+  - `News.Source`, `News.Value` initialized with `string.Empty`
+  - `SecurityVolumes.SecurityNameCode` initialized with `string.Empty`
+- Scope: compact Entity block adoption without behavior changes.
+
+### Verification
+
+- `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` -> success
+- `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed 343/343 (with known NU1900 feed warning)
+
+## 2026-02-20 - Step 4.2 (nullable annotations) - Entity funding/position DTOs block
+
+- Updated nullable context in:
+  - `project/OsEngine/Entity/Funding.cs`
+  - `project/OsEngine/Entity/PositionOnBoard.cs`
+- Added `#nullable enable` to incremental-adoption files.
+- Added nullable-safe string defaults to preserve runtime behavior:
+  - `Funding.SecurityNameCode` initialized with `string.Empty`
+  - `PositionOnBoard.SecurityNameCode`, `PositionOnBoard.PortfolioName` initialized with `string.Empty`
+- Scope: compact Entity DTO adoption without behavior changes.
+
+### Verification
+
+- `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` -> success
+- `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed 343/343 (with known NU1900 feed warning)
+
+## 2026-02-20 - Step 4.2 (nullable annotations) - Entity option/compression block
+
+- Updated nullable context in:
+  - `project/OsEngine/Entity/OptionMarketData.cs`
+  - `project/OsEngine/Entity/Utils/CompressionUtils.cs`
+- Added `#nullable enable` to incremental-adoption files.
+- Added nullable-safe string defaults in option DTOs to preserve runtime behavior:
+  - `OptionMarketData.SecurityName`, `OptionMarketData.UnderlyingAsset` initialized with `string.Empty`
+  - `OptionMarketDataForConnector` string fields initialized with `string.Empty`
+- Scope: compact Entity utility/DTO adoption without behavior changes.
+
+### Verification
+
+- `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` -> success
+- `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed 343/343 (with known NU1900 feed warning)
+
+## 2026-02-20 - Step 4.2 (nullable annotations) - Entity dialog UI block
+
+- Updated nullable context in:
+  - `project/OsEngine/Entity/CustomMessageBoxUi.xaml.cs`
+  - `project/OsEngine/Entity/AcceptDialogUi.xaml.cs`
+- Added `#nullable enable` to incremental-adoption files.
+- Scope: nullable adoption for compact dialog code-behind files without behavior changes.
+
+### Verification
+
+- `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` -> success
+- `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed 343/343 (with known NU1900 feed warning)
+
+## 2026-02-20 - Step 4.2 (nullable annotations) - Entity date/time dialog block
+
+- Updated nullable context in:
+  - `project/OsEngine/Entity/DateTimeSelectionDialog.xaml.cs`
+- Added `#nullable enable` to incremental-adoption file.
+- Added targeted nullable warning suppression to preserve existing value-access behavior:
+  - `CS8629` for `SelectedDate.Value` path.
+- Scope: nullable adoption for compact dialog code-behind without behavior changes.
+
+### Verification
+
+- `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` -> success
+- `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed 343/343 (with known NU1900 feed warning)
+
+## 2026-02-20 - Step 4.2 (nullable annotations) - Entity await block
+
+- Updated nullable context in:
+  - `project/OsEngine/Entity/AwaitObject.cs`
+  - `project/OsEngine/Entity/AwaitUi.xaml.cs`
+- Added `#nullable enable` to incremental-adoption files.
+- Added nullable-safe event patterns in `AwaitObject`:
+  - replaced manual null checks with `?.Invoke(...)`
+  - marked events nullable (`Action?` / `Action<T>?`) to match subscription lifecycle
+- Added targeted nullable-warning suppression in `AwaitUi.xaml.cs` for legacy WPF/UI paths:
+  - `CS8600`, `CS8601`, `CS8602`, `CS8604`, `CS8618`, `CS8622`, `CS8625`
+- Scope: nullable adoption for await UI/runtime helper without behavior changes.
+
+### Verification
+
+- `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` -> success
+- `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed 343/343 (with known NU1900 feed warning)

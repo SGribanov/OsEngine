@@ -1,6 +1,7 @@
-﻿using System.Windows;
+using System.Windows;
 using OsEngine.Language;
 
+#nullable enable
 
 namespace OsEngine.Entity
 {
@@ -43,3 +44,4 @@ namespace OsEngine.Entity
         }
     }
 }
+
