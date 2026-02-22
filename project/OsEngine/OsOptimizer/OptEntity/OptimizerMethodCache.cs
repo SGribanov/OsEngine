@@ -1,3 +1,5 @@
+#nullable enable
+
 /*
  * Your rights to use code governed by this license https://github.com/AlexWan/OsEngine/blob/master/LICENSE
  * Ваши права на использование кода регулируются данной лицензией http://o-s-a.net/doc/license_simple_engine.pdf
@@ -70,7 +72,7 @@ namespace OsEngine.OsOptimizer.OptEntity
                 && StringComparer.Ordinal.Equals(ResultTypeName, other.ResultTypeName);
         }
 
-        public override bool Equals(object obj)
+        public override bool Equals(object? obj)
         {
             return obj is OptimizerMethodCacheKey other && Equals(other);
         }
@@ -141,7 +143,7 @@ namespace OsEngine.OsOptimizer.OptEntity
         private readonly ConcurrentDictionary<OptimizerMethodCacheKey, object> _cache =
             new ConcurrentDictionary<OptimizerMethodCacheKey, object>();
 
-        private readonly object _sync = new object();
+        private readonly Lock _sync = new();
         private readonly int _maxEntries;
         private long _hits;
         private long _misses;
@@ -155,9 +157,9 @@ namespace OsEngine.OsOptimizer.OptEntity
 
         public bool TryGet<T>(in OptimizerMethodCacheKey key, out T value)
         {
-            value = default;
+            value = default!;
 
-            if (!_cache.TryGetValue(key, out object cached))
+            if (!_cache.TryGetValue(key, out object? cached))
             {
                 Interlocked.Increment(ref _misses);
                 return false;

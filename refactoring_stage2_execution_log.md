@@ -6721,3 +6721,874 @@
   - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` succeeded (`343/343`).
 - **Commit:** n/a (not committed in this session)
 - **Push:** n/a
+
+### Step 4.1 - Lock Migration (Incremental Adoption #326)
+
+- **Status:** In Progress (increment completed)
+- **Plan item:** `refactoring_stage2_plan.md` -> Phase 4 / Step 4.1
+- **Changes:**
+  - Migrated remaining optimizer cache lock targets from `object` to `Lock`:
+    - `project/OsEngine/OsOptimizer/OptEntity/IndicatorCache.cs`
+      - `private readonly object _sync = new object();` -> `private readonly Lock _sync = new();`
+    - `project/OsEngine/OsOptimizer/OptEntity/OptimizerMethodCache.cs`
+      - `private readonly object _sync = new object();` -> `private readonly Lock _sync = new();`
+  - Kept synchronization semantics unchanged:
+    - same `lock (_sync)` critical sections
+    - no changes to eviction/statistics/cache logic.
+- **Verification:**
+  - Sandbox verification remained affected by intermittent TLS/NuGet limitation (`NU1301`), so final verification ran in host context.
+  - `dotnet restore project/OsEngine/OsEngine.csproj --nologo` succeeded.
+  - `dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo` succeeded.
+  - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` succeeded (0 warnings).
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` succeeded (`343/343`).
+- **Commit:** n/a (not committed in this session)
+- **Push:** n/a
+
+### Step 4.2 - Nullable Annotations (Incremental Adoption #327)
+
+- **Status:** In Progress (increment completed)
+- **Plan item:** `refactoring_stage2_plan.md` -> Phase 4 / Step 4.2
+- **Changes:**
+  - Enabled nullable context in remaining optimizer cache files:
+    - `project/OsEngine/OsOptimizer/OptEntity/IndicatorCache.cs`
+    - `project/OsEngine/OsOptimizer/OptEntity/OptimizerMethodCache.cs`
+  - Nullable-safe contract updates:
+    - `Equals(object obj)` -> `Equals(object? obj)` in `IndicatorCacheKey` and `OptimizerMethodCacheKey`.
+    - `IndicatorCache.TryGet(...)` now uses nullable out contract (`out List<decimal>[]? values`) and nullable-safe local from `TryGetValue(...)`.
+    - `IndicatorCache.CloneSeries(...)` updated to nullable-aware signature/flow.
+    - `OptimizerMethodCache.TryGet<T>(...)` uses `default!` initialization and nullable-safe local from `TryGetValue(...)`.
+  - Behavior preserved:
+    - cache key material, lock sections, eviction strategy, and stats accounting unchanged.
+- **Verification:**
+  - Executed by project rule outside sandbox.
+  - `dotnet restore project/OsEngine/OsEngine.csproj --nologo` succeeded.
+  - `dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo` succeeded.
+  - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` succeeded (0 warnings).
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` succeeded (`343/343`).
+- **Commit:** n/a (not committed in this session)
+- **Push:** n/a
+
+### Step 1.3 - OKX HttpClient Refactor (Incremental Adoption #328)
+
+- **Status:** In Progress (increment completed)
+- **Plan item:** `refactoring_stage2_plan.md` -> Phase 1 / Step 1.3
+- **Changes:**
+  - Added regression-test coverage for existing OKX private HTTP pipeline in:
+    - `project/OsEngine.Tests/SecurityRefactorTests.cs`
+  - Added tests:
+    - `OkxHttpInterceptor_ShouldConfigureSocketsHandler_WithPooledLifetime`
+      - asserts interceptor uses `SocketsHttpHandler`
+      - asserts `PooledConnectionLifetime = 5 minutes`
+      - asserts no proxy by default when proxy is absent
+    - `OkxHttpInterceptor_ShouldAddSignedHeaders_AndDemoHeader`
+      - asserts signed header injection (`OK-ACCESS-KEY`, `OK-ACCESS-SIGN`, `OK-ACCESS-TIMESTAMP`, `OK-ACCESS-PASSPHRASE`)
+      - asserts accept header includes `application/json`
+      - asserts demo mode header value (`x-simulated-trading=1`)
+      - asserts request body-signing path via `HttpRequestMessage.Options` (`SignatureBodyOptionKey`)
+  - Scope:
+    - test-only increment, no production runtime behavior changes.
+- **Verification:**
+  - Executed by project rule outside sandbox.
+  - `dotnet restore project/OsEngine/OsEngine.csproj --nologo` succeeded.
+  - `dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo` succeeded.
+  - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` succeeded (0 warnings).
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` succeeded (`345/345`).
+- **Commit:** n/a (not committed in this session)
+- **Push:** n/a
+
+### Step 1.2 - SSL Bypass Warning (Incremental Adoption #329)
+
+- **Status:** In Progress (increment completed)
+- **Plan item:** `refactoring_stage2_plan.md` -> Phase 1 / Step 1.2
+- **Changes:**
+  - Added regression-test coverage for SSL bypass warning behavior in:
+    - `project/OsEngine.Tests/SecurityRefactorTests.cs`
+  - Added test:
+    - `WebSocket_IgnoreSslErrors_SetTrue_ShouldEmitTraceWarning`
+      - attaches a temporary `TraceListener`
+      - sets `WebSocket.IgnoreSslErrors = true`
+      - verifies warning output contains `IgnoreSslErrors=true`
+  - Maintained test hygiene:
+    - obsolete API warning (`CS0618`) is intentionally scoped only inside the regression test body.
+  - Scope:
+    - test-only increment, no production runtime changes.
+- **Verification:**
+  - Executed by project rule outside sandbox.
+  - `dotnet restore project/OsEngine/OsEngine.csproj --nologo` succeeded.
+  - `dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo` succeeded.
+  - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` succeeded (0 warnings).
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` succeeded (`346/346`).
+- **Commit:** n/a (not committed in this session)
+- **Push:** n/a
+
+### Step 1.2 - SSL Bypass Warning (Incremental Adoption #330)
+
+- **Status:** In Progress (increment completed)
+- **Plan item:** `refactoring_stage2_plan.md` -> Phase 1 / Step 1.2
+- **Changes:**
+  - Hardened API surface in `project/OsEngine/Entity/WebSocketOsEngine.cs`:
+    - `IgnoreSslErrors` visibility changed from `public` to `internal`.
+    - kept obsolete annotation and warning logging behavior unchanged.
+  - Updated regression tests in `project/OsEngine.Tests/SecurityRefactorTests.cs`:
+    - renamed/expanded test to assert `IgnoreSslErrors` is internal and still marked obsolete.
+    - switched warning-path test to reflection-based setter invocation for non-public property.
+  - Scope:
+    - security hardening only; no change in in-assembly runtime behavior.
+- **Verification:**
+  - Executed by project rule outside sandbox.
+  - `dotnet restore project/OsEngine/OsEngine.csproj --nologo` succeeded.
+  - `dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo` succeeded.
+  - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` succeeded (0 warnings).
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` succeeded (`346/346`).
+- **Commit:** n/a (not committed in this session)
+- **Push:** n/a
+
+### Step 1.3 - OKX HttpClient Refactor (Incremental Adoption #331)
+
+- **Status:** In Progress (increment completed)
+- **Plan item:** `refactoring_stage2_plan.md` -> Phase 1 / Step 1.3
+- **Changes:**
+  - Extended regression test coverage for OKX interceptor transport behavior in:
+    - `project/OsEngine.Tests/SecurityRefactorTests.cs`
+  - Added tests:
+    - `OkxHttpInterceptor_ShouldConfigureProxy_WhenProvided`
+      - verifies `SocketsHttpHandler.UseProxy` is enabled when proxy is provided
+      - verifies provided proxy instance is preserved in handler configuration
+    - `OkxHttpInterceptor_ShouldSetDemoHeaderToZero_WhenDemoModeDisabled`
+      - verifies non-demo path writes `x-simulated-trading=0`
+      - verifies request pipeline executes successfully
+  - Scope:
+    - test-only increment; no production runtime changes.
+- **Verification:**
+  - Executed by project rule outside sandbox.
+  - `dotnet restore project/OsEngine/OsEngine.csproj --nologo` succeeded.
+  - `dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo` succeeded.
+  - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` succeeded (0 warnings).
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` succeeded (`348/348`).
+- **Commit:** n/a (not committed in this session)
+- **Push:** n/a
+
+### Step 1.3 - OKX HttpClient Refactor (Incremental Adoption #332)
+
+- **Status:** In Progress (increment completed)
+- **Plan item:** `refactoring_stage2_plan.md` -> Phase 1 / Step 1.3
+- **Changes:**
+  - Hardened `project/OsEngine/Market/Servers/OKX/Entity/HttpInterceptor.cs`:
+    - added explicit guard for missing `request.RequestUri` with `InvalidOperationException`.
+    - switched signature timestamp to invariant UTC formatting:
+      - `DateTime.UtcNow.ToString("yyyy-MM-ddTHH:mm:ss.fffZ", CultureInfo.InvariantCulture)`.
+  - Added regression test in `project/OsEngine.Tests/SecurityRefactorTests.cs`:
+    - `OkxHttpInterceptor_ShouldThrowInvalidOperation_WhenRequestUriIsMissing`
+    - verifies explicit failure contract for malformed request objects.
+  - Scope:
+    - low-risk hardening of request-validation and timestamp formatting; valid-request behavior unchanged.
+- **Verification:**
+  - Executed by project rule outside sandbox.
+  - `dotnet restore project/OsEngine/OsEngine.csproj --nologo` succeeded.
+  - `dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo` succeeded.
+  - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` succeeded (0 warnings).
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` succeeded (`349/349`).
+- **Commit:** n/a (not committed in this session)
+- **Push:** n/a
+
+### Step 1.3 - OKX HttpClient Refactor (Incremental Adoption #333)
+
+- **Status:** In Progress (increment completed)
+- **Plan item:** `refactoring_stage2_plan.md` -> Phase 1 / Step 1.3
+- **Changes:**
+  - Extended `project/OsEngine.Tests/SecurityRefactorTests.cs` with:
+    - `OkxHttpInterceptor_ShouldEmitUtcTimestamp_InExpectedFormat`
+  - Test asserts:
+    - `OK-ACCESS-TIMESTAMP` uses `Z` UTC suffix
+    - timestamp matches expected exact format (`yyyy-MM-ddTHH:mm:ss.fffZ`)
+    - parsed value remains UTC (`DateTimeKind.Utc`)
+  - Scope:
+    - test-only increment; no production runtime changes.
+- **Verification:**
+  - Executed by project rule outside sandbox.
+  - `dotnet restore project/OsEngine/OsEngine.csproj --nologo` succeeded.
+  - `dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo` succeeded.
+  - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` succeeded (0 warnings).
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` succeeded (`350/350`).
+- **Commit:** n/a (not committed in this session)
+- **Push:** n/a
+
+### Step 2.2 - InvariantCulture Persistence (Incremental Adoption #334)
+
+- **Status:** In Progress (increment completed)
+- **Plan item:** `refactoring_stage2_plan.md` -> Phase 2 / Step 2.2
+- **Changes:**
+  - Hardened decimal persistence parsing in:
+    - `project/OsEngine/Market/Servers/Entity/ServerParameter.cs`
+  - Updated `ServerParameterDecimal.LoadFromStr(...)`:
+    - replaced primary `Convert.ToDecimal(values[2])` path with deterministic parse cascade:
+      - `InvariantCulture` (`NumberStyles.Float`)
+      - `CurrentCulture` fallback
+      - `ru-RU` fallback for legacy comma-decimal inputs
+      - final legacy `Convert.ToDecimal(...)` fallback to preserve historical exception behavior on malformed payloads.
+  - Added regression tests in:
+    - `project/OsEngine.Tests/ServerParameterPersistenceTests.cs`
+    - `ServerParameterDecimal_LoadFromStr_ShouldParseInvariantDecimal`
+    - `ServerParameterDecimal_LoadFromStr_ShouldParseCommaDecimal_OnNonRuCurrentCulture`
+  - Scope:
+    - persistence culture hardening only; save format unchanged.
+- **Verification:**
+  - Executed by project rule outside sandbox.
+  - `dotnet restore project/OsEngine/OsEngine.csproj --nologo` succeeded.
+  - `dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo` succeeded.
+  - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` succeeded (0 warnings).
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` succeeded (`352/352`).
+- **Commit:** n/a (not committed in this session)
+- **Push:** n/a
+
+### Step 2.2 - InvariantCulture Persistence (Incremental Adoption #335)
+
+- **Status:** In Progress (increment completed)
+- **Plan item:** `refactoring_stage2_plan.md` -> Phase 2 / Step 2.2
+- **Changes:**
+  - Hardened GateIo trade timestamp-fraction parsing to be culture-invariant:
+    - `project/OsEngine/Market/Servers/GateIoData/GateIoDataServer.cs`
+      - `time.AddMicroseconds(double.Parse(...))` -> `double.Parse(..., CultureInfo.InvariantCulture)`
+      - `time.AddMilliseconds(double.Parse(...))` -> `double.Parse(..., CultureInfo.InvariantCulture)`
+    - `project/OsEngine/Market/Servers/GateIo/GateIoFutures/GateIoServerFutures.cs`
+      - `time.AddMilliseconds(double.Parse(...))` -> `double.Parse(..., CultureInfo.InvariantCulture)`
+  - Scope:
+    - parsing hardening only; no business logic or transport contract changes.
+- **Verification:**
+  - Executed by project rule outside sandbox.
+  - `dotnet restore project/OsEngine/OsEngine.csproj --nologo` succeeded.
+  - `dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo` succeeded.
+  - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` succeeded (0 warnings).
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` succeeded (`352/352`).
+- **Commit:** n/a (not committed in this session)
+- **Push:** n/a
+
+### Step 2.2 - CultureInfo Invariant Persistence (Incremental Adoption #355)
+
+- **Status:** In Progress (increment completed)
+- **Plan item:** `refactoring_stage2_plan.md` -> Phase 2 / Step 2.2
+- **Changes:**
+  - Replayed persistence culture hardening in Trend robots:
+    - `project/OsEngine/Robots/Trend/WsurfBot.cs`
+    - `project/OsEngine/Robots/Trend/SmaStochastic.cs`
+    - `project/OsEngine/Robots/Trend/PriceChannelTrade.cs`
+  - Replacements:
+    - decimal save values: `ToString()` -> `ToString(CultureInfo.InvariantCulture)`
+    - decimal load values in `WsurfBot`/`SmaStochastic`: `Convert.ToDecimal(reader.ReadLine())` -> `reader.ReadLine().ToDecimal()`
+    - `PriceChannelTrade`: save serialization switched to invariant format (load already used `ToDecimal()`).
+  - Scope:
+    - persistence serialization/parsing hardening only; trading logic unchanged.
+- **Verification:**
+  - Executed by project rule outside sandbox.
+  - `dotnet restore project/OsEngine/OsEngine.csproj --nologo` succeeded.
+  - `dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo` succeeded.
+  - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` succeeded (0 warnings).
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` succeeded (`352/352`).
+- **Commit:** n/a (not committed in this session)
+- **Push:** n/a
+
+### Step 2.2 - CultureInfo Invariant Persistence (Incremental Adoption #354)
+
+- **Status:** In Progress (increment completed)
+- **Plan item:** `refactoring_stage2_plan.md` -> Phase 2 / Step 2.2
+- **Changes:**
+  - Replayed persistence culture hardening in CounterTrend robots:
+    - `project/OsEngine/Robots/CounterTrend/WilliamsRangeTrade.cs`
+    - `project/OsEngine/Robots/CounterTrend/StrategyBollinger.cs`
+    - `project/OsEngine/Robots/CounterTrend/RsiContrtrend.cs`
+  - Replacements:
+    - decimal save values: `ToString()` -> `ToString(CultureInfo.InvariantCulture)`
+    - decimal load values: `Convert.ToDecimal(reader.ReadLine())` -> `reader.ReadLine().ToDecimal()`
+  - Scope:
+    - persistence serialization/parsing hardening only; trading logic unchanged.
+- **Verification:**
+  - Executed by project rule outside sandbox.
+  - `dotnet restore project/OsEngine/OsEngine.csproj --nologo` succeeded.
+  - `dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo` succeeded.
+  - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` succeeded (0 warnings).
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` succeeded (`352/352`).
+- **Commit:** n/a (not committed in this session)
+- **Push:** n/a
+
+### Step 2.1 - Atomic File Writes (Incremental Adoption #353)
+
+- **Status:** In Progress (increment completed)
+- **Plan item:** `refactoring_stage2_plan.md` -> Phase 2 / Step 2.1
+- **Changes:**
+  - Hardened Polygon securities cache persistence flow in:
+    - `project/OsEngine/Market/Servers/Polygon/PolygonServer.cs`
+  - `GetSecurityData()` now:
+    - writes paged ticker payloads into temp cache file (`<cache>.tmp`) through shared stream writer
+    - atomically finalizes cache:
+      - `File.Replace(temp, target, target + ".bak", true)` when target exists
+      - `File.Move(temp, target)` when target is new
+    - removes temp file in `finally`.
+  - `SaveSecurityToFile(...)` refactored to write into provided `StreamWriter` instead of opening target path directly.
+  - Added compatible pre-finalize flush:
+    - `FileStream.Flush(true)` when available
+    - fallback `Stream.Flush()`.
+  - Scope:
+    - durability hardening only; cache payload format and business behavior unchanged.
+- **Verification:**
+  - Executed by project rule outside sandbox.
+  - `dotnet restore project/OsEngine/OsEngine.csproj --nologo` succeeded.
+  - `dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo` succeeded.
+  - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` succeeded (0 warnings).
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` succeeded (`352/352`).
+- **Commit:** n/a (not committed in this session)
+- **Push:** n/a
+
+### Step 2.2 - InvariantCulture Persistence (Incremental Adoption #336)
+
+- **Status:** In Progress (increment completed)
+- **Plan item:** `refactoring_stage2_plan.md` -> Phase 2 / Step 2.2
+- **Changes:**
+  - Hardened legacy decimal settings parsing in:
+    - `project/OsEngine/OsTrader/RiskManager/RiskManager.cs`
+  - Updated `ParseLegacySettings(...)`:
+    - `MaxDrowDownToDayPersent = Convert.ToDecimal(lines[0])`
+    - -> `MaxDrowDownToDayPersent = ParseDecimalInvariantOrCurrent(lines[0])`
+  - Added helper `ParseDecimalInvariantOrCurrent(string value)` with parse cascade:
+    - `InvariantCulture` (`NumberStyles.Any`)
+    - `CurrentCulture` fallback
+    - final legacy `Convert.ToDecimal(value)` fallback
+  - Upstream binary artifact check:
+    - confirmed `project/OsEngine/bin/Debug/OsEngine.dll` and `project/OsEngine/bin/Debug/OsEngine.exe` are not tracked by git and absent in working tree.
+  - Scope:
+    - persistence/culture hardening only; no runtime risk-manager algorithm changes.
+- **Verification:**
+  - Executed by project rule outside sandbox.
+  - `dotnet restore project/OsEngine/OsEngine.csproj --nologo` succeeded.
+  - `dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo` succeeded.
+  - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` succeeded (0 warnings).
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` succeeded (`352/352`).
+- **Commit:** n/a (not committed in this session)
+- **Push:** n/a
+
+### Step 2.2 - InvariantCulture Persistence (Incremental Adoption #337)
+
+- **Status:** In Progress (increment completed)
+- **Plan item:** `refactoring_stage2_plan.md` -> Phase 2 / Step 2.2
+- **Changes:**
+  - Replayed Step 2.2 hardening over upstream-introduced settings parsing paths:
+    - `project/OsEngine/OsTrader/Panels/Tab/BotTabOptions.cs`
+      - `StrikesToShow` parse changed from `Convert.ToDecimal(value)` to culture-neutral `value.ToDecimal()`.
+    - `project/OsEngine/Entity/SetLeverageUi.xaml.cs`
+      - removed decimal parse normalization via `Replace(".", ",")`.
+      - added `TryParseDecimalInvariantOrCurrent(string value, out decimal result)`:
+        - `InvariantCulture` (`NumberStyles.Any`)
+        - `CurrentCulture` fallback.
+      - wired helper into:
+        - `TextBoxLeverage_TextChanged(...)`
+        - `_dgv_CellValueChanged(...)` leverage cell validation.
+  - Scope:
+    - culture-parsing hardening only; leverage/options business logic unchanged.
+- **Verification:**
+  - Executed by project rule outside sandbox.
+  - `dotnet restore project/OsEngine/OsEngine.csproj --nologo` succeeded.
+  - `dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo` succeeded.
+  - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` succeeded (0 warnings).
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` succeeded (`352/352`).
+- **Commit:** n/a (not committed in this session)
+- **Push:** n/a
+
+### Step 2.2 - InvariantCulture Persistence (Incremental Adoption #338)
+
+- **Status:** In Progress (increment completed)
+- **Plan item:** `refactoring_stage2_plan.md` -> Phase 2 / Step 2.2
+- **Changes:**
+  - Hardened benchmark-data decimal parsing in:
+    - `project/OsEngine/Journal/JournalUi2.xaml.cs`
+  - Updated `LoadBenchmarkData(...)`:
+    - `decimal.Parse(parts[5].Replace(".", ","))`
+    - -> `ParseDecimalInvariantOrCurrent(parts[5])`
+  - Added helper `ParseDecimalInvariantOrCurrent(string value)`:
+    - `InvariantCulture` (`NumberStyles.Any`)
+    - `CurrentCulture` fallback
+    - final `Convert.ToDecimal(value)` fallback to keep legacy exception behavior.
+  - Scope:
+    - parsing hardening only; benchmark selection/chart logic unchanged.
+- **Verification:**
+  - Executed by project rule outside sandbox.
+  - `dotnet restore project/OsEngine/OsEngine.csproj --nologo` succeeded.
+  - `dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo` succeeded.
+  - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` succeeded (0 warnings).
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` succeeded (`352/352`).
+- **Commit:** n/a (not committed in this session)
+- **Push:** n/a
+
+### Upstream Replay Audit Checkpoint (Incremental Adoption #339)
+
+- **Status:** In Progress (audit checkpoint completed)
+- **Plan item:** cross-check against `refactoring_stage2_plan.md` after upstream integration (`733b909d5^1..733b909d5^2`)
+- **Audit scope:**
+  - Step 2.2 pattern group: culture-sensitive numeric parsing (`Parse/TryParse`, replace-based decimal normalization)
+  - Step 4.1 pattern group: upstream-introduced `new object()` lock fields
+  - Step 0.3 pattern group: upstream-introduced silent catches (`catch { }`)
+- **Method:**
+  - pattern search on files touched by upstream range
+  - line-level `git blame` attribution filtered to upstream commit set
+- **Result:**
+  - no remaining upstream-attributed matches for the above pattern groups after current replay-fix set (`#334..#338`).
+- **Verification:**
+  - Executed by project rule outside sandbox.
+  - `dotnet restore project/OsEngine/OsEngine.csproj --nologo` succeeded.
+  - `dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo` succeeded.
+  - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` succeeded (0 warnings).
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` succeeded (`352/352`).
+- **Commit:** n/a (not committed in this session)
+- **Push:** n/a
+
+### Governance - Tracked Binary Guard (Incremental Adoption #340)
+
+- **Status:** In Progress (increment completed)
+- **Plan linkage:** Execution Governance Addendum + Step 4.3 anti-regression support
+- **Changes:**
+  - Added helper script:
+    - `tools/check-tracked-debug-binaries.ps1`
+  - Behavior:
+    - default mode checks only:
+      - `project/OsEngine/bin/Debug/OsEngine.dll`
+      - `project/OsEngine/bin/Debug/OsEngine.exe`
+    - strict mode (`-StrictAllDebugBinaries`) checks all `project/OsEngine/bin/Debug/*.dll|*.exe`.
+  - Purpose:
+    - immediate post-merge verification that critical app binaries did not get reintroduced into git index.
+    - reduce repeated manual audit effort on future upstream integrations.
+- **Verification:**
+  - `pwsh -NoProfile -File tools/check-tracked-debug-binaries.ps1` -> success (`OK`, critical targets not tracked).
+  - `pwsh -NoProfile -File tools/check-tracked-debug-binaries.ps1 -StrictAllDebugBinaries` -> fails with tracked baseline list (expected; repository currently tracks historical vendor binaries).
+- **Commit:** n/a (not committed in this session)
+- **Push:** n/a
+
+### Governance - Automated Upstream Replay Audit (Incremental Adoption #341)
+
+- **Status:** In Progress (increment completed)
+- **Plan linkage:** Execution Governance Addendum (post-merge replay control)
+- **Changes:**
+  - Added script:
+    - `tools/audit-upstream-replay.ps1`
+  - Script behavior:
+    - accepts merge commit (`-MergeCommit`, default `HEAD`)
+    - resolves upstream integration range (`merge^1..merge^2`)
+    - scans changed `.cs` files only
+    - performs line-level `git blame` attribution and reports only lines authored by commits from the upstream range
+    - checks configured pattern groups for:
+      - Step 0.3 (`catch { }`)
+      - Step 2.2 (culture-sensitive parse signatures)
+      - Step 4.1 (`new object()` lock signatures)
+- **Verification:**
+  - `pwsh -NoProfile -File tools/audit-upstream-replay.ps1 -MergeCommit 733b909d5` -> success (`OK`, 0 findings).
+  - `pwsh -NoProfile -File tools/audit-upstream-replay.ps1 -MergeCommit HEAD` -> success (`OK`, 0 findings).
+- **Commit:** n/a (not committed in this session)
+- **Push:** n/a
+
+### Step 2.1 - Atomic File Writes (Incremental Adoption #342)
+
+- **Status:** In Progress (increment completed)
+- **Plan item:** `refactoring_stage2_plan.md` -> Phase 2 / Step 2.1
+- **Changes:**
+  - Replayed atomic-write hardening over upstream-accepted export paths in:
+    - `project/OsEngine/Journal/JournalUi2.xaml.cs`
+  - Replaced direct writes:
+    - `using StreamWriter writer = new StreamWriter(fileName); writer.Write(workSheet);`
+    - -> `SafeFileWriter.WriteAllText(fileName, workSheet.ToString());`
+  - Applied in two handlers:
+    - open positions export (`OpenDealSaveInFile_Click`)
+    - close positions export (`CloseDealSaveInFile_Click`)
+  - Scope:
+    - file-write durability hardening only; export payload format unchanged.
+- **Verification:**
+  - Executed by project rule outside sandbox.
+  - `dotnet restore project/OsEngine/OsEngine.csproj --nologo` succeeded.
+  - `dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo` succeeded.
+  - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` succeeded (0 warnings).
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` succeeded (`352/352`).
+- **Commit:** n/a (not committed in this session)
+- **Push:** n/a
+
+### Upstream Replay Audit - Full Check For Today's Accepted Commits (Incremental Adoption #343)
+
+- **Status:** In Progress (audit checkpoint completed)
+- **Plan item:** full replay conformance check for today's accepted upstream merge in scope of Stage 2/4 pattern groups
+- **Changes:**
+  - Extended `tools/audit-upstream-replay.ps1` checks with Step 2.1 pattern groups:
+    - `step2_1_streamwriter_write`
+    - `step2_1_file_writeall`
+    - `step2_1_filestream_create_append`
+  - Existing checks retained:
+    - Step 0.3 silent catches
+    - Step 2.2 culture-sensitive parse signatures
+    - Step 4.1 object lock signatures
+  - Ran audit for today's merge:
+    - merge commit: `733b909d5`
+    - upstream range: `733b909d5^1..733b909d5^2`
+    - scanned files: `1124` (`.cs` only)
+- **Result:**
+  - no upstream-attributed replay findings for configured checks.
+- **Verification:**
+  - `pwsh -File tools/audit-upstream-replay.ps1 -MergeCommit 733b909d5 -RepoRoot .` -> success (`OK`, 0 findings)
+- **Commit:** n/a (not committed in this session)
+- **Push:** n/a
+
+### Step 2.1 - Atomic File Writes (Incremental Adoption #344)
+
+- **Status:** In Progress (increment completed)
+- **Plan item:** `refactoring_stage2_plan.md` -> Phase 2 / Step 2.1
+- **Changes:**
+  - Replayed atomic-write hardening over upstream-accepted export paths in:
+    - `project/OsEngine/Journal/JournalUi.xaml.cs`
+  - Replaced direct writes:
+    - `using StreamWriter writer = new StreamWriter(fileName); writer.Write(workSheet);`
+    - -> `SafeFileWriter.WriteAllText(fileName, workSheet.ToString());`
+  - Applied in two handlers:
+    - open positions export (`OpenDealSaveInFile_Click`)
+    - close positions export (`CloseDealSaveInFile_Click`)
+  - Scope:
+    - file-write durability hardening only; export payload format unchanged.
+- **Verification:**
+  - Executed by project rule outside sandbox.
+  - `dotnet restore project/OsEngine/OsEngine.csproj --nologo` succeeded.
+  - `dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo` succeeded.
+  - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` succeeded (0 warnings).
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` succeeded (`352/352`).
+- **Commit:** n/a (not committed in this session)
+- **Push:** n/a
+
+### Step 2.1 - Atomic File Writes (Incremental Adoption #345)
+
+- **Status:** In Progress (increment completed)
+- **Plan item:** `refactoring_stage2_plan.md` -> Phase 2 / Step 2.1
+- **Changes:**
+  - Replayed atomic-write hardening on additional Entity save/export paths:
+    - `project/OsEngine/Entity/DataGridFactory.cs`
+    - `project/OsEngine/Entity/SecuritiesUi.xaml.cs`
+    - `project/OsEngine/Entity/NonTradePeriodsUi.xaml.cs`
+  - Replacements:
+    - `DataGridFactory`: `StreamWriter(fileName)` -> `SafeFileWriter.WriteAllText(fileName, saveStr)`
+    - `SecuritiesUi`: `StreamWriter(filePath, false)` -> `SafeFileWriter.WriteAllLines(filePath, new[] { mySecurity.GetSaveStr() })`
+    - `NonTradePeriodsUi`: line-by-line `StreamWriter(filePath)` -> `SafeFileWriter.WriteAllLines(filePath, array)`
+  - Cleanup:
+    - removed redundant `File.Create(filePath)` pre-create in `NonTradePeriodsUi` save handler.
+  - Scope:
+    - file-write durability hardening only; content format and UI behavior unchanged.
+- **Verification:**
+  - Executed by project rule outside sandbox.
+  - `dotnet restore project/OsEngine/OsEngine.csproj --nologo` succeeded.
+  - `dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo` succeeded.
+  - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` succeeded (0 warnings).
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` succeeded (`352/352`).
+- **Commit:** n/a (not committed in this session)
+- **Push:** n/a
+
+### Step 2.1 - Atomic File Writes (Incremental Adoption #346)
+
+- **Status:** In Progress (increment completed)
+- **Plan item:** `refactoring_stage2_plan.md` -> Phase 2 / Step 2.1
+- **Changes:**
+  - Replayed atomic-write hardening on OsData save paths:
+    - `project/OsEngine/OsData/OsDataSetUi.xaml.cs`
+    - `project/OsEngine/OsData/OsDataMasterPainter.cs`
+  - Replacements:
+    - `OsDataSetUi`: `File.WriteAllText(filePath, contentToSave)` -> `SafeFileWriter.WriteAllText(filePath, contentToSave)`
+    - `OsDataMasterPainter`: `StreamWriter(@"Engine\\OsDataAttachedServers.txt", false)` loop -> `SafeFileWriter.WriteAllLines(@"Engine\\OsDataAttachedServers.txt", _attachedServers.Select(server => server.ToString()))`
+  - Scope:
+    - file-write durability hardening only; content format and UI behavior unchanged.
+- **Verification:**
+  - Executed by project rule outside sandbox.
+  - `dotnet restore project/OsEngine/OsEngine.csproj --nologo` succeeded.
+  - `dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo` succeeded.
+  - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` succeeded (0 warnings).
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` succeeded (`352/352`).
+- **Commit:** n/a (not committed in this session)
+- **Push:** n/a
+
+### Step 2.1 - Atomic File Writes (Incremental Adoption #347)
+
+- **Status:** In Progress (increment completed)
+- **Plan item:** `refactoring_stage2_plan.md` -> Phase 2 / Step 2.1
+- **Changes:**
+  - Replayed atomic-write hardening on additional UI save/export paths:
+    - `project/OsEngine/Entity/StrategyParametersUi.xaml.cs`
+    - `project/OsEngine/OsTrader/Grids/TradeGridUi.xaml.cs`
+    - `project/OsEngine/OsTrader/Panels/Tab/BotTabScreenerUi.xaml.cs`
+    - `project/OsEngine/Market/Proxy/ProxyMasterUi.xaml.cs`
+    - `project/OsEngine/Market/Connectors/MassSourcesCreateUi.xaml.cs`
+    - `project/OsEngine/Market/AutoFollow/CopyPortfolioUi.xaml.cs`
+    - `project/OsEngine/OsOptimizer/OptimizerReportUi.xaml.cs`
+  - Replacements:
+    - direct `StreamWriter(...)` / `File.WriteAllText(...)` -> `SafeFileWriter.WriteAllText(...)` or `SafeFileWriter.WriteAllLines(...)`
+  - Cleanup:
+    - removed redundant `File.Create(...)` pre-create blocks in save handlers where they preceded write.
+  - Scope:
+    - file-write durability hardening only; content format and UI behavior unchanged.
+- **Verification:**
+  - Executed by project rule outside sandbox.
+  - `dotnet restore project/OsEngine/OsEngine.csproj --nologo` succeeded.
+  - `dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo` succeeded.
+  - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` succeeded (0 warnings).
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` succeeded (`352/352`).
+- **Commit:** n/a (not committed in this session)
+- **Push:** n/a
+
+### Step 2.1 - Atomic File Writes (Incremental Adoption #348)
+
+- **Status:** In Progress (increment completed)
+- **Plan item:** `refactoring_stage2_plan.md` -> Phase 2 / Step 2.1
+- **Changes:**
+  - Replayed atomic-write hardening on core/server save paths:
+    - `project/OsEngine/Market/ServerMaster.cs`
+    - `project/OsEngine/Market/Servers/Optimizer/OptimizerDataStorage.cs`
+    - `project/OsEngine/Market/Servers/QuikLua/QuikLuaServer.cs`
+    - `project/OsEngine/Market/Servers/Finam/Entity/FinamDataSeries.cs`
+    - `project/OsEngine/Market/Servers/ServerCandleStorage.cs`
+    - `project/OsEngine/Candles/CandleConverter.cs`
+  - Replacements:
+    - direct one-shot `StreamWriter(...)` / `File.WriteAllText(...)` -> `SafeFileWriter.WriteAllLines(...)` / `SafeFileWriter.WriteAllText(...)`
+  - Scope:
+    - file-write durability hardening only; persistence format and runtime behavior unchanged.
+- **Verification:**
+  - Executed by project rule outside sandbox.
+  - `dotnet restore project/OsEngine/OsEngine.csproj --nologo` succeeded.
+  - `dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo` succeeded.
+  - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` succeeded (0 warnings).
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` succeeded (`352/352`).
+- **Commit:** n/a (not committed in this session)
+- **Push:** n/a
+
+### Step 2.1 - Atomic File Writes (Incremental Adoption #349)
+
+- **Status:** In Progress (increment completed)
+- **Plan item:** `refactoring_stage2_plan.md` -> Phase 2 / Step 2.1
+- **Changes:**
+  - Replayed atomic-write hardening on robot settings save paths:
+    - `project/OsEngine/Robots/CounterTrend/WilliamsRangeTrade.cs`
+    - `project/OsEngine/Robots/CounterTrend/StrategyBollinger.cs`
+    - `project/OsEngine/Robots/CounterTrend/RsiContrtrend.cs`
+    - `project/OsEngine/Robots/Trend/WsurfBot.cs`
+    - `project/OsEngine/Robots/Trend/SmaStochastic.cs`
+    - `project/OsEngine/Robots/Trend/PriceChannelTrade.cs`
+    - `project/OsEngine/Robots/MarketMaker/MarketMakerBot.cs`
+    - `project/OsEngine/Robots/MarketMaker/PairTraderSimple.cs`
+    - `project/OsEngine/Robots/MarketMaker/PairTraderSpreadSma.cs`
+    - `project/OsEngine/Robots/Patterns/PivotPointsRobot.cs`
+    - `project/OsEngine/Robots/AlgoStart/AlgoStart2Soldiers.cs`
+    - `project/OsEngine/Robots/Grids/GridScreenerAdaptiveSoldiers.cs`
+    - `project/OsEngine/Robots/Screeners/ThreeSoldierAdaptiveScreener.cs`
+    - `project/OsEngine/Robots/Screeners/PinBarVolatilityScreener.cs`
+    - `project/OsEngine/Robots/TechSamples/CustomTableInTheParamWindowSample.cs`
+  - Replacements:
+    - direct one-shot `StreamWriter(Get...Path(), false)` save blocks -> `SafeFileWriter.WriteAllLines(...)`
+    - ensured saved line order remains identical for backward-compatible `Load()` routines.
+  - Scope:
+    - file-write durability hardening only; strategy behavior unchanged.
+- **Verification:**
+  - Executed by project rule outside sandbox.
+  - `dotnet restore project/OsEngine/OsEngine.csproj --nologo` succeeded.
+  - `dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo` succeeded.
+  - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` succeeded (0 warnings).
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` succeeded (`352/352`).
+- **Commit:** n/a (not committed in this session)
+- **Push:** n/a
+
+### Step 2.1 - Atomic File Writes (Incremental Adoption #350)
+
+- **Status:** In Progress (increment completed)
+- **Plan item:** `refactoring_stage2_plan.md` -> Phase 2 / Step 2.1
+- **Changes:**
+  - Replayed atomic-write hardening on remaining robot save paths:
+    - `project/OsEngine/Robots/BotCreateUi2.xaml.cs`
+    - `project/OsEngine/Robots/Helpers/TaxPayer.cs`
+    - `project/OsEngine/Robots/Helpers/PayOfMarginBot.cs`
+  - Replacements:
+    - `StreamWriter(..., false)` and `File.WriteAllText(...)` -> `SafeFileWriter.WriteAllLines(...)` / `SafeFileWriter.WriteAllText(...)`
+  - Scope:
+    - file-write durability hardening only; JSON/txt payload formats unchanged.
+- **Verification:**
+  - Executed by project rule outside sandbox.
+  - `dotnet restore project/OsEngine/OsEngine.csproj --nologo` succeeded.
+  - `dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo` succeeded.
+  - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` succeeded (0 warnings).
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` succeeded (`352/352`).
+- **Commit:** n/a (not committed in this session)
+- **Push:** n/a
+
+### Step 2.1 - Atomic File Writes (Incremental Adoption #351)
+
+- **Status:** In Progress (increment completed)
+- **Plan item:** `refactoring_stage2_plan.md` -> Phase 2 / Step 2.1
+- **Changes:**
+  - Replayed atomic-write hardening on additional persistence paths:
+    - `project/OsEngine/Market/Servers/AscendEX/AscendEXSpot/AscendexSpotServer.cs`
+    - `project/OsEngine/Market/Servers/TelegramNews/TelegramNewsServer.cs`
+    - `project/OsEngine/OsData/OsDataSet.cs`
+  - Replacements:
+    - direct `File.WriteAllText(...)` -> `SafeFileWriter.WriteAllText(...)` in Ascendex/Telegram.
+    - multiple one-shot non-append `StreamWriter(..., false)` / `File.WriteAllText(...)` paths in `OsDataSet` -> `SafeFileWriter.WriteAllLines(...)` / `SafeFileWriter.WriteAllText(...)`.
+  - Scope:
+    - durability hardening only.
+    - append/streaming/log-writer paths intentionally unchanged in this increment.
+- **Verification:**
+  - Executed by project rule outside sandbox.
+  - `dotnet restore project/OsEngine/OsEngine.csproj --nologo` succeeded.
+  - `dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo` succeeded.
+  - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` succeeded (0 warnings).
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` succeeded (`352/352`).
+- **Commit:** n/a (not committed in this session)
+- **Push:** n/a
+
+### Step 2.1 - Atomic File Writes (Incremental Adoption #352)
+
+- **Status:** In Progress (increment completed)
+- **Plan item:** `refactoring_stage2_plan.md` -> Phase 2 / Step 2.1
+- **Changes:**
+  - Hardened streaming converter output persistence in:
+    - `project/OsEngine/OsConverter/OsConverterMaster.cs`
+  - `WorkerSpaceStreaming()` now:
+    - writes to temp file (`<exit>.tmp`) during conversion
+    - atomically swaps result to final file:
+      - `File.Replace(temp, target, target + ".bak", true)` when target exists
+      - `File.Move(temp, target)` when target is new
+    - cleans temp file in `finally`.
+  - Added compatible flush sequence before swap:
+    - `FileStream.Flush(true)` when available
+    - fallback `Stream.Flush()` otherwise.
+  - Scope:
+    - durability hardening only; conversion algorithm/output unchanged.
+- **Verification:**
+  - Executed by project rule outside sandbox.
+  - `dotnet restore project/OsEngine/OsEngine.csproj --nologo` succeeded.
+  - `dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo` succeeded.
+  - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` succeeded (0 warnings).
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` succeeded (`352/352`).
+- **Commit:** n/a (not committed in this session)
+- **Push:** n/a
+
+### Step 2.2 - CultureInfo Invariant Persistence (Incremental Adoption #356)
+
+- **Status:** In Progress (increment completed)
+- **Plan item:** `refactoring_stage2_plan.md` -> Phase 2 / Step 2.2
+- **Changes:**
+  - Replayed persistence culture hardening in MarketMaker/Patterns robots:
+    - `project/OsEngine/Robots/MarketMaker/MarketMakerBot.cs`
+    - `project/OsEngine/Robots/MarketMaker/PairTraderSimple.cs`
+    - `project/OsEngine/Robots/MarketMaker/PairTraderSpreadSma.cs`
+    - `project/OsEngine/Robots/Patterns/PivotPointsRobot.cs`
+  - Replacements:
+    - decimal save values: `ToString()` -> `ToString(CultureInfo.InvariantCulture)`
+    - decimal load values from settings files: `Convert.ToDecimal(reader.ReadLine())` -> `reader.ReadLine().ToDecimal()`
+    - `PairTraderSimple` spread payload value: `Convert.ToDecimal(pos[1])` -> `pos[1].ToDecimal()`
+  - Scope:
+    - persistence serialization/parsing hardening only; trading logic unchanged.
+- **Verification:**
+  - Executed by project rule outside sandbox.
+  - `dotnet restore project/OsEngine/OsEngine.csproj --nologo` succeeded.
+  - `dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo` succeeded.
+  - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` succeeded (0 warnings).
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` succeeded (`352/352`).
+- **Commit:** n/a (not committed in this session)
+- **Push:** n/a
+
+### Step 2.2 - CultureInfo Invariant Persistence (Incremental Adoption #357)
+
+- **Status:** In Progress (increment completed)
+- **Plan item:** `refactoring_stage2_plan.md` -> Phase 2 / Step 2.2
+- **Changes:**
+  - Replayed persistence parsing hardening in:
+    - `project/OsEngine/Market/Servers/Entity/ServerParameter.cs`
+  - Replacement:
+    - `ServerParameterDecimal.LoadFromStr()` fallback `Convert.ToDecimal(values[2])` -> `values[2].ToDecimal()`
+  - Scope:
+    - persistence parsing hardening only; serialization format unchanged.
+- **Verification:**
+  - Executed by project rule outside sandbox.
+  - `dotnet restore project/OsEngine/OsEngine.csproj --nologo` succeeded.
+  - `dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo` succeeded.
+  - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` succeeded (0 warnings).
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` succeeded (`352/352`).
+- **Commit:** n/a (not committed in this session)
+- **Push:** n/a
+
+### Step 2.2 - CultureInfo Invariant Persistence (Incremental Adoption #358)
+
+- **Status:** In Progress (increment completed)
+- **Plan item:** `refactoring_stage2_plan.md` -> Phase 2 / Step 2.2
+- **Changes:**
+  - Replayed decimal parsing fallback hardening in:
+    - `project/OsEngine/Journal/JournalUi2.xaml.cs`
+    - `project/OsEngine/OsTrader/RiskManager/RiskManager.cs`
+  - Replacement:
+    - helper fallback `Convert.ToDecimal(value)` -> `value.ToDecimal()`
+  - Scope:
+    - parsing hardening only; primary Invariant/Current `TryParse` flow unchanged.
+- **Verification:**
+  - Executed by project rule outside sandbox.
+  - `dotnet restore project/OsEngine/OsEngine.csproj --nologo` succeeded.
+  - `dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo` succeeded.
+  - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` succeeded (0 warnings).
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` succeeded (`352/352`).
+- **Commit:** n/a (not committed in this session)
+- **Push:** n/a
+
+### Step 2.2 - CultureInfo Invariant Persistence (Incremental Adoption #359)
+
+- **Status:** In Progress (increment completed)
+- **Plan item:** `refactoring_stage2_plan.md` -> Phase 2 / Step 2.2
+- **Changes:**
+  - Replayed decimal parsing fallback hardening in indicator legacy-load helpers:
+    - `project/OsEngine/Charts/CandleChart/Indicators/DynamicTrendDetector.cs`
+    - `project/OsEngine/Charts/CandleChart/Indicators/KalmanFilter.cs`
+    - `project/OsEngine/Charts/CandleChart/Indicators/Envelops.cs`
+  - Replacement:
+    - helper fallback `Convert.ToDecimal(value)` -> `value.ToDecimal()`
+  - Scope:
+    - parsing hardening only; indicator logic unchanged.
+- **Verification:**
+  - Executed by project rule outside sandbox.
+  - `dotnet restore project/OsEngine/OsEngine.csproj --nologo` succeeded.
+  - `dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo` succeeded.
+  - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` succeeded (0 warnings).
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` succeeded (`352/352`).
+- **Commit:** n/a (not committed in this session)
+- **Push:** n/a
+
+### Step 2.2 - CultureInfo Invariant Persistence (Incremental Adoption #360)
+
+- **Status:** In Progress (increment completed)
+- **Plan item:** `refactoring_stage2_plan.md` -> Phase 2 / Step 2.2
+- **Changes:**
+  - Replayed persistence decimal parsing hardening in:
+    - `project/OsEngine/Market/Servers/Tester/TesterServer.cs`
+  - Replacement:
+    - optional dop-settings parse `Convert.ToDecimal(array[i][6])` -> `array[i][6].ToDecimal()`
+  - Scope:
+    - parsing hardening only; settings schema/behavior unchanged.
+- **Verification:**
+  - Executed by project rule outside sandbox.
+  - `dotnet restore project/OsEngine/OsEngine.csproj --nologo` succeeded.
+  - `dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo` succeeded.
+  - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` succeeded (0 warnings).
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` succeeded (`352/352`).
+- **Commit:** n/a (not committed in this session)
+- **Push:** n/a
+
+### Step 2.2 - CultureInfo Invariant Persistence (Incremental Adoption #361)
+
+- **Status:** In Progress (increment completed)
+- **Plan item:** `refactoring_stage2_plan.md` -> Phase 2 / Step 2.2
+- **Changes:**
+  - Replayed decimal parsing hardening in:
+    - `project/OsEngine/Market/Servers/AServerParameterUi.xaml.cs`
+  - Replacement:
+    - `SaveParam()` decimal input parse `Convert.ToDecimal(str.Replace(...))` -> `str.ToDecimal()`
+  - Cleanup:
+    - removed unused `using System.Globalization;`.
+  - Scope:
+    - UI decimal parsing hardening only; persistence format unchanged.
+- **Verification:**
+  - Executed by project rule outside sandbox.
+  - `dotnet restore project/OsEngine/OsEngine.csproj --nologo` succeeded.
+  - `dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo` succeeded.
+  - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` succeeded (0 warnings).
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` succeeded (`352/352`).
+- **Commit:** n/a (not committed in this session)
+- **Push:** n/a

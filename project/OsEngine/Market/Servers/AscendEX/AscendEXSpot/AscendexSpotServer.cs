@@ -1932,10 +1932,10 @@ namespace OsEngine.Market.Servers.AscendexSpot
                 string engineDir = GetEngineDirectory();
 
                 string orderTrackerJson = JsonConvert.SerializeObject(_orderTrackerDict, Formatting.Indented);
-                File.WriteAllText(Path.Combine(engineDir, "orderTrackerDict.json"), orderTrackerJson);
+                SafeFileWriter.WriteAllText(Path.Combine(engineDir, "orderTrackerDict.json"), orderTrackerJson);
 
                 string marketToUserJson = JsonConvert.SerializeObject(_marketToUserDict, Formatting.Indented);
-                File.WriteAllText(Path.Combine(engineDir, "marketToUserDict.json"), marketToUserJson);
+                SafeFileWriter.WriteAllText(Path.Combine(engineDir, "marketToUserDict.json"), marketToUserJson);
             }
             catch (Exception exception)
             {

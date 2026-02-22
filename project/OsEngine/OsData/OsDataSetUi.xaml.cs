@@ -750,7 +750,7 @@ namespace OsEngine.OsData
                         }
                     }
 
-                    System.IO.File.WriteAllText(filePath, contentToSave);
+                    SafeFileWriter.WriteAllText(filePath, contentToSave);
                 }
             }
             catch

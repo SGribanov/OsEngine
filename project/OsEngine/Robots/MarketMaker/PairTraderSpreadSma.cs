@@ -17,6 +17,7 @@ using OsEngine.OsTrader.Panels.Tab;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
+using System.Globalization;
 using System.IO;
 
 /*
@@ -123,23 +124,18 @@ namespace OsEngine.Robots.MarketMaker
         {
             try
             {
-                using (StreamWriter writer = new StreamWriter(GetSettingsPath(), false)
-                    )
+                global::OsEngine.Entity.SafeFileWriter.WriteAllLines(GetSettingsPath(), new[]
                 {
-                    writer.WriteLine(VolumeType1);
-                    writer.WriteLine(TradeAssetInPortfolio1);
-
-                    writer.WriteLine(VolumeType2);
-                    writer.WriteLine(TradeAssetInPortfolio2);
-
-                    writer.WriteLine(Regime);
-                    writer.WriteLine(Volume1);
-                    writer.WriteLine(Volume2);
-
-                    writer.WriteLine(Slippage1);
-                    writer.WriteLine(Slippage2);
-                    writer.Close();
-                }
+                    VolumeType1,
+                    TradeAssetInPortfolio1,
+                    VolumeType2,
+                    TradeAssetInPortfolio2,
+                    Regime.ToString(),
+                    Volume1.ToString(CultureInfo.InvariantCulture),
+                    Volume2.ToString(CultureInfo.InvariantCulture),
+                    Slippage1.ToString(CultureInfo.InvariantCulture),
+                    Slippage2.ToString(CultureInfo.InvariantCulture)
+                });
             }
             catch (Exception)
             {
@@ -165,11 +161,11 @@ namespace OsEngine.Robots.MarketMaker
                     TradeAssetInPortfolio2 = Convert.ToString(reader.ReadLine());
 
                     Enum.TryParse(reader.ReadLine(), true, out Regime);
-                    Volume1 = Convert.ToDecimal(reader.ReadLine());
-                    Volume2 = Convert.ToDecimal(reader.ReadLine());
+                    Volume1 = reader.ReadLine().ToDecimal();
+                    Volume2 = reader.ReadLine().ToDecimal();
 
-                    Slippage1 = Convert.ToDecimal(reader.ReadLine());
-                    Slippage2 = Convert.ToDecimal(reader.ReadLine());
+                    Slippage1 = reader.ReadLine().ToDecimal();
+                    Slippage2 = reader.ReadLine().ToDecimal();
 
                     reader.Close();
                 }

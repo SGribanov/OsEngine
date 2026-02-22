@@ -61,18 +61,15 @@ namespace OsEngine.OsData
                     Directory.CreateDirectory("Data\\" + SetName);
                 }
 
-                using (StreamWriter writer = new StreamWriter("Data\\" + SetName + @"\\Settings.txt", false))
+                List<string> linesToSave = new List<string>();
+                linesToSave.Add(BaseSettings.GetSaveStr());
+
+                for (int i = 0; SecuritiesLoad != null && i < SecuritiesLoad.Count; i++)
                 {
-                    writer.WriteLine(BaseSettings.GetSaveStr());
-
-                    for (int i = 0; SecuritiesLoad != null && i < SecuritiesLoad.Count; i++)
-                    {
-                        string security = SecuritiesLoad[i].GetSaveStr();
-                        writer.WriteLine(security);
-                    }
-
-                    writer.Close();
+                    linesToSave.Add(SecuritiesLoad[i].GetSaveStr());
                 }
+
+                SafeFileWriter.WriteAllLines("Data\\" + SetName + @"\\Settings.txt", linesToSave);
             }
             catch (Exception ex)
             {
@@ -1830,10 +1827,7 @@ namespace OsEngine.OsData
 
             try
             {
-                using (StreamWriter writer = new StreamWriter(_pathMyTxtFile, false))
-                {
-                    writer.WriteLine(builder.ToString());
-                }
+                SafeFileWriter.WriteAllText(_pathMyTxtFile, builder.ToString());
             }
             catch (Exception error)
             {
@@ -2376,10 +2370,7 @@ namespace OsEngine.OsData
 
             try
             {
-                using (StreamWriter writer = new StreamWriter(_pathMyTxtFile, false))
-                {
-                    writer.WriteLine(builder.ToString());
-                }
+                SafeFileWriter.WriteAllText(_pathMyTxtFile, builder.ToString());
             }
             catch (Exception error)
             {
@@ -3562,12 +3553,7 @@ namespace OsEngine.OsData
 
             try
             {
-                using (StreamWriter writer = new StreamWriter(pathToTempFile, false))
-                {
-
-                    writer.WriteLine(CountTriesToLoadSet);
-
-                }
+                SafeFileWriter.WriteAllLines(pathToTempFile, new[] { CountTriesToLoadSet.ToString() });
             }
             catch
             {
@@ -3681,23 +3667,24 @@ namespace OsEngine.OsData
             {
                 DateTime realEnd = End.AddDays(1);
 
-                using (StreamWriter writer = new StreamWriter(pathToTempFile, false))
+                List<string> linesToSave = new List<string>();
+
+                for (int i = 0; i < candles.Count; i++)
                 {
-                    for (int i = 0; i < candles.Count; i++)
+                    if (candles[i].TimeStart < Start)
                     {
-                        if (candles[i].TimeStart < Start)
-                        {
-                            continue;
-                        }
-
-                        if (candles[i].TimeStart > realEnd)
-                        {
-                            break;
-                        }
-
-                        writer.WriteLine(candles[i].StringToSave);
+                        continue;
                     }
+
+                    if (candles[i].TimeStart > realEnd)
+                    {
+                        break;
+                    }
+
+                    linesToSave.Add(candles[i].StringToSave);
                 }
+
+                SafeFileWriter.WriteAllLines(pathToTempFile, linesToSave);
             }
             catch
             {
@@ -3814,23 +3801,24 @@ namespace OsEngine.OsData
             {
                 DateTime realEnd = End.AddDays(1);
 
-                using (StreamWriter writer = new StreamWriter(pathToTempFile, false))
+                List<string> linesToSave = new List<string>();
+
+                for (int i = 0; i < trades.Count; i++)
                 {
-                    for (int i = 0; i < trades.Count; i++)
+                    if (trades[i].Time < Start)
                     {
-                        if (trades[i].Time < Start)
-                        {
-                            continue;
-                        }
-
-                        if (trades[i].Time > realEnd)
-                        {
-                            break;
-                        }
-
-                        writer.WriteLine(trades[i].GetSaveString());
+                        continue;
                     }
+
+                    if (trades[i].Time > realEnd)
+                    {
+                        break;
+                    }
+
+                    linesToSave.Add(trades[i].GetSaveString());
                 }
+
+                SafeFileWriter.WriteAllLines(pathToTempFile, linesToSave);
             }
             catch
             {
@@ -3891,7 +3879,7 @@ namespace OsEngine.OsData
 
                 string pieInfo = string.Join('#', [start, end, qshFilesCount]);
 
-                File.WriteAllText(pathToTempFile, pieInfo);
+                SafeFileWriter.WriteAllText(pathToTempFile, pieInfo);
             }
             catch
             {
@@ -3975,7 +3963,7 @@ namespace OsEngine.OsData
 
             try
             {
-                File.WriteAllText(pathSettings, result);
+                SafeFileWriter.WriteAllText(pathSettings, result);
             }
             catch (Exception ex)
             {
@@ -4110,7 +4098,7 @@ namespace OsEngine.OsData
 
             try
             {
-                File.WriteAllText(pathSettings, result);
+                SafeFileWriter.WriteAllText(pathSettings, result);
             }
             catch (Exception ex)
             {

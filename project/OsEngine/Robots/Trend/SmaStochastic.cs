@@ -17,6 +17,7 @@ using OsEngine.OsTrader.Panels.Attributes;
 using OsEngine.OsTrader.Panels.Tab;
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 
 /* Description
@@ -111,20 +112,17 @@ namespace OsEngine.Robots.Trend
         {
             try
             {
-                using (StreamWriter writer = new StreamWriter(GetSettingsPath(), false)
-                    )
+                global::OsEngine.Entity.SafeFileWriter.WriteAllLines(GetSettingsPath(), new[]
                 {
-                    writer.WriteLine(VolumeType);
-                    writer.WriteLine(TradeAssetInPortfolio);
-                    writer.WriteLine(Slippage);
-                    writer.WriteLine(Volume);
-                    writer.WriteLine(Regime);
-                    writer.WriteLine(Step);
-                    writer.WriteLine(Upline);
-                    writer.WriteLine(Downline);
-
-                    writer.Close();
-                }
+                    VolumeType,
+                    TradeAssetInPortfolio,
+                    Slippage.ToString(CultureInfo.InvariantCulture),
+                    Volume.ToString(CultureInfo.InvariantCulture),
+                    Regime.ToString(),
+                    Step.ToString(CultureInfo.InvariantCulture),
+                    Upline.ToString(CultureInfo.InvariantCulture),
+                    Downline.ToString(CultureInfo.InvariantCulture)
+                });
             }
             catch (Exception)
             {
@@ -145,12 +143,12 @@ namespace OsEngine.Robots.Trend
                 {
                     VolumeType = reader.ReadLine();
                     TradeAssetInPortfolio = reader.ReadLine();
-                    Slippage = Convert.ToDecimal(reader.ReadLine());
-                    Volume = Convert.ToDecimal(reader.ReadLine());
+                    Slippage = reader.ReadLine().ToDecimal();
+                    Volume = reader.ReadLine().ToDecimal();
                     Enum.TryParse(reader.ReadLine(), true, out Regime);
-                    Step = Convert.ToDecimal(reader.ReadLine());
-                    Upline = Convert.ToDecimal(reader.ReadLine());
-                    Downline = Convert.ToDecimal(reader.ReadLine());
+                    Step = reader.ReadLine().ToDecimal();
+                    Upline = reader.ReadLine().ToDecimal();
+                    Downline = reader.ReadLine().ToDecimal();
 
                     reader.Close();
                 }

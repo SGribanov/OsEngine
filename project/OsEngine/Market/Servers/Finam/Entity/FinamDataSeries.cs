@@ -428,8 +428,7 @@ namespace OsEngine.Market.Servers.Finam.Entity
                 }
             }
 
-            using StreamWriter writer = new StreamWriter(fileName);
-            writer.Write(list);
+            SafeFileWriter.WriteAllText(fileName, list.ToString());
 
             return fileName;
         }

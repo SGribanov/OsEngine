@@ -1,3 +1,5 @@
+#nullable enable
+
 /*
  * Your rights to use code governed by this license https://github.com/AlexWan/OsEngine/blob/master/LICENSE
  * Ваши права на использование кода регулируются данной лицензией http://o-s-a.net/doc/license_simple_engine.pdf
@@ -75,7 +77,7 @@ namespace OsEngine.OsOptimizer.OptEntity
                 && StringComparer.Ordinal.Equals(SourceId, other.SourceId);
         }
 
-        public override bool Equals(object obj)
+        public override bool Equals(object? obj)
         {
             return obj is IndicatorCacheKey other && Equals(other);
         }
@@ -147,7 +149,7 @@ namespace OsEngine.OsOptimizer.OptEntity
         private readonly ConcurrentDictionary<IndicatorCacheKey, List<decimal>[]> _cache =
             new ConcurrentDictionary<IndicatorCacheKey, List<decimal>[]>();
 
-        private readonly object _sync = new object();
+        private readonly Lock _sync = new();
         private readonly int _maxEntries;
         private long _hits;
         private long _misses;
@@ -159,18 +161,18 @@ namespace OsEngine.OsOptimizer.OptEntity
             _maxEntries = maxEntries > 0 ? maxEntries : 1;
         }
 
-        public bool TryGet(in IndicatorCacheKey key, out List<decimal>[] values)
+        public bool TryGet(in IndicatorCacheKey key, out List<decimal>[]? values)
         {
             values = null;
 
-            if (!_cache.TryGetValue(key, out List<decimal>[] cachedValues)
+            if (!_cache.TryGetValue(key, out List<decimal>[]? cachedValues)
                 || cachedValues == null)
             {
                 Interlocked.Increment(ref _misses);
                 return false;
             }
 
-            List<decimal>[] clone = CloneSeries(cachedValues);
+            List<decimal>[]? clone = CloneSeries(cachedValues);
             if (clone == null)
             {
                 Interlocked.Increment(ref _misses);
@@ -189,7 +191,7 @@ namespace OsEngine.OsOptimizer.OptEntity
                 return;
             }
 
-            List<decimal>[] clone = CloneSeries(values);
+            List<decimal>[]? clone = CloneSeries(values);
             if (clone == null)
             {
                 return;
@@ -231,7 +233,7 @@ namespace OsEngine.OsOptimizer.OptEntity
                 entriesCount: _cache.Count);
         }
 
-        private static List<decimal>[] CloneSeries(List<decimal>[] source)
+        private static List<decimal>[]? CloneSeries(List<decimal>[]? source)
         {
             if (source == null)
             {

@@ -1386,7 +1386,7 @@ namespace OsEngine.Journal
 
                             listData.Add(dateTime);
 
-                            decimal lastValue = decimal.Parse(parts[5].Replace(".", ","));
+                            decimal lastValue = ParseDecimalInvariantOrCurrent(parts[5]);
                             candleData[dateTime] = lastValue;
                         }
                     }
@@ -1437,6 +1437,21 @@ namespace OsEngine.Journal
                 SendNewLogMessage(error.ToString(), LogMessageType.Error);
                 return null;
             }
+        }
+
+        private static decimal ParseDecimalInvariantOrCurrent(string value)
+        {
+            if (decimal.TryParse(value, NumberStyles.Any, CultureInfo.InvariantCulture, out decimal parsedInvariant))
+            {
+                return parsedInvariant;
+            }
+
+            if (decimal.TryParse(value, NumberStyles.Any, CultureInfo.CurrentCulture, out decimal parsedCurrent))
+            {
+                return parsedCurrent;
+            }
+
+            return value.ToDecimal();
         }
 
         private Series ScaleDataToChart(List<decimal> originalData, decimal chartMin, decimal chartMax)
@@ -3339,8 +3354,7 @@ namespace OsEngine.Journal
                     fileName = fileName + ".txt";
                 }
 
-                using StreamWriter writer = new StreamWriter(fileName);
-                writer.Write(workSheet);
+                SafeFileWriter.WriteAllText(fileName, workSheet.ToString());
             }
             catch (Exception error)
             {
@@ -3881,8 +3895,7 @@ namespace OsEngine.Journal
                     fileName = fileName + ".txt";
                 }
 
-                using StreamWriter writer = new StreamWriter(fileName);
-                writer.Write(workSheet);
+                SafeFileWriter.WriteAllText(fileName, workSheet.ToString());
             }
             catch (Exception error)
             {

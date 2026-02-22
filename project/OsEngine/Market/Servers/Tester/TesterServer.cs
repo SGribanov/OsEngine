@@ -2737,7 +2737,7 @@ namespace OsEngine.Market.Servers.Tester
 
                         if (array[i].Length > 6)
                         {
-                            goSell = Convert.ToDecimal(array[i][6]);
+                            goSell = array[i][6].ToDecimal();
                         }
 
                         if (array[i].Length > 7)

@@ -17,6 +17,7 @@ using OsEngine.OsTrader.Panels.Attributes;
 using OsEngine.OsTrader.Panels.Tab;
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 
 /*Discription
@@ -114,18 +115,15 @@ namespace OsEngine.Robots.Patterns
         {
             try
             {
-                using (StreamWriter writer = new StreamWriter(GetSettingsPath(), false)
-                    )
+                global::OsEngine.Entity.SafeFileWriter.WriteAllLines(GetSettingsPath(), new[]
                 {
-                    writer.WriteLine(_volumeType);
-                    writer.WriteLine(_tradeAssetInPortfolio);
-                    writer.WriteLine(Slippage);
-                    writer.WriteLine(_volume);
-                    writer.WriteLine(Regime);
-                    writer.WriteLine(Stop);
-
-                    writer.Close();
-                }
+                    _volumeType,
+                    _tradeAssetInPortfolio,
+                    Slippage.ToString(CultureInfo.InvariantCulture),
+                    _volume.ToString(CultureInfo.InvariantCulture),
+                    Regime.ToString(),
+                    Stop.ToString(CultureInfo.InvariantCulture)
+                });
             }
             catch (Exception)
             {
@@ -146,10 +144,10 @@ namespace OsEngine.Robots.Patterns
                 {
                     _volumeType = Convert.ToString(reader.ReadLine());
                     _tradeAssetInPortfolio = Convert.ToString(reader.ReadLine());
-                    Slippage = Convert.ToDecimal(reader.ReadLine());
-                    _volume = Convert.ToDecimal(reader.ReadLine());
+                    Slippage = reader.ReadLine().ToDecimal();
+                    _volume = reader.ReadLine().ToDecimal();
                     Enum.TryParse(reader.ReadLine(), true, out Regime);
-                    Stop = Convert.ToDecimal(reader.ReadLine());
+                    Stop = reader.ReadLine().ToDecimal();
 
                     reader.Close();
                 }

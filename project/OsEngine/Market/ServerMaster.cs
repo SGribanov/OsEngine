@@ -279,15 +279,9 @@ namespace OsEngine.Market
 
                 ServerType serverType = servers[0].ServerType;
 
-                using (StreamWriter writer = new StreamWriter(GetServerInstanceNumbersPath(serverType), false))
-                {
-                    for (int i = 0; i < servers.Count; i++)
-                    {
-                        writer.WriteLine(servers[i].ServerNum);
-                    }
-
-                    writer.Close();
-                }
+                SafeFileWriter.WriteAllLines(
+                    GetServerInstanceNumbersPath(serverType),
+                    servers.ConvertAll(server => server.ServerNum.ToString()));
             }
             catch
             {

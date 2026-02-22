@@ -663,12 +663,7 @@ namespace OsEngine.Entity
 
             try
             {
-                using (StreamWriter writer = new StreamWriter(filePath, false))
-                {
-                    writer.WriteLine(mySecurity.GetSaveStr());
-
-                    writer.Close();
-                }
+                SafeFileWriter.WriteAllLines(filePath, new[] { mySecurity.GetSaveStr() });
             }
             catch (System.Exception ex)
             {

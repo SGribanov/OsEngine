@@ -937,16 +937,7 @@ namespace OsEngine.OsData
         {
             try
             {
-                using (StreamWriter writer = new StreamWriter(@"Engine\OsDataAttachedServers.txt", false)
-                    )
-                {
-                    for (int i = 0; i < _attachedServers.Count; i++)
-                    {
-                        writer.WriteLine(_attachedServers[i].ToString());
-                    }
-
-                    writer.Close();
-                }
+                SafeFileWriter.WriteAllLines(@"Engine\OsDataAttachedServers.txt", _attachedServers.Select(server => server.ToString()));
             }
             catch (Exception)
             {

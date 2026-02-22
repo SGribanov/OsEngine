@@ -141,11 +141,7 @@ namespace OsEngine.Entity
 
         public void WriteExitFile(List<Candle> candles)
         {
-            using (StreamWriter outputFile = new StreamWriter(_exitFile))
-            {
-                foreach (Candle candle in candles)
-                    outputFile.WriteLine(candle.StringToSave);
-            }
+            SafeFileWriter.WriteAllLines(_exitFile, candles.ConvertAll(candle => candle.StringToSave));
         }
 
         public void SelectSourceFile()

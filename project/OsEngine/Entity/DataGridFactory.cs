@@ -186,8 +186,7 @@ namespace OsEngine.Entity
                         }
 
 
-                        using StreamWriter writer = new StreamWriter(fileName);
-                        writer.Write(saveStr);
+                        SafeFileWriter.WriteAllText(fileName, saveStr);
                     }
                     catch (Exception error)
                     {

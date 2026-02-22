@@ -15,6 +15,7 @@ using OsEngine.OsTrader.Panels.Attributes;
 using OsEngine.OsTrader.Panels.Tab;
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 
 /* Description
@@ -451,19 +452,21 @@ namespace OsEngine.Robots.Trend
         {
             try
             {
-                using var writer = new StreamWriter(GetSettingsPath(), false);
-                writer.WriteLine(Regime);
-                writer.WriteLine(KTake);
-                writer.WriteLine(Comiss);
-                writer.WriteLine(KComiss);
-                writer.WriteLine(AtrLength);
-                writer.WriteLine(Katr);
-                writer.WriteLine(K2Atr);
-                writer.WriteLine(Kalman1Length);
-                writer.WriteLine(Kalman2Length);
-                writer.WriteLine(VolumeType);
-                writer.WriteLine(TradeAssetInPortfolio);
-                writer.WriteLine(Volume);
+                global::OsEngine.Entity.SafeFileWriter.WriteAllLines(GetSettingsPath(), new[]
+                {
+                    Regime.ToString(),
+                    KTake.ToString(CultureInfo.InvariantCulture),
+                    Comiss.ToString(CultureInfo.InvariantCulture),
+                    KComiss.ToString(CultureInfo.InvariantCulture),
+                    AtrLength.ToString(),
+                    Katr.ToString(CultureInfo.InvariantCulture),
+                    K2Atr.ToString(CultureInfo.InvariantCulture),
+                    Kalman1Length.ToString(),
+                    Kalman2Length.ToString(),
+                    VolumeType,
+                    TradeAssetInPortfolio,
+                    Volume.ToString(CultureInfo.InvariantCulture)
+                });
             }
             catch (Exception)
             {
@@ -480,17 +483,17 @@ namespace OsEngine.Robots.Trend
             {
                 using var reader = new StreamReader(GetSettingsPath());
                 Enum.TryParse(reader.ReadLine(), true, out Regime);
-                KTake = Convert.ToDecimal(reader.ReadLine());
-                Comiss = Convert.ToDecimal(reader.ReadLine());
-                KComiss = Convert.ToDecimal(reader.ReadLine());
+                KTake = reader.ReadLine().ToDecimal();
+                Comiss = reader.ReadLine().ToDecimal();
+                KComiss = reader.ReadLine().ToDecimal();
                 AtrLength = Convert.ToInt32(reader.ReadLine());
-                Katr = Convert.ToDecimal(reader.ReadLine());
-                K2Atr = Convert.ToDecimal(reader.ReadLine());
+                Katr = reader.ReadLine().ToDecimal();
+                K2Atr = reader.ReadLine().ToDecimal();
                 Kalman1Length = Convert.ToInt32(reader.ReadLine());
                 Kalman2Length = Convert.ToInt32(reader.ReadLine());
                 VolumeType = Convert.ToString(reader.ReadLine());
                 TradeAssetInPortfolio = Convert.ToString(reader.ReadLine());
-                Volume = Convert.ToDecimal(reader.ReadLine());
+                Volume = reader.ReadLine().ToDecimal();
             }
             catch (Exception)
             {

@@ -5368,6 +5368,426 @@
   - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` -> success (0 warnings)
   - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed `343/343`
 
+## 2026-02-22 - Governance: automated upstream replay-audit script
+
+- Added automation script:
+  - `tools/audit-upstream-replay.ps1`
+- Purpose:
+  - run post-merge replay checks for upstream-attributed lines only (via `git blame` attribution against merge second-parent range).
+  - detect potential regressions for configured plan-related pattern groups:
+    - Step 0.3: silent catches
+    - Step 2.2: culture-sensitive parse patterns
+    - Step 4.1: `new object()` lock fields
+- Verification run:
+  - `pwsh -NoProfile -File tools/audit-upstream-replay.ps1 -MergeCommit 733b909d5` -> `OK` (0 findings)
+  - `pwsh -NoProfile -File tools/audit-upstream-replay.ps1 -MergeCommit HEAD` -> `OK` (0 findings)
+
+## 2026-02-22 - Governance: tracked-binary guard script for upstream sync
+
+- Added guard script to reduce repeated manual cleanup after upstream merges:
+  - `tools/check-tracked-debug-binaries.ps1`
+- Default mode validates only critical targets:
+  - `project/OsEngine/bin/Debug/OsEngine.dll`
+  - `project/OsEngine/bin/Debug/OsEngine.exe`
+- Optional strict mode:
+  - `-StrictAllDebugBinaries` checks all `project/OsEngine/bin/Debug/*.dll|*.exe`
+  - currently expected to fail because repository still tracks historical vendor binaries in that directory.
+- Verification:
+  - `pwsh -NoProfile -File tools/check-tracked-debug-binaries.ps1` -> `OK` (target binaries not tracked)
+  - `pwsh -NoProfile -File tools/check-tracked-debug-binaries.ps1 -StrictAllDebugBinaries` -> fails with explicit tracked list (expected baseline behavior)
+
+## 2026-02-22 - Upstream replay audit checkpoint (Steps 0.3 / 2.2 / 4.1)
+
+- Performed targeted replay audit against integrated upstream range:
+  - merge range: `733b909d5^1..733b909d5^2`
+  - checked patterns mapped to refactoring plan:
+    - Step 2.2: `decimal/double/float Parse/TryParse`, culture-dependent replacements
+    - Step 4.1: `new object()` lock fields introduced by upstream
+    - Step 0.3: added silent catches `catch { }`
+- Result:
+  - no remaining upstream-authored occurrences for the above pattern groups after incremental fixes `#334..#338`.
+- Build/test safety check (host context, outside sandbox by project rule):
+  - `dotnet restore project/OsEngine/OsEngine.csproj --nologo` -> success
+  - `dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo` -> success
+  - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` -> success (0 warnings)
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed `352/352`
+
+## 2026-02-22 - Step 2.2 (InvariantCulture in persistence) - Journal benchmark import decimal parse hardening
+
+- Replayed Step 2.2 on upstream-affected journal benchmark load path:
+  - `project/OsEngine/Journal/JournalUi2.xaml.cs`
+  - in `LoadBenchmarkData(...)` replaced:
+    - `decimal.Parse(parts[5].Replace(".", ","))`
+    - -> `ParseDecimalInvariantOrCurrent(parts[5])`
+  - added local helper:
+    - `ParseDecimalInvariantOrCurrent(string value)` with parse cascade:
+      - `InvariantCulture` (`NumberStyles.Any`)
+      - `CurrentCulture` fallback
+      - final `Convert.ToDecimal(value)` fallback for legacy behavior parity.
+
+### Verification
+
+- Host-context verification (outside sandbox by project rule):
+  - `dotnet restore project/OsEngine/OsEngine.csproj --nologo` -> success
+  - `dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo` -> success
+  - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` -> success (0 warnings)
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed `352/352`
+
+## 2026-02-22 - Step 2.2 (CultureInfo.InvariantCulture) - Trend persistence parsing
+
+- Standardized persistence serialization/parsing in:
+  - `project/OsEngine/Robots/Trend/WsurfBot.cs`
+  - `project/OsEngine/Robots/Trend/SmaStochastic.cs`
+  - `project/OsEngine/Robots/Trend/PriceChannelTrade.cs`
+- Changes:
+  - save paths now serialize decimal values with explicit `CultureInfo.InvariantCulture`.
+  - load paths in `WsurfBot` and `SmaStochastic` now parse decimal values via `Extensions.ToDecimal()` (culture-neutral with legacy fallback).
+  - `PriceChannelTrade` save path updated to invariant decimal serialization (load path already used `ToDecimal()`).
+  - updated `using` imports accordingly.
+- Scope:
+  - persistence serialization/parsing hardening only
+  - strategy trading logic unchanged.
+
+### Verification
+
+- Host-context verification (outside sandbox by project rule):
+  - `dotnet restore project/OsEngine/OsEngine.csproj --nologo` -> success
+  - `dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo` -> success
+  - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` -> success (0 warnings)
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed `352/352`
+
+## 2026-02-22 - Step 2.2 (CultureInfo.InvariantCulture) - CounterTrend persistence parsing
+
+- Standardized persistence serialization/parsing in:
+  - `project/OsEngine/Robots/CounterTrend/WilliamsRangeTrade.cs`
+  - `project/OsEngine/Robots/CounterTrend/StrategyBollinger.cs`
+  - `project/OsEngine/Robots/CounterTrend/RsiContrtrend.cs`
+- Changes:
+  - save paths now serialize decimal values with explicit `CultureInfo.InvariantCulture`.
+  - load paths now parse decimal values via `Extensions.ToDecimal()` (culture-neutral with legacy fallback).
+  - updated `using` imports accordingly.
+- Scope:
+  - persistence format/parsing hardening only
+  - strategy trading logic unchanged.
+
+### Verification
+
+- Host-context verification (outside sandbox by project rule):
+  - `dotnet restore project/OsEngine/OsEngine.csproj --nologo` -> success
+  - `dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo` -> success
+  - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` -> success (0 warnings)
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed `352/352`
+
+## 2026-02-22 - Step 2.1 (Atomic File Writes) - Polygon securities cache persistence hardening
+
+- Hardened securities cache write path in:
+  - `project/OsEngine/Market/Servers/Polygon/PolygonServer.cs`
+- Changes:
+  - `GetSecurityData()` now streams all paged ticker responses into temp file (`<cache>.tmp`) via a shared writer.
+  - finalization now uses atomic swap:
+    - `File.Replace(temp, target, target + ".bak", true)` when target exists
+    - `File.Move(temp, target)` on first write
+  - added safe flush before finalize:
+    - `FileStream.Flush(true)` when underlying stream is `FileStream`
+    - fallback to `Stream.Flush()` otherwise
+  - added `finally` cleanup for leftover temp file.
+  - internal save helper now writes into provided `StreamWriter`, removing direct append/resave path.
+- Scope:
+  - write-path durability hardening only
+  - Polygon parsing/business logic and file format unchanged.
+
+### Verification
+
+- Host-context verification (outside sandbox by project rule):
+  - `dotnet restore project/OsEngine/OsEngine.csproj --nologo` -> success
+  - `dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo` -> success
+  - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` -> success (0 warnings)
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed `352/352`
+
+## 2026-02-22 - Step 2.2 (InvariantCulture in persistence) - Upstream alignment pass for leverage and options settings parsing
+
+- Continued Step 2.2 replay over newly integrated upstream scope with culture-safe parsing updates:
+  - `project/OsEngine/OsTrader/Panels/Tab/BotTabOptions.cs`
+    - in legacy settings loader, `StrikesToShow` parse switched:
+      - `Convert.ToDecimal(value)` -> `value.ToDecimal()` (culture-neutral extension).
+  - `project/OsEngine/Entity/SetLeverageUi.xaml.cs`
+    - removed decimal parsing via `Replace(".", ",")` in UI value handling.
+    - introduced helper `TryParseDecimalInvariantOrCurrent(...)`:
+      - `InvariantCulture` (`NumberStyles.Any`)
+      - `CurrentCulture` fallback.
+    - applied helper in:
+      - `TextBoxLeverage_TextChanged(...)`
+      - `_dgv_CellValueChanged(...)` for leverage cells.
+
+### Verification
+
+- Host-context verification (outside sandbox by project rule):
+  - `dotnet restore project/OsEngine/OsEngine.csproj --nologo` -> success
+  - `dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo` -> success
+  - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` -> success (0 warnings)
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed `352/352`
+
+## 2026-02-22 - Step 2.2 (InvariantCulture in persistence) - RiskManager decimal parse hardening after upstream sync
+
+- Audited upstream-accepted changes for culture-sensitive persistence parsing and applied an incremental Step 2.2 fix in:
+  - `project/OsEngine/OsTrader/RiskManager/RiskManager.cs`
+- Updated legacy settings parse path:
+  - `MaxDrowDownToDayPersent = Convert.ToDecimal(lines[0])`
+  - -> `MaxDrowDownToDayPersent = ParseDecimalInvariantOrCurrent(lines[0])`
+- Added local helper with deterministic parse order:
+  - `InvariantCulture` (`NumberStyles.Any`)
+  - `CurrentCulture` fallback
+  - final legacy `Convert.ToDecimal(value)` fallback for malformed legacy payload behavior parity.
+- Binary artifacts check after upstream merge:
+  - `project/OsEngine/bin/Debug/OsEngine.dll` and `project/OsEngine/bin/Debug/OsEngine.exe` are not tracked and absent in working tree.
+
+### Verification
+
+- Host-context verification (outside sandbox by project rule):
+  - `dotnet restore project/OsEngine/OsEngine.csproj --nologo` -> success
+  - `dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo` -> success
+  - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` -> success (0 warnings)
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed `352/352`
+
+## 2026-02-22 - Step 4.1 (lock migration) - Optimizer cache sync fields migrated to Lock
+
+- Migrated remaining optimizer cache synchronization targets from `object` to `Lock`:
+  - `project/OsEngine/OsOptimizer/OptEntity/IndicatorCache.cs`
+    - `private readonly object _sync = new object();` -> `private readonly Lock _sync = new();`
+  - `project/OsEngine/OsOptimizer/OptEntity/OptimizerMethodCache.cs`
+    - `private readonly object _sync = new object();` -> `private readonly Lock _sync = new();`
+- Scope and behavior:
+  - lock scope and critical sections are unchanged (`lock (_sync)` preserved)
+  - no API changes and no runtime logic changes
+  - this closes the remaining active `new object()` lock fields in `project/OsEngine` (excluding comments).
+
+### Verification
+
+- Sandbox note:
+  - local sandbox test/build path still shows intermittent NuGet TLS issue (`NU1301`), so final verification was executed in host context.
+- Host-context verification:
+  - `dotnet restore project/OsEngine/OsEngine.csproj --nologo` -> success
+  - `dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo` -> success
+  - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` -> success (0 warnings)
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed `343/343`
+
+## 2026-02-22 - Step 4.2 (nullable annotations) - Optimizer cache files nullable-enabled
+
+- Enabled nullable context in remaining optimizer cache files:
+  - `project/OsEngine/OsOptimizer/OptEntity/IndicatorCache.cs`
+  - `project/OsEngine/OsOptimizer/OptEntity/OptimizerMethodCache.cs`
+- Applied nullable-safe signature updates without changing runtime behavior:
+  - `Equals(object obj)` -> `Equals(object? obj)` in both key structs
+  - `IndicatorCache.TryGet(...)` out value marked nullable (`out List<decimal>[]? values`)
+  - internal `TryGetValue(...)` locals switched to nullable-safe `out` forms
+  - `CloneSeries(...)` signature aligned to nullable flow (`List<decimal>[]?`)
+  - `OptimizerMethodCache.TryGet<T>(...)` default initialization normalized (`default!`)
+- Scope:
+  - no changes to cache keys, eviction policy, hit/miss accounting, or lock semantics
+  - nullable adoption only.
+
+### Verification
+
+- Host-context verification (outside sandbox by project rule):
+  - `dotnet restore project/OsEngine/OsEngine.csproj --nologo` -> success
+  - `dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo` -> success
+  - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` -> success (0 warnings)
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed `343/343`
+
+## 2026-02-22 - Step 1.3 (OKX HttpClient hardening) - Security regression tests for interceptor pipeline
+
+- Added targeted tests for OKX request-signing transport layer in:
+  - `project/OsEngine.Tests/SecurityRefactorTests.cs`
+- New coverage:
+  - `OkxHttpInterceptor_ShouldConfigureSocketsHandler_WithPooledLifetime`
+    - validates `SocketsHttpHandler` usage
+    - validates `PooledConnectionLifetime = TimeSpan.FromMinutes(5)`
+    - validates proxy-off default when proxy is not provided
+  - `OkxHttpInterceptor_ShouldAddSignedHeaders_AndDemoHeader`
+    - validates signed-header injection (`OK-ACCESS-*`)
+    - validates JSON accept-header propagation
+    - validates demo-trading header (`x-simulated-trading=1`)
+    - validates per-request body-signing path via `HttpRequestMessage.Options` key (`SignatureBodyOptionKey`)
+- Scope:
+  - test-only increment (no runtime behavior changes in production code)
+  - secures existing Step 1.3 implementation against regressions.
+
+### Verification
+
+- Host-context verification (outside sandbox by project rule):
+  - `dotnet restore project/OsEngine/OsEngine.csproj --nologo` -> success
+  - `dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo` -> success
+  - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` -> success (0 warnings)
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed `345/345`
+
+## 2026-02-22 - Step 1.2 (SSL bypass warning) - Trace warning regression test
+
+- Added explicit regression test for SSL-bypass warning path in:
+  - `project/OsEngine.Tests/SecurityRefactorTests.cs`
+- New coverage:
+  - `WebSocket_IgnoreSslErrors_SetTrue_ShouldEmitTraceWarning`
+    - attaches temporary `TraceListener`
+    - toggles `IgnoreSslErrors = true`
+    - verifies warning text containing `IgnoreSslErrors=true` is emitted
+  - keeps `CS0618` usage local to test body because obsolete API call is intentional for regression validation.
+- Scope:
+  - test-only increment (no runtime behavior changes)
+  - secures existing Step 1.2 warning behavior from regressions.
+
+### Verification
+
+- Host-context verification (outside sandbox by project rule):
+  - `dotnet restore project/OsEngine/OsEngine.csproj --nologo` -> success
+  - `dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo` -> success
+  - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` -> success (0 warnings)
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed `346/346`
+
+## 2026-02-22 - Step 1.2 (SSL bypass warning) - Restrict IgnoreSslErrors visibility to internal
+
+- Hardened SSL bypass control surface in:
+  - `project/OsEngine/Entity/WebSocketOsEngine.cs`
+- Change:
+  - `IgnoreSslErrors` property visibility narrowed:
+    - `public` -> `internal`
+  - existing `[Obsolete(...)]` annotation and warning trace behavior preserved.
+- Updated security regression tests in:
+  - `project/OsEngine.Tests/SecurityRefactorTests.cs`
+  - `WebSocket_IgnoreSslErrors_Property_ShouldBeInternal_AndMarkedObsolete`
+    - validates non-public/internal visibility via reflection
+    - validates obsolete attribute still present
+  - `WebSocket_IgnoreSslErrors_SetTrue_ShouldEmitTraceWarning`
+    - updated to set property via reflection for non-public setter
+    - keeps warning-emission verification.
+- Scope:
+  - security hardening only; runtime TLS-bypass behavior is unchanged for in-assembly callers.
+
+### Verification
+
+- Host-context verification (outside sandbox by project rule):
+  - `dotnet restore project/OsEngine/OsEngine.csproj --nologo` -> success
+  - `dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo` -> success
+  - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` -> success (0 warnings)
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed `346/346`
+
+## 2026-02-22 - Step 1.3 (OKX HttpClient hardening) - Extended interceptor transport regression tests
+
+- Extended OKX interceptor security/transport test coverage in:
+  - `project/OsEngine.Tests/SecurityRefactorTests.cs`
+- Added tests:
+  - `OkxHttpInterceptor_ShouldConfigureProxy_WhenProvided`
+    - verifies `UseProxy == true` when proxy is passed
+    - verifies handler keeps provided proxy instance
+  - `OkxHttpInterceptor_ShouldSetDemoHeaderToZero_WhenDemoModeDisabled`
+    - verifies `x-simulated-trading=0` in non-demo mode
+    - validates request passes through signed transport pipeline successfully.
+- Scope:
+  - test-only increment
+  - no runtime behavior changes in production code.
+
+### Verification
+
+- Host-context verification (outside sandbox by project rule):
+  - `dotnet restore project/OsEngine/OsEngine.csproj --nologo` -> success
+  - `dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo` -> success
+  - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` -> success (0 warnings)
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed `348/348`
+
+## 2026-02-22 - Step 1.3 (OKX HttpClient hardening) - RequestUri guard and invariant UTC timestamp
+
+- Hardened OKX request-signing handler in:
+  - `project/OsEngine/Market/Servers/OKX/Entity/HttpInterceptor.cs`
+- Changes:
+  - added explicit guard:
+    - throws `InvalidOperationException` when `request.RequestUri` is missing before signature generation
+  - switched timestamp generation to deterministic UTC + invariant culture:
+    - `DateTime.UtcNow.ToString("yyyy-MM-ddTHH:mm:ss.fffZ", CultureInfo.InvariantCulture)`
+- Added regression test in:
+  - `project/OsEngine.Tests/SecurityRefactorTests.cs`
+  - `OkxHttpInterceptor_ShouldThrowInvalidOperation_WhenRequestUriIsMissing`
+    - validates explicit failure contract for missing URI.
+- Scope:
+  - low-risk hardening of error contract and timestamp formatting
+  - no functional change for valid requests.
+
+### Verification
+
+- Host-context verification (outside sandbox by project rule):
+  - `dotnet restore project/OsEngine/OsEngine.csproj --nologo` -> success
+  - `dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo` -> success
+  - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` -> success (0 warnings)
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed `349/349`
+
+## 2026-02-22 - Step 1.3 (OKX HttpClient hardening) - UTC timestamp format regression coverage
+
+- Extended OKX interceptor regression test coverage in:
+  - `project/OsEngine.Tests/SecurityRefactorTests.cs`
+- Added test:
+  - `OkxHttpInterceptor_ShouldEmitUtcTimestamp_InExpectedFormat`
+    - validates `OK-ACCESS-TIMESTAMP` ends with `Z`
+    - validates exact format `yyyy-MM-ddTHH:mm:ss.fffZ`
+    - validates parsed timestamp is UTC (`DateTimeKind.Utc`)
+- Scope:
+  - test-only increment
+  - no production runtime changes.
+
+### Verification
+
+- Host-context verification (outside sandbox by project rule):
+  - `dotnet restore project/OsEngine/OsEngine.csproj --nologo` -> success
+  - `dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo` -> success
+  - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` -> success (0 warnings)
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed `350/350`
+
+## 2026-02-22 - Step 2.2 (InvariantCulture in persistence) - ServerParameter decimal parsing hardening
+
+- Hardened persistence deserialization for decimal server parameters in:
+  - `project/OsEngine/Market/Servers/Entity/ServerParameter.cs`
+- Change in `ServerParameterDecimal.LoadFromStr(...)`:
+  - replaced culture-dependent `Convert.ToDecimal(values[2])` primary path with deterministic parse cascade:
+    - `decimal.TryParse(..., NumberStyles.Float, CultureInfo.InvariantCulture, ...)`
+    - fallback to `CultureInfo.CurrentCulture`
+    - fallback to `ru-RU` for legacy comma-decimal payloads
+    - final fallback to legacy `Convert.ToDecimal(...)` to preserve old exception behavior on invalid input
+- Added regression coverage in:
+  - `project/OsEngine.Tests/ServerParameterPersistenceTests.cs`
+  - tests:
+    - `ServerParameterDecimal_LoadFromStr_ShouldParseInvariantDecimal`
+    - `ServerParameterDecimal_LoadFromStr_ShouldParseCommaDecimal_OnNonRuCurrentCulture`
+- Scope:
+  - persistence culture hardening only
+  - serialization format unchanged (`InvariantCulture` on save remains intact).
+
+### Verification
+
+- Host-context verification (outside sandbox by project rule):
+  - `dotnet restore project/OsEngine/OsEngine.csproj --nologo` -> success
+  - `dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo` -> success
+  - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` -> success (0 warnings)
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed `352/352`
+
+## 2026-02-22 - Step 2.2 (InvariantCulture in persistence) - GateIo trade timestamp fraction parsing
+
+- Hardened culture handling for GateIo trade timestamp fraction parsing in:
+  - `project/OsEngine/Market/Servers/GateIoData/GateIoDataServer.cs`
+  - `project/OsEngine/Market/Servers/GateIo/GateIoFutures/GateIoServerFutures.cs`
+- Changes:
+  - replaced implicit-culture `double.Parse(...)` calls with explicit invariant parsing:
+    - `double.Parse(..., CultureInfo.InvariantCulture)`
+  - scenarios covered:
+    - microsecond suffix parsing from CSV historical trade files (GateIoData)
+    - millisecond suffix parsing from live REST trade payloads (GateIoData/GateIoFutures)
+- Scope:
+  - persistence/time parsing hardening only
+  - no protocol, business-logic, or API contract changes.
+
+### Verification
+
+- Host-context verification (outside sandbox by project rule):
+  - `dotnet restore project/OsEngine/OsEngine.csproj --nologo` -> success
+  - `dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo` -> success
+  - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` -> success (0 warnings)
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed `352/352`
+
 ## 2026-02-20 - Step 3.2 (optimizer performance) - Candle reference-sharing verification
 
 - Reviewed optimizer candle data flow in:
@@ -5462,3 +5882,389 @@
   - `dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo` -> success
   - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` -> success (0 warnings)
   - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed `343/343`
+
+## 2026-02-22 - Step 2.1 (Atomic File Writes) - JournalUi2 export save paths
+
+- Hardened close/open positions export write path in:
+  - `project/OsEngine/Journal/JournalUi2.xaml.cs`
+- Changes:
+  - replaced direct `StreamWriter(fileName)` writes with atomic:
+    - `SafeFileWriter.WriteAllText(fileName, workSheet.ToString())`
+  - updated in two export handlers:
+    - open positions export
+    - close positions export
+- Scope:
+  - persistence write-path hardening only
+  - export content/format unchanged.
+
+### Verification
+
+- Host-context verification (outside sandbox by project rule):
+  - `dotnet restore project/OsEngine/OsEngine.csproj --nologo` -> success
+  - `dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo` -> success
+  - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` -> success (0 warnings)
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed `352/352`
+
+## 2026-02-22 - Upstream Replay Audit - Extended full check for today's accepted commits
+
+- Extended upstream replay audit coverage script:
+  - `tools/audit-upstream-replay.ps1`
+- Added Step 2.1 pattern groups to existing Step 0.3/2.2/4.1 checks:
+  - direct `StreamWriter(...)` write paths
+  - direct `File.WriteAllText/WriteAllLines/WriteAllBytes(...)`
+  - `FileStream(..., FileMode.Create|OpenOrCreate|Append, ...)`
+- Ran full attribution-based audit for today's merge:
+  - merge commit: `733b909d5`
+  - upstream range: `733b909d5^1..733b909d5^2`
+  - files scanned: `1124` (`.cs` only)
+  - result: no upstream-attributed findings for configured checks.
+
+### Verification
+
+- `pwsh -File tools/audit-upstream-replay.ps1 -MergeCommit 733b909d5 -RepoRoot .` -> success (`OK`, 0 findings)
+
+## 2026-02-22 - Step 2.1 (Atomic File Writes) - JournalUi export save paths
+
+- Hardened close/open positions export write path in:
+  - `project/OsEngine/Journal/JournalUi.xaml.cs`
+- Changes:
+  - replaced direct `StreamWriter(fileName)` writes with atomic:
+    - `SafeFileWriter.WriteAllText(fileName, workSheet.ToString())`
+  - updated in two export handlers:
+    - open positions export
+    - close positions export
+- Scope:
+  - persistence write-path hardening only
+  - export content/format unchanged.
+
+### Verification
+
+- Host-context verification (outside sandbox by project rule):
+  - `dotnet restore project/OsEngine/OsEngine.csproj --nologo` -> success
+  - `dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo` -> success
+  - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` -> success (0 warnings)
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed `352/352`
+
+## 2026-02-22 - Step 2.1 (Atomic File Writes) - Entity UI save/export paths
+
+- Hardened file save/export write paths in:
+  - `project/OsEngine/Entity/DataGridFactory.cs`
+  - `project/OsEngine/Entity/SecuritiesUi.xaml.cs`
+  - `project/OsEngine/Entity/NonTradePeriodsUi.xaml.cs`
+- Changes:
+  - `DataGridFactory`: table export save switched from direct `StreamWriter(fileName)` to atomic `SafeFileWriter.WriteAllText(fileName, saveStr)`.
+  - `SecuritiesUi`: security dop-settings save switched from direct `StreamWriter(filePath, false)` to atomic `SafeFileWriter.WriteAllLines(filePath, new[] { mySecurity.GetSaveStr() })`.
+  - `NonTradePeriodsUi`: template save switched from direct `StreamWriter(filePath)` loop to atomic `SafeFileWriter.WriteAllLines(filePath, array)`.
+  - removed redundant pre-create step in `NonTradePeriodsUi` (`File.Create`) because atomic writer creates target safely.
+- Scope:
+  - write-path durability hardening only
+  - saved payload formats preserved (line-based txt remains unchanged).
+
+### Verification
+
+- Host-context verification (outside sandbox by project rule):
+  - `dotnet restore project/OsEngine/OsEngine.csproj --nologo` -> success
+  - `dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo` -> success
+  - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` -> success (0 warnings)
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed `352/352`
+
+## 2026-02-22 - Step 2.1 (Atomic File Writes) - OsData UI/painter save paths
+
+- Hardened file save paths in:
+  - `project/OsEngine/OsData/OsDataSetUi.xaml.cs`
+  - `project/OsEngine/OsData/OsDataMasterPainter.cs`
+- Changes:
+  - `OsDataSetUi`: dataset export save switched from direct `File.WriteAllText(filePath, contentToSave)` to atomic `SafeFileWriter.WriteAllText(filePath, contentToSave)`.
+  - `OsDataMasterPainter`: attached-servers persistence switched from direct `StreamWriter(@"Engine\OsDataAttachedServers.txt", false)` loop to atomic `SafeFileWriter.WriteAllLines(@"Engine\OsDataAttachedServers.txt", _attachedServers.Select(...))`.
+- Scope:
+  - write-path durability hardening only
+  - save payload formats preserved (txt line format unchanged).
+
+### Verification
+
+- Host-context verification (outside sandbox by project rule):
+  - `dotnet restore project/OsEngine/OsEngine.csproj --nologo` -> success
+  - `dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo` -> success
+  - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` -> success (0 warnings)
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed `352/352`
+
+## 2026-02-22 - Step 2.1 (Atomic File Writes) - Additional UI save/export paths
+
+- Hardened file save/export write paths in:
+  - `project/OsEngine/Entity/StrategyParametersUi.xaml.cs`
+  - `project/OsEngine/OsTrader/Grids/TradeGridUi.xaml.cs`
+  - `project/OsEngine/OsTrader/Panels/Tab/BotTabScreenerUi.xaml.cs`
+  - `project/OsEngine/Market/Proxy/ProxyMasterUi.xaml.cs`
+  - `project/OsEngine/Market/Connectors/MassSourcesCreateUi.xaml.cs`
+  - `project/OsEngine/Market/AutoFollow/CopyPortfolioUi.xaml.cs`
+  - `project/OsEngine/OsOptimizer/OptimizerReportUi.xaml.cs`
+- Changes:
+  - replaced direct `StreamWriter(...)`/`File.WriteAllText(...)` save paths with atomic `SafeFileWriter.WriteAllText(...)` or `SafeFileWriter.WriteAllLines(...)`.
+  - removed redundant `File.Create(...)` pre-create blocks before save where present.
+  - preserved save payload formats (single-line or multi-line txt content unchanged).
+- Scope:
+  - write-path durability hardening only
+  - no behavior changes in load/apply logic.
+
+### Verification
+
+- Host-context verification (outside sandbox by project rule):
+  - `dotnet restore project/OsEngine/OsEngine.csproj --nologo` -> success
+  - `dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo` -> success
+  - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` -> success (0 warnings)
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed `352/352`
+
+## 2026-02-22 - Step 2.1 (Atomic File Writes) - Core/server save paths
+
+- Hardened file save/write paths in:
+  - `project/OsEngine/Market/ServerMaster.cs`
+  - `project/OsEngine/Market/Servers/Optimizer/OptimizerDataStorage.cs`
+  - `project/OsEngine/Market/Servers/QuikLua/QuikLuaServer.cs`
+  - `project/OsEngine/Market/Servers/Finam/Entity/FinamDataSeries.cs`
+  - `project/OsEngine/Market/Servers/ServerCandleStorage.cs`
+  - `project/OsEngine/Candles/CandleConverter.cs`
+- Changes:
+  - replaced one-shot `StreamWriter(...)`/`File.WriteAllText(...)` paths with atomic:
+    - `SafeFileWriter.WriteAllLines(...)`
+    - `SafeFileWriter.WriteAllText(...)`
+  - updated optimizer/security settings save and multiple server-side cache/data-save routines to atomic file replacement in same directory.
+- Scope:
+  - write-path durability hardening only
+  - serialization formats and load logic unchanged.
+
+### Verification
+
+- Host-context verification (outside sandbox by project rule):
+  - `dotnet restore project/OsEngine/OsEngine.csproj --nologo` -> success
+  - `dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo` -> success
+  - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` -> success (0 warnings)
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed `352/352`
+
+## 2026-02-22 - Step 2.1 (Atomic File Writes) - Robots settings save paths
+
+- Hardened robot-settings save write paths in:
+  - `project/OsEngine/Robots/CounterTrend/WilliamsRangeTrade.cs`
+  - `project/OsEngine/Robots/CounterTrend/StrategyBollinger.cs`
+  - `project/OsEngine/Robots/CounterTrend/RsiContrtrend.cs`
+  - `project/OsEngine/Robots/Trend/WsurfBot.cs`
+  - `project/OsEngine/Robots/Trend/SmaStochastic.cs`
+  - `project/OsEngine/Robots/Trend/PriceChannelTrade.cs`
+  - `project/OsEngine/Robots/MarketMaker/MarketMakerBot.cs`
+  - `project/OsEngine/Robots/MarketMaker/PairTraderSimple.cs`
+  - `project/OsEngine/Robots/MarketMaker/PairTraderSpreadSma.cs`
+  - `project/OsEngine/Robots/Patterns/PivotPointsRobot.cs`
+  - `project/OsEngine/Robots/AlgoStart/AlgoStart2Soldiers.cs`
+  - `project/OsEngine/Robots/Grids/GridScreenerAdaptiveSoldiers.cs`
+  - `project/OsEngine/Robots/Screeners/ThreeSoldierAdaptiveScreener.cs`
+  - `project/OsEngine/Robots/Screeners/PinBarVolatilityScreener.cs`
+  - `project/OsEngine/Robots/TechSamples/CustomTableInTheParamWindowSample.cs`
+- Changes:
+  - replaced direct one-shot `StreamWriter(Get...Path(), false)` blocks with atomic `SafeFileWriter.WriteAllLines(...)`.
+  - preserved the same line order and serialized content format used by existing `Load()` methods.
+- Scope:
+  - write-path durability hardening only
+  - no trading logic or parameter semantics changed.
+
+### Verification
+
+- Host-context verification (outside sandbox by project rule):
+  - `dotnet restore project/OsEngine/OsEngine.csproj --nologo` -> success
+  - `dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo` -> success
+  - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` -> success (0 warnings)
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed `352/352`
+
+## 2026-02-22 - Step 2.1 (Atomic File Writes) - Robots residual save paths
+
+- Hardened remaining robot write paths in:
+  - `project/OsEngine/Robots/BotCreateUi2.xaml.cs`
+  - `project/OsEngine/Robots/Helpers/TaxPayer.cs`
+  - `project/OsEngine/Robots/Helpers/PayOfMarginBot.cs`
+- Changes:
+  - `BotCreateUi2`: bot descriptions file save switched to atomic `SafeFileWriter.WriteAllLines(...)`.
+  - `TaxPayer`: period table JSON save switched to atomic `SafeFileWriter.WriteAllText(...)`.
+  - `PayOfMarginBot`: both summary and period JSON saves switched to atomic `SafeFileWriter.WriteAllText(...)`.
+- Scope:
+  - write-path durability hardening only
+  - data formats unchanged.
+
+### Verification
+
+- Host-context verification (outside sandbox by project rule):
+  - `dotnet restore project/OsEngine/OsEngine.csproj --nologo` -> success
+  - `dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo` -> success
+  - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` -> success (0 warnings)
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed `352/352`
+
+## 2026-02-22 - Step 2.1 (Atomic File Writes) - AscendEX/Telegram/OsDataSet persistence
+
+- Hardened file save/write paths in:
+  - `project/OsEngine/Market/Servers/AscendEX/AscendEXSpot/AscendexSpotServer.cs`
+  - `project/OsEngine/Market/Servers/TelegramNews/TelegramNewsServer.cs`
+  - `project/OsEngine/OsData/OsDataSet.cs`
+- Changes:
+  - `AscendexSpotServer`: order-tracker JSON saves switched from `File.WriteAllText(...)` to atomic `SafeFileWriter.WriteAllText(...)`.
+  - `TelegramNewsServer`: oversized log-file reset switched from `File.WriteAllText(...)` to atomic `SafeFileWriter.WriteAllText(...)`.
+  - `OsDataSet`: migrated one-shot non-append persistence paths to atomic writes:
+    - set settings save (`Settings.txt`)
+    - candle/trade reconstructed output saves (non-append paths)
+    - temp pie settings/data files
+    - market-depth pie status file
+    - dublicator/updater settings files.
+- Scope:
+  - write-path durability hardening only
+  - append/streaming/log-writer scenarios left unchanged by design.
+
+### Verification
+
+- Host-context verification (outside sandbox by project rule):
+  - `dotnet restore project/OsEngine/OsEngine.csproj --nologo` -> success
+  - `dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo` -> success
+  - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` -> success (0 warnings)
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed `352/352`
+
+## 2026-02-22 - Step 2.1 (Atomic File Writes) - OsConverter streaming output hardening
+
+- Hardened converter output write path in:
+  - `project/OsEngine/OsConverter/OsConverterMaster.cs`
+- Changes:
+  - `WorkerSpaceStreaming()` now writes conversion result to temp file (`<exit>.tmp`) first.
+  - after successful write/flush:
+    - `File.Replace(temp, target, target + ".bak", true)` when target exists
+    - `File.Move(temp, target)` on first write
+  - added `finally` cleanup of leftover temp file.
+  - fixed flush call for stream compatibility:
+    - `FileStream.Flush(true)` when underlying stream is `FileStream`
+    - fallback to `Stream.Flush()` otherwise.
+- Scope:
+  - write-path durability hardening only
+  - conversion logic and output format unchanged.
+
+### Verification
+
+- Host-context verification (outside sandbox by project rule):
+  - `dotnet restore project/OsEngine/OsEngine.csproj --nologo` -> success
+  - `dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo` -> success
+  - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` -> success (0 warnings)
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed `352/352`
+
+## 2026-02-22 - Step 2.2 (CultureInfo.InvariantCulture) - MarketMaker/Patterns persistence parsing
+
+- Standardized persistence serialization/parsing in:
+  - `project/OsEngine/Robots/MarketMaker/MarketMakerBot.cs`
+  - `project/OsEngine/Robots/MarketMaker/PairTraderSimple.cs`
+  - `project/OsEngine/Robots/MarketMaker/PairTraderSpreadSma.cs`
+  - `project/OsEngine/Robots/Patterns/PivotPointsRobot.cs`
+- Changes:
+  - save paths now serialize decimal values with explicit `CultureInfo.InvariantCulture`.
+  - load paths now parse decimal values via `Extensions.ToDecimal()` where decimal settings are read from files.
+  - `PairTraderSimple` spread value persistence now uses invariant serialization/parsing for saved `Spred` values.
+  - updated `using` imports accordingly.
+- Scope:
+  - persistence serialization/parsing hardening only
+  - trading logic unchanged.
+
+### Verification
+
+- Host-context verification (outside sandbox by project rule):
+  - `dotnet restore project/OsEngine/OsEngine.csproj --nologo` -> success
+  - `dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo` -> success
+  - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` -> success (0 warnings)
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed `352/352`
+
+## 2026-02-22 - Step 2.2 (CultureInfo.InvariantCulture) - ServerParameter decimal fallback
+
+- Standardized persistence fallback parsing in:
+  - `project/OsEngine/Market/Servers/Entity/ServerParameter.cs`
+- Changes:
+  - `ServerParameterDecimal.LoadFromStr()` final fallback switched from `Convert.ToDecimal(values[2])` to `values[2].ToDecimal()`.
+  - this keeps culture-neutral parsing behavior consistent with other persistence loaders.
+- Scope:
+  - persistence parsing hardening only
+  - server parameter storage format unchanged.
+
+### Verification
+
+- Host-context verification (outside sandbox by project rule):
+  - `dotnet restore project/OsEngine/OsEngine.csproj --nologo` -> success
+  - `dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo` -> success
+  - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` -> success (0 warnings)
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed `352/352`
+
+## 2026-02-22 - Step 2.2 (CultureInfo.InvariantCulture) - Common decimal parse fallback cleanup
+
+- Standardized decimal fallback parsing in:
+  - `project/OsEngine/Journal/JournalUi2.xaml.cs`
+  - `project/OsEngine/OsTrader/RiskManager/RiskManager.cs`
+- Changes:
+  - helper methods `ParseDecimalInvariantOrCurrent(...)` now use `value.ToDecimal()` as final fallback instead of `Convert.ToDecimal(value)`.
+  - this aligns fallback behavior with unified culture-neutral parsing utilities.
+- Scope:
+  - parsing hardening only
+  - runtime behavior unchanged for valid invariant/current-culture values.
+
+### Verification
+
+- Host-context verification (outside sandbox by project rule):
+  - `dotnet restore project/OsEngine/OsEngine.csproj --nologo` -> success
+  - `dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo` -> success
+  - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` -> success (0 warnings)
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed `352/352`
+
+## 2026-02-22 - Step 2.2 (CultureInfo.InvariantCulture) - Indicator legacy parse fallback cleanup
+
+- Standardized decimal fallback parsing in:
+  - `project/OsEngine/Charts/CandleChart/Indicators/DynamicTrendDetector.cs`
+  - `project/OsEngine/Charts/CandleChart/Indicators/KalmanFilter.cs`
+  - `project/OsEngine/Charts/CandleChart/Indicators/Envelops.cs`
+- Changes:
+  - legacy settings helpers `ParseDecimalInvariantOrCurrent(...)` now use `value.ToDecimal()` as final fallback instead of `Convert.ToDecimal(value)`.
+  - unified with the persistence culture-neutral parsing strategy.
+- Scope:
+  - parsing hardening only
+  - indicator computation logic unchanged.
+
+### Verification
+
+- Host-context verification (outside sandbox by project rule):
+  - `dotnet restore project/OsEngine/OsEngine.csproj --nologo` -> success
+  - `dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo` -> success
+  - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` -> success (0 warnings)
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed `352/352`
+
+## 2026-02-22 - Step 2.2 (CultureInfo.InvariantCulture) - TesterServer dop-settings decimal parsing
+
+- Standardized persistence parsing in:
+  - `project/OsEngine/Market/Servers/Tester/TesterServer.cs`
+- Changes:
+  - in `SetToSecuritiesDopSettings()`, optional `goSell` value parse switched from `Convert.ToDecimal(array[i][6])` to `array[i][6].ToDecimal()`.
+  - this keeps decimal parsing culture-neutral for legacy dop-settings payloads.
+- Scope:
+  - parsing hardening only
+  - tester behavior and settings format unchanged.
+
+### Verification
+
+- Host-context verification (outside sandbox by project rule):
+  - `dotnet restore project/OsEngine/OsEngine.csproj --nologo` -> success
+  - `dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo` -> success
+  - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` -> success (0 warnings)
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed `352/352`
+
+## 2026-02-22 - Step 2.2 (CultureInfo.InvariantCulture) - Server parameter UI decimal input parsing
+
+- Standardized decimal input parsing in:
+  - `project/OsEngine/Market/Servers/AServerParameterUi.xaml.cs`
+- Changes:
+  - decimal parameter assignment in `SaveParam()` switched from custom `Convert.ToDecimal(str.Replace(...))` to `str.ToDecimal()`.
+  - removed now-unused `System.Globalization` import.
+- Scope:
+  - decimal parsing hardening for server parameter UI input
+  - parameter persistence format unchanged.
+
+### Verification
+
+- Host-context verification (outside sandbox by project rule):
+  - `dotnet restore project/OsEngine/OsEngine.csproj --nologo` -> success
+  - `dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo` -> success
+  - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` -> success (0 warnings)
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed `352/352`

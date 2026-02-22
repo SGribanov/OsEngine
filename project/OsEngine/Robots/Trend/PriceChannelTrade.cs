@@ -17,6 +17,7 @@ using OsEngine.OsTrader.Panels.Attributes;
 using OsEngine.OsTrader.Panels.Tab;
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 
 /* Description
@@ -101,17 +102,14 @@ namespace OsEngine.Robots.Trend
         {
             try
             {
-                using (StreamWriter writer = new StreamWriter(GetSettingsPath(), false)
-                    )
+                global::OsEngine.Entity.SafeFileWriter.WriteAllLines(GetSettingsPath(), new[]
                 {
-                    writer.WriteLine(VolumeType);
-                    writer.WriteLine(TradeAssetInPortfolio);
-                    writer.WriteLine(Volume);
-                    writer.WriteLine(Slippage);
-                    writer.WriteLine(Regime);
-
-                    writer.Close();
-                }
+                    VolumeType,
+                    TradeAssetInPortfolio,
+                    Volume.ToString(CultureInfo.InvariantCulture),
+                    Slippage.ToString(CultureInfo.InvariantCulture),
+                    Regime.ToString()
+                });
             }
             catch (Exception)
             {

@@ -225,10 +225,20 @@ namespace OsEngine.OsConverter
 
         private void WorkerSpaceStreaming()
         {
+            string tempOutputPath = _exitFile + ".tmp";
+
             try
             {
+                string fullExitPath = Path.GetFullPath(_exitFile);
+                string? exitDirectory = Path.GetDirectoryName(fullExitPath);
+
+                if (!string.IsNullOrWhiteSpace(exitDirectory))
+                {
+                    Directory.CreateDirectory(exitDirectory);
+                }
+
                 using (StreamReader reader = new StreamReader(_sourceFile))
-                using (StreamWriter writer = new StreamWriter(_exitFile, false))
+                using (StreamWriter writer = new StreamWriter(tempOutputPath, false))
                 {
                     SendNewLogMessage(OsLocalization.Converter.Message4, LogMessageType.System);
                     SendNewLogMessage(OsLocalization.Converter.Message5, LogMessageType.System);
@@ -262,12 +272,37 @@ namespace OsEngine.OsConverter
                         ProcessTradesAndWriteCandles(trades, writer);
                     }
 
+                    writer.Flush();
+                    if (writer.BaseStream is FileStream fileStream)
+                    {
+                        fileStream.Flush(true);
+                    }
+                    else
+                    {
+                        writer.BaseStream.Flush();
+                    }
                     SendNewLogMessage(OsLocalization.Converter.Message9, LogMessageType.System);
+                }
+
+                if (File.Exists(_exitFile))
+                {
+                    File.Replace(tempOutputPath, _exitFile, _exitFile + ".bak", true);
+                }
+                else
+                {
+                    File.Move(tempOutputPath, _exitFile);
                 }
             }
             catch (Exception ex)
             {
                 SendNewLogMessage(ex.ToString(), LogMessageType.Error);
+            }
+            finally
+            {
+                if (File.Exists(tempOutputPath))
+                {
+                    File.Delete(tempOutputPath);
+                }
             }
 
             _worker = null;

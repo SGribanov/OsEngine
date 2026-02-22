@@ -1042,22 +1042,9 @@ namespace OsEngine.Market.AutoFollow
 
                 string filePath = saveFileDialog.FileName;
 
-                if (File.Exists(filePath) == false)
-                {
-                    using (FileStream stream = File.Create(filePath))
-                    {
-                        // do nothin
-                    }
-                }
                 try
                 {
-                    using (StreamWriter writer = new StreamWriter(filePath))
-                    {
-                         for(int i = 0;i < securityToCopy.Count;i++)
-                        {
-                            writer.WriteLine(securityToCopy[i].GetSaveString());
-                        }
-                    }
+                    SafeFileWriter.WriteAllLines(filePath, securityToCopy.ConvertAll(sec => sec.GetSaveString()));
                 }
                 catch (Exception error)
                 {

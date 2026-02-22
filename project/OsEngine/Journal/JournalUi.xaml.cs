@@ -2180,8 +2180,7 @@ namespace OsEngine.Journal
                     fileName = fileName + ".txt";
                 }
 
-                using StreamWriter writer = new StreamWriter(fileName);
-                writer.Write(workSheet);
+                SafeFileWriter.WriteAllText(fileName, workSheet.ToString());
             }
             catch (Exception error)
             {
@@ -2544,8 +2543,7 @@ namespace OsEngine.Journal
                     fileName = fileName + ".txt";
                 }
 
-                using StreamWriter writer = new StreamWriter(fileName);
-                writer.Write(workSheet);
+                SafeFileWriter.WriteAllText(fileName, workSheet.ToString());
             }
             catch (Exception error)
             {

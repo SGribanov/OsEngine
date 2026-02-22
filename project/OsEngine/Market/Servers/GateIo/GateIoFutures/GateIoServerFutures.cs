@@ -699,7 +699,7 @@ namespace OsEngine.Market.Servers.GateIo.GateIoFutures
 
                         if (timeData.Length > 1)
                         {
-                            trade.Time = time.AddMilliseconds(double.Parse(timeData[1]));
+                            trade.Time = time.AddMilliseconds(double.Parse(timeData[1], CultureInfo.InvariantCulture));
                         }
 
                         trades.Add(trade);

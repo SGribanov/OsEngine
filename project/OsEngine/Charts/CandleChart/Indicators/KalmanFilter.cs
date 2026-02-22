@@ -277,7 +277,7 @@ namespace OsEngine.Charts.CandleChart.Indicators
                 return parsedCurrent;
             }
 
-            return Convert.ToDecimal(value);
+            return value.ToDecimal();
         }
 
         private sealed class KalmanFilterSettingsDto

@@ -1198,25 +1198,10 @@ namespace OsEngine.Entity
 
                 string filePath = saveFileDialog.FileName;
 
-                if (File.Exists(filePath) == false)
-                {
-                    using (FileStream stream = File.Create(filePath))
-                    {
-                        // do nothin
-                    }
-                }
-
                 try
                 {
                     List<string> array = _periods.GetFullSaveArray();
-
-                    using (StreamWriter writer = new StreamWriter(filePath))
-                    {
-                        for (int i = 0; i < array.Count; i++)
-                        {
-                            writer.WriteLine(array[i]);
-                        }
-                    }
+                    SafeFileWriter.WriteAllLines(filePath, array);
                 }
                 catch (Exception error)
                 {

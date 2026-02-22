@@ -17,6 +17,7 @@ using OsEngine.OsTrader.Panels.Attributes;
 using OsEngine.OsTrader.Panels.Tab;
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 
 /* Description 
@@ -86,17 +87,15 @@ namespace OsEngine.Robots.MarketMaker
         {
             try
             {
-                using (StreamWriter writer = new StreamWriter(GetSettingsPath(), false)
-                    )
+                global::OsEngine.Entity.SafeFileWriter.WriteAllLines(GetSettingsPath(), new[]
                 {
-                    writer.WriteLine(VolumeType);
-                    writer.WriteLine(TradeAssetInPortfolio);
-                    writer.WriteLine(Regime);
-                    writer.WriteLine(Volume);
-                    writer.WriteLine(PersentToSpreadLines);
-                    writer.WriteLine(PaintOn);
-                    writer.Close();
-                }
+                    VolumeType,
+                    TradeAssetInPortfolio,
+                    Regime.ToString(),
+                    Volume.ToString(CultureInfo.InvariantCulture),
+                    PersentToSpreadLines.ToString(CultureInfo.InvariantCulture),
+                    PaintOn.ToString()
+                });
             }
             catch (Exception)
             {
@@ -118,8 +117,8 @@ namespace OsEngine.Robots.MarketMaker
                     VolumeType = Convert.ToString(reader.ReadLine());
                     TradeAssetInPortfolio = Convert.ToString(reader.ReadLine());
                     Enum.TryParse(reader.ReadLine(), true, out Regime);
-                    Volume = Convert.ToDecimal(reader.ReadLine());
-                    PersentToSpreadLines = Convert.ToDecimal(reader.ReadLine());
+                    Volume = reader.ReadLine().ToDecimal();
+                    PersentToSpreadLines = reader.ReadLine().ToDecimal();
                     PaintOn = Convert.ToBoolean(reader.ReadLine());
                     reader.Close();
                 }

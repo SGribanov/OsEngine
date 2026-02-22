@@ -1384,13 +1384,7 @@ namespace OsEngine.Market.Servers.QuikLua
                 DateTime fileNameDate = DateTime.Now.TimeOfDay.Hours < 19 ? DateTime.Now.Date : DateTime.Now.Date.AddDays(1);
                 string fileName = @"Data\Temp\" + security.Name + "_QuikLuaServer_" + fileNameDate.ToShortDateString() + ".txt";
 
-                using (StreamWriter writer = new StreamWriter(fileName, false))
-                {
-                    for (int i = 0; i < newTrades.Count; i++)
-                    {
-                        writer.WriteLine(newTrades[i].GetSaveString());
-                    }
-                }
+                SafeFileWriter.WriteAllLines(fileName, newTrades.ConvertAll(trade => trade.GetSaveString()));
 
                 // объединим со старыми данными, если они есть	
                 List<string> files = Directory.GetFiles(@"Data\Temp\", "*").ToList().FindAll(x => x.Contains(security.Name + "_QuikLuaServer_"));

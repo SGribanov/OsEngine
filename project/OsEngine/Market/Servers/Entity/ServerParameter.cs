@@ -140,7 +140,28 @@ namespace OsEngine.Market.Servers.Entity
         {
             string[] values = value.Split('^');
             _name = values[1];
-            _value = Convert.ToDecimal(values[2]);
+
+            const NumberStyles parseStyle = NumberStyles.Float;
+
+            if (decimal.TryParse(values[2], parseStyle, CultureInfo.InvariantCulture, out decimal parsed))
+            {
+                _value = parsed;
+                return;
+            }
+
+            if (decimal.TryParse(values[2], parseStyle, CultureInfo.CurrentCulture, out parsed))
+            {
+                _value = parsed;
+                return;
+            }
+
+            if (decimal.TryParse(values[2], parseStyle, new CultureInfo("ru-RU"), out parsed))
+            {
+                _value = parsed;
+                return;
+            }
+
+            _value = values[2].ToDecimal();
         }
 
         public ServerParameterType Type

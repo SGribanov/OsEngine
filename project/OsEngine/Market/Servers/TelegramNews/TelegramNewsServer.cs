@@ -46,7 +46,7 @@ namespace OsEngine.Market.Servers.TelegramNews
             FileInfo logFile = new FileInfo(GetTelegramLogFilePath());
 
             if (logFile.Exists && logFile.Length > 1024 * 1024)
-                File.WriteAllText(logFile.FullName, "");
+                SafeFileWriter.WriteAllText(logFile.FullName, string.Empty);
 
             // Logs settings
             WTelegram.Helpers.Log = (level, message) =>

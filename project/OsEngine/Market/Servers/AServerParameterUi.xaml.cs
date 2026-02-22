@@ -9,7 +9,6 @@
 using System;
 using System.Collections.Generic;
 using System.Drawing;
-using System.Globalization;
 using System.Windows;
 using System.Windows.Forms;
 using OsEngine.Entity;
@@ -1194,9 +1193,7 @@ namespace OsEngine.Market.Servers
                         _gridServerParameters.Rows[i].Cells[1].Value = "0";
                     }
                     string str = _gridServerParameters.Rows[i].Cells[1].Value.ToString();
-                    ((ServerParameterDecimal)param[i]).Value =
-                        Convert.ToDecimal(str.Replace(".",
-                            CultureInfo.InvariantCulture.NumberFormat.NumberDecimalSeparator));
+                    ((ServerParameterDecimal)param[i]).Value = str.ToDecimal();
 
                 }
                 else if (param[i].Type == ServerParameterType.Int)

@@ -3,6 +3,7 @@
 
 using OsEngine.Market.Servers.Entity;
 using System;
+using System.Globalization;
 using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
@@ -47,8 +48,12 @@ namespace OsEngine.Market.Servers.OKX.Entity
             request.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
             request.Headers.Add("OK-ACCESS-KEY", this._apiKey);
 
-            var now = DateTime.Now;
-            var timeStamp = TimeZoneInfo.ConvertTimeToUtc(now).ToString("yyyy-MM-ddTHH:mm:ss.fffZ");
+            if (request.RequestUri == null)
+            {
+                throw new InvalidOperationException("RequestUri must be set for OKX signed request.");
+            }
+
+            var timeStamp = DateTime.UtcNow.ToString("yyyy-MM-ddTHH:mm:ss.fffZ", CultureInfo.InvariantCulture);
             var requestUrl = request.RequestUri.PathAndQuery;
             request.Options.TryGetValue(SignatureBodyOptionKey, out string bodyStr);
             string sign;

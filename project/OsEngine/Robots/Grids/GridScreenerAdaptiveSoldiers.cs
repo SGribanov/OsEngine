@@ -165,16 +165,9 @@ namespace OsEngine.Robots.Grids
         {
             try
             {
-                using (StreamWriter writer = new StreamWriter(GetTradeSettingsPath(), false)
-                    )
-                {
-                    for (int i = 0; i < _tradeSettings.Count; i++)
-                    {
-                        writer.WriteLine(_tradeSettings[i].GetSaveString());
-                    }
-
-                    writer.Close();
-                }
+                global::OsEngine.Entity.SafeFileWriter.WriteAllLines(
+                    GetTradeSettingsPath(),
+                    _tradeSettings.ConvertAll(setting => setting.GetSaveString()));
             }
             catch (Exception)
             {

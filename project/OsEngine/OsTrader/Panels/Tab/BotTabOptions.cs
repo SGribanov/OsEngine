@@ -244,7 +244,7 @@ namespace OsEngine.OsTrader.Panels.Tab
                 }
                 else if (key == "StrikesToShow")
                 {
-                    settings.StrikesToShow = Convert.ToDecimal(value);
+                    settings.StrikesToShow = value.ToDecimal();
                 }
                 else if (key == nameof(ServerType))
                 {

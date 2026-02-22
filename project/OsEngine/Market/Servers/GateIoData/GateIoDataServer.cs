@@ -9,6 +9,7 @@ using OsEngine.Market.Servers.GateIoData.Entity;
 using RestSharp;
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.IO.Compression;
 using System.Net;
@@ -915,7 +916,7 @@ namespace OsEngine.Market.Servers.GateIoData
 
                 if (timeData.Length > 1)
                 {
-                    time = time.AddMicroseconds(double.Parse(timeData[1]));
+                    time = time.AddMicroseconds(double.Parse(timeData[1], CultureInfo.InvariantCulture));
                 }
 
                 trade.Time = time;
@@ -1104,7 +1105,7 @@ namespace OsEngine.Market.Servers.GateIoData
 
                             if (timeData.Length > 1)
                             {
-                                trade.Time = time.AddMilliseconds(double.Parse(timeData[1]));
+                                trade.Time = time.AddMilliseconds(double.Parse(timeData[1], CultureInfo.InvariantCulture));
                             }
                         }
                         else  // spot

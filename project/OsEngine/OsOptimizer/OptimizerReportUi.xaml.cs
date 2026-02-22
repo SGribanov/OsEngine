@@ -291,8 +291,7 @@ namespace OsEngine.OsOptimizer
                     saveStr.Append(_reports[i].GetSaveString() + "\r\n");
                 }
 
-                using StreamWriter writer = new StreamWriter(fileName);
-                writer.Write(saveStr);
+                SafeFileWriter.WriteAllText(fileName, saveStr.ToString());
             }
             catch (Exception error)
             {

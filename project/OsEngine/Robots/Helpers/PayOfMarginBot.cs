@@ -267,7 +267,7 @@ namespace OsEngine.Robots.Helpers
             try
             {
                 string json = JsonConvert.SerializeObject(_dictTableSumm, Formatting.Indented);
-                File.WriteAllText(GetTableSummPath(), json);
+                global::OsEngine.Entity.SafeFileWriter.WriteAllText(GetTableSummPath(), json);
             }
             catch (Exception ex)
             {
@@ -541,7 +541,7 @@ namespace OsEngine.Robots.Helpers
             try
             {
                 string json = JsonConvert.SerializeObject(_listTable, Formatting.Indented);
-                File.WriteAllText(GetTablePeriodPath(), json);
+                global::OsEngine.Entity.SafeFileWriter.WriteAllText(GetTablePeriodPath(), json);
             }
             catch (Exception ex)
             {

@@ -278,20 +278,9 @@ namespace OsEngine.Entity
 
                 string filePath = saveFileDialog.FileName;
 
-                if (File.Exists(filePath) == false)
-                {
-                    using (FileStream stream = File.Create(filePath))
-                    {
-                        // do nothin
-                    }
-                }
-
                 try
                 {
-                    using (StreamWriter writer = new StreamWriter(filePath))
-                    {
-                        writer.WriteLine(GetSaveParamString());
-                    }
+                    SafeFileWriter.WriteAllLines(filePath, new[] { GetSaveParamString() });
                 }
                 catch (Exception error)
                 {

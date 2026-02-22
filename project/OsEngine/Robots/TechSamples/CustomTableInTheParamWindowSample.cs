@@ -161,15 +161,9 @@ namespace OsEngine.Robots.TechSamples
         {
             try
             {
-                using (StreamWriter writer = new StreamWriter(GetLinesPath(), false))
-                {
-                    for (int i = 0; i < Lines.Count; i++)
-                    {
-                        writer.WriteLine(Lines[i].GetSaveStr());
-                    }
-
-                    writer.Close();
-                }
+                global::OsEngine.Entity.SafeFileWriter.WriteAllLines(
+                    GetLinesPath(),
+                    Lines.ConvertAll(line => line.GetSaveStr()));
             }
             catch (Exception ex)
             {

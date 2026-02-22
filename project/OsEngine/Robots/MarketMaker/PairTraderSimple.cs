@@ -15,6 +15,7 @@ using OsEngine.OsTrader.Panels.Attributes;
 using OsEngine.OsTrader.Panels.Tab;
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 
 /*
@@ -107,39 +108,30 @@ namespace OsEngine.Robots.MarketMaker
         {
             try
             {
-                using (StreamWriter writer = new StreamWriter(GetSettingsPath(), false)
-                    )
+                string positions = "";
+
+                for (int i = 0; _positionNumbers != null && i < _positionNumbers.Count; i++)
                 {
-                    writer.WriteLine(VolumeType1);
-                    writer.WriteLine(TradeAssetInPortfolio1);
-
-                    writer.WriteLine(VolumeType2);
-                    writer.WriteLine(TradeAssetInPortfolio2);
-
-                    writer.WriteLine(Regime);
-                    writer.WriteLine(Volume1);
-                    writer.WriteLine(Volume2);
-
-                    writer.WriteLine(Slippage1);
-                    writer.WriteLine(Slippage2);
-
-                    writer.WriteLine(CountCandles);
-                    writer.WriteLine(SpreadDeviation);
-
-                    writer.WriteLine(Loss);
-                    writer.WriteLine(Profit);
-
-                    string positions = "";
-
-                    for (int i = 0; _positionNumbers != null && i < _positionNumbers.Count; i++)
-                    {
-                        positions += _positionNumbers[i].NumberPositions + "$" + _positionNumbers[i].Spred + "%";
-                    }
-
-                    writer.WriteLine(positions);
-
-                    writer.Close();
+                    positions += _positionNumbers[i].NumberPositions + "$" + _positionNumbers[i].Spred.ToString(CultureInfo.InvariantCulture) + "%";
                 }
+
+                global::OsEngine.Entity.SafeFileWriter.WriteAllLines(GetSettingsPath(), new[]
+                {
+                    VolumeType1,
+                    TradeAssetInPortfolio1,
+                    VolumeType2,
+                    TradeAssetInPortfolio2,
+                    Regime.ToString(),
+                    Volume1.ToString(CultureInfo.InvariantCulture),
+                    Volume2.ToString(CultureInfo.InvariantCulture),
+                    Slippage1.ToString(CultureInfo.InvariantCulture),
+                    Slippage2.ToString(CultureInfo.InvariantCulture),
+                    CountCandles.ToString(),
+                    SpreadDeviation.ToString(CultureInfo.InvariantCulture),
+                    Loss.ToString(CultureInfo.InvariantCulture),
+                    Profit.ToString(CultureInfo.InvariantCulture),
+                    positions
+                });
             }
             catch (Exception)
             {
@@ -165,18 +157,18 @@ namespace OsEngine.Robots.MarketMaker
                     TradeAssetInPortfolio2 = Convert.ToString(reader.ReadLine());
 
                     Enum.TryParse(reader.ReadLine(), true, out Regime);
-                    Volume1 = Convert.ToDecimal(reader.ReadLine());
-                    Volume2 = Convert.ToDecimal(reader.ReadLine());
+                    Volume1 = reader.ReadLine().ToDecimal();
+                    Volume2 = reader.ReadLine().ToDecimal();
 
-                    Slippage1 = Convert.ToDecimal(reader.ReadLine());
-                    Slippage2 = Convert.ToDecimal(reader.ReadLine());
+                    Slippage1 = reader.ReadLine().ToDecimal();
+                    Slippage2 = reader.ReadLine().ToDecimal();
 
                     CountCandles = Convert.ToInt32(reader.ReadLine());
 
-                    SpreadDeviation = Convert.ToDecimal(reader.ReadLine());
+                    SpreadDeviation = reader.ReadLine().ToDecimal();
 
-                    Loss = Convert.ToDecimal(reader.ReadLine());
-                    Profit = Convert.ToDecimal(reader.ReadLine());
+                    Loss = reader.ReadLine().ToDecimal();
+                    Profit = reader.ReadLine().ToDecimal();
 
                     string[] positions = reader.ReadLine().Split('%');
                     if (positions.Length != 0)
@@ -189,7 +181,7 @@ namespace OsEngine.Robots.MarketMaker
                             {
                                 PairDealStausSaver save = new PairDealStausSaver();
                                 save.NumberPositions.Add(Convert.ToInt32(pos[0]));
-                                save.Spred = Convert.ToDecimal(pos[1]);
+                                save.Spred = pos[1].ToDecimal();
                                 _positionNumbers.Add(save);
                             }
                         }

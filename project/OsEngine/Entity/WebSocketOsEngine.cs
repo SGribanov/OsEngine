@@ -54,7 +54,7 @@ namespace OsEngine.Entity.WebSocketOsEngine
         }
 
         [Obsolete("SSL validation bypass is a security risk. Use only for debugging.")]
-        public bool IgnoreSslErrors
+        internal bool IgnoreSslErrors
         {
             get { return _ignoreSslErrors; }
             set

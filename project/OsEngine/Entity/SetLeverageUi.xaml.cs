@@ -11,6 +11,7 @@ using OsEngine.Market.Servers;
 using OsEngine.Market.Servers.Bybit.Entities;
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Windows;
@@ -389,7 +390,7 @@ namespace OsEngine.Entity
         {
             try
             {
-                decimal.TryParse(TextBoxLeverage.Text.ToString().Replace(".", ","), out _textBoxLeverage);
+                TryParseDecimalInvariantOrCurrent(TextBoxLeverage.Text, out _textBoxLeverage);
 
                 string selectedClass = ComboBoxClass.SelectedItem.ToString();
 
@@ -743,7 +744,7 @@ namespace OsEngine.Entity
                 {
                     if (e.RowIndex >= 0)
                     {
-                        if (!decimal.TryParse(_dgv.Rows[e.RowIndex].Cells[e.ColumnIndex].Value.ToString().Replace(".", ","), out decimal leverage))
+                        if (!TryParseDecimalInvariantOrCurrent(_dgv.Rows[e.RowIndex].Cells[e.ColumnIndex].Value?.ToString(), out decimal leverage))
                         {
                             _dgv.Rows[e.RowIndex].Cells[e.ColumnIndex].Value = "";
                         }
@@ -794,6 +795,28 @@ namespace OsEngine.Entity
             {
                 ServerMaster.SendNewLogMessage(ex.ToString(), Logging.LogMessageType.Error);
             }
+        }
+
+        private static bool TryParseDecimalInvariantOrCurrent(string value, out decimal result)
+        {
+            result = 0;
+
+            if (string.IsNullOrWhiteSpace(value))
+            {
+                return false;
+            }
+
+            if (decimal.TryParse(value, NumberStyles.Any, CultureInfo.InvariantCulture, out result))
+            {
+                return true;
+            }
+
+            if (decimal.TryParse(value, NumberStyles.Any, CultureInfo.CurrentCulture, out result))
+            {
+                return true;
+            }
+
+            return false;
         }
 
         private void PaintLeverageTable()

@@ -2978,31 +2978,20 @@ namespace OsEngine.OsTrader.Grids
 
                 string filePath = saveFileDialog.FileName;
 
-                if (File.Exists(filePath) == false)
-                {
-                    using (FileStream stream = File.Create(filePath))
-                    {
-                        // do nothin
-                    }
-                }
-
                 try
                 {
-                    using (StreamWriter writer = new StreamWriter(filePath))
+                    TradeGridRegime regime = TradeGrid.Regime;
+
+                    if (TradeGrid.Regime != TradeGridRegime.Off)
                     {
-                        TradeGridRegime regime = TradeGrid.Regime;
+                        TradeGrid.Regime = TradeGridRegime.Off;
+                    }
 
-                        if (TradeGrid.Regime != TradeGridRegime.Off)
-                        {
-                            TradeGrid.Regime = TradeGridRegime.Off;
-                        }
+                    SafeFileWriter.WriteAllLines(filePath, new[] { TradeGrid.GetSaveString() });
 
-                        writer.WriteLine(TradeGrid.GetSaveString());
-
-                        if (TradeGrid.Regime != regime)
-                        {
-                            TradeGrid.Regime = regime;
-                        }
+                    if (TradeGrid.Regime != regime)
+                    {
+                        TradeGrid.Regime = regime;
                     }
                 }
                 catch (Exception error)

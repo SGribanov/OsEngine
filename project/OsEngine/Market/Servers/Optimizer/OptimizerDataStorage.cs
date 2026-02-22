@@ -1457,13 +1457,9 @@ namespace OsEngine.Market.Servers.Optimizer
 
                 fileName += ".txt";
 
-                using (StreamWriter writer = new StreamWriter(fileName, false))
-                {
-                    for (int i = 0; i < SecuritiesTester.Count; i++)
-                    {
-                        writer.WriteLine(SecuritiesTester[i].Security.Name + "#" + SecuritiesTester[i].TimeFrame);
-                    }
-                }
+                SafeFileWriter.WriteAllLines(
+                    fileName,
+                    SecuritiesTester.ConvertAll(security => security.Security.Name + "#" + security.TimeFrame));
             }
             catch
             {
@@ -1752,22 +1748,16 @@ namespace OsEngine.Market.Servers.Optimizer
 
             try
             {
-                using (StreamWriter writer = new StreamWriter(pathToSettings, false))
-                {
-                    // name, lot, GO, price step, cost of price step / Имя, Лот, ГО, Цена шага, стоимость цены шага
-                    for (int i = 0; i < saves.Count; i++)
-                    {
-                        writer.WriteLine(
-                            saves[i][0] + "$" +
-                            saves[i][1] + "$" +
-                            saves[i][2] + "$" +
-                            saves[i][3] + "$" +
-                            saves[i][4] + "$" +
-                            saves[i][5] + "$" +
-                            saves[i][6]
-                            );
-                    }
-                }
+                List<string> linesToSave = saves.ConvertAll(save =>
+                    save[0] + "$" +
+                    save[1] + "$" +
+                    save[2] + "$" +
+                    save[3] + "$" +
+                    save[4] + "$" +
+                    save[5] + "$" +
+                    save[6]);
+
+                SafeFileWriter.WriteAllLines(pathToSettings, linesToSave);
             }
             catch (Exception ex)
             {

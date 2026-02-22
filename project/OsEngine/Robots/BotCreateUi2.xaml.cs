@@ -718,16 +718,9 @@ namespace OsEngine.Robots
         {
             try
             {
-                using (StreamWriter writer = new StreamWriter(@"BotsDescriprion.txt", false)
-                    )
-                {
-                    for (int i = 0; i < descriptions.Count; i++)
-                    {
-                        writer.WriteLine(descriptions[i].GetStringToSave());
-                    }
-
-                    writer.Close();
-                }
+                global::OsEngine.Entity.SafeFileWriter.WriteAllLines(
+                    @"BotsDescriprion.txt",
+                    descriptions.ConvertAll(description => description.GetStringToSave()));
             }
             catch (Exception)
             {

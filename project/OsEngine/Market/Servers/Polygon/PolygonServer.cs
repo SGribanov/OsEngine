@@ -299,8 +299,23 @@ namespace OsEngine.Market.Servers.Polygon
 
         private void GetSecurityData()
         {
+            string targetPath = GetSecuritiesCachePath();
+            string tempPath = targetPath + ".tmp";
+
             try
             {
+                string? directory = Path.GetDirectoryName(Path.GetFullPath(targetPath));
+
+                if (!string.IsNullOrWhiteSpace(directory))
+                {
+                    Directory.CreateDirectory(directory);
+                }
+
+                if (File.Exists(tempPath))
+                {
+                    File.Delete(tempPath);
+                }
+
                 if (_freePlan)
                 {
                     _rateGateFreePlan.WaitToProceed();
@@ -311,21 +326,43 @@ namespace OsEngine.Market.Servers.Polygon
 
                 RestResponceMessage<Tickers> response = JsonConvert.DeserializeObject<RestResponceMessage<Tickers>>(json);
 
-                SaveSecurityToFile(response, false);
-
-                while (response.next_url != null)
+                using (StreamWriter writer = new StreamWriter(tempPath, false))
                 {
-                    if (_freePlan)
+                    SaveSecurityToFile(response, writer);
+
+                    while (response.next_url != null)
                     {
-                        _rateGateFreePlan.WaitToProceed();
+                        if (_freePlan)
+                        {
+                            _rateGateFreePlan.WaitToProceed();
+                        }
+
+                        HttpResponseMessage responseMessageNextUrl = _httpClient.GetAsync($"{response.next_url}&apiKey={_apiKey}").Result;
+                        string jsonNextUrl = responseMessageNextUrl.Content.ReadAsStringAsync().Result;
+
+                        response = JsonConvert.DeserializeObject<RestResponceMessage<Tickers>>(jsonNextUrl);
+
+                        SaveSecurityToFile(response, writer);
                     }
 
-                    HttpResponseMessage responseMessageNextUrl = _httpClient.GetAsync($"{response.next_url}&apiKey={_apiKey}").Result;
-                    string jsonNextUrl = responseMessageNextUrl.Content.ReadAsStringAsync().Result;
+                    writer.Flush();
+                    if (writer.BaseStream is FileStream fileStream)
+                    {
+                        fileStream.Flush(true);
+                    }
+                    else
+                    {
+                        writer.BaseStream.Flush();
+                    }
+                }
 
-                    response = JsonConvert.DeserializeObject<RestResponceMessage<Tickers>>(jsonNextUrl);
-
-                    SaveSecurityToFile(response, true);
+                if (File.Exists(targetPath))
+                {
+                    File.Replace(tempPath, targetPath, targetPath + ".bak", true);
+                }
+                else
+                {
+                    File.Move(tempPath, targetPath);
                 }
 
                 SendLogMessage($"Writing to file is finished.", LogMessageType.System);
@@ -334,31 +371,28 @@ namespace OsEngine.Market.Servers.Polygon
             {
                 SendLogMessage("GetSecurityData:" + e.Message, LogMessageType.Error);
             }
-        }
-
-        private void SaveSecurityToFile(RestResponceMessage<Tickers> response, bool resave)
-        {
-            try
-            {                
-                using (StreamWriter writer = new StreamWriter(GetSecuritiesCachePath(), resave))
-                {                    
-                    for (int i = 0; i < response.results.Count; i++)
-                    {
-                        string saveString = response.results[i].ticker + ",";
-                        saveString += response.results[i].name + ",";
-                        saveString += response.results[i].type + ",";
-                        saveString += response.results[i].primary_exchange;
-
-                        writer.WriteLine(saveString);
-
-                    }
-                    SendLogMessage($"Write to file {response.results.Count} tickers", LogMessageType.System);
+            finally
+            {
+                if (File.Exists(tempPath))
+                {
+                    File.Delete(tempPath);
                 }
             }
-            catch (Exception ex)
+        }
+
+        private void SaveSecurityToFile(RestResponceMessage<Tickers> response, StreamWriter writer)
+        {
+            for (int i = 0; i < response.results.Count; i++)
             {
-                SendLogMessage($"SaveSecurityToFile: {ex.Message}", LogMessageType.Error);
+                string saveString = response.results[i].ticker + ",";
+                saveString += response.results[i].name + ",";
+                saveString += response.results[i].type + ",";
+                saveString += response.results[i].primary_exchange;
+
+                writer.WriteLine(saveString);
             }
+
+            SendLogMessage($"Write to file {response.results.Count} tickers", LogMessageType.System);
         }
 
         private static string GetSecuritiesCachePath()

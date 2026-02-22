@@ -252,15 +252,9 @@ namespace OsEngine.Market.Servers
                 Directory.CreateDirectory(_pathName);
             }
 
-            using (StreamWriter writer = new StreamWriter(_pathName + "\\" + series.Specification + ".txt"))
-            {
-                for (int i = 0; i < mySaveInfo.AllCandlesInFile.Count; i++)
-                {
-                    writer.WriteLine(mySaveInfo.AllCandlesInFile[i].StringToSave);
-                }
-
-                writer.Close();
-            }
+            SafeFileWriter.WriteAllLines(
+                _pathName + "\\" + series.Specification + ".txt",
+                mySaveInfo.AllCandlesInFile.ConvertAll(candle => candle.StringToSave));
         }
 
         /// <summary>

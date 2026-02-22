@@ -19,6 +19,7 @@ using OsEngine.OsTrader.Panels.Tab;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
+using System.Globalization;
 using System.IO;
 
 /* Description
@@ -121,18 +122,16 @@ namespace OsEngine.Robots.CounterTrend
         {
             try
             {
-                using (StreamWriter writer = new StreamWriter(GetSettingsPath(), false))
+                global::OsEngine.Entity.SafeFileWriter.WriteAllLines(GetSettingsPath(), new[]
                 {
-                    writer.WriteLine(_volumeType);
-                    writer.WriteLine(_tradeAssetInPortfolio);
-                    writer.WriteLine(_slippage);
-                    writer.WriteLine(_volume);
-                    writer.WriteLine(_regime);
-                    writer.WriteLine(_upline.Value);
-                    writer.WriteLine(_downline.Value);
-
-                    writer.Close();
-                }
+                    _volumeType,
+                    _tradeAssetInPortfolio,
+                    _slippage.ToString(CultureInfo.InvariantCulture),
+                    _volume.ToString(CultureInfo.InvariantCulture),
+                    _regime.ToString(),
+                    _upline.Value.ToString(CultureInfo.InvariantCulture),
+                    _downline.Value.ToString(CultureInfo.InvariantCulture)
+                });
             }
             catch (Exception)
             {
@@ -153,11 +152,11 @@ namespace OsEngine.Robots.CounterTrend
                 {
                     _volumeType = Convert.ToString(reader.ReadLine());
                     _tradeAssetInPortfolio = Convert.ToString(reader.ReadLine());
-                    _slippage = Convert.ToDecimal(reader.ReadLine());
-                    _volume = Convert.ToDecimal(reader.ReadLine());
+                    _slippage = reader.ReadLine().ToDecimal();
+                    _volume = reader.ReadLine().ToDecimal();
                     Enum.TryParse(reader.ReadLine(), true, out _regime);
-                    _upline.Value = Convert.ToDecimal(reader.ReadLine());
-                    _downline.Value = Convert.ToDecimal(reader.ReadLine());
+                    _upline.Value = reader.ReadLine().ToDecimal();
+                    _downline.Value = reader.ReadLine().ToDecimal();
 
                     reader.Close();
                 }

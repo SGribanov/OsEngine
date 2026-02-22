@@ -1701,22 +1701,11 @@ namespace OsEngine.OsTrader.Panels.Tab
 
                 string filePath = saveFileDialog.FileName;
 
-                if (File.Exists(filePath) == false)
-                {
-                    using (FileStream stream = File.Create(filePath))
-                    {
-                        // do nothin
-                    }
-                }
-
                 MassSourcesCreator curSettings = GetCurSettings();
 
                 try
                 {
-                    using (StreamWriter writer = new StreamWriter(filePath))
-                    {
-                        writer.WriteLine(curSettings.GetSaveString());
-                    }
+                    SafeFileWriter.WriteAllLines(filePath, new[] { curSettings.GetSaveString() });
                 }
                 catch (Exception error)
                 {
