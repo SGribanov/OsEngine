@@ -130,7 +130,7 @@ namespace OsEngine.Market.Proxy
                 return parsed;
             }
 
-            return Convert.ToDateTime(value, CultureInfo.InvariantCulture);
+            return DateTime.MinValue;
         }
 
         public void ShowDialog()

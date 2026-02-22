@@ -3231,16 +3231,8 @@ namespace OsEngine.OsData
             TfMarketDepthIsOn = Convert.ToBoolean(saveArray[18]);
 
             Enum.TryParse(saveArray[19], out Source);
-            try
-            {
-                TimeStart = Convert.ToDateTime(saveArray[20], CultureInfo.InvariantCulture);
-                TimeEnd = Convert.ToDateTime(saveArray[21], CultureInfo.InvariantCulture);
-            }
-            catch
-            {
-                TimeStart = ParseDateInvariantOrCurrent(saveArray[20]);
-                TimeEnd = ParseDateInvariantOrCurrent(saveArray[21]);
-            }
+            TimeStart = ParseDateInvariantOrCurrent(saveArray[20]);
+            TimeEnd = ParseDateInvariantOrCurrent(saveArray[21]);
 
             MarketDepthDepth = Convert.ToInt32(saveArray[22]);
             NeedToUpdate = Convert.ToBoolean(saveArray[23]);

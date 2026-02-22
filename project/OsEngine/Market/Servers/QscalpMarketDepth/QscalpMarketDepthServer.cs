@@ -80,9 +80,9 @@ namespace OsEngine.Market.Servers.QscalpMarketDepth
             {
                 Match match = matches[i];
 
-                DateTime date = Convert.ToDateTime(match.Value, CultureInfo.InvariantCulture);
+                DateTime date = ParseDateInvariantOrCurrent(match.Value);
 
-                if (!dates.Contains(date))
+                if (date != DateTime.MinValue && !dates.Contains(date))
                     dates.Add(date);
             }
 
@@ -210,7 +210,7 @@ namespace OsEngine.Market.Servers.QscalpMarketDepth
 
                 string[] securities = secStr[0].Split('%');
 
-                DateTime fileDate = Convert.ToDateTime(secStr[1], CultureInfo.InvariantCulture);
+                DateTime fileDate = ParseDateInvariantOrCurrent(secStr[1]);
 
                 for (int i = 0; i < securities.Length; i++)
                 {
@@ -350,7 +350,7 @@ namespace OsEngine.Market.Servers.QscalpMarketDepth
 
                 List<string> qshFilesPaths = [];
 
-                DateTime firstArchiveDate = Convert.ToDateTime(_availableDates[0], CultureInfo.InvariantCulture);
+                DateTime firstArchiveDate = _availableDates[0];
 
                 if (startTime.Date < firstArchiveDate)
                 {
@@ -436,6 +436,36 @@ namespace OsEngine.Market.Servers.QscalpMarketDepth
             }
 
             return null;
+        }
+
+        private DateTime ParseDateInvariantOrCurrent(string value)
+        {
+            if (string.IsNullOrWhiteSpace(value))
+            {
+                return DateTime.MinValue;
+            }
+
+            if (DateTime.TryParse(value, CultureInfo.InvariantCulture, DateTimeStyles.RoundtripKind, out DateTime parsedDate))
+            {
+                return parsedDate;
+            }
+
+            if (DateTime.TryParse(value, CultureInfo.InvariantCulture, DateTimeStyles.None, out parsedDate))
+            {
+                return parsedDate;
+            }
+
+            if (DateTime.TryParse(value, CultureInfo.CurrentCulture, DateTimeStyles.None, out parsedDate))
+            {
+                return parsedDate;
+            }
+
+            if (DateTime.TryParse(value, new CultureInfo("ru-RU"), DateTimeStyles.None, out parsedDate))
+            {
+                return parsedDate;
+            }
+
+            return DateTime.MinValue;
         }
 
         #endregion

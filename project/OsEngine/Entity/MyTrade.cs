@@ -156,7 +156,7 @@ namespace OsEngine.Entity
                 return parsed;
             }
 
-            return Convert.ToDateTime(value, Invariant);
+            return DateTime.MinValue;
         }
 
         /// <summary>

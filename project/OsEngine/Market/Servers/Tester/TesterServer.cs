@@ -404,13 +404,13 @@ namespace OsEngine.Market.Servers.Tester
             DateTime timeStart = DateTime.MinValue;
             if (lines.Length > 0 && !string.IsNullOrWhiteSpace(lines[0]))
             {
-                timeStart = Convert.ToDateTime(lines[0], CultureInfo);
+                timeStart = ParseDateInvariantOrCurrent(lines[0]);
             }
 
             DateTime timeEnd = DateTime.MinValue;
             if (lines.Length > 1 && !string.IsNullOrWhiteSpace(lines[1]))
             {
-                timeEnd = Convert.ToDateTime(lines[1], CultureInfo);
+                timeEnd = ParseDateInvariantOrCurrent(lines[1]);
             }
 
             return new TesterSecurityTestSettingsDto
@@ -6199,7 +6199,7 @@ namespace OsEngine.Market.Servers.Tester
         {
             string result = "";
 
-            result += Time.ToString(CultureInfo.InvariantCulture) + "$";
+            result += Time.ToString("O", CultureInfo.InvariantCulture) + "$";
             result += IsOn;
 
             return result;
@@ -6209,8 +6209,33 @@ namespace OsEngine.Market.Servers.Tester
         {
             string[] strings = str.Split('$');
 
-            Time = Convert.ToDateTime(strings[0], CultureInfo.InvariantCulture);
+            Time = ParseDateInvariantOrCurrent(strings[0]);
             IsOn = Convert.ToBoolean(strings[1]);
+        }
+
+        private static DateTime ParseDateInvariantOrCurrent(string value)
+        {
+            if (DateTime.TryParse(value, CultureInfo.InvariantCulture, DateTimeStyles.RoundtripKind, out DateTime parsed))
+            {
+                return parsed;
+            }
+
+            if (DateTime.TryParse(value, CultureInfo.InvariantCulture, DateTimeStyles.None, out parsed))
+            {
+                return parsed;
+            }
+
+            if (DateTime.TryParse(value, CultureInfo.CurrentCulture, DateTimeStyles.None, out parsed))
+            {
+                return parsed;
+            }
+
+            if (DateTime.TryParse(value, new CultureInfo("ru-RU"), DateTimeStyles.None, out parsed))
+            {
+                return parsed;
+            }
+
+            return DateTime.MinValue;
         }
     }
 
@@ -6229,8 +6254,8 @@ namespace OsEngine.Market.Servers.Tester
         {
             string result = "";
 
-            result += DateStart.ToString(CultureInfo.InvariantCulture) + "$";
-            result += DateEnd.ToString(CultureInfo.InvariantCulture) + "$";
+            result += DateStart.ToString("O", CultureInfo.InvariantCulture) + "$";
+            result += DateEnd.ToString("O", CultureInfo.InvariantCulture) + "$";
             result += IsOn;
 
             return result;
@@ -6240,9 +6265,34 @@ namespace OsEngine.Market.Servers.Tester
         {
             string[] strings = str.Split('$');
 
-            DateStart = Convert.ToDateTime(strings[0], CultureInfo.InvariantCulture);
-            DateEnd = Convert.ToDateTime(strings[1], CultureInfo.InvariantCulture);
+            DateStart = ParseDateInvariantOrCurrent(strings[0]);
+            DateEnd = ParseDateInvariantOrCurrent(strings[1]);
             IsOn = Convert.ToBoolean(strings[2]);
+        }
+
+        private static DateTime ParseDateInvariantOrCurrent(string value)
+        {
+            if (DateTime.TryParse(value, CultureInfo.InvariantCulture, DateTimeStyles.RoundtripKind, out DateTime parsed))
+            {
+                return parsed;
+            }
+
+            if (DateTime.TryParse(value, CultureInfo.InvariantCulture, DateTimeStyles.None, out parsed))
+            {
+                return parsed;
+            }
+
+            if (DateTime.TryParse(value, CultureInfo.CurrentCulture, DateTimeStyles.None, out parsed))
+            {
+                return parsed;
+            }
+
+            if (DateTime.TryParse(value, new CultureInfo("ru-RU"), DateTimeStyles.None, out parsed))
+            {
+                return parsed;
+            }
+
+            return DateTime.MinValue;
         }
     }
 

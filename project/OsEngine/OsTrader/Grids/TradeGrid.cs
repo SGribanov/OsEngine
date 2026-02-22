@@ -118,7 +118,7 @@ namespace OsEngine.OsTrader.Grids
             result += MaxCloseOrdersInMarket + "@";
             result += _firstTradePrice + "@";
             result += _openPositionsBySession + "@";
-            result += _firstTradeTime.ToString(CultureInfo.InvariantCulture) + "@";
+            result += _firstTradeTime.ToString("O", CultureInfo.InvariantCulture) + "@";
             result += DelayInReal + "@";
             result += CheckMicroVolumes + "@";
             result += MaxDistanceToOrdersPercent + "@";
@@ -183,7 +183,7 @@ namespace OsEngine.OsTrader.Grids
                 MaxCloseOrdersInMarket = Convert.ToInt32(values[7]);
                 _firstTradePrice = values[8].ToDecimal();
                 _openPositionsBySession = Convert.ToInt32(values[9]);
-                _firstTradeTime = Convert.ToDateTime(values[10], CultureInfo.InvariantCulture);
+                _firstTradeTime = ParseDateInvariantOrCurrent(values[10]);
 
                 try
                 {
@@ -242,6 +242,31 @@ namespace OsEngine.OsTrader.Grids
             {
                 SendNewLogMessage(e.ToString(), LogMessageType.Error);
             }
+        }
+
+        private static DateTime ParseDateInvariantOrCurrent(string value)
+        {
+            if (DateTime.TryParse(value, CultureInfo.InvariantCulture, DateTimeStyles.RoundtripKind, out DateTime parsed))
+            {
+                return parsed;
+            }
+
+            if (DateTime.TryParse(value, CultureInfo.InvariantCulture, DateTimeStyles.None, out parsed))
+            {
+                return parsed;
+            }
+
+            if (DateTime.TryParse(value, CultureInfo.CurrentCulture, DateTimeStyles.None, out parsed))
+            {
+                return parsed;
+            }
+
+            if (DateTime.TryParse(value, new CultureInfo("ru-RU"), DateTimeStyles.None, out parsed))
+            {
+                return parsed;
+            }
+
+            return DateTime.MinValue;
         }
 
         public void Delete()

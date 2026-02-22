@@ -248,7 +248,7 @@ namespace OsEngine.Entity
                 return parsed;
             }
 
-            return Convert.ToDateTime(value, CultureInfo.InvariantCulture);
+            return DateTime.MinValue;
         }
     }
 }

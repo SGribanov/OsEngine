@@ -373,7 +373,7 @@ namespace OsEngine.Market.Servers.NinjaTrader
                 order.NumberUser = Convert.ToInt32(str[1]);
                 order.NumberMarket = str[3];
                 order.State = OrderStateType.Active;
-                order.TimeCallBack = Convert.ToDateTime(str[4], CultureInfo.InvariantCulture);
+                order.TimeCallBack = ParseDateInvariantOrCurrent(str[4]);
 
                 if (MyOrderEvent != null)
                 {
@@ -440,7 +440,7 @@ namespace OsEngine.Market.Servers.NinjaTrader
                     _marketDepths.Add(myDepth);
                 }
 
-                myDepth.Time = Convert.ToDateTime(str[5], CultureInfo.InvariantCulture);
+                myDepth.Time = ParseDateInvariantOrCurrent(str[5]);
 
                 if (myDepth.Bids == null)
                 {
@@ -704,7 +704,7 @@ namespace OsEngine.Market.Servers.NinjaTrader
                 newMyTrade.Price = trdStr[3].ToDecimal();
                 newMyTrade.Volume= trdStr[4].ToDecimal();
                 Enum.TryParse(trdStr[5], out newMyTrade.Side);
-                newMyTrade.Time= Convert.ToDateTime(trdStr[6], CultureInfo.InvariantCulture);
+                newMyTrade.Time= ParseDateInvariantOrCurrent(trdStr[6]);
 
                 if (MyTradeEvent != null)
                 {
@@ -791,7 +791,7 @@ namespace OsEngine.Market.Servers.NinjaTrader
                 OrderStateType state;
                 Enum.TryParse(ordStr[8], out state);
                 newOrder.State = state;
-                newOrder.TimeCallBack = Convert.ToDateTime(ordStr[9], CultureInfo.InvariantCulture);
+                newOrder.TimeCallBack = ParseDateInvariantOrCurrent(ordStr[9]);
 
                 if (MyOrderEvent != null)
                 {
@@ -950,13 +950,43 @@ namespace OsEngine.Market.Servers.NinjaTrader
                         tradeInArray[1].ToDecimal();
                 newTrade.Volume =
                         tradeInArray[2].ToDecimal();
-                newTrade.Time = Convert.ToDateTime(tradeInArray[3], CultureInfo.InvariantCulture);
+                newTrade.Time = ParseDateInvariantOrCurrent(tradeInArray[3]);
 
                 if (NewTradesEvent != null)
                 {
                     NewTradesEvent(newTrade);
                 }
             }
+        }
+
+        private DateTime ParseDateInvariantOrCurrent(string value)
+        {
+            if (string.IsNullOrWhiteSpace(value))
+            {
+                return DateTime.MinValue;
+            }
+
+            if (DateTime.TryParse(value, CultureInfo.InvariantCulture, DateTimeStyles.RoundtripKind, out DateTime parsedDate))
+            {
+                return parsedDate;
+            }
+
+            if (DateTime.TryParse(value, CultureInfo.InvariantCulture, DateTimeStyles.None, out parsedDate))
+            {
+                return parsedDate;
+            }
+
+            if (DateTime.TryParse(value, CultureInfo.CurrentCulture, DateTimeStyles.None, out parsedDate))
+            {
+                return parsedDate;
+            }
+
+            if (DateTime.TryParse(value, new CultureInfo("ru-RU"), DateTimeStyles.None, out parsedDate))
+            {
+                return parsedDate;
+            }
+
+            return DateTime.MinValue;
         }
 
 		// outgoing events

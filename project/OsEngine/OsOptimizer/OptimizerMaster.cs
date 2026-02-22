@@ -1523,9 +1523,9 @@ namespace OsEngine.OsOptimizer
 
             result += TypeFaze.ToString() + "%";
 
-            result += _timeStart.ToString(CultureInfo.InvariantCulture) + "%";
+            result += _timeStart.ToString("O", CultureInfo.InvariantCulture) + "%";
 
-            result += _timeEnd.ToString(CultureInfo.InvariantCulture) + "%";
+            result += _timeEnd.ToString("O", CultureInfo.InvariantCulture) + "%";
 
             result += Days.ToString() + "%";
 
@@ -1538,11 +1538,36 @@ namespace OsEngine.OsOptimizer
 
             Enum.TryParse(str[0], out TypeFaze);
 
-            _timeStart = Convert.ToDateTime(str[1], CultureInfo.InvariantCulture);
+            _timeStart = ParseDateInvariantOrCurrent(str[1]);
 
-            _timeEnd = Convert.ToDateTime(str[2], CultureInfo.InvariantCulture);
+            _timeEnd = ParseDateInvariantOrCurrent(str[2]);
 
             Days = Convert.ToInt32(str[3]);
+        }
+
+        private static DateTime ParseDateInvariantOrCurrent(string value)
+        {
+            if (DateTime.TryParse(value, CultureInfo.InvariantCulture, DateTimeStyles.RoundtripKind, out DateTime parsed))
+            {
+                return parsed;
+            }
+
+            if (DateTime.TryParse(value, CultureInfo.InvariantCulture, DateTimeStyles.None, out parsed))
+            {
+                return parsed;
+            }
+
+            if (DateTime.TryParse(value, CultureInfo.CurrentCulture, DateTimeStyles.None, out parsed))
+            {
+                return parsed;
+            }
+
+            if (DateTime.TryParse(value, new CultureInfo("ru-RU"), DateTimeStyles.None, out parsed))
+            {
+                return parsed;
+            }
+
+            return DateTime.MinValue;
         }
 
     }

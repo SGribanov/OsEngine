@@ -520,7 +520,7 @@ namespace OsEngine.Entity
 
             result.Append(ServerName + "@");
 
-            result.Append(IsSendToCancel + "&" + CancellingTryCount + "&" + LastCancelTryLocalTime.ToString(CultureInfo.InvariantCulture));
+            result.Append(IsSendToCancel + "&" + CancellingTryCount + "&" + LastCancelTryLocalTime.ToString("O", CultureInfo.InvariantCulture));
 
             if (State == OrderStateType.Done && Volume == VolumeExecute &&
                 _trades != null && _trades.Count > 0)
@@ -602,14 +602,24 @@ namespace OsEngine.Entity
                 {
                     IsSendToCancel = Convert.ToBoolean(cancelling[0]);
                     CancellingTryCount = Convert.ToInt32(cancelling[1]);
-                    LastCancelTryLocalTime = Convert.ToDateTime(cancelling[2],CultureInfo.InvariantCulture);
+                    LastCancelTryLocalTime = ParseDateTimeInvariantWithRuFallback(cancelling[2]);
                 }
             }
         }
 
         private static DateTime ParseDateTimeInvariantWithRuFallback(string value)
         {
+            if (DateTime.TryParse(value, Invariant, DateTimeStyles.RoundtripKind, out DateTime roundtrip))
+            {
+                return roundtrip;
+            }
+
             if (DateTime.TryParse(value, Invariant, DateTimeStyles.None, out DateTime parsed))
+            {
+                return parsed;
+            }
+
+            if (DateTime.TryParse(value, CultureInfo.CurrentCulture, DateTimeStyles.None, out parsed))
             {
                 return parsed;
             }
@@ -619,7 +629,7 @@ namespace OsEngine.Entity
                 return parsed;
             }
 
-            return Convert.ToDateTime(value, Invariant);
+            return DateTime.MinValue;
         }
     }
 
