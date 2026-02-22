@@ -15,6 +15,7 @@ using OsEngine.Market;
 using OsEngine.Market.Connectors;
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.Threading;
 using System.Windows.Controls;
@@ -2765,7 +2766,7 @@ namespace OsEngine.OsTrader.Panels.Tab
                 {
                     try
                     {
-                        _lastTimeUpdate = Convert.ToDateTime(_lastTimeUpdateIndex);
+                        _lastTimeUpdate = ParseDateInvariantOrCurrent(_lastTimeUpdateIndex);
                     }
                     catch (Exception ex)
                     {
@@ -2853,7 +2854,7 @@ namespace OsEngine.OsTrader.Panels.Tab
 
             _lastTimeUpdate = timeCandle;
 
-            _lastTimeUpdateIndex = _lastTimeUpdate.ToString();
+            _lastTimeUpdateIndex = _lastTimeUpdate.ToString("O", CultureInfo.InvariantCulture);
 
             if (_startProgram == StartProgram.IsOsTrader)
             {
@@ -2871,6 +2872,31 @@ namespace OsEngine.OsTrader.Panels.Tab
             }
 
             return true;
+        }
+
+        private static DateTime ParseDateInvariantOrCurrent(string value)
+        {
+            if (DateTime.TryParse(value, CultureInfo.InvariantCulture, DateTimeStyles.RoundtripKind, out DateTime parsed))
+            {
+                return parsed;
+            }
+
+            if (DateTime.TryParse(value, CultureInfo.InvariantCulture, DateTimeStyles.None, out parsed))
+            {
+                return parsed;
+            }
+
+            if (DateTime.TryParse(value, CultureInfo.CurrentCulture, DateTimeStyles.None, out parsed))
+            {
+                return parsed;
+            }
+
+            if (DateTime.TryParse(value, new CultureInfo("ru-RU"), DateTimeStyles.None, out parsed))
+            {
+                return parsed;
+            }
+
+            return DateTime.MinValue;
         }
 
         private void SetFormulaPriceWeighted(List<SecurityInIndex> secInIndex, int daysLookBack)

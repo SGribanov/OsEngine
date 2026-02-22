@@ -5,6 +5,7 @@ using OsEngine.Entity;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
+using System.Globalization;
 using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
@@ -306,17 +307,27 @@ namespace OsEngine.Charts.CandleChart.Indicators
 
         private static DateTime ParseLegacyDateTime(string value)
         {
-            if (DateTime.TryParse(value, System.Globalization.CultureInfo.CurrentCulture, System.Globalization.DateTimeStyles.None, out DateTime currentCulture))
+            if (DateTime.TryParse(value, CultureInfo.InvariantCulture, DateTimeStyles.RoundtripKind, out DateTime roundtrip))
             {
-                return currentCulture;
+                return roundtrip;
             }
 
-            if (DateTime.TryParse(value, System.Globalization.CultureInfo.InvariantCulture, System.Globalization.DateTimeStyles.None, out DateTime invariantCulture))
+            if (DateTime.TryParse(value, CultureInfo.InvariantCulture, DateTimeStyles.None, out DateTime invariantCulture))
             {
                 return invariantCulture;
             }
 
-            return Convert.ToDateTime(value, System.Globalization.CultureInfo.CurrentCulture);
+            if (DateTime.TryParse(value, CultureInfo.CurrentCulture, DateTimeStyles.None, out DateTime currentCulture))
+            {
+                return currentCulture;
+            }
+
+            if (DateTime.TryParse(value, new CultureInfo("ru-RU"), DateTimeStyles.None, out DateTime ruCulture))
+            {
+                return ruCulture;
+            }
+
+            return Convert.ToDateTime(value, CultureInfo.CurrentCulture);
         }
 
         private sealed class VwapSettingsDto

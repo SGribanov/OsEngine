@@ -85,7 +85,7 @@ namespace OsEngine.Charts.CandleChart.Indicators
             _atr.ColorBase = HostColorBase.Child.BackColor;
             _atr.Length= Convert.ToInt32(TextBoxLength.Text);
             _atr.PaintOn = CheckBoxPaintOnOff.IsChecked.Value;
-            _atr.Multiplier = Convert.ToDecimal(TextBoxMultiplier.Text);
+            _atr.Multiplier = TextBoxMultiplier.Text.ToDecimal();
             _atr.Save();
 
             IsChange = true;

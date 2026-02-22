@@ -9,6 +9,7 @@
 using System;
 using System.Globalization;
 using System.Windows;
+using OsEngine.Entity;
 using OsEngine.Language;
 using OsEngine.OsTrader.Panels;
 
@@ -70,10 +71,10 @@ namespace OsEngine.Robots.MarketMaker
         {
             try
             {
-                if (Convert.ToDecimal(TextBoxSlippage1.Text) < 0 ||
-                    Convert.ToDecimal(TextBoxSlippage2.Text) < 0 ||
-                    Convert.ToDecimal(TextBoxVolume1.Text) < 0 ||
-                    Convert.ToDecimal(TextBoxVolume2.Text) < 0)
+                if (TextBoxSlippage1.Text.ToDecimal() < 0 ||
+                    TextBoxSlippage2.Text.ToDecimal() < 0 ||
+                    TextBoxVolume1.Text.ToDecimal() < 0 ||
+                    TextBoxVolume2.Text.ToDecimal() < 0)
                 {
                     throw new Exception();
                 }
@@ -89,12 +90,12 @@ namespace OsEngine.Robots.MarketMaker
             _strategy.VolumeType2 = Convert.ToString(ComboBoxVolumeType2.Text);
             _strategy.TradeAssetInPortfolio2 = Convert.ToString(TextBoxAssetInPortfolio2.Text);
 
-            _strategy.Slippage1 = Convert.ToDecimal(TextBoxSlippage1.Text);
-            _strategy.Slippage2 = Convert.ToDecimal(TextBoxSlippage2.Text);
+            _strategy.Slippage1 = TextBoxSlippage1.Text.ToDecimal();
+            _strategy.Slippage2 = TextBoxSlippage2.Text.ToDecimal();
             Enum.TryParse(ComboBoxRegime.Text, true, out _strategy.Regime);
 
-            _strategy.Volume2 = Convert.ToDecimal(TextBoxVolume2.Text);
-            _strategy.Volume1 = Convert.ToDecimal(TextBoxVolume1.Text);
+            _strategy.Volume2 = TextBoxVolume2.Text.ToDecimal();
+            _strategy.Volume1 = TextBoxVolume1.Text.ToDecimal();
 
             _strategy.Save();
             Close();

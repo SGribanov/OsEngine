@@ -209,8 +209,7 @@ namespace OsEngine.Robots.Helpers
                         return;
                     }
 
-                    decimal rate = 0;
-                    decimal.TryParse(_dgv.Rows[e.RowIndex].Cells[1].Value?.ToString().Replace(".", ","), out rate);
+                    decimal rate = (_dgv.Rows[e.RowIndex].Cells[1].Value?.ToString() ?? string.Empty).ToDecimal();
 
                     ListTablePeriods list = new();
                     list.Year = year;

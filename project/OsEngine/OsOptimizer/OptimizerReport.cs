@@ -5,6 +5,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Text;
 using OsEngine.Entity;
 using OsEngine.Journal.Internal;
@@ -454,15 +455,15 @@ namespace OsEngine.OsOptimizer
             result += TabType + "*";
             result += SecurityName + "*";
             result += PositionsCount + "*";
-            result += TotalProfit + "*";
-            result += MaxDrawDawn + "*";
-            result += AverageProfit + "*";
-            result += AverageProfitPercentOneContract + "*";
-            result += ProfitFactor + "*";
-            result += PayOffRatio + "*";
-            result += Recovery + "*";
-            result += TotalProfitPercent + "*";
-            result += SharpRatio + "*";
+            result += TotalProfit.ToString(CultureInfo.InvariantCulture) + "*";
+            result += MaxDrawDawn.ToString(CultureInfo.InvariantCulture) + "*";
+            result += AverageProfit.ToString(CultureInfo.InvariantCulture) + "*";
+            result += AverageProfitPercentOneContract.ToString(CultureInfo.InvariantCulture) + "*";
+            result += ProfitFactor.ToString(CultureInfo.InvariantCulture) + "*";
+            result += PayOffRatio.ToString(CultureInfo.InvariantCulture) + "*";
+            result += Recovery.ToString(CultureInfo.InvariantCulture) + "*";
+            result += TotalProfitPercent.ToString(CultureInfo.InvariantCulture) + "*";
+            result += SharpRatio.ToString(CultureInfo.InvariantCulture) + "*";
 
             return result;
         }

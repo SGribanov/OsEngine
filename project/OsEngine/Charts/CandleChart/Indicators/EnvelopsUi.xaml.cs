@@ -72,7 +72,7 @@ namespace OsEngine.Charts.CandleChart.Indicators
         {
             try
             {
-                if (Convert.ToDecimal(TextBoxDeviation.Text) <= 0)
+                if (TextBoxDeviation.Text.ToDecimal() <= 0)
                 {
                     throw  new Exception();
                 }
@@ -83,7 +83,7 @@ namespace OsEngine.Charts.CandleChart.Indicators
                 return;
             }
 
-            decimal.TryParse(TextBoxDeviation.Text, out _envelops.Deviation);
+            _envelops.Deviation = TextBoxDeviation.Text.ToDecimal();
 
             _envelops.PaintOn = CheckBoxPaintOnOff.IsChecked.Value;
             IsChange = true;

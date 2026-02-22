@@ -412,8 +412,7 @@ namespace OsEngine.Robots.Helpers
                         return;
                     }
 
-                    decimal rate = 0;
-                    decimal.TryParse(_dgv.Rows[e.RowIndex].Cells[1].Value?.ToString().Replace(".", ","), out rate);
+                    decimal rate = (_dgv.Rows[e.RowIndex].Cells[1].Value?.ToString() ?? string.Empty).ToDecimal();
 
                     ListTablePeriods list = new();
                     list.Year = year;
@@ -1031,7 +1030,7 @@ namespace OsEngine.Robots.Helpers
 
                     list.Summ = _listTableSumm[e.RowIndex].Summ;
                     list.TypeValue = _dgv.Rows[e.RowIndex].Cells[1].Value?.ToString() == TypeValueTableSumm.Absolute.ToString() ? TypeValueTableSumm.Absolute : TypeValueTableSumm.Percent;
-                    decimal.TryParse(_dgv.Rows[e.RowIndex].Cells[2].Value?.ToString(), out list.Rate);
+                    list.Rate = (_dgv.Rows[e.RowIndex].Cells[2].Value?.ToString() ?? string.Empty).ToDecimal();
 
                     _listTableSumm[e.RowIndex] = list;
                     _bot.AddListTableSumm(_listTableSumm, _year);

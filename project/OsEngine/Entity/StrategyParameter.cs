@@ -5,6 +5,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Windows.Forms;
 
 #nullable enable
@@ -407,11 +408,11 @@ namespace OsEngine.Entity
         public string GetStringToSave()
         {
             string save = _name + "#";
-            save += _valueDecimal + "#";
-            save += _valueDecimalDefolt + "#";
-            save += _valueDecimalStart + "#";
-            save += _valueDecimalStop + "#";
-            save += _valueDecimalStep + "#";
+            save += _valueDecimal.ToString(CultureInfo.InvariantCulture) + "#";
+            save += _valueDecimalDefolt.ToString(CultureInfo.InvariantCulture) + "#";
+            save += _valueDecimalStart.ToString(CultureInfo.InvariantCulture) + "#";
+            save += _valueDecimalStop.ToString(CultureInfo.InvariantCulture) + "#";
+            save += _valueDecimalStep.ToString(CultureInfo.InvariantCulture) + "#";
 
             return save;
         }
@@ -1595,11 +1596,11 @@ namespace OsEngine.Entity
         public string GetStringToSave()
         {
             string save = _name + "#";
-            save += _valueDecimal + "#";
-            save += _valueDecimalDefolt + "#";
-            save += _valueDecimalStart + "#";
-            save += _valueDecimalStop + "#";
-            save += _valueDecimalStep + "#";
+            save += _valueDecimal.ToString(CultureInfo.InvariantCulture) + "#";
+            save += _valueDecimalDefolt.ToString(CultureInfo.InvariantCulture) + "#";
+            save += _valueDecimalStart.ToString(CultureInfo.InvariantCulture) + "#";
+            save += _valueDecimalStop.ToString(CultureInfo.InvariantCulture) + "#";
+            save += _valueDecimalStep.ToString(CultureInfo.InvariantCulture) + "#";
 
             if (_checkState == CheckState.Checked)
             {

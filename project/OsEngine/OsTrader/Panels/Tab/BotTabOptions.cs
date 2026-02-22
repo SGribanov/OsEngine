@@ -17,6 +17,7 @@ using System;
 using System.Collections.Generic;
 using System.Threading;
 using System.Drawing;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Windows.Forms;
@@ -285,6 +286,31 @@ namespace OsEngine.OsTrader.Panels.Tab
             public bool EventsIsOn { get; set; }
         }
 
+        private static DateTime ParseDateInvariantOrCurrent(string value)
+        {
+            if (DateTime.TryParse(value, CultureInfo.InvariantCulture, DateTimeStyles.RoundtripKind, out DateTime parsed))
+            {
+                return parsed;
+            }
+
+            if (DateTime.TryParse(value, CultureInfo.InvariantCulture, DateTimeStyles.None, out parsed))
+            {
+                return parsed;
+            }
+
+            if (DateTime.TryParse(value, CultureInfo.CurrentCulture, DateTimeStyles.None, out parsed))
+            {
+                return parsed;
+            }
+
+            if (DateTime.TryParse(value, new CultureInfo("ru-RU"), DateTimeStyles.None, out parsed))
+            {
+                return parsed;
+            }
+
+            return DateTime.MinValue;
+        }
+
         #endregion
 
         #region Constructor and Initialization
@@ -350,7 +376,7 @@ namespace OsEngine.OsTrader.Panels.Tab
                 }
                 if (!string.IsNullOrEmpty(selectedExpirationStr) && selectedExpirationStr != "All")
                 {
-                    selectedDate = Convert.ToDateTime(selectedExpirationStr);
+                    selectedDate = ParseDateInvariantOrCurrent(selectedExpirationStr);
                 }
 
                 // Update options grid
@@ -1240,7 +1266,7 @@ namespace OsEngine.OsTrader.Panels.Tab
 
             if (!string.IsNullOrEmpty(selectedExpirationStr) && selectedExpirationStr != "All")
             {
-                selectedDate = Convert.ToDateTime(selectedExpirationStr);
+                selectedDate = ParseDateInvariantOrCurrent(selectedExpirationStr);
             }
 
             // Step 1: Filter master list

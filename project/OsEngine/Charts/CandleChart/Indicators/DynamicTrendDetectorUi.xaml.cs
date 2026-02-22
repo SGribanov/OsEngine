@@ -85,7 +85,7 @@ namespace OsEngine.Charts.CandleChart.Indicators
             _dtd.ColorBase = HostColorBase.Child.BackColor;
             _dtd.Length= Convert.ToInt32(TextBoxLength.Text);
             _dtd.PaintOn = CheckBoxPaintOnOff.IsChecked.Value;
-            _dtd.CorrectionCoeff = Convert.ToDecimal(TextBoxCorrectionCoeff.Text);
+            _dtd.CorrectionCoeff = TextBoxCorrectionCoeff.Text.ToDecimal();
             _dtd.Save();
 
             IsChange = true;

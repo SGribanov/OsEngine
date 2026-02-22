@@ -70,8 +70,8 @@ namespace OsEngine.Charts.CandleChart.Indicators
         {
             try
             {
-                if (Convert.ToDecimal(TextBoxSharpness.Text) <= 0 ||
-                    Convert.ToDecimal(TextBoxK.Text) <= 0)
+                if (TextBoxSharpness.Text.ToDecimal() <= 0 ||
+                    TextBoxK.Text.ToDecimal() <= 0)
                 {
                     throw new Exception("error");
                 }
@@ -83,8 +83,8 @@ namespace OsEngine.Charts.CandleChart.Indicators
             }
 
             _indicator.ColorBase = HostColorBase.Child.BackColor;
-            _indicator.Sharpness = Convert.ToDecimal(TextBoxSharpness.Text);
-            _indicator.K = Convert.ToDecimal(TextBoxK.Text);
+            _indicator.Sharpness = TextBoxSharpness.Text.ToDecimal();
+            _indicator.K = TextBoxK.Text.ToDecimal();
 
             if (CheckBoxPaintOnOff.IsChecked.HasValue)
             {

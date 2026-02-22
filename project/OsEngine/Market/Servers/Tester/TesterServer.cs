@@ -2742,7 +2742,7 @@ namespace OsEngine.Market.Servers.Tester
 
                         if (array[i].Length > 7)
                         {
-                            secu.Expiration = Convert.ToDateTime(array[i][7]);
+                            secu.Expiration = ParseDateInvariantOrCurrent(array[i][7]);
                         }
 
                         if (lot != 0)
@@ -2955,6 +2955,31 @@ namespace OsEngine.Market.Servers.Tester
             {
                 Items = items.ToArray()
             };
+        }
+
+        private static DateTime ParseDateInvariantOrCurrent(string value)
+        {
+            if (DateTime.TryParse(value, CultureInfo, DateTimeStyles.RoundtripKind, out DateTime parsed))
+            {
+                return parsed;
+            }
+
+            if (DateTime.TryParse(value, CultureInfo, DateTimeStyles.None, out parsed))
+            {
+                return parsed;
+            }
+
+            if (DateTime.TryParse(value, System.Globalization.CultureInfo.CurrentCulture, DateTimeStyles.None, out parsed))
+            {
+                return parsed;
+            }
+
+            if (DateTime.TryParse(value, new System.Globalization.CultureInfo("ru-RU"), DateTimeStyles.None, out parsed))
+            {
+                return parsed;
+            }
+
+            return DateTime.MinValue;
         }
 
         private sealed class TesterSecurityDopSettingsDto
@@ -3279,15 +3304,15 @@ namespace OsEngine.Market.Servers.Tester
                         Candle candleN = new Candle();
                         candleN.SetCandleFromString(reader.ReadLine());
 
-                        decimal openD = (decimal)Convert.ToDouble(candleN.Open);
-                        decimal highD = (decimal)Convert.ToDouble(candleN.High);
-                        decimal lowD = (decimal)Convert.ToDouble(candleN.Low);
-                        decimal closeD = (decimal)Convert.ToDouble(candleN.Close);
+                        decimal openD = candleN.Open;
+                        decimal highD = candleN.High;
+                        decimal lowD = candleN.Low;
+                        decimal closeD = candleN.Close;
 
-                        string open = openD.ToString().Replace(",", ".");
-                        string high = highD.ToString().Replace(",", ".");
-                        string low = lowD.ToString().Replace(",", ".");
-                        string close = closeD.ToString().Replace(",", ".");
+                        string open = openD.ToString(CultureInfo.InvariantCulture);
+                        string high = highD.ToString(CultureInfo.InvariantCulture);
+                        string low = lowD.ToString(CultureInfo.InvariantCulture);
+                        string close = closeD.ToString(CultureInfo.InvariantCulture);
 
                         if (open.Split('.').Length > 1 ||
                             high.Split('.').Length > 1 ||
@@ -3592,7 +3617,7 @@ namespace OsEngine.Market.Servers.Tester
                         Trade tradeN = new Trade();
                         tradeN.SetTradeFromString(reader.ReadLine());
 
-                        decimal open = (decimal)Convert.ToDouble(tradeN.Price);
+                        decimal open = tradeN.Price;
 
                         if (open.ToString(culture).Split('.').Length > 1)
                         {

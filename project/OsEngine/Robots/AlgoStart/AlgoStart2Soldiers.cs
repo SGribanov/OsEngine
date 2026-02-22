@@ -663,8 +663,8 @@ namespace OsEngine.Robots.AlgoStart
 
             result += SecName + "%";
             result += SecClass + "%";
-            result += HeightSoldiers + "%";
-            result += LastUpdateTime.ToString(CultureInfo.InvariantCulture) + "%";
+            result += HeightSoldiers.ToString(CultureInfo.InvariantCulture) + "%";
+            result += LastUpdateTime.ToString("O", CultureInfo.InvariantCulture) + "%";
 
             return result;
         }
@@ -676,7 +676,32 @@ namespace OsEngine.Robots.AlgoStart
             SecName = array[0];
             SecClass = array[1];
             HeightSoldiers = array[2].ToDecimal();
-            LastUpdateTime = Convert.ToDateTime(array[3], CultureInfo.InvariantCulture);
+            LastUpdateTime = ParseDateInvariantOrCurrent(array[3]);
+        }
+
+        private static DateTime ParseDateInvariantOrCurrent(string value)
+        {
+            if (DateTime.TryParse(value, CultureInfo.InvariantCulture, DateTimeStyles.RoundtripKind, out DateTime parsed))
+            {
+                return parsed;
+            }
+
+            if (DateTime.TryParse(value, CultureInfo.InvariantCulture, DateTimeStyles.None, out parsed))
+            {
+                return parsed;
+            }
+
+            if (DateTime.TryParse(value, CultureInfo.CurrentCulture, DateTimeStyles.None, out parsed))
+            {
+                return parsed;
+            }
+
+            if (DateTime.TryParse(value, new CultureInfo("ru-RU"), DateTimeStyles.None, out parsed))
+            {
+                return parsed;
+            }
+
+            return DateTime.MinValue;
         }
     }
 }

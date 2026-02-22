@@ -5433,6 +5433,474 @@
   - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` -> success (0 warnings)
   - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed `352/352`
 
+## 2026-02-22 - Step 2.2 (CultureInfo.InvariantCulture) - OptimizerSettings datetime round-trip persistence
+
+- Standardized optimizer settings datetime persistence in:
+  - `project/OsEngine/OsOptimizer/OptEntity/OptimizerSettings.cs`
+- Changes:
+  - in `Save()`:
+    - `_timeStart` and `_timeEnd` now serialize via `ToString("O", CultureInfo.InvariantCulture)`.
+  - in `Load()`:
+    - replaced direct `Convert.ToDateTime(..., CultureInfo.InvariantCulture)` with helper `ParseDateInvariantOrCurrent(...)`.
+    - helper uses invariant-first fallback order:
+      - `Invariant Roundtrip -> Invariant -> Current -> ru-RU`.
+- Scope:
+  - persistence parsing/serialization hardening only
+  - optimizer behavior and settings schema unchanged.
+
+### Verification
+
+- Host-context verification (outside sandbox by project rule):
+  - `dotnet restore project/OsEngine/OsEngine.csproj --nologo` -> success
+  - `dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo` -> success
+  - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` -> success (0 warnings)
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed `352/352`
+
+## 2026-02-22 - Step 2.2 (CultureInfo.InvariantCulture) - OsDataSet base settings time round-trip serialization
+
+- Standardized base dataset settings datetime serialization in:
+  - `project/OsEngine/OsData/OsDataSet.cs`
+- Changes:
+  - in `SettingsToLoadSecurity.GetSaveStr()`:
+    - `TimeStart` and `TimeEnd` now save via `ToString("O", CultureInfo.InvariantCulture)` instead of culture-dependent invariant default formatting.
+- Scope:
+  - persistence serialization hardening only
+  - load flow and settings compatibility unchanged.
+
+### Verification
+
+- Host-context verification (outside sandbox by project rule):
+  - `dotnet restore project/OsEngine/OsEngine.csproj --nologo` -> success
+  - `dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo` -> success
+  - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` -> success (0 warnings)
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed `352/352`
+
+## 2026-02-22 - Step 2.2 (CultureInfo.InvariantCulture) - Screener LastUpdateTime round-trip persistence
+
+- Standardized screener settings datetime persistence in:
+  - `project/OsEngine/Robots/AlgoStart/AlgoStart2Soldiers.cs`
+  - `project/OsEngine/Robots/Grids/GridScreenerAdaptiveSoldiers.cs`
+  - `project/OsEngine/Robots/Screeners/ThreeSoldierAdaptiveScreener.cs`
+  - `project/OsEngine/Robots/Screeners/PinBarVolatilityScreener.cs`
+- Changes:
+  - `LastUpdateTime` save paths now serialize with:
+    - `ToString("O", CultureInfo.InvariantCulture)`
+  - load paths now use invariant-first fallback parser:
+    - `Invariant Roundtrip -> Invariant -> Current -> ru-RU`
+  - replaced direct `Convert.ToDateTime(..., CultureInfo.InvariantCulture)` in these settings loaders.
+- Scope:
+  - persistence parsing/serialization hardening only
+  - screener calculation/trading logic unchanged.
+
+### Verification
+
+- Host-context verification (outside sandbox by project rule):
+  - `dotnet restore project/OsEngine/OsEngine.csproj --nologo` -> success
+  - `dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo` -> success
+  - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` -> success (0 warnings)
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed `352/352`
+
+## 2026-02-22 - Step 2.2 (CultureInfo.InvariantCulture) - Additional entity/proxy datetime parser harmonization
+
+- Standardized legacy datetime parse flow in:
+  - `project/OsEngine/Entity/Security.cs`
+  - `project/OsEngine/Entity/PositionOpenerToStop.cs`
+  - `project/OsEngine/Market/Proxy/ProxyMaster.cs`
+- Changes:
+  - added explicit invariant non-roundtrip parse stage (`DateTimeStyles.None`) after invariant round-trip attempts in helper parsers.
+  - `ProxyMaster` parser now also checks invariant round-trip parse before existing fallback chain.
+- Scope:
+  - parsing hardening only
+  - file formats and runtime business logic unchanged.
+
+### Verification
+
+- Host-context verification (outside sandbox by project rule):
+  - `dotnet restore project/OsEngine/OsEngine.csproj --nologo` -> success
+  - `dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo` -> success
+  - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` -> success (0 warnings)
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed `352/352`
+
+## 2026-02-22 - Step 2.2 (CultureInfo.InvariantCulture) - Trade/MyTrade date parse priority hardening
+
+- Standardized date parsing priority in:
+  - `project/OsEngine/Entity/MyTrade.cs`
+  - `project/OsEngine/Entity/Trade.cs`
+- Changes:
+  - `MyTrade.ParseDateTimeInvariantWithRuFallback(...)` now checks `CultureInfo.CurrentCulture` before `ru-RU` fallback.
+  - `Trade.ParseIqFeedDateInvariantOrCurrent(...)` now attempts invariant round-trip parse first (`DateTimeStyles.RoundtripKind`) before existing invariant/current/`ru-RU` parsing.
+- Scope:
+  - parsing hardening only
+  - trade/mytrade save formats and business logic unchanged.
+
+### Verification
+
+- Host-context verification (outside sandbox by project rule):
+  - `dotnet restore project/OsEngine/OsEngine.csproj --nologo` -> success
+  - `dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo` -> success
+  - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` -> success (0 warnings)
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed `352/352`
+
+## 2026-02-22 - Step 2.2 (CultureInfo.InvariantCulture) - OsDataSet duplicate/update datetime round-trip persistence
+
+- Standardized datetime persistence in:
+  - `project/OsEngine/OsData/OsDataSet.cs`
+- Changes:
+  - in `SetDublicator.SaveDublicateSettings(...)` and `SetUpdater.SaveUpdateSettings(...)`, datetime values now serialize using round-trip format:
+    - `ToString("O", CultureInfo.InvariantCulture)`
+  - in corresponding load paths:
+    - `SetDublicator.LoadDublicateSettings(...)`
+    - `SetUpdater.LoadUpdateSettings(...)`
+    - replaced direct `Convert.ToDateTime(..., CultureInfo.InvariantCulture)` with invariant-first fallback parser (`Invariant Roundtrip -> Invariant -> Current -> ru-RU`).
+- Scope:
+  - persistence parsing/serialization hardening only
+  - duplicate/update scheduling logic unchanged.
+
+### Verification
+
+- Host-context verification (outside sandbox by project rule):
+  - `dotnet restore project/OsEngine/OsEngine.csproj --nologo` -> success
+  - `dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo` -> success
+  - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` -> success (0 warnings)
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed `352/352`
+
+## 2026-02-22 - Step 2.2 (CultureInfo.InvariantCulture) - VWAP legacy date parse priority
+
+- Standardized culture priority in VWAP legacy date parser:
+  - `project/OsEngine/Charts/CandleChart/Indicators/VWAP.cs`
+- Changes:
+  - `ParseLegacyDateTime()` now parses in invariant-first order:
+    - invariant round-trip -> invariant -> current culture -> `ru-RU` fallback.
+  - added `using System.Globalization;`.
+- Scope:
+  - parsing hardening only
+  - indicator calculation logic unchanged.
+
+### Verification
+
+- Host-context verification (outside sandbox by project rule):
+  - `dotnet restore project/OsEngine/OsEngine.csproj --nologo` -> success
+  - `dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo` -> success
+  - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` -> success (0 warnings)
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed `352/352`
+
+## 2026-02-22 - Step 2.2 (CultureInfo.InvariantCulture) - BotTabOptions expiration-date parsing
+
+- Standardized selected-expiration parsing in options tab UI paths:
+  - `project/OsEngine/OsTrader/Panels/Tab/BotTabOptions.cs`
+- Changes:
+  - replaced `Convert.ToDateTime(selectedExpirationStr)` with explicit invariant-first date parser in:
+    - `RedrawGrid()`
+    - `RefreshOptionsGrid()`
+  - parser order: invariant round-trip -> invariant -> current culture -> `ru-RU`.
+- Scope:
+  - parsing hardening only
+  - options filtering/render behavior unchanged.
+
+### Verification
+
+- Host-context verification (outside sandbox by project rule):
+  - `dotnet restore project/OsEngine/OsEngine.csproj --nologo` -> success
+  - `dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo` -> success
+  - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` -> success (0 warnings)
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed `352/352`
+
+## 2026-02-22 - Step 2.2 (CultureInfo.InvariantCulture) - Global UI layout window coordinates serialization
+
+- Standardized invariant serialization for saved window layouts:
+  - `project/OsEngine/Layout/GlobalGUILayout.cs`
+- Changes:
+  - in `OpenWindow.GetSaveString()`, decimal layout fields now serialize via `ToString(CultureInfo.InvariantCulture)`:
+    - `Height`, `Left`, `Top`, `Widht`.
+  - load path remains `ToDecimal()` and keeps legacy compatibility.
+- Scope:
+  - persistence serialization hardening only
+  - UI layout logic unchanged.
+
+### Verification
+
+- Host-context verification (outside sandbox by project rule):
+  - `dotnet restore project/OsEngine/OsEngine.csproj --nologo` -> success
+  - `dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo` -> success
+  - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` -> success (0 warnings)
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed `352/352`
+
+## 2026-02-22 - Step 2.2 (CultureInfo.InvariantCulture) - TesterServer security expiration parse
+
+- Standardized expiration date parsing in tester security extra settings:
+  - `project/OsEngine/Market/Servers/Tester/TesterServer.cs`
+- Changes:
+  - replaced `Convert.ToDateTime(array[i][7])` with explicit invariant-first fallback parser.
+  - parser order: invariant round-trip -> invariant -> current culture -> `ru-RU`.
+- Scope:
+  - parsing hardening only
+  - securities dop-settings schema and trading logic unchanged.
+
+### Verification
+
+- Host-context verification (outside sandbox by project rule):
+  - `dotnet restore project/OsEngine/OsEngine.csproj --nologo` -> success
+  - `dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo` -> success
+  - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` -> success (0 warnings)
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed `352/352`
+
+## 2026-02-22 - Step 2.2 (CultureInfo.InvariantCulture) - BotTabIndex formula-update timestamp persistence
+
+- Standardized datetime persistence around index formula rebuild tracking:
+  - `project/OsEngine/OsTrader/Panels/Tab/BotTabIndex.cs`
+- Changes:
+  - `_lastTimeUpdateIndex` now saves as invariant round-trip (`ToString("O", CultureInfo.InvariantCulture)`).
+  - parse path now uses invariant-first fallback parser instead of culture-implicit `Convert.ToDateTime(...)`.
+- Scope:
+  - persistence parsing/serialization hardening only
+  - index formula logic unchanged.
+
+### Verification
+
+- Host-context verification (outside sandbox by project rule):
+  - `dotnet restore project/OsEngine/OsEngine.csproj --nologo` -> success
+  - `dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo` -> success
+  - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` -> success (0 warnings)
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed `352/352`
+
+## 2026-02-22 - Step 2.2 (CultureInfo.InvariantCulture) - Alert chart line persistence format
+
+- Standardized alert line persistence for culture-neutral round-trip:
+  - `project/OsEngine/Alerts/AlertToChart.cs`
+- Changes:
+  - `ChartAlertLine.GetStringToSave()` now writes:
+    - datetimes as invariant round-trip (`"O"`)
+    - decimal values via `ToString(CultureInfo.InvariantCulture)`.
+  - `ChartAlertLine.SetFromSaveString()` now parses datetimes with invariant-first fallback and supports legacy `ru-RU` values.
+- Scope:
+  - persistence serialization/parsing hardening only
+  - alert signal logic unchanged.
+
+### Verification
+
+- Host-context verification (outside sandbox by project rule):
+  - `dotnet restore project/OsEngine/OsEngine.csproj --nologo` -> success
+  - `dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo` -> success
+  - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` -> success (0 warnings)
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed `352/352`
+
+## 2026-02-22 - Step 2.2 (CultureInfo.InvariantCulture) - OsDataSet legacy date parse fallback
+
+- Standardized fallback date parsing in dataset settings load:
+  - `project/OsEngine/OsData/OsDataSet.cs`
+- Changes:
+  - in `SettingsToLoadSecurity.Load()`, replaced fallback `Convert.ToDateTime(...)` (without explicit culture) with invariant-first parser.
+  - parser order: round-trip invariant -> invariant -> current culture -> `ru-RU`.
+- Scope:
+  - parsing hardening only
+  - settings schema and update workflow unchanged.
+
+### Verification
+
+- Host-context verification (outside sandbox by project rule):
+  - `dotnet restore project/OsEngine/OsEngine.csproj --nologo` -> success
+  - `dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo` -> success
+  - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` -> success (0 warnings)
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed `352/352`
+
+## 2026-02-22 - Step 2.2 (CultureInfo.InvariantCulture) - ProxyMaster legacy settings date parse
+
+- Standardized legacy date parsing in proxy settings loader:
+  - `project/OsEngine/Market/Proxy/ProxyMaster.cs`
+- Changes:
+  - replaced culture-implicit `Convert.ToDateTime(lines[1])` in legacy settings parse with invariant-first fallback parser (`InvariantCulture` -> `CurrentCulture` -> `ru-RU`).
+- Scope:
+  - parsing hardening only
+  - settings schema and runtime proxy behavior unchanged.
+
+### Verification
+
+- Host-context verification (outside sandbox by project rule):
+  - `dotnet restore project/OsEngine/OsEngine.csproj --nologo` -> success
+  - `dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo` -> success
+  - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` -> success (0 warnings)
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed `352/352`
+
+## 2026-02-22 - Step 2.2 (CultureInfo.InvariantCulture) - OsDataSet security-load settings serialization
+
+- Standardized decimal serialization in dataset security-load settings:
+  - `project/OsEngine/OsData/OsDataSet.cs`
+- Changes:
+  - in `SecurityToLoad.GetSaveStr()`, `PriceStep` and `VolumeStep` now serialize via `ToString(CultureInfo.InvariantCulture)`.
+  - corresponding load path already uses `ToDecimal()`, so old and new formats remain readable.
+- Scope:
+  - persistence serialization hardening only
+  - dataset loading flow and schema unchanged.
+
+### Verification
+
+- Host-context verification (outside sandbox by project rule):
+  - `dotnet restore project/OsEngine/OsEngine.csproj --nologo` -> success
+  - `dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo` -> success
+  - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` -> success (0 warnings)
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed `352/352`
+
+## 2026-02-22 - Step 2.2 (CultureInfo.InvariantCulture) - TesterServer price-step parsing cleanup
+
+- Standardized culture-safe numeric string handling in tester data loading:
+  - `project/OsEngine/Market/Servers/Tester/TesterServer.cs`
+- Changes:
+  - replaced legacy `ToString().Replace(",", ".")` decimal normalization with direct `ToString(CultureInfo.InvariantCulture)` for candle OHLC in price-step estimation.
+  - removed unnecessary `decimal -> double -> decimal` conversions in both candle and tick price-step estimation loops.
+- Scope:
+  - parsing/normalization hardening only
+  - tester behavior and stored formats unchanged.
+
+### Verification
+
+- Host-context verification (outside sandbox by project rule):
+  - `dotnet restore project/OsEngine/OsEngine.csproj --nologo` -> success
+  - `dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo` -> success
+  - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` -> success (0 warnings)
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed `352/352`
+
+## 2026-02-22 - Step 2.2 (CultureInfo.InvariantCulture) - Trade/MyTrade datetime parsing and serialization
+
+- Standardized datetime persistence parsing/serialization behavior:
+  - `project/OsEngine/Entity/Trade.cs`
+  - `project/OsEngine/Entity/MyTrade.cs`
+- Changes:
+  - `Trade.SetTradeFromString()` (IqFeed branch) now parses date with invariant-first fallback parser instead of culture-implicit `Convert.ToDateTime(...)`.
+  - `MyTrade.GetStringFofSave()` now saves `Time` as invariant round-trip (`"O"`).
+  - `MyTrade` parser now tries round-trip invariant parse first, then keeps previous invariant/legacy fallback behavior.
+- Scope:
+  - parsing/serialization hardening only
+  - trade logic and field schema unchanged.
+
+### Verification
+
+- Host-context verification (outside sandbox by project rule):
+  - `dotnet restore project/OsEngine/OsEngine.csproj --nologo` -> success
+  - `dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo` -> success
+  - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` -> success (0 warnings)
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed `352/352`
+
+## 2026-02-22 - Step 2.2 (CultureInfo.InvariantCulture) - MarketDepth persistence formatting
+
+- Standardized invariant numeric formatting in market depth save string:
+  - `project/OsEngine/Entity/MarketDepth.cs`
+- Changes:
+  - in `GetSaveStringToAllDepfh()`, ask/bid volume and price values now serialize via `ToString(CultureInfo.InvariantCulture)`.
+  - added `using System.Globalization;`.
+- Scope:
+  - persistence serialization hardening only
+  - load path remains unchanged (`ToDouble()`), backward compatibility preserved.
+
+### Verification
+
+- Host-context verification (outside sandbox by project rule):
+  - `dotnet restore project/OsEngine/OsEngine.csproj --nologo` -> success
+  - `dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo` -> success
+  - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` -> success (0 warnings)
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed `352/352`
+
+## 2026-02-22 - Step 2.2 (CultureInfo.InvariantCulture) - Position stop-opener persistence
+
+- Standardized culture-safe persistence in stop-opener serialization:
+  - `project/OsEngine/Entity/PositionOpenerToStop.cs`
+- Changes:
+  - in `GetSaveString()`, decimal fields now use `ToString(CultureInfo.InvariantCulture)` (`PriceOrder`, `PriceRedLine`, `Volume`).
+  - `LastCandleTime` and `TimeCreate` now serialize as invariant round-trip format (`"O"`).
+  - `LoadFromString()` now parses dates with invariant-first fallback (`InvariantCulture` -> legacy `ru-RU` -> `CurrentCulture`) for backward compatibility.
+- Scope:
+  - persistence serialization/parsing hardening only
+  - stop-opener execution logic unchanged.
+
+### Verification
+
+- Host-context verification (outside sandbox by project rule):
+  - `dotnet restore project/OsEngine/OsEngine.csproj --nologo` -> success
+  - `dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo` -> success
+  - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` -> success (0 warnings)
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed `352/352`
+
+## 2026-02-22 - Step 2.2 (CultureInfo.InvariantCulture) - Security persistence serialization
+
+- Standardized culture-safe persistence in `Security`:
+  - `project/OsEngine/Entity/Security.cs`
+- Changes:
+  - in `GetSaveStr()`, decimal fields now use explicit `ToString(CultureInfo.InvariantCulture)`:
+    - `PriceStep`, `Lot`, `PriceStepCost`, `MarginBuy`, `PriceLimitLow`, `PriceLimitHigh`, `Strike`, `MinTradeAmount`, `VolumeStep`, `MarginSell`.
+  - `Expiration` now saves as round-trip invariant format: `ToString("O", CultureInfo.InvariantCulture)`.
+  - in `LoadFromString()`, `Expiration` parsing now uses invariant-first fallback parser (`InvariantCulture` -> `CurrentCulture` -> `ru-RU`) to preserve backward compatibility.
+- Scope:
+  - persistence serialization/parsing hardening only
+  - security metadata logic unchanged.
+
+### Verification
+
+- Host-context verification (outside sandbox by project rule):
+  - `dotnet restore project/OsEngine/OsEngine.csproj --nologo` -> success
+  - `dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo` -> success
+  - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` -> success (0 warnings)
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed `352/352`
+
+## 2026-02-22 - Step 2.2 (CultureInfo.InvariantCulture) - Optimizer report decimal serialization
+
+- Standardized decimal serialization in optimizer report persistence:
+  - `project/OsEngine/OsOptimizer/OptEntity/OptimizerReportSerializer.cs`
+  - `project/OsEngine/OsOptimizer/OptimizerReport.cs`
+- Changes:
+  - in legacy body serializer, all decimal report aggregates now use `ToString(CultureInfo.InvariantCulture)`.
+  - in `OptimizerReportTab.GetSaveString()`, all decimal fields now use `ToString(CultureInfo.InvariantCulture)`.
+  - added `using System.Globalization;` in both files.
+- Scope:
+  - persistence serialization hardening only
+  - existing load paths (`ToDecimal()`) preserve backward compatibility.
+
+### Verification
+
+- Host-context verification (outside sandbox by project rule):
+  - `dotnet restore project/OsEngine/OsEngine.csproj --nologo` -> success
+  - `dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo` -> success
+  - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` -> success (0 warnings)
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed `352/352`
+
+## 2026-02-22 - Step 2.2 (CultureInfo.InvariantCulture) - Candle series decimal parameter serialization
+
+- Standardized decimal serialization in candle series parameter persistence:
+  - `project/OsEngine/Candles/Factory/CandleSeriesParameter.cs`
+- Changes:
+  - in `CandlesParameterDecimal.GetStringToSave()`, decimal value now uses `ToString(CultureInfo.InvariantCulture)`.
+  - added `using System.Globalization;`.
+- Scope:
+  - persistence serialization hardening only
+  - load path remains `ToDecimal()`, backward compatibility preserved.
+
+### Verification
+
+- Host-context verification (outside sandbox by project rule):
+  - `dotnet restore project/OsEngine/OsEngine.csproj --nologo` -> success
+  - `dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo` -> success
+  - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` -> success (0 warnings)
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed `352/352`
+
+## 2026-02-22 - Step 2.2 (CultureInfo.InvariantCulture) - Core parameter decimal serialization
+
+- Standardized decimal serialization in core parameter persistence:
+  - `project/OsEngine/Entity/StrategyParameter.cs`
+  - `project/OsEngine/Indicators/IndicatorParameter.cs`
+- Changes:
+  - in `StrategyParameterDecimal.GetStringToSave()` and `StrategyParameterDecimalCheckBox.GetStringToSave()`, decimal fields now use `ToString(CultureInfo.InvariantCulture)`.
+  - in `IndicatorParameterDecimal.GetStringToSave()`, decimal value now uses `ToString(CultureInfo.InvariantCulture)`.
+  - added `using System.Globalization;` where required.
+- Scope:
+  - persistence serialization hardening only
+  - load paths remain `ToDecimal()`, backward compatibility preserved.
+
+### Verification
+
+- Host-context verification (outside sandbox by project rule):
+  - `dotnet restore project/OsEngine/OsEngine.csproj --nologo` -> success
+  - `dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo` -> success
+  - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` -> success (0 warnings)
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed `352/352`
+
 ## 2026-02-22 - Step 2.2 (CultureInfo.InvariantCulture) - Trend persistence parsing
 
 - Standardized persistence serialization/parsing in:
@@ -6260,6 +6728,140 @@
 - Scope:
   - decimal parsing hardening for server parameter UI input
   - parameter persistence format unchanged.
+
+### Verification
+
+- Host-context verification (outside sandbox by project rule):
+  - `dotnet restore project/OsEngine/OsEngine.csproj --nologo` -> success
+  - `dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo` -> success
+  - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` -> success (0 warnings)
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed `352/352`
+
+## 2026-02-22 - Step 2.2 (CultureInfo.InvariantCulture) - OptimizerSettings decimal serialization
+
+- Standardized persistence serialization in:
+  - `project/OsEngine/OsOptimizer/OptEntity/OptimizerSettings.cs`
+- Changes:
+  - in `Save()`, decimal settings now serialize with explicit `CultureInfo.InvariantCulture`:
+    - `_startDeposit`, `_filterProfitValue`, `_filterMaxDrawDownValue`, `_filterMiddleProfitValue`, `_filterProfitFactorValue`, `_percentOnFiltration`, `_commissionValue`, `_bayesianAcquisitionKappa`.
+  - load path already used culture-neutral decimal parsing via `ToDecimal()` / helper parsing.
+- Scope:
+  - persistence serialization hardening only
+  - optimizer behavior and file structure unchanged.
+
+### Verification
+
+- Host-context verification (outside sandbox by project rule):
+  - `dotnet restore project/OsEngine/OsEngine.csproj --nologo` -> success
+  - `dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo` -> success
+  - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` -> success (0 warnings)
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed `352/352`
+
+## 2026-02-22 - Step 2.2 (CultureInfo.InvariantCulture) - UI decimal input parsing hardening
+
+- Standardized decimal parsing in UI handlers:
+  - `project/OsEngine/OsTrader/RiskManager/RiskManagerUi.xaml.cs`
+  - `project/OsEngine/Robots/CounterTrend/WilliamsRangeTradeUi.xaml.cs`
+  - `project/OsEngine/Robots/CounterTrend/StrategyBollingerUi.xaml.cs`
+  - `project/OsEngine/Robots/CounterTrend/RsiContrtrendUi.xaml.cs`
+  - `project/OsEngine/Robots/Trend/SmaStochasticUi.xaml.cs`
+  - `project/OsEngine/Robots/Trend/PriceChannelTradeUi.xaml.cs`
+  - `project/OsEngine/Robots/Patterns/PivotPointsRobotUi.xaml.cs`
+  - `project/OsEngine/Robots/MarketMaker/PairTraderSpreadSmaUi.xaml.cs`
+- Changes:
+  - replaced `Convert.ToDecimal(TextBox...Text)` with `TextBox...Text.ToDecimal()` in validation and assignment paths.
+  - added `using OsEngine.Entity;` where required for extension-method access.
+- Scope:
+  - input parsing hardening only
+  - strategy/risk-manager business logic unchanged.
+
+### Verification
+
+- Host-context verification (outside sandbox by project rule):
+  - `dotnet restore project/OsEngine/OsEngine.csproj --nologo` -> success
+  - `dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo` -> success
+  - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` -> success (0 warnings)
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed `352/352`
+
+## 2026-02-22 - Step 2.2 (CultureInfo.InvariantCulture) - Indicator UI decimal parsing hardening
+
+- Standardized decimal parsing in indicator UI handlers:
+  - `project/OsEngine/Charts/CandleChart/Indicators/BollingerUi.xaml.cs`
+  - `project/OsEngine/Charts/CandleChart/Indicators/KalmanFilterUi.xaml.cs`
+  - `project/OsEngine/Charts/CandleChart/Indicators/EnvelopsUi.xaml.cs`
+  - `project/OsEngine/Charts/CandleChart/Indicators/AtrChannelUi.xaml.cs`
+  - `project/OsEngine/Charts/CandleChart/Indicators/DynamicTrendDetectorUi.xaml.cs`
+- Changes:
+  - replaced `Convert.ToDecimal(TextBox...Text)` with `TextBox...Text.ToDecimal()` in validation/assignment paths.
+  - `EnvelopsUi`: replaced `decimal.TryParse(...)` assignment with explicit `ToDecimal()` for consistent culture-neutral behavior.
+- Scope:
+  - UI input parsing hardening only
+  - indicator calculations and persistence schema unchanged.
+
+### Verification
+
+- Host-context verification (outside sandbox by project rule):
+  - `dotnet restore project/OsEngine/OsEngine.csproj --nologo` -> success
+  - `dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo` -> success
+  - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` -> success (0 warnings)
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed `352/352`
+
+## 2026-02-22 - Step 2.2 (CultureInfo.InvariantCulture) - Additional textbox decimal parsing hardening
+
+- Standardized textbox decimal parsing in:
+  - `project/OsEngine/Entity/MarketDepthPainter.cs`
+  - `project/OsEngine/Entity/PositionUi.xaml.cs`
+  - `project/OsEngine/OsOptimizer/OptimizerUi.xaml.cs`
+- Changes:
+  - replaced decimal textbox parsing with `ToDecimal()` in validation/assignment paths:
+    - market depth limit-price validation
+    - position start-deposit save path
+    - optimizer filtration/filter values and Bayesian kappa textbox handlers.
+- Scope:
+  - input parsing hardening only
+  - business logic and persistence schema unchanged.
+
+### Verification
+
+- Host-context verification (outside sandbox by project rule):
+  - `dotnet restore project/OsEngine/OsEngine.csproj --nologo` -> success
+  - `dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo` -> success
+  - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` -> success (0 warnings)
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed `352/352`
+
+## 2026-02-22 - Step 2.2 (CultureInfo.InvariantCulture) - Helpers table-rate parsing cleanup
+
+- Standardized table rate parsing in:
+  - `project/OsEngine/Robots/Helpers/TaxPayer.cs`
+  - `project/OsEngine/Robots/Helpers/PayOfMarginBot.cs`
+- Changes:
+  - replaced legacy decimal parsing patterns based on string replacement and `decimal.TryParse(...)` with unified culture-neutral parsing via `ToDecimal()`.
+  - normalized nullable input handling using `(... ?? string.Empty).ToDecimal()` in DataGrid cell reads.
+- Scope:
+  - parsing hardening only
+  - table schema and business logic unchanged.
+
+### Verification
+
+- Host-context verification (outside sandbox by project rule):
+  - `dotnet restore project/OsEngine/OsEngine.csproj --nologo` -> success
+  - `dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo` -> success
+  - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` -> success (0 warnings)
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed `352/352`
+
+## 2026-02-22 - Step 2.2 (CultureInfo.InvariantCulture) - Screener settings decimal serialization
+
+- Standardized decimal serialization in screener/algorithm settings payloads:
+  - `project/OsEngine/Robots/AlgoStart/AlgoStart2Soldiers.cs`
+  - `project/OsEngine/Robots/Grids/GridScreenerAdaptiveSoldiers.cs`
+  - `project/OsEngine/Robots/Screeners/ThreeSoldierAdaptiveScreener.cs`
+  - `project/OsEngine/Robots/Screeners/PinBarVolatilityScreener.cs`
+- Changes:
+  - in `GetSaveString()` of volatility settings DTOs/classes, decimal fields now use explicit `ToString(CultureInfo.InvariantCulture)`.
+  - corresponding load paths already use `ToDecimal()` + invariant datetime parse.
+- Scope:
+  - persistence serialization hardening only
+  - trading logic unchanged.
 
 ### Verification
 

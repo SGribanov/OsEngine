@@ -951,7 +951,7 @@ namespace OsEngine.OsOptimizer
         {
             try
             {
-                _master.PercentOnFiltration = Convert.ToDecimal(TextBoxPercentFiltration.Text);
+                _master.PercentOnFiltration = TextBoxPercentFiltration.Text.ToDecimal();
             }
             catch
             {
@@ -975,10 +975,10 @@ namespace OsEngine.OsOptimizer
         {
             try
             {
-                _master.FilterProfitValue = Convert.ToDecimal(TextBoxFilterProfitValue.Text);
-                _master.FilterMaxDrawDownValue = Convert.ToDecimal(TextBoxMaxDrowDownValue.Text);
-                _master.FilterMiddleProfitValue = Convert.ToDecimal(TextBoxFilterMiddleProfitValue.Text);
-                _master.FilterProfitFactorValue = Convert.ToDecimal(TextBoxFilterProfitFactorValue.Text);
+                _master.FilterProfitValue = TextBoxFilterProfitValue.Text.ToDecimal();
+                _master.FilterMaxDrawDownValue = TextBoxMaxDrowDownValue.Text.ToDecimal();
+                _master.FilterMiddleProfitValue = TextBoxFilterMiddleProfitValue.Text.ToDecimal();
+                _master.FilterProfitFactorValue = TextBoxFilterProfitFactorValue.Text.ToDecimal();
                 _master.FilterDealsCountValue = Convert.ToInt32(TextBoxFilterDealsCount.Text);
             }
             catch
@@ -1237,7 +1237,7 @@ namespace OsEngine.OsOptimizer
         {
             try
             {
-                decimal kappa = Convert.ToDecimal(TextBoxBayesianAcquisitionKappa.Text, CultureInfo.InvariantCulture);
+                decimal kappa = TextBoxBayesianAcquisitionKappa.Text.ToDecimal();
                 if (kappa < 0)
                 {
                     throw new Exception("Kappa must be non-negative.");

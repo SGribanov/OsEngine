@@ -7,6 +7,7 @@ using OsEngine.Market.Servers.Entity;
 using OsEngine.OsData.BinaryEntity;
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 
 #nullable enable
 
@@ -515,13 +516,19 @@ namespace OsEngine.Entity
 
             for (int i = 0; i < Asks.Count && i < depth; i++)
             {
-                result += Asks[i].Ask + "&" + Asks[i].Price + "*";
+                result += Asks[i].Ask.ToString(CultureInfo.InvariantCulture)
+                    + "&"
+                    + Asks[i].Price.ToString(CultureInfo.InvariantCulture)
+                    + "*";
             }
             result += "_";
 
             for (int i = 0; i < Bids.Count && i < depth; i++)
             {
-                result += Bids[i].Bid + "&" + Bids[i].Price + "*";
+                result += Bids[i].Bid.ToString(CultureInfo.InvariantCulture)
+                    + "&"
+                    + Bids[i].Price.ToString(CultureInfo.InvariantCulture)
+                    + "*";
             }
 
             return result;

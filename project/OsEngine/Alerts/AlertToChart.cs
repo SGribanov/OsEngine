@@ -689,7 +689,7 @@ namespace OsEngine.Alerts
         /// </summary>
         public decimal LastPoint;
 
-        private readonly CultureInfo CultureInfo = new CultureInfo("ru-RU");
+        private static readonly CultureInfo LegacyCulture = new CultureInfo("ru-RU");
 
         /// <summary>
         /// take string to save
@@ -699,12 +699,12 @@ namespace OsEngine.Alerts
         {
             string result = "";
 
-            result += TimeFirstPoint.ToString(CultureInfo) + "@";
-            result += ValueFirstPoint.ToString(CultureInfo) + "@";
+            result += TimeFirstPoint.ToString("O", CultureInfo.InvariantCulture) + "@";
+            result += ValueFirstPoint.ToString(CultureInfo.InvariantCulture) + "@";
 
-            result += TimeSecondPoint.ToString(CultureInfo) + "@";
-            result += ValueSecondPoint.ToString(CultureInfo) + "@";
-            result += LastPoint.ToString(CultureInfo) + "@";
+            result += TimeSecondPoint.ToString("O", CultureInfo.InvariantCulture) + "@";
+            result += ValueSecondPoint.ToString(CultureInfo.InvariantCulture) + "@";
+            result += LastPoint.ToString(CultureInfo.InvariantCulture) + "@";
 
             return result;
         }
@@ -717,12 +717,37 @@ namespace OsEngine.Alerts
         {
             string[] saveStrings = saveString.Split('@');
 
-            TimeFirstPoint = Convert.ToDateTime(saveStrings[0], CultureInfo);
+            TimeFirstPoint = ParseDateInvariantOrLegacy(saveStrings[0]);
             ValueFirstPoint = saveStrings[1].ToDecimal();
 
-            TimeSecondPoint = Convert.ToDateTime(saveStrings[2], CultureInfo);
+            TimeSecondPoint = ParseDateInvariantOrLegacy(saveStrings[2]);
             ValueSecondPoint = saveStrings[3].ToDecimal();
             LastPoint = saveStrings[4].ToDecimal();
+        }
+
+        private static DateTime ParseDateInvariantOrLegacy(string value)
+        {
+            if (DateTime.TryParse(value, CultureInfo.InvariantCulture, DateTimeStyles.RoundtripKind, out DateTime parsed))
+            {
+                return parsed;
+            }
+
+            if (DateTime.TryParse(value, CultureInfo.InvariantCulture, DateTimeStyles.None, out parsed))
+            {
+                return parsed;
+            }
+
+            if (DateTime.TryParse(value, LegacyCulture, DateTimeStyles.None, out parsed))
+            {
+                return parsed;
+            }
+
+            if (DateTime.TryParse(value, CultureInfo.CurrentCulture, DateTimeStyles.None, out parsed))
+            {
+                return parsed;
+            }
+
+            return DateTime.MinValue;
         }
 
     }

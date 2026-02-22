@@ -5,6 +5,7 @@
 
 using System;
 using System.Diagnostics;
+using System.Globalization;
 using System.Text;
 using OsEngine.Entity;
 
@@ -55,15 +56,15 @@ namespace OsEngine.OsOptimizer.OptEntity
             // Сохраняем основное
             result.Append(report.BotName + "@");
             result.Append(report.PositionsCount + "@");
-            result.Append(report.TotalProfit + "@");
-            result.Append(report.MaxDrawDawn + "@");
-            result.Append(report.AverageProfit + "@");
-            result.Append(report.AverageProfitPercentOneContract + "@");
-            result.Append(report.ProfitFactor + "@");
-            result.Append(report.PayOffRatio + "@");
-            result.Append(report.Recovery + "@");
-            result.Append(report.TotalProfitPercent + "@");
-            result.Append(report.SharpRatio + "@");
+            result.Append(report.TotalProfit.ToString(CultureInfo.InvariantCulture) + "@");
+            result.Append(report.MaxDrawDawn.ToString(CultureInfo.InvariantCulture) + "@");
+            result.Append(report.AverageProfit.ToString(CultureInfo.InvariantCulture) + "@");
+            result.Append(report.AverageProfitPercentOneContract.ToString(CultureInfo.InvariantCulture) + "@");
+            result.Append(report.ProfitFactor.ToString(CultureInfo.InvariantCulture) + "@");
+            result.Append(report.PayOffRatio.ToString(CultureInfo.InvariantCulture) + "@");
+            result.Append(report.Recovery.ToString(CultureInfo.InvariantCulture) + "@");
+            result.Append(report.TotalProfitPercent.ToString(CultureInfo.InvariantCulture) + "@");
+            result.Append(report.SharpRatio.ToString(CultureInfo.InvariantCulture) + "@");
 
             // сохраняем параметры в строковом представлении
             StringBuilder parameters = new StringBuilder();

@@ -107,16 +107,16 @@ namespace OsEngine.Entity
             saveStr += TabName + "&";
             saveStr += Number + "&";
             saveStr += LifeTimeType + "&";
-            saveStr += PriceOrder + "&";
-            saveStr += PriceRedLine + "&";
+            saveStr += PriceOrder.ToString(CultureInfo.InvariantCulture) + "&";
+            saveStr += PriceRedLine.ToString(CultureInfo.InvariantCulture) + "&";
             saveStr += ActivateType + "&";
-            saveStr += Volume + "&";
+            saveStr += Volume.ToString(CultureInfo.InvariantCulture) + "&";
             saveStr += Side + "&";
             saveStr += _expiresBars + "&";
             saveStr += _orderCreateBarNumber + "&";
-            saveStr += LastCandleTime.ToString(CultureInfo) + "&";
+            saveStr += LastCandleTime.ToString("O", CultureInfo.InvariantCulture) + "&";
             saveStr += SignalType + "&";
-            saveStr += TimeCreate.ToString(CultureInfo) + "&";
+            saveStr += TimeCreate.ToString("O", CultureInfo.InvariantCulture) + "&";
             saveStr += OrderPriceType +"&";
             saveStr += PositionNumber ;
 
@@ -138,9 +138,9 @@ namespace OsEngine.Entity
             Enum.TryParse(savStr[8], out Side);
             _expiresBars = Convert.ToInt32(savStr[9]);
             _orderCreateBarNumber = Convert.ToInt32(savStr[10]);
-            LastCandleTime = Convert.ToDateTime(savStr[11], CultureInfo);
+            LastCandleTime = ParseDateInvariantOrLegacy(savStr[11]);
             SignalType = savStr[12];
-            TimeCreate = Convert.ToDateTime(savStr[13], CultureInfo);
+            TimeCreate = ParseDateInvariantOrLegacy(savStr[13]);
 
             if(savStr.Length > 14)
             {
@@ -151,6 +151,31 @@ namespace OsEngine.Entity
             {
                 PositionNumber = Convert.ToInt32(savStr[15]);
             }
+        }
+
+        private static DateTime ParseDateInvariantOrLegacy(string value)
+        {
+            if (DateTime.TryParse(value, CultureInfo.InvariantCulture, DateTimeStyles.RoundtripKind, out DateTime parsed))
+            {
+                return parsed;
+            }
+
+            if (DateTime.TryParse(value, CultureInfo.InvariantCulture, DateTimeStyles.None, out parsed))
+            {
+                return parsed;
+            }
+
+            if (DateTime.TryParse(value, CultureInfo, DateTimeStyles.None, out parsed))
+            {
+                return parsed;
+            }
+
+            if (DateTime.TryParse(value, CultureInfo.CurrentCulture, DateTimeStyles.None, out parsed))
+            {
+                return parsed;
+            }
+
+            return DateTime.MinValue;
         }
 
         private static readonly CultureInfo CultureInfo = new CultureInfo("ru-RU");

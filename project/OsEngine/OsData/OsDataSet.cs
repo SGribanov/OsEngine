@@ -820,8 +820,8 @@ namespace OsEngine.OsData
             result += IsCollapsed + "~";
             result += SecExchange + "~";
             result += SetName + "~";
-            result += PriceStep + "~";
-            result += VolumeStep + "~";
+            result += PriceStep.ToString(CultureInfo.InvariantCulture) + "~";
+            result += VolumeStep.ToString(CultureInfo.InvariantCulture) + "~";
             result += SettingsToLoadSecurities.GetSaveStr() + "~";
             result += SecNameFull;
 
@@ -3238,8 +3238,8 @@ namespace OsEngine.OsData
             }
             catch
             {
-                TimeStart = Convert.ToDateTime(saveArray[20]);
-                TimeEnd = Convert.ToDateTime(saveArray[21]);
+                TimeStart = ParseDateInvariantOrCurrent(saveArray[20]);
+                TimeEnd = ParseDateInvariantOrCurrent(saveArray[21]);
             }
 
             MarketDepthDepth = Convert.ToInt32(saveArray[22]);
@@ -3300,8 +3300,8 @@ namespace OsEngine.OsData
             result += TfMarketDepthIsOn + "%";
 
             result += Source + "%";
-            result += TimeStart.ToString(CultureInfo.InvariantCulture) + "%";
-            result += TimeEnd.ToString(CultureInfo.InvariantCulture) + "%";
+            result += TimeStart.ToString("O", CultureInfo.InvariantCulture) + "%";
+            result += TimeEnd.ToString("O", CultureInfo.InvariantCulture) + "%";
             result += MarketDepthDepth + "%";
             result += NeedToUpdate + "%";
             result += TfDayIsOn + "%";
@@ -3309,6 +3309,31 @@ namespace OsEngine.OsData
             result += TfMarketDepthHistIsOn + "%";
 
             return result;
+        }
+
+        private static DateTime ParseDateInvariantOrCurrent(string value)
+        {
+            if (DateTime.TryParse(value, CultureInfo.InvariantCulture, DateTimeStyles.RoundtripKind, out DateTime parsed))
+            {
+                return parsed;
+            }
+
+            if (DateTime.TryParse(value, CultureInfo.InvariantCulture, DateTimeStyles.None, out parsed))
+            {
+                return parsed;
+            }
+
+            if (DateTime.TryParse(value, CultureInfo.CurrentCulture, DateTimeStyles.None, out parsed))
+            {
+                return parsed;
+            }
+
+            if (DateTime.TryParse(value, new CultureInfo("ru-RU"), DateTimeStyles.None, out parsed))
+            {
+                return parsed;
+            }
+
+            return DateTime.MinValue;
         }
 
         public DataSetState Regime;
@@ -3959,7 +3984,7 @@ namespace OsEngine.OsData
             result += Regime + "%";
             result += PathForDublicate + "%";
             result += UpdatePeriod.Minutes + "%";
-            result += TimeWriteOriginalSet.ToString(CultureInfo.InvariantCulture);
+            result += TimeWriteOriginalSet.ToString("O", CultureInfo.InvariantCulture);
 
             try
             {
@@ -3984,13 +4009,38 @@ namespace OsEngine.OsData
                     Regime = setParts[0];
                     PathForDublicate = setParts[1];
                     UpdatePeriod = new TimeSpan(0, Convert.ToInt32(setParts[2]), 0);
-                    TimeWriteOriginalSet = Convert.ToDateTime(setParts[3], CultureInfo.InvariantCulture);
+                    TimeWriteOriginalSet = ParseDateInvariantOrCurrent(setParts[3]);
                 }
             }
             catch (Exception ex)
             {
                 SendNewLogMessage(ex.Message, LogMessageType.Error);
             }
+        }
+
+        private static DateTime ParseDateInvariantOrCurrent(string value)
+        {
+            if (DateTime.TryParse(value, CultureInfo.InvariantCulture, DateTimeStyles.RoundtripKind, out DateTime parsed))
+            {
+                return parsed;
+            }
+
+            if (DateTime.TryParse(value, CultureInfo.InvariantCulture, DateTimeStyles.None, out parsed))
+            {
+                return parsed;
+            }
+
+            if (DateTime.TryParse(value, CultureInfo.CurrentCulture, DateTimeStyles.None, out parsed))
+            {
+                return parsed;
+            }
+
+            if (DateTime.TryParse(value, new CultureInfo("ru-RU"), DateTimeStyles.None, out parsed))
+            {
+                return parsed;
+            }
+
+            return DateTime.MinValue;
         }
 
         public void UpdateDublicate(string setName)
@@ -4094,7 +4144,7 @@ namespace OsEngine.OsData
             result += Regime + "%";
             result += Period + "%";
             result += HourUpdate + "%";
-            result += TimeNextUpdate.ToString(CultureInfo.InvariantCulture);
+            result += TimeNextUpdate.ToString("O", CultureInfo.InvariantCulture);
 
             try
             {
@@ -4120,7 +4170,7 @@ namespace OsEngine.OsData
                     Period = setParts[1];
                     HourUpdate = int.Parse(setParts[2]);
 
-                    DateTime timeNextUpdate = Convert.ToDateTime(setParts[3], CultureInfo.InvariantCulture);
+                    DateTime timeNextUpdate = ParseDateInvariantOrCurrent(setParts[3]);
 
                     if (Period == "Day")
                     {
@@ -4142,6 +4192,31 @@ namespace OsEngine.OsData
             {
                 SendNewLogMessage(ex.Message, LogMessageType.Error);
             }
+        }
+
+        private static DateTime ParseDateInvariantOrCurrent(string value)
+        {
+            if (DateTime.TryParse(value, CultureInfo.InvariantCulture, DateTimeStyles.RoundtripKind, out DateTime parsed))
+            {
+                return parsed;
+            }
+
+            if (DateTime.TryParse(value, CultureInfo.InvariantCulture, DateTimeStyles.None, out parsed))
+            {
+                return parsed;
+            }
+
+            if (DateTime.TryParse(value, CultureInfo.CurrentCulture, DateTimeStyles.None, out parsed))
+            {
+                return parsed;
+            }
+
+            if (DateTime.TryParse(value, new CultureInfo("ru-RU"), DateTimeStyles.None, out parsed))
+            {
+                return parsed;
+            }
+
+            return DateTime.MinValue;
         }
 
         public void SendNewLogMessage(string message, LogMessageType type)

@@ -531,27 +531,27 @@ namespace OsEngine.OsOptimizer.OptEntity
                 {
                     _threadsCount.ToString(),
                     _strategyName,
-                    _startDeposit.ToString(),
+                    _startDeposit.ToString(CultureInfo.InvariantCulture),
 
-                    _filterProfitValue.ToString(),
+                    _filterProfitValue.ToString(CultureInfo.InvariantCulture),
                     _filterProfitIsOn.ToString(),
-                    _filterMaxDrawDownValue.ToString(),
+                    _filterMaxDrawDownValue.ToString(CultureInfo.InvariantCulture),
                     _filterMaxDrawDownIsOn.ToString(),
-                    _filterMiddleProfitValue.ToString(),
+                    _filterMiddleProfitValue.ToString(CultureInfo.InvariantCulture),
                     _filterMiddleProfitIsOn.ToString(),
-                    _filterProfitFactorValue.ToString(),
+                    _filterProfitFactorValue.ToString(CultureInfo.InvariantCulture),
                     _filterProfitFactorIsOn.ToString(),
 
-                    _timeStart.ToString(CultureInfo.InvariantCulture),
-                    _timeEnd.ToString(CultureInfo.InvariantCulture),
-                    _percentOnFiltration.ToString(),
+                    _timeStart.ToString("O", CultureInfo.InvariantCulture),
+                    _timeEnd.ToString("O", CultureInfo.InvariantCulture),
+                    _percentOnFiltration.ToString(CultureInfo.InvariantCulture),
 
                     _filterDealsCountValue.ToString(),
                     _filterDealsCountIsOn.ToString(),
                     _isScript.ToString(),
                     _iterationCount.ToString(),
                     _commissionType.ToString(),
-                    _commissionValue.ToString(),
+                    _commissionValue.ToString(CultureInfo.InvariantCulture),
                     _lastInSample.ToString(),
                     _orderExecutionType.ToString(),
                     _slippageToSimpleOrder.ToString(),
@@ -565,7 +565,7 @@ namespace OsEngine.OsOptimizer.OptEntity
                     _bayesianBatchSize.ToString(),
                     _objectiveDirection.ToString(),
                     _bayesianAcquisitionMode.ToString(),
-                    _bayesianAcquisitionKappa.ToString(),
+                    _bayesianAcquisitionKappa.ToString(CultureInfo.InvariantCulture),
                     _bayesianUseTailPass.ToString(),
                     _bayesianTailSharePercent.ToString(),
 
@@ -603,8 +603,8 @@ namespace OsEngine.OsOptimizer.OptEntity
                     _filterProfitFactorValue = (reader.ReadLine() ?? "0").ToDecimal();
                     _filterProfitFactorIsOn = Convert.ToBoolean(reader.ReadLine() ?? bool.FalseString);
 
-                    _timeStart = Convert.ToDateTime(reader.ReadLine() ?? DateTime.MinValue.ToString(CultureInfo.InvariantCulture), CultureInfo.InvariantCulture);
-                    _timeEnd = Convert.ToDateTime(reader.ReadLine() ?? DateTime.MinValue.ToString(CultureInfo.InvariantCulture), CultureInfo.InvariantCulture);
+                    _timeStart = ParseDateInvariantOrCurrent(reader.ReadLine());
+                    _timeEnd = ParseDateInvariantOrCurrent(reader.ReadLine());
                     _percentOnFiltration = (reader.ReadLine() ?? "0").ToDecimal();
 
                     _filterDealsCountValue = Convert.ToInt32(reader.ReadLine() ?? "0");
@@ -776,8 +776,38 @@ namespace OsEngine.OsOptimizer.OptEntity
                 || decimal.TryParse(
                     value,
                     NumberStyles.Number,
-                    CultureInfo.InvariantCulture,
-                    out result);
+                CultureInfo.InvariantCulture,
+                out result);
+        }
+
+        private static DateTime ParseDateInvariantOrCurrent(string? value)
+        {
+            if (string.IsNullOrWhiteSpace(value))
+            {
+                return DateTime.MinValue;
+            }
+
+            if (DateTime.TryParse(value, CultureInfo.InvariantCulture, DateTimeStyles.RoundtripKind, out DateTime parsed))
+            {
+                return parsed;
+            }
+
+            if (DateTime.TryParse(value, CultureInfo.InvariantCulture, DateTimeStyles.None, out parsed))
+            {
+                return parsed;
+            }
+
+            if (DateTime.TryParse(value, CultureInfo.CurrentCulture, DateTimeStyles.None, out parsed))
+            {
+                return parsed;
+            }
+
+            if (DateTime.TryParse(value, new CultureInfo("ru-RU"), DateTimeStyles.None, out parsed))
+            {
+                return parsed;
+            }
+
+            return DateTime.MinValue;
         }
 
         #endregion

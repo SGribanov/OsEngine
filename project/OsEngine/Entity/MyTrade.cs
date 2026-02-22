@@ -73,7 +73,7 @@ namespace OsEngine.Entity
             result += Volume.ToString(Invariant) + "&";
             result += Price.ToString(Invariant) + "&";
             result += NumberOrderParent.ToString(Invariant) + "&";
-            result += Time.ToString(Invariant) + "&";
+            result += Time.ToString("O", Invariant) + "&";
             result += NumberTrade.ToString(Invariant) + "&";
             result += Side + "&";
             result += SecurityNameCode.Replace("@","%") + "&";
@@ -136,7 +136,17 @@ namespace OsEngine.Entity
 
         private static DateTime ParseDateTimeInvariantWithRuFallback(string value)
         {
+            if (DateTime.TryParse(value, Invariant, DateTimeStyles.RoundtripKind, out DateTime roundtrip))
+            {
+                return roundtrip;
+            }
+
             if (DateTime.TryParse(value, Invariant, DateTimeStyles.None, out DateTime parsed))
+            {
+                return parsed;
+            }
+
+            if (DateTime.TryParse(value, CultureInfo.CurrentCulture, DateTimeStyles.None, out parsed))
             {
                 return parsed;
             }

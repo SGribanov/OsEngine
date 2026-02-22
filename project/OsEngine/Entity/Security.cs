@@ -279,7 +279,7 @@ namespace OsEngine.Entity
             PriceLimitHigh = array[12].ToDecimal();
             Enum.TryParse(array[13], out OptionType);
             Strike = array[14].ToDecimal();
-            Expiration = Convert.ToDateTime(array[15]);
+            Expiration = ParseDateInvariantOrCurrent(array[15]);
             DecimalsVolume = Convert.ToInt32(array[16]);
             MinTradeAmount = array[17].ToDecimal();
 
@@ -308,22 +308,22 @@ namespace OsEngine.Entity
             result += NameFull + "\n";
             result += NameId + "\n";
             result += State + "\n";
-            result += PriceStep + "\n";
-            result += Lot + "\n";
-            result += PriceStepCost + "\n";
-            result += MarginBuy + "\n";
+            result += PriceStep.ToString(CultureInfo.InvariantCulture) + "\n";
+            result += Lot.ToString(CultureInfo.InvariantCulture) + "\n";
+            result += PriceStepCost.ToString(CultureInfo.InvariantCulture) + "\n";
+            result += MarginBuy.ToString(CultureInfo.InvariantCulture) + "\n";
             result += SecurityType + "\n";
             result += _decimals + "\n";
-            result += PriceLimitLow + "\n";
-            result += PriceLimitHigh + "\n";
+            result += PriceLimitLow.ToString(CultureInfo.InvariantCulture) + "\n";
+            result += PriceLimitHigh.ToString(CultureInfo.InvariantCulture) + "\n";
             result += OptionType + "\n";
-            result += Strike + "\n";
-            result += Expiration + "\n";
+            result += Strike.ToString(CultureInfo.InvariantCulture) + "\n";
+            result += Expiration.ToString("O", CultureInfo.InvariantCulture) + "\n";
             result += DecimalsVolume + "\n";
-            result += MinTradeAmount + "\n";
-            result += VolumeStep +"\n";
+            result += MinTradeAmount.ToString(CultureInfo.InvariantCulture) + "\n";
+            result += VolumeStep.ToString(CultureInfo.InvariantCulture) +"\n";
             result += MinTradeAmountType + "\n";
-            result += MarginSell ;
+            result += MarginSell.ToString(CultureInfo.InvariantCulture);
 
             return result;
         }
@@ -333,6 +333,31 @@ namespace OsEngine.Entity
         /// Базовый актив (для опционов)
         /// </summary>
         public string UnderlyingAsset = string.Empty;
+
+        private static DateTime ParseDateInvariantOrCurrent(string value)
+        {
+            if (DateTime.TryParse(value, CultureInfo.InvariantCulture, DateTimeStyles.RoundtripKind, out DateTime parsed))
+            {
+                return parsed;
+            }
+
+            if (DateTime.TryParse(value, CultureInfo.InvariantCulture, DateTimeStyles.None, out parsed))
+            {
+                return parsed;
+            }
+
+            if (DateTime.TryParse(value, CultureInfo.CurrentCulture, DateTimeStyles.None, out parsed))
+            {
+                return parsed;
+            }
+
+            if (DateTime.TryParse(value, new CultureInfo("ru-RU"), DateTimeStyles.None, out parsed))
+            {
+                return parsed;
+            }
+
+            return DateTime.MinValue;
+        }
 
     }
 

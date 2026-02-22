@@ -610,9 +610,9 @@ namespace OsEngine.Robots.Grids
 
             result += SecName + "%";
             result += SecClass + "%";
-            result += HeightSoldiers + "%";
-            result += MinHeightOneSoldier + "%";
-            result += LastUpdateTime.ToString(CultureInfo.InvariantCulture) + "%";
+            result += HeightSoldiers.ToString(CultureInfo.InvariantCulture) + "%";
+            result += MinHeightOneSoldier.ToString(CultureInfo.InvariantCulture) + "%";
+            result += LastUpdateTime.ToString("O", CultureInfo.InvariantCulture) + "%";
 
             return result;
         }
@@ -625,7 +625,32 @@ namespace OsEngine.Robots.Grids
             SecClass = array[1];
             HeightSoldiers = array[2].ToDecimal();
             MinHeightOneSoldier = array[3].ToDecimal();
-            LastUpdateTime = Convert.ToDateTime(array[4], CultureInfo.InvariantCulture);
+            LastUpdateTime = ParseDateInvariantOrCurrent(array[4]);
+        }
+
+        private static DateTime ParseDateInvariantOrCurrent(string value)
+        {
+            if (DateTime.TryParse(value, CultureInfo.InvariantCulture, DateTimeStyles.RoundtripKind, out DateTime parsed))
+            {
+                return parsed;
+            }
+
+            if (DateTime.TryParse(value, CultureInfo.InvariantCulture, DateTimeStyles.None, out parsed))
+            {
+                return parsed;
+            }
+
+            if (DateTime.TryParse(value, CultureInfo.CurrentCulture, DateTimeStyles.None, out parsed))
+            {
+                return parsed;
+            }
+
+            if (DateTime.TryParse(value, new CultureInfo("ru-RU"), DateTimeStyles.None, out parsed))
+            {
+                return parsed;
+            }
+
+            return DateTime.MinValue;
         }
     }
 }

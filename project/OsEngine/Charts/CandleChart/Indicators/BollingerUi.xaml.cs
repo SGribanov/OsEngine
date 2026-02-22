@@ -76,7 +76,7 @@ namespace OsEngine.Charts.CandleChart.Indicators
             try
             {
                 if (Convert.ToInt32(TextBoxLength.Text) <= 0 ||
-                   Convert.ToDecimal(TextBoxDeviation.Text) <= 0)
+                   TextBoxDeviation.Text.ToDecimal() <= 0)
                 {
                     throw new Exception("error");
                 }
@@ -89,7 +89,7 @@ namespace OsEngine.Charts.CandleChart.Indicators
 
             _bollinger.ColorUp = HostColorUp.Child.BackColor;
             _bollinger.ColorDown = HostColorDown.Child.BackColor;
-            _bollinger.Deviation = Convert.ToDecimal(TextBoxDeviation.Text);
+            _bollinger.Deviation = TextBoxDeviation.Text.ToDecimal();
 
             _bollinger.Length = Convert.ToInt32(TextBoxLength.Text);
 

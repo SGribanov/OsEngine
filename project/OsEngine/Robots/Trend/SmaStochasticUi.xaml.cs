@@ -9,6 +9,7 @@
 using System;
 using System.Globalization;
 using System.Windows;
+using OsEngine.Entity;
 using OsEngine.Language;
 using OsEngine.OsTrader.Panels;
 
@@ -63,11 +64,11 @@ namespace OsEngine.Robots.Trend
             try
             {
 
-                if (Convert.ToDecimal(TextBoxVolumeOne.Text) <= 0 ||
+                if (TextBoxVolumeOne.Text.ToDecimal() <= 0 ||
                     Convert.ToInt32(StochUp.Text) <= 0 ||
                     Convert.ToInt32(StochDown.Text) <= 0 ||
                     Convert.ToInt32(Step.Text) <= 0 ||
-                     Convert.ToDecimal(TextBoxSlippage.Text) < 0)
+                    TextBoxSlippage.Text.ToDecimal() < 0)
                 {
                     throw new Exception("");
                 }
@@ -80,11 +81,11 @@ namespace OsEngine.Robots.Trend
 
             _strategy.VolumeType = Convert.ToString(ComboBoxVolumeType.Text);
             _strategy.TradeAssetInPortfolio = Convert.ToString(TextBoxAssetInPortfolio.Text);
-            _strategy.Slippage = Convert.ToDecimal(TextBoxSlippage.Text);
-            _strategy.Volume = Convert.ToDecimal(TextBoxVolumeOne.Text);
-            _strategy.Upline = Convert.ToDecimal(StochUp.Text);
-            _strategy.Downline = Convert.ToDecimal(StochDown.Text);
-            _strategy.Step = Convert.ToDecimal(Step.Text);
+            _strategy.Slippage = TextBoxSlippage.Text.ToDecimal();
+            _strategy.Volume = TextBoxVolumeOne.Text.ToDecimal();
+            _strategy.Upline = StochUp.Text.ToDecimal();
+            _strategy.Downline = StochDown.Text.ToDecimal();
+            _strategy.Step = Step.Text.ToDecimal();
 
             Enum.TryParse(ComboBoxRegime.Text, true, out _strategy.Regime);
 

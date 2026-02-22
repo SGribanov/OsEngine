@@ -71,7 +71,7 @@ namespace OsEngine.Robots.Trend
 
             _strategy.VolumeType = Convert.ToString(ComboBoxVolumeType.Text);
             _strategy.TradeAssetInPortfolio = Convert.ToString(TextBoxAssetInPortfolio.Text);
-            _strategy.Volume = Convert.ToDecimal(TextBoxVolumeOne.Text);
+            _strategy.Volume = TextBoxVolumeOne.Text.ToDecimal();
             _strategy.Slippage = TextBoxSlippage.Text.ToDecimal();
 
             Enum.TryParse(ComboBoxRegime.Text, true, out _strategy.Regime);

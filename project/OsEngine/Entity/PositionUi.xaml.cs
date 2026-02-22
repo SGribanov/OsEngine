@@ -1111,7 +1111,7 @@ namespace OsEngine.Entity
 
                 try
                 {
-                    _position.PortfolioValueOnOpenPosition = Convert.ToDecimal(TextBoxStartDepo.Text);
+                    _position.PortfolioValueOnOpenPosition = TextBoxStartDepo.Text.ToDecimal();
                 }
                 catch
                 {

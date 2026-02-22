@@ -12,6 +12,7 @@ using System.Diagnostics;
 using System.Threading;
 using OsEngine.Entity;
 using System.IO;
+using System.Globalization;
 
 namespace OsEngine.Layout
 {
@@ -523,7 +524,11 @@ namespace OsEngine.Layout
             string res = "";
 
             res += Name + "#";
-            res += Layout.Height + "$" + Layout.Left + "$" + Layout.Top + "$" + Layout.Widht + "$" + Layout.IsExpand;
+            res += Layout.Height.ToString(CultureInfo.InvariantCulture)
+                + "$" + Layout.Left.ToString(CultureInfo.InvariantCulture)
+                + "$" + Layout.Top.ToString(CultureInfo.InvariantCulture)
+                + "$" + Layout.Widht.ToString(CultureInfo.InvariantCulture)
+                + "$" + Layout.IsExpand;
 
             return res;
         }

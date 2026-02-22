@@ -217,7 +217,7 @@ namespace OsEngine.Entity
             {
                 try
                 {
-                    if (Convert.ToDecimal(_textBoxLimitPrice.Text) < 0)
+                    if (_textBoxLimitPrice.Text.ToDecimal() < 0)
                     {
                         throw new Exception();
                     }

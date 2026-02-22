@@ -9,6 +9,7 @@
 using System;
 using System.Globalization;
 using System.Windows;
+using OsEngine.Entity;
 using OsEngine.Language;
 
 namespace OsEngine.OsTrader.RiskManager
@@ -74,7 +75,7 @@ namespace OsEngine.OsTrader.RiskManager
         {
             try
             {
-                Convert.ToDecimal(TextBoxOpenMaxDd.Text);
+                TextBoxOpenMaxDd.Text.ToDecimal();
             }
             catch (Exception)
             {
@@ -84,7 +85,7 @@ namespace OsEngine.OsTrader.RiskManager
 
 
            _riskManager.IsActiv =  CheckBoxIsOn.IsChecked.Value;
-           _riskManager.MaxDrowDownToDayPersent = Convert.ToDecimal(TextBoxOpenMaxDd.Text);
+           _riskManager.MaxDrowDownToDayPersent = TextBoxOpenMaxDd.Text.ToDecimal();
 
            Enum.TryParse(ComboBoxReaction.Text,false,out _riskManager.ReactionType);
            _riskManager.Save();

@@ -9,6 +9,7 @@
 using System;
 using System.Globalization;
 using System.Windows;
+using OsEngine.Entity;
 using OsEngine.Language;
 using OsEngine.OsTrader.Panels;
 
@@ -60,10 +61,10 @@ namespace OsEngine.Robots.CounterTrend
         {
             try
             {
-                if (Convert.ToDecimal(TextBoxVolumeOne.Text) <= 0 || 
+                if (TextBoxVolumeOne.Text.ToDecimal() <= 0 || 
                     Convert.ToInt32(RsiUp.Text) <= 0 || 
                     Convert.ToInt32(RsiDown.Text) <= 0 ||
-                    Convert.ToDecimal(TextBoxSlippage.Text) < 0 ||
+                    TextBoxSlippage.Text.ToDecimal() < 0 ||
                     Convert.ToInt32(TextBoxVolumeOne.Text) <= 0)
                 {
                     throw new Exception("");
@@ -78,10 +79,10 @@ namespace OsEngine.Robots.CounterTrend
             Enum.TryParse(ComboBoxRegime.Text, true, out _strategy._regime);
             _strategy._volumeType =Convert.ToString(ComboBoxVolumeType.Text);
             _strategy._tradeAssetInPortfolio = Convert.ToString(TextBoxAssetInPortfolio.Text);
-            _strategy._slippage = Convert.ToDecimal(TextBoxSlippage.Text);
-            _strategy._volume = Convert.ToDecimal(TextBoxVolumeOne.Text);
-            _strategy._upline.Value = Convert.ToDecimal(RsiUp.Text);
-            _strategy._downline.Value = Convert.ToDecimal(RsiDown.Text);
+            _strategy._slippage = TextBoxSlippage.Text.ToDecimal();
+            _strategy._volume = TextBoxVolumeOne.Text.ToDecimal();
+            _strategy._upline.Value = RsiUp.Text.ToDecimal();
+            _strategy._downline.Value = RsiDown.Text.ToDecimal();
 
             _strategy._upline.Refresh();
             _strategy._downline.Refresh();

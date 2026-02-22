@@ -101,9 +101,36 @@ namespace OsEngine.Market.Proxy
             return new ProxyMasterSettings
             {
                 AutoPingIsOn = Convert.ToBoolean(lines[0]),
-                AutoPingLastTime = Convert.ToDateTime(lines[1]),
+                AutoPingLastTime = ParseDateInvariantOrCurrent(lines[1]),
                 AutoPingMinutes = Convert.ToInt32(lines[2])
             };
+        }
+
+        private static DateTime ParseDateInvariantOrCurrent(string value)
+        {
+            DateTime parsed;
+
+            if (DateTime.TryParse(value, CultureInfo.InvariantCulture, DateTimeStyles.RoundtripKind, out parsed))
+            {
+                return parsed;
+            }
+
+            if (DateTime.TryParse(value, CultureInfo.InvariantCulture, DateTimeStyles.None, out parsed))
+            {
+                return parsed;
+            }
+
+            if (DateTime.TryParse(value, CultureInfo.CurrentCulture, DateTimeStyles.None, out parsed))
+            {
+                return parsed;
+            }
+
+            if (DateTime.TryParse(value, new CultureInfo("ru-RU"), DateTimeStyles.None, out parsed))
+            {
+                return parsed;
+            }
+
+            return Convert.ToDateTime(value, CultureInfo.InvariantCulture);
         }
 
         public void ShowDialog()

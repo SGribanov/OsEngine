@@ -6963,6 +6963,496 @@
 - **Commit:** n/a (not committed in this session)
 - **Push:** n/a
 
+### Step 2.2 - CultureInfo Invariant Persistence (Incremental Adoption #390)
+
+- **Status:** In Progress (increment completed)
+- **Plan item:** `refactoring_stage2_plan.md` -> Phase 2 / Step 2.2
+- **Changes:**
+  - Replayed optimizer settings datetime persistence hardening in:
+    - `project/OsEngine/OsOptimizer/OptEntity/OptimizerSettings.cs`
+  - Replacements:
+    - `_timeStart` and `_timeEnd` save serialization now uses invariant round-trip format:
+      - `ToString("O", CultureInfo.InvariantCulture)`
+    - load path now uses helper parser with invariant-first fallback chain:
+      - `Invariant Roundtrip -> Invariant -> Current -> ru-RU`
+      - replacing direct `Convert.ToDateTime(..., CultureInfo.InvariantCulture)` usage.
+  - Scope:
+    - persistence parsing/serialization hardening only; optimizer logic unchanged.
+- **Verification:**
+  - Executed by project rule outside sandbox.
+  - `dotnet restore project/OsEngine/OsEngine.csproj --nologo` succeeded.
+  - `dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo` succeeded.
+  - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` succeeded (0 warnings).
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` succeeded (`352/352`).
+- **Commit:** n/a (not committed in this session)
+- **Push:** n/a
+
+### Step 2.2 - CultureInfo Invariant Persistence (Incremental Adoption #389)
+
+- **Status:** In Progress (increment completed)
+- **Plan item:** `refactoring_stage2_plan.md` -> Phase 2 / Step 2.2
+- **Changes:**
+  - Replayed datetime serialization hardening in:
+    - `project/OsEngine/OsData/OsDataSet.cs`
+  - Replacements:
+    - `SettingsToLoadSecurity.GetSaveStr()` now serializes `TimeStart` and `TimeEnd` in invariant round-trip format:
+      - `ToString("O", CultureInfo.InvariantCulture)`
+  - Scope:
+    - persistence serialization hardening only; settings schema and load behavior unchanged.
+- **Verification:**
+  - Executed by project rule outside sandbox.
+  - `dotnet restore project/OsEngine/OsEngine.csproj --nologo` succeeded.
+  - `dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo` succeeded.
+  - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` succeeded (0 warnings).
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` succeeded (`352/352`).
+- **Commit:** n/a (not committed in this session)
+- **Push:** n/a
+
+### Step 2.2 - CultureInfo Invariant Persistence (Incremental Adoption #388)
+
+- **Status:** In Progress (increment completed)
+- **Plan item:** `refactoring_stage2_plan.md` -> Phase 2 / Step 2.2
+- **Changes:**
+  - Replayed screener settings datetime persistence hardening in:
+    - `project/OsEngine/Robots/AlgoStart/AlgoStart2Soldiers.cs`
+    - `project/OsEngine/Robots/Grids/GridScreenerAdaptiveSoldiers.cs`
+    - `project/OsEngine/Robots/Screeners/ThreeSoldierAdaptiveScreener.cs`
+    - `project/OsEngine/Robots/Screeners/PinBarVolatilityScreener.cs`
+  - Replacements:
+    - `LastUpdateTime` serialization now uses round-trip invariant format (`ToString("O", CultureInfo.InvariantCulture)`).
+    - corresponding load paths now use invariant-first fallback parser (`Invariant Roundtrip -> Invariant -> Current -> ru-RU`) instead of direct `Convert.ToDateTime(..., InvariantCulture)`.
+  - Scope:
+    - persistence parsing/serialization hardening only; screener logic unchanged.
+- **Verification:**
+  - Executed by project rule outside sandbox.
+  - `dotnet restore project/OsEngine/OsEngine.csproj --nologo` succeeded.
+  - `dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo` succeeded.
+  - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` succeeded (0 warnings).
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` succeeded (`352/352`).
+- **Commit:** n/a (not committed in this session)
+- **Push:** n/a
+
+### Step 2.2 - CultureInfo Invariant Persistence (Incremental Adoption #387)
+
+- **Status:** In Progress (increment completed)
+- **Plan item:** `refactoring_stage2_plan.md` -> Phase 2 / Step 2.2
+- **Changes:**
+  - Replayed date parser priority harmonization in:
+    - `project/OsEngine/Entity/Security.cs`
+    - `project/OsEngine/Entity/PositionOpenerToStop.cs`
+    - `project/OsEngine/Market/Proxy/ProxyMaster.cs`
+  - Replacements:
+    - added explicit invariant non-roundtrip parse step (`DateTimeStyles.None`) after invariant round-trip parse in legacy datetime helpers.
+    - `ProxyMaster` parser now attempts invariant round-trip parse before existing invariant/current/`ru-RU` fallback flow.
+  - Scope:
+    - parsing hardening only; persistence schema and business logic unchanged.
+- **Verification:**
+  - Executed by project rule outside sandbox.
+  - `dotnet restore project/OsEngine/OsEngine.csproj --nologo` succeeded.
+  - `dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo` succeeded.
+  - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` succeeded (0 warnings).
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` succeeded (`352/352`).
+- **Commit:** n/a (not committed in this session)
+- **Push:** n/a
+
+### Step 2.2 - CultureInfo Invariant Persistence (Incremental Adoption #386)
+
+- **Status:** In Progress (increment completed)
+- **Plan item:** `refactoring_stage2_plan.md` -> Phase 2 / Step 2.2
+- **Changes:**
+  - Replayed date parsing priority hardening in:
+    - `project/OsEngine/Entity/MyTrade.cs`
+    - `project/OsEngine/Entity/Trade.cs`
+  - Replacements:
+    - `MyTrade` legacy parser now also checks `CultureInfo.CurrentCulture` before `ru-RU` fallback.
+    - `Trade` IQFeed date parser now checks invariant round-trip parsing (`DateTimeStyles.RoundtripKind`) before standard invariant/current/`ru-RU` fallbacks.
+  - Scope:
+    - parsing hardening only; save formats and trade processing logic unchanged.
+- **Verification:**
+  - Executed by project rule outside sandbox.
+  - `dotnet restore project/OsEngine/OsEngine.csproj --nologo` succeeded.
+  - `dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo` succeeded.
+  - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` succeeded (0 warnings).
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` succeeded (`352/352`).
+- **Commit:** n/a (not committed in this session)
+- **Push:** n/a
+
+### Step 2.2 - CultureInfo Invariant Persistence (Incremental Adoption #385)
+
+- **Status:** In Progress (increment completed)
+- **Plan item:** `refactoring_stage2_plan.md` -> Phase 2 / Step 2.2
+- **Changes:**
+  - Replayed datetime persistence hardening in:
+    - `project/OsEngine/OsData/OsDataSet.cs`
+  - Replacements:
+    - `SetDublicator` and `SetUpdater` save paths now serialize `DateTime` with round-trip format (`"O"`, invariant culture).
+    - corresponding load paths now use invariant-first fallback parser (`Invariant Roundtrip -> Invariant -> Current -> ru-RU`) instead of direct `Convert.ToDateTime(..., InvariantCulture)`.
+  - Scope:
+    - persistence parsing/serialization hardening only; update/duplicate business logic unchanged.
+- **Verification:**
+  - Executed by project rule outside sandbox.
+  - `dotnet restore project/OsEngine/OsEngine.csproj --nologo` succeeded.
+  - `dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo` succeeded.
+  - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` succeeded (0 warnings).
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` succeeded (`352/352`).
+- **Commit:** n/a (not committed in this session)
+- **Push:** n/a
+
+### Step 2.2 - CultureInfo Invariant Persistence (Incremental Adoption #384)
+
+- **Status:** In Progress (increment completed)
+- **Plan item:** `refactoring_stage2_plan.md` -> Phase 2 / Step 2.2
+- **Changes:**
+  - Replayed date parsing hardening in:
+    - `project/OsEngine/Charts/CandleChart/Indicators/VWAP.cs`
+  - Replacements:
+    - legacy date parser now uses invariant-first parse priority with fallback to current culture and `ru-RU`.
+  - Scope:
+    - parsing hardening only; indicator logic unchanged.
+- **Verification:**
+  - Executed by project rule outside sandbox.
+  - `dotnet restore project/OsEngine/OsEngine.csproj --nologo` succeeded.
+  - `dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo` succeeded.
+  - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` succeeded (0 warnings).
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` succeeded (`352/352`).
+- **Commit:** n/a (not committed in this session)
+- **Push:** n/a
+
+### Step 2.2 - CultureInfo Invariant Persistence (Incremental Adoption #383)
+
+- **Status:** In Progress (increment completed)
+- **Plan item:** `refactoring_stage2_plan.md` -> Phase 2 / Step 2.2
+- **Changes:**
+  - Replayed date parsing hardening in:
+    - `project/OsEngine/OsTrader/Panels/Tab/BotTabOptions.cs`
+  - Replacements:
+    - selected-expiration date parsing now uses explicit invariant-first fallback parser instead of culture-implicit `Convert.ToDateTime(...)`.
+  - Scope:
+    - parsing hardening only; options tab behavior unchanged.
+- **Verification:**
+  - Executed by project rule outside sandbox.
+  - `dotnet restore project/OsEngine/OsEngine.csproj --nologo` succeeded.
+  - `dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo` succeeded.
+  - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` succeeded (0 warnings).
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` succeeded (`352/352`).
+- **Commit:** n/a (not committed in this session)
+- **Push:** n/a
+
+### Step 2.2 - CultureInfo Invariant Persistence (Incremental Adoption #382)
+
+- **Status:** In Progress (increment completed)
+- **Plan item:** `refactoring_stage2_plan.md` -> Phase 2 / Step 2.2
+- **Changes:**
+  - Replayed persistence serialization hardening in:
+    - `project/OsEngine/Layout/GlobalGUILayout.cs`
+  - Replacements:
+    - `OpenWindow.GetSaveString()` now serializes window layout decimals with `ToString(CultureInfo.InvariantCulture)`.
+  - Scope:
+    - persistence serialization hardening only; UI behavior unchanged.
+- **Verification:**
+  - Executed by project rule outside sandbox.
+  - `dotnet restore project/OsEngine/OsEngine.csproj --nologo` succeeded.
+  - `dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo` succeeded.
+  - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` succeeded (0 warnings).
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` succeeded (`352/352`).
+- **Commit:** n/a (not committed in this session)
+- **Push:** n/a
+
+### Step 2.2 - CultureInfo Invariant Persistence (Incremental Adoption #381)
+
+- **Status:** In Progress (increment completed)
+- **Plan item:** `refactoring_stage2_plan.md` -> Phase 2 / Step 2.2
+- **Changes:**
+  - Replayed date parsing hardening in:
+    - `project/OsEngine/Market/Servers/Tester/TesterServer.cs`
+  - Replacements:
+    - `secu.Expiration` load from dop-settings now uses invariant-first fallback parser instead of culture-implicit `Convert.ToDateTime(...)`.
+  - Scope:
+    - parsing hardening only; tester settings schema/logic unchanged.
+- **Verification:**
+  - Executed by project rule outside sandbox.
+  - `dotnet restore project/OsEngine/OsEngine.csproj --nologo` succeeded.
+  - `dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo` succeeded.
+  - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` succeeded (0 warnings).
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` succeeded (`352/352`).
+- **Commit:** n/a (not committed in this session)
+- **Push:** n/a
+
+### Step 2.2 - CultureInfo Invariant Persistence (Incremental Adoption #380)
+
+- **Status:** In Progress (increment completed)
+- **Plan item:** `refactoring_stage2_plan.md` -> Phase 2 / Step 2.2
+- **Changes:**
+  - Replayed datetime persistence hardening in:
+    - `project/OsEngine/OsTrader/Panels/Tab/BotTabIndex.cs`
+  - Replacements:
+    - `_lastTimeUpdateIndex` now saves in invariant round-trip format.
+    - load/parse path for this timestamp now uses invariant-first fallback parser instead of culture-implicit conversion.
+  - Scope:
+    - persistence parsing/serialization hardening only; index behavior unchanged.
+- **Verification:**
+  - Executed by project rule outside sandbox.
+  - `dotnet restore project/OsEngine/OsEngine.csproj --nologo` succeeded.
+  - `dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo` succeeded.
+  - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` succeeded (0 warnings).
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` succeeded (`352/352`).
+- **Commit:** n/a (not committed in this session)
+- **Push:** n/a
+
+### Step 2.2 - CultureInfo Invariant Persistence (Incremental Adoption #379)
+
+- **Status:** In Progress (increment completed)
+- **Plan item:** `refactoring_stage2_plan.md` -> Phase 2 / Step 2.2
+- **Changes:**
+  - Replayed persistence serialization/parsing hardening in:
+    - `project/OsEngine/Alerts/AlertToChart.cs`
+  - Replacements:
+    - `ChartAlertLine` now saves datetime values in invariant round-trip format and decimal values with invariant culture.
+    - datetime load now uses invariant-first fallback with legacy `ru-RU` compatibility.
+  - Scope:
+    - persistence hardening only; alert runtime behavior unchanged.
+- **Verification:**
+  - Executed by project rule outside sandbox.
+  - `dotnet restore project/OsEngine/OsEngine.csproj --nologo` succeeded.
+  - `dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo` succeeded.
+  - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` succeeded (0 warnings).
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` succeeded (`352/352`).
+- **Commit:** n/a (not committed in this session)
+- **Push:** n/a
+
+### Step 2.2 - CultureInfo Invariant Persistence (Incremental Adoption #378)
+
+- **Status:** In Progress (increment completed)
+- **Plan item:** `refactoring_stage2_plan.md` -> Phase 2 / Step 2.2
+- **Changes:**
+  - Replayed date-parse hardening in:
+    - `project/OsEngine/OsData/OsDataSet.cs`
+  - Replacements:
+    - `SettingsToLoadSecurity.Load()` fallback date parsing now uses explicit invariant-first parser instead of culture-implicit `Convert.ToDateTime(...)`.
+  - Scope:
+    - parsing hardening only; settings persistence schema unchanged.
+- **Verification:**
+  - Executed by project rule outside sandbox.
+  - `dotnet restore project/OsEngine/OsEngine.csproj --nologo` succeeded.
+  - `dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo` succeeded.
+  - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` succeeded (0 warnings).
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` succeeded (`352/352`).
+- **Commit:** n/a (not committed in this session)
+- **Push:** n/a
+
+### Step 2.2 - CultureInfo Invariant Persistence (Incremental Adoption #377)
+
+- **Status:** In Progress (increment completed)
+- **Plan item:** `refactoring_stage2_plan.md` -> Phase 2 / Step 2.2
+- **Changes:**
+  - Replayed legacy date parsing hardening in:
+    - `project/OsEngine/Market/Proxy/ProxyMaster.cs`
+  - Replacements:
+    - legacy loader date parse now uses invariant-first fallback parser instead of culture-implicit `Convert.ToDateTime(...)`.
+  - Scope:
+    - parsing hardening only; settings schema and proxy runtime behavior unchanged.
+- **Verification:**
+  - Executed by project rule outside sandbox.
+  - `dotnet restore project/OsEngine/OsEngine.csproj --nologo` succeeded.
+  - `dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo` succeeded.
+  - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` succeeded (0 warnings).
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` succeeded (`352/352`).
+- **Commit:** n/a (not committed in this session)
+- **Push:** n/a
+
+### Step 2.2 - CultureInfo Invariant Persistence (Incremental Adoption #376)
+
+- **Status:** In Progress (increment completed)
+- **Plan item:** `refactoring_stage2_plan.md` -> Phase 2 / Step 2.2
+- **Changes:**
+  - Replayed persistence serialization hardening in:
+    - `project/OsEngine/OsData/OsDataSet.cs`
+  - Replacements:
+    - `SecurityToLoad.GetSaveStr()` now serializes `PriceStep` and `VolumeStep` with `ToString(CultureInfo.InvariantCulture)`.
+  - Scope:
+    - persistence serialization hardening only; loading compatibility preserved via existing `ToDecimal()`.
+- **Verification:**
+  - Executed by project rule outside sandbox.
+  - `dotnet restore project/OsEngine/OsEngine.csproj --nologo` succeeded.
+  - `dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo` succeeded.
+  - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` succeeded (0 warnings).
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` succeeded (`352/352`).
+- **Commit:** n/a (not committed in this session)
+- **Push:** n/a
+
+### Step 2.2 - CultureInfo Invariant Persistence (Incremental Adoption #375)
+
+- **Status:** In Progress (increment completed)
+- **Plan item:** `refactoring_stage2_plan.md` -> Phase 2 / Step 2.2
+- **Changes:**
+  - Replayed culture-safe numeric normalization in:
+    - `project/OsEngine/Market/Servers/Tester/TesterServer.cs`
+  - Replacements:
+    - replaced `ToString().Replace(",", ".")` with `ToString(CultureInfo.InvariantCulture)` in candle price-step analysis.
+    - removed unnecessary decimal-double-decimal roundtrip conversions in candle/tick price-step loops.
+  - Scope:
+    - parsing/normalization hardening only; tester business logic and data formats unchanged.
+- **Verification:**
+  - Executed by project rule outside sandbox.
+  - `dotnet restore project/OsEngine/OsEngine.csproj --nologo` succeeded.
+  - `dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo` succeeded.
+  - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` succeeded (0 warnings).
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` succeeded (`352/352`).
+- **Commit:** n/a (not committed in this session)
+- **Push:** n/a
+
+### Step 2.2 - CultureInfo Invariant Persistence (Incremental Adoption #374)
+
+- **Status:** In Progress (increment completed)
+- **Plan item:** `refactoring_stage2_plan.md` -> Phase 2 / Step 2.2
+- **Changes:**
+  - Replayed datetime serialization/parsing hardening in:
+    - `project/OsEngine/Entity/Trade.cs`
+    - `project/OsEngine/Entity/MyTrade.cs`
+  - Replacements:
+    - removed culture-implicit `Convert.ToDateTime` in IqFeed trade parse path, replaced with invariant-first fallback parser.
+    - `MyTrade` save now uses invariant round-trip datetime format (`"O"`), with backward-compatible parse fallback retained.
+  - Scope:
+    - persistence parsing/serialization hardening only; trade processing logic unchanged.
+- **Verification:**
+  - Executed by project rule outside sandbox.
+  - `dotnet restore project/OsEngine/OsEngine.csproj --nologo` succeeded.
+  - `dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo` succeeded.
+  - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` succeeded (0 warnings).
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` succeeded (`352/352`).
+- **Commit:** n/a (not committed in this session)
+- **Push:** n/a
+
+### Step 2.2 - CultureInfo Invariant Persistence (Incremental Adoption #373)
+
+- **Status:** In Progress (increment completed)
+- **Plan item:** `refactoring_stage2_plan.md` -> Phase 2 / Step 2.2
+- **Changes:**
+  - Replayed persistence formatting hardening in:
+    - `project/OsEngine/Entity/MarketDepth.cs`
+  - Replacements:
+    - `GetSaveStringToAllDepfh()` now serializes ask/bid `price/volume` values with `ToString(CultureInfo.InvariantCulture)`.
+  - Scope:
+    - persistence serialization hardening only; parsing compatibility preserved via existing `ToDouble()`.
+- **Verification:**
+  - Executed by project rule outside sandbox.
+  - `dotnet restore project/OsEngine/OsEngine.csproj --nologo` succeeded.
+  - `dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo` succeeded.
+  - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` succeeded (0 warnings).
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` succeeded (`352/352`).
+- **Commit:** n/a (not committed in this session)
+- **Push:** n/a
+
+### Step 2.2 - CultureInfo Invariant Persistence (Incremental Adoption #372)
+
+- **Status:** In Progress (increment completed)
+- **Plan item:** `refactoring_stage2_plan.md` -> Phase 2 / Step 2.2
+- **Changes:**
+  - Replayed persistence hardening in:
+    - `project/OsEngine/Entity/PositionOpenerToStop.cs`
+  - Replacements:
+    - `GetSaveString()` decimal fields now serialize via `ToString(CultureInfo.InvariantCulture)`.
+    - datetime fields now serialize via invariant round-trip format (`"O"`).
+    - `LoadFromString()` datetime parsing now uses invariant-first fallback with legacy `ru-RU` compatibility.
+  - Scope:
+    - persistence serialization/parsing hardening only; runtime logic unchanged.
+- **Verification:**
+  - Executed by project rule outside sandbox.
+  - `dotnet restore project/OsEngine/OsEngine.csproj --nologo` succeeded.
+  - `dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo` succeeded.
+  - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` succeeded (0 warnings).
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` succeeded (`352/352`).
+- **Commit:** n/a (not committed in this session)
+- **Push:** n/a
+
+### Step 2.2 - CultureInfo Invariant Persistence (Incremental Adoption #371)
+
+- **Status:** In Progress (increment completed)
+- **Plan item:** `refactoring_stage2_plan.md` -> Phase 2 / Step 2.2
+- **Changes:**
+  - Replayed persistence hardening in:
+    - `project/OsEngine/Entity/Security.cs`
+  - Replacements:
+    - `GetSaveStr()` decimal values now serialize with `ToString(CultureInfo.InvariantCulture)`.
+    - `Expiration` now serializes as invariant round-trip (`"O"`).
+    - `LoadFromString()` now parses `Expiration` via invariant-first fallback parser to keep compatibility with old saves.
+  - Scope:
+    - persistence serialization/parsing hardening only; business logic unchanged.
+- **Verification:**
+  - Executed by project rule outside sandbox.
+  - `dotnet restore project/OsEngine/OsEngine.csproj --nologo` succeeded.
+  - `dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo` succeeded.
+  - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` succeeded (0 warnings).
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` succeeded (`352/352`).
+- **Commit:** n/a (not committed in this session)
+- **Push:** n/a
+
+### Step 2.2 - CultureInfo Invariant Persistence (Incremental Adoption #370)
+
+- **Status:** In Progress (increment completed)
+- **Plan item:** `refactoring_stage2_plan.md` -> Phase 2 / Step 2.2
+- **Changes:**
+  - Replayed decimal serialization hardening in optimizer report persistence:
+    - `project/OsEngine/OsOptimizer/OptEntity/OptimizerReportSerializer.cs`
+    - `project/OsEngine/OsOptimizer/OptimizerReport.cs`
+  - Replacements:
+    - serializer aggregate decimals now use `ToString(CultureInfo.InvariantCulture)`.
+    - `OptimizerReportTab.GetSaveString()` decimal fields now use `ToString(CultureInfo.InvariantCulture)`.
+  - Scope:
+    - persistence serialization hardening only; loading compatibility preserved via existing `ToDecimal()`.
+- **Verification:**
+  - Executed by project rule outside sandbox.
+  - `dotnet restore project/OsEngine/OsEngine.csproj --nologo` succeeded.
+  - `dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo` succeeded.
+  - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` succeeded (0 warnings).
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` succeeded (`352/352`).
+- **Commit:** n/a (not committed in this session)
+- **Push:** n/a
+
+### Step 2.2 - CultureInfo Invariant Persistence (Incremental Adoption #369)
+
+- **Status:** In Progress (increment completed)
+- **Plan item:** `refactoring_stage2_plan.md` -> Phase 2 / Step 2.2
+- **Changes:**
+  - Replayed decimal serialization hardening in candle series parameters:
+    - `project/OsEngine/Candles/Factory/CandleSeriesParameter.cs`
+  - Replacements:
+    - `CandlesParameterDecimal.GetStringToSave()` now serializes decimal using `ToString(CultureInfo.InvariantCulture)`.
+  - Scope:
+    - persistence serialization hardening only; load compatibility preserved via existing `ToDecimal()`.
+- **Verification:**
+  - Executed by project rule outside sandbox.
+  - `dotnet restore project/OsEngine/OsEngine.csproj --nologo` succeeded.
+  - `dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo` succeeded.
+  - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` succeeded (0 warnings).
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` succeeded (`352/352`).
+- **Commit:** n/a (not committed in this session)
+- **Push:** n/a
+
+### Step 2.2 - CultureInfo Invariant Persistence (Incremental Adoption #368)
+
+- **Status:** In Progress (increment completed)
+- **Plan item:** `refactoring_stage2_plan.md` -> Phase 2 / Step 2.2
+- **Changes:**
+  - Replayed core decimal serialization hardening in parameter persistence:
+    - `project/OsEngine/Entity/StrategyParameter.cs`
+    - `project/OsEngine/Indicators/IndicatorParameter.cs`
+  - Replacements:
+    - decimal concatenation in `GetStringToSave()` -> explicit `ToString(CultureInfo.InvariantCulture)` for:
+      - `StrategyParameterDecimal`
+      - `StrategyParameterDecimalCheckBox`
+      - `IndicatorParameterDecimal`
+  - Scope:
+    - persistence serialization hardening only; load compatibility preserved via existing `ToDecimal()`.
+- **Verification:**
+  - Executed by project rule outside sandbox.
+  - `dotnet restore project/OsEngine/OsEngine.csproj --nologo` succeeded.
+  - `dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo` succeeded.
+  - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` succeeded (0 warnings).
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` succeeded (`352/352`).
+- **Commit:** n/a (not committed in this session)
+- **Push:** n/a
+
 ### Step 2.2 - CultureInfo Invariant Persistence (Incremental Adoption #355)
 
 - **Status:** In Progress (increment completed)
@@ -7584,6 +8074,144 @@
     - removed unused `using System.Globalization;`.
   - Scope:
     - UI decimal parsing hardening only; persistence format unchanged.
+- **Verification:**
+  - Executed by project rule outside sandbox.
+  - `dotnet restore project/OsEngine/OsEngine.csproj --nologo` succeeded.
+  - `dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo` succeeded.
+  - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` succeeded (0 warnings).
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` succeeded (`352/352`).
+- **Commit:** n/a (not committed in this session)
+- **Push:** n/a
+
+### Step 2.2 - CultureInfo Invariant Persistence (Incremental Adoption #362)
+
+- **Status:** In Progress (increment completed)
+- **Plan item:** `refactoring_stage2_plan.md` -> Phase 2 / Step 2.2
+- **Changes:**
+  - Replayed persistence decimal serialization hardening in:
+    - `project/OsEngine/OsOptimizer/OptEntity/OptimizerSettings.cs`
+  - Replacements in `Save()`:
+    - decimal `.ToString()` -> `.ToString(CultureInfo.InvariantCulture)` for optimizer settings numeric fields.
+  - Scope:
+    - serialization hardening only; load flow and settings schema unchanged.
+- **Verification:**
+  - Executed by project rule outside sandbox.
+  - `dotnet restore project/OsEngine/OsEngine.csproj --nologo` succeeded.
+  - `dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo` succeeded.
+  - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` succeeded (0 warnings).
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` succeeded (`352/352`).
+- **Commit:** n/a (not committed in this session)
+- **Push:** n/a
+
+### Step 2.2 - CultureInfo Invariant Persistence (Incremental Adoption #363)
+
+- **Status:** In Progress (increment completed)
+- **Plan item:** `refactoring_stage2_plan.md` -> Phase 2 / Step 2.2
+- **Changes:**
+  - Replayed decimal parse hardening across UI input handlers:
+    - `project/OsEngine/OsTrader/RiskManager/RiskManagerUi.xaml.cs`
+    - `project/OsEngine/Robots/CounterTrend/WilliamsRangeTradeUi.xaml.cs`
+    - `project/OsEngine/Robots/CounterTrend/StrategyBollingerUi.xaml.cs`
+    - `project/OsEngine/Robots/CounterTrend/RsiContrtrendUi.xaml.cs`
+    - `project/OsEngine/Robots/Trend/SmaStochasticUi.xaml.cs`
+    - `project/OsEngine/Robots/Trend/PriceChannelTradeUi.xaml.cs`
+    - `project/OsEngine/Robots/Patterns/PivotPointsRobotUi.xaml.cs`
+    - `project/OsEngine/Robots/MarketMaker/PairTraderSpreadSmaUi.xaml.cs`
+  - Replacements:
+    - `Convert.ToDecimal(TextBox...Text)` -> `TextBox...Text.ToDecimal()`
+  - Scope:
+    - UI parsing hardening only; runtime trading logic unchanged.
+- **Verification:**
+  - Executed by project rule outside sandbox.
+  - `dotnet restore project/OsEngine/OsEngine.csproj --nologo` succeeded.
+  - `dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo` succeeded.
+  - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` succeeded (0 warnings).
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` succeeded (`352/352`).
+- **Commit:** n/a (not committed in this session)
+- **Push:** n/a
+
+### Step 2.2 - CultureInfo Invariant Persistence (Incremental Adoption #364)
+
+- **Status:** In Progress (increment completed)
+- **Plan item:** `refactoring_stage2_plan.md` -> Phase 2 / Step 2.2
+- **Changes:**
+  - Replayed decimal parsing hardening in indicator UI editors:
+    - `project/OsEngine/Charts/CandleChart/Indicators/BollingerUi.xaml.cs`
+    - `project/OsEngine/Charts/CandleChart/Indicators/KalmanFilterUi.xaml.cs`
+    - `project/OsEngine/Charts/CandleChart/Indicators/EnvelopsUi.xaml.cs`
+    - `project/OsEngine/Charts/CandleChart/Indicators/AtrChannelUi.xaml.cs`
+    - `project/OsEngine/Charts/CandleChart/Indicators/DynamicTrendDetectorUi.xaml.cs`
+  - Replacements:
+    - `Convert.ToDecimal(TextBox...Text)` -> `TextBox...Text.ToDecimal()`
+    - `EnvelopsUi` parse assignment `decimal.TryParse(...)` -> `ToDecimal()`
+  - Scope:
+    - UI input parsing hardening only; indicator logic unchanged.
+- **Verification:**
+  - Executed by project rule outside sandbox.
+  - `dotnet restore project/OsEngine/OsEngine.csproj --nologo` succeeded.
+  - `dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo` succeeded.
+  - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` succeeded (0 warnings).
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` succeeded (`352/352`).
+- **Commit:** n/a (not committed in this session)
+- **Push:** n/a
+
+### Step 2.2 - CultureInfo Invariant Persistence (Incremental Adoption #365)
+
+- **Status:** In Progress (increment completed)
+- **Plan item:** `refactoring_stage2_plan.md` -> Phase 2 / Step 2.2
+- **Changes:**
+  - Replayed decimal textbox parsing hardening in:
+    - `project/OsEngine/Entity/MarketDepthPainter.cs`
+    - `project/OsEngine/Entity/PositionUi.xaml.cs`
+    - `project/OsEngine/OsOptimizer/OptimizerUi.xaml.cs`
+  - Replacements:
+    - `Convert.ToDecimal(...Text...)` -> `...Text.ToDecimal()`
+  - Scope:
+    - UI/input parsing hardening only; runtime behavior unchanged for valid values.
+- **Verification:**
+  - Executed by project rule outside sandbox.
+  - `dotnet restore project/OsEngine/OsEngine.csproj --nologo` succeeded.
+  - `dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo` succeeded.
+  - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` succeeded (0 warnings).
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` succeeded (`352/352`).
+- **Commit:** n/a (not committed in this session)
+- **Push:** n/a
+
+### Step 2.2 - CultureInfo Invariant Persistence (Incremental Adoption #366)
+
+- **Status:** In Progress (increment completed)
+- **Plan item:** `refactoring_stage2_plan.md` -> Phase 2 / Step 2.2
+- **Changes:**
+  - Replayed table-rate decimal parsing hardening in:
+    - `project/OsEngine/Robots/Helpers/TaxPayer.cs`
+    - `project/OsEngine/Robots/Helpers/PayOfMarginBot.cs`
+  - Replacements:
+    - `decimal.TryParse(value.Replace(".", ","), out rate)` and similar -> `(... ?? string.Empty).ToDecimal()`
+  - Scope:
+    - parsing hardening only; runtime logic and stored JSON structure unchanged.
+- **Verification:**
+  - Executed by project rule outside sandbox.
+  - `dotnet restore project/OsEngine/OsEngine.csproj --nologo` succeeded.
+  - `dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo` succeeded.
+  - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` succeeded (0 warnings).
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` succeeded (`352/352`).
+- **Commit:** n/a (not committed in this session)
+- **Push:** n/a
+
+### Step 2.2 - CultureInfo Invariant Persistence (Incremental Adoption #367)
+
+- **Status:** In Progress (increment completed)
+- **Plan item:** `refactoring_stage2_plan.md` -> Phase 2 / Step 2.2
+- **Changes:**
+  - Replayed decimal serialization hardening in screener/algo settings DTO save methods:
+    - `project/OsEngine/Robots/AlgoStart/AlgoStart2Soldiers.cs`
+    - `project/OsEngine/Robots/Grids/GridScreenerAdaptiveSoldiers.cs`
+    - `project/OsEngine/Robots/Screeners/ThreeSoldierAdaptiveScreener.cs`
+    - `project/OsEngine/Robots/Screeners/PinBarVolatilityScreener.cs`
+  - Replacements:
+    - decimal concatenation in `GetSaveString()` -> invariant formatted decimal strings.
+  - Scope:
+    - persistence serialization hardening only; load compatibility preserved.
 - **Verification:**
   - Executed by project rule outside sandbox.
   - `dotnet restore project/OsEngine/OsEngine.csproj --nologo` succeeded.

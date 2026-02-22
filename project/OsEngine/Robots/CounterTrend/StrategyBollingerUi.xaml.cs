@@ -9,6 +9,7 @@
 using System;
 using System.Globalization;
 using System.Windows;
+using OsEngine.Entity;
 using OsEngine.Language;
 using OsEngine.OsTrader.Panels;
 
@@ -57,8 +58,8 @@ namespace OsEngine.Robots.CounterTrend
             try
             {
 
-                if (Convert.ToDecimal(TextBoxVolumeOne.Text) <= 0 ||
-                    Convert.ToDecimal(TextBoxSlippage.Text) < 0)
+                if (TextBoxVolumeOne.Text.ToDecimal() <= 0 ||
+                    TextBoxSlippage.Text.ToDecimal() < 0)
                 {
                     throw new Exception("");
                 }
@@ -71,8 +72,8 @@ namespace OsEngine.Robots.CounterTrend
 
             _strategy._volumeType = Convert.ToString(ComboBoxVolumeType.Text);
             _strategy._tradeAssetInPortfolio = Convert.ToString(TextBoxAssetInPortfolio.Text);
-            _strategy._volume = Convert.ToDecimal(TextBoxVolumeOne.Text);
-            _strategy._slippage = Convert.ToDecimal(TextBoxSlippage.Text);
+            _strategy._volume = TextBoxVolumeOne.Text.ToDecimal();
+            _strategy._slippage = TextBoxSlippage.Text.ToDecimal();
 
             Enum.TryParse(ComboBoxRegime.Text, true, out _strategy._regime);
 

@@ -158,7 +158,7 @@ namespace OsEngine.Entity
             {
                 // download data from IqFeed
                 // загружаем данные из IqFeed
-                Time = Convert.ToDateTime(sIn[0]);
+                Time = ParseIqFeedDateInvariantOrCurrent(sIn[0]);
                 Price = sIn[1].ToDecimal();
                 Volume = sIn[2].ToDecimal();
                 Bid = sIn[3].ToDecimal();
@@ -222,6 +222,33 @@ namespace OsEngine.Entity
                 return Side.Buy;
             else
                 return Side.Sell;
+        }
+
+        private static DateTime ParseIqFeedDateInvariantOrCurrent(string value)
+        {
+            DateTime parsed;
+
+            if (DateTime.TryParse(value, CultureInfo.InvariantCulture, DateTimeStyles.RoundtripKind, out parsed))
+            {
+                return parsed;
+            }
+
+            if (DateTime.TryParse(value, CultureInfo.InvariantCulture, DateTimeStyles.None, out parsed))
+            {
+                return parsed;
+            }
+
+            if (DateTime.TryParse(value, CultureInfo.CurrentCulture, DateTimeStyles.None, out parsed))
+            {
+                return parsed;
+            }
+
+            if (DateTime.TryParse(value, new CultureInfo("ru-RU"), DateTimeStyles.None, out parsed))
+            {
+                return parsed;
+            }
+
+            return Convert.ToDateTime(value, CultureInfo.InvariantCulture);
         }
     }
 }

@@ -9,6 +9,7 @@
 using OsEngine.Entity;
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 
 namespace OsEngine.Candles.Factory
 {
@@ -193,7 +194,7 @@ namespace OsEngine.Candles.Factory
         public override string GetStringToSave()
         {
             string save = _name + "#";
-            save += ValueDecimal;
+            save += ValueDecimal.ToString(CultureInfo.InvariantCulture);
             return save;
         }
 
