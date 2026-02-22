@@ -15,6 +15,7 @@ using OsEngine.Language;
 using System.Windows;
 using System.Windows.Input;
 using OsEngine.Market;
+using System.Windows.Threading;
 
 namespace OsEngine.OsData
 {
@@ -61,6 +62,64 @@ namespace OsEngine.OsData
             this.Focus();
 
             Closed += NewSecurityUi_Closed;
+
+            if (InteractiveInstructions.Data.AllInstructionsInClass == null
+             || InteractiveInstructions.Data.AllInstructionsInClass.Count == 0)
+            {
+                ButtonDataNewSecurity.Visibility = Visibility.Visible;
+            }
+
+            StartButtonBlinkAnimation();
+        }
+
+        private void StartButtonBlinkAnimation()
+        {
+            try
+            {
+                DispatcherTimer timer = new DispatcherTimer();
+                int blinkCount = 0;
+                bool isGreenVisible = true;
+
+                timer.Interval = TimeSpan.FromMilliseconds(300);
+                timer.Tick += (s, e) =>
+                {
+                    try
+                    {
+                        if (blinkCount >= 20)
+                        {
+                            timer.Stop();
+                            PostGreenDataNewSecurity.Opacity = 1;
+                            PostWhiteDataNewSecurity.Opacity = 0;
+                            return;
+                        }
+
+                        if (isGreenVisible)
+                        {
+                            PostGreenDataNewSecurity.Opacity = 0;
+                            PostWhiteDataNewSecurity.Opacity = 1;
+                        }
+                        else
+                        {
+                            PostGreenDataNewSecurity.Opacity = 1;
+                            PostWhiteDataNewSecurity.Opacity = 0;
+                        }
+
+                        isGreenVisible = !isGreenVisible;
+                        blinkCount++;
+                    }
+                    catch (Exception ex)
+                    {
+                        ServerMaster.SendNewLogMessage(ex.ToString(), Logging.LogMessageType.Error);
+                        timer.Stop();
+                    }
+                };
+
+                timer.Start();
+            }
+            catch (Exception ex)
+            {
+                ServerMaster.SendNewLogMessage(ex.ToString(), Logging.LogMessageType.Error);
+            }
         }
 
         private void NewSecurityUi_Closed(object sender, EventArgs e)
@@ -467,6 +526,22 @@ namespace OsEngine.OsData
             {
                 System.Windows.MessageBox.Show(error.ToString());
             }		
+        }
+
+        #endregion
+
+        #region Posts collection
+
+        private void ButtonDataNewSecurity_Click(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                InteractiveInstructions.Data.Link10.ShowLinkInBrowser();
+            }
+            catch (Exception ex)
+            {
+                ServerMaster.SendNewLogMessage(ex.ToString(), Logging.LogMessageType.Error);
+            }
         }
 
         #endregion

@@ -566,6 +566,11 @@ namespace OsEngine.Market.Servers.Bybit
                     LoadOptionInstruments("SOL");
                 }
 
+                if (_securities.Count > 0)
+                {
+                    _securities = _securities.OrderBy(s => s.Name).ToList();
+                }
+                
                 SecurityEvent?.Invoke(_securities);
             }
             catch (System.Exception ex)

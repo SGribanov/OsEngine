@@ -1,7 +1,4 @@
-#nullable enable
-#pragma warning disable CS8600, CS8601, CS8602, CS8603, CS8604, CS8605, CS8618, CS8619, CS8620, CS8622, CS8625, CS8629, CS8765, CS8767
-
-/*
+﻿/*
  * Your rights to use code governed by this license http://o-s-a.net/doc/license_simple_engine.pdf
  * Ваши права на использование кода регулируются данной лицензией http://o-s-a.net/doc/license_simple_engine.pdf
 */
@@ -12,7 +9,7 @@ using static OsEngine.Language.OsLocalization;
 
 namespace OsEngine.Instructions
 {
-    public class MainMenuInstructions
+    public class PositionComparisonInstructions
     {
         public string AllInstructionsInClassDescription
         {
@@ -22,11 +19,11 @@ namespace OsEngine.Instructions
 
                 if (currentLanguage == OsLocalType.Ru)
                 {
-                    return "Главное меню OsEngine. Сборник статей";
+                    return "Модуль сравнения позиций. Сборник статей";
                 }
                 else if (currentLanguage == OsLocalType.Eng)
                 {
-                    return "OsEngine Main Menu. Post Collection";
+                    return "Position comparison module. A collection of posts";
                 }
 
                 return "";
@@ -41,6 +38,7 @@ namespace OsEngine.Instructions
 
                 result.Add(Link1);
                 result.Add(Link2);
+                result.Add(Link3);
 
                 return result;
             }
@@ -48,25 +46,35 @@ namespace OsEngine.Instructions
 
         public Instruction Link1 = new Instruction()
         {
-            Type = InstructionType.Video,
+            Type = InstructionType.Post,
 
             Ru = new InstructionLocalized()
             {
-                Description = "Главное меню OsEngine",
-                PostLink = "https://o-s-a.net/os-engine-faq?cats%5B%5D=tab10&cats%5B%5D=tab88&subcats%5B%5D=sub28&items%5B%5D=item304"
+                Description = "Автосравнение позиций",
+                PostLink = "https://o-s-a.net/os-engine-faq?cats%5B%5D=tab10&cats%5B%5D=tab11&cats%5B%5D=tab88&subcats%5B%5D=sub34&items%5B%5D=item406"
             }
         };
 
         public Instruction Link2 = new Instruction()
         {
-            Type = InstructionType.Post,
+            Type = InstructionType.Video,
 
             Ru = new InstructionLocalized()
             {
-                Description = "Главное меню OsEngine. Общие настройки",
-                PostLink = "https://o-s-a.net/os-engine-faq?cats%5B%5D=tab10&cats%5B%5D=tab88&subcats%5B%5D=sub28&items%5B%5D=item845"
+                Description = "Выравнивание позиций. Фейковые позиции",
+                PostLink = "https://o-s-a.net/os-engine-faq?cats%5B%5D=tab10&cats%5B%5D=tab11&cats%5B%5D=tab88&subcats%5B%5D=sub34&items%5B%5D=item418"
+            }
+        };
+
+        public Instruction Link3 = new Instruction()
+        {
+            Type = InstructionType.Video,
+
+            Ru = new InstructionLocalized()
+            {
+                Description = "Синхронизация позиций у брокера и в OsEngine",
+                PostLink = "https://o-s-a.net/os-engine-faq?cats%5B%5D=tab10&cats%5B%5D=tab11&cats%5B%5D=tab88&subcats%5B%5D=sub34&items%5B%5D=item838"
             }
         };
     }
 }
-

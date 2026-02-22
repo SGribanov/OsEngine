@@ -3113,10 +3113,6 @@ ContextMenuStrip menu)
         /// <param name="point"></param>
         public void PaintPoint(PointElement point)
         {
-            if (point.Y <= 0)
-            {
-                return;
-            }
             if (_myCandles == null)
             {
                 return;
@@ -4092,6 +4088,11 @@ ContextMenuStrip menu)
                 {
                     Aindicator ind = (Aindicator)indicator;
                     List<IndicatorDataSeries> series = ind.DataSeries;
+
+                    if (ind.IsOn == false)
+                    {
+                        return;
+                    }
 
                     for (int i = 0; series != null && i < series.Count; i++)
                     {

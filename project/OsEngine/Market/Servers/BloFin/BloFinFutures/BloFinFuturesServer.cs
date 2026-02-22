@@ -21,6 +21,7 @@ using System.Security.Cryptography;
 using System.Text;
 using System.Threading;
 using OsEngine.Entity.WebSocketOsEngine;
+using System.Linq;
 
 
 namespace OsEngine.Market.Servers.BloFin
@@ -376,6 +377,11 @@ namespace OsEngine.Market.Servers.BloFin
                             newSecurity.VolumeStep = item.minSize.ToDecimal();
 
                             securities.Add(newSecurity);
+                        }
+
+                        if (securities.Count > 0)
+                        {
+                            securities = securities.OrderBy(s => s.Name).ToList();
                         }
 
                         foreach (Security sec in securities)

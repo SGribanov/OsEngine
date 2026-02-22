@@ -6,6 +6,7 @@
  * Ваши права на использование кода регулируются данной лицензией http://o-s-a.net/doc/license_simple_engine.pdf
 */
 
+using OsEngine.Candles.Series;
 using OsEngine.Entity;
 using OsEngine.Indicators;
 using OsEngine.Language;
@@ -610,6 +611,11 @@ namespace OsEngine.Robots.FuturesStart
             for (int i = 0; i < futures.Tabs.Count; i++)
             {
                 Security sec = futures.Tabs[i].Security;
+
+                if (sec == null) 
+                { 
+                    continue; 
+                }
 
                 if (sec.Expiration == DateTime.MinValue)
                 {
@@ -1247,6 +1253,10 @@ namespace OsEngine.Robots.FuturesStart
             tabFutures.ServerType = server.ServerType;
             tabFutures.ServerName = server.ServerNameAndPrefix;
 
+            tabFutures.CandleCreateMethodType = CandleCreateMethodType.Simple.ToString();
+            ((Simple)tabFutures.CandleSeriesRealization).TimeFrame = TimeFrame.Min15;
+            ((Simple)tabFutures.CandleSeriesRealization).TimeFrameParameter.ValueString = TimeFrame.Min15.ToString();
+
             List<ActivatedSecurity> securitiesToScreener = new List<ActivatedSecurity>();
 
             for (int i = 0; i < futuresSecurity.Count; i++)
@@ -1266,6 +1276,7 @@ namespace OsEngine.Robots.FuturesStart
                 }
             }
 
+            tabFutures.SaveSettings();
             tabFutures.NeedToReloadTabs = true;
         }
 

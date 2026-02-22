@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:OsEngine.OsTrader.Grids"
         mc:Ignorable="d"
-        Title="Trade grid settings" Height="600" MinHeight="600" Width="705" MinWidth="705" Style="{StaticResource WindowStyleCanResize}" ResizeMode="CanResize" WindowStartupLocation="CenterScreen" Icon="/Images/OsLogo.ico">
+             Title="Trade grid settings" Height="600" MinHeight="600" Width="705" MinWidth="705" Style="{StaticResource WindowStyleCanResize}" ResizeMode="CanResize" WindowStartupLocation="CenterScreen" Icon="/Images/OsLogo.ico">
     <Grid>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="351*"/>

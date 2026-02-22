@@ -1,7 +1,4 @@
-#nullable enable
-#pragma warning disable CS8600, CS8601, CS8602, CS8603, CS8604, CS8605, CS8618, CS8619, CS8620, CS8622, CS8625, CS8629, CS8765, CS8767
-
-/*
+﻿/*
  * Your rights to use code governed by this license https://github.com/AlexWan/OsEngine/blob/master/LICENSE
  * Ваши права на использование кода регулируются данной лицензией http://o-s-a.net/doc/license_simple_engine.pdf
 */
@@ -152,7 +149,6 @@ namespace OsEngine
               || InteractiveInstructions.MainMenu.AllInstructionsInClass.Count == 0)
             {
                 ButtonPostsMenu.Visibility = Visibility.Hidden;
-
             }
             else
             {
@@ -170,37 +166,52 @@ namespace OsEngine
 
         private void StartButtonBlinkAnimation()
         {
-            DispatcherTimer timer = new DispatcherTimer();
-            int blinkCount = 0;
-            bool isGreenVisible = true;
-
-            timer.Interval = TimeSpan.FromMilliseconds(300);
-            timer.Tick += (s, e) =>
+            try
             {
-                if (blinkCount >= 20)
-                {
-                    timer.Stop();
-                    GreenCollectionMenu.Opacity = 1;
-                    WhiteCollectionMenu.Opacity = 0;
-                    return;
-                }
+                DispatcherTimer timer = new DispatcherTimer();
+                int blinkCount = 0;
+                bool isGreenVisible = true;
 
-                if (isGreenVisible)
+                timer.Interval = TimeSpan.FromMilliseconds(300);
+                timer.Tick += (s, e) =>
                 {
-                    GreenCollectionMenu.Opacity = 0;
-                    WhiteCollectionMenu.Opacity = 1;
-                }
-                else
-                {
-                    GreenCollectionMenu.Opacity = 1;
-                    WhiteCollectionMenu.Opacity = 0;
-                }
+                    try
+                    {
+                        if (blinkCount >= 20)
+                        {
+                            timer.Stop();
+                            GreenCollectionMenu.Opacity = 1;
+                            WhiteCollectionMenu.Opacity = 0;
+                            return;
+                        }
 
-                isGreenVisible = !isGreenVisible;
-                blinkCount++;
-            };
+                        if (isGreenVisible)
+                        {
+                            GreenCollectionMenu.Opacity = 0;
+                            WhiteCollectionMenu.Opacity = 1;
+                        }
+                        else
+                        {
+                            GreenCollectionMenu.Opacity = 1;
+                            WhiteCollectionMenu.Opacity = 0;
+                        }
 
-            timer.Start();
+                        isGreenVisible = !isGreenVisible;
+                        blinkCount++;
+                    }
+                    catch (Exception ex)
+                    {
+                        ServerMaster.SendNewLogMessage(ex.ToString(), Logging.LogMessageType.Error);
+                        timer.Stop();
+                    }
+                };
+
+                timer.Start();
+            }
+            catch (Exception ex)
+            {
+                ServerMaster.SendNewLogMessage(ex.ToString(), Logging.LogMessageType.Error);
+            }
         }
 
         private void GifT_MediaEnded(object sender, RoutedEventArgs e)
@@ -237,13 +248,20 @@ namespace OsEngine
 
         private void ImagePadlock_MouseDown(object sender, System.Windows.Input.MouseButtonEventArgs e)
         {
-            RobotsUiLightUnblock ui = new RobotsUiLightUnblock();
-
-            ui.ShowDialog();
-
-            if (ui.IsUnBlocked == true)
+            try
             {
-                UnblockInterface();
+                RobotsUiLightUnblock ui = new RobotsUiLightUnblock();
+
+                ui.ShowDialog();
+
+                if (ui.IsUnBlocked == true)
+                {
+                    UnblockInterface();
+                }
+            }
+            catch (Exception ex)
+            {
+                ServerMaster.SendNewLogMessage(ex.ToString(), Logging.LogMessageType.Error);
             }
         }
 
@@ -295,26 +313,34 @@ namespace OsEngine
 
         private void MainWindow_Closing(object sender, System.ComponentModel.CancelEventArgs e)
         {
-            GlobalGUILayout.IsClosed = true;
-
-            if (ProccesIsWorked == true)
+            try
             {
-                ProccesIsWorked = false;
+                GlobalGUILayout.IsClosed = true;
 
-                if (this.IsVisible == false)
+                if (ProccesIsWorked == true)
                 {
-                    _awaitUiBotsInfoLoading = new AwaitObject(OsLocalization.Trader.Label391, 100, 0, true);
-                    AwaitUi ui = new AwaitUi(_awaitUiBotsInfoLoading);
+                    ProccesIsWorked = false;
 
-                    Task.Run(Await7Seconds);
+                    if (this.IsVisible == false)
+                    {
+                        _awaitUiBotsInfoLoading = new AwaitObject(OsLocalization.Trader.Label391, 100, 0, true);
+                        AwaitUi ui = new AwaitUi(_awaitUiBotsInfoLoading);
 
-                    ui.ShowDialog();
+                        Thread worker = new Thread(Await7Seconds);
+                        worker.Start();
+
+                        ui.ShowDialog();
+                    }
                 }
+
+                Thread.Sleep(500);
+
+                Process.GetCurrentProcess().Kill();
             }
-
-            Thread.Sleep(500);
-
-            Process.GetCurrentProcess().Kill();
+            catch (Exception ex)
+            {
+                ServerMaster.SendNewLogMessage(ex.ToString(), Logging.LogMessageType.Error);
+            }
         }
 
         AwaitObject _awaitUiBotsInfoLoading;
@@ -348,7 +374,7 @@ namespace OsEngine
 
             if (ImageGear.Dispatcher.CheckAccess() == false)
             {
-                ImageGear.Dispatcher.InvokeAsync(new Action(ChangeText));
+                ImageGear.Dispatcher.Invoke(new Action(ChangeText));
                 return;
             }
 
@@ -441,20 +467,19 @@ namespace OsEngine
         {
             try
             {
-
                 if (!Directory.Exists("Engine"))
                 {
                     Directory.CreateDirectory("Engine");
                 }
 
-                if (File.Exists(GetDirectoryCheckFilePath()))
+                if (File.Exists("Engine\\checkFile.txt"))
                 {
-                    File.Delete(GetDirectoryCheckFilePath());
+                    File.Delete("Engine\\checkFile.txt");
                 }
 
-                File.Create(GetDirectoryCheckFilePath());
+                File.Create("Engine\\checkFile.txt");
 
-                if (File.Exists(GetDirectoryCheckFilePath()) == false)
+                if (File.Exists("Engine\\checkFile.txt") == false)
                 {
                     return false;
                 }
@@ -466,16 +491,6 @@ namespace OsEngine
 
 
             return true;
-        }
-
-        private static string GetDirectoryCheckFilePath()
-        {
-            return "Engine\\checkFile.txt";
-        }
-
-        private static string GetCurrentDirectoryExecutablePath()
-        {
-            return Path.Combine(Directory.GetCurrentDirectory(), "OsEngine.exe");
         }
 
         private bool CheckAlreadyWorkEngine()
@@ -507,15 +522,15 @@ namespace OsEngine
                             process.Add(p);
                         }
                     }
-                    catch (System.Exception ex)
+                    catch
                     {
-                        System.Diagnostics.Trace.TraceWarning(ex.ToString());
+
                     }
                 }
 
                 int osEngineCount = 0;
 
-                string myProgramPath = GetCurrentDirectoryExecutablePath();
+                string myProgramPath = myDirectory + "\\OsEngine.exe";
 
                 for (int i = 0; i < process.Count; i++)
                 {
@@ -557,7 +572,8 @@ namespace OsEngine
             message = System.Reflection.Assembly.GetExecutingAssembly() + "\n" + message;
 
             _messageToCrashServer = "Crash% " + message;
-            Task.Run(SendMessageInCrashServer);
+            Thread worker = new Thread(SendMessageInCrashServer);
+            worker.Start();
 
             if (PrimeSettingsMaster.RebootTradeUiLight == true &&
                 RobotUiLite.IsRobotUiLightStart)
@@ -573,7 +589,7 @@ namespace OsEngine
         private void TaskScheduler_UnobservedTaskException(object sender, UnobservedTaskExceptionEventArgs e)
         {
             if (e.Exception != null
-                && e.Exception.ToString().Contains("(995):")== true)
+                && e.Exception.ToString().Contains("(995):") == true)
             { // игнорируем прерывания потока за делом по кансел токену
                 return;
             }
@@ -585,7 +601,8 @@ namespace OsEngine
             message = System.Reflection.Assembly.GetExecutingAssembly() + "\n" + message;
 
             _messageToCrashServer = "Crash% " + message;
-            Task.Run(SendMessageInCrashServer);
+            Thread worker = new Thread(SendMessageInCrashServer);
+            worker.Start();
 
             if (PrimeSettingsMaster.RebootTradeUiLight == true &&
                 RobotUiLite.IsRobotUiLightStart)
@@ -605,7 +622,7 @@ namespace OsEngine
 
             if (!CheckAccess())
             {
-                Dispatcher.InvokeAsync(() =>
+                Dispatcher.Invoke(() =>
                 {
                     Reboot(message);
                 });
@@ -614,7 +631,7 @@ namespace OsEngine
 
             App.app.Shutdown();
             Process process = new Process();
-            process.StartInfo.FileName = GetCurrentDirectoryExecutablePath();
+            process.StartInfo.FileName = Directory.GetCurrentDirectory() + "\\OsEngine.exe";
             process.StartInfo.Arguments = " -error " + message;
             process.Start();
 
@@ -756,51 +773,63 @@ namespace OsEngine
 
         private async void ThreadAreaGreeting()
         {
-            await Task.Delay(1000);
-            double angle = 5;
-
-            for (int i = 0; i < 7; i++)
+            try
             {
-                RotatePic(angle);
-                await Task.Delay(50);
-                angle += 10;
-            }
+                await Task.Delay(1000);
+                double angle = 5;
 
-            for (int i = 0; i < 7; i++)
-            {
-                RotatePic(angle);
+                for (int i = 0; i < 7; i++)
+                {
+                    RotatePic(angle);
+                    await Task.Delay(50);
+                    angle += 10;
+                }
+
+                for (int i = 0; i < 7; i++)
+                {
+                    RotatePic(angle);
+                    await Task.Delay(100);
+                    angle += 10;
+                }
+
                 await Task.Delay(100);
-                angle += 10;
+                RotatePic(angle);
             }
-
-            await Task.Delay(100);
-            RotatePic(angle);
-
+            catch (Exception ex)
+            {
+                ServerMaster.SendNewLogMessage(ex.ToString(), Logging.LogMessageType.Error);
+            }
         }
 
         private void RotatePic(double angle)
         {
             if (ImageGear.Dispatcher.CheckAccess() == false)
             {
-                ImageGear.Dispatcher.InvokeAsync(new Action(() => RotatePic(angle)));
+                ImageGear.Dispatcher.Invoke(new Action<double>(RotatePic), angle);
                 return;
             }
 
             ImageGear.RenderTransform = new RotateTransform(angle, 12, 12);
-
         }
 
         private void ButtonSettings_Click(object sender, RoutedEventArgs e)
         {
-            if (_settingsUi == null)
+            try
             {
-                _settingsUi = new PrimeSettingsMasterUi();
-                _settingsUi.Show();
-                _settingsUi.Closing += delegate { _settingsUi = null; };
+                if (_settingsUi == null)
+                {
+                    _settingsUi = new PrimeSettingsMasterUi();
+                    _settingsUi.Show();
+                    _settingsUi.Closing += delegate { _settingsUi = null; };
+                }
+                else
+                {
+                    _settingsUi.Activate();
+                }
             }
-            else
+            catch (Exception ex)
             {
-                _settingsUi.Activate();
+                ServerMaster.SendNewLogMessage(ex.ToString(), Logging.LogMessageType.Error);
             }
         }
 
@@ -826,40 +855,47 @@ namespace OsEngine
 
         private void CommandLineInterfaceProcess()
         {
-            string[] args = Environment.GetCommandLineArgs();
-            if (Array.Exists(args, a => a.Equals("-robots")))
+            try
             {
-                ButtonRobotCandleOne_Click(this, default);
-            }
-            else if (Array.Exists(args, a => a.Equals("-tester")))
-            {
-                ButtonTesterCandleOne_Click(this, default);
-            }
-            else if (Array.Exists(args, a => a.Equals("-robotslight")))
-            {
-                ButtonRobotLight_Click(this, default);
-            }
-            else if (Array.Exists(args, a => a.Equals("-error")) && PrimeSettingsMaster.RebootTradeUiLight)
-            {
+                string[] args = Environment.GetCommandLineArgs();
 
-                CriticalErrorHandler.ErrorInStartUp = true;
-
-                Array.ForEach(args, (a) => { CriticalErrorHandler.ErrorMessage += a; });
-
-                new Task(() =>
+                if (Array.Exists(args, a => a.Equals("-robots")))
                 {
-                    string messageError = String.Empty;
+                    ButtonRobotCandleOne_Click(this, default);
+                }
+                else if (Array.Exists(args, a => a.Equals("-tester")))
+                {
+                    ButtonTesterCandleOne_Click(this, default);
+                }
+                else if (Array.Exists(args, a => a.Equals("-robotslight")))
+                {
+                    ButtonRobotLight_Click(this, default);
+                }
+                else if (Array.Exists(args, a => a.Equals("-error")) && PrimeSettingsMaster.RebootTradeUiLight)
+                {
+                    CriticalErrorHandler.ErrorInStartUp = true;
 
-                    for (int i = 0; i < args.Length; i++)
+                    Array.ForEach(args, (a) => { CriticalErrorHandler.ErrorMessage += a; });
+
+                    new Task(() =>
                     {
-                        messageError += args[i];
-                    }
+                        string messageError = String.Empty;
 
-                    MessageBox.Show(messageError);
+                        for (int i = 0; i < args.Length; i++)
+                        {
+                            messageError += args[i];
+                        }
 
-                }).Start();
+                        MessageBox.Show(messageError);
 
-                ButtonRobotLight_Click(this, default);
+                    }).Start();
+
+                    ButtonRobotLight_Click(this, default);
+                }
+            }
+            catch (Exception ex)
+            {
+                ServerMaster.SendNewLogMessage(ex.ToString(), Logging.LogMessageType.Error);
             }
         }
 
@@ -900,7 +936,24 @@ namespace OsEngine
 
         private void SendMessageInCrashServer()
         {
-            // Disabled: external crash reporting.
+            try
+            {
+                if (PrimeSettingsMaster.ReportCriticalErrors == false)
+                {
+                    return;
+                }
+
+                TcpClient newClient = new TcpClient();
+                newClient.Connect("45.137.152.144", 11000);
+                NetworkStream tcpStream = newClient.GetStream();
+                byte[] sendBytes = Encoding.UTF8.GetBytes(_messageToCrashServer);
+                tcpStream.Write(sendBytes, 0, sendBytes.Length);
+                newClient.Close();
+            }
+            catch
+            {
+                // ignore
+            }
         }
 
         private void ButtonLocal_Click(object sender, RoutedEventArgs e)
@@ -974,7 +1027,7 @@ namespace OsEngine
                     _instructionsUi.Activate();
                 }
             }
-            catch (System.Exception ex)
+            catch (Exception ex)
             {
                 ServerMaster.SendNewLogMessage(ex.ToString(), Logging.LogMessageType.Error);
             }
@@ -982,8 +1035,15 @@ namespace OsEngine
 
         private void _instructionsUi_Closed(object sender, EventArgs e)
         {
-            _instructionsUi.Closed -= _instructionsUi_Closed;
-            _instructionsUi = null;
+            try
+            {
+                _instructionsUi.Closed -= _instructionsUi_Closed;
+                _instructionsUi = null;
+            }
+            catch (Exception ex)
+            {
+                ServerMaster.SendNewLogMessage(ex.ToString(), Logging.LogMessageType.Error);
+            }
         }
 
         #endregion
@@ -998,4 +1058,3 @@ namespace OsEngine
     }
 
 }
-

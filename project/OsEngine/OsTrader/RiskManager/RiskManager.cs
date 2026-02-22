@@ -23,7 +23,7 @@ namespace OsEngine.OsTrader.RiskManager
     /// </summary>
     public class RiskManager
     {
-        // static part with work flow 
+        #region Static part with work flow 
 
         public static Task Watcher;
 
@@ -88,7 +88,9 @@ namespace OsEngine.OsTrader.RiskManager
             }
         }
 
-        // service
+        #endregion
+
+        #region Service
 
         /// <summary>
         /// Constructor
@@ -100,8 +102,8 @@ namespace OsEngine.OsTrader.RiskManager
             _startProgram = startProgram;
             _name = nameBot + "RiskManager";
             MaxDrowDownToDayPersent = 1;
-            
-            if(_startProgram != StartProgram.IsOsOptimizer)
+
+            if (_startProgram != StartProgram.IsOsOptimizer)
             {
                 Load();
 
@@ -351,7 +353,9 @@ namespace OsEngine.OsTrader.RiskManager
             }
         }
 
-        // logging
+        #endregion
+
+        #region logging
 
         /// <summary>
         /// Send new message
@@ -378,6 +382,7 @@ namespace OsEngine.OsTrader.RiskManager
         /// </summary>
         public event Action<RiskManagerReactionType> RiskManagerAlarmEvent;
 
+        #endregion
     }
 
     /// <summary>

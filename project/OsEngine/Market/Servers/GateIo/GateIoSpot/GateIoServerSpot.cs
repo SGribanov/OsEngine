@@ -17,6 +17,7 @@ using RestSharp;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Linq;
 using System.Net;
 using System.Security.Cryptography;
 using System.Text;
@@ -290,6 +291,11 @@ namespace OsEngine.Market.Servers.GateIo.GateIoSpot
                         security.MinTradeAmountType = MinTradeAmountType.C_Currency;
 
                         securities.Add(security);
+                    }
+
+                    if (securities.Count > 0)
+                    {
+                        securities = securities.OrderBy(s => s.Name).ToList();
                     }
 
                     foreach (Security sec in securities)

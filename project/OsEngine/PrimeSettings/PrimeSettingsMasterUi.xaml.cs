@@ -12,7 +12,9 @@ using System.Diagnostics;
 using System.Threading;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Threading;
 using OsEngine.Language;
+using OsEngine.Market;
 
 
 namespace OsEngine.PrimeSettings
@@ -88,6 +90,64 @@ namespace OsEngine.PrimeSettings
 
             this.Activate();
             this.Focus();
+
+            if (InteractiveInstructions.MainMenu.AllInstructionsInClass == null
+              || InteractiveInstructions.MainMenu.AllInstructionsInClass.Count == 0)
+            {
+                ButtonGeneralSettings.Visibility = Visibility.Hidden;
+            }
+
+            StartButtonBlinkAnimation();
+        }
+
+        private void StartButtonBlinkAnimation()
+        {
+            try
+            {
+                DispatcherTimer timer = new DispatcherTimer();
+                int blinkCount = 0;
+                bool isGreenVisible = true;
+
+                timer.Interval = TimeSpan.FromMilliseconds(300);
+                timer.Tick += (s, e) =>
+                {
+                    try
+                    {
+                        if (blinkCount >= 20)
+                        {
+                            timer.Stop();
+                            PostGreenGeneralSettings.Opacity = 1;
+                            PostWhiteGeneralSettings.Opacity = 0;
+                            return;
+                        }
+
+                        if (isGreenVisible)
+                        {
+                            PostGreenGeneralSettings.Opacity = 0;
+                            PostWhiteGeneralSettings.Opacity = 1;
+                        }
+                        else
+                        {
+                            PostGreenGeneralSettings.Opacity = 1;
+                            PostWhiteGeneralSettings.Opacity = 0;
+                        }
+
+                        isGreenVisible = !isGreenVisible;
+                        blinkCount++;
+                    }
+                    catch (Exception ex)
+                    {
+                        ServerMaster.SendNewLogMessage(ex.ToString(), Logging.LogMessageType.Error);
+                        timer.Stop();
+                    }
+                };
+
+                timer.Start();
+            }
+            catch (Exception ex)
+            {
+                ServerMaster.SendNewLogMessage(ex.ToString(), Logging.LogMessageType.Error);
+            }
         }
 
         private void ChangeText()
@@ -181,6 +241,22 @@ namespace OsEngine.PrimeSettings
                 // ignore
             }
         }
+
+        #region Posts collection
+
+        private void ButtonGeneralSettings_Click(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                InteractiveInstructions.MainMenu.Link2.ShowLinkInBrowser();
+            }
+            catch (Exception ex)
+            {
+                ServerMaster.SendNewLogMessage(ex.ToString(), Logging.LogMessageType.Error);
+            }
+        }
+
+        #endregion
     }
 }
 

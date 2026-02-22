@@ -20,6 +20,15 @@ namespace OsEngine
 
         public static ConverterInstructions Converter = new ConverterInstructions();
 
+        public static Journal2Instructions Journal2Posts = new Journal2Instructions();
+
+        public static TesterLightInstructions TesterLightPosts = new TesterLightInstructions();
+
+        public static BotStationLightInstructions BotStationLightPosts = new BotStationLightInstructions();
+
+        public static PositionComparisonInstructions PositionComparisonPosts = new PositionComparisonInstructions();
+
+        public static OptimizerInstructions OptimizerPosts = new OptimizerInstructions();
     }
 }
 
