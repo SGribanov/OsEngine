@@ -221,7 +221,7 @@ namespace OsEngine.Market.Servers.MoexAlgopack
                     newSecurity.PriceStep = item[6].ToDecimal();
                     newSecurity.PriceStepCost = newSecurity.PriceStep;
                     newSecurity.MarginBuy = item[14].ToDecimal();
-                    newSecurity.Expiration = DateTime.Parse(item[7],CultureInfo.InvariantCulture); 
+                    newSecurity.Expiration = ParseDateInvariantOrCurrent(item[7]); 
                     newSecurity.State = SecurityStateType.Activ;
                     securities.Add(newSecurity);
                 }
@@ -849,7 +849,7 @@ namespace OsEngine.Market.Servers.MoexAlgopack
                                 newCandle.Low = item[3].ToDecimal();
                                 newCandle.Volume = item[5].ToDecimal();
                                 newCandle.State = CandleState.Finished;
-                                newCandle.TimeStart = DateTime.Parse(item[6], CultureInfo.InvariantCulture);
+                                newCandle.TimeStart = ParseDateInvariantOrCurrent(item[6]);
                                 candles.Add(newCandle);
                             }
 

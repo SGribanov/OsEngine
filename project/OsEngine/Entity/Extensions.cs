@@ -121,12 +121,29 @@ namespace OsEngine.Entity
             }
             catch
             {
-                if (double.TryParse(value, out double result))
+                if (TryParseDoubleInvariantOrCurrent(value, out double result))
                 {
                     return result;
                 }
                 return 0;
             }
+        }
+
+        private static bool TryParseDoubleInvariantOrCurrent(string value, out double result)
+        {
+            const NumberStyles parseStyle = NumberStyles.Float | NumberStyles.AllowThousands;
+
+            if (double.TryParse(value, parseStyle, CultureInfo.InvariantCulture, out result))
+            {
+                return true;
+            }
+
+            if (double.TryParse(value, parseStyle, CultureInfo.CurrentCulture, out result))
+            {
+                return true;
+            }
+
+            return double.TryParse(value, parseStyle, _culture, out result);
         }
 
         /// <summary>

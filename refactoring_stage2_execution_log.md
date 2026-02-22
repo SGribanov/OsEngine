@@ -6963,6 +6963,227 @@
 - **Commit:** n/a (not committed in this session)
 - **Push:** n/a
 
+### Step 2.2 - CultureInfo Invariant Persistence (Incremental Adoption #421)
+
+- **Status:** In Progress (increment completed)
+- **Plan item:** `refactoring_stage2_plan.md` -> Phase 2 / Step 2.2
+- **Changes:**
+  - Replayed legacy expiration-date parsing hardening in:
+    - `project/OsEngine/Market/Servers/Atp/AtpServer.cs`
+  - Replacements:
+    - in legacy security-line parsing, replaced unqualified
+      `DateTime.TryParse(array[16], out expiration)`
+      with helper parser call.
+    - added `ParseDateInvariantOrCurrent(...)` with parse priority:
+      - `Invariant Roundtrip -> Invariant -> Current -> ru-RU`.
+    - final fallback is non-throwing: `DateTime.MinValue`.
+  - Scope:
+    - parsing hardening only; ATP security load behavior unchanged for valid values.
+- **Verification:**
+  - Executed by project rule outside sandbox.
+  - `dotnet restore project/OsEngine/OsEngine.csproj --nologo` succeeded.
+  - `dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo` succeeded.
+  - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` succeeded (0 warnings).
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` succeeded (`352/352`).
+- **Commit:** n/a (not committed in this session)
+- **Push:** n/a
+
+### Step 2.2 - CultureInfo Invariant Persistence (Incremental Adoption #422)
+
+- **Status:** In Progress (increment completed)
+- **Plan item:** `refactoring_stage2_plan.md` -> Phase 2 / Step 2.2
+- **Changes:**
+  - Replayed filename-date parsing hardening in:
+    - `project/OsEngine/Market/Servers/BybitData/BybitDataServer.cs`
+  - Replacements:
+    - in `ExtractDateFromFileName(...)`, replaced unqualified
+      `DateTime.TryParse(match.Groups[1].Value, out date)`
+      with helper parser call.
+    - added `TryParseDateInvariantOrCurrent(...)` with parse priority:
+      - `Invariant Roundtrip -> Invariant -> Current -> ru-RU`.
+    - method remains non-throwing and preserves `null` return on parse failure.
+  - Scope:
+    - parsing hardening only; Bybit historical filename-date extraction behavior unchanged for valid values.
+- **Verification:**
+  - Executed by project rule outside sandbox.
+  - `dotnet restore project/OsEngine/OsEngine.csproj --nologo` succeeded.
+  - `dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo` succeeded.
+  - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` succeeded (0 warnings).
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` succeeded (`352/352`).
+- **Commit:** n/a (not committed in this session)
+- **Push:** n/a
+
+### Step 2.2 - CultureInfo Invariant Persistence (Incremental Adoption #423)
+
+- **Status:** In Progress (increment completed)
+- **Plan item:** `refactoring_stage2_plan.md` -> Phase 2 / Step 2.2
+- **Changes:**
+  - Replayed datetime parsing hardening in:
+    - `project/OsEngine/Market/Servers/TraderNet/TraderNetServer.cs`
+  - Replacements:
+    - replaced all remaining unqualified `DateTime.TryParse(...)` usages in:
+      - order update trade mapping
+      - public trade stream timestamp mapping
+      - order status trade mapping
+      - order callback timestamp mapping
+    - added shared helper `ParseDateInvariantOrCurrent(...)` with parse priority:
+      - `Invariant Roundtrip -> Invariant -> Current -> ru-RU`.
+    - final fallback is non-throwing: `DateTime.MinValue` (preserves prior graceful behavior on parse failure).
+  - Scope:
+    - parsing hardening only; TraderNet behavior unchanged for valid timestamps.
+- **Verification:**
+  - Executed by project rule outside sandbox.
+  - `dotnet restore project/OsEngine/OsEngine.csproj --nologo` succeeded.
+  - `dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo` succeeded.
+  - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` succeeded (0 warnings).
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` succeeded (`352/352`).
+- **Commit:** n/a (not committed in this session)
+- **Push:** n/a
+
+### Step 2.2 - CultureInfo Invariant Persistence (Incremental Adoption #424)
+
+- **Status:** In Progress (increment completed)
+- **Plan item:** `refactoring_stage2_plan.md` -> Phase 2 / Step 2.2
+- **Changes:**
+  - Replayed timestamp decimal parsing hardening in:
+    - `project/OsEngine/Market/Servers/Polygon/PolygonServer.cs`
+  - Replacements:
+    - in trade conversion, replaced unqualified
+      `decimal.TryParse(response.results[i].sip_timestamp, out timestamp)`
+      with helper parser call.
+    - added `ParseDecimalInvariantOrCurrent(...)` with parse priority:
+      - `Invariant -> Current -> ru-RU`.
+    - final fallback is non-throwing: `0m` (preserves prior default-on-fail behavior).
+  - Scope:
+    - parsing hardening only; Polygon trade timestamp mapping unchanged for valid values.
+- **Verification:**
+  - Executed by project rule outside sandbox.
+  - `dotnet restore project/OsEngine/OsEngine.csproj --nologo` succeeded.
+  - `dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo` succeeded.
+  - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` succeeded (0 warnings).
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` succeeded (`352/352`).
+- **Commit:** n/a (not committed in this session)
+- **Push:** n/a
+
+### Step 2.2 - CultureInfo Invariant Persistence (Incremental Adoption #425)
+
+- **Status:** In Progress (increment completed)
+- **Plan item:** `refactoring_stage2_plan.md` -> Phase 2 / Step 2.2
+- **Changes:**
+  - Replayed culture-safe numeric parsing hardening in:
+    - `project/OsEngine/Entity/Extensions.cs`
+  - Replacements:
+    - in `ToDouble(string? value)` catch fallback, replaced implicit-culture
+      `double.TryParse(value, out result)`
+      with helper `TryParseDoubleInvariantOrCurrent(...)`.
+    - helper parse priority:
+      - `Invariant -> Current -> ru-RU` with `NumberStyles.Float | AllowThousands`.
+    - final behavior remains non-throwing and keeps `0` fallback on parse failure.
+  - Scope:
+    - parsing hardening only; conversion semantics for valid numeric values unchanged.
+- **Verification:**
+  - Executed by project rule outside sandbox.
+  - `dotnet restore project/OsEngine/OsEngine.csproj --nologo` succeeded.
+  - `dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo` succeeded.
+  - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` succeeded (0 warnings).
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` succeeded (`352/352`).
+- **Commit:** n/a (not committed in this session)
+- **Push:** n/a
+
+### Step 2.2 - CultureInfo Invariant Persistence (Incremental Adoption #420)
+
+- **Status:** In Progress (increment completed)
+- **Plan item:** `refactoring_stage2_plan.md` -> Phase 2 / Step 2.2
+- **Changes:**
+  - Replayed server timestamp parsing hardening in:
+    - `project/OsEngine/Market/Servers/Transaq/TransaqServer.cs`
+  - Replacements:
+    - replaced all remaining `DateTime.Parse(...)` usages (ticks, candles, news, my-trades, order callbacks, trades) with one shared helper.
+    - added `ParseDateInvariantOrCurrentOrThrow(...)` with parse priority:
+      - `Invariant Roundtrip -> Invariant -> Current -> ru-RU`.
+    - on parse failure helper throws `FormatException`, preserving existing outer-thread error handling behavior.
+  - Scope:
+    - parsing hardening only; Transaq flow unchanged for valid timestamps.
+- **Verification:**
+  - Executed by project rule outside sandbox.
+  - `dotnet restore project/OsEngine/OsEngine.csproj --nologo` succeeded.
+  - `dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo` succeeded.
+  - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` succeeded (0 warnings).
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` succeeded (`352/352`).
+- **Commit:** n/a (not committed in this session)
+- **Push:** n/a
+
+### Step 2.2 - CultureInfo Invariant Persistence (Incremental Adoption #419)
+
+- **Status:** In Progress (increment completed)
+- **Plan item:** `refactoring_stage2_plan.md` -> Phase 2 / Step 2.2
+- **Changes:**
+  - Replayed explicit parse-call cleanup in:
+    - `project/OsEngine/Market/Servers/MoexAlgopack/MoexAlgopackServer.cs`
+  - Replacements:
+    - replaced `DateTime.Parse(item[7], CultureInfo.InvariantCulture)` with existing helper:
+      `ParseDateInvariantOrCurrent(item[7])`.
+    - replaced `DateTime.Parse(item[6], CultureInfo.InvariantCulture)` with existing helper:
+      `ParseDateInvariantOrCurrent(item[6])`.
+    - unified these paths with the same server-local parse strategy used by trades/depth.
+  - Scope:
+    - parsing hardening only; MOEX Algopack data flow unchanged for valid timestamps.
+- **Verification:**
+  - Executed by project rule outside sandbox.
+  - `dotnet restore project/OsEngine/OsEngine.csproj --nologo` succeeded.
+  - `dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo` succeeded.
+  - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` succeeded (0 warnings).
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` succeeded (`352/352`).
+- **Commit:** n/a (not committed in this session)
+- **Push:** n/a
+
+### Step 2.2 - CultureInfo Invariant Persistence (Incremental Adoption #418)
+
+- **Status:** In Progress (increment completed)
+- **Plan item:** `refactoring_stage2_plan.md` -> Phase 2 / Step 2.2
+- **Changes:**
+  - Replayed fixed-value datetime comparison hardening in:
+    - `project/OsEngine/Market/Servers/TInvest/TInvestServer.cs`
+  - Replacements:
+    - replaced parsing of constant string
+      `DateTime.Parse("01.01.1970 03:00:00")`
+      with explicit constant construction:
+      `new DateTime(1970, 1, 1, 3, 0, 0)`.
+  - Scope:
+    - parsing hardening only; TInvest trade-time fallback logic unchanged.
+- **Verification:**
+  - Executed by project rule outside sandbox.
+  - `dotnet restore project/OsEngine/OsEngine.csproj --nologo` succeeded.
+  - `dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo` succeeded.
+  - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` succeeded (0 warnings).
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` succeeded (`352/352`).
+- **Commit:** n/a (not committed in this session)
+- **Push:** n/a
+
+### Step 2.2 - CultureInfo Invariant Persistence (Incremental Adoption #417)
+
+- **Status:** In Progress (increment completed)
+- **Plan item:** `refactoring_stage2_plan.md` -> Phase 2 / Step 2.2
+- **Changes:**
+  - Replayed benchmark axis-label date parsing hardening in:
+    - `project/OsEngine/Journal/JournalUi2.xaml.cs`
+  - Replacements:
+    - in benchmark comparison/load flow, replaced direct
+      `DateTime.Parse(series.Points[...].AxisLabel)` with shared helper parser.
+    - reused `ParseDateInvariantOrCurrentOrThrow(...)` with parse priority:
+      - `Invariant Roundtrip -> Invariant -> _currentCulture -> ru-RU`.
+    - parse failures keep existing behavior via outer method `try/catch` (error log + null result).
+  - Scope:
+    - parsing hardening only; benchmark chart behavior unchanged for valid axis-label timestamps.
+- **Verification:**
+  - Executed by project rule outside sandbox.
+  - `dotnet restore project/OsEngine/OsEngine.csproj --nologo` succeeded.
+  - `dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo` succeeded.
+  - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` succeeded (0 warnings).
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` succeeded (`352/352`).
+- **Commit:** n/a (not committed in this session)
+- **Push:** n/a
+
 ### Step 2.2 - CultureInfo Invariant Persistence (Incremental Adoption #415)
 
 - **Status:** In Progress (increment completed)
@@ -8833,3 +9054,4 @@
   - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` succeeded (`352/352`).
 - **Commit:** n/a (not committed in this session)
 - **Push:** n/a
+

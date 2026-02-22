@@ -12,6 +12,7 @@ using System.IO;
 using System.IO.Compression;
 using System.Net;
 using System.Net.Http;
+using System.Globalization;
 using System.Text.RegularExpressions;
 using System.Threading;
 
@@ -610,13 +611,33 @@ namespace OsEngine.Market.Servers.BybitData
 
             if (match.Success && match.Groups.Count > 1)
             {
-                if (DateTime.TryParse(match.Groups[1].Value, out DateTime date))
+                if (TryParseDateInvariantOrCurrent(match.Groups[1].Value, out DateTime date))
                 {
                     return date;
                 }
             }
 
             return null;
+        }
+
+        private static bool TryParseDateInvariantOrCurrent(string value, out DateTime date)
+        {
+            if (DateTime.TryParse(value, CultureInfo.InvariantCulture, DateTimeStyles.RoundtripKind, out date))
+            {
+                return true;
+            }
+
+            if (DateTime.TryParse(value, CultureInfo.InvariantCulture, DateTimeStyles.None, out date))
+            {
+                return true;
+            }
+
+            if (DateTime.TryParse(value, CultureInfo.CurrentCulture, DateTimeStyles.None, out date))
+            {
+                return true;
+            }
+
+            return DateTime.TryParse(value, new CultureInfo("ru-RU"), DateTimeStyles.None, out date);
         }
 
         private List<Trade> ParseCsvFileToTrades(string csvFilePath, Security security)

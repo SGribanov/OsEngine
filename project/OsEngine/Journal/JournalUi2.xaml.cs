@@ -1399,12 +1399,12 @@ namespace OsEngine.Journal
                         return null;
                     }
 
-                    if (DateTime.Parse(series.Points[0].AxisLabel) < listData[0])
+                    if (ParseDateInvariantOrCurrentOrThrow(series.Points[0].AxisLabel) < listData[0])
                     {
                         return null;
                     }
 
-                    if (DateTime.Parse(series.Points[^1].AxisLabel).AddDays(-1).Date > listData[^1])
+                    if (ParseDateInvariantOrCurrentOrThrow(series.Points[^1].AxisLabel).AddDays(-1).Date > listData[^1])
                     {
                         return null;
                     }
@@ -1414,7 +1414,7 @@ namespace OsEngine.Journal
 
                 for (int i = 0; i < series.Points.Count; i++)
                 {
-                    DateTime dateTime = DateTime.Parse(series.Points[i].AxisLabel).Date;
+                    DateTime dateTime = ParseDateInvariantOrCurrentOrThrow(series.Points[i].AxisLabel).Date;
 
                     DateTime roundedDateTime = candleData.Keys
                             .Where(date => date < dateTime)

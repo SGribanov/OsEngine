@@ -1457,7 +1457,7 @@ namespace OsEngine.Market.Servers.TraderNet
                             decimal volume = responseOrder[i].trade[j].q.ToDecimal() / lot;
 
                             MyTrade myTrade = new MyTrade();
-                            DateTime.TryParse(responseOrder[i].trade[j].date, out myTrade.Time);
+                            myTrade.Time = ParseDateInvariantOrCurrent(responseOrder[i].trade[j].date);
                             myTrade.SecurityNameCode = responseOrder[i].instr;
                             myTrade.NumberOrderParent = responseOrder[i].id.ToString();
                             myTrade.NumberTrade = responseOrder[i].trade[j].id;
@@ -1528,8 +1528,7 @@ namespace OsEngine.Market.Servers.TraderNet
                 trade.SecurityNameCode = responseTrade.c;
                 trade.Price = _listTrades[responseTrade.c].ltp.ToDecimal();
                 trade.Id = responseTrade.rev;
-                DateTime time;
-                DateTime.TryParse(_listTrades[responseTrade.c].ltt, out time);
+                DateTime time = ParseDateInvariantOrCurrent(_listTrades[responseTrade.c].ltt);
                 trade.Time = time.AddHours(timeShift);
                 trade.Volume = _listTrades[responseTrade.c].lts.ToDecimal();
                 trade.Side = Side.Buy;
@@ -1914,7 +1913,7 @@ namespace OsEngine.Market.Servers.TraderNet
                             decimal volume = item.trade[j].q.ToDecimal() / lot;
 
                             MyTrade myTrade = new MyTrade();
-                            DateTime.TryParse(item.trade[j].date, out myTrade.Time);
+                            myTrade.Time = ParseDateInvariantOrCurrent(item.trade[j].date);
                             myTrade.SecurityNameCode = item.instr;
                             myTrade.NumberOrderParent = item.id.ToString();
                             myTrade.NumberTrade = item.trade[j].id;
@@ -1968,7 +1967,7 @@ namespace OsEngine.Market.Servers.TraderNet
 
             newOrder.SecurityNameCode = responseOrder.instr;
             newOrder.SecurityClassCode = GetClassSecurity(newOrder.SecurityNameCode);
-            DateTime.TryParse(responseOrder.date, out newOrder.TimeCallBack);
+            newOrder.TimeCallBack = ParseDateInvariantOrCurrent(responseOrder.date);
             newOrder.NumberMarket = responseOrder.id.ToString();
             newOrder.Side = GetOrderSide(responseOrder.oper);
             newOrder.State = GetOrderState(responseOrder.stat);
@@ -1986,6 +1985,31 @@ namespace OsEngine.Market.Servers.TraderNet
             }
 
             return newOrder;
+        }
+
+        private static DateTime ParseDateInvariantOrCurrent(string value)
+        {
+            if (DateTime.TryParse(value, CultureInfo.InvariantCulture, DateTimeStyles.RoundtripKind, out DateTime date))
+            {
+                return date;
+            }
+
+            if (DateTime.TryParse(value, CultureInfo.InvariantCulture, DateTimeStyles.None, out date))
+            {
+                return date;
+            }
+
+            if (DateTime.TryParse(value, CultureInfo.CurrentCulture, DateTimeStyles.None, out date))
+            {
+                return date;
+            }
+
+            if (DateTime.TryParse(value, new CultureInfo("ru-RU"), DateTimeStyles.None, out date))
+            {
+                return date;
+            }
+
+            return DateTime.MinValue;
         }
 
         private string GetClassSecurity(string securityNameCode)

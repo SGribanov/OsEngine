@@ -1361,7 +1361,7 @@ namespace OsEngine.Market.Servers.Transaq
                     ticks = _allTicks.Where(x => x.Seccode == security.Name).ToList();
                     if (ticks.Count > 0)
                     {
-                        lastTickTime = DateTime.Parse(ticks.Last().Tradetime);
+                        lastTickTime = ParseDateInvariantOrCurrentOrThrow(ticks.Last().Tradetime);
                     }
                 }
                 catch (System.Exception ex)
@@ -1381,7 +1381,7 @@ namespace OsEngine.Market.Servers.Transaq
                             Price = tick.Price.ToDecimal(),
                             Side = tick.Buysell == "B" ? Side.Buy : Side.Sell,
                             Volume = tick.Quantity.ToDecimal(),
-                            Time = DateTime.Parse(tick.Tradetime),
+                            Time = ParseDateInvariantOrCurrentOrThrow(tick.Tradetime),
                         });
                     }
 
@@ -1549,7 +1549,7 @@ namespace OsEngine.Market.Servers.Transaq
                     osCandle.Low = candles.Candle[i].Low.ToDecimal();
                     osCandle.Close = candles.Candle[i].Close.ToDecimal();
                     osCandle.Volume = candles.Candle[i].Volume.ToDecimal();
-                    osCandle.TimeStart = DateTime.Parse(candles.Candle[i].Date);
+                    osCandle.TimeStart = ParseDateInvariantOrCurrentOrThrow(candles.Candle[i].Date);
 
                     if (string.IsNullOrEmpty(candles.Candle[i].Oi) == false)
                     {
@@ -2461,7 +2461,7 @@ namespace OsEngine.Market.Servers.Transaq
 
                             News news = new News();
 
-                            news.TimeMessage = DateTime.Parse(myNews.Timestamp);
+                            news.TimeMessage = ParseDateInvariantOrCurrentOrThrow(myNews.Timestamp);
                             news.Source = this.ServerType + " " + myNews.Source;
                             news.Value = myNews.NewsBody;
 
@@ -2710,7 +2710,7 @@ namespace OsEngine.Market.Servers.Transaq
                 TransaqEntity.Trade trade = trades[i];
 
                 MyTrade myTrade = new MyTrade();
-                myTrade.Time = DateTime.Parse(trade.Time);
+                myTrade.Time = ParseDateInvariantOrCurrentOrThrow(trade.Time);
                 myTrade.NumberOrderParent = trade.Orderno;
                 myTrade.NumberTrade = trade.Tradeno;
                 myTrade.Volume = trade.Quantity.ToDecimal();
@@ -2765,7 +2765,7 @@ namespace OsEngine.Market.Servers.Transaq
 
                         failOrder.NumberUser = Convert.ToInt32(order.Transactionid);
                         failOrder.NumberMarket = order.Orderno;
-                        failOrder.TimeCallBack = order.Time != null ? DateTime.Parse(order.Time) : ServerTime;
+                        failOrder.TimeCallBack = order.Time != null ? ParseDateInvariantOrCurrentOrThrow(order.Time) : ServerTime;
                         failOrder.State = OrderStateType.Cancel;
 
                         MyOrderEvent?.Invoke(failOrder);
@@ -2780,7 +2780,7 @@ namespace OsEngine.Market.Servers.Transaq
                 newOrder.SecurityClassCode = order.Board;
                 newOrder.NumberMarket = order.Orderno;
 
-                newOrder.TimeCallBack = order.Time != null ? DateTime.Parse(order.Time) : ServerTime;
+                newOrder.TimeCallBack = order.Time != null ? ParseDateInvariantOrCurrentOrThrow(order.Time) : ServerTime;
                 newOrder.Side = order.Buysell == "B" ? Side.Buy : Side.Sell;
                 newOrder.Volume = order.Quantity.ToDecimal();
                 newOrder.Price = order.Price.ToDecimal();
@@ -3286,7 +3286,7 @@ namespace OsEngine.Market.Servers.Transaq
                 trade.Price = t.Price.ToDecimal();
                 trade.Side = t.Buysell == "B" ? Side.Buy : Side.Sell;
                 trade.Volume = t.Quantity.ToDecimal();
-                trade.Time = DateTime.Parse(t.Time);
+                trade.Time = ParseDateInvariantOrCurrentOrThrow(t.Time);
 
                 if (string.IsNullOrEmpty(t.Openinterest) == false)
                 {
@@ -3295,6 +3295,31 @@ namespace OsEngine.Market.Servers.Transaq
 
                 NewTradesEvent?.Invoke(trade);
             }
+        }
+
+        private static DateTime ParseDateInvariantOrCurrentOrThrow(string value)
+        {
+            if (DateTime.TryParse(value, CultureInfo.InvariantCulture, DateTimeStyles.RoundtripKind, out DateTime parsedDate))
+            {
+                return parsedDate;
+            }
+
+            if (DateTime.TryParse(value, CultureInfo.InvariantCulture, DateTimeStyles.None, out parsedDate))
+            {
+                return parsedDate;
+            }
+
+            if (DateTime.TryParse(value, CultureInfo.CurrentCulture, DateTimeStyles.None, out parsedDate))
+            {
+                return parsedDate;
+            }
+
+            if (DateTime.TryParse(value, new CultureInfo("ru-RU"), DateTimeStyles.None, out parsedDate))
+            {
+                return parsedDate;
+            }
+
+            throw new FormatException($"Cannot parse datetime value: {value}");
         }
 
         public event Action<Order> MyOrderEvent;

@@ -13,6 +13,7 @@ using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Globalization;
 using System.IO;
 using System.Net;
 using System.Net.Sockets;
@@ -751,7 +752,7 @@ namespace OsEngine.Market.Servers.Atp
             DateTime expiration = DateTime.MinValue;
             if (array.Length > 16)
             {
-                DateTime.TryParse(array[16], out expiration);
+                expiration = ParseDateInvariantOrCurrent(array[16]);
             }
 
             return new AtpSecurityDto
@@ -773,6 +774,31 @@ namespace OsEngine.Market.Servers.Atp
                 Strike = array[15].ToDecimal(),
                 Expiration = expiration
             };
+        }
+
+        private static DateTime ParseDateInvariantOrCurrent(string value)
+        {
+            if (DateTime.TryParse(value, CultureInfo.InvariantCulture, DateTimeStyles.RoundtripKind, out DateTime parsedDate))
+            {
+                return parsedDate;
+            }
+
+            if (DateTime.TryParse(value, CultureInfo.InvariantCulture, DateTimeStyles.None, out parsedDate))
+            {
+                return parsedDate;
+            }
+
+            if (DateTime.TryParse(value, CultureInfo.CurrentCulture, DateTimeStyles.None, out parsedDate))
+            {
+                return parsedDate;
+            }
+
+            if (DateTime.TryParse(value, new CultureInfo("ru-RU"), DateTimeStyles.None, out parsedDate))
+            {
+                return parsedDate;
+            }
+
+            return DateTime.MinValue;
         }
 
         private sealed class AtpSecuritiesSettingsDto

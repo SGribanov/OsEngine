@@ -5433,6 +5433,219 @@
   - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` -> success (0 warnings)
   - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed `352/352`
 
+## 2026-02-22 - Step 2.2 (CultureInfo.InvariantCulture) - ATP legacy security expiration parsing hardening
+
+- Standardized legacy expiration-date parsing in:
+  - `project/OsEngine/Market/Servers/Atp/AtpServer.cs`
+- Changes:
+  - in `ParseLegacySecurityLine(...)`, replaced unqualified
+    `DateTime.TryParse(array[16], out expiration)` with helper parse method.
+  - added helper `ParseDateInvariantOrCurrent(string value)` with parse order:
+    - `Invariant Roundtrip -> Invariant -> Current -> ru-RU`
+  - final fallback is safe/non-throwing:
+    - `DateTime.MinValue`.
+- Scope:
+  - parsing hardening only
+  - ATP security import behavior unchanged for valid data.
+
+### Verification
+
+- Host-context verification (outside sandbox by project rule):
+  - `dotnet restore project/OsEngine/OsEngine.csproj --nologo` -> success
+  - `dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo` -> success
+  - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` -> success (0 warnings)
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed `352/352`
+
+## 2026-02-22 - Step 2.2 (CultureInfo.InvariantCulture) - BybitData filename date parsing hardening
+
+- Standardized filename-date parsing in:
+  - `project/OsEngine/Market/Servers/BybitData/BybitDataServer.cs`
+- Changes:
+  - in `ExtractDateFromFileName(...)`, replaced unqualified:
+    - `DateTime.TryParse(match.Groups[1].Value, out date)`
+    - with `TryParseDateInvariantOrCurrent(...)`.
+  - added helper `TryParseDateInvariantOrCurrent(string value, out DateTime date)` with parse order:
+    - `Invariant Roundtrip -> Invariant -> Current -> ru-RU`
+  - helper remains non-throwing; method still returns `null` when parse fails.
+- Scope:
+  - parsing hardening only
+  - behavior unchanged for valid filename dates.
+
+### Verification
+
+- Host-context verification (outside sandbox by project rule):
+  - `dotnet restore project/OsEngine/OsEngine.csproj --nologo` -> success
+  - `dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo` -> success
+  - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` -> success (0 warnings)
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed `352/352`
+
+## 2026-02-22 - Step 2.2 (CultureInfo.InvariantCulture) - TraderNet datetime parsing hardening
+
+- Standardized datetime parsing in:
+  - `project/OsEngine/Market/Servers/TraderNet/TraderNetServer.cs`
+- Changes:
+  - replaced all remaining unqualified `DateTime.TryParse(...)` usages in:
+    - order update trade mapping
+    - public trades stream timestamp mapping
+    - order status trade mapping
+    - order callback timestamp mapping
+  - added shared helper `ParseDateInvariantOrCurrent(string value)` with parse order:
+    - `Invariant Roundtrip -> Invariant -> Current -> ru-RU`
+  - helper final fallback is non-throwing:
+    - `DateTime.MinValue` (parity with prior graceful behavior on parse failures).
+- Scope:
+  - parsing hardening only
+  - TraderNet behavior unchanged for valid timestamps.
+
+### Verification
+
+- Host-context verification (outside sandbox by project rule):
+  - `dotnet restore project/OsEngine/OsEngine.csproj --nologo` -> success
+  - `dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo` -> success
+  - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` -> success (0 warnings)
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed `352/352`
+
+## 2026-02-22 - Step 2.2 (CultureInfo.InvariantCulture) - Polygon trade timestamp decimal parsing hardening
+
+- Standardized decimal parsing for trade timestamp payload in:
+  - `project/OsEngine/Market/Servers/Polygon/PolygonServer.cs`
+- Changes:
+  - in `ConvertTrades(...)`, replaced unqualified:
+    - `decimal.TryParse(response.results[i].sip_timestamp, out timestamp)`
+    - with `ParseDecimalInvariantOrCurrent(...)`.
+  - added helper `ParseDecimalInvariantOrCurrent(string value)` with parse order:
+    - `Invariant -> Current -> ru-RU`
+  - helper final fallback:
+    - `0m` (parity with prior default-on-fail behavior of `decimal.TryParse`).
+- Scope:
+  - parsing hardening only
+  - trade timestamp conversion behavior unchanged for valid payload values.
+
+### Verification
+
+- Host-context verification (outside sandbox by project rule):
+  - `dotnet restore project/OsEngine/OsEngine.csproj --nologo` -> success
+  - `dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo` -> success
+  - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` -> success (0 warnings)
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed `352/352`
+
+## 2026-02-22 - Step 2.2 (CultureInfo.InvariantCulture) - Extensions ToDouble fallback parsing hardening
+
+- Standardized numeric fallback parsing in:
+  - `project/OsEngine/Entity/Extensions.cs`
+- Changes:
+  - in `ToDouble(string? value)`, catch-fallback replaced:
+    - `double.TryParse(value, out result)`
+    - with `TryParseDoubleInvariantOrCurrent(value, out result)`.
+  - added helper `TryParseDoubleInvariantOrCurrent(string value, out double result)` with parse order:
+    - `Invariant -> Current -> ru-RU`
+  - helper uses `NumberStyles.Float | NumberStyles.AllowThousands`.
+  - fallback behavior preserved:
+    - returns `0` when parsing fails.
+- Scope:
+  - parsing hardening only
+  - conversion behavior unchanged for valid numeric values.
+
+### Verification
+
+- Host-context verification (outside sandbox by project rule):
+  - `dotnet restore project/OsEngine/OsEngine.csproj --nologo` -> success
+  - `dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo` -> success
+  - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` -> success (0 warnings)
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed `352/352`
+
+
+## 2026-02-22 - Step 2.2 (CultureInfo.InvariantCulture) - Transaq server datetime parsing hardening
+
+- Standardized Transaq datetime parsing in:
+  - `project/OsEngine/Market/Servers/Transaq/TransaqServer.cs`
+- Changes:
+  - replaced all remaining `DateTime.Parse(...)` calls in:
+    - tick history load
+    - candle parsing
+    - news timestamp mapping
+    - my-trades updates
+    - order callback timestamps
+    - public trades updates
+  - added shared helper `ParseDateInvariantOrCurrentOrThrow(string value)` with parse order:
+    - `Invariant Roundtrip -> Invariant -> Current -> ru-RU`
+  - parse failures throw `FormatException`, preserving existing outer-thread error handling behavior.
+- Scope:
+  - parsing hardening only
+  - Transaq behavior unchanged for valid timestamps.
+
+### Verification
+
+- Host-context verification (outside sandbox by project rule):
+  - `dotnet restore project/OsEngine/OsEngine.csproj --nologo` -> success
+  - `dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo` -> success
+  - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` -> success (0 warnings)
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed `352/352`
+
+## 2026-02-22 - Step 2.2 (CultureInfo.InvariantCulture) - MoexAlgopack explicit datetime parse cleanup
+
+- Standardized explicit datetime parsing in:
+  - `project/OsEngine/Market/Servers/MoexAlgopack/MoexAlgopackServer.cs`
+- Changes:
+  - replaced explicit invariant parse calls:
+    - `DateTime.Parse(item[7], CultureInfo.InvariantCulture)`
+    - `DateTime.Parse(item[6], CultureInfo.InvariantCulture)`
+  - both paths now use existing helper:
+    - `ParseDateInvariantOrCurrent(...)`
+  - aligns securities/candles parsing with already hardened trades/depth parsing paths in this server.
+- Scope:
+  - parsing hardening only
+  - MOEX Algopack behavior unchanged for valid timestamps.
+
+### Verification
+
+- Host-context verification (outside sandbox by project rule):
+  - `dotnet restore project/OsEngine/OsEngine.csproj --nologo` -> success
+  - `dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo` -> success
+  - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` -> success (0 warnings)
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed `352/352`
+
+## 2026-02-22 - Step 2.2 (CultureInfo.InvariantCulture) - TInvest constant datetime parse cleanup
+
+- Standardized fixed-value datetime comparison in:
+  - `project/OsEngine/Market/Servers/TInvest/TInvestServer.cs`
+- Changes:
+  - replaced `DateTime.Parse("01.01.1970 03:00:00")` with explicit constant:
+    - `new DateTime(1970, 1, 1, 3, 0, 0)`
+  - avoids locale-dependent parsing for sentinel timestamp comparison.
+- Scope:
+  - parsing hardening only
+  - TInvest trade-time fallback logic unchanged.
+
+### Verification
+
+- Host-context verification (outside sandbox by project rule):
+  - `dotnet restore project/OsEngine/OsEngine.csproj --nologo` -> success
+  - `dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo` -> success
+  - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` -> success (0 warnings)
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed `352/352`
+
+## 2026-02-22 - Step 2.2 (CultureInfo.InvariantCulture) - Journal benchmark axis-label parsing hardening
+
+- Standardized benchmark axis-label date parsing in:
+  - `project/OsEngine/Journal/JournalUi2.xaml.cs`
+- Changes:
+  - replaced direct `DateTime.Parse(series.Points[...].AxisLabel)` in benchmark validation/alignment flow.
+  - reused existing helper `ParseDateInvariantOrCurrentOrThrow(string value)` with parse order:
+    - `Invariant Roundtrip -> Invariant -> _currentCulture -> ru-RU`
+  - parse failures preserve existing behavior through outer method-level error handling (log + `null`).
+- Scope:
+  - parsing hardening only
+  - journal benchmark behavior unchanged for valid axis-label timestamps.
+
+### Verification
+
+- Host-context verification (outside sandbox by project rule):
+  - `dotnet restore project/OsEngine/OsEngine.csproj --nologo` -> success
+  - `dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo` -> success
+  - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` -> success (0 warnings)
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed `352/352`
+
 ## 2026-02-22 - Step 2.2 (CultureInfo.InvariantCulture) - Benchmark axis-label date parsing hardening
 
 - Standardized benchmark axis-label date parsing in:
@@ -7458,3 +7671,4 @@
   - `dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo` -> success
   - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` -> success (0 warnings)
   - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed `352/352`
+

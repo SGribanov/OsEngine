@@ -3255,7 +3255,7 @@ namespace OsEngine.Market.Servers.TInvest
                                 trade.NumberTrade = orderTrade.TradeId;
                                 trade.Time = TimeZoneInfo.ConvertTimeFromUtc(orderTrade.DateTime.ToDateTime(), _mskTimeZone); // convert to MSK
 
-                                if (trade.Time == DateTime.Parse("01.01.1970 03:00:00"))
+                                if (trade.Time == new DateTime(1970, 1, 1, 3, 0, 0))
                                 {
                                     DateTime tTime = orderTrade.DateTime.ToDateTime();
                                     SendLogMessage($"TInvest sent trade with time == {tTime} for trade Id {orderTrade.TradeId}", LogMessageType.System);
