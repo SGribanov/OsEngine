@@ -17,6 +17,7 @@ using OsEngine.OsTrader.Panels.Attributes;
 using OsEngine.OsTrader.Panels.Tab;
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 
 /* Description
 trading robot for osengine
@@ -178,13 +179,43 @@ namespace OsEngine.Robots.OnScriptIndicators
                 return;
             }
 
-            System.DateTime timeExit = Convert.ToDateTime(position.SignalTypeOpen);
+            DateTime timeExit = ParseDateInvariantOrCurrent(position.SignalTypeOpen);
 
             if(timeExit < candles[candles.Count-1].TimeStart 
                 && position.State == PositionStateType.Open)
             {
                 _tab.CloseAtMarket(position, position.OpenVolume);
             }
+        }
+
+        private DateTime ParseDateInvariantOrCurrent(string value)
+        {
+            if (string.IsNullOrWhiteSpace(value))
+            {
+                return DateTime.MinValue;
+            }
+
+            if (DateTime.TryParse(value, CultureInfo.InvariantCulture, DateTimeStyles.RoundtripKind, out DateTime parsedDate))
+            {
+                return parsedDate;
+            }
+
+            if (DateTime.TryParse(value, CultureInfo.InvariantCulture, DateTimeStyles.None, out parsedDate))
+            {
+                return parsedDate;
+            }
+
+            if (DateTime.TryParse(value, CultureInfo.CurrentCulture, DateTimeStyles.None, out parsedDate))
+            {
+                return parsedDate;
+            }
+
+            if (DateTime.TryParse(value, new CultureInfo("ru-RU"), DateTimeStyles.None, out parsedDate))
+            {
+                return parsedDate;
+            }
+
+            return DateTime.MinValue;
         }
 
         // Method for calculating the volume of entry into a position

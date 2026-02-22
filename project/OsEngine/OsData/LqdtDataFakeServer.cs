@@ -15,6 +15,7 @@ using OsEngine.Market.Servers.Entity;
 using RestSharp;
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.Net;
 using System.Net.Http;
@@ -186,7 +187,12 @@ namespace OsEngine.OsData
                 {
                     string[] dateAndKey = lines[i].Split('-', StringSplitOptions.RemoveEmptyEntries);
 
-                    if (DateTime.TryParse(dateAndKey[0], out DateTime date))
+                    if (dateAndKey.Length < 2)
+                    {
+                        continue;
+                    }
+
+                    if (TryParseDateInvariantOrCurrent(dateAndKey[0], out DateTime date))
                     {
                         cbrRates.Add((date, dateAndKey[1].ToDouble()));
                     }
@@ -278,7 +284,13 @@ namespace OsEngine.OsData
 
                         if (!string.IsNullOrEmpty(dateStr) && !string.IsNullOrEmpty(rateStr))
                         {
-                            DateTime dateRate = DateTime.Parse(dateStr);
+                            DateTime dateRate = ParseDateInvariantOrCurrent(dateStr);
+
+                            if (dateRate == DateTime.MinValue)
+                            {
+                                continue;
+                            }
+
                             double rate = rateStr.ToDouble();
 
                             if (lastRate.Rate == 0)
@@ -310,6 +322,36 @@ namespace OsEngine.OsData
                 SendNewLogMessage($"Ошибка загрузки ставок с сайта ЦБ РФ\n{ex.Message}", LogMessageType.Error);
                 return null;
             }
+        }
+
+        private static bool TryParseDateInvariantOrCurrent(string value, out DateTime parsedDate)
+        {
+            if (DateTime.TryParse(value, CultureInfo.InvariantCulture, DateTimeStyles.RoundtripKind, out parsedDate))
+            {
+                return true;
+            }
+
+            if (DateTime.TryParse(value, CultureInfo.InvariantCulture, DateTimeStyles.None, out parsedDate))
+            {
+                return true;
+            }
+
+            if (DateTime.TryParse(value, CultureInfo.CurrentCulture, DateTimeStyles.None, out parsedDate))
+            {
+                return true;
+            }
+
+            return DateTime.TryParse(value, new CultureInfo("ru-RU"), DateTimeStyles.None, out parsedDate);
+        }
+
+        private static DateTime ParseDateInvariantOrCurrent(string value)
+        {
+            if (TryParseDateInvariantOrCurrent(value, out DateTime parsedDate))
+            {
+                return parsedDate;
+            }
+
+            return DateTime.MinValue;
         }
 
         #endregion

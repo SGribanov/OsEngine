@@ -917,7 +917,7 @@ namespace OsEngine.Market.Servers.MoexAlgopack
                             List<string> item = data.orderbook.data[i];
 
                             marketDepth.SecurityNameCode = item[1];
-                            marketDepth.Time = Convert.ToDateTime(item[6]);
+                            marketDepth.Time = ParseDateInvariantOrCurrent(item[6]);
 
                             if (!item[2].Equals("B"))
                                 continue;
@@ -1033,7 +1033,7 @@ namespace OsEngine.Market.Servers.MoexAlgopack
                                 newTrade.Id = item[0];
                                 newTrade.SecurityNameCode = item[3];
                                 newTrade.Price = item[4].ToDecimal();
-                                newTrade.Time = Convert.ToDateTime(item[1]);
+                                newTrade.Time = ParseDateInvariantOrCurrent(item[1]);
                                 newTrade.Side = item[10].Equals("S") ? Side.Sell : Side.Buy;
                                 newTrade.Volume = item[5].ToDecimal();
                                 trades.Add(newTrade);
@@ -1050,7 +1050,7 @@ namespace OsEngine.Market.Servers.MoexAlgopack
                                 newTrade.Id = item[0];
                                 newTrade.SecurityNameCode = item[2];
                                 newTrade.Price = item[5].ToDecimal();
-                                newTrade.Time = Convert.ToDateTime(item[4]);
+                                newTrade.Time = ParseDateInvariantOrCurrent(item[4]);
                                 newTrade.Side = item[11].Equals("S") ? Side.Sell : Side.Buy;
                                 newTrade.Volume = item[6].ToDecimal();
                                 trades.Add(newTrade);
@@ -1069,6 +1069,36 @@ namespace OsEngine.Market.Servers.MoexAlgopack
                 }
 
                 return null;
+            }
+
+            private DateTime ParseDateInvariantOrCurrent(string value)
+            {
+                if (string.IsNullOrWhiteSpace(value))
+                {
+                    return DateTime.MinValue;
+                }
+
+                if (DateTime.TryParse(value, CultureInfo.InvariantCulture, DateTimeStyles.RoundtripKind, out DateTime parsedDate))
+                {
+                    return parsedDate;
+                }
+
+                if (DateTime.TryParse(value, CultureInfo.InvariantCulture, DateTimeStyles.None, out parsedDate))
+                {
+                    return parsedDate;
+                }
+
+                if (DateTime.TryParse(value, CultureInfo.CurrentCulture, DateTimeStyles.None, out parsedDate))
+                {
+                    return parsedDate;
+                }
+
+                if (DateTime.TryParse(value, new CultureInfo("ru-RU"), DateTimeStyles.None, out parsedDate))
+                {
+                    return parsedDate;
+                }
+
+                return DateTime.MinValue;
             }
 
             public void SetLeverage(string securityName, string className, string leverage, string leverageLong, string leverageShort) { }

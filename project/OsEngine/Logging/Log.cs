@@ -904,17 +904,15 @@ namespace OsEngine.Logging
 
                         LogMessage message = new LogMessage();
 
-                        try
-                        {
-                            message.Time = Convert.ToDateTime(msgArray[0]);
-                            message.Type = LogMessageType.OldSession;
-                            message.Message = msgArray[1] + " " + msgArray[2];
-                            result.Add(message);
-                        }
-                        catch
+                        if (TryParseDateInvariantOrCurrent(msgArray[0], out DateTime parsedTime) == false)
                         {
                             continue;
                         }
+
+                        message.Time = parsedTime;
+                        message.Type = LogMessageType.OldSession;
+                        message.Message = msgArray[1] + " " + msgArray[2];
+                        result.Add(message);
                     }
                 }
 
@@ -937,6 +935,26 @@ namespace OsEngine.Logging
         {
             string date = DateTime.Now.Year + "_" + DateTime.Now.Month + "_" + DateTime.Now.Day;
             return GetLogsDirectoryPath() + _uniqName + @"Log_" + date + ".txt";
+        }
+
+        private static bool TryParseDateInvariantOrCurrent(string value, out DateTime time)
+        {
+            if (DateTime.TryParse(value, CultureInfo.InvariantCulture, DateTimeStyles.RoundtripKind, out time))
+            {
+                return true;
+            }
+
+            if (DateTime.TryParse(value, CultureInfo.InvariantCulture, DateTimeStyles.None, out time))
+            {
+                return true;
+            }
+
+            if (DateTime.TryParse(value, CultureInfo.CurrentCulture, DateTimeStyles.None, out time))
+            {
+                return true;
+            }
+
+            return DateTime.TryParse(value, new CultureInfo("ru-RU"), DateTimeStyles.None, out time);
         }
 
         // distribution

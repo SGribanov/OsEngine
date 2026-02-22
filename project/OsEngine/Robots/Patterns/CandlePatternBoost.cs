@@ -16,6 +16,7 @@ using OsEngine.OsTrader.Panels.Attributes;
 using OsEngine.OsTrader.Panels.Tab;
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 
 /* Description
 Trading robot for osengine.
@@ -289,7 +290,7 @@ namespace OsEngine.Robots.patt
                 }
                 else if (_regimeExit.ValueString == "Candle count")
                 {
-                    DateTime timeOpenPos = Convert.ToDateTime(position.SignalTypeOpen);
+                    DateTime timeOpenPos = ParseDateInvariantOrCurrent(position.SignalTypeOpen);
 
                     int candleCountAfterOpen = -1;
 
@@ -323,6 +324,36 @@ namespace OsEngine.Robots.patt
                     }
                 }
             }
+        }
+
+        private DateTime ParseDateInvariantOrCurrent(string value)
+        {
+            if (string.IsNullOrWhiteSpace(value))
+            {
+                return DateTime.MinValue;
+            }
+
+            if (DateTime.TryParse(value, CultureInfo.InvariantCulture, DateTimeStyles.RoundtripKind, out DateTime parsedDate))
+            {
+                return parsedDate;
+            }
+
+            if (DateTime.TryParse(value, CultureInfo.InvariantCulture, DateTimeStyles.None, out parsedDate))
+            {
+                return parsedDate;
+            }
+
+            if (DateTime.TryParse(value, CultureInfo.CurrentCulture, DateTimeStyles.None, out parsedDate))
+            {
+                return parsedDate;
+            }
+
+            if (DateTime.TryParse(value, new CultureInfo("ru-RU"), DateTimeStyles.None, out parsedDate))
+            {
+                return parsedDate;
+            }
+
+            return DateTime.MinValue;
         }
 
         // Get last value indicator and price

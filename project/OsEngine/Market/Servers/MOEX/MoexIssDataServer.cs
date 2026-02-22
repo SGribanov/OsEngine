@@ -13,6 +13,7 @@ using OsEngine.Market.Servers.Entity;
 using RestSharp;
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Net;
 using System.Windows;
 
@@ -693,7 +694,7 @@ namespace OsEngine.Market.Servers.MOEX
                 candle.High = innerArray[2].ToString().ToDecimal();
                 candle.Low = innerArray[3].ToString().ToDecimal();
                 candle.Volume = innerArray[5].ToString().ToDecimal();
-                candle.TimeStart = Convert.ToDateTime(innerArray[6].ToString());
+                candle.TimeStart = ParseDateInvariantOrCurrent(innerArray[6].ToString());
 
                 result.Add(candle);
             }
@@ -705,6 +706,36 @@ namespace OsEngine.Market.Servers.MOEX
 
             // "http://iss.moex.com/iss/engines/stock/markets/shares/boards/TQBR/securities/SBER/candles.json?from=2014-01-01&interval=60&start=0";
             //  http://iss.moex.com/iss/engines/stock/markets/shares/boards/TQBR/securities/LKOH/candles.json?from=2014-04-01-&interval=1&start=500
+        }
+
+        private DateTime ParseDateInvariantOrCurrent(string value)
+        {
+            if (string.IsNullOrWhiteSpace(value))
+            {
+                return DateTime.MinValue;
+            }
+
+            if (DateTime.TryParse(value, CultureInfo.InvariantCulture, DateTimeStyles.RoundtripKind, out DateTime parsedDate))
+            {
+                return parsedDate;
+            }
+
+            if (DateTime.TryParse(value, CultureInfo.InvariantCulture, DateTimeStyles.None, out parsedDate))
+            {
+                return parsedDate;
+            }
+
+            if (DateTime.TryParse(value, CultureInfo.CurrentCulture, DateTimeStyles.None, out parsedDate))
+            {
+                return parsedDate;
+            }
+
+            if (DateTime.TryParse(value, new CultureInfo("ru-RU"), DateTimeStyles.None, out parsedDate))
+            {
+                return parsedDate;
+            }
+
+            return DateTime.MinValue;
         }
 
         #endregion

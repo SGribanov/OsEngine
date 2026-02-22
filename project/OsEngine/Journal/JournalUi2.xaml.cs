@@ -5665,7 +5665,7 @@ namespace OsEngine.Journal
                 DateTime to;
                 try
                 {
-                    to = Convert.ToDateTime(TextBoxTo.Text, _currentCulture);
+                    to = ParseDateInvariantOrCurrentOrThrow(TextBoxTo.Text);
 
                     if (to < _minTime ||
                         to > _maxTime)
@@ -5697,7 +5697,7 @@ namespace OsEngine.Journal
                 DateTime from;
                 try
                 {
-                    from = Convert.ToDateTime(TextBoxFrom.Text, _currentCulture);
+                    from = ParseDateInvariantOrCurrentOrThrow(TextBoxFrom.Text);
 
                     if (from < _minTime ||
                         from > _maxTime)
@@ -5718,6 +5718,36 @@ namespace OsEngine.Journal
             {
                 SendNewLogMessage(error.ToString(), LogMessageType.Error);
             }
+        }
+
+        private bool TryParseDateInvariantOrCurrent(string value, out DateTime time)
+        {
+            if (DateTime.TryParse(value, CultureInfo.InvariantCulture, DateTimeStyles.RoundtripKind, out time))
+            {
+                return true;
+            }
+
+            if (DateTime.TryParse(value, CultureInfo.InvariantCulture, DateTimeStyles.None, out time))
+            {
+                return true;
+            }
+
+            if (DateTime.TryParse(value, _currentCulture, DateTimeStyles.None, out time))
+            {
+                return true;
+            }
+
+            return DateTime.TryParse(value, new CultureInfo("ru-RU"), DateTimeStyles.None, out time);
+        }
+
+        private DateTime ParseDateInvariantOrCurrentOrThrow(string value)
+        {
+            if (TryParseDateInvariantOrCurrent(value, out DateTime time))
+            {
+                return time;
+            }
+
+            throw new FormatException($"Cannot parse datetime value: {value}");
         }
 
         private void ButtonReload_Click(object sender, RoutedEventArgs e)

@@ -8,6 +8,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms.DataVisualization.Charting;
@@ -137,8 +138,8 @@ namespace OsEngine.OsData
                     {
                         await Task.Delay(6000, cts.Token).ConfigureAwait(false);
 
-                        DateTime timeStart = DateTime.Parse(_series.Points[0].AxisLabel).AddDays(-30);
-                        DateTime timeEnd = DateTime.Parse(_series.Points[^1].AxisLabel).AddDays(1);
+                        DateTime timeStart = ParseDateInvariantOrCurrentOrThrow(_series.Points[0].AxisLabel).AddDays(-30);
+                        DateTime timeEnd = ParseDateInvariantOrCurrentOrThrow(_series.Points[^1].AxisLabel).AddDays(1);
 
                         SettingsToLoadSecurity param = new();
 
@@ -201,6 +202,31 @@ namespace OsEngine.OsData
             {
                 SendNewLogMessage(error.ToString(), LogMessageType.Error);
             }
+        }
+
+        private static DateTime ParseDateInvariantOrCurrentOrThrow(string value)
+        {
+            if (DateTime.TryParse(value, CultureInfo.InvariantCulture, DateTimeStyles.RoundtripKind, out DateTime parsedDate))
+            {
+                return parsedDate;
+            }
+
+            if (DateTime.TryParse(value, CultureInfo.InvariantCulture, DateTimeStyles.None, out parsedDate))
+            {
+                return parsedDate;
+            }
+
+            if (DateTime.TryParse(value, CultureInfo.CurrentCulture, DateTimeStyles.None, out parsedDate))
+            {
+                return parsedDate;
+            }
+
+            if (DateTime.TryParse(value, new CultureInfo("ru-RU"), DateTimeStyles.None, out parsedDate))
+            {
+                return parsedDate;
+            }
+
+            throw new FormatException($"Cannot parse datetime value: {value}");
         }
 
         public event Action DownloadBenchmarkEvent;

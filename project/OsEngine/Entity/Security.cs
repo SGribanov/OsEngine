@@ -81,15 +81,15 @@ namespace OsEngine.Entity
                     return;
                 }
 
-                string step = Convert.ToDecimal(Convert.ToDouble(_priceStep)).ToString(new CultureInfo("ru-RU"));
+                string step = Convert.ToDecimal(Convert.ToDouble(_priceStep)).ToString(CultureInfo.InvariantCulture);
                
-                if(step.Split(',').Length == 1)
+                if(step.Split('.').Length == 1)
                 {
                     _decimals = 0;
                 }
                 else
                 {
-                    _decimals = step.Split(',')[1].Length;
+                    _decimals = step.Split('.')[1].Length;
                 }
             }
         }
@@ -172,15 +172,15 @@ namespace OsEngine.Entity
                 }
 
 
-                string step = Convert.ToDecimal(Convert.ToDouble(PriceStep)).ToString(new CultureInfo("ru-RU"));
+                string step = Convert.ToDecimal(Convert.ToDouble(PriceStep)).ToString(CultureInfo.InvariantCulture);
 
-                if (step.Split(',').Length > 1)
-                {
-                    _decimals = step.Split(',')[1].Length;
-                }
-                else if(step.Split('.').Length > 1)
+                if (step.Split('.').Length > 1)
                 {
                     _decimals = step.Split('.')[1].Length;
+                }
+                else
+                {
+                    _decimals = 0;
                 }
 
                 return _decimals;

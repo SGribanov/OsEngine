@@ -2592,7 +2592,7 @@ namespace OsEngine.Market.Servers.BingX.BingXFutures
 
                             MyTrade newTrade = new MyTrade();
 
-                            newTrade.Time = Convert.ToDateTime(response.data.fill_orders[i].filledTime);
+                            newTrade.Time = ParseTimestampOrDateInvariantOrCurrent(response.data.fill_orders[i].filledTime);
                             newTrade.SecurityNameCode = response.data.fill_orders[i].symbol;
                             newTrade.NumberOrderParent = response.data.fill_orders[i].orderId;
                             newTrade.Price = response.data.fill_orders[i].price.ToDecimal();
@@ -2612,6 +2612,49 @@ namespace OsEngine.Market.Servers.BingX.BingXFutures
             {
                 SendLogMessage(exception.ToString(), LogMessageType.Error);
             }
+        }
+
+        private DateTime ParseTimestampOrDateInvariantOrCurrent(string value)
+        {
+            if (string.IsNullOrWhiteSpace(value))
+            {
+                return DateTime.MinValue;
+            }
+
+            if (long.TryParse(value, NumberStyles.Integer, CultureInfo.InvariantCulture, out long unixTime))
+            {
+                if (unixTime > 100000000000)
+                {
+                    return TimeManager.GetDateTimeFromTimeStamp(unixTime);
+                }
+
+                if (unixTime > 1000000000)
+                {
+                    return TimeManager.GetDateTimeFromTimeStamp(unixTime * 1000);
+                }
+            }
+
+            if (DateTime.TryParse(value, CultureInfo.InvariantCulture, DateTimeStyles.RoundtripKind, out DateTime parsedDate))
+            {
+                return parsedDate;
+            }
+
+            if (DateTime.TryParse(value, CultureInfo.InvariantCulture, DateTimeStyles.None, out parsedDate))
+            {
+                return parsedDate;
+            }
+
+            if (DateTime.TryParse(value, CultureInfo.CurrentCulture, DateTimeStyles.None, out parsedDate))
+            {
+                return parsedDate;
+            }
+
+            if (DateTime.TryParse(value, new CultureInfo("ru-RU"), DateTimeStyles.None, out parsedDate))
+            {
+                return parsedDate;
+            }
+
+            return DateTime.MinValue;
         }
 
         private RateGate _getOrderStatusRateGate = new RateGate(1, TimeSpan.FromMilliseconds(210)); // individual IP speed limit is 5 requests per 1 second

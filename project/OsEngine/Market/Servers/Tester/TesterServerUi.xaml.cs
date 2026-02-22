@@ -1474,13 +1474,7 @@ namespace OsEngine.Market.Servers.Tester
                 { // Изменилось время старта периода
                     string value = _gridNonTradePeriods.Rows[row].Cells[column].Value.ToString();
 
-                    DateTime time = DateTime.MinValue;
-
-                    try
-                    {
-                        time = Convert.ToDateTime(value, OsLocalization.CurCulture);
-                    }
-                    catch
+                    if (TryParseDateInvariantOrCurrent(value, out DateTime time) == false)
                     {
                         return;
                     }
@@ -1492,13 +1486,7 @@ namespace OsEngine.Market.Servers.Tester
                 { // Изменилось время конца периода
                     string value = _gridNonTradePeriods.Rows[row].Cells[column].Value.ToString();
 
-                    DateTime time = DateTime.MinValue;
-
-                    try
-                    {
-                        time = Convert.ToDateTime(value, OsLocalization.CurCulture);
-                    }
-                    catch
+                    if (TryParseDateInvariantOrCurrent(value, out DateTime time) == false)
                     {
                         return;
                     }
@@ -1805,7 +1793,7 @@ namespace OsEngine.Market.Servers.Tester
             {
                 _timerTextBoxTo.Stop();
 
-                to = Convert.ToDateTime(TextBoxTo.Text, _currentCulture);
+                to = ParseDateInvariantOrCurrentOrThrow(TextBoxTo.Text);
 
                 if (to < _server.TimeMin ||
                     to > _server.TimeMax)
@@ -1845,7 +1833,7 @@ namespace OsEngine.Market.Servers.Tester
             {
                 _timerTextBoxFrom.Stop();
 
-                from = Convert.ToDateTime(TextBoxFrom.Text, _currentCulture);
+                from = ParseDateInvariantOrCurrentOrThrow(TextBoxFrom.Text);
 
                 if (from < _server.TimeMin ||
                     from > _server.TimeMax)
@@ -1861,6 +1849,36 @@ namespace OsEngine.Market.Servers.Tester
 
             _server.TimeStart = from;
             SliderFrom.Value = (_server.TimeStart - DateTime.MinValue).TotalMinutes;
+        }
+
+        private bool TryParseDateInvariantOrCurrent(string value, out DateTime time)
+        {
+            if (DateTime.TryParse(value, CultureInfo.InvariantCulture, DateTimeStyles.RoundtripKind, out time))
+            {
+                return true;
+            }
+
+            if (DateTime.TryParse(value, CultureInfo.InvariantCulture, DateTimeStyles.None, out time))
+            {
+                return true;
+            }
+
+            if (DateTime.TryParse(value, _currentCulture, DateTimeStyles.None, out time))
+            {
+                return true;
+            }
+
+            return DateTime.TryParse(value, new CultureInfo("ru-RU"), DateTimeStyles.None, out time);
+        }
+
+        private DateTime ParseDateInvariantOrCurrentOrThrow(string value)
+        {
+            if (TryParseDateInvariantOrCurrent(value, out DateTime time))
+            {
+                return time;
+            }
+
+            throw new FormatException($"Cannot parse datetime value: {value}");
         }
 
         private void ButtonSetDataFromPath_Click(object sender, RoutedEventArgs e)

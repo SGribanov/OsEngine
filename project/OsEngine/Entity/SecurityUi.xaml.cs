@@ -78,7 +78,7 @@ namespace OsEngine.Entity
                 step = TextBoxStep.Text.ToDecimal();
                 stepCost = TextBoxStepCost.Text.ToDecimal();
                 volDecimals = Convert.ToInt32(TextBoxVolumeDecimals.Text);
-                expiration = Convert.ToDateTime(TextBoxExpiration.Text);
+                expiration = ParseDateInvariantOrCurrentOrThrow(TextBoxExpiration.Text);
 
                 string message = OsLocalization.Message.HintMessageError5 + "\n";
 
@@ -180,6 +180,31 @@ namespace OsEngine.Entity
         {
             CustomMessageBoxUi ui = new CustomMessageBoxUi(OsLocalization.Message.HintMessageLabel8);
             ui.ShowDialog();
+        }
+
+        private static DateTime ParseDateInvariantOrCurrentOrThrow(string value)
+        {
+            if (DateTime.TryParse(value, CultureInfo.InvariantCulture, DateTimeStyles.RoundtripKind, out DateTime parsedDate))
+            {
+                return parsedDate;
+            }
+
+            if (DateTime.TryParse(value, CultureInfo.InvariantCulture, DateTimeStyles.None, out parsedDate))
+            {
+                return parsedDate;
+            }
+
+            if (DateTime.TryParse(value, CultureInfo.CurrentCulture, DateTimeStyles.None, out parsedDate))
+            {
+                return parsedDate;
+            }
+
+            if (DateTime.TryParse(value, new CultureInfo("ru-RU"), DateTimeStyles.None, out parsedDate))
+            {
+                return parsedDate;
+            }
+
+            throw new FormatException($"Cannot parse datetime value: {value}");
         }
     }
 }

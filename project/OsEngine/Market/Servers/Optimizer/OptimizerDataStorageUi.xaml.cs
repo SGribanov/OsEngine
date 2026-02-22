@@ -975,13 +975,7 @@ namespace OsEngine.Market.Servers.Optimizer
                 { // Изменилось время старта периода
                     string value = _gridNonTradePeriods.Rows[row].Cells[column].Value.ToString();
 
-                    DateTime time = DateTime.MinValue;
-
-                    try
-                    {
-                        time = Convert.ToDateTime(value, OsLocalization.CurCulture);
-                    }
-                    catch
+                    if (TryParseDateInvariantOrCurrent(value, out DateTime time) == false)
                     {
                         return;
                     }
@@ -993,13 +987,7 @@ namespace OsEngine.Market.Servers.Optimizer
                 { // Изменилось время конца периода
                     string value = _gridNonTradePeriods.Rows[row].Cells[column].Value.ToString();
 
-                    DateTime time = DateTime.MinValue;
-
-                    try
-                    {
-                        time = Convert.ToDateTime(value, OsLocalization.CurCulture);
-                    }
-                    catch
+                    if (TryParseDateInvariantOrCurrent(value, out DateTime time) == false)
                     {
                         return;
                     }
@@ -1029,6 +1017,26 @@ namespace OsEngine.Market.Servers.Optimizer
             {
                 _master.SendLogMessage(ex.ToString(), LogMessageType.Error);
             }
+        }
+
+        private bool TryParseDateInvariantOrCurrent(string value, out DateTime time)
+        {
+            if (DateTime.TryParse(value, CultureInfo.InvariantCulture, DateTimeStyles.RoundtripKind, out time))
+            {
+                return true;
+            }
+
+            if (DateTime.TryParse(value, CultureInfo.InvariantCulture, DateTimeStyles.None, out time))
+            {
+                return true;
+            }
+
+            if (DateTime.TryParse(value, _currentCulture, DateTimeStyles.None, out time))
+            {
+                return true;
+            }
+
+            return DateTime.TryParse(value, new CultureInfo("ru-RU"), DateTimeStyles.None, out time);
         }
 
         #endregion

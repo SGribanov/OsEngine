@@ -327,7 +327,7 @@ namespace OsEngine.Charts.CandleChart.Indicators
                 return ruCulture;
             }
 
-            return Convert.ToDateTime(value, CultureInfo.CurrentCulture);
+            return DateTime.MinValue;
         }
 
         private sealed class VwapSettingsDto

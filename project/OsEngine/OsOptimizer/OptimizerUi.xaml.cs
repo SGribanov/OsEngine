@@ -1912,7 +1912,8 @@ namespace OsEngine.OsOptimizer
 
             try
             {
-                DateTime time = Convert.ToDateTime(_gridFazes.Rows[indexRow].Cells[indexColumn].EditedFormattedValue.ToString(), _currentCulture);
+                DateTime time = ParseDateInvariantOrCurrentOrThrow(
+                    _gridFazes.Rows[indexRow].Cells[indexColumn].EditedFormattedValue.ToString());
 
                 if (indexColumn == 2)
                 {
@@ -1942,6 +1943,31 @@ namespace OsEngine.OsOptimizer
             {
                 WalkForwardPeriodsPainter.PaintForwards(HostWalkForwardPeriods, _master.Fazes);
             }
+        }
+
+        private DateTime ParseDateInvariantOrCurrentOrThrow(string value)
+        {
+            if (DateTime.TryParse(value, CultureInfo.InvariantCulture, DateTimeStyles.RoundtripKind, out DateTime parsedDate))
+            {
+                return parsedDate;
+            }
+
+            if (DateTime.TryParse(value, CultureInfo.InvariantCulture, DateTimeStyles.None, out parsedDate))
+            {
+                return parsedDate;
+            }
+
+            if (DateTime.TryParse(value, _currentCulture, DateTimeStyles.None, out parsedDate))
+            {
+                return parsedDate;
+            }
+
+            if (DateTime.TryParse(value, new CultureInfo("ru-RU"), DateTimeStyles.None, out parsedDate))
+            {
+                return parsedDate;
+            }
+
+            throw new FormatException($"Cannot parse datetime value: {value}");
         }
 
         private void PaintTableOptimizeFazes()

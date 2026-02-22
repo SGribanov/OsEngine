@@ -11,6 +11,7 @@ using System.Collections.Generic;
 using System.Threading;
 using OsEngine.OsTrader.Panels.Attributes;
 using OsEngine.Language;
+using System.Globalization;
 
 namespace OsEngine.Robots.AutoTestBots.ServerTests
 {
@@ -807,7 +808,7 @@ namespace OsEngine.Robots.AutoTestBots.ServerTests
                         Data_1_Integrity tester = new Data_1_Integrity();
                         tester.SecName = D1_SecurityName.ValueString;
                         tester.SecClass = D1_SecurityClass.ValueString;
-                        tester.StartDate = DateTime.Parse(D1_StartDate.ValueString);
+                        tester.StartDate = ParseDateInvariantOrCurrentOrThrow(D1_StartDate.ValueString);
                         tester.LogMessage += SendNewLogMessage;
                         tester.TestEndEvent += Tester_TestEndEvent;
                         _testers.Add(tester);
@@ -845,7 +846,7 @@ namespace OsEngine.Robots.AutoTestBots.ServerTests
                         tester.SecNames = D4_SecuritiesNames.ValueString;
                         tester.SecClass = D4_SecurityClass.ValueString;
                         tester.SecuritiesSeparator = D4_SecuritiesSeparator.ValueString;
-                        tester.StartDate = DateTime.Parse(D4_StartDate.ValueString);
+                        tester.StartDate = ParseDateInvariantOrCurrentOrThrow(D4_StartDate.ValueString);
                         tester.LogMessage += SendNewLogMessage;
                         tester.TestEndEvent += Tester_TestEndEvent;
                         _testers.Add(tester);
@@ -1162,6 +1163,31 @@ namespace OsEngine.Robots.AutoTestBots.ServerTests
             }
 
             SendNewLogMessage(serverTest.GetReport(), LogMessageType.Error);
+        }
+
+        private static DateTime ParseDateInvariantOrCurrentOrThrow(string value)
+        {
+            if (DateTime.TryParse(value, CultureInfo.InvariantCulture, DateTimeStyles.RoundtripKind, out DateTime parsedDate))
+            {
+                return parsedDate;
+            }
+
+            if (DateTime.TryParse(value, CultureInfo.InvariantCulture, DateTimeStyles.None, out parsedDate))
+            {
+                return parsedDate;
+            }
+
+            if (DateTime.TryParse(value, CultureInfo.CurrentCulture, DateTimeStyles.None, out parsedDate))
+            {
+                return parsedDate;
+            }
+
+            if (DateTime.TryParse(value, new CultureInfo("ru-RU"), DateTimeStyles.None, out parsedDate))
+            {
+                return parsedDate;
+            }
+
+            throw new FormatException($"Cannot parse datetime value: {value}");
         }
 
         #endregion
