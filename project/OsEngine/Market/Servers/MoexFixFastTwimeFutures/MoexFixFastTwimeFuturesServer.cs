@@ -998,14 +998,14 @@ namespace OsEngine.Market.Servers.MoexFixFastTwimeFutures
                         XmlNodeList histIP = mdConnections[j].SelectNodes("ip");
                         connection.SrsIP = histIP[0].InnerText;
                         connection.MulticastIP = histIP[1].InnerText;
-                        connection.Port = Convert.ToInt32(mdConnections[j].SelectSingleNode("port").InnerText);
+                        connection.Port = Convert.ToInt32(mdConnections[j].SelectSingleNode("port").InnerText, CultureInfo.InvariantCulture);
                     }
                     else
                     {
                         connection.Feed = mdConnections[j].SelectSingleNode("feed").InnerText;
                         connection.SrsIP = mdConnections[j].SelectSingleNode("src-ip").InnerText;
                         connection.MulticastIP = mdConnections[j].SelectSingleNode("ip").InnerText;
-                        connection.Port = Convert.ToInt32(mdConnections[j].SelectSingleNode("port").InnerText);
+                        connection.Port = Convert.ToInt32(mdConnections[j].SelectSingleNode("port").InnerText, CultureInfo.InvariantCulture);
                     }
 
                     mdGroup.FastConnections.Add(connection);
@@ -3377,13 +3377,13 @@ namespace OsEngine.Market.Servers.MoexFixFastTwimeFutures
                     modifiedOrder.NumMarket = newClOrdId;
                     modifiedOrder.NewNumUser = fixValues["11"];
 
-                    order.NumberUser = Convert.ToInt32(modifiedOrder.NumUserInSystem);
+                    order.NumberUser = Convert.ToInt32(modifiedOrder.NumUserInSystem, CultureInfo.InvariantCulture);
                 }
                 else  // в списке измененных ордеров нет информации о новом измененном ордере
                 {
                     _modifiedOrders.Add(new IDsModifiedFixOrders() { NumUserInSystem = origClordId, NumMarket = newClOrdId, NewNumUser = ClOrdId });
 
-                    order.NumberUser = Convert.ToInt32(origClordId);
+                    order.NumberUser = Convert.ToInt32(origClordId, CultureInfo.InvariantCulture);
                 }
             }
 
@@ -3398,11 +3398,11 @@ namespace OsEngine.Market.Servers.MoexFixFastTwimeFutures
 
                 if (modifiedOrder != null)
                 {
-                    order.NumberUser = Convert.ToInt32(modifiedOrder.NumUserInSystem);
+                    order.NumberUser = Convert.ToInt32(modifiedOrder.NumUserInSystem, CultureInfo.InvariantCulture);
                 }
                 else
                 {
-                    order.NumberUser = Convert.ToInt32(fixValues["41"]); // изменений цены не было, была отмена
+                    order.NumberUser = Convert.ToInt32(fixValues["41"], CultureInfo.InvariantCulture); // изменений цены не было, была отмена
                 }
             }
 

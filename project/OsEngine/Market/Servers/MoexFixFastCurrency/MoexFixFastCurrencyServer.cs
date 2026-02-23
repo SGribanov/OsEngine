@@ -775,7 +775,7 @@ namespace OsEngine.Market.Servers.MoexFixFastCurrency
                     {
                         connection.FeedType = feedType;
                         connection.SrsIP = recoveryPoint.SelectSingleNode("ip").InnerText;
-                        connection.Port = Convert.ToInt32(recoveryPoint.SelectSingleNode("port").InnerText);
+                        connection.Port = Convert.ToInt32(recoveryPoint.SelectSingleNode("port").InnerText, CultureInfo.InvariantCulture);
                     }
                     else { SendLogMessage("Couldn't get a TCP recovery address", LogMessageType.Error); }
 
@@ -793,7 +793,7 @@ namespace OsEngine.Market.Servers.MoexFixFastCurrency
                     connection.FeedID = feed[j].Attributes["id"].Value;
                     connection.SrsIP = feed[j].SelectSingleNode("src-ip").InnerText;
                     connection.MulticastIP = feed[j].SelectSingleNode("ip").InnerText;
-                    connection.Port = Convert.ToInt32(feed[j].SelectSingleNode("port").InnerText);
+                    connection.Port = Convert.ToInt32(feed[j].SelectSingleNode("port").InnerText, CultureInfo.InvariantCulture);
 
                     fastConnections.Add(connection);
                 }
@@ -2525,13 +2525,13 @@ namespace OsEngine.Market.Servers.MoexFixFastCurrency
                     modifiedOrder.NumMarket = newClOrdId;
                     modifiedOrder.NewNumUser = fixValues["11"];
 
-                    order.NumberUser = Convert.ToInt32(modifiedOrder.NumUserInSystem);
+                    order.NumberUser = Convert.ToInt32(modifiedOrder.NumUserInSystem, CultureInfo.InvariantCulture);
                 }
                 else  // в списке измененных ордеров нет информации о новом измененном ордере
                 {
                     _modifiedOrders.Add(new IDsModifiedOrder() { NumUserInSystem = origClordId, NumMarket = newClOrdId, NewNumUser = ClOrdId });
 
-                    order.NumberUser = Convert.ToInt32(origClordId);
+                    order.NumberUser = Convert.ToInt32(origClordId, CultureInfo.InvariantCulture);
                 }
             }
 
@@ -2545,11 +2545,11 @@ namespace OsEngine.Market.Servers.MoexFixFastCurrency
                 IDsModifiedOrder modifiedOrder = _modifiedOrders.Find(o => o.NumMarket == order.NumberMarket);
                 if (modifiedOrder != null)
                 {
-                    order.NumberUser = Convert.ToInt32(modifiedOrder.NumUserInSystem);
+                    order.NumberUser = Convert.ToInt32(modifiedOrder.NumUserInSystem, CultureInfo.InvariantCulture);
                 }
                 else
                 {
-                    order.NumberUser = Convert.ToInt32(fixValues["41"]); // изменений цены не было, была отмена
+                    order.NumberUser = Convert.ToInt32(fixValues["41"], CultureInfo.InvariantCulture); // изменений цены не было, была отмена
                 }
             }
 
