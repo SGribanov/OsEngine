@@ -163,7 +163,7 @@ namespace OsEngine.Market.Servers.MoexFixFastSpot.FIX
                 name = fixDict.ContainsKey(name) ? fixDict[name] : name;
                 if (name == "MsgSeqNum")
                 {
-                    FIXMessage.MsgSeqNum = long.Parse(value);
+                    FIXMessage.MsgSeqNum = long.Parse(value, System.Globalization.CultureInfo.InvariantCulture);
                 }
 
                 if (name == "MsgType")

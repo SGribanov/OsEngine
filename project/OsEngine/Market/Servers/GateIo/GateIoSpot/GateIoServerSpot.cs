@@ -675,7 +675,7 @@ namespace OsEngine.Market.Servers.GateIo.GateIoSpot
                 while (firstRange.Time > startTime)
                 {
                     int ts = TimeManager.GetTimeStampSecondsToDateTime(firstRange.Time);
-                    trades = GetTickDataById(security, long.Parse(firstRange.Id));
+                    trades = GetTickDataById(security, long.Parse(firstRange.Id, CultureInfo.InvariantCulture));
 
                     if (trades.Count == 0)
                     {

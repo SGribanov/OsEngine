@@ -1316,7 +1316,7 @@ namespace OsEngine.Market.Servers.MoexFixFastTwimeFutures
                                 continue;
 
                             string msgType = msg.GetString("MessageType");
-                            long msgSeqNum = long.Parse(msg.GetString("MsgSeqNum"));
+                            long msgSeqNum = long.Parse(msg.GetString("MsgSeqNum"), System.Globalization.CultureInfo.InvariantCulture);
 
                             if (msgType == "d") /// security definition
                             {
@@ -1753,7 +1753,7 @@ namespace OsEngine.Market.Servers.MoexFixFastTwimeFutures
 
                                 timeTrade = DateTime.UtcNow.ToString("ddMMyyyy") + timePart;
                                 DateTime tradeDateTime = DateTime.ParseExact(timeTrade, "ddMMyyyyHHmmss", System.Globalization.CultureInfo.InvariantCulture);
-                                long nanoseconds = long.Parse(nanosecondsPart);
+                                long nanoseconds = long.Parse(nanosecondsPart, System.Globalization.CultureInfo.InvariantCulture);
                                 tradeDateTime = tradeDateTime.AddTicks(nanoseconds / 100); // Переводим наносекунды в тики
 
                                 trade.Time = tradeDateTime.AddHours(3);
@@ -3108,7 +3108,7 @@ namespace OsEngine.Market.Servers.MoexFixFastTwimeFutures
 
         private void ParseFixMessage(Dictionary<string, string> fixMsgValues)
         {
-            long newFixMsgNum = long.Parse(fixMsgValues["34"]);
+            long newFixMsgNum = long.Parse(fixMsgValues["34"], System.Globalization.CultureInfo.InvariantCulture);
 
             _timeOfTheLastFIXMessage = DateTime.Now;
 
@@ -3266,7 +3266,7 @@ namespace OsEngine.Market.Servers.MoexFixFastTwimeFutures
 
                     string GapFillFlag = fixMsgValues["123"];
 
-                    _incomingFixMsgNum = long.Parse(fixMsgValues["36"]) + 1;
+                    _incomingFixMsgNum = long.Parse(fixMsgValues["36"], System.Globalization.CultureInfo.InvariantCulture) + 1;
 
                     SendLogMessage($"The message SequenceReset has been received. GapFillFlag={GapFillFlag}, NewSeqNo={fixMsgValues["36"]}", LogMessageType.System);
                     break;
@@ -3339,7 +3339,7 @@ namespace OsEngine.Market.Servers.MoexFixFastTwimeFutures
                 string nanosecondsPart = TransactTime.Substring(18);
 
                 TransactionTime = DateTime.ParseExact(datetimePart, "yyyyMMdd-HH:mm:ss", System.Globalization.CultureInfo.InvariantCulture);
-                long nanoseconds = long.Parse(nanosecondsPart);
+                long nanoseconds = long.Parse(nanosecondsPart, System.Globalization.CultureInfo.InvariantCulture);
                 TransactionTime = TransactionTime.AddTicks(nanoseconds / 100).AddHours(3); // Переводим наносекунды в тики
             }
 

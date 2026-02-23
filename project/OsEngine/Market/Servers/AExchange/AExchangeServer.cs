@@ -1077,7 +1077,7 @@ namespace OsEngine.Market.Servers.AE
                 SendCommand(new WebSocketCancelOrderMessage
                 {
                     Account = order.PortfolioNumber,
-                    OrderId = long.Parse(order.NumberMarket),
+                    OrderId = long.Parse(order.NumberMarket, System.Globalization.CultureInfo.InvariantCulture),
                     Ticker = order.SecurityNameCode
                 });
             }

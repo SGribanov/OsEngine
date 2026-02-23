@@ -8745,3 +8745,27 @@
 - Host-context verification (outside sandbox):
   - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` -> success (0 warnings, 0 errors)
   - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed `352/352`
+
+## 2026-02-23 - Step 2.2 (CultureInfo.InvariantCulture) - Broad long.Parse hardening (Market Servers)
+
+- Standardized numeric string parsing with explicit invariant culture in:
+  - `project/OsEngine/Market/Servers/AExchange/AExchangeServer.cs`
+  - `project/OsEngine/Market/Servers/BybitData/BybitDataServer.cs`
+  - `project/OsEngine/Market/Servers/GateIo/GateIoSpot/GateIoServerSpot.cs`
+  - `project/OsEngine/Market/Servers/MoexFixFastCurrency/MoexFixFastCurrencyServer.cs`
+  - `project/OsEngine/Market/Servers/MoexFixFastTwimeFutures/MoexFixFastTwimeFuturesServer.cs`
+  - `project/OsEngine/Market/Servers/MoexFixFastSpot/MoexFixFastSpotServer.cs`
+  - `project/OsEngine/Market/Servers/MoexFixFastSpot/FIX/FIXMessage.cs`
+- Changes:
+  - replaced generic parsing:
+    - `long.Parse(value)` -> `long.Parse(value, CultureInfo.InvariantCulture)`
+  - applied in remaining market-server paths (timestamps, ids, sequence numbers).
+- Scope:
+  - parser hardening only
+  - runtime behavior unchanged for valid payloads.
+
+### Verification
+
+- Host-context verification (outside sandbox):
+  - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` -> success (0 warnings, 0 errors)
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed `352/352`

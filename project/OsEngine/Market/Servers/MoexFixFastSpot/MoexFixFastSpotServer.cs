@@ -1230,7 +1230,7 @@ namespace OsEngine.Market.Servers.MoexFixFastSpot
                             OpenFAST.Message msg = decoder.ReadMessage();
 
                             string msgType = msg.GetString("MessageType");
-                            long msgSeqNum = long.Parse(msg.GetString("MsgSeqNum"));
+                            long msgSeqNum = long.Parse(msg.GetString("MsgSeqNum"), System.Globalization.CultureInfo.InvariantCulture);
 
                             if (msgType == "d") /// security definition
                             {
@@ -3932,7 +3932,7 @@ namespace OsEngine.Market.Servers.MoexFixFastSpot
     {
         public int Compare(OrdersUpdate x, OrdersUpdate y)
         {
-            return long.Parse(x.Id).CompareTo(long.Parse(y.Id));
+            return long.Parse(x.Id, System.Globalization.CultureInfo.InvariantCulture).CompareTo(long.Parse(y.Id, System.Globalization.CultureInfo.InvariantCulture));
         }
     }
 
@@ -3948,7 +3948,7 @@ namespace OsEngine.Market.Servers.MoexFixFastSpot
     {
         public int Compare(Trade x, Trade y)
         {
-            return long.Parse(x.Id).CompareTo(long.Parse(y.Id));
+            return long.Parse(x.Id, System.Globalization.CultureInfo.InvariantCulture).CompareTo(long.Parse(y.Id, System.Globalization.CultureInfo.InvariantCulture));
         }
     }
 

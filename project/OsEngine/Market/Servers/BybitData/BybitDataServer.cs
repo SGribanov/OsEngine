@@ -678,7 +678,7 @@ namespace OsEngine.Market.Servers.BybitData
                 }
                 else
                 {
-                    trade.Time = new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc).AddSeconds(long.Parse(tradeParts[0].Split('.')[0]));
+                    trade.Time = new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc).AddSeconds(long.Parse(tradeParts[0].Split('.')[0], CultureInfo.InvariantCulture));
                     trade.Price = tradeParts[4].ToDecimal();
                     trade.MicroSeconds = 0;
                     trade.Id = tradeParts[6].Split('-')[^1];
