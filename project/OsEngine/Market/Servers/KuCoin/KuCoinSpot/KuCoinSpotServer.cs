@@ -502,7 +502,7 @@ namespace OsEngine.Market.Servers.KuCoin.KuCoinSpot
                             newCandle.Low = item[4].ToDecimal();
                             newCandle.Volume = item[5].ToDecimal();
                             newCandle.State = CandleState.Finished;
-                            newCandle.TimeStart = TimeManager.GetDateTimeFromTimeStampSeconds(Convert.ToInt64(item[0]));
+                            newCandle.TimeStart = TimeManager.GetDateTimeFromTimeStampSeconds(Convert.ToInt64(item[0], CultureInfo.InvariantCulture));
                             candles.Add(newCandle);
                         }
 
@@ -1397,7 +1397,7 @@ namespace OsEngine.Market.Servers.KuCoin.KuCoinSpot
                 trade.SecurityNameCode = responseTrade.topic.Split(':')[1];
                 trade.Price = responseTrade.data.price.ToDecimal();
                 trade.Id = responseTrade.data.tradeId;
-                trade.Time = TimeManager.GetDateTimeFromTimeStamp(Convert.ToInt64(responseTrade.data.time) / 1000000);
+                trade.Time = TimeManager.GetDateTimeFromTimeStamp(Convert.ToInt64(responseTrade.data.time, CultureInfo.InvariantCulture) / 1000000);
                 trade.Volume = responseTrade.data.size.ToDecimal();
 
                 if (responseTrade.data.side == "sell")
@@ -1485,7 +1485,7 @@ namespace OsEngine.Market.Servers.KuCoin.KuCoinSpot
                 marketDepth.Asks = ascs;
                 marketDepth.Bids = bids;
 
-                marketDepth.Time = TimeManager.GetDateTimeFromTimeStamp(Convert.ToInt64(responseDepth.data.timestamp));
+                marketDepth.Time = TimeManager.GetDateTimeFromTimeStamp(Convert.ToInt64(responseDepth.data.timestamp, CultureInfo.InvariantCulture));
 
                 if (marketDepth.Time == DateTime.MinValue)
                 {
@@ -1565,7 +1565,7 @@ namespace OsEngine.Market.Servers.KuCoin.KuCoinSpot
 
                 Order newOrder = new Order();
                 newOrder.SecurityNameCode = item.symbol;
-                newOrder.TimeCallBack = TimeManager.GetDateTimeFromTimeStamp(Convert.ToInt64(item.ts) / 1000000); //from nanoseconds to ms
+                newOrder.TimeCallBack = TimeManager.GetDateTimeFromTimeStamp(Convert.ToInt64(item.ts, CultureInfo.InvariantCulture) / 1000000); //from nanoseconds to ms
 
                 if (item.clientOid != null)
                 {
@@ -1609,7 +1609,7 @@ namespace OsEngine.Market.Servers.KuCoin.KuCoinSpot
                 {
                     MyTrade myTrade = new MyTrade();
 
-                    myTrade.Time = TimeManager.GetDateTimeFromTimeStamp(Convert.ToInt64(item.ts) / 1000000); //from nanoseconds to ms
+                    myTrade.Time = TimeManager.GetDateTimeFromTimeStamp(Convert.ToInt64(item.ts, CultureInfo.InvariantCulture) / 1000000); //from nanoseconds to ms
                     myTrade.NumberOrderParent = item.orderId;
                     myTrade.NumberTrade = item.tradeId;
                     myTrade.Price = item.matchPrice.ToDecimal();
@@ -1914,8 +1914,8 @@ namespace OsEngine.Market.Servers.KuCoin.KuCoinSpot
                                 Order newOrder = new Order();
 
                                 newOrder.SecurityNameCode = order.data.items[i].symbol;
-                                newOrder.TimeCallBack = TimeManager.GetDateTimeFromTimeStamp(Convert.ToInt64(order.data.items[i].createdAt));
-                                newOrder.TimeCreate = TimeManager.GetDateTimeFromTimeStamp(Convert.ToInt64(order.data.items[i].createdAt));
+                                newOrder.TimeCallBack = TimeManager.GetDateTimeFromTimeStamp(Convert.ToInt64(order.data.items[i].createdAt, CultureInfo.InvariantCulture));
+                                newOrder.TimeCreate = TimeManager.GetDateTimeFromTimeStamp(Convert.ToInt64(order.data.items[i].createdAt, CultureInfo.InvariantCulture));
                                 newOrder.ServerType = ServerType.KuCoinSpot;
 
                                 try
@@ -2090,8 +2090,8 @@ namespace OsEngine.Market.Servers.KuCoin.KuCoinSpot
                         if (order.data != null)
                         {
                             newOrder.SecurityNameCode = order.data.symbol;
-                            newOrder.TimeCallBack = TimeManager.GetDateTimeFromTimeStamp(Convert.ToInt64(order.data.createdAt));
-                            newOrder.TimeCreate = TimeManager.GetDateTimeFromTimeStamp(Convert.ToInt64(order.data.createdAt));
+                            newOrder.TimeCallBack = TimeManager.GetDateTimeFromTimeStamp(Convert.ToInt64(order.data.createdAt, CultureInfo.InvariantCulture));
+                            newOrder.TimeCreate = TimeManager.GetDateTimeFromTimeStamp(Convert.ToInt64(order.data.createdAt, CultureInfo.InvariantCulture));
                             newOrder.ServerType = ServerType.KuCoinSpot;
 
                             try
@@ -2163,7 +2163,7 @@ namespace OsEngine.Market.Servers.KuCoin.KuCoinSpot
 
                             MyTrade myTrade = new MyTrade();
 
-                            myTrade.Time = TimeManager.GetDateTimeFromTimeStamp(Convert.ToInt64(responseT.createdAt));
+                            myTrade.Time = TimeManager.GetDateTimeFromTimeStamp(Convert.ToInt64(responseT.createdAt, CultureInfo.InvariantCulture));
                             myTrade.NumberOrderParent = responseT.orderId;
                             myTrade.NumberTrade = responseT.tradeId;
                             myTrade.Price = responseT.price.ToDecimal();
