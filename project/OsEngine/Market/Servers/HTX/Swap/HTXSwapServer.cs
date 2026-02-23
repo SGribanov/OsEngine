@@ -2446,7 +2446,7 @@ namespace OsEngine.Market.Servers.HTX.Swap
 
                 try
                 {
-                    newOrder.NumberUser = Convert.ToInt32(response.client_order_id);
+                    newOrder.NumberUser = Convert.ToInt32(response.client_order_id, CultureInfo.InvariantCulture);
                 }
                 catch (System.Exception ex)
                 {
@@ -3092,7 +3092,7 @@ namespace OsEngine.Market.Servers.HTX.Swap
 
                             try
                             {
-                                newOrder.NumberUser = Convert.ToInt32(item.client_order_id);
+                                newOrder.NumberUser = Convert.ToInt32(item.client_order_id, CultureInfo.InvariantCulture);
                             }
                             catch (System.Exception ex)
                             {
@@ -3143,8 +3143,8 @@ namespace OsEngine.Market.Servers.HTX.Swap
 
                         if (response.data.orders.Count > 1)
                         {
-                            int totalPage = Convert.ToInt32(response.data.total_page);
-                            int currentPage = Convert.ToInt32(response.data.current_page);
+                            int totalPage = Convert.ToInt32(response.data.total_page, CultureInfo.InvariantCulture);
+                            int currentPage = Convert.ToInt32(response.data.current_page, CultureInfo.InvariantCulture);
                             //int totalSize = Convert.ToInt32(response.data.total_size);
 
                             while (currentPage < totalPage)
@@ -3293,7 +3293,7 @@ namespace OsEngine.Market.Servers.HTX.Swap
 
                             try
                             {
-                                newOrder.NumberUser = Convert.ToInt32(item.client_order_id);
+                                newOrder.NumberUser = Convert.ToInt32(item.client_order_id, CultureInfo.InvariantCulture);
                             }
                             catch (System.Exception ex)
                             {

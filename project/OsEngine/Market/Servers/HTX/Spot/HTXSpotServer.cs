@@ -258,11 +258,11 @@ namespace OsEngine.Market.Servers.HTX.Spot
                                 newSecurity.NameClass = item.qc;
                                 newSecurity.NameId = item.symbol;
                                 newSecurity.SecurityType = SecurityType.CurrencyPair;
-                                newSecurity.DecimalsVolume = Convert.ToInt32(item.ap);
+                                newSecurity.DecimalsVolume = Convert.ToInt32(item.ap, CultureInfo.InvariantCulture);
                                 newSecurity.Lot = 1;
-                                newSecurity.VolumeStep = Convert.ToInt32(item.ap).GetValueByDecimals();
-                                newSecurity.PriceStep = Convert.ToInt32(item.pp).GetValueByDecimals();
-                                newSecurity.Decimals = Convert.ToInt32(item.pp);
+                                newSecurity.VolumeStep = Convert.ToInt32(item.ap, CultureInfo.InvariantCulture).GetValueByDecimals();
+                                newSecurity.PriceStep = Convert.ToInt32(item.pp, CultureInfo.InvariantCulture).GetValueByDecimals();
+                                newSecurity.Decimals = Convert.ToInt32(item.pp, CultureInfo.InvariantCulture);
                                 newSecurity.PriceStepCost = newSecurity.PriceStep;
                                 newSecurity.State = SecurityStateType.Activ;
                                 newSecurity.MinTradeAmount = item.minov.ToDecimal();
@@ -1932,7 +1932,7 @@ namespace OsEngine.Market.Servers.HTX.Spot
                         {
                             string numberFull = item.clientOrderId;
                             string numUser = numberFull.Replace("AAe2ccbd47", "");
-                            newOrder.NumberUser = Convert.ToInt32(numUser);
+                            newOrder.NumberUser = Convert.ToInt32(numUser, CultureInfo.InvariantCulture);
                         }
                         catch
                         {
@@ -2025,7 +2025,7 @@ namespace OsEngine.Market.Servers.HTX.Spot
                         {
                             string numberFull = item.clientOrderId;
                             string numUser = numberFull.Replace("AAe2ccbd47", "");
-                            newOrder.NumberUser = Convert.ToInt32(numUser);
+                            newOrder.NumberUser = Convert.ToInt32(numUser, CultureInfo.InvariantCulture);
                         }
                         catch
                         {
@@ -2366,7 +2366,7 @@ namespace OsEngine.Market.Servers.HTX.Spot
                                     {
                                         string numberFull = item[i].client_order_id;
                                         string numUser = numberFull.Replace("AAe2ccbd47", "");
-                                        newOrder.NumberUser = Convert.ToInt32(numUser);
+                                        newOrder.NumberUser = Convert.ToInt32(numUser, CultureInfo.InvariantCulture);
                                     }
                                     catch
                                     {
@@ -2565,7 +2565,7 @@ namespace OsEngine.Market.Servers.HTX.Spot
                         {
                             string numberFull = item.client_order_id;
                             string numUser = numberFull.Replace("AAe2ccbd47", "");
-                            newOrder.NumberUser = Convert.ToInt32(numUser);
+                            newOrder.NumberUser = Convert.ToInt32(numUser, CultureInfo.InvariantCulture);
                         }
                         catch
                         {
@@ -2809,7 +2809,7 @@ namespace OsEngine.Market.Servers.HTX.Spot
                                     {
                                         string numberFull = item[i].client_order_id;
                                         string numUser = numberFull.Replace("AAe2ccbd47", "");
-                                        newOrder.NumberUser = Convert.ToInt32(numUser);
+                                        newOrder.NumberUser = Convert.ToInt32(numUser, CultureInfo.InvariantCulture);
                                     }
                                     catch
                                     {

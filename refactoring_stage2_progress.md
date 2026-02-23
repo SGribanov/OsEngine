@@ -8861,3 +8861,28 @@
   - `dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo` -> success
   - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` -> success (0 warnings, 0 errors)
   - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed `352/352`
+
+## 2026-02-23 - Step 2.2 (CultureInfo.InvariantCulture) - HTX int parsing hardening (Spot/Futures/Swap)
+
+- Standardized numeric string parsing with explicit invariant culture in:
+  - `project/OsEngine/Market/Servers/HTX/Futures/HTXFuturesServer.cs`
+  - `project/OsEngine/Market/Servers/HTX/Spot/HTXSpotServer.cs`
+  - `project/OsEngine/Market/Servers/HTX/Swap/HTXSwapServer.cs`
+- Changes:
+  - replaced string-based int conversions:
+    - `Convert.ToInt32(value)` -> `Convert.ToInt32(value, CultureInfo.InvariantCulture)`
+  - applied to:
+    - HTX client order ids (`client_order_id` / derived `numUser`)
+    - HTX spot precision fields (`ap` / `pp`)
+    - HTX swap pagination fields (`total_page` / `current_page`).
+- Scope:
+  - parser hardening only
+  - connector behavior unchanged for valid payloads.
+
+### Verification
+
+- Host-context verification (outside sandbox):
+  - `dotnet restore project/OsEngine/OsEngine.csproj --nologo` -> success
+  - `dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo` -> success
+  - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` -> success (0 warnings, 0 errors)
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed `352/352`

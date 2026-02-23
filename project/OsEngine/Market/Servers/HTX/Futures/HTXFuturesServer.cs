@@ -1714,7 +1714,7 @@ namespace OsEngine.Market.Servers.HTX.Futures
 
                 try
                 {
-                    newOrder.NumberUser = Convert.ToInt32(response.client_order_id);
+                    newOrder.NumberUser = Convert.ToInt32(response.client_order_id, CultureInfo.InvariantCulture);
                 }
                 catch
                 {
@@ -2100,7 +2100,7 @@ namespace OsEngine.Market.Servers.HTX.Futures
 
                                 try
                                 {
-                                    newOrder.NumberUser = Convert.ToInt32(item[i].client_order_id);
+                                    newOrder.NumberUser = Convert.ToInt32(item[i].client_order_id, CultureInfo.InvariantCulture);
                                 }
                                 catch
                                 {
@@ -2242,7 +2242,7 @@ namespace OsEngine.Market.Servers.HTX.Futures
 
                             try
                             {
-                                newOrder.NumberUser = Convert.ToInt32(item[0].client_order_id);
+                                newOrder.NumberUser = Convert.ToInt32(item[0].client_order_id, CultureInfo.InvariantCulture);
                             }
                             catch
                             {
