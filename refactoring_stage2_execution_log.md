@@ -10183,3 +10183,28 @@
   - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` succeeded (`352/352`).
 - **Commit:** n/a (not committed in this session)
 - **Push:** n/a
+
+### Step 2.2 - CultureInfo Invariant Persistence (Incremental Adoption #468)
+
+- **Status:** In Progress (increment completed)
+- **Plan item:** `refactoring_stage2_plan.md` -> Phase 2 / Step 2.2
+- **Changes:**
+  - Hardened explicit invariant parsing/formatting of ids and timestamp query params in:
+    - `project/OsEngine/Market/Servers/Binance/Spot/BinanceServerSpot.cs`
+    - `project/OsEngine/Market/Servers/Binance/Futures/BinanceServerFutures.cs`
+    - `project/OsEngine/Market/Servers/QuikLua/QuikLuaServer.cs`
+    - `project/OsEngine/Market/Servers/Plaza/PlazaServer.cs`
+    - `project/OsEngine/Market/Servers/HTX/Futures/HTXFuturesServer.cs`
+  - Replacements:
+    - `Convert.ToInt64(value)` -> `Convert.ToInt64(value, CultureInfo.InvariantCulture)` in external string id parsing paths.
+    - `.ToString()` -> `.ToString(CultureInfo.InvariantCulture)` for Binance outbound timestamp/id string values.
+  - Scope:
+    - parser hardening only; runtime behavior unchanged for valid API payloads.
+- **Verification:**
+  - Executed outside sandbox.
+  - `dotnet restore project/OsEngine/OsEngine.csproj --nologo` succeeded.
+  - `dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo` succeeded.
+  - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` succeeded (0 warnings).
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` succeeded (`352/352`).
+- **Commit:** n/a (not committed in this session)
+- **Push:** n/a
