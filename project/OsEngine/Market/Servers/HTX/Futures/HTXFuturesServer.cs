@@ -635,7 +635,7 @@ namespace OsEngine.Market.Servers.HTX.Futures
                 Candle candle = new Candle();
 
                 candle.State = CandleState.Finished;
-                candle.TimeStart = TimeManager.GetDateTimeFromTimeStampSeconds(long.Parse(item[i].id));
+                candle.TimeStart = TimeManager.GetDateTimeFromTimeStampSeconds(long.Parse(item[i].id, CultureInfo.InvariantCulture));
                 candle.Volume = item[i].vol.ToDecimal();
                 candle.Close = item[i].close.ToDecimal();
                 candle.High = item[i].high.ToDecimal();
@@ -1707,8 +1707,8 @@ namespace OsEngine.Market.Servers.HTX.Futures
                 }
 
                 Order newOrder = new Order();
-                newOrder.TimeCallBack = TimeManager.GetDateTimeFromTimeStamp(long.Parse(response.ts));
-                newOrder.TimeCreate = TimeManager.GetDateTimeFromTimeStamp(long.Parse(response.created_at));
+                newOrder.TimeCallBack = TimeManager.GetDateTimeFromTimeStamp(long.Parse(response.ts, CultureInfo.InvariantCulture));
+                newOrder.TimeCreate = TimeManager.GetDateTimeFromTimeStamp(long.Parse(response.created_at, CultureInfo.InvariantCulture));
                 newOrder.ServerType = ServerType.HTXFutures;
                 newOrder.SecurityNameCode = JoinSecurityName(response.symbol, response.contract_type);
 
@@ -2093,8 +2093,8 @@ namespace OsEngine.Market.Servers.HTX.Futures
                             {
                                 Order newOrder = new Order();
 
-                                newOrder.TimeCallBack = TimeManager.GetDateTimeFromTimeStamp(long.Parse(item[i].update_time));
-                                newOrder.TimeCreate = TimeManager.GetDateTimeFromTimeStamp(long.Parse(item[i].created_at));
+                                newOrder.TimeCallBack = TimeManager.GetDateTimeFromTimeStamp(long.Parse(item[i].update_time, CultureInfo.InvariantCulture));
+                                newOrder.TimeCreate = TimeManager.GetDateTimeFromTimeStamp(long.Parse(item[i].created_at, CultureInfo.InvariantCulture));
                                 newOrder.ServerType = ServerType.HTXFutures;
                                 newOrder.SecurityNameCode = JoinSecurityName(item[i].symbol, item[i].contract_type);
 
@@ -2235,8 +2235,8 @@ namespace OsEngine.Market.Servers.HTX.Futures
                     {
                         if (item != null && item.Count > 0)
                         {
-                            newOrder.TimeCallBack = TimeManager.GetDateTimeFromTimeStamp(long.Parse(item[0].created_at));
-                            newOrder.TimeCreate = TimeManager.GetDateTimeFromTimeStamp(long.Parse(item[0].created_at));
+                            newOrder.TimeCallBack = TimeManager.GetDateTimeFromTimeStamp(long.Parse(item[0].created_at, CultureInfo.InvariantCulture));
+                            newOrder.TimeCreate = TimeManager.GetDateTimeFromTimeStamp(long.Parse(item[0].created_at, CultureInfo.InvariantCulture));
                             newOrder.ServerType = ServerType.HTXFutures;
                             newOrder.SecurityNameCode = JoinSecurityName(item[0].symbol, item[0].contract_type);
 
