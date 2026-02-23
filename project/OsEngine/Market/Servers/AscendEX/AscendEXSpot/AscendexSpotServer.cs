@@ -600,7 +600,7 @@ namespace OsEngine.Market.Servers.AscendexSpot
                         Candle newCandle = new Candle();
 
                         newCandle.State = CandleState.Finished;
-                        newCandle.TimeStart = TimeManager.GetDateTimeFromTimeStamp(Convert.ToInt64(candleData.ts));
+                        newCandle.TimeStart = TimeManager.GetDateTimeFromTimeStamp(Convert.ToInt64(candleData.ts, CultureInfo.InvariantCulture));
                         newCandle.Open = open;
                         newCandle.Close = close;
                         newCandle.High = high;
@@ -1405,7 +1405,7 @@ namespace OsEngine.Market.Servers.AscendexSpot
                 MarketDepth newDepth = new MarketDepth();
 
                 newDepth.SecurityNameCode = snapshot.symbol;
-                newDepth.Time = TimeManager.GetDateTimeFromTimeStamp(Convert.ToInt64(snapshot.data.ts));
+                newDepth.Time = TimeManager.GetDateTimeFromTimeStamp(Convert.ToInt64(snapshot.data.ts, CultureInfo.InvariantCulture));
 
                 for (int i = 0; i < snapshot.data.bids.Count && i < 25; i++)
                 {
@@ -1507,7 +1507,7 @@ namespace OsEngine.Market.Servers.AscendexSpot
                 ApplyLevels(update.data.bids, depth.Bids, isBid: true);
                 ApplyLevels(update.data.asks, depth.Asks, isBid: false);
 
-                depth.Time = TimeManager.GetDateTimeFromTimeStamp(Convert.ToInt64(update.data.ts));
+                depth.Time = TimeManager.GetDateTimeFromTimeStamp(Convert.ToInt64(update.data.ts, CultureInfo.InvariantCulture));
 
                 List<MarketDepthLevel> topBids = new List<MarketDepthLevel>();
 
@@ -1630,7 +1630,7 @@ namespace OsEngine.Market.Servers.AscendexSpot
                     newTrade.Price = json.p.ToDecimal();
                     newTrade.Volume = json.q.ToDecimal();
                     newTrade.Side = (json.bm == "true") ? Side.Sell : Side.Buy; // Ascendex: bm = "true" → buyer is maker → инициатор продажи
-                    newTrade.Time = TimeManager.GetDateTimeFromTimeStamp(Convert.ToInt64(json.ts));
+                    newTrade.Time = TimeManager.GetDateTimeFromTimeStamp(Convert.ToInt64(json.ts, CultureInfo.InvariantCulture));
 
                     NewTradesEvent?.Invoke(newTrade);
                 }
@@ -1674,7 +1674,7 @@ namespace OsEngine.Market.Servers.AscendexSpot
                 updateOrder.TypeOrder = (data.ot == "Limit") ? OrderPriceType.Limit : OrderPriceType.Market;
                 updateOrder.Price = (data.p).ToDecimal();
                 updateOrder.Volume = (data.q).ToDecimal();
-                updateOrder.TimeCreate = TimeManager.GetDateTimeFromTimeStamp(Convert.ToInt64(data.t));
+                updateOrder.TimeCreate = TimeManager.GetDateTimeFromTimeStamp(Convert.ToInt64(data.t, CultureInfo.InvariantCulture));
                 updateOrder.ServerType = ServerType.AscendexSpot;
                 updateOrder.PortfolioNumber = _portfolioName;
 
@@ -1725,7 +1725,7 @@ namespace OsEngine.Market.Servers.AscendexSpot
                 }
 
                 myTrade.NumberTrade = data.sn;
-                myTrade.Time = TimeManager.GetDateTimeFromTimeStamp(Convert.ToInt64(data.t));
+                myTrade.Time = TimeManager.GetDateTimeFromTimeStamp(Convert.ToInt64(data.t, CultureInfo.InvariantCulture));
 
                 MyTradeEvent?.Invoke(myTrade);
             }
@@ -2229,7 +2229,7 @@ namespace OsEngine.Market.Servers.AscendexSpot
 
                             Order activeOrder = new Order();
 
-                            activeOrder.TimeCallBack = TimeManager.GetDateTimeFromTimeStamp(Convert.ToInt64(order.lastExecTime));
+                            activeOrder.TimeCallBack = TimeManager.GetDateTimeFromTimeStamp(Convert.ToInt64(order.lastExecTime, CultureInfo.InvariantCulture));
                             activeOrder.ServerType = ServerType.AscendexSpot;
                             activeOrder.SecurityNameCode = order.symbol;
                             activeOrder.SecurityClassCode = GetNameClass(order.symbol);
@@ -2355,14 +2355,14 @@ namespace OsEngine.Market.Servers.AscendexSpot
                         order.Side = orderData.side == "Buy" ? Side.Buy : Side.Sell;
                         order.TypeOrder = orderData.orderType == "Limit" ? OrderPriceType.Limit : OrderPriceType.Market;
                         order.Volume = orderData.orderQty.ToDecimal();
-                        order.TimeCallBack = TimeManager.GetDateTimeFromTimeStamp(Convert.ToInt64(orderData.lastExecTime));
+                        order.TimeCallBack = TimeManager.GetDateTimeFromTimeStamp(Convert.ToInt64(orderData.lastExecTime, CultureInfo.InvariantCulture));
                         order.State = GetOrderState(orderData.status);
 
                         if (orderData.status == "Filled" || orderData.status == "PartiallyFilled")
                         {
                             MyTrade myTrade = new MyTrade();
 
-                            myTrade.Time = TimeManager.GetDateTimeFromTimeStamp(Convert.ToInt64(orderData.lastExecTime));
+                            myTrade.Time = TimeManager.GetDateTimeFromTimeStamp(Convert.ToInt64(orderData.lastExecTime, CultureInfo.InvariantCulture));
                             myTrade.SecurityNameCode = orderData.symbol;
                             myTrade.Price = orderData.price.ToDecimal();
                             myTrade.NumberTrade = orderData.seqNum;
