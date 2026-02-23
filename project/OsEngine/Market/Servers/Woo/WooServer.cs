@@ -2216,7 +2216,7 @@ namespace OsEngine.Market.Servers.Woo
 
                 try
                 {
-                    newOrder.NumberUser = Convert.ToInt32(item.cid);
+                    newOrder.NumberUser = Convert.ToInt32(item.cid, CultureInfo.InvariantCulture);
                 }
                 catch
                 {
@@ -2589,7 +2589,7 @@ namespace OsEngine.Market.Servers.Woo
 
                             try
                             {
-                                newOrder.NumberUser = Convert.ToInt32(item.clientOrderId);
+                                newOrder.NumberUser = Convert.ToInt32(item.clientOrderId, CultureInfo.InvariantCulture);
                             }
                             catch
                             {
@@ -2699,7 +2699,7 @@ namespace OsEngine.Market.Servers.Woo
 
                         try
                         {
-                            newOrder.NumberUser = Convert.ToInt32(item.clientOrderId);
+                            newOrder.NumberUser = Convert.ToInt32(item.clientOrderId, CultureInfo.InvariantCulture);
                         }
                         catch
                         {

@@ -2892,7 +2892,7 @@ namespace OsEngine.Market.Servers.OKX
 
             try
             {
-                newOrder.NumberUser = Convert.ToInt32(item.clOrdId);
+                newOrder.NumberUser = Convert.ToInt32(item.clOrdId, CultureInfo.InvariantCulture);
             }
             catch (System.Exception ex)
             {

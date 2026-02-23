@@ -1030,7 +1030,7 @@ namespace OsEngine.Market.Servers.Deribit
                     continue;
                 }
 
-                newOrder.NumberUser = Convert.ToInt32(item[i].label);
+                newOrder.NumberUser = Convert.ToInt32(item[i].label, System.Globalization.CultureInfo.InvariantCulture);
                 newOrder.NumberMarket = item[i].order_id.ToString();
                 newOrder.Side = item[i].direction.Equals("buy") ? Side.Buy : Side.Sell;
                 newOrder.State = stateType;
@@ -1347,7 +1347,7 @@ namespace OsEngine.Market.Servers.Deribit
                                 newOrder.SecurityNameCode = item[j].instrument_name;
                                 try
                                 {
-                                    newOrder.NumberUser = Convert.ToInt32(item[j].label);
+                                    newOrder.NumberUser = Convert.ToInt32(item[j].label, System.Globalization.CultureInfo.InvariantCulture);
                                 }
                                 catch
                                 {
@@ -1466,7 +1466,7 @@ namespace OsEngine.Market.Servers.Deribit
                     newOrder.TimeCreate = TimeManager.GetDateTimeFromTimeStamp(long.Parse(item.creation_timestamp, System.Globalization.CultureInfo.InvariantCulture));
                     newOrder.ServerType = ServerType.Deribit;
                     newOrder.SecurityNameCode = item.instrument_name;
-                    newOrder.NumberUser = Convert.ToInt32(item.label);
+                    newOrder.NumberUser = Convert.ToInt32(item.label, System.Globalization.CultureInfo.InvariantCulture);
                     newOrder.NumberMarket = item.order_id.ToString();
                     newOrder.Side = item.direction.Equals("buy") ? Side.Buy : Side.Sell;
                     newOrder.State = GetOrderState(item.order_state);
