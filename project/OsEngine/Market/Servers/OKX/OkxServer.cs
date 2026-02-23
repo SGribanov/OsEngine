@@ -855,7 +855,7 @@ namespace OsEngine.Market.Servers.OKX
                 Candle candle = new Candle();
                 try
                 {
-                    candle.TimeStart = TimeManager.GetDateTimeFromTimeStamp(Convert.ToInt64(candlesResponse.data[j][0]));
+                    candle.TimeStart = TimeManager.GetDateTimeFromTimeStamp(Convert.ToInt64(candlesResponse.data[j][0], CultureInfo.InvariantCulture));
 
                     candle.Open = candlesResponse.data[j][1].ToDecimal();
                     candle.High = candlesResponse.data[j][2].ToDecimal();
@@ -1116,7 +1116,7 @@ namespace OsEngine.Market.Servers.OKX
                             Trade trade = new Trade();
                             trade.SecurityNameCode = item.instId;
                             trade.Id = item.tradeId;
-                            trade.Time = TimeManager.GetDateTimeFromTimeStamp(Convert.ToInt64(item.ts));
+                            trade.Time = TimeManager.GetDateTimeFromTimeStamp(Convert.ToInt64(item.ts, CultureInfo.InvariantCulture));
                             trade.Price = item.px.ToDecimal();
                             trade.Volume = item.sz.ToDecimal(); //For spot trading, the unit is base currency
                                                                 //For FUTURES / SWAP / OPTION, the unit is contract.
@@ -2678,7 +2678,7 @@ namespace OsEngine.Market.Servers.OKX
                 marketDepth.Asks = ascs;
                 marketDepth.Bids = bids;
 
-                marketDepth.Time = TimeManager.GetDateTimeFromTimeStamp(Convert.ToInt64(responseDepth.data[0].ts));
+                marketDepth.Time = TimeManager.GetDateTimeFromTimeStamp(Convert.ToInt64(responseDepth.data[0].ts, CultureInfo.InvariantCulture));
 
                 if (marketDepth.Time <= _lastTimeMd)
                 {
@@ -2717,7 +2717,7 @@ namespace OsEngine.Market.Servers.OKX
 
                 trade.Price = tradeRespone.data[0].px.ToDecimal();
                 trade.Id = tradeRespone.data[0].tradeId;
-                trade.Time = TimeManager.GetDateTimeFromTimeStamp(Convert.ToInt64(tradeRespone.data[0].ts));
+                trade.Time = TimeManager.GetDateTimeFromTimeStamp(Convert.ToInt64(tradeRespone.data[0].ts, CultureInfo.InvariantCulture));
                 trade.Volume = tradeRespone.data[0].sz.ToDecimal();
 
                 if (tradeRespone.data[0].side.Equals("buy"))
@@ -2800,7 +2800,7 @@ namespace OsEngine.Market.Servers.OKX
 
                         MyTrade myTrade = new MyTrade();
 
-                        myTrade.Time = TimeManager.GetDateTimeFromTimeStamp(Convert.ToInt64(item.cTime));
+                        myTrade.Time = TimeManager.GetDateTimeFromTimeStamp(Convert.ToInt64(item.cTime, CultureInfo.InvariantCulture));
                         myTrade.SecurityNameCode = item.instId;
                         myTrade.NumberOrderParent = item.ordId.ToString();
                         myTrade.NumberTrade = item.tradeId.ToString();
@@ -2878,8 +2878,8 @@ namespace OsEngine.Market.Servers.OKX
 
             newOrder.State = GetOrderState(item.state);
             newOrder.SecurityNameCode = item.instId;
-            newOrder.TimeCreate = TimeManager.GetDateTimeFromTimeStamp(Convert.ToInt64(item.cTime));
-            newOrder.TimeCallBack = TimeManager.GetDateTimeFromTimeStamp(Convert.ToInt64(item.uTime));
+            newOrder.TimeCreate = TimeManager.GetDateTimeFromTimeStamp(Convert.ToInt64(item.cTime, CultureInfo.InvariantCulture));
+            newOrder.TimeCallBack = TimeManager.GetDateTimeFromTimeStamp(Convert.ToInt64(item.uTime, CultureInfo.InvariantCulture));
 
             if (newOrder.State == OrderStateType.Done)
             {
@@ -3661,7 +3661,7 @@ namespace OsEngine.Market.Servers.OKX
 
                             MyTrade myTrade = new MyTrade();
 
-                            myTrade.Time = TimeManager.GetDateTimeFromTimeStamp(Convert.ToInt64(item.ts));
+                            myTrade.Time = TimeManager.GetDateTimeFromTimeStamp(Convert.ToInt64(item.ts, CultureInfo.InvariantCulture));
                             myTrade.SecurityNameCode = item.instId;
                             myTrade.NumberOrderParent = item.ordId.ToString();
                             myTrade.NumberTrade = item.tradeId.ToString();

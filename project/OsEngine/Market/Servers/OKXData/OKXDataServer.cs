@@ -305,7 +305,7 @@ namespace OsEngine.Market.Servers.OKXData
                 security.State = SecurityStateType.Activ;
 
                 // The Expiration field is used to store the listing date.
-                security.Expiration = DateTimeOffset.FromUnixTimeMilliseconds(Convert.ToInt64(item.listTime)).DateTime;
+                security.Expiration = DateTimeOffset.FromUnixTimeMilliseconds(Convert.ToInt64(item.listTime, CultureInfo.InvariantCulture)).DateTime;
 
                 _securities.Add(security);
             }
@@ -519,7 +519,7 @@ namespace OsEngine.Market.Servers.OKXData
                 Candle candle = new Candle();
                 try
                 {
-                    candle.TimeStart = TimeManager.GetDateTimeFromTimeStamp(Convert.ToInt64(candlesResponse.data[j][0]));
+                    candle.TimeStart = TimeManager.GetDateTimeFromTimeStamp(Convert.ToInt64(candlesResponse.data[j][0], CultureInfo.InvariantCulture));
 
                     candle.Open = candlesResponse.data[j][1].ToDecimal();
                     candle.High = candlesResponse.data[j][2].ToDecimal();

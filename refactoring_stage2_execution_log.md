@@ -9669,3 +9669,22 @@
   - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` succeeded (`352/352`).
 - **Commit:** n/a (not committed in this session)
 - **Push:** n/a
+
+### Step 2.2 - CultureInfo Invariant Persistence (Incremental Adoption #441)
+
+- **Status:** In Progress (increment completed)
+- **Plan item:** `refactoring_stage2_plan.md` -> Phase 2 / Step 2.2
+- **Changes:**
+  - Hardened explicit invariant parsing of string timestamps in:
+    - `project/OsEngine/Market/Servers/OKX/OkxServer.cs`
+    - `project/OsEngine/Market/Servers/OKXData/OKXDataServer.cs`
+  - Replacements:
+    - `Convert.ToInt64(value)` -> `Convert.ToInt64(value, CultureInfo.InvariantCulture)` in timestamp parsing paths.
+  - Scope:
+    - parser hardening only; runtime behavior unchanged for valid API payloads.
+- **Verification:**
+  - Executed outside sandbox.
+  - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` succeeded (0 warnings).
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` succeeded (`352/352`).
+- **Commit:** n/a (not committed in this session)
+- **Push:** n/a
