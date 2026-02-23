@@ -2269,7 +2269,7 @@ namespace OsEngine.Market.Servers.GateIo.GateIoFutures
 
                     try
                     {
-                        newOrder.NumberUser = Convert.ToInt32(responseOrders.result[i].text.Replace("t-", ""));
+                        newOrder.NumberUser = Convert.ToInt32(responseOrders.result[i].text.Replace("t-", ""), CultureInfo.InvariantCulture);
                     }
                     catch
                     {
@@ -2609,7 +2609,7 @@ namespace OsEngine.Market.Servers.GateIo.GateIoFutures
 
                         try
                         {
-                            newOrder.NumberUser = Convert.ToInt32(responseOrders[i].text.Replace("t-", ""));
+                            newOrder.NumberUser = Convert.ToInt32(responseOrders[i].text.Replace("t-", ""), CultureInfo.InvariantCulture);
                         }
                         catch
                         {
@@ -2704,7 +2704,7 @@ namespace OsEngine.Market.Servers.GateIo.GateIoFutures
 
                         if (responseMyTrade[i].text.Contains("t"))
                         {
-                            userNumber = Convert.ToInt32(responseMyTrade[i].text.Replace("t-", ""));
+                            userNumber = Convert.ToInt32(responseMyTrade[i].text.Replace("t-", ""), CultureInfo.InvariantCulture);
                         }
                         else
                         {
