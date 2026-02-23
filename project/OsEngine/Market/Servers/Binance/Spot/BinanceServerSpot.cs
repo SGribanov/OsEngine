@@ -1134,7 +1134,7 @@ namespace OsEngine.Market.Servers.Binance.Spot
             {
                 var trade = new Trade();
 
-                trade.Time = new DateTime(1970, 1, 1).AddMilliseconds(Convert.ToDouble(jtTrade.T));
+                trade.Time = new DateTime(1970, 1, 1).AddMilliseconds(jtTrade.T.ToDouble());
                 trade.Price = jtTrade.p.ToDecimal();
                 trade.MicroSeconds = 0;
                 trade.Id = jtTrade.a.ToString();

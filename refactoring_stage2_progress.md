@@ -8186,3 +8186,20 @@
 - Host-context verification (outside sandbox):
   - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` -> success (0 warnings, 0 errors)
   - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed `352/352`
+
+## 2026-02-23 - Step 2.2 (CultureInfo.InvariantCulture) - Binance Spot aggregated trade timestamp parsing
+
+- Hardened string timestamp parsing in:
+  - `project/OsEngine/Market/Servers/Binance/Spot/BinanceServerSpot.cs`
+- Changes:
+  - replaced `Convert.ToDouble(jtTrade.T)` with `jtTrade.T.ToDouble()` in aggregated trade history conversion.
+  - retained websocket trade timestamp conversion for numeric `long` payload field (`trades.data.T`).
+- Scope:
+  - timestamp parsing hardening only
+  - connector behavior unchanged for valid payloads.
+
+### Verification
+
+- Host-context verification (outside sandbox):
+  - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` -> success (0 warnings, 0 errors)
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed `352/352`
