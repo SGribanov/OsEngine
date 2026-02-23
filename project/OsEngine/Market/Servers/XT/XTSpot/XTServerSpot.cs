@@ -630,7 +630,7 @@ namespace OsEngine.Market.Servers.XT.XTSpot
                                 newCandle.Low = item.l.ToDecimal();
                                 newCandle.Volume = item.v.ToDecimal();
                                 newCandle.State = CandleState.Finished;
-                                newCandle.TimeStart = TimeManager.GetDateTimeFromTimeStamp(Convert.ToInt64(item.t));
+                                newCandle.TimeStart = TimeManager.GetDateTimeFromTimeStamp(Convert.ToInt64(item.t, CultureInfo.InvariantCulture));
                                 candles.Add(newCandle);
                             }
 
@@ -1418,7 +1418,7 @@ namespace OsEngine.Market.Servers.XT.XTSpot
                     trade.SecurityNameCode = responseTrade.data.s;
                     trade.Price = responseTrade.data.p.ToDecimal();
                     trade.Id = responseTrade.data.i;
-                    trade.Time = TimeManager.GetDateTimeFromTimeStamp(Convert.ToInt64(responseTrade.data.t));
+                    trade.Time = TimeManager.GetDateTimeFromTimeStamp(Convert.ToInt64(responseTrade.data.t, CultureInfo.InvariantCulture));
                     trade.Volume = responseTrade.data.q.ToDecimal();
                     trade.Side = responseTrade.data.b.Equals("true") ? Side.Buy : Side.Sell;
 
@@ -1790,7 +1790,7 @@ namespace OsEngine.Market.Servers.XT.XTSpot
 
                     Order newOrder = new Order();
                     newOrder.SecurityNameCode = item.s;
-                    long time = item.t == null ? Convert.ToInt64(item.ct) : Convert.ToInt64(item.t);
+                    long time = item.t == null ? Convert.ToInt64(item.ct, CultureInfo.InvariantCulture) : Convert.ToInt64(item.t, CultureInfo.InvariantCulture);
                     newOrder.TimeCreate = TimeManager.GetDateTimeFromTimeStamp(time);
                     newOrder.TimeCallBack = TimeManager.GetDateTimeFromTimeStamp(time);
 
@@ -2162,11 +2162,11 @@ namespace OsEngine.Market.Servers.XT.XTSpot
 
                 if (!string.IsNullOrEmpty(item.updateTime))
                 {
-                    newOrder.TimeCallBack = TimeManager.GetDateTimeFromTimeStamp(Convert.ToInt64(item.updateTime));
+                    newOrder.TimeCallBack = TimeManager.GetDateTimeFromTimeStamp(Convert.ToInt64(item.updateTime, CultureInfo.InvariantCulture));
                 }
                 else
                 {
-                    newOrder.TimeCallBack = TimeManager.GetDateTimeFromTimeStamp(Convert.ToInt64(item.time));
+                    newOrder.TimeCallBack = TimeManager.GetDateTimeFromTimeStamp(Convert.ToInt64(item.time, CultureInfo.InvariantCulture));
                 }
 
                 if (type == OrderStateType.Done)
@@ -2390,7 +2390,7 @@ namespace OsEngine.Market.Servers.XT.XTSpot
 
                         MyTrade myTrade = new MyTrade();
 
-                        myTrade.Time = TimeManager.GetDateTimeFromTimeStamp(Convert.ToInt64(responseT.time));
+                        myTrade.Time = TimeManager.GetDateTimeFromTimeStamp(Convert.ToInt64(responseT.time, CultureInfo.InvariantCulture));
                         myTrade.NumberOrderParent = responseT.orderId;
                         myTrade.NumberTrade = responseT.tradeId;
                         myTrade.Price = responseT.price.ToDecimal();
