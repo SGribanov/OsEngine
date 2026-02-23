@@ -939,7 +939,7 @@ namespace OsEngine.Market.Servers.BitGet.BitGetFutures
                 Candle candle = new Candle();
 
                 candle.State = CandleState.Finished;
-                candle.TimeStart = TimeManager.GetDateTimeFromTimeStamp(long.Parse(responseCandles.data[i][0]));
+                candle.TimeStart = TimeManager.GetDateTimeFromTimeStamp(long.Parse(responseCandles.data[i][0], CultureInfo.InvariantCulture));
                 candle.Volume = responseCandles.data[i][5].ToDecimal();
                 candle.Close = responseCandles.data[i][4].ToDecimal();
                 candle.High = responseCandles.data[i][2].ToDecimal();
