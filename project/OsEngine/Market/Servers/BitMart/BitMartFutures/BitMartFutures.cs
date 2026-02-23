@@ -654,7 +654,7 @@ namespace OsEngine.Market.Servers.BitMartFutures
                             newCandle.Low = curCandle.low_price.ToDecimal();
                             newCandle.Close = curCandle.close_price.ToDecimal();
                             newCandle.Volume = curCandle.volume.ToDecimal();
-                            newCandle.TimeStart = TimeManager.GetDateTimeFromTimeStampSeconds(Convert.ToInt64(curCandle.timestamp));
+                            newCandle.TimeStart = TimeManager.GetDateTimeFromTimeStampSeconds(Convert.ToInt64(curCandle.timestamp, CultureInfo.InvariantCulture));
 
                             //fix candle
                             if (newCandle.Open < newCandle.Low)
@@ -1734,7 +1734,7 @@ namespace OsEngine.Market.Servers.BitMartFutures
 
                 MarketDepth depth = new MarketDepth();
                 depth.SecurityNameCode = baseDepth.symbol;
-                depth.Time = TimeManager.GetDateTimeFromTimeStamp(Convert.ToInt64(baseDepth.ms_t));
+                depth.Time = TimeManager.GetDateTimeFromTimeStamp(Convert.ToInt64(baseDepth.ms_t, CultureInfo.InvariantCulture));
 
                 double maxBid = 0;
                 double minAsk = double.MaxValue;
@@ -2011,8 +2011,8 @@ namespace OsEngine.Market.Servers.BitMartFutures
             order.NumberMarket = baseOrder.order_id;
             order.ServerType = ServerType.BitMartFutures;
 
-            order.TimeCreate = TimeManager.GetDateTimeFromTimeStamp(Convert.ToInt64(baseOrder.create_time));
-            order.TimeCallBack = TimeManager.GetDateTimeFromTimeStamp(Convert.ToInt64(baseOrder.update_time));
+            order.TimeCreate = TimeManager.GetDateTimeFromTimeStamp(Convert.ToInt64(baseOrder.create_time, CultureInfo.InvariantCulture));
+            order.TimeCallBack = TimeManager.GetDateTimeFromTimeStamp(Convert.ToInt64(baseOrder.update_time, CultureInfo.InvariantCulture));
 
             SetOrderSide(order, Convert.ToInt32(baseOrder.side));
 
@@ -2680,7 +2680,7 @@ namespace OsEngine.Market.Servers.BitMartFutures
 
             order.NumberMarket = baseOrder.order_id;
 
-            order.TimeCallBack = TimeManager.GetDateTimeFromTimeStamp(Convert.ToInt64(baseOrder.update_time));
+            order.TimeCallBack = TimeManager.GetDateTimeFromTimeStamp(Convert.ToInt64(baseOrder.update_time, CultureInfo.InvariantCulture));
 
             SetOrderSide(order, baseOrder.side);
 
@@ -2774,7 +2774,7 @@ namespace OsEngine.Market.Servers.BitMartFutures
             trade.NumberOrderParent = baseTrade.order_id;
             trade.NumberTrade = baseTrade.trade_id;
             trade.SecurityNameCode = baseTrade.symbol;
-            trade.Time = TimeManager.GetDateTimeFromTimeStamp(Convert.ToInt64(baseTrade.create_time));
+            trade.Time = TimeManager.GetDateTimeFromTimeStamp(Convert.ToInt64(baseTrade.create_time, CultureInfo.InvariantCulture));
             if (baseTrade.side <= 2)
             {
                 trade.Side = Side.Buy;

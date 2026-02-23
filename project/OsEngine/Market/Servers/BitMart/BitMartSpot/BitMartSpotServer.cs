@@ -476,7 +476,7 @@ namespace OsEngine.Market.Servers.BitMart
                             Candle candle = new Candle();
 
                             candle.State = CandleState.Finished;
-                            candle.TimeStart = TimeManager.GetDateTimeFromTimeStampSeconds(Convert.ToInt64(item[0]));
+                            candle.TimeStart = TimeManager.GetDateTimeFromTimeStampSeconds(Convert.ToInt64(item[0], CultureInfo.InvariantCulture));
                             candle.Volume = item[5].ToDecimal();
                             candle.Close = item[4].ToDecimal();
                             candle.High = item[2].ToDecimal();
@@ -1292,7 +1292,7 @@ namespace OsEngine.Market.Servers.BitMart
                     Trade trade = new Trade();
                     trade.SecurityNameCode = quotes.symbol;
                     trade.Price = quotes.price.ToDecimal();
-                    trade.Time = TimeManager.GetDateTimeFromTimeStampSeconds(Convert.ToInt64(quotes.s_t));
+                    trade.Time = TimeManager.GetDateTimeFromTimeStampSeconds(Convert.ToInt64(quotes.s_t, CultureInfo.InvariantCulture));
                     trade.Id = quotes.s_t.ToString() + quotes.side + quotes.symbol;
 
                     if (quotes.side == "buy")
@@ -1352,7 +1352,7 @@ namespace OsEngine.Market.Servers.BitMart
 
                     MarketDepth depth = new MarketDepth();
                     depth.SecurityNameCode = messDepth.symbol;
-                    depth.Time = TimeManager.GetDateTimeFromTimeStamp(Convert.ToInt64(messDepth.ms_t));
+                    depth.Time = TimeManager.GetDateTimeFromTimeStamp(Convert.ToInt64(messDepth.ms_t, CultureInfo.InvariantCulture));
 
                     for (int k = 0; k < messDepth.bids.Count; k++)
                     {
@@ -1551,8 +1551,8 @@ namespace OsEngine.Market.Servers.BitMart
             order.NumberMarket = baseOrder.order_id;
             order.ServerType = ServerType.BitMartSpot;
 
-            order.TimeCreate = TimeManager.GetDateTimeFromTimeStamp(Convert.ToInt64(baseOrder.create_time));
-            order.TimeCallBack = TimeManager.GetDateTimeFromTimeStamp(Convert.ToInt64(baseOrder.update_time));
+            order.TimeCreate = TimeManager.GetDateTimeFromTimeStamp(Convert.ToInt64(baseOrder.create_time, CultureInfo.InvariantCulture));
+            order.TimeCallBack = TimeManager.GetDateTimeFromTimeStamp(Convert.ToInt64(baseOrder.update_time, CultureInfo.InvariantCulture));
 
             if (baseOrder.side == "buy")
             {
@@ -1995,7 +1995,7 @@ namespace OsEngine.Market.Servers.BitMart
 
             order.NumberMarket = baseOrder.orderId;
 
-            order.TimeCallBack = TimeManager.GetDateTimeFromTimeStamp(Convert.ToInt64(baseOrder.updateTime));
+            order.TimeCallBack = TimeManager.GetDateTimeFromTimeStamp(Convert.ToInt64(baseOrder.updateTime, CultureInfo.InvariantCulture));
 
             if (baseOrder.side == "buy")
             {
@@ -2114,7 +2114,7 @@ namespace OsEngine.Market.Servers.BitMart
             trade.NumberOrderParent = baseTrade.orderId;
             trade.NumberTrade = baseTrade.tradeId;
             trade.SecurityNameCode = baseTrade.symbol;
-            trade.Time = TimeManager.GetDateTimeFromTimeStamp(Convert.ToInt64(baseTrade.createTime));
+            trade.Time = TimeManager.GetDateTimeFromTimeStamp(Convert.ToInt64(baseTrade.createTime, CultureInfo.InvariantCulture));
 
             if (baseTrade.side == "buy")
             {
