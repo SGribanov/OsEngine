@@ -720,7 +720,7 @@ namespace OsEngine.Market.Servers.Woo
                             Candle candle = new Candle();
 
                             candle.State = CandleState.Finished;
-                            candle.TimeStart = TimeManager.GetDateTimeFromTimeStamp(long.Parse(item.startTimestamp));
+                            candle.TimeStart = TimeManager.GetDateTimeFromTimeStamp(long.Parse(item.startTimestamp, CultureInfo.InvariantCulture));
                             candle.Volume = item.volume.ToDecimal();
                             candle.Close = response.data.rows[i].close.ToDecimal();
                             candle.High = item.high.ToDecimal();
@@ -1662,7 +1662,7 @@ namespace OsEngine.Market.Servers.Woo
                 trade.SecurityNameCode = item.s;
                 trade.Price = item.px.ToDecimal();
                 trade.Id = responseTrade.ts;
-                trade.Time = TimeManager.GetDateTimeFromTimeStamp(Convert.ToInt64(responseTrade.ts));
+                trade.Time = TimeManager.GetDateTimeFromTimeStamp(Convert.ToInt64(responseTrade.ts, CultureInfo.InvariantCulture));
                 trade.Volume = item.sx.ToDecimal();
                 trade.Side = item.sd.Equals("BUY") ? Side.Buy : Side.Sell;
 
@@ -1816,7 +1816,7 @@ namespace OsEngine.Market.Servers.Woo
                         marketDepth.Asks = asks;
                         marketDepth.Bids = bids;
 
-                        marketDepth.Time = TimeManager.GetDateTimeFromTimeStamp(Convert.ToInt64(response.timestamp));
+                        marketDepth.Time = TimeManager.GetDateTimeFromTimeStamp(Convert.ToInt64(response.timestamp, CultureInfo.InvariantCulture));
 
                         if (MarketDepthEvent != null)
                         {
@@ -1951,7 +1951,7 @@ namespace OsEngine.Market.Servers.Woo
                     }
                 }
 
-                marketDepth.Time = TimeManager.GetDateTimeFromTimeStamp(Convert.ToInt64(item.ts));
+                marketDepth.Time = TimeManager.GetDateTimeFromTimeStamp(Convert.ToInt64(item.ts, CultureInfo.InvariantCulture));
 
                 if (_lastMdTime != DateTime.MinValue &&
                     _lastMdTime >= marketDepth.Time)
@@ -2211,8 +2211,8 @@ namespace OsEngine.Market.Servers.Woo
 
                 Order newOrder = new Order();
                 newOrder.SecurityNameCode = item.s;
-                newOrder.TimeCallBack = TimeManager.GetDateTimeFromTimeStamp(long.Parse(item.ts));
-                newOrder.TimeCreate = TimeManager.GetDateTimeFromTimeStamp(long.Parse(item.ts));
+                newOrder.TimeCallBack = TimeManager.GetDateTimeFromTimeStamp(long.Parse(item.ts, CultureInfo.InvariantCulture));
+                newOrder.TimeCreate = TimeManager.GetDateTimeFromTimeStamp(long.Parse(item.ts, CultureInfo.InvariantCulture));
 
                 try
                 {
@@ -2248,7 +2248,7 @@ namespace OsEngine.Market.Servers.Woo
                 {
                     MyTrade myTrade = new MyTrade();
 
-                    myTrade.Time = TimeManager.GetDateTimeFromTimeStamp(Convert.ToInt64(item.ts));
+                    myTrade.Time = TimeManager.GetDateTimeFromTimeStamp(Convert.ToInt64(item.ts, CultureInfo.InvariantCulture));
                     myTrade.NumberOrderParent = item.oid;
                     myTrade.NumberTrade = item.tid;
                     myTrade.Price = item.epx.ToDecimal();
