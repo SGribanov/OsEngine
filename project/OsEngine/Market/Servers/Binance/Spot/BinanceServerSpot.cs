@@ -262,11 +262,15 @@ namespace OsEngine.Market.Servers.Binance.Spot
                         decimal minQty = sec.filters[1].minQty.ToDecimal();
 
                         security.Lot = 1;
-                        string qtyInStr = minQty.ToStringWithNoEndZero().Replace(",", ".");
+                        string qtyInStr = minQty.ToStringWithNoEndZero();
+                        int dotIndex = qtyInStr.LastIndexOf('.');
+                        int commaIndex = qtyInStr.LastIndexOf(',');
+                        int separatorIndex = Math.Max(dotIndex, commaIndex);
 
-                        if (qtyInStr.Split('.').Length > 1)
+                        if (separatorIndex >= 0 &&
+                            separatorIndex < qtyInStr.Length - 1)
                         {
-                            security.DecimalsVolume = qtyInStr.Split('.')[1].Length;
+                            security.DecimalsVolume = qtyInStr.Length - separatorIndex - 1;
                         }
                     }
 

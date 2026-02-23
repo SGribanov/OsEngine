@@ -16,6 +16,7 @@ using RestSharp;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Net;
 using System.Security.Cryptography;
 using System.Text;
@@ -1948,8 +1949,8 @@ namespace OsEngine.Market.Servers.BloFin
                 orderRequest.Add("positionSide", posSide);
                 orderRequest.Add("side", order.Side == Side.Buy ? "buy" : "sell");
                 orderRequest.Add("orderType", order.TypeOrder.ToString().ToLower());
-                orderRequest.Add("price", order.Price.ToString().Replace(",", "."));
-                orderRequest.Add("size", volume.ToString().Replace(",", "."));
+                orderRequest.Add("price", order.Price.ToString(CultureInfo.InvariantCulture));
+                orderRequest.Add("size", volume.ToString(CultureInfo.InvariantCulture));
                 orderRequest.Add("clientOrderId", order.NumberUser.ToString());
                 orderRequest.Add("brokerId", "0f43c3141c50b7e3");
 

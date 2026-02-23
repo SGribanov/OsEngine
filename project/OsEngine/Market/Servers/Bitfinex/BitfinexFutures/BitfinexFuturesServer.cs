@@ -240,7 +240,7 @@ namespace OsEngine.Market.Servers.Bitfinex.BitfinexFutures
                         List<string> item = securityList[i];
 
                         string symbol = item[0]?.ToString();
-                        string derevativePrice = item[3]?.ToString()?.Replace('.', ',');
+                        string derevativePrice = item[3]?.ToString();
 
                         if (symbol.Contains("TEST"))
                         {
@@ -294,10 +294,22 @@ namespace OsEngine.Market.Servers.Bitfinex.BitfinexFutures
 
         private int DigitsAfterComma(string valueNumber)
         {
-            int commaPosition = valueNumber.IndexOf(',');
-            int digitsAfterComma = valueNumber.Length - commaPosition - 1;
+            if (string.IsNullOrEmpty(valueNumber))
+            {
+                return 0;
+            }
 
-            return digitsAfterComma;
+            int dotPosition = valueNumber.LastIndexOf('.');
+            int commaPosition = valueNumber.LastIndexOf(',');
+            int separatorPosition = Math.Max(dotPosition, commaPosition);
+
+            if (separatorPosition < 0 ||
+                separatorPosition >= valueNumber.Length - 1)
+            {
+                return 0;
+            }
+
+            return valueNumber.Length - separatorPosition - 1;
         }
 
         public void RequestMinSizes()
@@ -2629,15 +2641,15 @@ namespace OsEngine.Market.Servers.Bitfinex.BitfinexFutures
                     newOrder.OrderType = "MARKET";
                 }
 
-                newOrder.Price = order.TypeOrder == OrderPriceType.Market ? null : order.Price.ToString().Replace(",", ".");
+                newOrder.Price = order.TypeOrder == OrderPriceType.Market ? null : order.Price.ToString(CultureInfo.InvariantCulture);
 
                 if (order.Side.ToString() == "Sell")
                 {
-                    newOrder.Amount = "-" + (order.Volume).ToString().Replace(",", ".");
+                    newOrder.Amount = "-" + order.Volume.ToString(CultureInfo.InvariantCulture);
                 }
                 else
                 {
-                    newOrder.Amount = (order.Volume).ToString().Replace(",", ".");
+                    newOrder.Amount = order.Volume.ToString(CultureInfo.InvariantCulture);
                 }
 
                 string body = $"{{\"type\":\"{newOrder.OrderType}\"," +

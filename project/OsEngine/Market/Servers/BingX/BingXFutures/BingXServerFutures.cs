@@ -1876,10 +1876,10 @@ namespace OsEngine.Market.Servers.BingX.BingXFutures
                 {
                     trade.SecurityNameCode = response.data[i].s;
 
-                    trade.Price = response.data[i].p.Replace('.', ',').ToDecimal();
+                    trade.Price = response.data[i].p.ToDecimal();
                     // trade.Id = // the exchange does not send trade id
                     trade.Time = TimeManager.GetDateTimeFromTimeStamp(Convert.ToInt64(response.data[i].T));
-                    trade.Volume = response.data[i].q.Replace('.', ',').ToDecimal();
+                    trade.Volume = response.data[i].q.ToDecimal();
 
                     if (response.data[i].m == "true")
                     {
@@ -2056,8 +2056,8 @@ namespace OsEngine.Market.Servers.BingX.BingXFutures
                 newOrder.SecurityClassCode = responseOrder.o.N;
                 newOrder.PortfolioNumber = "BingXFutures";
                 newOrder.Side = responseOrder.o.S.Equals("BUY") ? Side.Buy : Side.Sell;
-                newOrder.Price = responseOrder.o.p.Replace('.', ',').ToDecimal();
-                newOrder.Volume = responseOrder.o.q.Replace('.', ',').ToDecimal();
+                newOrder.Price = responseOrder.o.p.ToDecimal();
+                newOrder.Volume = responseOrder.o.q.ToDecimal();
                 newOrder.State = orderState;
                 newOrder.TimeCallBack = TimeManager.GetDateTimeFromTimeStamp(Convert.ToInt64(responseOrder.E));
                 newOrder.TypeOrder = responseOrder.o.o.Equals("MARKET") ? OrderPriceType.Market : OrderPriceType.Limit;
@@ -2225,7 +2225,7 @@ namespace OsEngine.Market.Servers.BingX.BingXFutures
                 string positionSide = CheckPositionSide(order);
 
                 string timeStamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds().ToString();
-                string quantity = order.Volume.ToString().Replace(",", ".");
+                string quantity = order.Volume.ToString(CultureInfo.InvariantCulture);
                 string typeOrder = "";
                 string parameters = "";
                 string price = "";
@@ -2239,7 +2239,7 @@ namespace OsEngine.Market.Servers.BingX.BingXFutures
                 else if (order.TypeOrder == OrderPriceType.Limit)
                 {
                     typeOrder = "LIMIT";
-                    price = order.Price.ToString().Replace(",", ".");
+                    price = order.Price.ToString(CultureInfo.InvariantCulture);
                     parameters = $"timestamp={timeStamp}&symbol={symbol}&side={side}&positionSide={positionSide}" +
                         $"&type={typeOrder}&quantity={quantity}&price={price}&clientOrderID={order.NumberUser}";
                 }
@@ -2505,8 +2505,8 @@ namespace OsEngine.Market.Servers.BingX.BingXFutures
                             openOrder.SecurityClassCode = response.data.orders[i].symbol.Split('-')[1];
                             openOrder.PortfolioNumber = "BingXFutures";
                             openOrder.Side = response.data.orders[i].side.Equals("BUY") ? Side.Buy : Side.Sell;
-                            openOrder.Price = response.data.orders[i].price.Replace('.', ',').ToDecimal();
-                            openOrder.Volume = response.data.orders[i].origQty.Replace('.', ',').ToDecimal();
+                            openOrder.Price = response.data.orders[i].price.ToDecimal();
+                            openOrder.Volume = response.data.orders[i].origQty.ToDecimal();
                             openOrder.TimeCallBack = TimeManager.GetDateTimeFromTimeStamp(Convert.ToInt64(response.data.orders[i].time));
                             openOrder.TypeOrder = response.data.orders[i].type.Equals("MARKET") ? OrderPriceType.Market : OrderPriceType.Limit;
                             openOrder.ServerType = ServerType.BingXFutures;
@@ -2731,8 +2731,8 @@ namespace OsEngine.Market.Servers.BingX.BingXFutures
                         openOrder.SecurityClassCode = response.data.order.symbol.Split('-')[1];
                         openOrder.PortfolioNumber = "BingXFutures";
                         openOrder.Side = response.data.order.side.Equals("BUY") ? Side.Buy : Side.Sell;
-                        openOrder.Price = response.data.order.price.Replace('.', ',').ToDecimal();
-                        openOrder.Volume = response.data.order.origQty.Replace('.', ',').ToDecimal();
+                        openOrder.Price = response.data.order.price.ToDecimal();
+                        openOrder.Volume = response.data.order.origQty.ToDecimal();
                         openOrder.TimeCallBack = TimeManager.GetDateTimeFromTimeStamp(Convert.ToInt64(response.data.order.time));
                         openOrder.TypeOrder = response.data.order.type.Equals("MARKET") ? OrderPriceType.Market : OrderPriceType.Limit;
                         openOrder.ServerType = ServerType.BingXFutures;

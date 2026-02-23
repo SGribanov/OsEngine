@@ -17,6 +17,7 @@ using RestSharp;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Net;
 using System.Security.Cryptography;
@@ -2050,8 +2051,8 @@ namespace OsEngine.Market.Servers.BitGet.BitGetSpot
                 jsonContent.Add("symbol", order.SecurityNameCode);
                 jsonContent.Add("side", order.Side == Side.Buy ? "buy" : "sell");
                 jsonContent.Add("orderType", order.TypeOrder.ToString().ToLower());
-                jsonContent.Add("price", order.Price.ToString().Replace(",", "."));
-                jsonContent.Add("size", order.Volume.ToString().Replace(",", "."));
+                jsonContent.Add("price", order.Price.ToString(CultureInfo.InvariantCulture));
+                jsonContent.Add("size", order.Volume.ToString(CultureInfo.InvariantCulture));
                 jsonContent.Add("clientOid", order.NumberUser);
                 jsonContent.Add("force", "gtc");
 

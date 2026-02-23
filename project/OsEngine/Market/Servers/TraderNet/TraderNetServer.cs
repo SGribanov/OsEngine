@@ -1721,8 +1721,8 @@ namespace OsEngine.Market.Servers.TraderNet
                 paramsDict.Add("instr_name", order.SecurityNameCode);
                 paramsDict.Add("action_id", order.Side == Side.Buy ? "1" : "3");
                 paramsDict.Add("order_type_id", order.TypeOrder == OrderPriceType.Market ? "1" : "2");
-                paramsDict.Add("qty", volume.ToString());
-                paramsDict.Add("limit_price", order.Price.ToString().Replace(",", "."));
+                paramsDict.Add("qty", volume.ToString(CultureInfo.InvariantCulture));
+                paramsDict.Add("limit_price", order.Price.ToString(CultureInfo.InvariantCulture));
                 paramsDict.Add("expiration_id", "3");
                 paramsDict.Add("user_order_id", order.NumberUser.ToString());
 

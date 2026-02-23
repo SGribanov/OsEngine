@@ -17,6 +17,7 @@ using RestSharp;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO.Compression;
 using System.Linq;
 using System.Net;
@@ -445,15 +446,15 @@ namespace OsEngine.Market.Servers.HTX.Swap
                                 }
                                 else
                                 {
-                                    newSecurity.PriceStep = item.price_tick.Replace(',', '.').TrimEnd('0').TrimEnd('.').ToDecimal();
+                                    newSecurity.PriceStep = item.price_tick.TrimEnd('0').TrimEnd('.', ',').ToDecimal();
                                 }
 
                                 newSecurity.Decimals = item.price_tick.DecimalsCount();
                                 newSecurity.PriceStepCost = newSecurity.PriceStep;
                                 newSecurity.State = SecurityStateType.Activ;
-                                newSecurity.MinTradeAmount = item.contract_size.Replace(',', '.').TrimEnd('0').TrimEnd('.').ToDecimal();
+                                newSecurity.MinTradeAmount = item.contract_size.TrimEnd('0').TrimEnd('.', ',').ToDecimal();
                                 newSecurity.MinTradeAmountType = MinTradeAmountType.Contract;
-                                newSecurity.VolumeStep = item.contract_size.Replace(',', '.').TrimEnd('0').TrimEnd('.').ToDecimal();
+                                newSecurity.VolumeStep = item.contract_size.TrimEnd('0').TrimEnd('.', ',').ToDecimal();
 
                                 securities.Add(newSecurity);
                             }
@@ -2772,7 +2773,7 @@ namespace OsEngine.Market.Servers.HTX.Swap
                 jsonContent.Add("direction", order.Side == Side.Buy ? "buy" : "sell");
 
                 decimal volume = order.Volume / GetVolume(order.SecurityNameCode);
-                jsonContent.Add("volume", volume.ToString("0.#####").Replace(",", "."));
+                jsonContent.Add("volume", volume.ToString("0.#####", CultureInfo.InvariantCulture));
 
                 if (HedgeMode
                     || "COIN".Equals(((ServerParameterEnum)ServerParameters[2]).Value))
@@ -2792,14 +2793,14 @@ namespace OsEngine.Market.Servers.HTX.Swap
                 if (order.TypeOrder == OrderPriceType.Limit)
                 {
                     jsonContent.Add("order_price_type", "limit");
-                    jsonContent.Add("price", order.Price.ToString().Replace(",", "."));
+                    jsonContent.Add("price", order.Price.ToString(CultureInfo.InvariantCulture));
                 }
                 else if (order.TypeOrder == OrderPriceType.Market)
                 {
                     if ("COIN".Equals(((ServerParameterEnum)ServerParameters[2]).Value))
                     {
                         jsonContent.Add("order_price_type", "limit");
-                        jsonContent.Add("price", order.Price.ToString().Replace(",", "."));
+                        jsonContent.Add("price", order.Price.ToString(CultureInfo.InvariantCulture));
 
                         if (order.Price == 0)
                         {

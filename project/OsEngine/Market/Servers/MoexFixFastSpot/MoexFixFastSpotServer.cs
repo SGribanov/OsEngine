@@ -25,6 +25,7 @@ using System.Xml;
 using System.Net;
 using LiteDB;
 using System.Linq;
+using System.Globalization;
 
 namespace OsEngine.Market.Servers.MoexFixFastSpot
 {
@@ -3614,8 +3615,8 @@ namespace OsEngine.Market.Servers.MoexFixFastSpot
                 msg.Side = order.Side == Side.Buy ? "1" : "2";
                 msg.TransactTime = DateTime.UtcNow.ToString("yyyyMMdd-HH:mm:ss.fff");
                 msg.OrdType = order.TypeOrder == OrderPriceType.Market ? "1" : "2"; // 1 - Market, 2 - Limit
-                msg.OrderQty = order.Volume.ToString();
-                msg.Price = order.TypeOrder == OrderPriceType.Limit ? order.Price.ToString().Replace(',', '.') : "0";
+                msg.OrderQty = order.Volume.ToString(CultureInfo.InvariantCulture);
+                msg.Price = order.TypeOrder == OrderPriceType.Limit ? order.Price.ToString(CultureInfo.InvariantCulture) : "0";
                 
                 string newSingleOrderMessage = SendFIXMessage(_MFIXTradeSocket, header, msg);
                 WriteLogOutgoingFIXMessage(newSingleOrderMessage);
@@ -3678,8 +3679,8 @@ namespace OsEngine.Market.Servers.MoexFixFastSpot
                 msg.Side = order.Side == Side.Buy ? "1" : "2";
                 msg.TransactTime = DateTime.UtcNow.ToString("yyyyMMdd-HH:mm:ss.fff");
                 msg.OrdType = order.TypeOrder == OrderPriceType.Market ? "1" : "2"; // 1 - Market, 2 - Limit
-                msg.OrderQty = order.Volume.ToString();
-                msg.Price = order.TypeOrder == OrderPriceType.Limit ? newPrice.ToString().Replace(',', '.') : "0";
+                msg.OrderQty = order.Volume.ToString(CultureInfo.InvariantCulture);
+                msg.Price = order.TypeOrder == OrderPriceType.Limit ? newPrice.ToString(CultureInfo.InvariantCulture) : "0";
                                
                 string orderMessage = SendFIXMessage(_MFIXTradeSocket, header, msg);
                 WriteLogOutgoingFIXMessage(orderMessage);

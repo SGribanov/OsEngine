@@ -17,6 +17,7 @@ using RestSharp;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Net;
 using System.Security.Cryptography;
@@ -1588,18 +1589,18 @@ namespace OsEngine.Market.Servers.KuCoin.KuCoinSpot
 
                 if (item.size != null)
                 {
-                    newOrder.Volume = item.size.Replace('.', ',').ToDecimal();
+                    newOrder.Volume = item.size.ToDecimal();
                 }
                 else if (item.originSize != null)
                 {
-                    newOrder.Volume = item.originSize.Replace('.', ',').ToDecimal();
+                    newOrder.Volume = item.originSize.ToDecimal();
                 }
                 else
                 {
-                    newOrder.Volume = item.filledSize.Replace('.', ',').ToDecimal();
+                    newOrder.Volume = item.filledSize.ToDecimal();
                 }
 
-                newOrder.Price = item.price != null ? item.price.Replace('.', ',').ToDecimal() : 0;
+                newOrder.Price = item.price != null ? item.price.ToDecimal() : 0;
 
                 newOrder.ServerType = ServerType.KuCoinSpot;
                 newOrder.PortfolioNumber = "KuCoinSpot";
@@ -1684,8 +1685,8 @@ namespace OsEngine.Market.Servers.KuCoin.KuCoinSpot
                 data.symbol = order.SecurityNameCode;
                 data.side = order.Side.ToString().ToLower();
                 data.type = order.TypeOrder.ToString().ToLower();
-                data.price = order.TypeOrder == OrderPriceType.Market ? null : order.Price.ToString().Replace(",", ".");
-                data.size = order.Volume.ToString().Replace(",", ".");
+                data.price = order.TypeOrder == OrderPriceType.Market ? null : order.Price.ToString(CultureInfo.InvariantCulture);
+                data.size = order.Volume.ToString(CultureInfo.InvariantCulture);
 
                 JsonSerializerSettings dataSerializerSettings = new JsonSerializerSettings();
                 dataSerializerSettings.NullValueHandling = NullValueHandling.Ignore;// if it's a market order, then we ignore the price parameter
@@ -1939,8 +1940,8 @@ namespace OsEngine.Market.Servers.KuCoin.KuCoinSpot
                                 }
 
                                 newOrder.State = OrderStateType.Active;
-                                newOrder.Volume = order.data.items[i].size.Replace('.', ',').ToDecimal();
-                                newOrder.Price = order.data.items[i].price != null ? order.data.items[i].price.Replace('.', ',').ToDecimal() : 0;
+                                newOrder.Volume = order.data.items[i].size.ToDecimal();
+                                newOrder.Price = order.data.items[i].price != null ? order.data.items[i].price.ToDecimal() : 0;
                                 newOrder.PortfolioNumber = "KuCoinSpot";
 
                                 orders.Add(newOrder);
@@ -2115,8 +2116,8 @@ namespace OsEngine.Market.Servers.KuCoin.KuCoinSpot
                             }
 
                             newOrder.State = order.data.active == "true" ? OrderStateType.Active : OrderStateType.Done;
-                            newOrder.Volume = order.data.size.Replace('.', ',').ToDecimal();
-                            newOrder.Price = order.data.price != null ? order.data.price.Replace('.', ',').ToDecimal() : 0;
+                            newOrder.Volume = order.data.size.ToDecimal();
+                            newOrder.Price = order.data.price != null ? order.data.price.ToDecimal() : 0;
                             newOrder.PortfolioNumber = "KuCoinSpot";
                         }
 

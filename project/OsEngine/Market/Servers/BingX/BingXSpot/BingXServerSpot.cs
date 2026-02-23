@@ -1383,8 +1383,8 @@ namespace OsEngine.Market.Servers.BinGxSpot
                 newOrder.SecurityClassCode = responseOrder.data.s.Split('-')[1];
                 newOrder.PortfolioNumber = "BingXSpot";
                 newOrder.Side = responseOrder.data.S.Equals("BUY") ? Side.Buy : Side.Sell;
-                newOrder.Price = responseOrder.data.p.Replace('.', ',').ToDecimal();
-                newOrder.Volume = responseOrder.data.q.Replace('.', ',').ToDecimal();
+                newOrder.Price = responseOrder.data.p.ToDecimal();
+                newOrder.Volume = responseOrder.data.q.ToDecimal();
                 newOrder.State = orderState;
                 newOrder.TimeCallBack = TimeManager.GetDateTimeFromTimeStamp(Convert.ToInt64(responseOrder.data.E));
                 newOrder.TypeOrder = responseOrder.data.o.Equals("MARKET") ? OrderPriceType.Market : OrderPriceType.Limit;
@@ -1499,10 +1499,10 @@ namespace OsEngine.Market.Servers.BinGxSpot
                 Trade trade = new Trade();
                 trade.SecurityNameCode = responseTrades.data.s;
 
-                trade.Price = responseTrades.data.p.Replace('.', ',').ToDecimal();
+                trade.Price = responseTrades.data.p.ToDecimal();
                 trade.Id = responseTrades.data.t;
                 trade.Time = TimeManager.GetDateTimeFromTimeStamp(Convert.ToInt64(responseTrades.data.T));
-                trade.Volume = responseTrades.data.q.Replace('.', ',').ToDecimal();
+                trade.Volume = responseTrades.data.q.ToDecimal();
                 if (responseTrades.data.m == "true")
                     trade.Side = Side.Sell;
                 else trade.Side = Side.Buy;
@@ -1639,7 +1639,7 @@ namespace OsEngine.Market.Servers.BinGxSpot
                 string secName = order.SecurityNameCode;
                 string side = order.Side == Side.Buy ? "BUY" : "SELL";
                 string timeStamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds().ToString();
-                string quantity = order.Volume.ToString().Replace(",", ".");
+                string quantity = order.Volume.ToString(CultureInfo.InvariantCulture);
                 string typeOrder = "";
                 string parameters = "";
                 string price = "";
@@ -1652,7 +1652,7 @@ namespace OsEngine.Market.Servers.BinGxSpot
                 else if (order.TypeOrder == OrderPriceType.Limit)
                 {
                     typeOrder = "LIMIT";
-                    price = order.Price.ToString().Replace(",", ".");
+                    price = order.Price.ToString(CultureInfo.InvariantCulture);
                     parameters = $"timestamp={timeStamp}&symbol={secName}&side={side}&type={typeOrder}&quantity={quantity}&price={price}&newClientOrderId={order.NumberUser}";
                 }
                 string sign = CalculateHmacSha256(parameters);
@@ -1927,8 +1927,8 @@ namespace OsEngine.Market.Servers.BinGxSpot
                             newOrder.SecurityClassCode = itemOrders.symbol.Split('-')[1];
                             newOrder.PortfolioNumber = "BingXSpot";
                             newOrder.Side = itemOrders.side.Equals("BUY") ? Side.Buy : Side.Sell;
-                            newOrder.Price = itemOrders.price.Replace('.', ',').ToDecimal();
-                            newOrder.Volume = itemOrders.origQty.Replace('.', ',').ToDecimal();
+                            newOrder.Price = itemOrders.price.ToDecimal();
+                            newOrder.Volume = itemOrders.origQty.ToDecimal();
                             newOrder.State = orderState;
                             newOrder.TimeCallBack = TimeManager.GetDateTimeFromTimeStamp(Convert.ToInt64(itemOrders.updateTime));
                             newOrder.TypeOrder = itemOrders.type.Equals("MARKET") ? OrderPriceType.Market : OrderPriceType.Limit;
@@ -2062,8 +2062,8 @@ namespace OsEngine.Market.Servers.BinGxSpot
                                 newOrder.SecurityClassCode = itemOrders.symbol.Split('-')[1];
                                 newOrder.PortfolioNumber = "BingXSpot";
                                 newOrder.Side = itemOrders.side.Equals("BUY") ? Side.Buy : Side.Sell;
-                                newOrder.Price = itemOrders.price.Replace('.', ',').ToDecimal();
-                                newOrder.Volume = itemOrders.origQty.Replace('.', ',').ToDecimal();
+                                newOrder.Price = itemOrders.price.ToDecimal();
+                                newOrder.Volume = itemOrders.origQty.ToDecimal();
                                 newOrder.State = orderState;
                                 newOrder.TimeCallBack = TimeManager.GetDateTimeFromTimeStamp(Convert.ToInt64(itemOrders.updateTime));
                                 newOrder.TypeOrder = itemOrders.type.Equals("MARKET") ? OrderPriceType.Market : OrderPriceType.Limit;

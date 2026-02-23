@@ -618,13 +618,14 @@ namespace OsEngine.Market.Servers.OKX
                 }
 
                 security.Lot = 1;
-                string volStep = item.minSz.Replace(',', '.');
+                int dotIndex = item.minSz.LastIndexOf('.');
+                int commaIndex = item.minSz.LastIndexOf(',');
+                int separatorIndex = Math.Max(dotIndex, commaIndex);
 
-                if (volStep != null
-                        && volStep.Length > 0 &&
-                        volStep.Split('.').Length > 1)
+                if (separatorIndex >= 0 &&
+                    separatorIndex < item.minSz.Length - 1)
                 {
-                    security.DecimalsVolume = volStep.Split('.')[1].Length;
+                    security.DecimalsVolume = item.minSz.Length - separatorIndex - 1;
                 }
 
                 security.MinTradeAmountType = MinTradeAmountType.Contract;
@@ -3215,13 +3216,13 @@ namespace OsEngine.Market.Servers.OKX
 
                 if (order.TypeOrder == OrderPriceType.Limit)
                 {
-                    orderRequest.Add("px", order.Price.ToString().Replace(",", "."));
-                    orderRequest.Add("sz", order.Volume.ToString().Replace(",", "."));
+                    orderRequest.Add("px", order.Price.ToString(CultureInfo.InvariantCulture));
+                    orderRequest.Add("sz", order.Volume.ToString(CultureInfo.InvariantCulture));
                 }
                 else if (order.TypeOrder == OrderPriceType.Market)
                 {
                     orderRequest.Add("tgtCcy", "base_ccy");
-                    orderRequest.Add("sz", order.Volume.ToString().Replace(",", "."));
+                    orderRequest.Add("sz", order.Volume.ToString(CultureInfo.InvariantCulture));
                 }
 
                 orderRequest.Add("tag", "5faf8b0e85c1BCDE");
@@ -3283,10 +3284,10 @@ namespace OsEngine.Market.Servers.OKX
                 orderRequest.Add("clOrdId", order.NumberUser.ToString());
                 orderRequest.Add("side", order.Side == Side.Buy ? "buy" : "sell");
                 orderRequest.Add("ordType", order.TypeOrder.ToString().ToLower());
-                orderRequest.Add("px", order.Price.ToString().Replace(",", "."));
+                orderRequest.Add("px", order.Price.ToString(CultureInfo.InvariantCulture));
 
                 decimal volume = order.Volume / GetVolume(order.SecurityNameCode);
-                orderRequest.Add("sz", volume.ToString().Replace(",", "."));
+                orderRequest.Add("sz", volume.ToString(CultureInfo.InvariantCulture));
                 orderRequest.Add("posSide", posSide);
                 orderRequest.Add("tag", "5faf8b0e85c1BCDE");
 

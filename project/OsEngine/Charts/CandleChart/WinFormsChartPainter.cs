@@ -6600,42 +6600,38 @@ ContextMenuStrip menu)
                 string lowS = low.ToStringWithNoEndZero();
                 string closeS = close.ToStringWithNoEndZero();
 
-                openS = openS.Replace(".", ",");
-                highS = highS.Replace(".", ",");
-                lowS = lowS.Replace(".", ",");
-                closeS = closeS.Replace(".", ",");
+                int openFractionLength = GetFractionLength(openS);
+                int highFractionLength = GetFractionLength(highS);
+                int lowFractionLength = GetFractionLength(lowS);
+                int closeFractionLength = GetFractionLength(closeS);
 
-                if (openS.Split(',').Length > 1 ||
-                    highS.Split(',').Length > 1 ||
-                    lowS.Split(',').Length > 1 ||
-                    closeS.Split(',').Length > 1)
+                if (openFractionLength > 0 ||
+                    highFractionLength > 0 ||
+                    lowFractionLength > 0 ||
+                    closeFractionLength > 0)
                 {
                     // if there's a physical part
                     // если имеет место вещественная часть
                     int length = 1;
 
-                    if (openS.Split(',').Length > 1 &&
-                        openS.Split(',')[1].Length > length)
+                    if (openFractionLength > length)
                     {
-                        length = openS.Split(',')[1].Length;
+                        length = openFractionLength;
                     }
 
-                    if (highS.Split(',').Length > 1 &&
-                        highS.Split(',')[1].Length > length)
+                    if (highFractionLength > length)
                     {
-                        length = highS.Split(',')[1].Length;
+                        length = highFractionLength;
                     }
 
-                    if (lowS.Split(',').Length > 1 &&
-                        lowS.Split(',')[1].Length > length)
+                    if (lowFractionLength > length)
                     {
-                        length = lowS.Split(',')[1].Length;
+                        length = lowFractionLength;
                     }
 
-                    if (closeS.Split(',').Length > 1 &&
-                        closeS.Split(',')[1].Length > length)
+                    if (closeFractionLength > length)
                     {
-                        length = closeS.Split(',')[1].Length;
+                        length = closeFractionLength;
                     }
 
                     if (length == 1 && minPriceStep > 0.1m)
@@ -6774,6 +6770,30 @@ ContextMenuStrip menu)
             }
 
            return countZnak;
+        }
+
+        private static int GetFractionLength(string value)
+        {
+            if (string.IsNullOrEmpty(value))
+            {
+                return 0;
+            }
+
+            int separatorIndex = value.LastIndexOf('.');
+            int commaIndex = value.LastIndexOf(',');
+
+            if (commaIndex > separatorIndex)
+            {
+                separatorIndex = commaIndex;
+            }
+
+            if (separatorIndex < 0 ||
+                separatorIndex >= value.Length - 1)
+            {
+                return 0;
+            }
+
+            return value.Length - separatorIndex - 1;
         }
 
         private int GetAreaDecimal(string areaName)

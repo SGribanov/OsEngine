@@ -17,6 +17,7 @@ using RestSharp;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Net;
 using System.Security.Cryptography;
@@ -1990,8 +1991,8 @@ namespace OsEngine.Market.Servers.GateIo.GateIoSpot
                     }
 
                     newOrder.State = orderState;
-                    newOrder.Volume = responseOrders.result[i].amount.Replace('.', ',').ToDecimal();
-                    newOrder.Price = responseOrders.result[i].price.Replace('.', ',').ToDecimal();
+                    newOrder.Volume = responseOrders.result[i].amount.ToDecimal();
+                    newOrder.Price = responseOrders.result[i].price.ToDecimal();
                     newOrder.ServerType = ServerType.GateIoSpot;
                     newOrder.PortfolioNumber = "GateIO_Spot";
 
@@ -2064,8 +2065,8 @@ namespace OsEngine.Market.Servers.GateIo.GateIoSpot
             {
                 string side = order.Side == Side.Buy ? "buy" : "sell";
                 string secName = order.SecurityNameCode;
-                string price = order.Price.ToString().Replace(",", ".");
-                string volume = order.Volume.ToString().Replace(",", ".");
+                string price = order.Price.ToString(CultureInfo.InvariantCulture);
+                string volume = order.Volume.ToString(CultureInfo.InvariantCulture);
 
                 string method = "POST";
                 string url = "/spot/orders";
@@ -2277,8 +2278,8 @@ namespace OsEngine.Market.Servers.GateIo.GateIoSpot
                             }
 
                             newOrder.State = OrderStateType.Active;
-                            newOrder.Volume = itemOrders[j].amount.Replace('.', ',').ToDecimal();
-                            newOrder.Price = itemOrders[j].price.Replace('.', ',').ToDecimal();
+                            newOrder.Volume = itemOrders[j].amount.ToDecimal();
+                            newOrder.Price = itemOrders[j].price.ToDecimal();
                             newOrder.ServerType = ServerType.GateIoSpot;
                             newOrder.PortfolioNumber = "GateIO_Spot";
 
@@ -2447,8 +2448,8 @@ namespace OsEngine.Market.Servers.GateIo.GateIoSpot
                         }
 
                         newOrder.State = orderState;
-                        newOrder.Volume = responseOrders[i].amount.Replace('.', ',').ToDecimal();
-                        newOrder.Price = responseOrders[i].price.Replace('.', ',').ToDecimal();
+                        newOrder.Volume = responseOrders[i].amount.ToDecimal();
+                        newOrder.Price = responseOrders[i].price.ToDecimal();
                         newOrder.ServerType = ServerType.GateIoSpot;
                         newOrder.PortfolioNumber = "GateIO_Spot";
 

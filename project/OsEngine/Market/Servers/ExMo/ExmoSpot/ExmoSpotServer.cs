@@ -17,6 +17,7 @@ using RestSharp;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Net;
 using System.Security.Cryptography;
 using System.Text;
@@ -1525,11 +1526,11 @@ namespace OsEngine.Market.Servers.ExMo.ExmoSpot
                 string timeStamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds().ToString();
 
                 string queryParam = $"pair={order.SecurityNameCode}&";
-                queryParam += $"quantity={order.Volume.ToString().Replace(",", ".")}&";
+                queryParam += $"quantity={order.Volume.ToString(CultureInfo.InvariantCulture)}&";
 
                 if (order.TypeOrder == OrderPriceType.Limit)
                 {
-                    queryParam += $"price={order.Price.ToString().Replace(",", ".")}&";
+                    queryParam += $"price={order.Price.ToString(CultureInfo.InvariantCulture)}&";
 
                     if (order.Side == Side.Buy)
                     {

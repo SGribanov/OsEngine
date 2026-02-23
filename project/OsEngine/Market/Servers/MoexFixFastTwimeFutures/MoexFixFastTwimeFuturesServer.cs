@@ -8,6 +8,7 @@ using OsEngine.Market.Servers.Entity;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.Net.Sockets;
 using System.Net;
@@ -4013,7 +4014,7 @@ namespace OsEngine.Market.Servers.MoexFixFastTwimeFutures
                     string ExpireDate = "";
 
                     string ordType = "2"; // Limit only
-                    string price = order.TypeOrder == OrderPriceType.Market ? null : order.Price.ToString().Replace(",", ".");
+                    string price = order.TypeOrder == OrderPriceType.Market ? null : order.Price.ToString(CultureInfo.InvariantCulture);
                     string MarketSegmentID = order.SecurityClassCode.Equals("Futures") ? "F" : "O";
                     string symbol = order.SecurityNameCode;
                     string account = _TradeAccount.Substring(4); // 3-х символьный код клиента.
@@ -4041,7 +4042,7 @@ namespace OsEngine.Market.Servers.MoexFixFastTwimeFutures
                                     timeInForce,
                                     ((byte)order.Side).ToString(),
                                     false, null, null, // айсберг
-                                    order.Volume.ToString().Replace(",", "."),
+                                    order.Volume.ToString(CultureInfo.InvariantCulture),
                                     price,
                                     new string[] { "1", _senderCompID, "C", "3" }, // группа Parties
                                     ExpireDate,
@@ -4115,7 +4116,7 @@ namespace OsEngine.Market.Servers.MoexFixFastTwimeFutures
                             order.SecurityNameCode,
                             CFICode,
                             ((byte)order.Side).ToString(),
-                            order.Volume.ToString().Replace(",", "."),
+                            order.Volume.ToString(CultureInfo.InvariantCulture),
                             _msgSeqNum
                         );
 
@@ -4196,8 +4197,8 @@ namespace OsEngine.Market.Servers.MoexFixFastTwimeFutures
                     string clOrdID = DateTime.UtcNow.Ticks.ToString();   // идентификатор заявки на снятие/изменение
                     string orderID = order.NumberMarket;
                     string side = order.Side == Side.Buy ? "1" : "2";
-                    string orderQty = order.Volume.ToString();
-                    string price = order.TypeOrder == OrderPriceType.Limit ? newPrice.ToString().Replace(',', '.') : "0";
+                    string orderQty = order.Volume.ToString(CultureInfo.InvariantCulture);
+                    string price = order.TypeOrder == OrderPriceType.Limit ? newPrice.ToString(CultureInfo.InvariantCulture) : "0";
                     string CFICode = string.Empty;
 
                     if (!order.SecurityClassCode.Equals("Futures"))

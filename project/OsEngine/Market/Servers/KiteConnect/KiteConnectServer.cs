@@ -8,6 +8,7 @@ using OsEngine.Market.Servers.Entity;
 using RestSharp;
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Net;
 using System.Text;
 using System.Threading;
@@ -1629,10 +1630,10 @@ namespace OsEngine.Market.Servers.KiteConnect
 
                 if (order.TypeOrder != OrderPriceType.Market)
                 {
-                    request.AddParameter("price", order.Price.ToString().Replace(",", "."));
+                    request.AddParameter("price", order.Price.ToString(CultureInfo.InvariantCulture));
                 }
 
-                request.AddParameter("quantity", order.Volume.ToString().Replace(",", "."));
+                request.AddParameter("quantity", order.Volume.ToString(CultureInfo.InvariantCulture));
                 request.AddParameter("product", "CNC");
                 request.AddParameter("validity", "DAY");
                 request.AddParameter("tag", tag);
@@ -1704,8 +1705,8 @@ namespace OsEngine.Market.Servers.KiteConnect
                 request.AddHeader("Authorization", "token " + _apiKey + ":" + _accessToken);
                 request.AddHeader("X-Kite-Version", "3");
                 request.AddParameter("order_type", "LIMIT");
-                request.AddParameter("quantity", order.Volume.ToString().Replace(",", "."));
-                request.AddParameter("price", newPrice.ToString().Replace(",", "."));
+                request.AddParameter("quantity", order.Volume.ToString(CultureInfo.InvariantCulture));
+                request.AddParameter("price", newPrice.ToString(CultureInfo.InvariantCulture));
                 request.AddParameter("validity", "DAY");
 
                 IRestResponse response = client.Execute(request);

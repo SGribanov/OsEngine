@@ -16,6 +16,7 @@ using OsEngine.Entity.WebSocketOsEngine;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Net;
 using System.Security.Cryptography;
 using System.Text;
@@ -234,8 +235,8 @@ namespace OsEngine.Market.Servers.Bitfinex
                         List<string> item = securityList[i];
 
                         string symbol = item[0]?.ToString();
-                        string price = item[7]?.ToString()?.Replace('.', ',');
-                        string volume = item[8]?.ToString()?.Replace('.', ',');
+                        string price = item[7]?.ToString();
+                        string volume = item[8]?.ToString();
 
                         if (symbol.Contains("F0")
                             || symbol.Contains("TEST")
@@ -292,10 +293,22 @@ namespace OsEngine.Market.Servers.Bitfinex
 
         private int DigitsAfterComma(string valueNumber)
         {
-            int commaPosition = valueNumber.IndexOf(',');
-            int digitsAfterComma = valueNumber.Length - commaPosition - 1;
+            if (string.IsNullOrEmpty(valueNumber))
+            {
+                return 0;
+            }
 
-            return digitsAfterComma;
+            int dotPosition = valueNumber.LastIndexOf('.');
+            int commaPosition = valueNumber.LastIndexOf(',');
+            int separatorPosition = Math.Max(dotPosition, commaPosition);
+
+            if (separatorPosition < 0 ||
+                separatorPosition >= valueNumber.Length - 1)
+            {
+                return 0;
+            }
+
+            return valueNumber.Length - separatorPosition - 1;
         }
 
         public void RequestMinSizes()
@@ -2503,15 +2516,15 @@ namespace OsEngine.Market.Servers.Bitfinex
                     newOrder.OrderType = "EXCHANGE MARKET";
                 }
 
-                newOrder.Price = order.TypeOrder == OrderPriceType.Market ? null : order.Price.ToString().Replace(",", ".");
+                newOrder.Price = order.TypeOrder == OrderPriceType.Market ? null : order.Price.ToString(CultureInfo.InvariantCulture);
 
                 if (order.Side.ToString() == "Sell")
                 {
-                    newOrder.Amount = "-" + (order.Volume).ToString().Replace(",", ".");
+                    newOrder.Amount = "-" + order.Volume.ToString(CultureInfo.InvariantCulture);
                 }
                 else
                 {
-                    newOrder.Amount = (order.Volume).ToString().Replace(",", ".");
+                    newOrder.Amount = order.Volume.ToString(CultureInfo.InvariantCulture);
                 }
 
                 string body = $"{{\"type\":\"{newOrder.OrderType}\",\"symbol\":\"{newOrder.Symbol}\"," +
@@ -2648,7 +2661,7 @@ namespace OsEngine.Market.Servers.Bitfinex
 
             try
             {
-                string price = newPrice.ToString().Replace(',', '.');
+                string price = newPrice.ToString(CultureInfo.InvariantCulture);
 
                 if (order.TypeOrder == OrderPriceType.Market)
                 {

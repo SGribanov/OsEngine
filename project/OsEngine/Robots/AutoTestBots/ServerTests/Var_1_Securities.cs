@@ -172,11 +172,19 @@ namespace OsEngine.Robots.AutoTestBots.ServerTests
         {
             int realDecimals = 0;
 
-            string stepInStr = step.ToStringWithNoEndZero().Replace(",", ".");
+            string stepInStr = step.ToStringWithNoEndZero();
+            int separatorIndex = stepInStr.LastIndexOf('.');
+            int commaIndex = stepInStr.LastIndexOf(',');
 
-            if (stepInStr.Split('.').Length > 1)
+            if (commaIndex > separatorIndex)
             {
-                realDecimals = stepInStr.Split('.')[1].Length;
+                separatorIndex = commaIndex;
+            }
+
+            if (separatorIndex >= 0 &&
+                separatorIndex < stepInStr.Length - 1)
+            {
+                realDecimals = stepInStr.Length - separatorIndex - 1;
 
                 if (realDecimals != decimals)
                 {

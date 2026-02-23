@@ -17,6 +17,7 @@ using RestSharp;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.IO.Compression;
 using System.Net;
@@ -2292,7 +2293,7 @@ namespace OsEngine.Market.Servers.BitMartFutures
             if (order.TypeOrder == OrderPriceType.Limit)
             {
                 requestObj.type = "limit";
-                requestObj.price = order.Price.ToString().Replace(',', '.');
+                requestObj.price = order.Price.ToString(CultureInfo.InvariantCulture);
             }
             else if (order.TypeOrder == OrderPriceType.Market)
             {

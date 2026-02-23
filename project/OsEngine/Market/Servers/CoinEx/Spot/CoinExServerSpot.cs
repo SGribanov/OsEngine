@@ -1831,14 +1831,14 @@ namespace OsEngine.Market.Servers.CoinEx.Spot
                 parameters.Add("market", order.SecurityNameCode);
                 parameters.Add("market_type", _marketMode);
                 parameters.Add("side", order.Side == Side.Buy ? "buy" : "sell");
-                parameters.Add("amount", order.Volume.ToString(CultureInfo.InvariantCulture).Replace(",", "."));
+                parameters.Add("amount", order.Volume.ToString(CultureInfo.InvariantCulture));
                 parameters.Add("client_id", order.NumberUser.ToString());
                 parameters.Add("ccy", order.SecurityNameCode.Replace("USDT", ""));
 
                 if (order.TypeOrder == OrderPriceType.Limit)
                 {
                     parameters.Add("type", "limit");
-                    parameters.Add("price", order.Price.ToString(CultureInfo.InvariantCulture).Replace(",", "."));
+                    parameters.Add("price", order.Price.ToString(CultureInfo.InvariantCulture));
                 }
                 else if (order.TypeOrder == OrderPriceType.Market)
                 {
@@ -1896,7 +1896,7 @@ namespace OsEngine.Market.Servers.CoinEx.Spot
                 parameters.Add("market", order.SecurityNameCode);
                 parameters.Add("order_id", (long)order.NumberMarket.ToDecimal());
                 parameters.Add("market_type", _marketMode);
-                parameters.Add("price", newPrice.ToString(CultureInfo.InvariantCulture).Replace(",", "."));
+                parameters.Add("price", newPrice.ToString(CultureInfo.InvariantCulture));
 
                 string jsonRequest = JsonConvert.SerializeObject(parameters);
 

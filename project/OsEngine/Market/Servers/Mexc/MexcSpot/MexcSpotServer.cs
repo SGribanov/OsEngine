@@ -18,6 +18,7 @@ using RestSharp;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Net;
 using System.Security.Cryptography;
@@ -1871,8 +1872,8 @@ namespace OsEngine.Market.Servers.Mexc
                     {"symbol", order.SecurityNameCode},
                     {"side", side},
                     {"type", "LIMIT"},
-                    {"quantity", order.Volume.ToString().Replace(',', '.') },
-                    {"price",  order.Price.ToString().Replace(',', '.') },
+                    {"quantity", order.Volume.ToString(CultureInfo.InvariantCulture) },
+                    {"price",  order.Price.ToString(CultureInfo.InvariantCulture) },
                     {"newClientOrderId", order.NumberUser.ToString() },
                 };
 

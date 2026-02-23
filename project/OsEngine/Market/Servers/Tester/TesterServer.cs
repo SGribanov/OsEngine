@@ -4074,8 +4074,7 @@ namespace OsEngine.Market.Servers.Tester
                 {
                     if (volumeSplit[0] == "VolumeStep")
                     {
-                        string normalized = volumeSplit[1].Replace(',', '.');
-                        if (decimal.TryParse(normalized, NumberStyles.Float, CultureInfo.InvariantCulture, out volumeStep))
+                        if (TryParseDecimalInvariantOrCurrent(volumeSplit[1], out volumeStep))
                         {
                             securityTester.Security.VolumeStep = volumeStep;
                         }
@@ -4099,7 +4098,7 @@ namespace OsEngine.Market.Servers.Tester
             double priceStep = 1;
             if (step.Length == 5)
             {
-                if (double.TryParse(step[4].Replace(',', '.'), NumberStyles.Float, NumberFormatInfo.InvariantInfo, out priceStep))
+                if (TryParseDoubleInvariantOrCurrent(step[4], out priceStep))
                 {
                     securityTester.Security.PriceStep = (decimal)priceStep;
                     securityTester.Security.PriceStepCost = (decimal)priceStep;
@@ -4115,6 +4114,40 @@ namespace OsEngine.Market.Servers.Tester
             }
 
             return true;
+        }
+
+        private static bool TryParseDecimalInvariantOrCurrent(string value, out decimal result)
+        {
+            const NumberStyles parseStyle = NumberStyles.Float | NumberStyles.AllowThousands;
+
+            if (decimal.TryParse(value, parseStyle, CultureInfo.InvariantCulture, out result))
+            {
+                return true;
+            }
+
+            if (decimal.TryParse(value, parseStyle, CultureInfo.CurrentCulture, out result))
+            {
+                return true;
+            }
+
+            return decimal.TryParse(value, parseStyle, new CultureInfo("ru-RU"), out result);
+        }
+
+        private static bool TryParseDoubleInvariantOrCurrent(string value, out double result)
+        {
+            const NumberStyles parseStyle = NumberStyles.Float | NumberStyles.AllowThousands;
+
+            if (double.TryParse(value, parseStyle, CultureInfo.InvariantCulture, out result))
+            {
+                return true;
+            }
+
+            if (double.TryParse(value, parseStyle, CultureInfo.CurrentCulture, out result))
+            {
+                return true;
+            }
+
+            return double.TryParse(value, parseStyle, new CultureInfo("ru-RU"), out result);
         }
 
         private void ReadDealsFile(DealsStream dealsStream, DataBinaryReader binaryReader, ref SecurityTester security, ref long lastMilliseconds)
@@ -5674,8 +5707,9 @@ namespace OsEngine.Market.Servers.Tester
             string[] volumeSplit = comment.Split(':');
             if (volumeSplit.Length == 2 && volumeSplit[0] == "VolumeStep")
             {
-                string normalized = volumeSplit[1].Replace(',', '.');
-                if (decimal.TryParse(normalized, NumberStyles.Float, CultureInfo.InvariantCulture, out decimal volumeStep))
+                decimal volumeStep = volumeSplit[1].ToDecimal();
+
+                if (volumeStep != 0)
                 {
                     Security.VolumeStep = volumeStep;
                 }

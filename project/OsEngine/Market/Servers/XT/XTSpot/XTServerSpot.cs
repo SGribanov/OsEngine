@@ -15,6 +15,7 @@ using OsEngine.Market.Servers.XT.XTSpot.Entity;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Net;
 using System.Security.Cryptography;
 using System.Text;
@@ -1924,12 +1925,12 @@ namespace OsEngine.Market.Servers.XT.XTSpot
                     data.type = order.TypeOrder.ToString().ToUpper();
                     data.timeInForce = "GTC";
                     data.bizType = "SPOT";
-                    data.price = order.TypeOrder == OrderPriceType.Market ? null : order.Price.ToString().Replace(",", ".");
+                    data.price = order.TypeOrder == OrderPriceType.Market ? null : order.Price.ToString(CultureInfo.InvariantCulture);
 
                     if (order.TypeOrder == OrderPriceType.Limit)
                     {
-                        data.price = order.Price.ToString().Replace(",", ".");
-                        data.quantity = order.Volume.ToString().Replace(",", ".");
+                        data.price = order.Price.ToString(CultureInfo.InvariantCulture);
+                        data.quantity = order.Volume.ToString(CultureInfo.InvariantCulture);
                     }
                     else
                     {
@@ -1938,12 +1939,12 @@ namespace OsEngine.Market.Servers.XT.XTSpot
                         if (data.side == "BUY")
                         {
                             data.quantity = null;
-                            data.quoteQty = (order.Volume * order.Price).ToString().Replace(",", ".");
+                            data.quoteQty = (order.Volume * order.Price).ToString(CultureInfo.InvariantCulture);
                         }
                         else
                         {
                             data.quoteQty = null;
-                            data.quantity = order.Volume.ToString().Replace(",", ".");
+                            data.quantity = order.Volume.ToString(CultureInfo.InvariantCulture);
                         }
                     }
 

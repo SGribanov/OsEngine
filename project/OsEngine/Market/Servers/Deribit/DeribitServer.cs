@@ -1157,7 +1157,7 @@ namespace OsEngine.Market.Servers.Deribit
             jsonRequest.@params.instrument_name = order.SecurityNameCode;
             jsonRequest.@params.amount = order.Volume;
             jsonRequest.@params.label = order.NumberUser.ToString();
-            jsonRequest.@params.price = order.Price.ToString().ToDecimal();
+            jsonRequest.@params.price = order.Price;
 
             if (order.TypeOrder == OrderPriceType.Limit)
             {
@@ -1199,7 +1199,7 @@ namespace OsEngine.Market.Servers.Deribit
             jsonRequest.method = "private/edit";
             jsonRequest.@params = new JsonRequest.Params();
             jsonRequest.@params.order_id = order.NumberMarket;
-            jsonRequest.@params.price = newPrice.ToString().ToDecimal();
+            jsonRequest.@params.price = newPrice;
             jsonRequest.@params.amount = order.Volume;
 
             string json = JsonConvert.SerializeObject(jsonRequest);

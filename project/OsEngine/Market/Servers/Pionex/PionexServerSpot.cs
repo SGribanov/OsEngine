@@ -17,6 +17,7 @@ using RestSharp;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Net;
 using System.Security.Cryptography;
 using System.Text;
@@ -1500,9 +1501,9 @@ namespace OsEngine.Market.Servers.Pionex
                 data.symbol = order.SecurityNameCode;
                 data.side = order.Side.ToString().ToUpper();
                 data.type = order.TypeOrder.ToString().ToUpper();
-                data.price = order.TypeOrder == OrderPriceType.Market ? null : order.Price.ToString().Replace(",", ".");
-                data.size = order.Volume.ToString().Replace(",", ".");
-                data.amount = (order.Volume * order.Price).ToString().Replace(",", "."); // для BUY MARKET ORDER указывается размер в USDT не меньше 10
+                data.price = order.TypeOrder == OrderPriceType.Market ? null : order.Price.ToString(CultureInfo.InvariantCulture);
+                data.size = order.Volume.ToString(CultureInfo.InvariantCulture);
+                data.amount = (order.Volume * order.Price).ToString(CultureInfo.InvariantCulture); // для BUY MARKET ORDER указывается размер в USDT не меньше 10
                 data.IOC = false;
 
                 string timestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds().ToString();

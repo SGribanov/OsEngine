@@ -2003,8 +2003,8 @@ namespace OsEngine.Market.Servers.Atp
 
             orderToTcp += order.SecurityNameCode + "@";
             orderToTcp += isBuy + "@";
-            orderToTcp += order.Price.ToString().Replace(",", ".") + "@";
-            orderToTcp += order.Volume.ToString().Replace(",", ".") + "@";
+            orderToTcp += order.Price.ToString(CultureInfo.InvariantCulture) + "@";
+            orderToTcp += order.Volume.ToString(CultureInfo.InvariantCulture) + "@";
             orderToTcp += order.NumberUser + "@";
 
             _messagesToSendTrade.Enqueue(orderToTcp);

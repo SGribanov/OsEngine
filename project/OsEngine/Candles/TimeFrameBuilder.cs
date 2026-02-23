@@ -336,7 +336,7 @@ namespace OsEngine.Entity
 
                 result.Append(series);
 
-                _lastSpecification = result.ToString().Replace(",",".");
+                _lastSpecification = NormalizeNumericCommas(result.ToString());
 
                 return _lastSpecification;
             }
@@ -344,6 +344,32 @@ namespace OsEngine.Entity
         private bool _needToRebuildSpecification;
 
         private string _lastSpecification;
+
+        private static string NormalizeNumericCommas(string value)
+        {
+            if (string.IsNullOrEmpty(value))
+            {
+                return string.Empty;
+            }
+
+            char[] chars = value.ToCharArray();
+
+            for (int i = 1; i < chars.Length - 1; i++)
+            {
+                if (chars[i] != ',')
+                {
+                    continue;
+                }
+
+                if (char.IsDigit(chars[i - 1]) &&
+                    char.IsDigit(chars[i + 1]))
+                {
+                    chars[i] = '.';
+                }
+            }
+
+            return new string(chars);
+        }
 
         public TimeFrame TimeFrame
         {

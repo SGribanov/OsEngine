@@ -17,6 +17,7 @@ using RestSharp;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO.Compression;
 using System.Linq;
 using System.Net;
@@ -2157,11 +2158,11 @@ namespace OsEngine.Market.Servers.HTX.Spot
                 jsonContent.Add("account-id", accountData[2]);
                 jsonContent.Add("symbol", order.SecurityNameCode);
                 jsonContent.Add("type", order.Side == Side.Buy ? $"buy-{typeOrder}" : $"sell-{typeOrder}");
-                jsonContent.Add("amount", order.Volume.ToString().Replace(",", "."));
+                jsonContent.Add("amount", order.Volume.ToString(CultureInfo.InvariantCulture));
 
                 if (order.TypeOrder != OrderPriceType.Market)
                 {
-                    jsonContent.Add("price", order.Price.ToString().Replace(",", "."));
+                    jsonContent.Add("price", order.Price.ToString(CultureInfo.InvariantCulture));
                 }
 
                 jsonContent.Add("source", source_portfolio);

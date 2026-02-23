@@ -12,6 +12,7 @@ using OsEngine.Market.Servers.MoexFixFastCurrency.Entity;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.Net.Sockets;
 using System.Net;
@@ -2987,14 +2988,14 @@ namespace OsEngine.Market.Servers.MoexFixFastCurrency
             try
             {
                 string ordType = order.TypeOrder == OrderPriceType.Market ? "1" : "2";
-                string price = order.TypeOrder == OrderPriceType.Market ? null : order.Price.ToString().Replace(",", ".");
+                string price = order.TypeOrder == OrderPriceType.Market ? null : order.Price.ToString(CultureInfo.InvariantCulture);
 
                 string newOrder = _fxMFIXTradeMessages.NewOrderMessage
                             (
                                 order.NumberUser.ToString(),
                                 new string[] { "1", _MFIXTradeClientCode, "D", "1" },   // группа Parties
                                 order.SecurityNameCode,
-                                order.Volume.ToString().Replace(",", "."),
+                                order.Volume.ToString(CultureInfo.InvariantCulture),
                                 order.PortfolioNumber,
                                 null,
                                 false,
@@ -3082,8 +3083,8 @@ namespace OsEngine.Market.Servers.MoexFixFastCurrency
                 string tradingSessionID = order.SecurityClassCode;
                 string side = order.Side == Side.Buy ? "1" : "2";
                 string ordType = order.TypeOrder == OrderPriceType.Market ? "1" : "2"; // 1 - Market, 2 - Limit
-                string orderQty = order.Volume.ToString();
-                string price = order.TypeOrder == OrderPriceType.Limit ? newPrice.ToString().Replace(',', '.') : "0";
+                string orderQty = order.Volume.ToString(CultureInfo.InvariantCulture);
+                string price = order.TypeOrder == OrderPriceType.Limit ? newPrice.ToString(CultureInfo.InvariantCulture) : "0";
 
                 string changeOrderMsg = _fxMFIXTradeMessages.OrderReplaceMessage
                     (

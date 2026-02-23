@@ -75,7 +75,7 @@ namespace OsEngine.Charts.CandleChart.Indicators
         {
             try
             {
-                if (Convert.ToDouble(TextBoxAf.Text) <= 0 || Convert.ToDouble(TextBoxMaxAf.Text) <= 0)
+                if (TextBoxAf.Text.ToDouble() <= 0 || TextBoxMaxAf.Text.ToDouble() <= 0)
                 {
                     throw new Exception("error");
                 }
@@ -90,8 +90,8 @@ namespace OsEngine.Charts.CandleChart.Indicators
             _mA.ColorUp = HostColor.Child.BackColor;
             _mA.ColorDown = HostColorDown.Child.BackColor;
 
-            _mA.Af = Convert.ToDouble(TextBoxAf.Text);
-            _mA.MaxAf = Convert.ToDouble(TextBoxMaxAf.Text);
+            _mA.Af = TextBoxAf.Text.ToDouble();
+            _mA.MaxAf = TextBoxMaxAf.Text.ToDouble();
             _mA.PaintOn = CheckBoxPaintOnOff.IsChecked.Value;
             //Enum.TryParse(ComboBoxPriceField.SelectedItem.ToString(), true, out _mA.TypePointsToSearch);
 

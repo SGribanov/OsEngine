@@ -7672,3 +7672,474 @@
   - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` -> success (0 warnings)
   - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed `352/352`
 
+## 2026-02-23 - Step 2.2 (CultureInfo.InvariantCulture) - WinFormsChartPainter decimal-separator neutral precision detection
+
+- Standardized decimal-fraction detection in:
+  - `project/OsEngine/Charts/CandleChart/WinFormsChartPainter.cs`
+- Changes:
+  - removed replace-based decimal separator normalization:
+    - `openS/highS/lowS/closeS = ...Replace(".", ",")`
+  - replaced split-by-comma fraction detection with separator-agnostic helper:
+    - added `GetFractionLength(string value)` that supports both `.` and `,` without string rewriting.
+  - updated decimal-length selection logic in `GetCandlesDecimal(...)` to use precomputed fraction lengths.
+- Scope:
+  - precision detection hardening only
+  - chart rendering/business behavior unchanged.
+
+### Verification
+
+- Attempted verification in sandbox with local `DOTNET_CLI_HOME`:
+  - `dotnet restore project/OsEngine/OsEngine.csproj --nologo` -> failed (`NU1301`, TLS/auth handshake to `https://api.nuget.org/v3/index.json`)
+  - `dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo` -> failed (`NU1301`, same cause)
+  - `dotnet build ...` / `dotnet test ...` could not be reliably validated in this environment due restore failure.
+
+## 2026-02-23 - Step 2.2 (CultureInfo.InvariantCulture) - Extensions.ToDecimal parse cascade hardening
+
+- Standardized core decimal parsing helper in:
+  - `project/OsEngine/Entity/Extensions.cs`
+- Changes:
+  - updated `ToDecimal(this string? value)`:
+    - replaced replace-based convert flow (`value.Replace(",", ".")` + `Convert.ToDecimal(...)`) with explicit parse cascade.
+    - new parse order: `InvariantCulture` -> `CurrentCulture` -> `ru-RU` via `decimal.TryParse(...)`.
+    - preserved legacy fallback through `value.ToDouble()` conversion if direct decimal parse fails.
+  - added helper:
+    - `TryParseDecimalInvariantOrCurrent(string value, out decimal result)`.
+  - `DecimalsCount(...)` scientific-notation branch now normalizes via invariant string:
+    - `value.ToDecimal().ToString(CultureInfo.InvariantCulture)`.
+- Scope:
+  - parsing hardening only
+  - business logic and settings formats unchanged.
+
+### Verification
+
+- Host-context verification (outside sandbox):
+  - `curl.exe -I https://api.nuget.org/v3/index.json --ssl-no-revoke` -> success (`HTTP/1.1 200 OK`)
+  - `dotnet restore project/OsEngine/OsEngine.csproj --nologo` -> success
+  - `dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo` -> success
+  - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` -> success (0 warnings, 0 errors)
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed `352/352`
+
+## 2026-02-23 - Step 2.2 (CultureInfo.InvariantCulture) - Extensions.DecimalsCount separator-neutral parsing
+
+- Standardized decimal precision detection in:
+  - `project/OsEngine/Entity/Extensions.cs`
+- Changes:
+  - updated `DecimalsCount(this string? value)`:
+    - removed replace-based normalization (`value.Replace(",", ".")`).
+    - added separator-neutral logic using last decimal separator (`.` or `,`).
+    - kept trailing-zero trim semantics and exponent-path normalization (`E` -> invariant decimal string).
+- Scope:
+  - precision detection/parsing hardening only
+  - calling code and formatting contracts unchanged.
+
+### Verification
+
+- Host-context verification (outside sandbox):
+  - `dotnet restore project/OsEngine/OsEngine.csproj --nologo` -> success
+  - `dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo` -> success
+  - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` -> success (0 warnings, 0 errors)
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed `352/352`
+
+## 2026-02-23 - Step 2.2 (CultureInfo.InvariantCulture) - Extensions.ToDouble parse cascade hardening
+
+- Standardized core double parsing helper in:
+  - `project/OsEngine/Entity/Extensions.cs`
+- Changes:
+  - updated `ToDouble(this string? value)`:
+    - removed replace-based parsing path (`value.Replace(",", ".")` + `Convert.ToDouble(...)`).
+    - switched to explicit parse cascade via `TryParseDoubleInvariantOrCurrent(...)`:
+      - `InvariantCulture`
+      - `CurrentCulture`
+      - `ru-RU` fallback
+    - null/whitespace input remains safe (`0`).
+- Scope:
+  - parsing hardening only
+  - numerical behavior for valid persisted values preserved.
+
+### Verification
+
+- Host-context verification (outside sandbox):
+  - `dotnet restore project/OsEngine/OsEngine.csproj --nologo` -> success
+  - `dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo` -> success
+  - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` -> success (0 warnings, 0 errors)
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed `352/352`
+
+## 2026-02-23 - Step 2.2 (CultureInfo.InvariantCulture) - Table export numeric formatting and step-decimals check cleanup
+
+- Standardized separator handling in:
+  - `project/OsEngine/Entity/Extensions.cs`
+  - `project/OsEngine/Robots/AutoTestBots/ServerTests/Var_1_Securities.cs`
+- Changes:
+  - `Extensions.ToFormatString(DataGridViewRow)`:
+    - removed blanket `Replace(",", ".")` for all cell text.
+    - numeric cells now format via `CultureInfo.InvariantCulture`.
+    - non-numeric cells remain textual with newline cleanup only.
+  - `Var_1_Securities.IsCompairDecimalsAndStep(...)`:
+    - removed replace-based separator normalization.
+    - switched to separator-neutral fractional-length detection (`.` or `,`).
+- Scope:
+  - formatting/parsing hardening only
+  - export schema and test intent preserved.
+
+### Verification
+
+- Host-context verification (outside sandbox):
+  - `dotnet restore project/OsEngine/OsEngine.csproj --nologo` -> success
+  - `dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo` -> success
+  - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` -> success (0 warnings, 0 errors)
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed `352/352`
+
+## 2026-02-23 - Step 2.2 (CultureInfo.InvariantCulture) - Market server order payload formatting (Bybit/BingX/BitGet)
+
+- Standardized decimal formatting in outbound order payloads:
+  - `project/OsEngine/Market/Servers/Bybit/BybitServer.cs`
+  - `project/OsEngine/Market/Servers/BingX/BingXSpot/BingXServerSpot.cs`
+  - `project/OsEngine/Market/Servers/BingX/BingXFutures/BingXServerFutures.cs`
+  - `project/OsEngine/Market/Servers/BitGet/BitGetSpot/BitGetServerSpot.cs`
+  - `project/OsEngine/Market/Servers/BitGet/BitGetFutures/BitGetServerFutures.cs`
+- Changes:
+  - replaced replace-based formatting:
+    - `order.Price/Volume.ToString().Replace(",", ".")`
+    - `newPrice.ToString().Replace(",", ".")`
+  - with explicit invariant formatting:
+    - `ToString(CultureInfo.InvariantCulture)`
+  - added missing `using System.Globalization;` in BitGet server files.
+- Scope:
+  - request-payload formatting hardening only
+  - trading logic and endpoint contracts unchanged.
+
+### Verification
+
+- Host-context verification (outside sandbox):
+  - `dotnet restore project/OsEngine/OsEngine.csproj --nologo` -> success
+  - `dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo` -> success
+  - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` -> success (0 warnings, 0 errors)
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed `352/352`
+
+## 2026-02-23 - Step 2.2 (CultureInfo.InvariantCulture) - Market server payload formatting (GateIo/HTX/OKX)
+
+- Standardized decimal payload formatting in:
+  - `project/OsEngine/Market/Servers/GateIo/GateIoSpot/GateIoServerSpot.cs`
+  - `project/OsEngine/Market/Servers/HTX/Spot/HTXSpotServer.cs`
+  - `project/OsEngine/Market/Servers/HTX/Futures/HTXFuturesServer.cs`
+  - `project/OsEngine/Market/Servers/HTX/Swap/HTXSwapServer.cs`
+  - `project/OsEngine/Market/Servers/OKX/OkxServer.cs`
+- Changes:
+  - replaced replace-based formatting:
+    - `ToString().Replace(",", ".")`
+    - `ToString("0.#####").Replace(",", ".")`
+  - with explicit invariant formatting:
+    - `ToString(CultureInfo.InvariantCulture)`
+    - `ToString("0.#####", CultureInfo.InvariantCulture)`
+  - added missing `using System.Globalization;` in GateIo/HTX files where needed.
+- Scope:
+  - request serialization hardening only
+  - endpoint routing, payload keys, and trading logic unchanged.
+
+### Verification
+
+- Host-context verification (outside sandbox):
+  - `dotnet restore project/OsEngine/OsEngine.csproj --nologo` -> success
+  - `dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo` -> success
+  - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` -> success (0 warnings, 0 errors)
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed `352/352`
+
+## 2026-02-23 - Step 2.2 (CultureInfo.InvariantCulture) - Market server payload formatting (Exmo/Woo/Kite/TraderNet/Pionex/KuCoin)
+
+- Standardized decimal serialization in outbound order payloads:
+  - `project/OsEngine/Market/Servers/ExMo/ExmoSpot/ExmoSpotServer.cs`
+  - `project/OsEngine/Market/Servers/Woo/WooServer.cs`
+  - `project/OsEngine/Market/Servers/KiteConnect/KiteConnectServer.cs`
+  - `project/OsEngine/Market/Servers/TraderNet/TraderNetServer.cs`
+  - `project/OsEngine/Market/Servers/Pionex/PionexServerSpot.cs`
+  - `project/OsEngine/Market/Servers/KuCoin/KuCoinSpot/KuCoinSpotServer.cs`
+  - `project/OsEngine/Market/Servers/KuCoin/KuCoinFutures/KuCoinFuturesServer.cs`
+- Changes:
+  - replaced replace-based formatting:
+    - `ToString().Replace(",", ".")`
+  - with explicit invariant formatting:
+    - `ToString(CultureInfo.InvariantCulture)`
+  - additionally normalized TraderNet `qty` serialization to invariant formatting.
+  - added missing `using System.Globalization;` in affected files.
+- Scope:
+  - payload-format hardening only
+  - API fields, routing, and business logic unchanged.
+
+### Verification
+
+- Host-context verification (outside sandbox):
+  - `dotnet restore project/OsEngine/OsEngine.csproj --nologo` -> success
+  - `dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo` -> success
+  - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` -> success (0 warnings, 0 errors)
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed `352/352`
+
+## 2026-02-23 - Step 2.2 (CultureInfo.InvariantCulture) - Market server payload formatting (Bitfinex/BloFin/FinamGrpc/XT)
+
+- Standardized decimal serialization in outbound order payloads:
+  - `project/OsEngine/Market/Servers/Bitfinex/BitfinexSpot/BitfinexSpotServer.cs`
+  - `project/OsEngine/Market/Servers/Bitfinex/BitfinexFutures/BitfinexFuturesServer.cs`
+  - `project/OsEngine/Market/Servers/BloFin/BloFinFutures/BloFinFuturesServer.cs`
+  - `project/OsEngine/Market/Servers/FinamGrpc/FinamGrpcServer.cs`
+  - `project/OsEngine/Market/Servers/XT/XTSpot/XTServerSpot.cs`
+- Changes:
+  - replaced replace-based formatting:
+    - `ToString().Replace(",", ".")`
+  - with explicit invariant formatting:
+    - `ToString(CultureInfo.InvariantCulture)`
+  - covered `price`, `volume/amount/size/quantity`, and quote-volume payload fields.
+  - added missing `using System.Globalization;` in affected files.
+- Scope:
+  - serialization hardening only
+  - request shape and business logic unchanged.
+
+### Verification
+
+- Host-context verification (outside sandbox):
+  - `dotnet restore project/OsEngine/OsEngine.csproj --nologo` -> success
+  - `dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo` -> success
+  - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` -> success (0 warnings, 0 errors)
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed `352/352`
+
+## 2026-02-23 - Step 2.2 (CultureInfo.InvariantCulture) - Market server formatting finalization (CoinEx/Atp/MoexFix/Bybit leverage)
+
+- Standardized remaining market-server payload formatting in:
+  - `project/OsEngine/Market/Servers/CoinEx/Spot/CoinExServerSpot.cs`
+  - `project/OsEngine/Market/Servers/CoinEx/Futures/CoinExServerFutures.cs`
+  - `project/OsEngine/Market/Servers/Atp/AtpServer.cs`
+  - `project/OsEngine/Market/Servers/MoexFixFastCurrency/MoexFixFastCurrencyServer.cs`
+  - `project/OsEngine/Market/Servers/MoexFixFastTwimeFutures/MoexFixFastTwimeFuturesServer.cs`
+  - `project/OsEngine/Market/Servers/Bybit/BybitServer.cs`
+- Changes:
+  - removed redundant `.Replace(",", ".")` after already invariant `ToString(CultureInfo.InvariantCulture)` in CoinEx.
+  - replaced remaining decimal `ToString().Replace(",", ".")` in Atp/MoexFix order messages with explicit invariant formatting.
+  - Bybit leverage payload:
+    - replaced direct replace-based path with `NormalizeNumericValueForApi(...)` helper:
+      - parse order: `InvariantCulture -> CurrentCulture -> ru-RU`
+      - output: invariant decimal string
+      - fallback preserves legacy behavior (`Replace(",", ".")`) for non-numeric inputs.
+  - added missing `using System.Globalization;` in MoexFix files.
+- Scope:
+  - formatting hardening only
+  - connector business logic and message field sets unchanged.
+
+### Verification
+
+- Host-context verification (outside sandbox):
+  - `dotnet restore project/OsEngine/OsEngine.csproj --nologo` -> success
+  - `dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo` -> success
+  - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` -> success (0 warnings, 0 errors)
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed `352/352`
+  - grep audit checkpoint:
+    - `rg -n 'ToString\\([^)]*\\)\\.Replace\\(\",\",\\s*\"\\.\"\\)' project/OsEngine/Market/Servers` -> no matches.
+
+## 2026-02-23 - Step 2.2 (CultureInfo.InvariantCulture) - Residual replace-to-invariant sweep (Binance/Bybit)
+
+- Cleared remaining replace-based decimal normalization in:
+  - `project/OsEngine/Market/Servers/Binance/Spot/BinanceServerSpot.cs`
+  - `project/OsEngine/Market/Servers/Binance/Futures/BinanceServerFutures.cs`
+  - `project/OsEngine/Market/Servers/Bybit/BybitServer.cs`
+- Changes:
+  - Binance Spot/Futures:
+    - replaced `minQty.ToStringWithNoEndZero().Replace(",", ".")` and split-based parsing.
+    - switched to separator-agnostic fractional-length detection via `LastIndexOf('.')` / `LastIndexOf(',')` and index arithmetic.
+  - Bybit leverage helper:
+    - `NormalizeNumericValueForApi(...)` fallback changed from blanket `Replace(",", ".")`
+    - to safe numeric-comma normalization (`NormalizeNumericCommas`) that only rewrites commas between digits.
+- Scope:
+  - formatting/parsing hardening only
+  - API contract and order routing logic unchanged.
+
+### Verification
+
+- Host-context verification (outside sandbox):
+  - `dotnet restore project/OsEngine/OsEngine.csproj --nologo` -> success
+  - `dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo` -> success
+  - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` -> success (0 warnings, 0 errors)
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed `352/352`
+  - grep audit checkpoint:
+    - `rg -n 'Replace\\(\\s*\"\\,\"\\s*,\\s*\"\\.\"\\s*\\)' project/OsEngine` -> no matches.
+
+## 2026-02-23 - Step 2.2 (CultureInfo.InvariantCulture) - Market payload sweep (Moex/Woo/Mexc/Bitfinex Spot)
+
+- Standardized remaining decimal serialization in outbound order payloads:
+  - `project/OsEngine/Market/Servers/MoexFixFastSpot/MoexFixFastSpotServer.cs`
+  - `project/OsEngine/Market/Servers/MoexFixFastCurrency/MoexFixFastCurrencyServer.cs`
+  - `project/OsEngine/Market/Servers/MoexFixFastTwimeFutures/MoexFixFastTwimeFuturesServer.cs`
+  - `project/OsEngine/Market/Servers/Woo/WooServer.cs`
+  - `project/OsEngine/Market/Servers/Mexc/MexcSpot/MexcSpotServer.cs`
+  - `project/OsEngine/Market/Servers/Bitfinex/BitfinexSpot/BitfinexSpotServer.cs`
+- Changes:
+  - replaced replace-based formatting:
+    - `ToString().Replace(',', '.')`
+  - with explicit invariant formatting:
+    - `ToString(CultureInfo.InvariantCulture)`
+  - additionally normalized `OrderQty`/`Volume` string serialization in Moex replace paths to invariant format.
+  - added missing `using System.Globalization;` where needed.
+- Scope:
+  - payload-format hardening only
+  - request schema and trading logic unchanged.
+
+### Verification
+
+- Host-context verification (outside sandbox):
+  - `dotnet restore project/OsEngine/OsEngine.csproj --nologo` -> success
+  - `dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo` -> success
+  - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` -> success (0 warnings, 0 errors)
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed `352/352`
+  - grep audit checkpoint:
+    - `rg -n "ToString\\(\\)\\.Replace\\(',', '\\.'\\)" project/OsEngine/Market/Servers` -> remaining matches only in `BitMart`, `Transaq`, `Plaza` (out of current batch).
+
+## 2026-02-23 - Step 2.2 (CultureInfo.InvariantCulture) - Market payload sweep (BitMart/Transaq/Plaza)
+
+- Standardized remaining order-price serialization in outbound requests:
+  - `project/OsEngine/Market/Servers/BitMart/BitMartSpot/BitMartSpotServer.cs`
+  - `project/OsEngine/Market/Servers/BitMart/BitMartFutures/BitMartFutures.cs`
+  - `project/OsEngine/Market/Servers/Transaq/TransaqServer.cs`
+  - `project/OsEngine/Market/Servers/Plaza/PlazaServer.cs`
+- Changes:
+  - replaced replace-based formatting:
+    - `ToString().Replace(',', '.')`
+  - with explicit invariant formatting:
+    - `ToString(CultureInfo.InvariantCulture)`
+  - in Plaza aligned both transport values (`smsg["price"]`, `smsg["price1"]`) and related diagnostic logs to invariant decimal output.
+  - added missing `using System.Globalization;` in BitMart spot/futures files.
+- Scope:
+  - payload/log formatting hardening only
+  - order routing logic unchanged.
+
+### Verification
+
+- Host-context verification (outside sandbox):
+  - `dotnet restore project/OsEngine/OsEngine.csproj --nologo` -> success
+  - `dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo` -> success
+  - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` -> success (0 warnings, 0 errors)
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed `352/352`
+  - grep audit checkpoint:
+    - `rg -n "ToString\\(\\)\\.Replace\\(',', '\\.'\\)" project/OsEngine/Market/Servers` -> no matches.
+
+
+## 2026-02-23 - Step 2.2 (CultureInfo.InvariantCulture) - Parsing sweep (HTX/OKX/OsDataSet/Tester)
+
+- Removed remaining separator-replace parsing in:
+  - `project/OsEngine/Market/Servers/HTX/Swap/HTXSwapServer.cs`
+  - `project/OsEngine/Market/Servers/HTX/Futures/HTXFuturesServer.cs`
+  - `project/OsEngine/Market/Servers/OKX/OkxServer.cs`
+  - `project/OsEngine/Market/Servers/OKXData/OKXDataServer.cs`
+  - `project/OsEngine/OsData/OsDataSet.cs`
+  - `project/OsEngine/Market/Servers/Tester/TesterServer.cs`
+- Changes:
+  - replaced parsing patterns based on `Replace(',', '.')` with separator-agnostic parsing.
+  - HTX numeric string cleanup now uses `TrimEnd(''0'').TrimEnd(''.'', '','')` before `ToDecimal()`.
+  - OKX/OKXData decimal-volume precision detection switched to last-separator index (`.` or `,`) without string replacement.
+  - OsDataSet/Tester binary-header parsing now uses explicit parse cascade helpers:
+    - `InvariantCulture -> CurrentCulture -> ru-RU`.
+- Scope:
+  - parsing hardening only
+  - business logic and protocol semantics unchanged.
+
+### Verification
+
+- Host-context verification (outside sandbox):
+  - `dotnet restore project/OsEngine/OsEngine.csproj --nologo` -> success
+  - `dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo` -> success
+  - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` -> success (0 warnings, 0 errors)
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed `352/352`
+  - grep audit checkpoint:
+    - `rg -n -F "Replace(',', '.')" project/OsEngine` -> no matches.
+
+## 2026-02-23 - Step 2.2 (CultureInfo.InvariantCulture) - Parsing cleanup (BingX/GateIo/KuCoin/Bitfinex)
+
+- Removed replace-based decimal normalization in market-server parse paths:
+  - `project/OsEngine/Market/Servers/BingX/BingXSpot/BingXServerSpot.cs`
+  - `project/OsEngine/Market/Servers/BingX/BingXFutures/BingXServerFutures.cs`
+  - `project/OsEngine/Market/Servers/GateIo/GateIoSpot/GateIoServerSpot.cs`
+  - `project/OsEngine/Market/Servers/KuCoin/KuCoinSpot/KuCoinSpotServer.cs`
+  - `project/OsEngine/Market/Servers/KuCoin/KuCoinFutures/KuCoinFuturesServer.cs`
+  - `project/OsEngine/Market/Servers/Bitfinex/BitfinexSpot/BitfinexSpotServer.cs`
+  - `project/OsEngine/Market/Servers/Bitfinex/BitfinexFutures/BitfinexFuturesServer.cs`
+- Changes:
+  - replaced incoming parse chains:
+    - `value.Replace('.', ',').ToDecimal()`
+    - with direct culture-agnostic parse:
+    - `value.ToDecimal()`
+  - aligned remaining BingX outbound `quantity/price` formatting from `ToString().Replace(",", ".")` to `ToString(CultureInfo.InvariantCulture)`.
+  - Bitfinex securities precision helper updated to separator-agnostic logic (`.` or `,`) without pre-normalization replace.
+- Scope:
+  - parsing/serialization hardening only
+  - connector behavior and order-routing logic unchanged.
+
+### Verification
+
+- Host-context verification (outside sandbox):
+  - `dotnet restore project/OsEngine/OsEngine.csproj --nologo` -> success
+  - `dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo` -> success
+  - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` -> success (0 warnings, 0 errors)
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed `352/352`
+  - grep audit checkpoint:
+    - `rg -n -F "Replace('.', ',')" project/OsEngine` -> no matches.
+
+## 2026-02-23 - Step 2.2 (CultureInfo.InvariantCulture) - Parse/format cleanup (Deribit/Transaq + exchange parsers)
+
+- Completed cleanup of residual replace-based normalization in:
+  - `project/OsEngine/Market/Servers/Deribit/DeribitServer.cs`
+  - `project/OsEngine/Market/Servers/Transaq/TransaqServer.cs`
+  - `project/OsEngine/Market/Servers/BingX/BingXSpot/BingXServerSpot.cs`
+  - `project/OsEngine/Market/Servers/BingX/BingXFutures/BingXServerFutures.cs`
+  - `project/OsEngine/Market/Servers/GateIo/GateIoSpot/GateIoServerSpot.cs`
+  - `project/OsEngine/Market/Servers/KuCoin/KuCoinSpot/KuCoinSpotServer.cs`
+  - `project/OsEngine/Market/Servers/KuCoin/KuCoinFutures/KuCoinFuturesServer.cs`
+  - `project/OsEngine/Market/Servers/Bitfinex/BitfinexSpot/BitfinexSpotServer.cs`
+  - `project/OsEngine/Market/Servers/Bitfinex/BitfinexFutures/BitfinexFuturesServer.cs`
+- Changes:
+  - removed incoming parse pattern `Replace('.', ',').ToDecimal()` in exchange payload readers.
+  - replaced with direct `ToDecimal()` (culture-agnostic parse cascade).
+  - Deribit order price assignment simplified from `ToString().ToDecimal()` to direct decimal assignment.
+  - Transaq volume serialization normalized via `ToString(CultureInfo.InvariantCulture)` and `.0` trim.
+  - Bitfinex precision helper `DigitsAfterComma` made separator-agnostic (`.` or `,`) without pre-normalization replace.
+- Scope:
+  - parsing/formatting hardening only
+  - trading/business behavior unchanged.
+
+### Verification
+
+- Host-context verification (outside sandbox):
+  - `dotnet restore project/OsEngine/OsEngine.csproj --nologo` -> success
+  - `dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo` -> success
+  - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` -> success (0 warnings, 0 errors)
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed `352/352`
+  - grep audit checkpoint:
+    - `rg -n -F "Replace('.', ',')" project/OsEngine` -> no matches.
+    - `rg -n -F "Replace(',', '.')" project/OsEngine` -> no matches.
+
+## 2026-02-23 - Step 2.2 (CultureInfo.InvariantCulture) - UI double parsing hardening
+
+- Replaced culture-sensitive `Convert.ToDouble(...)` UI input parsing in:
+  - `project/OsEngine/Charts/CandleChart/Indicators/ParabolicSARUi.xaml.cs`
+  - `project/OsEngine/OsTrader/AvailabilityServer/ServerAvailabilityUi.xaml.cs`
+- Changes:
+  - `Convert.ToDouble(...)` -> `ToDouble()` for UI strings.
+  - maintained existing validation semantics (`<= 0` checks) and business behavior.
+- Scope:
+  - input parsing hardening only.
+
+### Verification
+
+- Host-context verification (outside sandbox):
+  - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` -> success (0 warnings, 0 errors)
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed `352/352`
+
+## 2026-02-23 - Step 2.2 (CultureInfo.InvariantCulture) - Tester parser cleanup
+
+- Removed duplicated parse helper in `SecurityTester` scope:
+  - `project/OsEngine/Market/Servers/Tester/TesterServer.cs`
+- Changes:
+  - replaced local `TryParseDecimalInvariantOrCurrent(...)` usage in `ParseVolumeStepFromComment(...)` with direct `ToDecimal()` parse and zero-guard.
+  - behavior preserved (`VolumeStep` fallback to `1` when invalid/zero).
+- Scope:
+  - internal parser cleanup only.
+
+### Verification
+
+- Host-context verification (outside sandbox):
+  - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` -> success (0 warnings, 0 errors)
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed `352/352`

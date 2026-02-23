@@ -17,6 +17,7 @@ using RestSharp;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Net;
 using System.Security.Cryptography;
@@ -2092,9 +2093,9 @@ namespace OsEngine.Market.Servers.KuCoin.KuCoinFutures
 
                 OrderPriceType.TryParse(item.orderType, true, out newOrder.TypeOrder);
                 newOrder.Side = item.side.Equals("buy") ? Side.Buy : Side.Sell;
-                newOrder.Volume = item.size.Replace('.', ',').ToDecimal() * GetVolume(newOrder.SecurityNameCode);
+                newOrder.Volume = item.size.ToDecimal() * GetVolume(newOrder.SecurityNameCode);
                 //newOrder.VolumeExecute = item.remainSize.ToDecimal();
-                newOrder.Price = item.price != null ? item.price.Replace('.', ',').ToDecimal() : 0;
+                newOrder.Price = item.price != null ? item.price.ToDecimal() : 0;
                 newOrder.State = stateType;
                 newOrder.ServerType = ServerType.KuCoinFutures;
                 newOrder.PortfolioNumber = "KuCoinFutures";
@@ -2223,10 +2224,10 @@ namespace OsEngine.Market.Servers.KuCoin.KuCoinFutures
                 data.symbol = order.SecurityNameCode;
                 data.side = order.Side.ToString().ToLower();
                 data.type = order.TypeOrder.ToString().ToLower();
-                data.price = order.TypeOrder == OrderPriceType.Market ? null : order.Price.ToString().Replace(",", ".");
+                data.price = order.TypeOrder == OrderPriceType.Market ? null : order.Price.ToString(CultureInfo.InvariantCulture);
 
                 decimal volume = order.Volume / GetVolume(order.SecurityNameCode);
-                data.size = volume.ToString().Replace(",", ".");
+                data.size = volume.ToString(CultureInfo.InvariantCulture);
                 data.leverage = _leverage;
                 data.positionSide = posSide;
                 data.marginMode = _marginMode;
@@ -2502,9 +2503,9 @@ namespace OsEngine.Market.Servers.KuCoin.KuCoinFutures
                                 newOrder.State = OrderStateType.Done;
                             }
 
-                            newOrder.Volume = order.data.items[i].size == null ? order.data.items[i].filledSize.Replace('.', ',').ToDecimal() * GetVolume(newOrder.SecurityNameCode) : order.data.items[i].size.Replace('.', ',').ToDecimal() * GetVolume(newOrder.SecurityNameCode);
+                            newOrder.Volume = order.data.items[i].size == null ? order.data.items[i].filledSize.ToDecimal() * GetVolume(newOrder.SecurityNameCode) : order.data.items[i].size.ToDecimal() * GetVolume(newOrder.SecurityNameCode);
 
-                            newOrder.Price = order.data.items[i].price != null ? order.data.items[i].price.Replace('.', ',').ToDecimal() : 0;
+                            newOrder.Price = order.data.items[i].price != null ? order.data.items[i].price.ToDecimal() : 0;
                             newOrder.PortfolioNumber = "KuCoinFutures";
 
                             orders.Add(newOrder);
@@ -2647,8 +2648,8 @@ namespace OsEngine.Market.Servers.KuCoin.KuCoinFutures
                                 newOrder.TimeCancel = newOrder.TimeCreate;
                             }
 
-                            newOrder.Volume = order.data.size == null ? order.data.filledSize.Replace('.', ',').ToDecimal() * GetVolume(newOrder.SecurityNameCode) : order.data.size.Replace('.', ',').ToDecimal() * GetVolume(newOrder.SecurityNameCode);
-                            newOrder.Price = order.data.price != null ? order.data.price.Replace('.', ',').ToDecimal() : 0;
+                            newOrder.Volume = order.data.size == null ? order.data.filledSize.ToDecimal() * GetVolume(newOrder.SecurityNameCode) : order.data.size.ToDecimal() * GetVolume(newOrder.SecurityNameCode);
+                            newOrder.Price = order.data.price != null ? order.data.price.ToDecimal() : 0;
                             newOrder.PortfolioNumber = "KuCoinFutures";
                         }
 

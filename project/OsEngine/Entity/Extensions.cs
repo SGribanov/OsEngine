@@ -76,23 +76,23 @@ namespace OsEngine.Entity
         /// </summary>
         public static decimal ToDecimal(this string? value)
         {
-            if(value == null)
+            if (string.IsNullOrWhiteSpace(value))
             {
                 return 0;
             }
-            if (value.Contains("E"))
+
+            if (TryParseDecimalInvariantOrCurrent(value, out decimal parsed))
             {
-                return Convert.ToDecimal(value.ToDouble());
+                return parsed;
             }
+
             try
             {
-                return Convert.ToDecimal(value.Replace(",",
-                        CultureInfo.InvariantCulture.NumberFormat.NumberDecimalSeparator),
-                    CultureInfo.InvariantCulture);
+                return Convert.ToDecimal(value.ToDouble());
             }
             catch
             {
-                return Convert.ToDecimal(value.ToDouble());
+                return 0;
             }
         }
 
@@ -101,32 +101,17 @@ namespace OsEngine.Entity
         /// </summary>
         public static double ToDouble(this string? value)
         {
-            if (string.IsNullOrEmpty(value))
+            if (string.IsNullOrWhiteSpace(value))
             {
                 return 0;
             }
-            if (value.Contains("E"))
+
+            if (TryParseDoubleInvariantOrCurrent(value, out double result))
             {
-                if (double.TryParse(value, NumberStyles.Float, CultureInfo.InvariantCulture, out double result))
-                {
-                    return result;
-                }
-                return 0;
+                return result;
             }
-            try
-            {
-                return Convert.ToDouble(value.Replace(",",
-                        CultureInfo.InvariantCulture.NumberFormat.NumberDecimalSeparator),
-                    CultureInfo.InvariantCulture);
-            }
-            catch
-            {
-                if (TryParseDoubleInvariantOrCurrent(value, out double result))
-                {
-                    return result;
-                }
-                return 0;
-            }
+
+            return 0;
         }
 
         private static bool TryParseDoubleInvariantOrCurrent(string value, out double result)
@@ -144,6 +129,23 @@ namespace OsEngine.Entity
             }
 
             return double.TryParse(value, parseStyle, _culture, out result);
+        }
+
+        private static bool TryParseDecimalInvariantOrCurrent(string value, out decimal result)
+        {
+            const NumberStyles parseStyle = NumberStyles.Float | NumberStyles.AllowThousands;
+
+            if (decimal.TryParse(value, parseStyle, CultureInfo.InvariantCulture, out result))
+            {
+                return true;
+            }
+
+            if (decimal.TryParse(value, parseStyle, CultureInfo.CurrentCulture, out result))
+            {
+                return true;
+            }
+
+            return decimal.TryParse(value, parseStyle, _culture, out result);
         }
 
         /// <summary>
@@ -206,23 +208,33 @@ namespace OsEngine.Entity
 
             if (value.Contains("E"))
             {
-                value = value.ToDecimal().ToString();
+                value = value.ToDecimal().ToString(CultureInfo.InvariantCulture);
             }
 
-            value = value.Replace(",", ".");
+            value = value.Trim();
+            int separatorIndex = value.LastIndexOf('.');
+            int commaIndex = value.LastIndexOf(',');
 
-            while (value.Length > 0 &&
-                   value.EndsWith("0"))
+            if (commaIndex > separatorIndex)
             {
-                value = value.Remove(value.Length - 1);
+                separatorIndex = commaIndex;
             }
 
-            if (value.Split('.').Length == 1)
+            if (separatorIndex < 0 ||
+                separatorIndex >= value.Length - 1)
             {
                 return 0;
             }
 
-            return value.Split('.')[1].Length;
+            string fraction = value.Substring(separatorIndex + 1);
+
+            while (fraction.Length > 0 &&
+                   fraction.EndsWith("0", StringComparison.Ordinal))
+            {
+                fraction = fraction.Remove(fraction.Length - 1);
+            }
+
+            return fraction.Length;
         }
 
         /// <summary>
@@ -565,11 +577,38 @@ namespace OsEngine.Entity
                     result +=  ";";
                     continue;
                 }
-                string cellValue = cellObject.ToString() ?? string.Empty;
-                result += cellValue.Replace("\n"," ").Replace("\r"," ").Replace(",",".") + ";";
+                string cellValue;
+
+                if (IsNumericType(cellObject))
+                {
+                    cellValue = Convert.ToString(cellObject, CultureInfo.InvariantCulture) ?? string.Empty;
+                }
+                else
+                {
+                    cellValue = cellObject.ToString() ?? string.Empty;
+                }
+
+                result += cellValue.Replace("\n"," ").Replace("\r"," ") + ";";
             }
 
             return result;
+        }
+
+        private static bool IsNumericType(object value)
+        {
+            TypeCode typeCode = Type.GetTypeCode(value.GetType());
+
+            return typeCode == TypeCode.Decimal
+                || typeCode == TypeCode.Double
+                || typeCode == TypeCode.Single
+                || typeCode == TypeCode.Byte
+                || typeCode == TypeCode.SByte
+                || typeCode == TypeCode.Int16
+                || typeCode == TypeCode.UInt16
+                || typeCode == TypeCode.Int32
+                || typeCode == TypeCode.UInt32
+                || typeCode == TypeCode.Int64
+                || typeCode == TypeCode.UInt64;
         }
 
     }

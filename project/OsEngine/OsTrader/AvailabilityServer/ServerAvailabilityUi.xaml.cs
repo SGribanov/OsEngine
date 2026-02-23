@@ -56,7 +56,7 @@ namespace OsEngine.OsTrader.ServerAvailability
 
         private void TextBoxRefreshRate_SelectionChanged(object sender, System.Windows.Controls.SelectionChangedEventArgs e)
         {
-            ServerAvailabilityMaster.CheckPingPeriod = Convert.ToDouble(TextBoxRefreshRate.SelectedItem.ToString());
+            ServerAvailabilityMaster.CheckPingPeriod = TextBoxRefreshRate.SelectedItem.ToString().ToDouble();
         }
 
         private void _dataGridConnector_CellValueChanged(object sender, DataGridViewCellEventArgs e)

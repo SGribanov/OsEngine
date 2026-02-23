@@ -3621,11 +3621,11 @@ namespace OsEngine.Market.Servers.Bybit
 
                 parameters["side"] = side;
                 parameters["order_type"] = type;
-                parameters["qty"] = order.Volume.ToString().Replace(",", ".");
+                parameters["qty"] = order.Volume.ToString(CultureInfo.InvariantCulture);
 
                 if (order.TypeOrder == OrderPriceType.Limit)
                 {
-                    parameters["price"] = order.Price.ToString().Replace(",", ".");
+                    parameters["price"] = order.Price.ToString(CultureInfo.InvariantCulture);
                 }
                 else if ((string)parameters["category"] == Category.spot.ToString())
                 {
@@ -3723,7 +3723,7 @@ namespace OsEngine.Market.Servers.Bybit
 
                 parameters["symbol"] = order.SecurityNameCode.Split('.')[0];
                 parameters["orderLinkId"] = order.NumberUser.ToString();
-                parameters["price"] = newPrice.ToString().Replace(",", ".");
+                parameters["price"] = newPrice.ToString(CultureInfo.InvariantCulture);
 
                 IRestResponse responseMessage = CreatePrivateQuery(parameters, Method.POST, "/v5/order/amend");
 
@@ -4689,8 +4689,10 @@ namespace OsEngine.Market.Servers.Bybit
                 parameters.Clear();
                 parameters["category"] = category;
                 parameters["symbol"] = securityName.Split(".")[0];
-                parameters["buyLeverage"] = leverageLong == "" ? leverage.ToString().Replace(",", ".") : leverageLong.ToString().Replace(",", ".");
-                parameters["sellLeverage"] = leverageShort == "" ? leverage.ToString().Replace(",", ".") : leverageShort.ToString().Replace(",", ".");
+                string buyLeverage = leverageLong == "" ? leverage : leverageLong;
+                string sellLeverage = leverageShort == "" ? leverage : leverageShort;
+                parameters["buyLeverage"] = NormalizeNumericValueForApi(buyLeverage);
+                parameters["sellLeverage"] = NormalizeNumericValueForApi(sellLeverage);
 
                 IRestResponse response = CreatePrivateQuery(parameters, Method.POST, "/v5/position/set-leverage");
 
@@ -4709,6 +4711,46 @@ namespace OsEngine.Market.Servers.Bybit
             catch (System.Exception ex)
             {
                 SendLogMessage($"SetLeverage: {securityName} - {ex.Message} {ex.StackTrace}", LogMessageType.Error);
+            }
+
+            static string NormalizeNumericValueForApi(string value)
+            {
+                const NumberStyles parseStyle = NumberStyles.Float | NumberStyles.AllowThousands;
+
+                if (decimal.TryParse(value, parseStyle, CultureInfo.InvariantCulture, out decimal parsed)
+                    || decimal.TryParse(value, parseStyle, CultureInfo.CurrentCulture, out parsed)
+                    || decimal.TryParse(value, parseStyle, new CultureInfo("ru-RU"), out parsed))
+                {
+                    return parsed.ToString(CultureInfo.InvariantCulture);
+                }
+
+                return NormalizeNumericCommas(value);
+            }
+
+            static string NormalizeNumericCommas(string value)
+            {
+                if (string.IsNullOrEmpty(value))
+                {
+                    return string.Empty;
+                }
+
+                char[] chars = value.ToCharArray();
+
+                for (int i = 1; i < chars.Length - 1; i++)
+                {
+                    if (chars[i] != ',')
+                    {
+                        continue;
+                    }
+
+                    if (char.IsDigit(chars[i - 1]) &&
+                        char.IsDigit(chars[i + 1]))
+                    {
+                        chars[i] = '.';
+                    }
+                }
+
+                return new string(chars);
             }
         }
 

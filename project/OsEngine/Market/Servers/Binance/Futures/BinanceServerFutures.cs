@@ -316,10 +316,15 @@ namespace OsEngine.Market.Servers.Binance.Futures
                     if (sec.filters[1].minQty != null)
                     {
                         decimal minQty = sec.filters[1].minQty.ToDecimal();
-                        string qtyInStr = minQty.ToStringWithNoEndZero().Replace(",", ".");
-                        if (qtyInStr.Replace(",", ".").Split('.').Length > 1)
+                        string qtyInStr = minQty.ToStringWithNoEndZero();
+                        int dotIndex = qtyInStr.LastIndexOf('.');
+                        int commaIndex = qtyInStr.LastIndexOf(',');
+                        int separatorIndex = Math.Max(dotIndex, commaIndex);
+
+                        if (separatorIndex >= 0 &&
+                            separatorIndex < qtyInStr.Length - 1)
                         {
-                            security.DecimalsVolume = qtyInStr.Replace(",", ".").Split('.')[1].Length;
+                            security.DecimalsVolume = qtyInStr.Length - separatorIndex - 1;
                         }
                     }
 

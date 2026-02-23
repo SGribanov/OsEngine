@@ -17,6 +17,7 @@ using RestSharp;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Net;
 using System.Security.Cryptography;
 using System.Text;
@@ -2375,8 +2376,8 @@ namespace OsEngine.Market.Servers.Woo
                 jsonContent.Add("type", order.TypeOrder.ToString() == "Limit" ? "LIMIT" : "MARKET");
                 jsonContent.Add("clientOrderId", order.NumberUser.ToString());
                 jsonContent.Add("positionSide", posSide);
-                jsonContent.Add("price", order.Price.ToString().Replace(",", "."));
-                jsonContent.Add("quantity", order.Volume.ToString().Replace(",", "."));
+                jsonContent.Add("price", order.Price.ToString(CultureInfo.InvariantCulture));
+                jsonContent.Add("quantity", order.Volume.ToString(CultureInfo.InvariantCulture));
 
                 string requestBody = JsonConvert.SerializeObject(jsonContent);
 
@@ -2429,7 +2430,7 @@ namespace OsEngine.Market.Servers.Woo
                 Dictionary<string, string> jsonContent = new Dictionary<string, string>();
                 jsonContent.Add("orderId", order.NumberMarket);
                 jsonContent.Add("clientOrderId", order.NumberUser.ToString());
-                jsonContent.Add("price", newPrice.ToString());
+                jsonContent.Add("price", newPrice.ToString(CultureInfo.InvariantCulture));
 
                 string requestBody = JsonConvert.SerializeObject(jsonContent);
 

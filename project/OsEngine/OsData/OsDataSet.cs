@@ -2947,7 +2947,7 @@ namespace OsEngine.OsData
 
                                 if (volumeSplit.Length == 2)
                                 {
-                                    if (volumeSplit[0] == "VolumeStep" && double.TryParse(volumeSplit[1].Replace(',', '.'), NumberStyles.Float, NumberFormatInfo.InvariantInfo, out volumeStep))
+                                    if (volumeSplit[0] == "VolumeStep" && TryParseDoubleInvariantOrCurrent(volumeSplit[1], out volumeStep))
                                     {
                                         _volumeStep = (decimal)volumeStep;
                                     }
@@ -2973,7 +2973,7 @@ namespace OsEngine.OsData
                             double priceStep = 1;
                             if (step.Length == 5)
                             {
-                                if (double.TryParse(step[4].Replace(',', '.'), NumberStyles.Float, NumberFormatInfo.InvariantInfo, out priceStep))
+                                if (TryParseDoubleInvariantOrCurrent(step[4], out priceStep))
                                 {
                                     _priceStep = (decimal)priceStep;
                                 }
@@ -3031,6 +3031,23 @@ namespace OsEngine.OsData
                     return false;
 
             return true;
+        }
+
+        private static bool TryParseDoubleInvariantOrCurrent(string value, out double result)
+        {
+            const NumberStyles parseStyle = NumberStyles.Float | NumberStyles.AllowThousands;
+
+            if (double.TryParse(value, parseStyle, CultureInfo.InvariantCulture, out result))
+            {
+                return true;
+            }
+
+            if (double.TryParse(value, parseStyle, CultureInfo.CurrentCulture, out result))
+            {
+                return true;
+            }
+
+            return double.TryParse(value, parseStyle, new CultureInfo("ru-RU"), out result);
         }
 
         private Stream GetDataStream(FileStream fs, byte[] prefix)

@@ -6941,6 +6941,32 @@
 - **Commit:** n/a (not committed in this session)
 - **Push:** n/a
 
+### Step 2.2 - CultureInfo Invariant Persistence (Incremental Adoption #428)
+
+- **Status:** In Progress (increment completed)
+- **Plan item:** `refactoring_stage2_plan.md` -> Phase 2 / Step 2.2
+- **Changes:**
+  - Standardized remaining order payload formatting in:
+    - `project/OsEngine/Market/Servers/BitMart/BitMartSpot/BitMartSpotServer.cs`
+    - `project/OsEngine/Market/Servers/BitMart/BitMartFutures/BitMartFutures.cs`
+    - `project/OsEngine/Market/Servers/Transaq/TransaqServer.cs`
+    - `project/OsEngine/Market/Servers/Plaza/PlazaServer.cs`
+  - Replacements:
+    - `ToString().Replace(',', '.')` -> `ToString(CultureInfo.InvariantCulture)` for `price`/`size` serialization.
+    - Plaza `price` fields in transport messages (`price`, `price1`) and related order diagnostics switched to invariant format.
+  - Added missing `using System.Globalization;` in BitMart spot/futures files.
+  - Scope:
+    - formatting hardening only; connector business logic unchanged.
+- **Verification:**
+  - Executed outside sandbox.
+  - `dotnet restore project/OsEngine/OsEngine.csproj --nologo` succeeded.
+  - `dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo` succeeded.
+  - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` succeeded (0 warnings).
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` succeeded (`352/352`).
+  - `rg -n "ToString\\(\\)\\.Replace\\(',', '\\.'\\)" project/OsEngine/Market/Servers` -> no matches.
+- **Commit:** n/a (not committed in this session)
+- **Push:** n/a
+
 ### Step 2.2 - InvariantCulture Persistence (Incremental Adoption #335)
 
 - **Status:** In Progress (increment completed)
@@ -8114,6 +8140,41 @@
 - **Commit:** n/a (not committed in this session)
 - **Push:** n/a
 
+### Step 2.2 - CultureInfo Invariant Persistence (Incremental Adoption #377)
+
+- **Status:** In Progress (increment completed)
+- **Plan item:** `refactoring_stage2_plan.md` -> Phase 2 / Step 2.2
+- **Changes:**
+  - Finalized remaining market-server replace-based decimal formatting in:
+    - `project/OsEngine/Market/Servers/CoinEx/Spot/CoinExServerSpot.cs`
+    - `project/OsEngine/Market/Servers/CoinEx/Futures/CoinExServerFutures.cs`
+    - `project/OsEngine/Market/Servers/Atp/AtpServer.cs`
+    - `project/OsEngine/Market/Servers/MoexFixFastCurrency/MoexFixFastCurrencyServer.cs`
+    - `project/OsEngine/Market/Servers/MoexFixFastTwimeFutures/MoexFixFastTwimeFuturesServer.cs`
+    - `project/OsEngine/Market/Servers/Bybit/BybitServer.cs`
+  - Replacements:
+    - removed `.Replace(",", ".")` where values were already formatted with `CultureInfo.InvariantCulture`.
+    - converted remaining decimal `ToString().Replace(",", ".")` paths to explicit invariant formatting.
+  - Bybit leverage path:
+    - introduced `NormalizeNumericValueForApi(string)` helper for leverage strings with parse cascade:
+      - `InvariantCulture`
+      - `CurrentCulture`
+      - `ru-RU`
+    - fallback preserves prior non-numeric handling (`Replace(",", ".")`) to avoid behavior regressions.
+  - Additional:
+    - added `using System.Globalization;` in MoexFix server files.
+  - Scope:
+    - formatting hardening only; no API contract or flow changes.
+- **Verification:**
+  - Executed outside sandbox.
+  - `dotnet restore project/OsEngine/OsEngine.csproj --nologo` succeeded.
+  - `dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo` succeeded.
+  - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` succeeded (0 warnings).
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` succeeded (`352/352`).
+  - `rg -n 'ToString\\([^)]*\\)\\.Replace\\(\",\",\\s*\"\\.\"\\)' project/OsEngine/Market/Servers` returned no matches.
+- **Commit:** n/a (not committed in this session)
+- **Push:** n/a
+
 ### Step 2.2 - CultureInfo Invariant Persistence (Incremental Adoption #375)
 
 - **Status:** In Progress (increment completed)
@@ -8128,6 +8189,34 @@
     - parsing/normalization hardening only; tester business logic and data formats unchanged.
 - **Verification:**
   - Executed by project rule outside sandbox.
+  - `dotnet restore project/OsEngine/OsEngine.csproj --nologo` succeeded.
+  - `dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo` succeeded.
+  - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` succeeded (0 warnings).
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` succeeded (`352/352`).
+- **Commit:** n/a (not committed in this session)
+- **Push:** n/a
+
+### Step 2.2 - CultureInfo Invariant Persistence (Incremental Adoption #376)
+
+- **Status:** In Progress (increment completed)
+- **Plan item:** `refactoring_stage2_plan.md` -> Phase 2 / Step 2.2
+- **Changes:**
+  - Hardened outbound decimal payload formatting in:
+    - `project/OsEngine/Market/Servers/Bitfinex/BitfinexSpot/BitfinexSpotServer.cs`
+    - `project/OsEngine/Market/Servers/Bitfinex/BitfinexFutures/BitfinexFuturesServer.cs`
+    - `project/OsEngine/Market/Servers/BloFin/BloFinFutures/BloFinFuturesServer.cs`
+    - `project/OsEngine/Market/Servers/FinamGrpc/FinamGrpcServer.cs`
+    - `project/OsEngine/Market/Servers/XT/XTSpot/XTServerSpot.cs`
+  - Replacements:
+    - `decimal.ToString().Replace(",", ".")` -> `decimal.ToString(CultureInfo.InvariantCulture)`
+  - Covered fields:
+    - `price`, `size`, `amount`, `quantity`, and `quoteQty` payload values.
+  - Additional:
+    - added `using System.Globalization;` where needed.
+  - Scope:
+    - formatting hardening only; no API contract changes.
+- **Verification:**
+  - Executed outside sandbox.
   - `dotnet restore project/OsEngine/OsEngine.csproj --nologo` succeeded.
   - `dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo` succeeded.
   - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` succeeded (0 warnings).
@@ -8157,6 +8246,35 @@
 - **Commit:** n/a (not committed in this session)
 - **Push:** n/a
 
+### Step 2.2 - CultureInfo Invariant Persistence (Incremental Adoption #375)
+
+- **Status:** In Progress (increment completed)
+- **Plan item:** `refactoring_stage2_plan.md` -> Phase 2 / Step 2.2
+- **Changes:**
+  - Hardened order payload decimal formatting in:
+    - `project/OsEngine/Market/Servers/ExMo/ExmoSpot/ExmoSpotServer.cs`
+    - `project/OsEngine/Market/Servers/Woo/WooServer.cs`
+    - `project/OsEngine/Market/Servers/KiteConnect/KiteConnectServer.cs`
+    - `project/OsEngine/Market/Servers/TraderNet/TraderNetServer.cs`
+    - `project/OsEngine/Market/Servers/Pionex/PionexServerSpot.cs`
+    - `project/OsEngine/Market/Servers/KuCoin/KuCoinSpot/KuCoinSpotServer.cs`
+    - `project/OsEngine/Market/Servers/KuCoin/KuCoinFutures/KuCoinFuturesServer.cs`
+  - Replacements:
+    - `decimal.ToString().Replace(",", ".")` -> `decimal.ToString(CultureInfo.InvariantCulture)`
+    - TraderNet `qty` switched from culture-default `.ToString()` to invariant formatting.
+  - Additional:
+    - added `using System.Globalization;` in files where invariant formatting was introduced.
+  - Scope:
+    - formatting hardening only; no changes in API parameters set or order flow logic.
+- **Verification:**
+  - Executed outside sandbox.
+  - `dotnet restore project/OsEngine/OsEngine.csproj --nologo` succeeded.
+  - `dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo` succeeded.
+  - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` succeeded (0 warnings).
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` succeeded (`352/352`).
+- **Commit:** n/a (not committed in this session)
+- **Push:** n/a
+
 ### Step 2.2 - CultureInfo Invariant Persistence (Incremental Adoption #373)
 
 - **Status:** In Progress (increment completed)
@@ -8170,6 +8288,33 @@
     - persistence serialization hardening only; parsing compatibility preserved via existing `ToDouble()`.
 - **Verification:**
   - Executed by project rule outside sandbox.
+  - `dotnet restore project/OsEngine/OsEngine.csproj --nologo` succeeded.
+  - `dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo` succeeded.
+  - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` succeeded (0 warnings).
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` succeeded (`352/352`).
+- **Commit:** n/a (not committed in this session)
+- **Push:** n/a
+
+### Step 2.2 - CultureInfo Invariant Persistence (Incremental Adoption #374)
+
+- **Status:** In Progress (increment completed)
+- **Plan item:** `refactoring_stage2_plan.md` -> Phase 2 / Step 2.2
+- **Changes:**
+  - Hardened decimal serialization for outbound order payloads in:
+    - `project/OsEngine/Market/Servers/GateIo/GateIoSpot/GateIoServerSpot.cs`
+    - `project/OsEngine/Market/Servers/HTX/Spot/HTXSpotServer.cs`
+    - `project/OsEngine/Market/Servers/HTX/Futures/HTXFuturesServer.cs`
+    - `project/OsEngine/Market/Servers/HTX/Swap/HTXSwapServer.cs`
+    - `project/OsEngine/Market/Servers/OKX/OkxServer.cs`
+  - Replacements:
+    - `decimal.ToString().Replace(",", ".")` -> `decimal.ToString(CultureInfo.InvariantCulture)`
+    - formatted volume path `ToString("0.#####").Replace(",", ".")` -> `ToString("0.#####", CultureInfo.InvariantCulture)`
+  - Additional:
+    - added `using System.Globalization;` in affected GateIo/HTX files where invariant formatting was introduced.
+  - Scope:
+    - payload-format hardening only; connector control flow and API fields unchanged.
+- **Verification:**
+  - Executed outside sandbox.
   - `dotnet restore project/OsEngine/OsEngine.csproj --nologo` succeeded.
   - `dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo` succeeded.
   - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` succeeded (0 warnings).
@@ -8199,6 +8344,33 @@
 - **Commit:** n/a (not committed in this session)
 - **Push:** n/a
 
+### Step 2.2 - CultureInfo Invariant Persistence (Incremental Adoption #373)
+
+- **Status:** In Progress (increment completed)
+- **Plan item:** `refactoring_stage2_plan.md` -> Phase 2 / Step 2.2
+- **Changes:**
+  - Hardened outbound decimal payload formatting in exchange connectors:
+    - `project/OsEngine/Market/Servers/Bybit/BybitServer.cs`
+    - `project/OsEngine/Market/Servers/BingX/BingXSpot/BingXServerSpot.cs`
+    - `project/OsEngine/Market/Servers/BingX/BingXFutures/BingXServerFutures.cs`
+    - `project/OsEngine/Market/Servers/BitGet/BitGetSpot/BitGetServerSpot.cs`
+    - `project/OsEngine/Market/Servers/BitGet/BitGetFutures/BitGetServerFutures.cs`
+  - Replacements:
+    - `decimal.ToString().Replace(",", ".")` -> `decimal.ToString(CultureInfo.InvariantCulture)` for `price/qty/size` request fields.
+    - `newPrice` payload formatting switched to invariant string.
+  - Additional:
+    - added `using System.Globalization;` in BitGet spot/futures server files.
+  - Scope:
+    - formatting hardening only; connector behavior and API field sets unchanged.
+- **Verification:**
+  - Executed outside sandbox.
+  - `dotnet restore project/OsEngine/OsEngine.csproj --nologo` succeeded.
+  - `dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo` succeeded.
+  - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` succeeded (0 warnings).
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` succeeded (`352/352`).
+- **Commit:** n/a (not committed in this session)
+- **Push:** n/a
+
 ### Step 2.2 - CultureInfo Invariant Persistence (Incremental Adoption #371)
 
 - **Status:** In Progress (increment completed)
@@ -8214,6 +8386,33 @@
     - persistence serialization/parsing hardening only; business logic unchanged.
 - **Verification:**
   - Executed by project rule outside sandbox.
+  - `dotnet restore project/OsEngine/OsEngine.csproj --nologo` succeeded.
+  - `dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo` succeeded.
+  - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` succeeded (0 warnings).
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` succeeded (`352/352`).
+- **Commit:** n/a (not committed in this session)
+- **Push:** n/a
+
+### Step 2.2 - CultureInfo Invariant Persistence (Incremental Adoption #372)
+
+- **Status:** In Progress (increment completed)
+- **Plan item:** `refactoring_stage2_plan.md` -> Phase 2 / Step 2.2
+- **Changes:**
+  - Hardened separator handling in table export and decimal-step check:
+    - `project/OsEngine/Entity/Extensions.cs`
+    - `project/OsEngine/Robots/AutoTestBots/ServerTests/Var_1_Securities.cs`
+  - Replacements:
+    - `ToFormatString(DataGridViewRow)`:
+      - removed unconditional `Replace(",", ".")` on all cell text
+      - numeric cells now emit invariant-formatted values
+      - non-numeric cells keep textual content (newline-stripped only)
+    - `IsCompairDecimalsAndStep(...)`:
+      - removed `Replace(",", ".")`
+      - separator-neutral fractional precision detection by last separator index (`.` / `,`)
+  - Scope:
+    - parsing/formatting hardening only; no changes to business logic.
+- **Verification:**
+  - Executed outside sandbox.
   - `dotnet restore project/OsEngine/OsEngine.csproj --nologo` succeeded.
   - `dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo` succeeded.
   - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` succeeded (0 warnings).
@@ -8243,6 +8442,30 @@
 - **Commit:** n/a (not committed in this session)
 - **Push:** n/a
 
+### Step 2.2 - CultureInfo Invariant Persistence (Incremental Adoption #371)
+
+- **Status:** In Progress (increment completed)
+- **Plan item:** `refactoring_stage2_plan.md` -> Phase 2 / Step 2.2
+- **Changes:**
+  - Hardened central double parse helper in:
+    - `project/OsEngine/Entity/Extensions.cs`
+  - Replacements:
+    - `ToDouble(this string?)` no longer uses replace-based separator normalization and direct `Convert.ToDouble(...)`.
+    - parse path is unified through `TryParseDoubleInvariantOrCurrent(...)` with culture cascade:
+      - `InvariantCulture`
+      - `CurrentCulture`
+      - `ru-RU`
+  - Scope:
+    - parsing hardening only; no change to persisted schema or business logic.
+- **Verification:**
+  - Executed outside sandbox.
+  - `dotnet restore project/OsEngine/OsEngine.csproj --nologo` succeeded.
+  - `dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo` succeeded.
+  - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` succeeded (0 warnings).
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` succeeded (`352/352`).
+- **Commit:** n/a (not committed in this session)
+- **Push:** n/a
+
 ### Step 2.2 - CultureInfo Invariant Persistence (Incremental Adoption #369)
 
 - **Status:** In Progress (increment completed)
@@ -8256,6 +8479,28 @@
     - persistence serialization hardening only; load compatibility preserved via existing `ToDecimal()`.
 - **Verification:**
   - Executed by project rule outside sandbox.
+  - `dotnet restore project/OsEngine/OsEngine.csproj --nologo` succeeded.
+  - `dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo` succeeded.
+  - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` succeeded (0 warnings).
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` succeeded (`352/352`).
+- **Commit:** n/a (not committed in this session)
+- **Push:** n/a
+
+### Step 2.2 - CultureInfo Invariant Persistence (Incremental Adoption #370)
+
+- **Status:** In Progress (increment completed)
+- **Plan item:** `refactoring_stage2_plan.md` -> Phase 2 / Step 2.2
+- **Changes:**
+  - Hardened decimal precision parsing helper in:
+    - `project/OsEngine/Entity/Extensions.cs`
+  - Replacements:
+    - `DecimalsCount(this string?)` no longer uses replace-based separator normalization (`Replace(",", ".")`).
+    - added separator-neutral fraction detection (`.` / `,` via last-separator index) with preserved trailing-zero trim behavior.
+    - preserved exponent normalization path (`E` -> invariant decimal string).
+  - Scope:
+    - parsing hardening only; external persistence formats and behavior for valid inputs unchanged.
+- **Verification:**
+  - Executed outside sandbox.
   - `dotnet restore project/OsEngine/OsEngine.csproj --nologo` succeeded.
   - `dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo` succeeded.
   - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` succeeded (0 warnings).
@@ -8280,6 +8525,89 @@
     - persistence serialization hardening only; load compatibility preserved via existing `ToDecimal()`.
 - **Verification:**
   - Executed by project rule outside sandbox.
+  - `dotnet restore project/OsEngine/OsEngine.csproj --nologo` succeeded.
+  - `dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo` succeeded.
+  - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` succeeded (0 warnings).
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` succeeded (`352/352`).
+- **Commit:** n/a (not committed in this session)
+- **Push:** n/a
+
+### Step 2.2 - CultureInfo Invariant Persistence (Incremental Adoption #427)
+
+- **Status:** In Progress (increment completed)
+- **Plan item:** `refactoring_stage2_plan.md` -> Phase 2 / Step 2.2
+- **Changes:**
+  - Standardized decimal payload serialization in:
+    - `project/OsEngine/Market/Servers/MoexFixFastSpot/MoexFixFastSpotServer.cs`
+    - `project/OsEngine/Market/Servers/MoexFixFastCurrency/MoexFixFastCurrencyServer.cs`
+    - `project/OsEngine/Market/Servers/MoexFixFastTwimeFutures/MoexFixFastTwimeFuturesServer.cs`
+    - `project/OsEngine/Market/Servers/Woo/WooServer.cs`
+    - `project/OsEngine/Market/Servers/Mexc/MexcSpot/MexcSpotServer.cs`
+    - `project/OsEngine/Market/Servers/Bitfinex/BitfinexSpot/BitfinexSpotServer.cs`
+  - Replacements:
+    - `ToString().Replace(',', '.')` -> `ToString(CultureInfo.InvariantCulture)` for order `price` / `quantity` / `amount` fields.
+    - Moex FIX replace paths: `OrderQty` serialization switched to invariant decimal string.
+  - Added missing `using System.Globalization;` in files where invariant formatting was introduced.
+  - Scope:
+    - payload serialization hardening only; connector business logic unchanged.
+- **Verification:**
+  - Executed outside sandbox.
+  - `dotnet restore project/OsEngine/OsEngine.csproj --nologo` succeeded.
+  - `dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo` succeeded.
+  - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` succeeded (0 warnings).
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` succeeded (`352/352`).
+  - `rg -n "ToString\\(\\)\\.Replace\\(',', '\\.'\\)" project/OsEngine/Market/Servers` -> remaining matches only in `BitMart`, `Transaq`, `Plaza`.
+- **Commit:** n/a (not committed in this session)
+- **Push:** n/a
+
+### Step 2.2 - CultureInfo Invariant Persistence (Incremental Adoption #426)
+
+- **Status:** In Progress (increment completed)
+- **Plan item:** `refactoring_stage2_plan.md` -> Phase 2 / Step 2.2
+- **Changes:**
+  - Removed residual replace-based decimal normalization in:
+    - `project/OsEngine/Market/Servers/Binance/Spot/BinanceServerSpot.cs`
+    - `project/OsEngine/Market/Servers/Binance/Futures/BinanceServerFutures.cs`
+    - `project/OsEngine/Market/Servers/Bybit/BybitServer.cs`
+  - Binance Spot/Futures:
+    - replaced `minQty.ToStringWithNoEndZero().Replace(",", ".")` and related split logic
+    - with separator-agnostic fractional-length detection using last separator index (`.` or `,`).
+  - Bybit leverage helper:
+    - `NormalizeNumericValueForApi(...)` fallback changed from blanket `Replace(",", ".")`
+    - to safe `NormalizeNumericCommas(...)` that rewrites only commas between digits.
+  - Scope:
+    - formatting/parsing hardening only; connector business logic unchanged.
+- **Verification:**
+  - Executed by project rule outside sandbox.
+  - `dotnet restore project/OsEngine/OsEngine.csproj --nologo` succeeded.
+  - `dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo` succeeded.
+  - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` succeeded (0 warnings).
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` succeeded (`352/352`).
+  - `rg -n 'Replace\\(\\s*\"\\,\"\\s*,\\s*\"\\.\"\\s*\\)' project/OsEngine` -> no matches.
+- **Commit:** n/a (not committed in this session)
+- **Push:** n/a
+
+### Step 2.2 - CultureInfo Invariant Persistence (Incremental Adoption #369)
+
+- **Status:** In Progress (increment completed)
+- **Plan item:** `refactoring_stage2_plan.md` -> Phase 2 / Step 2.2
+- **Changes:**
+  - Hardened core decimal parse helper in:
+    - `project/OsEngine/Entity/Extensions.cs`
+  - Replacements:
+    - `ToDecimal(this string?)` no longer uses replace-based decimal separator normalization + direct `Convert.ToDecimal(...)`.
+    - introduced `TryParseDecimalInvariantOrCurrent(...)` with explicit culture cascade:
+      - `InvariantCulture`
+      - `CurrentCulture`
+      - `ru-RU` fallback
+    - retained compatibility fallback through `value.ToDouble()` conversion.
+  - Additional adjustment:
+    - `DecimalsCount(...)` exponential-path normalization now uses invariant decimal string (`ToString(CultureInfo.InvariantCulture)`).
+  - Scope:
+    - parsing hardening only; persistence formats and domain logic unchanged.
+- **Verification:**
+  - Executed outside sandbox.
+  - `curl.exe -I https://api.nuget.org/v3/index.json --ssl-no-revoke` succeeded (`HTTP/1.1 200 OK`).
   - `dotnet restore project/OsEngine/OsEngine.csproj --nologo` succeeded.
   - `dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo` succeeded.
   - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` succeeded (0 warnings).
@@ -9055,3 +9383,149 @@
 - **Commit:** n/a (not committed in this session)
 - **Push:** n/a
 
+### Step 2.2 - CultureInfo Invariant Persistence (Incremental Adoption #368)
+
+- **Status:** In Progress (increment completed)
+- **Plan item:** `refactoring_stage2_plan.md` -> Phase 2 / Step 2.2
+- **Changes:**
+  - Removed culture-dependent decimal separator normalization in:
+    - `project/OsEngine/Charts/CandleChart/WinFormsChartPainter.cs`
+  - Replacements:
+    - `openS/highS/lowS/closeS.Replace(".", ",")` + split-by-comma branches
+    - -> separator-agnostic fraction-length calculation via new helper `GetFractionLength(string value)` used by `GetCandlesDecimal(...)`.
+  - Scope:
+    - decimal precision detection hardening only; chart behavior and persistence formats unchanged.
+- **Verification:**
+  - Attempted in current sandbox with local `DOTNET_CLI_HOME`.
+  - `dotnet restore project/OsEngine/OsEngine.csproj --nologo` failed (`NU1301`: TLS/auth handshake failure to `https://api.nuget.org/v3/index.json`).
+  - `dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo` failed with same `NU1301`.
+  - `dotnet build` / `dotnet test` not considered valid in this environment after restore failure.
+- **Commit:** n/a (not committed in this session)
+- **Push:** n/a
+
+
+### Step 2.2 - CultureInfo Invariant Persistence (Incremental Adoption #429)
+
+- **Status:** In Progress (increment completed)
+- **Plan item:** `refactoring_stage2_plan.md` -> Phase 2 / Step 2.2
+- **Changes:**
+  - Removed residual replace-based parsing in:
+    - `project/OsEngine/Market/Servers/HTX/Swap/HTXSwapServer.cs`
+    - `project/OsEngine/Market/Servers/HTX/Futures/HTXFuturesServer.cs`
+    - `project/OsEngine/Market/Servers/OKX/OkxServer.cs`
+    - `project/OsEngine/Market/Servers/OKXData/OKXDataServer.cs`
+    - `project/OsEngine/OsData/OsDataSet.cs`
+    - `project/OsEngine/Market/Servers/Tester/TesterServer.cs`
+  - Replacements:
+    - string normalization via `Replace(',', '.')` removed from decimal parsing paths.
+    - HTX parsing paths migrated to separator-neutral trim + `ToDecimal()`.
+    - OKX/OKXData decimals-volume detection migrated to last-separator index logic.
+    - OsDataSet/Tester parsing now uses explicit parse-cascade helpers (`Invariant -> Current -> ru-RU`).
+  - Scope:
+    - parsing hardening only; runtime behavior preserved for valid numeric payloads.
+- **Verification:**
+  - Executed outside sandbox.
+  - `dotnet restore project/OsEngine/OsEngine.csproj --nologo` succeeded.
+  - `dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo` succeeded.
+  - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` succeeded (0 warnings).
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` succeeded (`352/352`).
+  - `rg -n -F "Replace(',', '.')" project/OsEngine` -> no matches.
+- **Commit:** n/a (not committed in this session)
+- **Push:** n/a
+
+### Step 2.2 - CultureInfo Invariant Persistence (Incremental Adoption #430)
+
+- **Status:** In Progress (increment completed)
+- **Plan item:** `refactoring_stage2_plan.md` -> Phase 2 / Step 2.2
+- **Changes:**
+  - Removed replace-based decimal normalization in:
+    - `project/OsEngine/Market/Servers/BingX/BingXSpot/BingXServerSpot.cs`
+    - `project/OsEngine/Market/Servers/BingX/BingXFutures/BingXServerFutures.cs`
+    - `project/OsEngine/Market/Servers/GateIo/GateIoSpot/GateIoServerSpot.cs`
+    - `project/OsEngine/Market/Servers/KuCoin/KuCoinSpot/KuCoinSpotServer.cs`
+    - `project/OsEngine/Market/Servers/KuCoin/KuCoinFutures/KuCoinFuturesServer.cs`
+    - `project/OsEngine/Market/Servers/Bitfinex/BitfinexSpot/BitfinexSpotServer.cs`
+    - `project/OsEngine/Market/Servers/Bitfinex/BitfinexFutures/BitfinexFuturesServer.cs`
+  - Replacements:
+    - `value.Replace('.', ',').ToDecimal()` -> `value.ToDecimal()` in incoming payload parsing.
+    - BingX outbound numeric fields moved from `ToString().Replace(",", ".")` to invariant formatting.
+    - Bitfinex digit-count helper migrated to separator-agnostic logic without pre-normalization.
+  - Scope:
+    - parsing/serialization hardening only; domain logic unchanged.
+- **Verification:**
+  - Executed outside sandbox.
+  - `dotnet restore project/OsEngine/OsEngine.csproj --nologo` succeeded.
+  - `dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo` succeeded.
+  - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` succeeded (0 warnings).
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` succeeded (`352/352`).
+  - `rg -n -F "Replace('.', ',')" project/OsEngine` -> no matches.
+- **Commit:** n/a (not committed in this session)
+- **Push:** n/a
+
+### Step 2.2 - CultureInfo Invariant Persistence (Incremental Adoption #431)
+
+- **Status:** In Progress (increment completed)
+- **Plan item:** `refactoring_stage2_plan.md` -> Phase 2 / Step 2.2
+- **Changes:**
+  - Removed replace-based parse normalization in:
+    - `project/OsEngine/Market/Servers/BingX/BingXSpot/BingXServerSpot.cs`
+    - `project/OsEngine/Market/Servers/BingX/BingXFutures/BingXServerFutures.cs`
+    - `project/OsEngine/Market/Servers/GateIo/GateIoSpot/GateIoServerSpot.cs`
+    - `project/OsEngine/Market/Servers/KuCoin/KuCoinSpot/KuCoinSpotServer.cs`
+    - `project/OsEngine/Market/Servers/KuCoin/KuCoinFutures/KuCoinFuturesServer.cs`
+    - `project/OsEngine/Market/Servers/Bitfinex/BitfinexSpot/BitfinexSpotServer.cs`
+    - `project/OsEngine/Market/Servers/Bitfinex/BitfinexFutures/BitfinexFuturesServer.cs`
+  - Additional hardening:
+    - `project/OsEngine/Market/Servers/Deribit/DeribitServer.cs` (`price` assignments simplified to direct decimal).
+    - `project/OsEngine/Market/Servers/Transaq/TransaqServer.cs` (`volume` serialization switched to invariant string).
+  - Replacements:
+    - `value.Replace('.', ',').ToDecimal()` -> `value.ToDecimal()`
+    - locale-sensitive outbound decimal strings -> invariant formatting where applicable.
+  - Scope:
+    - parsing/formatting hardening only; connector logic unchanged.
+- **Verification:**
+  - Executed outside sandbox.
+  - `dotnet restore project/OsEngine/OsEngine.csproj --nologo` succeeded.
+  - `dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo` succeeded.
+  - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` succeeded (0 warnings).
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` succeeded (`352/352`).
+  - `rg -n -F "Replace('.', ',')" project/OsEngine` -> no matches.
+  - `rg -n -F "Replace(',', '.')" project/OsEngine` -> no matches.
+- **Commit:** n/a (not committed in this session)
+- **Push:** n/a
+
+### Step 2.2 - CultureInfo Invariant Persistence (Incremental Adoption #432)
+
+- **Status:** In Progress (increment completed)
+- **Plan item:** `refactoring_stage2_plan.md` -> Phase 2 / Step 2.2
+- **Changes:**
+  - Hardened UI double parsing in:
+    - `project/OsEngine/Charts/CandleChart/Indicators/ParabolicSARUi.xaml.cs`
+    - `project/OsEngine/OsTrader/AvailabilityServer/ServerAvailabilityUi.xaml.cs`
+  - Replacements:
+    - `Convert.ToDouble(...)` -> `ToDouble()` for user-entered values.
+  - Scope:
+    - UI parsing hardening only; behavior unchanged for valid input.
+- **Verification:**
+  - Executed outside sandbox.
+  - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` succeeded (0 warnings).
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` succeeded (`352/352`).
+- **Commit:** n/a (not committed in this session)
+- **Push:** n/a
+
+### Step 2.2 - CultureInfo Invariant Persistence (Incremental Adoption #433)
+
+- **Status:** In Progress (increment completed)
+- **Plan item:** `refactoring_stage2_plan.md` -> Phase 2 / Step 2.2
+- **Changes:**
+  - Internal cleanup in `project/OsEngine/Market/Servers/Tester/TesterServer.cs`:
+    - removed duplicated `TryParseDecimalInvariantOrCurrent(...)` helper in `SecurityTester` scope.
+    - `ParseVolumeStepFromComment(...)` switched to `ToDecimal()` + zero-guard with existing fallback logic.
+  - Scope:
+    - parser simplification only; runtime behavior unchanged.
+- **Verification:**
+  - Executed outside sandbox.
+  - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` succeeded (0 warnings).
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` succeeded (`352/352`).
+- **Commit:** n/a (not committed in this session)
+- **Push:** n/a

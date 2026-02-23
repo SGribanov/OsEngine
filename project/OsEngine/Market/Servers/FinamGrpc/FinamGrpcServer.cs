@@ -18,6 +18,7 @@ using OsEngine.Market.Servers.Entity;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Net;
 using System.Net.Http;
 using System.Threading;
@@ -1551,13 +1552,13 @@ namespace OsEngine.Market.Servers.FinamGrpc
             FOrder fOrder = new FOrder();
             fOrder.AccountId = _accountId;
             fOrder.Symbol = order.SecurityNameCode;
-            fOrder.Quantity = new Google.Type.Decimal { Value = order.Volume.ToString().Replace(",", ".") };
+            fOrder.Quantity = new Google.Type.Decimal { Value = order.Volume.ToString(CultureInfo.InvariantCulture) };
             fOrder.Side = GetFSide(order.Side);
             fOrder.ClientOrderId = order.NumberUser.ToString();
             if (order.TypeOrder == OrderPriceType.Limit)
             {
                 fOrder.Type = OrderType.Limit;
-                fOrder.LimitPrice = new Google.Type.Decimal { Value = order.Price.ToString().Replace(",", ".") };
+                fOrder.LimitPrice = new Google.Type.Decimal { Value = order.Price.ToString(CultureInfo.InvariantCulture) };
             }
             else if (order.TypeOrder == OrderPriceType.Market)
             {

@@ -15,6 +15,7 @@ using RestSharp;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO.Compression;
 using System.Net;
 using System.Text;
@@ -237,7 +238,7 @@ namespace OsEngine.Market.Servers.HTX.Futures
 
                             newSecurity.DecimalsVolume = contractSize.ToString().DecimalsCount();
                             newSecurity.Lot = 1;
-                            newSecurity.PriceStep = item.price_tick.Replace(',', '.').TrimEnd('0').TrimEnd('.').ToDecimal();
+                            newSecurity.PriceStep = item.price_tick.TrimEnd('0').TrimEnd('.', ',').ToDecimal();
                             newSecurity.Decimals = item.price_tick.DecimalsCount();
                             newSecurity.PriceStepCost = newSecurity.PriceStep;
                             newSecurity.State = SecurityStateType.Activ;
@@ -296,7 +297,7 @@ namespace OsEngine.Market.Servers.HTX.Futures
                 if (!responseMessage.Content.Contains("error"))
                 {
                     ResponseMessageSecurities response = JsonConvert.DeserializeObject<ResponseMessageSecurities>(responseMessage.Content);
-                    decimal contractSize = response.data[0].contract_size.Replace(',', '.').TrimEnd('0').TrimEnd('.').ToDecimal();
+                    decimal contractSize = response.data[0].contract_size.TrimEnd('0').TrimEnd('.', ',').ToDecimal();
 
                     return contractSize;
                 }
@@ -1904,8 +1905,8 @@ namespace OsEngine.Market.Servers.HTX.Futures
                 jsonContent.Add("symbol", order.SecurityNameCode.Split('_')[0]);
                 jsonContent.Add("contract_type", contractType);
                 jsonContent.Add("client_order_id", order.NumberUser.ToString());
-                jsonContent.Add("price", order.Price.ToString().Replace(",", "."));
-                jsonContent.Add("volume", order.Volume.ToString().Replace(",", "."));
+                jsonContent.Add("price", order.Price.ToString(CultureInfo.InvariantCulture));
+                jsonContent.Add("volume", order.Volume.ToString(CultureInfo.InvariantCulture));
                 jsonContent.Add("direction", order.Side == Side.Buy ? "buy" : "sell");
 
                 if (order.PositionConditionType == OrderPositionConditionType.Close)

@@ -252,13 +252,14 @@ namespace OsEngine.Market.Servers.OKXData
                 }
 
                 security.Lot = item.lotSz.ToDecimal();
-                string volStep = item.minSz.Replace(',', '.');
+                int dotIndex = item.minSz.LastIndexOf('.');
+                int commaIndex = item.minSz.LastIndexOf(',');
+                int separatorIndex = Math.Max(dotIndex, commaIndex);
 
-                if (volStep != null
-                        && volStep.Length > 0 &&
-                        volStep.Split('.').Length > 1)
+                if (separatorIndex >= 0 &&
+                    separatorIndex < item.minSz.Length - 1)
                 {
-                    security.DecimalsVolume = volStep.Split('.')[1].Length;
+                    security.DecimalsVolume = item.minSz.Length - separatorIndex - 1;
                 }
 
                 security.MinTradeAmountType = MinTradeAmountType.Contract;

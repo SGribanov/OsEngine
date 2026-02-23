@@ -1940,16 +1940,14 @@ namespace OsEngine.Market.Servers.Transaq
                 }
                 if (order.TypeOrder == OrderPriceType.Limit)
                 {
-                    cmd += "<price>" + order.Price.ToString().Replace(',', '.') + "</price>";
+                    cmd += "<price>" + order.Price.ToString(CultureInfo.InvariantCulture) + "</price>";
                 }
                 else if (order.TypeOrder == OrderPriceType.Market)
                 {
                     cmd += "<bymarket/>";
                 }
 
-                string volume = order.Volume.ToString();
-
-                volume = volume.Replace(",0", "");
+                string volume = order.Volume.ToString(CultureInfo.InvariantCulture);
                 volume = volume.Replace(".0", "");
 
                 cmd += "<quantity>" + volume + "</quantity>";
@@ -2067,7 +2065,7 @@ namespace OsEngine.Market.Servers.Transaq
 
                 string cmd = "<command id=\"moveorder\">";
                 cmd += "<transactionid>" + order.NumberUser + "</transactionid>";
-                cmd += "<price>" + newPrice.ToString().Replace(',', '.') + "</price>";
+                cmd += "<price>" + newPrice.ToString(CultureInfo.InvariantCulture) + "</price>";
                 cmd += "<moveflag>" + 0 + "</moveflag>";
                 cmd += "</command>";
 
