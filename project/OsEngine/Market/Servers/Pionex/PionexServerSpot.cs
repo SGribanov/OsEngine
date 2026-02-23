@@ -458,7 +458,7 @@ namespace OsEngine.Market.Servers.Pionex
                             newCandle.Low = responseCandles.data.klines[i].low.ToDecimal();
                             newCandle.Volume = responseCandles.data.klines[i].volume.ToDecimal();
                             newCandle.State = CandleState.Finished;
-                            newCandle.TimeStart = TimeManager.GetDateTimeFromTimeStamp(Convert.ToInt64(responseCandles.data.klines[i].time));
+                            newCandle.TimeStart = TimeManager.GetDateTimeFromTimeStamp(Convert.ToInt64(responseCandles.data.klines[i].time, CultureInfo.InvariantCulture));
                             candles.Add(newCandle);
                         }
 
@@ -1245,7 +1245,7 @@ namespace OsEngine.Market.Servers.Pionex
                 trade.SecurityNameCode = responseTrade.data[0].symbol;
                 trade.Price = responseTrade.data[0].price.ToDecimal();
                 trade.Id = responseTrade.data[0].tradeId;
-                trade.Time = TimeManager.GetDateTimeFromTimeStamp(Convert.ToInt64(responseTrade.data[0].timestamp));
+                trade.Time = TimeManager.GetDateTimeFromTimeStamp(Convert.ToInt64(responseTrade.data[0].timestamp, CultureInfo.InvariantCulture));
                 trade.Volume = responseTrade.data[0].size.ToDecimal();
                 trade.Side = responseTrade.data[0].side.Equals("BUY") ? Side.Buy : Side.Sell;
 
@@ -1293,7 +1293,7 @@ namespace OsEngine.Market.Servers.Pionex
 
                 marketDepth.Asks = ascs;
                 marketDepth.Bids = bids;
-                marketDepth.Time = TimeManager.GetDateTimeFromTimeStamp(Convert.ToInt64(responseDepth.timestamp));
+                marketDepth.Time = TimeManager.GetDateTimeFromTimeStamp(Convert.ToInt64(responseDepth.timestamp, CultureInfo.InvariantCulture));
 
                 if (marketDepth.Asks.Count == 0 ||
                     marketDepth.Bids.Count == 0)
@@ -1346,7 +1346,7 @@ namespace OsEngine.Market.Servers.Pionex
 
                 MyTrades item = responseTrades.data;
 
-                long time = Convert.ToInt64(item.timestamp);
+                long time = Convert.ToInt64(item.timestamp, CultureInfo.InvariantCulture);
 
                 MyTrade newTrade = new MyTrade();
 
@@ -1419,7 +1419,7 @@ namespace OsEngine.Market.Servers.Pionex
                 Order newOrder = new Order();
 
                 newOrder.SecurityNameCode = item.symbol;
-                newOrder.TimeCallBack = TimeManager.GetDateTimeFromTimeStamp(Convert.ToInt64(item.createTime));
+                newOrder.TimeCallBack = TimeManager.GetDateTimeFromTimeStamp(Convert.ToInt64(item.createTime, CultureInfo.InvariantCulture));
 
                 if (string.IsNullOrEmpty(item.clientOrderId))
                 {
@@ -1722,7 +1722,7 @@ namespace OsEngine.Market.Servers.Pionex
                             Order newOrder = new Order();
 
                             newOrder.SecurityNameCode = item.symbol;
-                            newOrder.TimeCallBack = TimeManager.GetDateTimeFromTimeStamp(Convert.ToInt64(item.createTime));
+                            newOrder.TimeCallBack = TimeManager.GetDateTimeFromTimeStamp(Convert.ToInt64(item.createTime, CultureInfo.InvariantCulture));
 
                             if (string.IsNullOrEmpty(item.clientOrderId))
                             {
@@ -1822,7 +1822,7 @@ namespace OsEngine.Market.Servers.Pionex
                         Order newOrder = new Order();
 
                         newOrder.SecurityNameCode = item.symbol;
-                        newOrder.TimeCallBack = TimeManager.GetDateTimeFromTimeStamp(Convert.ToInt64(item.createTime));
+                        newOrder.TimeCallBack = TimeManager.GetDateTimeFromTimeStamp(Convert.ToInt64(item.createTime, CultureInfo.InvariantCulture));
 
                         if (string.IsNullOrEmpty(item.clientOrderId))
                         {
@@ -1889,7 +1889,7 @@ namespace OsEngine.Market.Servers.Pionex
                         {
                             FillItem item = response.data.fills[j];
 
-                            long time = Convert.ToInt64(item.timestamp);
+                            long time = Convert.ToInt64(item.timestamp, CultureInfo.InvariantCulture);
 
                             MyTrade newTrade = new MyTrade();
 
