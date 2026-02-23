@@ -4688,7 +4688,7 @@ namespace OsEngine.Market.Servers
                 if (!string.IsNullOrEmpty(data.TimeCreate) &&
                     _dictAdditionalMarketData[data.SecurityName].TimeCreate.ToString() != data.TimeCreate)
                 {
-                    _dictAdditionalMarketData[data.SecurityName].TimeCreate = TimeManager.GetDateTimeFromTimeStamp(Convert.ToInt64(data.TimeCreate));
+                    _dictAdditionalMarketData[data.SecurityName].TimeCreate = TimeManager.GetDateTimeFromTimeStamp(Convert.ToInt64(data.TimeCreate, System.Globalization.CultureInfo.InvariantCulture));
                 }
 
                 if (NewAdditionalMarketDataEvent != null)

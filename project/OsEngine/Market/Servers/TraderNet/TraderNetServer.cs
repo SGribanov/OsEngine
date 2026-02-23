@@ -953,7 +953,7 @@ namespace OsEngine.Market.Servers.TraderNet
                     candle.Open = coords[2].ToDecimal();
                     candle.Close = coords[3].ToDecimal();
                     candle.Volume = listVl[i].ToDecimal();
-                    candle.TimeStart = TimeManager.GetDateTimeFromTimeStampSeconds(long.Parse(listSeries[i])).AddHours(timeShift);
+                    candle.TimeStart = TimeManager.GetDateTimeFromTimeStampSeconds(long.Parse(listSeries[i], CultureInfo.InvariantCulture)).AddHours(timeShift);
 
                     candles.Add(candle);
                 }

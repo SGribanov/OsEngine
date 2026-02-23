@@ -455,7 +455,7 @@ namespace OsEngine.Market.Servers.YahooFinance
                 Candle candle = new Candle();
 
                 candle.State = CandleState.Finished;
-                candle.TimeStart = TimeManager.GetDateTimeFromTimeStampSeconds(long.Parse(timeStamp[i]));
+                candle.TimeStart = TimeManager.GetDateTimeFromTimeStampSeconds(long.Parse(timeStamp[i], System.Globalization.CultureInfo.InvariantCulture));
                 candle.Volume = quotes.volume[i].ToDecimal();
                 candle.Close = quotes.close[i].ToDecimal();
                 candle.High = quotes.high[i].ToDecimal();
