@@ -1055,7 +1055,7 @@ namespace OsEngine.Market.Servers.HTX.Swap
                             Candle candle = new Candle();
 
                             candle.State = CandleState.Finished;
-                            candle.TimeStart = TimeManager.GetDateTimeFromTimeStampSeconds(long.Parse(item.id));
+                            candle.TimeStart = TimeManager.GetDateTimeFromTimeStampSeconds(long.Parse(item.id, CultureInfo.InvariantCulture));
                             candle.Volume = item.vol.ToDecimal();
                             candle.Close = item.close.ToDecimal();
                             candle.High = item.high.ToDecimal();
@@ -2439,8 +2439,8 @@ namespace OsEngine.Market.Servers.HTX.Swap
 
                 Order newOrder = new Order();
 
-                newOrder.TimeCallBack = TimeManager.GetDateTimeFromTimeStamp(long.Parse(response.ts));
-                newOrder.TimeCreate = TimeManager.GetDateTimeFromTimeStamp(long.Parse(response.created_at));
+                newOrder.TimeCallBack = TimeManager.GetDateTimeFromTimeStamp(long.Parse(response.ts, CultureInfo.InvariantCulture));
+                newOrder.TimeCreate = TimeManager.GetDateTimeFromTimeStamp(long.Parse(response.created_at, CultureInfo.InvariantCulture));
                 newOrder.ServerType = ServerType.HTXFutures;
                 newOrder.SecurityNameCode = response.contract_code;
 
@@ -3077,8 +3077,8 @@ namespace OsEngine.Market.Servers.HTX.Swap
                             newOrder.ServerType = ServerType.HTXSwap;
                             newOrder.SecurityNameCode = item.contract_code;
                             newOrder.State = GetOrderState(item.status);
-                            newOrder.TimeCallBack = TimeManager.GetDateTimeFromTimeStamp(long.Parse(item.update_time));
-                            newOrder.TimeCreate = TimeManager.GetDateTimeFromTimeStamp(long.Parse(item.created_at));
+                            newOrder.TimeCallBack = TimeManager.GetDateTimeFromTimeStamp(long.Parse(item.update_time, CultureInfo.InvariantCulture));
+                            newOrder.TimeCreate = TimeManager.GetDateTimeFromTimeStamp(long.Parse(item.created_at, CultureInfo.InvariantCulture));
 
                             if (newOrder.State == OrderStateType.Cancel)
                             {
@@ -3286,8 +3286,8 @@ namespace OsEngine.Market.Servers.HTX.Swap
 
                         if (item != null)
                         {
-                            newOrder.TimeCallBack = TimeManager.GetDateTimeFromTimeStamp(long.Parse(item.created_at));
-                            newOrder.TimeCreate = TimeManager.GetDateTimeFromTimeStamp(long.Parse(item.created_at));
+                            newOrder.TimeCallBack = TimeManager.GetDateTimeFromTimeStamp(long.Parse(item.created_at, CultureInfo.InvariantCulture));
+                            newOrder.TimeCreate = TimeManager.GetDateTimeFromTimeStamp(long.Parse(item.created_at, CultureInfo.InvariantCulture));
                             newOrder.ServerType = ServerType.HTXSwap;
                             newOrder.SecurityNameCode = item.contract_code;
 
