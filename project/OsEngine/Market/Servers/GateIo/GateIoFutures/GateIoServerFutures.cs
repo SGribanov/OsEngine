@@ -695,7 +695,7 @@ namespace OsEngine.Market.Servers.GateIo.GateIoFutures
                         trade.SecurityNameCode = current.contract;
                         trade.Side = current.size.ToDecimal() > 0 ? Side.Buy : Side.Sell;
                         string[] timeData = current.create_time_ms.Split('.');
-                        DateTime time = TimeManager.GetDateTimeFromTimeStampSeconds(long.Parse(timeData[0]));
+                        DateTime time = TimeManager.GetDateTimeFromTimeStampSeconds(long.Parse(timeData[0], CultureInfo.InvariantCulture));
 
                         if (timeData.Length > 1)
                         {
@@ -1522,7 +1522,7 @@ namespace OsEngine.Market.Servers.GateIo.GateIoFutures
                     Funding data = new Funding();
 
                     data.SecurityNameCode = security;
-                    data.PreviousFundingTime = TimeManager.GetDateTimeFromTimeStampSeconds(long.Parse(item.t));
+                    data.PreviousFundingTime = TimeManager.GetDateTimeFromTimeStampSeconds(long.Parse(item.t, CultureInfo.InvariantCulture));
 
                     FundingUpdateEvent?.Invoke(data);
                 }
@@ -2017,7 +2017,7 @@ namespace OsEngine.Market.Servers.GateIo.GateIoFutures
 
                 for (int i = 0; i < responseTrades.result.Count; i++)
                 {
-                    long time = Convert.ToInt64(responseTrades.result[i].create_time);
+                    long time = Convert.ToInt64(responseTrades.result[i].create_time, CultureInfo.InvariantCulture);
 
                     Trade newTrade = new Trade();
 
@@ -2167,7 +2167,7 @@ namespace OsEngine.Market.Servers.GateIo.GateIoFutures
                 depth.Asks = ascs;
                 depth.Bids = bids;
 
-                depth.Time = TimeManager.GetDateTimeFromTimeStamp(Convert.ToInt64(responseDepths.result.t));
+                depth.Time = TimeManager.GetDateTimeFromTimeStamp(Convert.ToInt64(responseDepths.result.t, CultureInfo.InvariantCulture));
 
                 if (depth.Time <= _lastMdTime)
                 {
@@ -2205,7 +2205,7 @@ namespace OsEngine.Market.Servers.GateIo.GateIoFutures
                         continue;
                     }
 
-                    long time = Convert.ToInt64(responseMyTrade.result[i].create_time);
+                    long time = Convert.ToInt64(responseMyTrade.result[i].create_time, CultureInfo.InvariantCulture);
 
                     MyTrade newTrade = new MyTrade();
 
@@ -2237,8 +2237,8 @@ namespace OsEngine.Market.Servers.GateIo.GateIoFutures
                 {
                     Order newOrder = new Order();
                     newOrder.SecurityNameCode = responseOrders.result[i].contract;
-                    newOrder.TimeCallBack = DateTimeOffset.FromUnixTimeMilliseconds(Convert.ToInt64(responseOrders.result[i].create_time_ms)).UtcDateTime;
-                    newOrder.TimeCreate = DateTimeOffset.FromUnixTimeMilliseconds(Convert.ToInt64(responseOrders.result[i].create_time_ms)).UtcDateTime;
+                    newOrder.TimeCallBack = DateTimeOffset.FromUnixTimeMilliseconds(Convert.ToInt64(responseOrders.result[i].create_time_ms, CultureInfo.InvariantCulture)).UtcDateTime;
+                    newOrder.TimeCreate = DateTimeOffset.FromUnixTimeMilliseconds(Convert.ToInt64(responseOrders.result[i].create_time_ms, CultureInfo.InvariantCulture)).UtcDateTime;
 
                     OrderStateType orderState = OrderStateType.None;
 
@@ -2604,8 +2604,8 @@ namespace OsEngine.Market.Servers.GateIo.GateIoFutures
                         newOrder.SecurityNameCode = responseOrders[i].contract;
 
                         string time = responseOrders[i].create_time.Split('.')[0];
-                        newOrder.TimeCallBack = TimeManager.GetDateTimeFromTimeStampSeconds(Convert.ToInt64(time));
-                        newOrder.TimeCreate = TimeManager.GetDateTimeFromTimeStampSeconds(Convert.ToInt64(time));
+                        newOrder.TimeCallBack = TimeManager.GetDateTimeFromTimeStampSeconds(Convert.ToInt64(time, CultureInfo.InvariantCulture));
+                        newOrder.TimeCreate = TimeManager.GetDateTimeFromTimeStampSeconds(Convert.ToInt64(time, CultureInfo.InvariantCulture));
 
                         try
                         {
@@ -2717,7 +2717,7 @@ namespace OsEngine.Market.Servers.GateIo.GateIoFutures
 
                             MyTrade newTrade = new MyTrade();
 
-                            newTrade.Time = TimeManager.GetDateTimeFromTimeStampSeconds(Convert.ToInt64(time));
+                            newTrade.Time = TimeManager.GetDateTimeFromTimeStampSeconds(Convert.ToInt64(time, CultureInfo.InvariantCulture));
                             newTrade.SecurityNameCode = security;
                             newTrade.NumberOrderParent = responseMyTrade[i].order_id;
                             newTrade.Price = responseMyTrade[i].price.ToDecimal();
