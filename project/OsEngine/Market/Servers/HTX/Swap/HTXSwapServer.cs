@@ -2249,7 +2249,7 @@ namespace OsEngine.Market.Servers.HTX.Swap
                     trade.SecurityNameCode = GetSecurityName(responseTrade.ch);
                     trade.Price = item[i].price.ToDecimal();
                     trade.Id = item[i].id;
-                    trade.Time = TimeManager.GetDateTimeFromTimeStamp(Convert.ToInt64(item[i].ts));
+                    trade.Time = TimeManager.GetDateTimeFromTimeStamp(Convert.ToInt64(item[i].ts, CultureInfo.InvariantCulture));
                     trade.Volume = item[i].amount.ToDecimal();
                     trade.Side = item[i].direction.Equals("buy") ? Side.Buy : Side.Sell;
 
@@ -2370,7 +2370,7 @@ namespace OsEngine.Market.Servers.HTX.Swap
 
                 marketDepth.Asks = ascs;
                 marketDepth.Bids = bids;
-                marketDepth.Time = TimeManager.GetDateTimeFromTimeStamp(Convert.ToInt64(responseDepth.ts));
+                marketDepth.Time = TimeManager.GetDateTimeFromTimeStamp(Convert.ToInt64(responseDepth.ts, CultureInfo.InvariantCulture));
 
                 if (_lastTimeMd != DateTime.MinValue &&
                     _lastTimeMd >= marketDepth.Time)
@@ -2402,7 +2402,7 @@ namespace OsEngine.Market.Servers.HTX.Swap
             {
                 MyTrade myTrade = new MyTrade();
 
-                myTrade.Time = TimeManager.GetDateTimeFromTimeStamp(Convert.ToInt64(response.trade[i].created_at));
+                myTrade.Time = TimeManager.GetDateTimeFromTimeStamp(Convert.ToInt64(response.trade[i].created_at, CultureInfo.InvariantCulture));
                 myTrade.NumberOrderParent = response.order_id;
 
                 string num = response.trade[i].id;
@@ -3082,12 +3082,12 @@ namespace OsEngine.Market.Servers.HTX.Swap
 
                             if (newOrder.State == OrderStateType.Cancel)
                             {
-                                newOrder.TimeCancel = TimeManager.GetDateTimeFromTimeStamp(Convert.ToInt64(item.update_time));
+                                newOrder.TimeCancel = TimeManager.GetDateTimeFromTimeStamp(Convert.ToInt64(item.update_time, CultureInfo.InvariantCulture));
                             }
 
                             if (newOrder.State == OrderStateType.Done)
                             {
-                                newOrder.TimeDone = TimeManager.GetDateTimeFromTimeStamp(Convert.ToInt64(item.update_time));
+                                newOrder.TimeDone = TimeManager.GetDateTimeFromTimeStamp(Convert.ToInt64(item.update_time, CultureInfo.InvariantCulture));
                             }
 
                             try
@@ -3392,7 +3392,7 @@ namespace OsEngine.Market.Servers.HTX.Swap
                                 newTrade.NumberOrderParent = response.data.order_id;
                                 newTrade.Volume = response.data.trades[i].trade_volume.ToDecimal() * GetVolume(newTrade.SecurityNameCode);
                                 newTrade.Price = response.data.trades[i].trade_price.ToDecimal();
-                                newTrade.Time = TimeManager.GetDateTimeFromTimeStamp(Convert.ToInt64(response.data.trades[i].created_at));
+                                newTrade.Time = TimeManager.GetDateTimeFromTimeStamp(Convert.ToInt64(response.data.trades[i].created_at, CultureInfo.InvariantCulture));
 
                                 if (response.data.direction == "buy")
                                 {

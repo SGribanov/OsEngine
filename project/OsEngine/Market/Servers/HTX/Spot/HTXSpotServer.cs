@@ -1738,7 +1738,7 @@ namespace OsEngine.Market.Servers.HTX.Spot
                     trade.SecurityNameCode = GetSecurityName(response.ch);
                     trade.Price = item[i].price.ToDecimal();
                     trade.Id = item[i].tradeId;
-                    trade.Time = TimeManager.GetDateTimeFromTimeStamp(Convert.ToInt64(item[i].ts));
+                    trade.Time = TimeManager.GetDateTimeFromTimeStamp(Convert.ToInt64(item[i].ts, CultureInfo.InvariantCulture));
                     trade.Volume = item[i].amount.ToDecimal();
                     trade.Side = item[i].direction.Equals("buy") ? Side.Buy : Side.Sell;
 
@@ -1851,7 +1851,7 @@ namespace OsEngine.Market.Servers.HTX.Spot
                 marketDepth.Asks = asks;
                 marketDepth.Bids = bids;
 
-                marketDepth.Time = TimeManager.GetDateTimeFromTimeStamp(Convert.ToInt64(response.ts));
+                marketDepth.Time = TimeManager.GetDateTimeFromTimeStamp(Convert.ToInt64(response.ts, CultureInfo.InvariantCulture));
 
                 if (marketDepth.Time <= _lastMdTime)
                 {
@@ -1891,7 +1891,7 @@ namespace OsEngine.Market.Servers.HTX.Spot
 
                 MyTrade myTrade = new MyTrade();
 
-                myTrade.Time = TimeManager.GetDateTimeFromTimeStamp(Convert.ToInt64(item.tradeTime));
+                myTrade.Time = TimeManager.GetDateTimeFromTimeStamp(Convert.ToInt64(item.tradeTime, CultureInfo.InvariantCulture));
                 myTrade.NumberOrderParent = item.orderId;
                 myTrade.NumberTrade = item.tradeId;
                 myTrade.Price = item.tradePrice.ToDecimal();
@@ -2642,7 +2642,7 @@ namespace OsEngine.Market.Servers.HTX.Spot
                                 newTrade.NumberOrderParent = item[i].order_id;
                                 newTrade.Volume = item[i].filled_amount.ToDecimal();
                                 newTrade.Price = item[i].price.ToDecimal();
-                                newTrade.Time = TimeManager.GetDateTimeFromTimeStamp(Convert.ToInt64(item[i].created_at));
+                                newTrade.Time = TimeManager.GetDateTimeFromTimeStamp(Convert.ToInt64(item[i].created_at, CultureInfo.InvariantCulture));
 
                                 if (item[i].type.Split('-')[0] == "buy")
                                 {
