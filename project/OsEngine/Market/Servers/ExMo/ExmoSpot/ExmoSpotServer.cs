@@ -495,7 +495,7 @@ namespace OsEngine.Market.Servers.ExMo.ExmoSpot
                         Candle candle = new Candle();
 
                         candle.State = CandleState.Finished;
-                        candle.TimeStart = TimeManager.GetDateTimeFromTimeStamp(Convert.ToInt64(item.t));
+                        candle.TimeStart = TimeManager.GetDateTimeFromTimeStamp(Convert.ToInt64(item.t, CultureInfo.InvariantCulture));
                         candle.Volume = item.v.ToDecimal();
                         candle.Close = item.c.ToDecimal();
                         candle.High = item.h.ToDecimal();
@@ -1232,7 +1232,7 @@ namespace OsEngine.Market.Servers.ExMo.ExmoSpot
                     Trade trade = new Trade();
                     trade.SecurityNameCode = responseTrade.topic.Split(':')[1];
                     trade.Price = item.price.ToDecimal();
-                    trade.Time = DateTimeOffset.FromUnixTimeSeconds(Convert.ToInt64(item.date)).UtcDateTime;
+                    trade.Time = DateTimeOffset.FromUnixTimeSeconds(Convert.ToInt64(item.date, CultureInfo.InvariantCulture)).UtcDateTime;
                     trade.Id = item.trade_id;
 
                     if (item.type == "buy")
@@ -1277,7 +1277,7 @@ namespace OsEngine.Market.Servers.ExMo.ExmoSpot
 
                 MarketDepth depth = new MarketDepth();
                 depth.SecurityNameCode = responseDepth.topic.Split(':')[1];
-                depth.Time = TimeManager.GetDateTimeFromTimeStamp(Convert.ToInt64(responseDepth.ts));
+                depth.Time = TimeManager.GetDateTimeFromTimeStamp(Convert.ToInt64(responseDepth.ts, CultureInfo.InvariantCulture));
 
                 for (int i = 0; i < responseDepth.data.bid.Count; i++)
                 {
@@ -1332,7 +1332,7 @@ namespace OsEngine.Market.Servers.ExMo.ExmoSpot
 
                 MyTrade myTrade = new MyTrade();
 
-                myTrade.Time = DateTimeOffset.FromUnixTimeSeconds(Convert.ToInt64(item.date)).UtcDateTime; //TimeManager.GetDateTimeFromTimeStamp(Convert.ToInt64(item.ts));
+                myTrade.Time = DateTimeOffset.FromUnixTimeSeconds(Convert.ToInt64(item.date, CultureInfo.InvariantCulture)).UtcDateTime; //TimeManager.GetDateTimeFromTimeStamp(Convert.ToInt64(item.ts));
                 myTrade.NumberOrderParent = item.order_id;
                 myTrade.NumberTrade = item.trade_id;
                 myTrade.Price = item.price.ToDecimal();
@@ -1389,8 +1389,8 @@ namespace OsEngine.Market.Servers.ExMo.ExmoSpot
 
                 Order newOrder = new Order();
                 newOrder.SecurityNameCode = item.pair;
-                newOrder.TimeCallBack = DateTimeOffset.FromUnixTimeSeconds(Convert.ToInt64(item.created)).UtcDateTime;
-                newOrder.TimeCreate = DateTimeOffset.FromUnixTimeSeconds(Convert.ToInt64(item.created)).UtcDateTime;
+                newOrder.TimeCallBack = DateTimeOffset.FromUnixTimeSeconds(Convert.ToInt64(item.created, CultureInfo.InvariantCulture)).UtcDateTime;
+                newOrder.TimeCreate = DateTimeOffset.FromUnixTimeSeconds(Convert.ToInt64(item.created, CultureInfo.InvariantCulture)).UtcDateTime;
 
                 try
                 {
@@ -1761,8 +1761,8 @@ namespace OsEngine.Market.Servers.ExMo.ExmoSpot
 
                             Order newOrder = new Order();
                             newOrder.SecurityNameCode = item.pair;
-                            newOrder.TimeCallBack = DateTimeOffset.FromUnixTimeSeconds(Convert.ToInt64(item.created)).UtcDateTime;
-                            newOrder.TimeCreate = DateTimeOffset.FromUnixTimeSeconds(Convert.ToInt64(item.created)).UtcDateTime;
+                            newOrder.TimeCallBack = DateTimeOffset.FromUnixTimeSeconds(Convert.ToInt64(item.created, CultureInfo.InvariantCulture)).UtcDateTime;
+                            newOrder.TimeCreate = DateTimeOffset.FromUnixTimeSeconds(Convert.ToInt64(item.created, CultureInfo.InvariantCulture)).UtcDateTime;
 
                             try
                             {
@@ -1917,8 +1917,8 @@ namespace OsEngine.Market.Servers.ExMo.ExmoSpot
 
                         Order newOrder = new Order();
                         newOrder.SecurityNameCode = item.pair;
-                        newOrder.TimeCallBack = DateTimeOffset.FromUnixTimeSeconds(Convert.ToInt64(item.created)).UtcDateTime;
-                        newOrder.TimeCreate = DateTimeOffset.FromUnixTimeSeconds(Convert.ToInt64(item.created)).UtcDateTime;
+                        newOrder.TimeCallBack = DateTimeOffset.FromUnixTimeSeconds(Convert.ToInt64(item.created, CultureInfo.InvariantCulture)).UtcDateTime;
+                        newOrder.TimeCreate = DateTimeOffset.FromUnixTimeSeconds(Convert.ToInt64(item.created, CultureInfo.InvariantCulture)).UtcDateTime;
 
                         try
                         {
@@ -2021,8 +2021,8 @@ namespace OsEngine.Market.Servers.ExMo.ExmoSpot
 
                             Order newOrder = new Order();
                             newOrder.SecurityNameCode = item.pair;
-                            newOrder.TimeCallBack = DateTimeOffset.FromUnixTimeSeconds(Convert.ToInt64(item.date)).UtcDateTime;
-                            newOrder.TimeCreate = DateTimeOffset.FromUnixTimeSeconds(Convert.ToInt64(item.date)).UtcDateTime;
+                            newOrder.TimeCallBack = DateTimeOffset.FromUnixTimeSeconds(Convert.ToInt64(item.date, CultureInfo.InvariantCulture)).UtcDateTime;
+                            newOrder.TimeCreate = DateTimeOffset.FromUnixTimeSeconds(Convert.ToInt64(item.date, CultureInfo.InvariantCulture)).UtcDateTime;
 
                             try
                             {
@@ -2066,7 +2066,7 @@ namespace OsEngine.Market.Servers.ExMo.ExmoSpot
                             {
                                 MyTrade myTrade = new MyTrade();
 
-                                myTrade.Time = DateTimeOffset.FromUnixTimeSeconds(Convert.ToInt64(item.date)).UtcDateTime;
+                                myTrade.Time = DateTimeOffset.FromUnixTimeSeconds(Convert.ToInt64(item.date, CultureInfo.InvariantCulture)).UtcDateTime;
                                 myTrade.NumberOrderParent = item.order_id;
                                 myTrade.NumberTrade = item.trade_id;
                                 myTrade.Price = item.price.ToDecimal();
