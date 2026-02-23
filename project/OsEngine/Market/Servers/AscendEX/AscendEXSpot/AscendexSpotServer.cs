@@ -1399,7 +1399,7 @@ namespace OsEngine.Market.Servers.AscendexSpot
                     return;
                 }
 
-                _lastSeqNum = Convert.ToInt64(snapshot.data.seqnum);
+                _lastSeqNum = Convert.ToInt64(snapshot.data.seqnum, CultureInfo.InvariantCulture);
                 _snapshotInitialized = true;
 
                 MarketDepth newDepth = new MarketDepth();
@@ -1479,7 +1479,7 @@ namespace OsEngine.Market.Servers.AscendexSpot
                     return;
                 }
 
-                if (_lastSeqNum != -1 && Convert.ToInt64(update.data.seqnum) != _lastSeqNum + 1)
+                if (_lastSeqNum != -1 && Convert.ToInt64(update.data.seqnum, CultureInfo.InvariantCulture) != _lastSeqNum + 1)
                 {
                     _snapshotInitialized = false;
                     _lastSeqNum = -1;
@@ -1488,7 +1488,7 @@ namespace OsEngine.Market.Servers.AscendexSpot
                     return;
                 }
 
-                _lastSeqNum = Convert.ToInt64(update.data.seqnum);
+                _lastSeqNum = Convert.ToInt64(update.data.seqnum, CultureInfo.InvariantCulture);
 
                 depth.Time = DateTime.UtcNow;
 

@@ -1476,7 +1476,7 @@ namespace OsEngine.Market.Servers.XT.XTFutures
                         return;
                     }
 
-                    _lastSeqNum = Convert.ToInt64(depth.id);
+                    _lastSeqNum = Convert.ToInt64(depth.id, CultureInfo.InvariantCulture);
                     _snapshotInitialized = true;
 
                     MarketDepth newDepth = new MarketDepth();
@@ -1561,14 +1561,14 @@ namespace OsEngine.Market.Servers.XT.XTFutures
                         return;
                     }
 
-                    if (_lastSeqNum != -1 && Convert.ToInt64(marketDepth.fu) != _lastSeqNum + 1)
+                    if (_lastSeqNum != -1 && Convert.ToInt64(marketDepth.fu, CultureInfo.InvariantCulture) != _lastSeqNum + 1)
                     {
                         _snapshotInitialized = false;
                         _lastSeqNum = -1;
                         return;
                     }
 
-                    _lastSeqNum = Convert.ToInt64(marketDepth.fu);
+                    _lastSeqNum = Convert.ToInt64(marketDepth.fu, CultureInfo.InvariantCulture);
 
                     depth.Time = DateTime.UtcNow;
 
@@ -1697,7 +1697,7 @@ namespace OsEngine.Market.Servers.XT.XTFutures
                     trade.Time = TimeManager.GetDateTimeFromTimeStamp(Convert.ToInt64(responseTrade.data?.t, CultureInfo.InvariantCulture));
                     trade.Volume = (responseTrade.data?.a).ToDecimal();
                     trade.Side = responseTrade.data?.m?.Equals("BID", StringComparison.OrdinalIgnoreCase) == true ? Side.Buy : Side.Sell;
-                    trade.Id = Convert.ToInt64(responseTrade.data?.t).ToString();
+                    trade.Id = Convert.ToInt64(responseTrade.data?.t, CultureInfo.InvariantCulture).ToString(CultureInfo.InvariantCulture);
 
                     NewTradesEvent?.Invoke(trade);
                 }
@@ -1771,7 +1771,7 @@ namespace OsEngine.Market.Servers.XT.XTFutures
 
                     myTrade.Time = TimeManager.GetDateTimeFromTimeStamp(Convert.ToInt64(response.data.timestamp, CultureInfo.InvariantCulture));
                     myTrade.NumberOrderParent = response.data.orderId;
-                    myTrade.NumberTrade = Convert.ToInt64(response.data.clientOrderId).ToString();
+                    myTrade.NumberTrade = Convert.ToInt64(response.data.clientOrderId, CultureInfo.InvariantCulture).ToString(CultureInfo.InvariantCulture);
                     myTrade.Price = response.data.price.ToDecimal();
                     myTrade.SecurityNameCode = response.data.symbol;
                     myTrade.Volume = response.data.quantity.ToDecimal() * GetVolume(myTrade.SecurityNameCode);

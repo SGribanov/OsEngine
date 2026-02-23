@@ -3562,7 +3562,7 @@ namespace OsEngine.Market.Servers.MoexFixFastSpot
                     if (fixMessage.MessageType == "SequenceReset")
                     {
                         string GapFillFlag = fixMessage.Fields["GapFillFlag"];                                                
-                        _MFIXTradeMsgSeqNumIncoming = long.Parse(fixMessage.Fields["NewSeqNo"]) + 1; // new sequence number with loss of data
+                        _MFIXTradeMsgSeqNumIncoming = long.Parse(fixMessage.Fields["NewSeqNo"], CultureInfo.InvariantCulture) + 1; // new sequence number with loss of data
                     }
                 }
                 catch (Exception exception)

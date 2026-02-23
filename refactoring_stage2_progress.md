@@ -8769,3 +8769,28 @@
 - Host-context verification (outside sandbox):
   - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` -> success (0 warnings, 0 errors)
   - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed `352/352`
+
+## 2026-02-23 - Step 2.2 (CultureInfo.InvariantCulture) - Sequence and order id parsing hardening (Moex/AscendEX/XT)
+
+- Standardized numeric string parsing with explicit invariant culture in:
+  - `project/OsEngine/Market/Servers/MoexFixFastSpot/MoexFixFastSpotServer.cs`
+  - `project/OsEngine/Market/Servers/MoexFixFastTwimeFutures/MoexFixFastTwimeFuturesServer.cs`
+  - `project/OsEngine/Market/Servers/AscendEX/AscendEXSpot/AscendexSpotServer.cs`
+  - `project/OsEngine/Market/Servers/XT/XTFutures/XTFuturesServer.cs`
+- Changes:
+  - replaced parsing/conversion of sequence and order identifiers:
+    - `long.Parse(value)` -> `long.Parse(value, CultureInfo.InvariantCulture)`
+    - `Convert.ToInt64(value)` -> `Convert.ToInt64(value, CultureInfo.InvariantCulture)`
+  - standardized string conversion for parsed ids in XT futures:
+    - `.ToString()` -> `.ToString(CultureInfo.InvariantCulture)`
+- Scope:
+  - parser hardening only
+  - connector behavior unchanged for valid payloads.
+
+### Verification
+
+- Host-context verification (outside sandbox):
+  - `dotnet restore project/OsEngine/OsEngine.csproj --nologo` -> success
+  - `dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo` -> success
+  - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` -> success (0 warnings, 0 errors)
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed `352/352`

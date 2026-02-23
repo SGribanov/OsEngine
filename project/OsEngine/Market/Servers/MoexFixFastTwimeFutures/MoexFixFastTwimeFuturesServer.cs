@@ -4072,7 +4072,7 @@ namespace OsEngine.Market.Servers.MoexFixFastTwimeFutures
                     _newOrdersTwime.Add(order);
 
                     ulong ClOrdID = (ulong)DateTime.UtcNow.Ticks;
-                    long OrderID = Convert.ToInt64(order.NumberMarket);
+                    long OrderID = Convert.ToInt64(order.NumberMarket, CultureInfo.InvariantCulture);
                     int securityID = Convert.ToInt32(_secIdByName[order.SecurityNameCode]);
 
                     byte[] ordDelMsg = _twimeMessageConstructor.OrderCancel(ClOrdID, OrderID, securityID, _TradeAccount, out string msgLog);
@@ -4160,7 +4160,7 @@ namespace OsEngine.Market.Servers.MoexFixFastTwimeFutures
                     _newOrdersTwime.Add(order);
 
                     ulong ClOrdID = (ulong)DateTime.UtcNow.Ticks;
-                    long OrderID = Convert.ToInt64(order.NumberMarket);
+                    long OrderID = Convert.ToInt64(order.NumberMarket, CultureInfo.InvariantCulture);
                     int securityID = Convert.ToInt32(_secIdByName[order.SecurityNameCode]);
                     uint OrderQty = (uint)order.Volume;
                     int ClOrdLinkID = order.NumberUser;
