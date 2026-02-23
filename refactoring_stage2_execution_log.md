@@ -10249,3 +10249,25 @@
   - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` succeeded (`352/352`).
 - **Commit:** n/a (not committed in this session)
 - **Push:** n/a
+
+### Step 2.2 - CultureInfo Invariant Persistence (Incremental Adoption #471)
+
+- **Status:** In Progress (increment completed)
+- **Plan item:** `refactoring_stage2_plan.md` -> Phase 2 / Step 2.2
+- **Changes:**
+  - Hardened explicit invariant parsing of string-based int values in:
+    - `project/OsEngine/Market/Servers/HTX/Futures/HTXFuturesServer.cs`
+    - `project/OsEngine/Market/Servers/HTX/Spot/HTXSpotServer.cs`
+    - `project/OsEngine/Market/Servers/HTX/Swap/HTXSwapServer.cs`
+  - Replacements:
+    - `Convert.ToInt32(value)` -> `Convert.ToInt32(value, CultureInfo.InvariantCulture)` for client order ids, spot precision fields (`ap`/`pp`) and swap paging fields (`total_page`/`current_page`).
+  - Scope:
+    - parser hardening only; runtime behavior unchanged for valid API payloads.
+- **Verification:**
+  - Executed outside sandbox.
+  - `dotnet restore project/OsEngine/OsEngine.csproj --nologo` succeeded.
+  - `dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo` succeeded.
+  - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` succeeded (0 warnings).
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` succeeded (`352/352`).
+- **Commit:** n/a (not committed in this session)
+- **Push:** n/a
