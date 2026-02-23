@@ -2342,7 +2342,7 @@ namespace OsEngine.Market.Servers.QuikLua
                 else
                 {
                     string numberMarket = order.NumberMarket.Split('+')[0];
-                    qOrder.OrderNum = Convert.ToInt64(numberMarket);
+                    qOrder.OrderNum = Convert.ToInt64(numberMarket, CultureInfo.InvariantCulture);
                 }
 
                 lock (_serverLocker)
@@ -2389,7 +2389,7 @@ namespace OsEngine.Market.Servers.QuikLua
                 if (order.NumberMarket != null && order.NumberMarket != "")
                 {
                     string numberMarket = order.NumberMarket.Split('+')[0];
-                    foundOrder = QuikLua.Orders.GetOrder(order.SecurityNameCode.Split('+')[1], Convert.ToInt64(numberMarket)).Result;
+                    foundOrder = QuikLua.Orders.GetOrder(order.SecurityNameCode.Split('+')[1], Convert.ToInt64(numberMarket, CultureInfo.InvariantCulture)).Result;
                 }
                 else
                 {
@@ -2474,7 +2474,7 @@ namespace OsEngine.Market.Servers.QuikLua
                     if (needTrade)
                     {
                         string numberMarket = order.NumberMarket.Split('+')[0];
-                        var quikTrades = QuikLua.Trading.GetTrades_by_OdrerNumber(Convert.ToInt64(numberMarket)).Result;
+                        var quikTrades = QuikLua.Trading.GetTrades_by_OdrerNumber(Convert.ToInt64(numberMarket, CultureInfo.InvariantCulture)).Result;
 
                         if (quikTrades != null)
                         {

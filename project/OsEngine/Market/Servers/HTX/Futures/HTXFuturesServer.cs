@@ -2288,7 +2288,7 @@ namespace OsEngine.Market.Servers.HTX.Futures
                 Dictionary<string, dynamic> jsonContent = new Dictionary<string, dynamic>();
 
                 jsonContent.Add("symbol", security.Split('_')[0]);
-                jsonContent.Add("order_id", Convert.ToInt64(orderId));
+                jsonContent.Add("order_id", Convert.ToInt64(orderId, CultureInfo.InvariantCulture));
                 jsonContent.Add("created_at", TimeManager.GetTimeStampMilliSecondsToDateTime(createdOrderTime));
                 jsonContent.Add("order_type", 1);
 

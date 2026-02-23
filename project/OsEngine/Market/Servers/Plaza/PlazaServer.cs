@@ -3001,7 +3001,7 @@ namespace OsEngine.Market.Servers.Plaza
                     DataMessage smsg = (DataMessage)sendMessage;
                     smsg.UserId = (uint)order.NumberUser;
                     smsg["broker_code"].set(brockerCode);
-                    smsg["order_id"].set(Convert.ToInt64(order.NumberMarket));
+                    smsg["order_id"].set(Convert.ToInt64(order.NumberMarket, CultureInfo.InvariantCulture));
 
                     SendLogMessage($"Отменен ордер. Price {order.Price.ToString(CultureInfo.InvariantCulture)}, User: {order.NumberUser}, Number: {order.NumberMarket}, Volume: {Convert.ToInt32(order.Volume)} ", LogMessageType.System);
 
@@ -3060,7 +3060,7 @@ namespace OsEngine.Market.Servers.Plaza
                     }
 
                     smsg["isin_id"].set(isinId);
-                    smsg["order_id1"].set(Convert.ToInt64(order.NumberMarket));
+                    smsg["order_id1"].set(Convert.ToInt64(order.NumberMarket, CultureInfo.InvariantCulture));
                     smsg["client_code"].set(clientCode);
                     smsg["ext_id1"].set(order.NumberUser);
                     smsg["price1"].set(newPrice.ToString(CultureInfo.InvariantCulture));

@@ -794,11 +794,11 @@ namespace OsEngine.Market.Servers.Binance.Futures
 
             var timeStampStart = timeStart - yearBegin;
             var r = timeStampStart.TotalMilliseconds;
-            string startTime = Convert.ToInt64(r).ToString();
+            string startTime = Convert.ToInt64(r).ToString(CultureInfo.InvariantCulture);
 
             var timeStampEnd = timeEnd - yearBegin;
             var rEnd = timeStampEnd.TotalMilliseconds;
-            string endTime = Convert.ToInt64(rEnd).ToString();
+            string endTime = Convert.ToInt64(rEnd).ToString(CultureInfo.InvariantCulture);
 
 
             string needTf = "";
@@ -3241,7 +3241,7 @@ namespace OsEngine.Market.Servers.Binance.Futures
                 var r = timeStamp.TotalMilliseconds;
                 var re = Convert.ToInt64(r);
 
-                return re.ToString();
+                return re.ToString(CultureInfo.InvariantCulture);
             }
         }
 

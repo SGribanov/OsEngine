@@ -640,11 +640,11 @@ namespace OsEngine.Market.Servers.Binance.Spot
 
             var timeStampStart = timeStart - yearBegin;
             var r = timeStampStart.TotalMilliseconds;
-            string startTime = Convert.ToInt64(r).ToString();
+            string startTime = Convert.ToInt64(r).ToString(CultureInfo.InvariantCulture);
 
             var timeStampEnd = timeEnd - yearBegin;
             var rEnd = timeStampEnd.TotalMilliseconds;
-            string endTime = Convert.ToInt64(rEnd).ToString();
+            string endTime = Convert.ToInt64(rEnd).ToString(CultureInfo.InvariantCulture);
 
             string needTf = "";
 
@@ -1013,7 +1013,7 @@ namespace OsEngine.Market.Servers.Binance.Spot
 
                     Trade firstTrade = firstTrades.First();
 
-                    lastId = Convert.ToInt64(firstTrade.Id);
+                    lastId = Convert.ToInt64(firstTrade.Id, CultureInfo.InvariantCulture);
 
                     newTrades.Add(firstTrade);
                 }
@@ -1023,7 +1023,7 @@ namespace OsEngine.Market.Servers.Binance.Spot
 
                     try
                     {
-                        lastId = Convert.ToInt64(newTrades[newTrades.Count - 1].Id);
+                        lastId = Convert.ToInt64(newTrades[newTrades.Count - 1].Id, CultureInfo.InvariantCulture);
                     }
                     catch (Exception ex) // If the date for which we download the candles is greater than today: Ignore
                     {
@@ -3060,7 +3060,7 @@ namespace OsEngine.Market.Servers.Binance.Spot
                 var r = timeStamp.TotalMilliseconds;
                 var re = Convert.ToInt64(r);
 
-                return re.ToString();
+                return re.ToString(CultureInfo.InvariantCulture);
             }
         }
 
