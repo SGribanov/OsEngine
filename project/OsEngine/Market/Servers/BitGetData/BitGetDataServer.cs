@@ -686,7 +686,7 @@ namespace OsEngine.Market.Servers.BitGetData
 
                 trade.SecurityNameCode = secName;
                 trade.Id = tradeParts[0];
-                trade.Time = TimeManager.GetDateTimeFromTimeStamp(long.Parse(tradeParts[1]));
+                trade.Time = TimeManager.GetDateTimeFromTimeStamp(long.Parse(tradeParts[1], System.Globalization.CultureInfo.InvariantCulture));
                 trade.Price = tradeParts[2].ToDecimal();
                 trade.Side = tradeParts[3] == "sell" ? Side.Sell : Side.Buy;
                 trade.Volume = Math.Abs(tradeParts[5].ToDecimal());
