@@ -803,7 +803,7 @@ namespace OsEngine.Market.Servers.GateIo.GateIoSpot
                 trade.SecurityNameCode = current.currency_pair;
                 trade.Side = current.side == "buy" ? Side.Buy : Side.Sell;
 
-                long timeMs = long.Parse(current.create_time_ms.Split('.')[0]);
+                long timeMs = long.Parse(current.create_time_ms.Split('.')[0], CultureInfo.InvariantCulture);
 
                 trade.Time = TimeManager.GetDateTimeFromTimeStamp(timeMs);
 
@@ -1783,7 +1783,7 @@ namespace OsEngine.Market.Servers.GateIo.GateIoSpot
 
                 trade.Price = responseTrades.result.price.ToDecimal();
                 trade.Id = responseTrades.result.id;
-                trade.Time = TimeManager.GetDateTimeFromTimeStampSeconds(Convert.ToInt64(responseTrades.result.create_time));
+                trade.Time = TimeManager.GetDateTimeFromTimeStampSeconds(Convert.ToInt64(responseTrades.result.create_time, CultureInfo.InvariantCulture));
                 trade.Volume = responseTrades.result.amount.ToDecimal();
                 trade.Side = responseTrades.result.side.Equals("sell") ? Side.Sell : Side.Buy;
 
@@ -1857,7 +1857,7 @@ namespace OsEngine.Market.Servers.GateIo.GateIoSpot
                 depth.Asks = ascs;
                 depth.Bids = bids;
 
-                depth.Time = TimeManager.GetDateTimeFromTimeStamp(Convert.ToInt64(responseDepths.result.t));
+                depth.Time = TimeManager.GetDateTimeFromTimeStamp(Convert.ToInt64(responseDepths.result.t, CultureInfo.InvariantCulture));
 
                 if (depth.Time <= _lastMdTime)
                 {
@@ -1889,7 +1889,7 @@ namespace OsEngine.Market.Servers.GateIo.GateIoSpot
                 {
                     string security = responseMyTrade.result[i].currency_pair;
 
-                    long time = Convert.ToInt64(responseMyTrade.result[i].create_time);
+                    long time = Convert.ToInt64(responseMyTrade.result[i].create_time, CultureInfo.InvariantCulture);
 
                     MyTrade newTrade = new MyTrade();
 
@@ -1945,7 +1945,7 @@ namespace OsEngine.Market.Servers.GateIo.GateIoSpot
                 {
                     Order newOrder = new Order();
                     newOrder.SecurityNameCode = responseOrders.result[i].currency_pair;
-                    newOrder.TimeCallBack = TimeManager.GetDateTimeFromTimeStampSeconds(Convert.ToInt64(responseOrders.result[i].create_time));
+                    newOrder.TimeCallBack = TimeManager.GetDateTimeFromTimeStampSeconds(Convert.ToInt64(responseOrders.result[i].create_time, CultureInfo.InvariantCulture));
 
                     OrderStateType orderState = OrderStateType.None;
 
@@ -2253,8 +2253,8 @@ namespace OsEngine.Market.Servers.GateIo.GateIoSpot
 
                             Order newOrder = new Order();
                             newOrder.SecurityNameCode = itemOrders[j].currency_pair;
-                            newOrder.TimeCallBack = TimeManager.GetDateTimeFromTimeStampSeconds(Convert.ToInt64(itemOrders[j].create_time));
-                            newOrder.TimeCreate = TimeManager.GetDateTimeFromTimeStampSeconds(Convert.ToInt64(itemOrders[j].create_time));
+                            newOrder.TimeCallBack = TimeManager.GetDateTimeFromTimeStampSeconds(Convert.ToInt64(itemOrders[j].create_time, CultureInfo.InvariantCulture));
+                            newOrder.TimeCreate = TimeManager.GetDateTimeFromTimeStampSeconds(Convert.ToInt64(itemOrders[j].create_time, CultureInfo.InvariantCulture));
 
                             try
                             {
@@ -2404,8 +2404,8 @@ namespace OsEngine.Market.Servers.GateIo.GateIoSpot
                     {
                         Order newOrder = new Order();
                         newOrder.SecurityNameCode = responseOrders[i].currency_pair;
-                        newOrder.TimeCallBack = TimeManager.GetDateTimeFromTimeStampSeconds(Convert.ToInt64(responseOrders[i].create_time));
-                        newOrder.TimeCreate = TimeManager.GetDateTimeFromTimeStampSeconds(Convert.ToInt64(responseOrders[i].create_time));
+                        newOrder.TimeCallBack = TimeManager.GetDateTimeFromTimeStampSeconds(Convert.ToInt64(responseOrders[i].create_time, CultureInfo.InvariantCulture));
+                        newOrder.TimeCreate = TimeManager.GetDateTimeFromTimeStampSeconds(Convert.ToInt64(responseOrders[i].create_time, CultureInfo.InvariantCulture));
 
                         try
                         {
@@ -2521,7 +2521,7 @@ namespace OsEngine.Market.Servers.GateIo.GateIoSpot
                         {
                             string security = responseMyTrade[i].currency_pair;
 
-                            long time = Convert.ToInt64(responseMyTrade[i].create_time);
+                            long time = Convert.ToInt64(responseMyTrade[i].create_time, CultureInfo.InvariantCulture);
 
                             MyTrade newTrade = new MyTrade();
 
