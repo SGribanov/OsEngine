@@ -449,7 +449,7 @@ namespace OsEngine.Market.Servers.BinanceData
 
                 newCandle = new Candle();
 
-                newCandle.TimeStart = DateTimeOffset.FromUnixTimeMilliseconds(long.Parse(candleParts[0][..13])).DateTime;
+                newCandle.TimeStart = DateTimeOffset.FromUnixTimeMilliseconds(long.Parse(candleParts[0][..13], System.Globalization.CultureInfo.InvariantCulture)).DateTime;
                 newCandle.Open = candleParts[1].ToDecimal();
                 newCandle.High = candleParts[2].ToDecimal();
                 newCandle.Low = candleParts[3].ToDecimal();
@@ -630,7 +630,7 @@ namespace OsEngine.Market.Servers.BinanceData
                 // futures USDT-M/COIN-M - agg_trade_id,price,quantity,first_trade_id,last_trade_id,transact_time,is_buyer_maker 
                 // 513613220,0.6224,2714.0,1603729958,1603729969,1752105604847,false
 
-                trade.Time = DateTimeOffset.FromUnixTimeMilliseconds(long.Parse(tradeParts[5][..13])).DateTime;
+                trade.Time = DateTimeOffset.FromUnixTimeMilliseconds(long.Parse(tradeParts[5][..13], System.Globalization.CultureInfo.InvariantCulture)).DateTime;
                 trade.Price = tradeParts[1].ToDecimal();
                 trade.MicroSeconds = 0;
                 trade.Id = tradeParts[0];

@@ -650,7 +650,7 @@ namespace OsEngine.Market.Servers.OKXData
                 trade.Side = line[commas[1] + 1] == 'b' ? Side.Buy : Side.Sell;
                 trade.Price = decimal.Parse(line.Slice(commas[2] + 1, commas[3] - commas[2] - 1), NumberStyles.Any, culture);
                 trade.Volume = Math.Abs(decimal.Parse(line.Slice(commas[3] + 1, commas[4] - commas[3] - 1), NumberStyles.Any, culture));
-                trade.Time = DateTimeOffset.FromUnixTimeMilliseconds(long.Parse(line.Slice(commas[4] + 1))).DateTime;
+                trade.Time = DateTimeOffset.FromUnixTimeMilliseconds(long.Parse(line.Slice(commas[4] + 1), CultureInfo.InvariantCulture)).DateTime;
                 trade.MicroSeconds = 0;
                 trade.SecurityNameCode = secName;
 

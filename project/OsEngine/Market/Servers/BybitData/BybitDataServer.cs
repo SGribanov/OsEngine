@@ -351,7 +351,7 @@ namespace OsEngine.Market.Servers.BybitData
 
                         Candle candle = new Candle();
 
-                        candle.TimeStart = DateTimeOffset.FromUnixTimeMilliseconds(long.Parse(oneSec[0].ToString())).UtcDateTime;
+                        candle.TimeStart = DateTimeOffset.FromUnixTimeMilliseconds(long.Parse(oneSec[0].ToString(), CultureInfo.InvariantCulture)).UtcDateTime;
                         candle.Open = oneSec[1].ToString().ToDecimal();
                         candle.High = oneSec[2].ToString().ToDecimal();
                         candle.Low = oneSec[3].ToString().ToDecimal();
@@ -668,7 +668,7 @@ namespace OsEngine.Market.Servers.BybitData
                 {
                     string newId = DateTime.UtcNow.Ticks.ToString();
 
-                    trade.Time = DateTimeOffset.FromUnixTimeMilliseconds(long.Parse(tradeParts[1])).DateTime;
+                    trade.Time = DateTimeOffset.FromUnixTimeMilliseconds(long.Parse(tradeParts[1], CultureInfo.InvariantCulture)).DateTime;
                     trade.Price = tradeParts[2].ToDecimal();
                     trade.MicroSeconds = 0;
                     trade.Id = newId + tradeParts[0];
