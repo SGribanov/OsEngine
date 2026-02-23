@@ -587,7 +587,7 @@ namespace OsEngine.Market.Servers.BloFin
                 Candle candle = new Candle();
 
                 candle.State = CandleState.Finished;
-                candle.TimeStart = TimeManager.GetDateTimeFromTimeStamp(long.Parse(symbols.data[i][0]));
+                candle.TimeStart = TimeManager.GetDateTimeFromTimeStamp(long.Parse(symbols.data[i][0], CultureInfo.InvariantCulture));
                 candle.Volume = symbols.data[i][5].ToDecimal();
                 candle.Close = symbols.data[i][4].ToDecimal();
                 candle.High = symbols.data[i][2].ToDecimal();
@@ -1535,7 +1535,7 @@ namespace OsEngine.Market.Servers.BloFin
                 marketDepth.Asks = ascs;
                 marketDepth.Bids = bids;
 
-                marketDepth.Time = TimeManager.GetDateTimeFromTimeStamp(Convert.ToInt64(responseDepth.data.ts));
+                marketDepth.Time = TimeManager.GetDateTimeFromTimeStamp(Convert.ToInt64(responseDepth.data.ts, CultureInfo.InvariantCulture));
 
                 if (marketDepth.Time <= _lastTimeMd)
                 {
@@ -1576,7 +1576,7 @@ namespace OsEngine.Market.Servers.BloFin
 
                 trade.Price = tradeRespone.data[0].price.ToDecimal();
                 trade.Id = tradeRespone.data[0].tradeId;
-                trade.Time = TimeManager.GetDateTimeFromTimeStamp(Convert.ToInt64(tradeRespone.data[0].ts));
+                trade.Time = TimeManager.GetDateTimeFromTimeStamp(Convert.ToInt64(tradeRespone.data[0].ts, CultureInfo.InvariantCulture));
                 trade.Volume = tradeRespone.data[0].size.ToDecimal();
 
                 if (tradeRespone.data[0].side.Equals("buy"))
@@ -1671,8 +1671,8 @@ namespace OsEngine.Market.Servers.BloFin
             }
 
             newOrder.SecurityNameCode = item.instId;
-            newOrder.TimeCreate = TimeManager.GetDateTimeFromTimeStamp(Convert.ToInt64(item.createTime));
-            newOrder.TimeCallBack = TimeManager.GetDateTimeFromTimeStamp(Convert.ToInt64(item.updateTime));
+            newOrder.TimeCreate = TimeManager.GetDateTimeFromTimeStamp(Convert.ToInt64(item.createTime, CultureInfo.InvariantCulture));
+            newOrder.TimeCallBack = TimeManager.GetDateTimeFromTimeStamp(Convert.ToInt64(item.updateTime, CultureInfo.InvariantCulture));
 
             if (newOrder.State == OrderStateType.Done)
             {
@@ -2170,7 +2170,7 @@ namespace OsEngine.Market.Servers.BloFin
                             OrderStateType stateType = GetOrderState(item.state);
 
                             newOrder.SecurityNameCode = item.instId;
-                            newOrder.TimeCallBack = TimeManager.GetDateTimeFromTimeStamp(Convert.ToInt64(item.createTime));
+                            newOrder.TimeCallBack = TimeManager.GetDateTimeFromTimeStamp(Convert.ToInt64(item.createTime, CultureInfo.InvariantCulture));
                             int.TryParse(item.clientOrderId, out newOrder.NumberUser);
                             newOrder.NumberMarket = item.orderId.ToString();
                             newOrder.Side = item.side == "buy" ? Side.Buy : Side.Sell;
@@ -2290,7 +2290,7 @@ namespace OsEngine.Market.Servers.BloFin
                             OrderStateType stateType = GetOrderState(item.state);
 
                             newOrder.SecurityNameCode = item.instId;
-                            newOrder.TimeCallBack = TimeManager.GetDateTimeFromTimeStamp(Convert.ToInt64(item.createTime));
+                            newOrder.TimeCallBack = TimeManager.GetDateTimeFromTimeStamp(Convert.ToInt64(item.createTime, CultureInfo.InvariantCulture));
                             int.TryParse(item.clientOrderId, out newOrder.NumberUser);
                             newOrder.NumberMarket = item.orderId.ToString();
                             newOrder.Side = item.side == "buy" ? Side.Buy : Side.Sell;
@@ -2353,7 +2353,7 @@ namespace OsEngine.Market.Servers.BloFin
 
                             MyTrade newTrade = new MyTrade();
 
-                            newTrade.Time = TimeManager.GetDateTimeFromTimeStamp(Convert.ToInt64(item.ts));
+                            newTrade.Time = TimeManager.GetDateTimeFromTimeStamp(Convert.ToInt64(item.ts, CultureInfo.InvariantCulture));
                             newTrade.SecurityNameCode = item.instId;
                             newTrade.NumberOrderParent = item.orderId;
                             newTrade.Price = item.fillPrice.ToDecimal();
