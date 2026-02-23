@@ -223,10 +223,10 @@ namespace OsEngine.Market.Servers.Pionex
                             newSecurity.NameId = item.symbol;
                             newSecurity.SecurityType = SecurityType.CurrencyPair;
                             newSecurity.MinTradeAmount = item.minAmount.ToDecimal();
-                            newSecurity.Decimals = Convert.ToInt32(item.quotePrecision);
+                            newSecurity.Decimals = Convert.ToInt32(item.quotePrecision, CultureInfo.InvariantCulture);
                             newSecurity.PriceStep = newSecurity.Decimals.GetValueByDecimals();
                             newSecurity.PriceStepCost = newSecurity.PriceStep;
-                            newSecurity.DecimalsVolume = Convert.ToInt32(item.basePrecision);
+                            newSecurity.DecimalsVolume = Convert.ToInt32(item.basePrecision, CultureInfo.InvariantCulture);
                             newSecurity.State = SecurityStateType.Activ;
                             newSecurity.MinTradeAmountType = MinTradeAmountType.C_Currency;
                             newSecurity.VolumeStep = item.minTradeSize.ToDecimal();
@@ -1426,7 +1426,7 @@ namespace OsEngine.Market.Servers.Pionex
                     return;
                 }
 
-                newOrder.NumberUser = Convert.ToInt32(item.clientOrderId);
+                newOrder.NumberUser = Convert.ToInt32(item.clientOrderId, CultureInfo.InvariantCulture);
                 newOrder.NumberMarket = item.orderId;
                 newOrder.Side = item.side.Equals("BUY") ? Side.Buy : Side.Sell;
                 newOrder.State = stateType;
@@ -1729,7 +1729,7 @@ namespace OsEngine.Market.Servers.Pionex
                                 return null;
                             }
 
-                            newOrder.NumberUser = Convert.ToInt32(item.clientOrderId);
+                            newOrder.NumberUser = Convert.ToInt32(item.clientOrderId, CultureInfo.InvariantCulture);
                             newOrder.NumberMarket = item.orderId;
                             newOrder.Side = item.side.Equals("BUY") ? Side.Buy : Side.Sell;
                             newOrder.State = stateType;
@@ -1829,7 +1829,7 @@ namespace OsEngine.Market.Servers.Pionex
                             return null;
                         }
 
-                        newOrder.NumberUser = Convert.ToInt32(item.clientOrderId);
+                        newOrder.NumberUser = Convert.ToInt32(item.clientOrderId, CultureInfo.InvariantCulture);
                         newOrder.NumberMarket = item.orderId;
                         newOrder.Side = item.side.Equals("BUY") ? Side.Buy : Side.Sell;
                         newOrder.State = stateType;

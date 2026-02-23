@@ -1571,7 +1571,7 @@ namespace OsEngine.Market.Servers.KuCoin.KuCoinSpot
                 {
                     try
                     {
-                        newOrder.NumberUser = Convert.ToInt32(item.clientOid);
+                        newOrder.NumberUser = Convert.ToInt32(item.clientOid, CultureInfo.InvariantCulture);
                     }
                     catch
                     {
@@ -1920,7 +1920,7 @@ namespace OsEngine.Market.Servers.KuCoin.KuCoinSpot
 
                                 try
                                 {
-                                    newOrder.NumberUser = Convert.ToInt32(order.data.items[i].clientOid);
+                                    newOrder.NumberUser = Convert.ToInt32(order.data.items[i].clientOid, CultureInfo.InvariantCulture);
                                 }
                                 catch (System.Exception ex)
                                 {
@@ -2096,7 +2096,7 @@ namespace OsEngine.Market.Servers.KuCoin.KuCoinSpot
 
                             try
                             {
-                                newOrder.NumberUser = Convert.ToInt32(order.data.clientOid);
+                                newOrder.NumberUser = Convert.ToInt32(order.data.clientOid, CultureInfo.InvariantCulture);
                             }
                             catch (System.Exception ex)
                             {
