@@ -808,7 +808,7 @@ namespace OsEngine.Market.Servers.HTX.Spot
                 Candle candle = new Candle();
 
                 candle.State = CandleState.Finished;
-                candle.TimeStart = TimeManager.GetDateTimeFromTimeStampSeconds(long.Parse(item.id));
+                candle.TimeStart = TimeManager.GetDateTimeFromTimeStampSeconds(long.Parse(item.id, CultureInfo.InvariantCulture));
                 candle.Volume = item.vol.ToDecimal();
                 candle.Close = item.close.ToDecimal();
                 candle.High = item.high.ToDecimal();
@@ -1923,8 +1923,8 @@ namespace OsEngine.Market.Servers.HTX.Spot
                     Order newOrder = new Order();
                     newOrder.ServerType = ServerType.HTXSpot;
                     newOrder.SecurityNameCode = item.symbol;
-                    newOrder.TimeCallBack = TimeManager.GetDateTimeFromTimeStamp(long.Parse(item.tradeTime));
-                    newOrder.TimeCreate = TimeManager.GetDateTimeFromTimeStamp(long.Parse(item.orderCreateTime));
+                    newOrder.TimeCallBack = TimeManager.GetDateTimeFromTimeStamp(long.Parse(item.tradeTime, CultureInfo.InvariantCulture));
+                    newOrder.TimeCreate = TimeManager.GetDateTimeFromTimeStamp(long.Parse(item.orderCreateTime, CultureInfo.InvariantCulture));
 
                     if (item.clientOrderId != null)
                     {
@@ -2004,16 +2004,16 @@ namespace OsEngine.Market.Servers.HTX.Spot
 
                     if (item.eventType.Equals("creation"))
                     {
-                        newOrder.TimeCallBack = TimeManager.GetDateTimeFromTimeStamp(long.Parse(item.orderCreateTime));
+                        newOrder.TimeCallBack = TimeManager.GetDateTimeFromTimeStamp(long.Parse(item.orderCreateTime, CultureInfo.InvariantCulture));
                         newOrder.TimeCreate = newOrder.TimeCallBack;
                     }
                     else if (item.eventType.Equals("cancellation"))
                     {
-                        newOrder.TimeCallBack = TimeManager.GetDateTimeFromTimeStamp(long.Parse(item.lastActTime));
+                        newOrder.TimeCallBack = TimeManager.GetDateTimeFromTimeStamp(long.Parse(item.lastActTime, CultureInfo.InvariantCulture));
                     }
                     else if (item.eventType.Equals("trade"))
                     {
-                        newOrder.TimeCallBack = TimeManager.GetDateTimeFromTimeStamp(long.Parse(item.tradeTime));
+                        newOrder.TimeCallBack = TimeManager.GetDateTimeFromTimeStamp(long.Parse(item.tradeTime, CultureInfo.InvariantCulture));
                     }
 
                     newOrder.ServerType = ServerType.HTXSpot;
@@ -2347,17 +2347,17 @@ namespace OsEngine.Market.Servers.HTX.Spot
                                 newOrder.ServerType = ServerType.HTXSpot;
                                 newOrder.SecurityNameCode = item[i].symbol;
                                 newOrder.State = GetOrderState(item[i].state);
-                                newOrder.TimeCallBack = TimeManager.GetDateTimeFromTimeStamp(long.Parse(item[i].created_at));
-                                newOrder.TimeCreate = TimeManager.GetDateTimeFromTimeStamp(long.Parse(item[i].created_at));
+                                newOrder.TimeCallBack = TimeManager.GetDateTimeFromTimeStamp(long.Parse(item[i].created_at, CultureInfo.InvariantCulture));
+                                newOrder.TimeCreate = TimeManager.GetDateTimeFromTimeStamp(long.Parse(item[i].created_at, CultureInfo.InvariantCulture));
 
                                 if (newOrder.State == OrderStateType.Cancel)
                                 {
-                                    newOrder.TimeCancel = TimeManager.GetDateTimeFromTimeStamp(long.Parse(item[i].created_at));
+                                    newOrder.TimeCancel = TimeManager.GetDateTimeFromTimeStamp(long.Parse(item[i].created_at, CultureInfo.InvariantCulture));
                                 }
 
                                 if (newOrder.State == OrderStateType.Done)
                                 {
-                                    newOrder.TimeDone = TimeManager.GetDateTimeFromTimeStamp(long.Parse(item[i].created_at));
+                                    newOrder.TimeDone = TimeManager.GetDateTimeFromTimeStamp(long.Parse(item[i].created_at, CultureInfo.InvariantCulture));
                                 }
 
                                 if (item[i].client_order_id != null)
@@ -2554,8 +2554,8 @@ namespace OsEngine.Market.Servers.HTX.Spot
                 }
                 else
                 {
-                    newOrder.TimeCallBack = TimeManager.GetDateTimeFromTimeStamp(long.Parse(item.created_at));
-                    newOrder.TimeCreate = TimeManager.GetDateTimeFromTimeStamp(long.Parse(item.created_at));
+                    newOrder.TimeCallBack = TimeManager.GetDateTimeFromTimeStamp(long.Parse(item.created_at, CultureInfo.InvariantCulture));
+                    newOrder.TimeCreate = TimeManager.GetDateTimeFromTimeStamp(long.Parse(item.created_at, CultureInfo.InvariantCulture));
                     newOrder.ServerType = ServerType.HTXSpot;
                     newOrder.SecurityNameCode = item.symbol;
 
@@ -2790,17 +2790,17 @@ namespace OsEngine.Market.Servers.HTX.Spot
                                 newOrder.ServerType = ServerType.HTXSpot;
                                 newOrder.SecurityNameCode = item[i].symbol;
                                 newOrder.State = GetOrderState(item[i].state);
-                                newOrder.TimeCallBack = TimeManager.GetDateTimeFromTimeStamp(long.Parse(item[i].created_at));
-                                newOrder.TimeCreate = TimeManager.GetDateTimeFromTimeStamp(long.Parse(item[i].created_at));
+                                newOrder.TimeCallBack = TimeManager.GetDateTimeFromTimeStamp(long.Parse(item[i].created_at, CultureInfo.InvariantCulture));
+                                newOrder.TimeCreate = TimeManager.GetDateTimeFromTimeStamp(long.Parse(item[i].created_at, CultureInfo.InvariantCulture));
 
                                 if (newOrder.State == OrderStateType.Cancel)
                                 {
-                                    newOrder.TimeCancel = TimeManager.GetDateTimeFromTimeStamp(long.Parse(item[i].created_at));
+                                    newOrder.TimeCancel = TimeManager.GetDateTimeFromTimeStamp(long.Parse(item[i].created_at, CultureInfo.InvariantCulture));
                                 }
 
                                 if (newOrder.State == OrderStateType.Done)
                                 {
-                                    newOrder.TimeDone = TimeManager.GetDateTimeFromTimeStamp(long.Parse(item[i].created_at));
+                                    newOrder.TimeDone = TimeManager.GetDateTimeFromTimeStamp(long.Parse(item[i].created_at, CultureInfo.InvariantCulture));
                                 }
 
                                 if (item[i].client_order_id != null)
