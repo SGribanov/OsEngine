@@ -2914,7 +2914,7 @@ namespace OsEngine.Market.Servers.Woo
 
         private DateTime UnixTimeMilliseconds(string timestamp)
         {
-            double timestampSeconds = Convert.ToDouble(timestamp);
+            double timestampSeconds = timestamp.ToDouble();
             long milliseconds = (long)(timestampSeconds * 1000);
 
             DateTime epoch = new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc);

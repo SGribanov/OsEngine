@@ -8203,3 +8203,20 @@
 - Host-context verification (outside sandbox):
   - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` -> success (0 warnings, 0 errors)
   - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed `352/352`
+
+## 2026-02-23 - Step 2.2 (CultureInfo.InvariantCulture) - Woo timestamp parser hardening
+
+- Hardened string timestamp parsing in:
+  - `project/OsEngine/Market/Servers/Woo/WooServer.cs`
+- Changes:
+  - in `UnixTimeMilliseconds(string timestamp)` replaced `Convert.ToDouble(timestamp)` with `timestamp.ToDouble()`.
+  - keeps existing milliseconds conversion and rounding behavior unchanged.
+- Scope:
+  - parser hardening only
+  - connector behavior unchanged for valid payloads.
+
+### Verification
+
+- Host-context verification (outside sandbox):
+  - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` -> success (0 warnings, 0 errors)
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed `352/352`
