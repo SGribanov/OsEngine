@@ -1336,7 +1336,7 @@ namespace OsEngine.Market.Servers.Bybit
 
                         Candle candle = new Candle();
 
-                        candle.TimeStart = DateTimeOffset.FromUnixTimeMilliseconds(long.Parse(oneSec[0].ToString())).UtcDateTime;
+                        candle.TimeStart = DateTimeOffset.FromUnixTimeMilliseconds(long.Parse(oneSec[0].ToString(), CultureInfo.InvariantCulture)).UtcDateTime;
                         candle.Open = oneSec[1].ToString().ToDecimal();
                         candle.High = oneSec[2].ToString().ToDecimal();
                         candle.Low = oneSec[3].ToString().ToDecimal();
@@ -2649,7 +2649,7 @@ namespace OsEngine.Market.Servers.Bybit
                         myTrade.SecurityNameCode = responseMyTrades.data[i].symbol;
                     }
 
-                    myTrade.Time = TimeManager.GetDateTimeFromTimeStamp(Convert.ToInt64(responseMyTrades.data[i].execTime));
+                    myTrade.Time = TimeManager.GetDateTimeFromTimeStamp(Convert.ToInt64(responseMyTrades.data[i].execTime, CultureInfo.InvariantCulture));
                     myTrade.NumberOrderParent = responseMyTrades.data[i].orderId;
                     myTrade.NumberTrade = responseMyTrades.data[i].execId;
                     myTrade.Price = responseMyTrades.data[i].execPrice.ToDecimal();
@@ -2739,16 +2739,16 @@ namespace OsEngine.Market.Servers.Bybit
                         newOrder.SecurityNameCode = responseMyTrades.data[i].symbol;
                     }
 
-                    newOrder.TimeCreate = TimeManager.GetDateTimeFromTimeStamp(Convert.ToInt64(responseMyTrades.data[i].createdTime));
+                    newOrder.TimeCreate = TimeManager.GetDateTimeFromTimeStamp(Convert.ToInt64(responseMyTrades.data[i].createdTime, CultureInfo.InvariantCulture));
 
                     if (stateType == OrderStateType.Active)
                     {
-                        newOrder.TimeCallBack = TimeManager.GetDateTimeFromTimeStamp(Convert.ToInt64(responseMyTrades.data[i].updatedTime));
+                        newOrder.TimeCallBack = TimeManager.GetDateTimeFromTimeStamp(Convert.ToInt64(responseMyTrades.data[i].updatedTime, CultureInfo.InvariantCulture));
                     }
 
                     if (stateType == OrderStateType.Cancel)
                     {
-                        newOrder.TimeCancel = TimeManager.GetDateTimeFromTimeStamp(Convert.ToInt64(responseMyTrades.data[i].updatedTime));
+                        newOrder.TimeCancel = TimeManager.GetDateTimeFromTimeStamp(Convert.ToInt64(responseMyTrades.data[i].updatedTime, CultureInfo.InvariantCulture));
                     }
 
                     try
@@ -3660,8 +3660,8 @@ namespace OsEngine.Market.Servers.Bybit
                             DateTime placedTime = DateTime.Now;
                             order.State = OrderStateType.Active;
                             order.NumberMarket = responseOrder.result.orderId;
-                            order.TimeCreate = DateTimeOffset.FromUnixTimeMilliseconds(Convert.ToInt64(responseOrder.time)).UtcDateTime;
-                            order.TimeCallBack = DateTimeOffset.FromUnixTimeMilliseconds(Convert.ToInt64(responseOrder.time)).UtcDateTime.Add(placedTime.Subtract(startTime));
+                            order.TimeCreate = DateTimeOffset.FromUnixTimeMilliseconds(Convert.ToInt64(responseOrder.time, CultureInfo.InvariantCulture)).UtcDateTime;
+                            order.TimeCallBack = DateTimeOffset.FromUnixTimeMilliseconds(Convert.ToInt64(responseOrder.time, CultureInfo.InvariantCulture)).UtcDateTime.Add(placedTime.Subtract(startTime));
                             MyOrderEvent?.Invoke(order);
                         }
 
@@ -3805,7 +3805,7 @@ namespace OsEngine.Market.Servers.Bybit
                         && responseOrder.retCode == "0"
                         && responseOrder.retMsg == "OK")
                     {
-                        order.TimeCancel = DateTimeOffset.FromUnixTimeMilliseconds(Convert.ToInt64(responseOrder.time)).UtcDateTime;
+                        order.TimeCancel = DateTimeOffset.FromUnixTimeMilliseconds(Convert.ToInt64(responseOrder.time, CultureInfo.InvariantCulture)).UtcDateTime;
                         order.State = OrderStateType.Cancel;
                         MyOrderEvent?.Invoke(order);
                         return true;
@@ -4011,12 +4011,12 @@ namespace OsEngine.Market.Servers.Bybit
                             || order.orderStatus == "Deactivated")
                         {
                             newOrder.State = OrderStateType.Cancel;
-                            newOrder.TimeCancel = TimeManager.GetDateTimeFromTimeStamp(Convert.ToInt64(order.updatedTime));
+                            newOrder.TimeCancel = TimeManager.GetDateTimeFromTimeStamp(Convert.ToInt64(order.updatedTime, CultureInfo.InvariantCulture));
                         }
                         else if (order.orderStatus == "Filled")
                         {
                             newOrder.State = OrderStateType.Done;
-                            newOrder.TimeDone = TimeManager.GetDateTimeFromTimeStamp(Convert.ToInt64(order.updatedTime));
+                            newOrder.TimeDone = TimeManager.GetDateTimeFromTimeStamp(Convert.ToInt64(order.updatedTime, CultureInfo.InvariantCulture));
                         }
                         else if (order.orderStatus == "New"
                             || order.orderStatus == "Untriggered")
@@ -4054,7 +4054,7 @@ namespace OsEngine.Market.Servers.Bybit
                         newOrder.Price = order.price.ToDecimal();
                         newOrder.Volume = order.qty.ToDecimal();
 
-                        newOrder.TimeCallBack = TimeManager.GetDateTimeFromTimeStamp(Convert.ToInt64(order.updatedTime));
+                        newOrder.TimeCallBack = TimeManager.GetDateTimeFromTimeStamp(Convert.ToInt64(order.updatedTime, CultureInfo.InvariantCulture));
                         newOrder.TimeCreate = newOrder.TimeCallBack;
 
                         string numUser = order.orderLinkId;
@@ -4182,7 +4182,7 @@ namespace OsEngine.Market.Servers.Bybit
                             newTrade.NumberOrderParent = orderBase.NumberMarket;
                             newTrade.Price = trade.execPrice.ToDecimal();
                             newTrade.Volume = trade.execQty.ToDecimal();
-                            newTrade.Time = TimeManager.GetDateTimeFromTimeStamp(Convert.ToInt64(trade.execTime));
+                            newTrade.Time = TimeManager.GetDateTimeFromTimeStamp(Convert.ToInt64(trade.execTime, CultureInfo.InvariantCulture));
 
                             string side = trade.side;
 
