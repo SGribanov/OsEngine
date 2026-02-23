@@ -517,7 +517,7 @@ namespace OsEngine.Market.Servers.BinGxSpot
                     Candle candle = new Candle();
 
                     candle.State = CandleState.Finished;
-                    candle.TimeStart = TimeManager.GetDateTimeFromTimeStamp(Convert.ToInt64(current[0]));
+                    candle.TimeStart = TimeManager.GetDateTimeFromTimeStamp(Convert.ToInt64(current[0], CultureInfo.InvariantCulture));
                     candle.Volume = current[7].ToDecimal();
                     candle.Close = current[4].ToDecimal();
                     candle.High = current[2].ToDecimal();
@@ -1386,7 +1386,7 @@ namespace OsEngine.Market.Servers.BinGxSpot
                 newOrder.Price = responseOrder.data.p.ToDecimal();
                 newOrder.Volume = responseOrder.data.q.ToDecimal();
                 newOrder.State = orderState;
-                newOrder.TimeCallBack = TimeManager.GetDateTimeFromTimeStamp(Convert.ToInt64(responseOrder.data.E));
+                newOrder.TimeCallBack = TimeManager.GetDateTimeFromTimeStamp(Convert.ToInt64(responseOrder.data.E, CultureInfo.InvariantCulture));
                 newOrder.TypeOrder = responseOrder.data.o.Equals("MARKET") ? OrderPriceType.Market : OrderPriceType.Limit;
                 newOrder.ServerType = ServerType.BingXSpot;
 
@@ -1445,7 +1445,7 @@ namespace OsEngine.Market.Servers.BinGxSpot
 
                 MyTrade newTrade = new MyTrade();
 
-                newTrade.Time = TimeManager.GetDateTimeFromTimeStamp(Convert.ToInt64(responseOrder.data.T));
+                newTrade.Time = TimeManager.GetDateTimeFromTimeStamp(Convert.ToInt64(responseOrder.data.T, CultureInfo.InvariantCulture));
                 newTrade.SecurityNameCode = responseOrder.data.s;
                 newTrade.NumberOrderParent = responseOrder.data.i;
                 newTrade.Price = responseOrder.data.L.ToDecimal();
@@ -1501,7 +1501,7 @@ namespace OsEngine.Market.Servers.BinGxSpot
 
                 trade.Price = responseTrades.data.p.ToDecimal();
                 trade.Id = responseTrades.data.t;
-                trade.Time = TimeManager.GetDateTimeFromTimeStamp(Convert.ToInt64(responseTrades.data.T));
+                trade.Time = TimeManager.GetDateTimeFromTimeStamp(Convert.ToInt64(responseTrades.data.T, CultureInfo.InvariantCulture));
                 trade.Volume = responseTrades.data.q.ToDecimal();
                 if (responseTrades.data.m == "true")
                     trade.Side = Side.Sell;
@@ -1930,7 +1930,7 @@ namespace OsEngine.Market.Servers.BinGxSpot
                             newOrder.Price = itemOrders.price.ToDecimal();
                             newOrder.Volume = itemOrders.origQty.ToDecimal();
                             newOrder.State = orderState;
-                            newOrder.TimeCallBack = TimeManager.GetDateTimeFromTimeStamp(Convert.ToInt64(itemOrders.updateTime));
+                            newOrder.TimeCallBack = TimeManager.GetDateTimeFromTimeStamp(Convert.ToInt64(itemOrders.updateTime, CultureInfo.InvariantCulture));
                             newOrder.TypeOrder = itemOrders.type.Equals("MARKET") ? OrderPriceType.Market : OrderPriceType.Limit;
                             newOrder.ServerType = ServerType.BingXSpot;
 
@@ -2065,7 +2065,7 @@ namespace OsEngine.Market.Servers.BinGxSpot
                                 newOrder.Price = itemOrders.price.ToDecimal();
                                 newOrder.Volume = itemOrders.origQty.ToDecimal();
                                 newOrder.State = orderState;
-                                newOrder.TimeCallBack = TimeManager.GetDateTimeFromTimeStamp(Convert.ToInt64(itemOrders.updateTime));
+                                newOrder.TimeCallBack = TimeManager.GetDateTimeFromTimeStamp(Convert.ToInt64(itemOrders.updateTime, CultureInfo.InvariantCulture));
                                 newOrder.TypeOrder = itemOrders.type.Equals("MARKET") ? OrderPriceType.Market : OrderPriceType.Limit;
                                 newOrder.ServerType = ServerType.BingXSpot;
 
@@ -2138,7 +2138,7 @@ namespace OsEngine.Market.Servers.BinGxSpot
 
                             MyTrade newTrade = new MyTrade();
 
-                            newTrade.Time = TimeManager.GetDateTimeFromTimeStamp(Convert.ToInt64(itemTrades.time));
+                            newTrade.Time = TimeManager.GetDateTimeFromTimeStamp(Convert.ToInt64(itemTrades.time, CultureInfo.InvariantCulture));
                             newTrade.SecurityNameCode = itemTrades.symbol;
                             newTrade.NumberOrderParent = itemTrades.orderId;
                             newTrade.Price = itemTrades.price.ToDecimal();

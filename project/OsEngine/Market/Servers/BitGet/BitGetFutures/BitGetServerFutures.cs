@@ -1082,7 +1082,7 @@ namespace OsEngine.Market.Servers.BitGet.BitGetFutures
                             Trade trade = new Trade();
                             trade.SecurityNameCode = item.symbol;
                             trade.Id = item.tradeId;
-                            trade.Time = TimeManager.GetDateTimeFromTimeStamp(Convert.ToInt64(item.ts));
+                            trade.Time = TimeManager.GetDateTimeFromTimeStamp(Convert.ToInt64(item.ts, CultureInfo.InvariantCulture));
                             trade.Price = item.price.ToDecimal();
                             trade.Volume = item.size.ToDecimal();
                             trade.Side = item.side == "Sell" ? Side.Sell : Side.Buy;
@@ -2306,7 +2306,7 @@ namespace OsEngine.Market.Servers.BitGet.BitGetFutures
 
                     Order newOrder = new Order();
                     newOrder.SecurityNameCode = item.instId;
-                    newOrder.TimeCallBack = TimeManager.GetDateTimeFromTimeStamp(Convert.ToInt64(item.cTime));
+                    newOrder.TimeCallBack = TimeManager.GetDateTimeFromTimeStamp(Convert.ToInt64(item.cTime, CultureInfo.InvariantCulture));
                     int.TryParse(item.clientOId, out newOrder.NumberUser);
                     newOrder.NumberMarket = item.orderId.ToString();
                     newOrder.Side = GetSide(item.tradeSide, item.side);
@@ -2331,7 +2331,7 @@ namespace OsEngine.Market.Servers.BitGet.BitGetFutures
                         MyOrderEvent?.Invoke(newOrder);
 
                         MyTrade myTrade = new MyTrade();
-                        myTrade.Time = TimeManager.GetDateTimeFromTimeStamp(Convert.ToInt64(item.fillTime));
+                        myTrade.Time = TimeManager.GetDateTimeFromTimeStamp(Convert.ToInt64(item.fillTime, CultureInfo.InvariantCulture));
                         myTrade.NumberOrderParent = item.orderId.ToString();
                         myTrade.NumberTrade = item.tradeId;
                         myTrade.Volume = item.baseVolume.ToDecimal();
@@ -2348,7 +2348,7 @@ namespace OsEngine.Market.Servers.BitGet.BitGetFutures
                         MyOrderEvent?.Invoke(newOrder);
 
                         MyTrade myTrade = new MyTrade();
-                        myTrade.Time = TimeManager.GetDateTimeFromTimeStamp(Convert.ToInt64(item.fillTime));
+                        myTrade.Time = TimeManager.GetDateTimeFromTimeStamp(Convert.ToInt64(item.fillTime, CultureInfo.InvariantCulture));
                         myTrade.NumberOrderParent = item.orderId.ToString();
                         myTrade.NumberTrade = item.tradeId;
                         myTrade.Volume = item.baseVolume.ToDecimal();
@@ -2409,7 +2409,7 @@ namespace OsEngine.Market.Servers.BitGet.BitGetFutures
                         return;
                     }
 
-                    trade.Time = TimeManager.GetDateTimeFromTimeStamp(Convert.ToInt64(responseTrade.data[i].ts));
+                    trade.Time = TimeManager.GetDateTimeFromTimeStamp(Convert.ToInt64(responseTrade.data[i].ts, CultureInfo.InvariantCulture));
                     trade.Volume = responseTrade.data[i].size.ToDecimal();
                     trade.Side = responseTrade.data[i].side.Equals("buy") ? Side.Buy : Side.Sell;
 
@@ -2510,7 +2510,7 @@ namespace OsEngine.Market.Servers.BitGet.BitGetFutures
                 marketDepth.Asks = ascs;
                 marketDepth.Bids = bids;
 
-                marketDepth.Time = TimeManager.GetDateTimeFromTimeStamp(Convert.ToInt64(responseDepth.data[0].ts));
+                marketDepth.Time = TimeManager.GetDateTimeFromTimeStamp(Convert.ToInt64(responseDepth.data[0].ts, CultureInfo.InvariantCulture));
 
                 if (marketDepth.Time == DateTime.MinValue)
                 {
@@ -2796,7 +2796,7 @@ namespace OsEngine.Market.Servers.BitGet.BitGetFutures
 
                         newOrder.SecurityNameCode = stateResponse.data.symbol;
                         newOrder.SecurityClassCode = stateResponse.data.marginCoin + "-FUTURES";
-                        newOrder.TimeCallBack = TimeManager.GetDateTimeFromTimeStamp(Convert.ToInt64(stateResponse.data.cTime));
+                        newOrder.TimeCallBack = TimeManager.GetDateTimeFromTimeStamp(Convert.ToInt64(stateResponse.data.cTime, CultureInfo.InvariantCulture));
                         int.TryParse(stateResponse.data.clientOid, out newOrder.NumberUser);
                         newOrder.NumberMarket = stateResponse.data.orderId.ToString();
                         newOrder.Side = stateResponse.data.side == "buy" ? Side.Buy : Side.Sell;
@@ -2860,7 +2860,7 @@ namespace OsEngine.Market.Servers.BitGet.BitGetFutures
                             FillList item = stateResponse.data.fillList[i];
 
                             MyTrade myTrade = new MyTrade();
-                            myTrade.Time = TimeManager.GetDateTimeFromTimeStamp(Convert.ToInt64(item.cTime));
+                            myTrade.Time = TimeManager.GetDateTimeFromTimeStamp(Convert.ToInt64(item.cTime, CultureInfo.InvariantCulture));
                             myTrade.NumberOrderParent = item.orderId.ToString();
                             myTrade.NumberTrade = item.tradeId;
                             myTrade.Volume = item.baseVolume.ToDecimal();
@@ -3022,17 +3022,17 @@ namespace OsEngine.Market.Servers.BitGet.BitGetFutures
             newOrder.SecurityNameCode = item.symbol;
             newOrder.SecurityClassCode = item.marginCoin + "-FUTURES";
             newOrder.State = stateType;
-            newOrder.TimeCreate = TimeManager.GetDateTimeFromTimeStamp(Convert.ToInt64(item.cTime));
-            newOrder.TimeCallBack = TimeManager.GetDateTimeFromTimeStamp(Convert.ToInt64(item.uTime));
+            newOrder.TimeCreate = TimeManager.GetDateTimeFromTimeStamp(Convert.ToInt64(item.cTime, CultureInfo.InvariantCulture));
+            newOrder.TimeCallBack = TimeManager.GetDateTimeFromTimeStamp(Convert.ToInt64(item.uTime, CultureInfo.InvariantCulture));
 
             if (newOrder.State == OrderStateType.Cancel)
             {
-                newOrder.TimeCancel = TimeManager.GetDateTimeFromTimeStamp(Convert.ToInt64(item.uTime));
+                newOrder.TimeCancel = TimeManager.GetDateTimeFromTimeStamp(Convert.ToInt64(item.uTime, CultureInfo.InvariantCulture));
             }
 
             if (newOrder.State == OrderStateType.Done)
             {
-                newOrder.TimeDone = TimeManager.GetDateTimeFromTimeStamp(Convert.ToInt64(item.uTime));
+                newOrder.TimeDone = TimeManager.GetDateTimeFromTimeStamp(Convert.ToInt64(item.uTime, CultureInfo.InvariantCulture));
             }
 
             try

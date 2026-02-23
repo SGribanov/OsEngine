@@ -765,7 +765,7 @@ namespace OsEngine.Market.Servers.BingX.BingXFutures
                     Candle candle = new Candle();
 
                     candle.State = CandleState.Finished;
-                    candle.TimeStart = TimeManager.GetDateTimeFromTimeStamp(Convert.ToInt64(current.time));
+                    candle.TimeStart = TimeManager.GetDateTimeFromTimeStamp(Convert.ToInt64(current.time, CultureInfo.InvariantCulture));
                     candle.Volume = current.volume.ToDecimal();
                     candle.Close = current.close.ToDecimal();
                     candle.High = current.high.ToDecimal();
@@ -1878,7 +1878,7 @@ namespace OsEngine.Market.Servers.BingX.BingXFutures
 
                     trade.Price = response.data[i].p.ToDecimal();
                     // trade.Id = // the exchange does not send trade id
-                    trade.Time = TimeManager.GetDateTimeFromTimeStamp(Convert.ToInt64(response.data[i].T));
+                    trade.Time = TimeManager.GetDateTimeFromTimeStamp(Convert.ToInt64(response.data[i].T, CultureInfo.InvariantCulture));
                     trade.Volume = response.data[i].q.ToDecimal();
 
                     if (response.data[i].m == "true")
@@ -2059,7 +2059,7 @@ namespace OsEngine.Market.Servers.BingX.BingXFutures
                 newOrder.Price = responseOrder.o.p.ToDecimal();
                 newOrder.Volume = responseOrder.o.q.ToDecimal();
                 newOrder.State = orderState;
-                newOrder.TimeCallBack = TimeManager.GetDateTimeFromTimeStamp(Convert.ToInt64(responseOrder.E));
+                newOrder.TimeCallBack = TimeManager.GetDateTimeFromTimeStamp(Convert.ToInt64(responseOrder.E, CultureInfo.InvariantCulture));
                 newOrder.TypeOrder = responseOrder.o.o.Equals("MARKET") ? OrderPriceType.Market : OrderPriceType.Limit;
                 newOrder.ServerType = ServerType.BingXFutures;
 
@@ -2084,7 +2084,7 @@ namespace OsEngine.Market.Servers.BingX.BingXFutures
                 TradeUpdateEvent responseOrder = JsonConvert.DeserializeObject<TradeUpdateEvent>(message);
                 MyTrade newTrade = new MyTrade();
 
-                newTrade.Time = TimeManager.GetDateTimeFromTimeStamp(Convert.ToInt64(responseOrder.E));
+                newTrade.Time = TimeManager.GetDateTimeFromTimeStamp(Convert.ToInt64(responseOrder.E, CultureInfo.InvariantCulture));
                 newTrade.SecurityNameCode = responseOrder.o.s;
                 newTrade.NumberOrderParent = responseOrder.o.i;
                 newTrade.Price = responseOrder.o.ap.ToDecimal();
@@ -2166,7 +2166,7 @@ namespace OsEngine.Market.Servers.BingX.BingXFutures
                 depth.Asks = ascs;
                 depth.Bids = bids;
 
-                depth.Time = TimeManager.GetDateTimeFromTimeStamp(Convert.ToInt64(responceDepths.ts));
+                depth.Time = TimeManager.GetDateTimeFromTimeStamp(Convert.ToInt64(responceDepths.ts, CultureInfo.InvariantCulture));
 
                 if (depth.Time <= _lastTimeMd)
                 {
@@ -2507,7 +2507,7 @@ namespace OsEngine.Market.Servers.BingX.BingXFutures
                             openOrder.Side = response.data.orders[i].side.Equals("BUY") ? Side.Buy : Side.Sell;
                             openOrder.Price = response.data.orders[i].price.ToDecimal();
                             openOrder.Volume = response.data.orders[i].origQty.ToDecimal();
-                            openOrder.TimeCallBack = TimeManager.GetDateTimeFromTimeStamp(Convert.ToInt64(response.data.orders[i].time));
+                            openOrder.TimeCallBack = TimeManager.GetDateTimeFromTimeStamp(Convert.ToInt64(response.data.orders[i].time, CultureInfo.InvariantCulture));
                             openOrder.TypeOrder = response.data.orders[i].type.Equals("MARKET") ? OrderPriceType.Market : OrderPriceType.Limit;
                             openOrder.ServerType = ServerType.BingXFutures;
 
@@ -2733,7 +2733,7 @@ namespace OsEngine.Market.Servers.BingX.BingXFutures
                         openOrder.Side = response.data.order.side.Equals("BUY") ? Side.Buy : Side.Sell;
                         openOrder.Price = response.data.order.price.ToDecimal();
                         openOrder.Volume = response.data.order.origQty.ToDecimal();
-                        openOrder.TimeCallBack = TimeManager.GetDateTimeFromTimeStamp(Convert.ToInt64(response.data.order.time));
+                        openOrder.TimeCallBack = TimeManager.GetDateTimeFromTimeStamp(Convert.ToInt64(response.data.order.time, CultureInfo.InvariantCulture));
                         openOrder.TypeOrder = response.data.order.type.Equals("MARKET") ? OrderPriceType.Market : OrderPriceType.Limit;
                         openOrder.ServerType = ServerType.BingXFutures;
 
