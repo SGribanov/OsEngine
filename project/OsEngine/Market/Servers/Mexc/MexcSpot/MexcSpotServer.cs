@@ -1481,7 +1481,7 @@ namespace OsEngine.Market.Servers.Mexc
                     Trade trade = new Trade();
                     trade.SecurityNameCode = deals.symbol;
                     trade.Price = deal.price.ToDecimal();
-                    trade.Time = TimeManager.GetDateTimeFromTimeStamp(Convert.ToInt64(deal.time));// ConvertToDateTimeFromUnixFromMilliseconds(deal.time);
+                    trade.Time = TimeManager.GetDateTimeFromTimeStamp(Convert.ToInt64(deal.time, CultureInfo.InvariantCulture));// ConvertToDateTimeFromUnixFromMilliseconds(deal.time);
                     trade.Id = deal.time + deal.tradeType + trade.SecurityNameCode;
 
                     if (deal.tradeType == "1")
@@ -1551,7 +1551,7 @@ namespace OsEngine.Market.Servers.Mexc
 
                 MarketDepth depth = new MarketDepth();
                 depth.SecurityNameCode = baseDepth.symbol;
-                depth.Time = TimeManager.GetDateTimeFromTimeStamp(Convert.ToInt64(baseDepth.sendTime));// ConvertToDateTimeFromUnixFromMilliseconds(baseDepth.sendTime);
+                depth.Time = TimeManager.GetDateTimeFromTimeStamp(Convert.ToInt64(baseDepth.sendTime, CultureInfo.InvariantCulture));// ConvertToDateTimeFromUnixFromMilliseconds(baseDepth.sendTime);
 
                 for (int i = 0; baseDepth.publicLimitDepths.bids != null && i < baseDepth.publicLimitDepths.bids.Count; i++)
                 {
@@ -1665,7 +1665,7 @@ namespace OsEngine.Market.Servers.Mexc
                 MexcSocketMyTrade item = baseMyTrade.privateDeals;
 
                 MyTrade myTrade = new MyTrade();
-                myTrade.Time = TimeManager.GetDateTimeFromTimeStamp(Convert.ToInt64(item.time));
+                myTrade.Time = TimeManager.GetDateTimeFromTimeStamp(Convert.ToInt64(item.time, CultureInfo.InvariantCulture));
                 myTrade.NumberOrderParent = item.orderId;
                 myTrade.NumberTrade = item.tradeId;
                 myTrade.Price = item.price.ToDecimal();
@@ -1739,8 +1739,8 @@ namespace OsEngine.Market.Servers.Mexc
                     order.TypeOrder = OrderPriceType.Market;
                 }
 
-                order.TimeCreate = TimeManager.GetDateTimeFromTimeStamp(Convert.ToInt64(item.createTime));
-                order.TimeCallBack = TimeManager.GetDateTimeFromTimeStamp(Convert.ToInt64(item.createTime));
+                order.TimeCreate = TimeManager.GetDateTimeFromTimeStamp(Convert.ToInt64(item.createTime, CultureInfo.InvariantCulture));
+                order.TimeCallBack = TimeManager.GetDateTimeFromTimeStamp(Convert.ToInt64(item.createTime, CultureInfo.InvariantCulture));
                 order.ServerType = ServerType.MexcSpot;
 
                 //status 1:New order 2:Filled 3:Partially filled 4:Order canceled
@@ -2240,11 +2240,11 @@ namespace OsEngine.Market.Servers.Mexc
 
             if (baseOrder.updateTime != null)
             {
-                order.TimeCallBack = TimeManager.GetDateTimeFromTimeStamp(Convert.ToInt64(baseOrder.updateTime));
+                order.TimeCallBack = TimeManager.GetDateTimeFromTimeStamp(Convert.ToInt64(baseOrder.updateTime, CultureInfo.InvariantCulture));
             }
             else
             {
-                order.TimeCallBack = TimeManager.GetDateTimeFromTimeStamp(Convert.ToInt64(baseOrder.time));
+                order.TimeCallBack = TimeManager.GetDateTimeFromTimeStamp(Convert.ToInt64(baseOrder.time, CultureInfo.InvariantCulture));
             }
 
             if (baseOrder.side == "BUY")
@@ -2352,7 +2352,7 @@ namespace OsEngine.Market.Servers.Mexc
             trade.NumberOrderParent = baseTrade.orderId;
             trade.NumberTrade = baseTrade.id;
             trade.SecurityNameCode = baseTrade.symbol;
-            trade.Time = TimeManager.GetDateTimeFromTimeStamp(Convert.ToInt64(baseTrade.time));
+            trade.Time = TimeManager.GetDateTimeFromTimeStamp(Convert.ToInt64(baseTrade.time, CultureInfo.InvariantCulture));
 
             if (baseTrade.isBuyer == "true")
             {
