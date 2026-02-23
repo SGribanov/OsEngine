@@ -264,7 +264,7 @@ namespace OsEngine.Market.Servers.Deribit
                     if (newSecurity.SecurityType == SecurityType.Option)
                     {
                         newSecurity.Strike = item.strike.ToDecimal();
-                        newSecurity.Expiration = TimeManager.GetDateTimeFromTimeStamp(long.Parse(item.expiration_timestamp));
+                        newSecurity.Expiration = TimeManager.GetDateTimeFromTimeStamp(long.Parse(item.expiration_timestamp, System.Globalization.CultureInfo.InvariantCulture));
                         newSecurity.OptionType = item.option_type == "put" ? OptionType.Put : OptionType.Call;
                         newSecurity.UnderlyingAsset = item.base_currency;
                     }
@@ -489,7 +489,7 @@ namespace OsEngine.Market.Servers.Deribit
                 Candle candle = new Candle();
 
                 candle.State = CandleState.Finished;
-                candle.TimeStart = TimeManager.GetDateTimeFromTimeStamp(long.Parse(item.ticks[i]));
+                candle.TimeStart = TimeManager.GetDateTimeFromTimeStamp(long.Parse(item.ticks[i], System.Globalization.CultureInfo.InvariantCulture));
                 candle.Volume = item.volume[i].ToDecimal();
                 candle.Close = item.close[i].ToDecimal();
                 candle.High = item.high[i].ToDecimal();
@@ -881,7 +881,7 @@ namespace OsEngine.Market.Servers.Deribit
                 trade.SecurityNameCode = item[i].instrument_name;
                 trade.Price = item[i].price.ToDecimal();
                 trade.Id = item[i].trade_id;
-                trade.Time = TimeManager.GetDateTimeFromTimeStamp(Convert.ToInt64(item[i].timestamp));
+                trade.Time = TimeManager.GetDateTimeFromTimeStamp(Convert.ToInt64(item[i].timestamp, System.Globalization.CultureInfo.InvariantCulture));
                 trade.Volume = item[i].amount.ToDecimal();
                 trade.Side = item[i].direction.Equals("buy") ? Side.Buy : Side.Sell;
 
@@ -953,7 +953,7 @@ namespace OsEngine.Market.Servers.Deribit
             {
                 MyTrade myTrade = new MyTrade();
 
-                myTrade.Time = TimeManager.GetDateTimeFromTimeStamp(Convert.ToInt64(item[i].timestamp));
+                myTrade.Time = TimeManager.GetDateTimeFromTimeStamp(Convert.ToInt64(item[i].timestamp, System.Globalization.CultureInfo.InvariantCulture));
                 myTrade.NumberOrderParent = item[i].order_id;
                 myTrade.NumberTrade = item[i].trade_id;
                 myTrade.Price = item[i].price.ToDecimal();
@@ -1022,8 +1022,8 @@ namespace OsEngine.Market.Servers.Deribit
 
                 Order newOrder = new Order();
                 newOrder.SecurityNameCode = item[i].instrument_name;
-                newOrder.TimeCallBack = TimeManager.GetDateTimeFromTimeStamp(long.Parse(item[i].creation_timestamp));
-                newOrder.TimeCreate = TimeManager.GetDateTimeFromTimeStamp(long.Parse(item[i].creation_timestamp));
+                newOrder.TimeCallBack = TimeManager.GetDateTimeFromTimeStamp(long.Parse(item[i].creation_timestamp, System.Globalization.CultureInfo.InvariantCulture));
+                newOrder.TimeCreate = TimeManager.GetDateTimeFromTimeStamp(long.Parse(item[i].creation_timestamp, System.Globalization.CultureInfo.InvariantCulture));
 
                 if (string.IsNullOrEmpty(item[i].label))
                 {
@@ -1341,8 +1341,8 @@ namespace OsEngine.Market.Servers.Deribit
                             {
                                 Order newOrder = new Order();
 
-                                newOrder.TimeCallBack = TimeManager.GetDateTimeFromTimeStamp(long.Parse(item[j].last_update_timestamp));
-                                newOrder.TimeCreate = TimeManager.GetDateTimeFromTimeStamp(long.Parse(item[j].creation_timestamp));
+                                newOrder.TimeCallBack = TimeManager.GetDateTimeFromTimeStamp(long.Parse(item[j].last_update_timestamp, System.Globalization.CultureInfo.InvariantCulture));
+                                newOrder.TimeCreate = TimeManager.GetDateTimeFromTimeStamp(long.Parse(item[j].creation_timestamp, System.Globalization.CultureInfo.InvariantCulture));
                                 newOrder.ServerType = ServerType.Deribit;
                                 newOrder.SecurityNameCode = item[j].instrument_name;
                                 try
@@ -1462,8 +1462,8 @@ namespace OsEngine.Market.Servers.Deribit
 
                 if (responseMessage.StatusCode == System.Net.HttpStatusCode.OK)
                 {
-                    newOrder.TimeCallBack = TimeManager.GetDateTimeFromTimeStamp(long.Parse(item.last_update_timestamp));
-                    newOrder.TimeCreate = TimeManager.GetDateTimeFromTimeStamp(long.Parse(item.creation_timestamp));
+                    newOrder.TimeCallBack = TimeManager.GetDateTimeFromTimeStamp(long.Parse(item.last_update_timestamp, System.Globalization.CultureInfo.InvariantCulture));
+                    newOrder.TimeCreate = TimeManager.GetDateTimeFromTimeStamp(long.Parse(item.creation_timestamp, System.Globalization.CultureInfo.InvariantCulture));
                     newOrder.ServerType = ServerType.Deribit;
                     newOrder.SecurityNameCode = item.instrument_name;
                     newOrder.NumberUser = Convert.ToInt32(item.label);
@@ -1513,7 +1513,7 @@ namespace OsEngine.Market.Servers.Deribit
                             newTrade.NumberOrderParent = item[i].order_id;
                             newTrade.Volume = item[i].amount.ToDecimal();
                             newTrade.Price = item[i].price.ToDecimal();
-                            newTrade.Time = TimeManager.GetDateTimeFromTimeStamp(Convert.ToInt64(item[i].timestamp));
+                            newTrade.Time = TimeManager.GetDateTimeFromTimeStamp(Convert.ToInt64(item[i].timestamp, System.Globalization.CultureInfo.InvariantCulture));
 
                             if (item[i].direction == "buy")
                             {
