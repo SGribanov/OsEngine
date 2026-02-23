@@ -671,12 +671,12 @@ namespace OsEngine.Market.Servers.Bitfinex.BitfinexFutures
 
                     for (int i = 0; i < tradeList.Count; i++)
                     {
-                        DateTime tradeTime = TimeManager.GetDateTimeFromTimeStamp(Convert.ToInt64(tradeList[i][1]));
+                        DateTime tradeTime = TimeManager.GetDateTimeFromTimeStamp(Convert.ToInt64(tradeList[i][1], CultureInfo.InvariantCulture));
 
                         Trade newTrade = new Trade();
 
                         newTrade.Id = tradeList[i][0].ToString();
-                        newTrade.Time = TimeManager.GetDateTimeFromTimeStamp(Convert.ToInt64(tradeList[i][1]));
+                        newTrade.Time = TimeManager.GetDateTimeFromTimeStamp(Convert.ToInt64(tradeList[i][1], CultureInfo.InvariantCulture));
                         newTrade.SecurityNameCode = security;
                         decimal amount = tradeList[i][2].ToString().ToDecimal();
                         newTrade.Volume = Math.Abs(amount);
@@ -986,7 +986,7 @@ namespace OsEngine.Market.Servers.Bitfinex.BitfinexFutures
                         Candle newCandle = new Candle();
 
                         newCandle.State = CandleState.Finished;
-                        newCandle.TimeStart = TimeManager.GetDateTimeFromTimeStamp(Convert.ToInt64(candle.Mts));
+                        newCandle.TimeStart = TimeManager.GetDateTimeFromTimeStamp(Convert.ToInt64(candle.Mts, CultureInfo.InvariantCulture));
                         newCandle.Open = candle.Open.ToDecimal();
                         newCandle.Close = candle.Close.ToDecimal();
                         newCandle.High = candle.High.ToDecimal();
@@ -2403,7 +2403,7 @@ namespace OsEngine.Market.Servers.Bitfinex.BitfinexFutures
 
                 newTrade.Volume = volume;
                 newTrade.Side = volume > 0 ? Side.Buy : Side.Sell;
-                newTrade.Time = TimeManager.GetDateTimeFromTimeStamp(Convert.ToInt64(tradeData[1]));
+                newTrade.Time = TimeManager.GetDateTimeFromTimeStamp(Convert.ToInt64(tradeData[1], CultureInfo.InvariantCulture));
 
                 NewTradesEvent?.Invoke(newTrade);
             }
@@ -2440,7 +2440,7 @@ namespace OsEngine.Market.Servers.Bitfinex.BitfinexFutures
 
                 MyTrade myTrade = new MyTrade();
 
-                myTrade.Time = TimeManager.GetDateTimeFromTimeStamp(Convert.ToInt64(tradeData[2]));
+                myTrade.Time = TimeManager.GetDateTimeFromTimeStamp(Convert.ToInt64(tradeData[2], CultureInfo.InvariantCulture));
                 myTrade.SecurityNameCode = Convert.ToString(tradeData[1]);
                 myTrade.NumberOrderParent = (tradeData[3]).ToString();
                 myTrade.Price = (tradeData[7]).ToString().ToDecimal();
@@ -2497,8 +2497,8 @@ namespace OsEngine.Market.Servers.Bitfinex.BitfinexFutures
                 Order updateOrder = new Order();
 
                 updateOrder.SecurityNameCode = (orderDataList[3]).ToString();
-                updateOrder.TimeCreate = TimeManager.GetDateTimeFromTimeStamp(Convert.ToInt64(orderDataList[4]));
-                updateOrder.TimeCallBack = TimeManager.GetDateTimeFromTimeStamp(Convert.ToInt64(orderDataList[5]));
+                updateOrder.TimeCreate = TimeManager.GetDateTimeFromTimeStamp(Convert.ToInt64(orderDataList[4], CultureInfo.InvariantCulture));
+                updateOrder.TimeCallBack = TimeManager.GetDateTimeFromTimeStamp(Convert.ToInt64(orderDataList[5], CultureInfo.InvariantCulture));
 
                 try
                 {
@@ -2898,8 +2898,8 @@ namespace OsEngine.Market.Servers.Bitfinex.BitfinexFutures
 
                         Order activeOrder = new Order();
 
-                        activeOrder.TimeCallBack = TimeManager.GetDateTimeFromTimeStamp(Convert.ToInt64(orderData[5]));
-                        activeOrder.TimeCreate = TimeManager.GetDateTimeFromTimeStamp(Convert.ToInt64(orderData[4]));
+                        activeOrder.TimeCallBack = TimeManager.GetDateTimeFromTimeStamp(Convert.ToInt64(orderData[5], CultureInfo.InvariantCulture));
+                        activeOrder.TimeCreate = TimeManager.GetDateTimeFromTimeStamp(Convert.ToInt64(orderData[4], CultureInfo.InvariantCulture));
                         activeOrder.ServerType = ServerType.BitfinexFutures;
                         activeOrder.SecurityNameCode = orderData[3].ToString();
 
@@ -3044,7 +3044,7 @@ namespace OsEngine.Market.Servers.Bitfinex.BitfinexFutures
                             {
                                 MyTrade myTrade = new MyTrade();
 
-                                myTrade.Time = TimeManager.GetDateTimeFromTimeStamp(Convert.ToInt64(tradeData[2]));
+                                myTrade.Time = TimeManager.GetDateTimeFromTimeStamp(Convert.ToInt64(tradeData[2], CultureInfo.InvariantCulture));
                                 myTrade.SecurityNameCode = Convert.ToString(tradeData[1]);
                                 myTrade.NumberOrderParent = (tradeData[3]).ToString();
                                 myTrade.Price = (tradeData[7]).ToString().ToDecimal();
@@ -3132,8 +3132,8 @@ namespace OsEngine.Market.Servers.Bitfinex.BitfinexFutures
                                 }
 
                                 historyOrder.NumberMarket = orderData[0]?.ToString();
-                                historyOrder.TimeCreate = TimeManager.GetDateTimeFromTimeStamp(Convert.ToInt64(orderData[5]));
-                                historyOrder.TimeCallBack = TimeManager.GetDateTimeFromTimeStamp(Convert.ToInt64(orderData[4]));
+                                historyOrder.TimeCreate = TimeManager.GetDateTimeFromTimeStamp(Convert.ToInt64(orderData[5], CultureInfo.InvariantCulture));
+                                historyOrder.TimeCallBack = TimeManager.GetDateTimeFromTimeStamp(Convert.ToInt64(orderData[4], CultureInfo.InvariantCulture));
                                 historyOrder.ServerType = ServerType.BitfinexFutures;
                                 historyOrder.SecurityNameCode = orderData[3]?.ToString();
                                 historyOrder.Side = orderData[7]?.ToString().ToDecimal() > 0 ? Side.Buy : Side.Sell;
