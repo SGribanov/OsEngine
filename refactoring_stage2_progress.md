@@ -8166,3 +8166,23 @@
 - Host-context verification (outside sandbox):
   - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` -> success (0 warnings, 0 errors)
   - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed `352/352`
+
+## 2026-02-23 - Step 2.2 (CultureInfo.InvariantCulture) - Binance Futures timestamp parsing hardening
+
+- Hardened string timestamp parsing in:
+  - `project/OsEngine/Market/Servers/Binance/Futures/BinanceServerFutures.cs`
+- Changes:
+  - replaced string-based `Convert.ToDouble(...)` in websocket/rest timestamp fields with culture-agnostic `ToDouble()` for:
+    - candle payload split fields `param[0]`
+    - order update timestamps `ord.T`, `order.T`
+    - order REST timestamps `orderOnBoardResp.time/updateTime`, `orderOnBoard.time/updateTime`
+  - kept numeric `long` timestamp conversion (`trades.data.T`) unchanged as `Convert.ToDouble(...)`.
+- Scope:
+  - timestamp parsing hardening only
+  - connector behavior unchanged for valid payloads.
+
+### Verification
+
+- Host-context verification (outside sandbox):
+  - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` -> success (0 warnings, 0 errors)
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed `352/352`

@@ -9553,3 +9553,22 @@
   - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` succeeded (`352/352`).
 - **Commit:** n/a (not committed in this session)
 - **Push:** n/a
+
+### Step 2.2 - CultureInfo Invariant Persistence (Incremental Adoption #435)
+
+- **Status:** In Progress (increment completed)
+- **Plan item:** `refactoring_stage2_plan.md` -> Phase 2 / Step 2.2
+- **Changes:**
+  - Hardened culture-neutral parsing of string timestamps in:
+    - `project/OsEngine/Market/Servers/Binance/Futures/BinanceServerFutures.cs`
+  - Replacements:
+    - `Convert.ToDouble(...)` on string timestamp fields -> `ToDouble()`.
+    - retained numeric `long` timestamp conversion (`trades.data.T`) with `Convert.ToDouble(...)`.
+  - Scope:
+    - parser hardening only; runtime behavior unchanged for valid API payloads.
+- **Verification:**
+  - Executed outside sandbox.
+  - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` succeeded (0 warnings).
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` succeeded (`352/352`).
+- **Commit:** n/a (not committed in this session)
+- **Push:** n/a

@@ -1070,7 +1070,7 @@ namespace OsEngine.Market.Servers.Binance.Futures
                             string[] param = upd.Split(',');
 
                             newCandle = new Candle();
-                            newCandle.TimeStart = new DateTime(1970, 1, 1).AddMilliseconds(Convert.ToDouble(param[0]));
+                            newCandle.TimeStart = new DateTime(1970, 1, 1).AddMilliseconds(param[0].ToDouble());
                             newCandle.Low = param[3].ToDecimal();
                             newCandle.High = param[2].ToDecimal();
                             newCandle.Open = param[1].ToDecimal();
@@ -1083,7 +1083,7 @@ namespace OsEngine.Market.Servers.Binance.Futures
                             string[] param = res2[i].Replace("\"", "").Split(',');
 
                             newCandle = new Candle();
-                            newCandle.TimeStart = new DateTime(1970, 1, 1).AddMilliseconds(Convert.ToDouble(param[0]));
+                            newCandle.TimeStart = new DateTime(1970, 1, 1).AddMilliseconds(param[0].ToDouble());
                             newCandle.Low = param[3].ToDecimal();
                             newCandle.High = param[2].ToDecimal();
                             newCandle.Open = param[1].ToDecimal();
@@ -2191,7 +2191,7 @@ namespace OsEngine.Market.Servers.Binance.Futures
             {
                 Order newOrder = new Order();
                 newOrder.SecurityNameCode = order.s;
-                newOrder.TimeCallBack = new DateTime(1970, 1, 1).AddMilliseconds(Convert.ToDouble(ord.T));
+                newOrder.TimeCallBack = new DateTime(1970, 1, 1).AddMilliseconds(ord.T.ToDouble());
                 newOrder.NumberUser = orderNumUser;
 
                 newOrder.NumberMarket = order.i.ToString();
@@ -2221,7 +2221,7 @@ namespace OsEngine.Market.Servers.Binance.Futures
             {
                 Order newOrder = new Order();
                 newOrder.SecurityNameCode = order.s;
-                newOrder.TimeCallBack = new DateTime(1970, 1, 1).AddMilliseconds(Convert.ToDouble(ord.T));
+                newOrder.TimeCallBack = new DateTime(1970, 1, 1).AddMilliseconds(ord.T.ToDouble());
                 newOrder.TimeCancel = newOrder.TimeCallBack;
                 newOrder.NumberUser = orderNumUser;
                 newOrder.NumberMarket = order.i.ToString();
@@ -2250,7 +2250,7 @@ namespace OsEngine.Market.Servers.Binance.Futures
             {
                 Order newOrder = new Order();
                 newOrder.SecurityNameCode = order.s;
-                newOrder.TimeCallBack = new DateTime(1970, 1, 1).AddMilliseconds(Convert.ToDouble(ord.T));
+                newOrder.TimeCallBack = new DateTime(1970, 1, 1).AddMilliseconds(ord.T.ToDouble());
                 newOrder.NumberUser = orderNumUser;
                 newOrder.NumberMarket = order.i.ToString();
                 newOrder.Side = order.S == "BUY" ? Side.Buy : Side.Sell;
@@ -2278,7 +2278,7 @@ namespace OsEngine.Market.Servers.Binance.Futures
             {
 
                 MyTrade trade = new MyTrade();
-                trade.Time = new DateTime(1970, 1, 1).AddMilliseconds(Convert.ToDouble(order.T));
+                trade.Time = new DateTime(1970, 1, 1).AddMilliseconds(order.T.ToDouble());
                 trade.NumberOrderParent = order.i;
                 trade.NumberTrade = order.t;
                 trade.Volume = order.l.ToDecimal();
@@ -2296,7 +2296,7 @@ namespace OsEngine.Market.Servers.Binance.Futures
                 {
                     Order newOrder = new Order();
                     newOrder.SecurityNameCode = order.s;
-                    newOrder.TimeCallBack = new DateTime(1970, 1, 1).AddMilliseconds(Convert.ToDouble(ord.T));
+                    newOrder.TimeCallBack = new DateTime(1970, 1, 1).AddMilliseconds(ord.T.ToDouble());
                     newOrder.NumberUser = orderNumUser;
                     newOrder.NumberMarket = order.i.ToString();
                     newOrder.Side = order.S == "BUY" ? Side.Buy : Side.Sell;
@@ -2325,7 +2325,7 @@ namespace OsEngine.Market.Servers.Binance.Futures
             {
                 Order newOrder = new Order();
                 newOrder.SecurityNameCode = order.s;
-                newOrder.TimeCallBack = new DateTime(1970, 1, 1).AddMilliseconds(Convert.ToDouble(ord.T));
+                newOrder.TimeCallBack = new DateTime(1970, 1, 1).AddMilliseconds(ord.T.ToDouble());
                 newOrder.TimeCancel = newOrder.TimeCallBack;
                 newOrder.NumberUser = orderNumUser;
                 newOrder.NumberMarket = order.i.ToString();
@@ -2926,8 +2926,8 @@ namespace OsEngine.Market.Servers.Binance.Futures
                     }
                     newOrder.ServerType = ServerType.BinanceFutures;
                     newOrder.SecurityNameCode = orderOnBoardResp.symbol;
-                    newOrder.TimeCreate = new DateTime(1970, 1, 1).AddMilliseconds(Convert.ToDouble(orderOnBoardResp.time));
-                    newOrder.TimeCallBack = new DateTime(1970, 1, 1).AddMilliseconds(Convert.ToDouble(orderOnBoardResp.updateTime));
+                    newOrder.TimeCreate = new DateTime(1970, 1, 1).AddMilliseconds(orderOnBoardResp.time.ToDouble());
+                    newOrder.TimeCallBack = new DateTime(1970, 1, 1).AddMilliseconds(orderOnBoardResp.updateTime.ToDouble());
 
                     if (orderOnBoardResp.side == "BUY")
                     {
@@ -3046,8 +3046,8 @@ namespace OsEngine.Market.Servers.Binance.Futures
                 newOrder.Price = oldOrder.Price;
                 newOrder.TypeOrder = oldOrder.TypeOrder;
 
-                newOrder.TimeCreate = new DateTime(1970, 1, 1).AddMilliseconds(Convert.ToDouble(orderOnBoard.time));
-                newOrder.TimeCallBack = new DateTime(1970, 1, 1).AddMilliseconds(Convert.ToDouble(orderOnBoard.updateTime));
+                newOrder.TimeCreate = new DateTime(1970, 1, 1).AddMilliseconds(orderOnBoard.time.ToDouble());
+                newOrder.TimeCallBack = new DateTime(1970, 1, 1).AddMilliseconds(orderOnBoard.updateTime.ToDouble());
 
                 newOrder.ServerType = ServerType.BinanceFutures;
                 newOrder.PortfolioNumber = oldOrder.PortfolioNumber;
