@@ -9529,3 +9529,27 @@
   - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` succeeded (`352/352`).
 - **Commit:** n/a (not committed in this session)
 - **Push:** n/a
+
+### Step 2.2 - CultureInfo Invariant Persistence (Incremental Adoption #434)
+
+- **Status:** In Progress (increment completed)
+- **Plan item:** `refactoring_stage2_plan.md` -> Phase 2 / Step 2.2
+- **Changes:**
+  - Consolidated decimal parsing onto shared extension and removed duplicated local helpers in:
+    - `project/OsEngine/Charts/CandleChart/Indicators/Envelops.cs`
+    - `project/OsEngine/Charts/CandleChart/Indicators/DynamicTrendDetector.cs`
+    - `project/OsEngine/Charts/CandleChart/Indicators/KalmanFilter.cs`
+    - `project/OsEngine/Journal/JournalUi2.xaml.cs`
+    - `project/OsEngine/OsTrader/RiskManager/RiskManager.cs`
+    - `project/OsEngine/Market/Servers/Polygon/PolygonServer.cs`
+  - Replacements:
+    - local `ParseDecimalInvariantOrCurrent(...)` calls -> `ToDecimal()`.
+    - removed helper method definitions whose fallback semantics duplicated `ToDecimal()`.
+  - Scope:
+    - parser/helper consolidation only; runtime behavior unchanged.
+- **Verification:**
+  - Executed outside sandbox.
+  - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` succeeded (0 warnings).
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` succeeded (`352/352`).
+- **Commit:** n/a (not committed in this session)
+- **Push:** n/a

@@ -9,7 +9,6 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Globalization;
 using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
@@ -276,25 +275,10 @@ namespace OsEngine.OsTrader.RiskManager
 
             return new RiskManagerSettingsDto
             {
-                MaxDrowDownToDayPersent = ParseDecimalInvariantOrCurrent(lines[0]),
+                MaxDrowDownToDayPersent = lines[0].ToDecimal(),
                 IsActiv = Convert.ToBoolean(lines[1]),
                 ReactionType = reactionType
             };
-        }
-
-        private static decimal ParseDecimalInvariantOrCurrent(string value)
-        {
-            if (decimal.TryParse(value, NumberStyles.Any, CultureInfo.InvariantCulture, out decimal parsedInvariant))
-            {
-                return parsedInvariant;
-            }
-
-            if (decimal.TryParse(value, NumberStyles.Any, CultureInfo.CurrentCulture, out decimal parsedCurrent))
-            {
-                return parsedCurrent;
-            }
-
-            return value.ToDecimal();
         }
 
         private sealed class RiskManagerSettingsDto

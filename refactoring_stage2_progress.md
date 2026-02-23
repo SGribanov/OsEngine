@@ -8143,3 +8143,26 @@
 - Host-context verification (outside sandbox):
   - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` -> success (0 warnings, 0 errors)
   - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed `352/352`
+
+## 2026-02-23 - Step 2.2 (CultureInfo.InvariantCulture) - Parser helper consolidation (Indicators/Journal/Risk/Polygon)
+
+- Unified decimal parsing through shared `ToDecimal()` extension and removed duplicate local helpers in:
+  - `project/OsEngine/Charts/CandleChart/Indicators/Envelops.cs`
+  - `project/OsEngine/Charts/CandleChart/Indicators/DynamicTrendDetector.cs`
+  - `project/OsEngine/Charts/CandleChart/Indicators/KalmanFilter.cs`
+  - `project/OsEngine/Journal/JournalUi2.xaml.cs`
+  - `project/OsEngine/OsTrader/RiskManager/RiskManager.cs`
+  - `project/OsEngine/Market/Servers/Polygon/PolygonServer.cs`
+- Changes:
+  - replaced local `ParseDecimalInvariantOrCurrent(...)` usage with `ToDecimal()` in legacy-settings and benchmark/timestamp parsing paths.
+  - removed duplicated helper methods where behavior was equivalent to `ToDecimal()` fallback cascade.
+  - cleaned no-longer-used `System.Globalization` usings in touched files.
+- Scope:
+  - parsing unification/refactoring only
+  - data contracts and business logic unchanged.
+
+### Verification
+
+- Host-context verification (outside sandbox):
+  - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` -> success (0 warnings, 0 errors)
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed `352/352`

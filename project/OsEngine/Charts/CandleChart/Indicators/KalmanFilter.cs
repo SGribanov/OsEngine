@@ -10,7 +10,6 @@
 using System;
 using System.Collections.Generic;
 using System.Drawing;
-using System.Globalization;
 using System.IO;
 using OsEngine.Entity;
 using OsEngine.Indicators;
@@ -258,26 +257,11 @@ namespace OsEngine.Charts.CandleChart.Indicators
             return new KalmanFilterSettingsDto
             {
                 ColorArgb = Convert.ToInt32(lines[0]),
-                Sharpness = ParseDecimalInvariantOrCurrent(lines[1]),
-                K = ParseDecimalInvariantOrCurrent(lines[2]),
+                Sharpness = lines[1].ToDecimal(),
+                K = lines[2].ToDecimal(),
                 PaintOn = Convert.ToBoolean(lines[3]),
                 TypeCalculationAverage = typeCalculationAverage
             };
-        }
-
-        private static decimal ParseDecimalInvariantOrCurrent(string value)
-        {
-            if (decimal.TryParse(value, NumberStyles.Any, CultureInfo.InvariantCulture, out decimal parsedInvariant))
-            {
-                return parsedInvariant;
-            }
-
-            if (decimal.TryParse(value, NumberStyles.Any, CultureInfo.CurrentCulture, out decimal parsedCurrent))
-            {
-                return parsedCurrent;
-            }
-
-            return value.ToDecimal();
         }
 
         private sealed class KalmanFilterSettingsDto

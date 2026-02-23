@@ -1386,7 +1386,7 @@ namespace OsEngine.Journal
 
                             listData.Add(dateTime);
 
-                            decimal lastValue = ParseDecimalInvariantOrCurrent(parts[5]);
+                            decimal lastValue = parts[5].ToDecimal();
                             candleData[dateTime] = lastValue;
                         }
                     }
@@ -1437,21 +1437,6 @@ namespace OsEngine.Journal
                 SendNewLogMessage(error.ToString(), LogMessageType.Error);
                 return null;
             }
-        }
-
-        private static decimal ParseDecimalInvariantOrCurrent(string value)
-        {
-            if (decimal.TryParse(value, NumberStyles.Any, CultureInfo.InvariantCulture, out decimal parsedInvariant))
-            {
-                return parsedInvariant;
-            }
-
-            if (decimal.TryParse(value, NumberStyles.Any, CultureInfo.CurrentCulture, out decimal parsedCurrent))
-            {
-                return parsedCurrent;
-            }
-
-            return value.ToDecimal();
         }
 
         private Series ScaleDataToChart(List<decimal> originalData, decimal chartMin, decimal chartMax)

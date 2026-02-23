@@ -9,7 +9,6 @@
 using System;
 using System.Collections.Generic;
 using System.Drawing;
-using System.Globalization;
 using System.IO;
 using System.Linq;
 using OsEngine.Entity;
@@ -257,24 +256,9 @@ namespace OsEngine.Charts.CandleChart.Indicators
             {
                 ColorArgb = Convert.ToInt32(lines[0]),
                 Length = Convert.ToInt32(lines[1]),
-                CorrectionCoeff = ParseDecimalInvariantOrCurrent(lines[2]),
+                CorrectionCoeff = lines[2].ToDecimal(),
                 PaintOn = Convert.ToBoolean(lines[3])
             };
-        }
-
-        private static decimal ParseDecimalInvariantOrCurrent(string value)
-        {
-            if (decimal.TryParse(value, NumberStyles.Any, CultureInfo.InvariantCulture, out decimal parsedInvariant))
-            {
-                return parsedInvariant;
-            }
-
-            if (decimal.TryParse(value, NumberStyles.Any, CultureInfo.CurrentCulture, out decimal parsedCurrent))
-            {
-                return parsedCurrent;
-            }
-
-            return value.ToDecimal();
         }
 
         private sealed class DynamicTrendDetectorSettingsDto

@@ -12,7 +12,6 @@ using System.IO;
 using System.Net.Http;
 using System.Net;
 using System.Threading;
-using System.Globalization;
 
 namespace OsEngine.Market.Servers.Polygon
 {
@@ -491,7 +490,7 @@ namespace OsEngine.Market.Servers.Polygon
 
                 Trade trade = new Trade();
 
-                decimal timestamp = ParseDecimalInvariantOrCurrent(response.results[i].sip_timestamp);
+                decimal timestamp = response.results[i].sip_timestamp.ToDecimal();
 
                 trade.Time = new DateTime(1970, 1, 1).AddMilliseconds(Convert.ToDouble(Math.Floor(timestamp / 1000000)));
                 trade.MicroSeconds = Convert.ToInt32(((timestamp / 1000000) % 1) * 1000000);
@@ -504,28 +503,6 @@ namespace OsEngine.Market.Servers.Polygon
             }
 
             return trades;
-        }
-
-        private static decimal ParseDecimalInvariantOrCurrent(string value)
-        {
-            const NumberStyles style = NumberStyles.Any;
-
-            if (decimal.TryParse(value, style, CultureInfo.InvariantCulture, out decimal parsed))
-            {
-                return parsed;
-            }
-
-            if (decimal.TryParse(value, style, CultureInfo.CurrentCulture, out parsed))
-            {
-                return parsed;
-            }
-
-            if (decimal.TryParse(value, style, new CultureInfo("ru-RU"), out parsed))
-            {
-                return parsed;
-            }
-
-            return 0m;
         }
 
         public List<Candle> GetLastCandleHistory(Security security, TimeFrameBuilder timeFrameBuilder, int candleCount)
