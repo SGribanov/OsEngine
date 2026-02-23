@@ -655,7 +655,7 @@ namespace OsEngine.Market.Servers.OKX
                     security.UnderlyingAsset = item.uly;
 
                     if (item.expTime != "")
-                        security.Expiration = TimeManager.GetDateTimeFromTimeStamp(long.Parse(item.expTime));
+                        security.Expiration = TimeManager.GetDateTimeFromTimeStamp(long.Parse(item.expTime, CultureInfo.InvariantCulture));
                 }
 
                 if (securityType == SecurityType.Option)
@@ -670,7 +670,7 @@ namespace OsEngine.Market.Servers.OKX
                     }
 
                     //security.Lot = item.ctVal.ToDecimal();
-                    security.Expiration = TimeManager.GetDateTimeFromTimeStamp(long.Parse(item.expTime));
+                    security.Expiration = TimeManager.GetDateTimeFromTimeStamp(long.Parse(item.expTime, CultureInfo.InvariantCulture));
                     security.OptionType = item.optType == "P" ? OptionType.Put : OptionType.Call;
                     security.Strike = item.stk.ToDecimal();
 
