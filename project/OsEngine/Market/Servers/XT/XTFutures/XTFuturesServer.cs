@@ -715,7 +715,7 @@ namespace OsEngine.Market.Servers.XT.XTFutures
                                 newCandle.Low = item.l.ToDecimal();
                                 newCandle.Volume = item.a.ToDecimal();
                                 newCandle.State = CandleState.Finished;
-                                newCandle.TimeStart = TimeManager.GetDateTimeFromTimeStamp(Convert.ToInt64(item.t));
+                                newCandle.TimeStart = TimeManager.GetDateTimeFromTimeStamp(Convert.ToInt64(item.t, CultureInfo.InvariantCulture));
 
                                 candles.Add(newCandle);
                             }
@@ -1482,7 +1482,7 @@ namespace OsEngine.Market.Servers.XT.XTFutures
                     MarketDepth newDepth = new MarketDepth();
 
                     newDepth.SecurityNameCode = depth.s;
-                    newDepth.Time = TimeManager.GetDateTimeFromTimeStamp(Convert.ToInt64(depth.t));
+                    newDepth.Time = TimeManager.GetDateTimeFromTimeStamp(Convert.ToInt64(depth.t, CultureInfo.InvariantCulture));
 
                     for (int i = 0; i < depth.b.Count && i < 25; i++)
                     {
@@ -1587,7 +1587,7 @@ namespace OsEngine.Market.Servers.XT.XTFutures
                     ApplyLevels(marketDepth.b, depth.Bids, isBid: true);
                     ApplyLevels(marketDepth.a, depth.Asks, isBid: false);
 
-                    depth.Time = TimeManager.GetDateTimeFromTimeStamp(Convert.ToInt64(marketDepth.t));
+                    depth.Time = TimeManager.GetDateTimeFromTimeStamp(Convert.ToInt64(marketDepth.t, CultureInfo.InvariantCulture));
 
                     List<MarketDepthLevel> topBids = new List<MarketDepthLevel>();
 
@@ -1694,7 +1694,7 @@ namespace OsEngine.Market.Servers.XT.XTFutures
 
                     trade.SecurityNameCode = responseTrade.data?.s ?? string.Empty;
                     trade.Price = (responseTrade.data?.p).ToDecimal();
-                    trade.Time = TimeManager.GetDateTimeFromTimeStamp(Convert.ToInt64(responseTrade.data?.t));
+                    trade.Time = TimeManager.GetDateTimeFromTimeStamp(Convert.ToInt64(responseTrade.data?.t, CultureInfo.InvariantCulture));
                     trade.Volume = (responseTrade.data?.a).ToDecimal();
                     trade.Side = responseTrade.data?.m?.Equals("BID", StringComparison.OrdinalIgnoreCase) == true ? Side.Buy : Side.Sell;
                     trade.Id = Convert.ToInt64(responseTrade.data?.t).ToString();
@@ -1769,7 +1769,7 @@ namespace OsEngine.Market.Servers.XT.XTFutures
 
                     MyTrade myTrade = new MyTrade();
 
-                    myTrade.Time = TimeManager.GetDateTimeFromTimeStamp(Convert.ToInt64(response.data.timestamp));
+                    myTrade.Time = TimeManager.GetDateTimeFromTimeStamp(Convert.ToInt64(response.data.timestamp, CultureInfo.InvariantCulture));
                     myTrade.NumberOrderParent = response.data.orderId;
                     myTrade.NumberTrade = Convert.ToInt64(response.data.clientOrderId).ToString();
                     myTrade.Price = response.data.price.ToDecimal();
@@ -1831,8 +1831,8 @@ namespace OsEngine.Market.Servers.XT.XTFutures
                     Order updateOrder = new Order();
 
                     updateOrder.SecurityNameCode = order.data.symbol;
-                    updateOrder.TimeCreate = TimeManager.GetDateTimeFromTimeStamp(Convert.ToInt64(order.data.createdTime));
-                    updateOrder.TimeCallBack = TimeManager.GetDateTimeFromTimeStamp(Convert.ToInt64(order.data.updatedTime));
+                    updateOrder.TimeCreate = TimeManager.GetDateTimeFromTimeStamp(Convert.ToInt64(order.data.createdTime, CultureInfo.InvariantCulture));
+                    updateOrder.TimeCallBack = TimeManager.GetDateTimeFromTimeStamp(Convert.ToInt64(order.data.updatedTime, CultureInfo.InvariantCulture));
                     updateOrder.NumberMarket = order.data.orderId;
                     updateOrder.NumberUser = Convert.ToInt32(order.data.clientOrderId);
                     updateOrder.Side = order.data.orderSide.Equals("BUY", StringComparison.OrdinalIgnoreCase) ? Side.Buy : Side.Sell;
@@ -2302,8 +2302,8 @@ namespace OsEngine.Market.Servers.XT.XTFutures
                                 activeOrder.NumberMarket = item.orderId;
                                 activeOrder.SecurityNameCode = item.symbol;
                                 activeOrder.ServerType = ServerType.XTFutures;
-                                activeOrder.TimeCreate = TimeManager.GetDateTimeFromTimeStamp(Convert.ToInt64(item.createdTime));
-                                activeOrder.TimeCallBack = TimeManager.GetDateTimeFromTimeStamp(Convert.ToInt64(item.updatedTime));
+                                activeOrder.TimeCreate = TimeManager.GetDateTimeFromTimeStamp(Convert.ToInt64(item.createdTime, CultureInfo.InvariantCulture));
+                                activeOrder.TimeCallBack = TimeManager.GetDateTimeFromTimeStamp(Convert.ToInt64(item.updatedTime, CultureInfo.InvariantCulture));
                                 activeOrder.Volume = item.origQty.ToDecimal() * GetVolume(activeOrder.SecurityNameCode);
                                 activeOrder.Price = item.price.ToDecimal();
                                 activeOrder.Side = item.orderSide.Equals("BUY", StringComparison.OrdinalIgnoreCase) ? Side.Buy : Side.Sell;
@@ -2457,7 +2457,7 @@ namespace OsEngine.Market.Servers.XT.XTFutures
                                 trade.SecurityNameCode = data.symbol;
                                 trade.Price = data.price.ToDecimal();
                                 trade.Volume = data.quantity.ToDecimal() * GetVolume(trade.SecurityNameCode);
-                                trade.Time = TimeManager.GetDateTimeFromTimeStamp(Convert.ToInt64(data.timestamp));
+                                trade.Time = TimeManager.GetDateTimeFromTimeStamp(Convert.ToInt64(data.timestamp, CultureInfo.InvariantCulture));
                                 trade.Side = string.Equals(data.orderSide, "BUY", StringComparison.OrdinalIgnoreCase) ? Side.Buy : Side.Sell;
 
                                 MyTradeEvent?.Invoke(trade);
@@ -2607,8 +2607,8 @@ namespace OsEngine.Market.Servers.XT.XTFutures
                                 historyOrder.Volume = item.origQty.ToDecimal() * GetVolume(historyOrder.SecurityNameCode);
                                 historyOrder.Price = item.price.ToDecimal();
                                 historyOrder.PortfolioNumber = _portfolioName;
-                                historyOrder.TimeCreate = TimeManager.GetDateTimeFromTimeStamp(Convert.ToInt64(item.createdTime));
-                                historyOrder.TimeCallBack = TimeManager.GetDateTimeFromTimeStamp(Convert.ToInt64(item.updatedTime));
+                                historyOrder.TimeCreate = TimeManager.GetDateTimeFromTimeStamp(Convert.ToInt64(item.createdTime, CultureInfo.InvariantCulture));
+                                historyOrder.TimeCallBack = TimeManager.GetDateTimeFromTimeStamp(Convert.ToInt64(item.updatedTime, CultureInfo.InvariantCulture));
 
                                 historyOrder.ServerType = ServerType.XTFutures;
 
