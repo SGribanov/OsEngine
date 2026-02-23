@@ -912,7 +912,7 @@ namespace OsEngine.Market.Servers.GateIoData
 
                 trade.SecurityNameCode = security.Name;
 
-                DateTime time = TimeManager.GetDateTimeFromTimeStampSeconds(long.Parse(timeData[0]));
+                DateTime time = TimeManager.GetDateTimeFromTimeStampSeconds(long.Parse(timeData[0], CultureInfo.InvariantCulture));
 
                 if (timeData.Length > 1)
                 {
@@ -1101,7 +1101,7 @@ namespace OsEngine.Market.Servers.GateIoData
                             trade.SecurityNameCode = current.contract;
                             trade.Side = current.size.ToDecimal() > 0 ? Side.Buy : Side.Sell;
                             string[] timeData = current.create_time_ms.Split('.');
-                            DateTime time = TimeManager.GetDateTimeFromTimeStampSeconds(long.Parse(timeData[0]));
+                            DateTime time = TimeManager.GetDateTimeFromTimeStampSeconds(long.Parse(timeData[0], CultureInfo.InvariantCulture));
 
                             if (timeData.Length > 1)
                             {
@@ -1113,7 +1113,7 @@ namespace OsEngine.Market.Servers.GateIoData
                             trade.Volume = current.amount.ToDecimal();
                             trade.SecurityNameCode = current.currency_pair;
                             trade.Side = current.side == "buy" ? Side.Buy : Side.Sell;
-                            long timeMs = long.Parse(current.create_time_ms.Split('.')[0]);
+                            long timeMs = long.Parse(current.create_time_ms.Split('.')[0], CultureInfo.InvariantCulture);
 
                             trade.Time = TimeManager.GetDateTimeFromTimeStamp(timeMs);
                         }
@@ -1235,7 +1235,7 @@ namespace OsEngine.Market.Servers.GateIoData
 
                         string[] timeData = tradeParts[0].Split('.');
 
-                        DateTime time = TimeManager.GetDateTimeFromTimeStampSeconds(long.Parse(timeData[0]));
+                        DateTime time = TimeManager.GetDateTimeFromTimeStampSeconds(long.Parse(timeData[0], CultureInfo.InvariantCulture));
 
                         DateTime date = time.Date;
 
