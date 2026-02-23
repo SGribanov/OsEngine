@@ -641,7 +641,7 @@ namespace OsEngine.Market.Servers.Polygon
                     Candle candle = new Candle();
 
                     candle.State = CandleState.Finished;
-                    candle.TimeStart = TimeManager.GetDateTimeFromTimeStamp(long.Parse(responce.results[i].t));
+                    candle.TimeStart = TimeManager.GetDateTimeFromTimeStamp(long.Parse(responce.results[i].t, System.Globalization.CultureInfo.InvariantCulture));
                     candle.Volume = responce.results[i].v.ToDecimal();
                     candle.Close = responce.results[i].c.ToDecimal();
                     candle.High = responce.results[i].h.ToDecimal();
