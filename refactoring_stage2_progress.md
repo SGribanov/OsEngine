@@ -8819,3 +8819,22 @@
   - `dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo` -> success
   - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` -> success (0 warnings, 0 errors)
   - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed `352/352`
+
+## 2026-02-23 - Step 2.2 (CultureInfo.InvariantCulture) - FED rates timestamp parsing hardening (OsData)
+
+- Standardized numeric string parsing with explicit invariant culture in:
+  - `project/OsEngine/OsData/LqdtDataFakeServer.cs`
+- Changes:
+  - replaced parsing of external FED rates timestamp:
+    - `Convert.ToInt64(value)` -> `Convert.ToInt64(value, CultureInfo.InvariantCulture)`
+- Scope:
+  - parser hardening only
+  - behavior unchanged for valid payloads.
+
+### Verification
+
+- Host-context verification (outside sandbox):
+  - `dotnet restore project/OsEngine/OsEngine.csproj --nologo` -> success
+  - `dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo` -> success
+  - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` -> success (0 warnings, 0 errors)
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed `352/352`

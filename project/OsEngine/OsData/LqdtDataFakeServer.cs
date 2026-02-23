@@ -114,7 +114,7 @@ namespace OsEngine.OsData
 
                         for (int i = fedRates.attr.Length - 1; i >= 0; i--)
                         {
-                            DateTime dateRate = TimeManager.GetDateTimeFromTimeStamp(Convert.ToInt64(fedRates.attr[i].timestamp)).Date;
+                            DateTime dateRate = TimeManager.GetDateTimeFromTimeStamp(Convert.ToInt64(fedRates.attr[i].timestamp, CultureInfo.InvariantCulture)).Date;
                             double rate = fedRates.attr[i].actual_formatted.TrimEnd('%').ToDouble();
 
                             if (dateRate == _rates[0].Date)
