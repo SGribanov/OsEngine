@@ -216,7 +216,7 @@ namespace OsEngine.Market.Servers.MoexAlgopack
                     newSecurity.NameClass = "Фьючерсы/Фортс";
                     newSecurity.NameId = item[0]; 
                     newSecurity.SecurityType = SecurityType.Futures;
-                    newSecurity.Decimals = Convert.ToInt32(item[5]);
+                    newSecurity.Decimals = Convert.ToInt32(item[5], CultureInfo.InvariantCulture);
                     newSecurity.DecimalsVolume = 0;
                     newSecurity.PriceStep = item[6].ToDecimal();
                     newSecurity.PriceStepCost = newSecurity.PriceStep;
@@ -245,7 +245,7 @@ namespace OsEngine.Market.Servers.MoexAlgopack
                     newSecurity.NameClass = "Акции/TQBR";
                     newSecurity.NameId = item[0]; 
                     newSecurity.SecurityType = SecurityType.Stock;
-                    newSecurity.Decimals = Convert.ToInt32(item[8]);
+                    newSecurity.Decimals = Convert.ToInt32(item[8], CultureInfo.InvariantCulture);
                     newSecurity.DecimalsVolume = 0;
                     newSecurity.PriceStep = item[14].ToDecimal();
                     newSecurity.PriceStepCost = newSecurity.PriceStep;

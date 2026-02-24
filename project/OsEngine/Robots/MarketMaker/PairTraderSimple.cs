@@ -163,7 +163,7 @@ namespace OsEngine.Robots.MarketMaker
                     Slippage1 = reader.ReadLine().ToDecimal();
                     Slippage2 = reader.ReadLine().ToDecimal();
 
-                    CountCandles = Convert.ToInt32(reader.ReadLine());
+                    CountCandles = Convert.ToInt32(reader.ReadLine(), CultureInfo.InvariantCulture);
 
                     SpreadDeviation = reader.ReadLine().ToDecimal();
 
@@ -180,7 +180,7 @@ namespace OsEngine.Robots.MarketMaker
                             if (pos.Length == 2)
                             {
                                 PairDealStausSaver save = new PairDealStausSaver();
-                                save.NumberPositions.Add(Convert.ToInt32(pos[0]));
+                                save.NumberPositions.Add(Convert.ToInt32(pos[0], CultureInfo.InvariantCulture));
                                 save.Spred = pos[1].ToDecimal();
                                 _positionNumbers.Add(save);
                             }

@@ -10,6 +10,7 @@ using OsEngine.Language;
 using OsEngine.Market;
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
@@ -236,7 +237,7 @@ namespace OsEngine.OsData
 
         private void SetDailyPeriod()
         {
-            int updHour = Convert.ToInt32(TimeBox.Text);
+            int updHour = Convert.ToInt32(TimeBox.Text, CultureInfo.InvariantCulture);
 
             _set.Updater.UpdatePeriod = new TimeSpan(1, 0, 0, 0, 0);
             _set.Updater.HourUpdate = updHour;

@@ -1666,7 +1666,7 @@ namespace OsEngine.Market.Servers.HTX.Swap
                         funding.SecurityNameCode = item.contract_code;
                         funding.PreviousFundingTime = TimeManager.GetDateTimeFromTimeStamp((long)item.funding_time.ToDecimal());
                         TimeSpan data = TimeManager.GetDateTimeFromTimeStamp((long)item.funding_time.ToDecimal()) - TimeManager.GetDateTimeFromTimeStamp((long)response.data.data[1].funding_time.ToDecimal());
-                        funding.FundingIntervalHours = int.Parse(data.Hours.ToString());
+                        funding.FundingIntervalHours = int.Parse(data.Hours.ToString(), CultureInfo.InvariantCulture);
 
                         FundingUpdateEvent?.Invoke(funding);
                     }

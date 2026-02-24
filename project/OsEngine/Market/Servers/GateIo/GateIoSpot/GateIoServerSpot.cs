@@ -599,7 +599,7 @@ namespace OsEngine.Market.Servers.GateIo.GateIoSpot
                         Candle candle = new Candle();
 
                         candle.State = CandleState.Finished;
-                        candle.TimeStart = TimeManager.GetDateTimeFromTimeStampSeconds(int.Parse(current[0]));
+                        candle.TimeStart = TimeManager.GetDateTimeFromTimeStampSeconds(int.Parse(current[0], CultureInfo.InvariantCulture));
                         candle.Volume = current[1].ToDecimal();
                         candle.Close = current[2].ToDecimal();
                         candle.High = current[3].ToDecimal();

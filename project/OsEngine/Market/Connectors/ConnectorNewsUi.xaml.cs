@@ -11,6 +11,7 @@ using OsEngine.Logging;
 using OsEngine.Market.Servers;
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Windows;
 using OsEngine.Language;
 using MessageBox = System.Windows.MessageBox;
@@ -131,7 +132,7 @@ namespace OsEngine.Market.Connectors
                 int countNewsToSave = 0;
                 try
                 {
-                    countNewsToSave = Convert.ToInt32(TextBoxCountNewsToSave.Text);
+                    countNewsToSave = Convert.ToInt32(TextBoxCountNewsToSave.Text, CultureInfo.InvariantCulture);
                 }
                 catch
                 {

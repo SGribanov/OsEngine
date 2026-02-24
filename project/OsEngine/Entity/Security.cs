@@ -274,13 +274,13 @@ namespace OsEngine.Entity
             PriceStepCost = array[7].ToDecimal();
             MarginBuy = array[8].ToDecimal();
             Enum.TryParse(array[9],out SecurityType);
-            _decimals = Convert.ToInt32(array[10]);
+            _decimals = Convert.ToInt32(array[10], CultureInfo.InvariantCulture);
             PriceLimitLow = array[11].ToDecimal();
             PriceLimitHigh = array[12].ToDecimal();
             Enum.TryParse(array[13], out OptionType);
             Strike = array[14].ToDecimal();
             Expiration = ParseDateInvariantOrCurrent(array[15]);
-            DecimalsVolume = Convert.ToInt32(array[16]);
+            DecimalsVolume = Convert.ToInt32(array[16], CultureInfo.InvariantCulture);
             MinTradeAmount = array[17].ToDecimal();
 
             if (array.Length > 18)

@@ -5,6 +5,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Windows.Forms;
 using OsEngine.Language;
 using OsEngine.Market.Servers;
@@ -577,8 +578,8 @@ namespace OsEngine.Entity
             decimal lot = row.Cells[6].Value.ToString().ToDecimal();
             decimal priceStep = row.Cells[7].Value.ToString().ToDecimal();
             decimal priceStepCost = row.Cells[8].Value.ToString().ToDecimal();
-            int priceDecimals = Convert.ToInt32(row.Cells[9].Value);
-            int volumeDecimals = Convert.ToInt32(row.Cells[10].Value);
+            int priceDecimals = Convert.ToInt32(row.Cells[9].Value, CultureInfo.InvariantCulture);
+            int volumeDecimals = Convert.ToInt32(row.Cells[10].Value, CultureInfo.InvariantCulture);
             MinTradeAmountType minVolumeType;
             Enum.TryParse(row.Cells[11].Value.ToString(), out minVolumeType);
             decimal minVolume = row.Cells[12].Value.ToString().ToDecimal();
@@ -855,9 +856,9 @@ namespace OsEngine.Entity
         {
             try
             {
-                int indexRow = Convert.ToInt32(LabelCurrentResultShow.Content) - 1;
+                int indexRow = Convert.ToInt32(LabelCurrentResultShow.Content, CultureInfo.InvariantCulture) - 1;
 
-                int maxRowIndex = Convert.ToInt32(LabelCountResultsShow.Content);
+                int maxRowIndex = Convert.ToInt32(LabelCountResultsShow.Content, CultureInfo.InvariantCulture);
 
                 if (indexRow <= 0)
                 {
@@ -884,9 +885,9 @@ namespace OsEngine.Entity
         {
             try
             {
-                int indexRow = Convert.ToInt32(LabelCurrentResultShow.Content) - 1 + 1;
+                int indexRow = Convert.ToInt32(LabelCurrentResultShow.Content, CultureInfo.InvariantCulture) - 1 + 1;
 
-                int maxRowIndex = Convert.ToInt32(LabelCountResultsShow.Content);
+                int maxRowIndex = Convert.ToInt32(LabelCountResultsShow.Content, CultureInfo.InvariantCulture);
 
                 if (indexRow >= maxRowIndex)
                 {

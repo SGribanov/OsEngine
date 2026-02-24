@@ -405,7 +405,7 @@ namespace OsEngine.Market.Servers.Tester
         {
             try
             {
-                _server.SlippageToSimpleOrder = Convert.ToInt32(TextBoxSlippageSimpleOrder.Text);
+                _server.SlippageToSimpleOrder = Convert.ToInt32(TextBoxSlippageSimpleOrder.Text, CultureInfo.InvariantCulture);
                 _server.Save();
             }
             catch (Exception)
@@ -434,7 +434,7 @@ namespace OsEngine.Market.Servers.Tester
         {
             try
             {
-                _server.SlippageToStopOrder = Convert.ToInt32(TextBoxSlippageStop.Text);
+                _server.SlippageToStopOrder = Convert.ToInt32(TextBoxSlippageStop.Text, CultureInfo.InvariantCulture);
                 _server.Save();
             }
             catch (Exception)
@@ -1250,8 +1250,8 @@ namespace OsEngine.Market.Servers.Tester
 
                     string[] values = value.Split(':');
 
-                    int hour = int.Parse(values[0]);
-                    int minute = int.Parse(values[1]);
+                    int hour = int.Parse(values[0], CultureInfo.InvariantCulture);
+                    int minute = int.Parse(values[1], CultureInfo.InvariantCulture);
 
                     _server.ClearingTimes[row].Time = new DateTime(2022, 1, 1, hour, minute, 0);
                     _server.SaveClearingInfo();

@@ -129,15 +129,15 @@ namespace OsEngine.Entity
 
             Security = savStr[0];
             TabName = savStr[1];
-            Number = Convert.ToInt32(savStr[2]);
+            Number = Convert.ToInt32(savStr[2], CultureInfo.InvariantCulture);
             Enum.TryParse(savStr[3], out LifeTimeType);
             PriceOrder = savStr[4].ToDecimal();
             PriceRedLine = savStr[5].ToDecimal();
             Enum.TryParse(savStr[6], out ActivateType);
             Volume = savStr[7].ToDecimal();
             Enum.TryParse(savStr[8], out Side);
-            _expiresBars = Convert.ToInt32(savStr[9]);
-            _orderCreateBarNumber = Convert.ToInt32(savStr[10]);
+            _expiresBars = Convert.ToInt32(savStr[9], CultureInfo.InvariantCulture);
+            _orderCreateBarNumber = Convert.ToInt32(savStr[10], CultureInfo.InvariantCulture);
             LastCandleTime = ParseDateInvariantOrLegacy(savStr[11]);
             SignalType = savStr[12];
             TimeCreate = ParseDateInvariantOrLegacy(savStr[13]);
@@ -149,7 +149,7 @@ namespace OsEngine.Entity
 
             if (savStr.Length > 15)
             {
-                PositionNumber = Convert.ToInt32(savStr[15]);
+                PositionNumber = Convert.ToInt32(savStr[15], CultureInfo.InvariantCulture);
             }
         }
 

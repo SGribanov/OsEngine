@@ -283,15 +283,15 @@ namespace OsEngine.Market.Servers.BitGet.BitGetFutures
                             {
                                 RestMessageSymbol item = symbols.data[i];
 
-                                int decimals = Convert.ToInt32(item.pricePlace);
-                                decimal priceStep = (GetPriceStep(Convert.ToInt32(item.pricePlace), Convert.ToInt32(item.priceEndStep))).ToDecimal();
+                                int decimals = Convert.ToInt32(item.pricePlace, CultureInfo.InvariantCulture);
+                                decimal priceStep = (GetPriceStep(Convert.ToInt32(item.pricePlace, CultureInfo.InvariantCulture), Convert.ToInt32(item.priceEndStep, CultureInfo.InvariantCulture))).ToDecimal();
 
                                 if (item.symbolStatus.Equals("normal"))
                                 {
                                     Security newSecurity = new Security();
 
                                     newSecurity.Exchange = ServerType.BitGetFutures.ToString();
-                                    newSecurity.DecimalsVolume = Convert.ToInt32(item.volumePlace);
+                                    newSecurity.DecimalsVolume = Convert.ToInt32(item.volumePlace, CultureInfo.InvariantCulture);
                                     newSecurity.Lot = 1;
                                     newSecurity.Name = item.symbol;
                                     newSecurity.NameFull = item.symbol;
@@ -1701,7 +1701,7 @@ namespace OsEngine.Market.Servers.BitGet.BitGetFutures
                         data.SecurityNameCode = item.symbol;
                         data.MaxFundingRate = item.maxFundingRate.ToDecimal();
                         data.MinFundingRate = item.minFundingRate.ToDecimal();
-                        data.FundingIntervalHours = int.Parse(item.fundingRateInterval);
+                        data.FundingIntervalHours = int.Parse(item.fundingRateInterval, CultureInfo.InvariantCulture);
 
                         FundingUpdateEvent?.Invoke(data);
                     }
@@ -3037,7 +3037,7 @@ namespace OsEngine.Market.Servers.BitGet.BitGetFutures
 
             try
             {
-                newOrder.NumberUser = Convert.ToInt32(item.clientOid);
+                newOrder.NumberUser = Convert.ToInt32(item.clientOid, CultureInfo.InvariantCulture);
             }
             catch (System.Exception ex)
             {

@@ -1484,7 +1484,7 @@ namespace OsEngine.Market.Servers.MoexFixFastTwimeFutures
 
                                 newSecurity.PriceStepCost = msg.GetString("MinPriceIncrementAmount").ToDecimal();
                                 newSecurity.DecimalsVolume = 1;
-                                newSecurity.Decimals = int.Parse(secDecimals);
+                                newSecurity.Decimals = int.Parse(secDecimals, CultureInfo.InvariantCulture);
                                 newSecurity.Decimals = GetDecimals(newSecurity.PriceStep);
                                 newSecurity.MarginBuy = msg.GetString("InitialMarginOnBuy").ToDecimal();
                                 newSecurity.PriceLimitLow = msg.GetString("LowLimitPx").ToDecimal();
@@ -3987,7 +3987,7 @@ namespace OsEngine.Market.Servers.MoexFixFastTwimeFutures
                     _newOrdersTwime.Add(order);
 
                     ulong ClOrdID = (ulong)order.NumberUser;
-                    int securityID = Convert.ToInt32(_secIdByName[order.SecurityNameCode]);
+                    int securityID = Convert.ToInt32(_secIdByName[order.SecurityNameCode], CultureInfo.InvariantCulture);
                     int volume = (int)order.Volume;
 
                     byte[] newOrder = _twimeMessageConstructor.NewOrderSingle
@@ -4073,7 +4073,7 @@ namespace OsEngine.Market.Servers.MoexFixFastTwimeFutures
 
                     ulong ClOrdID = (ulong)DateTime.UtcNow.Ticks;
                     long OrderID = Convert.ToInt64(order.NumberMarket, CultureInfo.InvariantCulture);
-                    int securityID = Convert.ToInt32(_secIdByName[order.SecurityNameCode]);
+                    int securityID = Convert.ToInt32(_secIdByName[order.SecurityNameCode], CultureInfo.InvariantCulture);
 
                     byte[] ordDelMsg = _twimeMessageConstructor.OrderCancel(ClOrdID, OrderID, securityID, _TradeAccount, out string msgLog);
 
@@ -4161,7 +4161,7 @@ namespace OsEngine.Market.Servers.MoexFixFastTwimeFutures
 
                     ulong ClOrdID = (ulong)DateTime.UtcNow.Ticks;
                     long OrderID = Convert.ToInt64(order.NumberMarket, CultureInfo.InvariantCulture);
-                    int securityID = Convert.ToInt32(_secIdByName[order.SecurityNameCode]);
+                    int securityID = Convert.ToInt32(_secIdByName[order.SecurityNameCode], CultureInfo.InvariantCulture);
                     uint OrderQty = (uint)order.Volume;
                     int ClOrdLinkID = order.NumberUser;
 
@@ -4302,7 +4302,7 @@ namespace OsEngine.Market.Servers.MoexFixFastTwimeFutures
                 {
                     ulong ClOrdID = (ulong)DateTime.UtcNow.Ticks;
                     int ClOrdLinkID = 0;
-                    int securityID = Convert.ToInt32(security.NameId);
+                    int securityID = Convert.ToInt32(security.NameId, CultureInfo.InvariantCulture);
                     byte SecurityType = security.NameClass.Equals("Futures") ? (byte)0 : (byte)1; // 0-Futures, 1-Options 
                     byte Side = 89;
                     string SecurityGroup = "%";
@@ -4551,7 +4551,7 @@ namespace OsEngine.Market.Servers.MoexFixFastTwimeFutures
             for (int t = 0; t < _templates.Length; t++)
             {
                 MessageTemplate tmplt = _templates[t];
-                context.RegisterTemplate(int.Parse(tmplt.Id), tmplt);
+                context.RegisterTemplate(int.Parse(tmplt.Id, CultureInfo.InvariantCulture), tmplt);
             }
 
             return context;

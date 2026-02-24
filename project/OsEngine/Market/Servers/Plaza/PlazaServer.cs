@@ -3304,7 +3304,7 @@ namespace OsEngine.Market.Servers.Plaza
             {
                 if (_securities[i].Name.Equals(isin))
                 {
-                    return Convert.ToInt32(_securities[i].NameId);
+                    return Convert.ToInt32(_securities[i].NameId, CultureInfo.InvariantCulture);
                 }
             }
 

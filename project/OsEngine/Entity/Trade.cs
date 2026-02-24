@@ -181,7 +181,7 @@ namespace OsEngine.Entity
 
             if (sIn.Length > 5)
             {
-                MicroSeconds = Convert.ToInt32(sIn[5]);
+                MicroSeconds = Convert.ToInt32(sIn[5], CultureInfo.InvariantCulture);
             }
 
             if (sIn.Length > 6)

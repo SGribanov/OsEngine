@@ -12,6 +12,7 @@ using OsEngine.Market.Servers.Entity;
 using OsEngine.Market.Servers.Finam.Entity;
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.Net;
 using System.Net.Http;
@@ -284,11 +285,13 @@ namespace OsEngine.Market.Servers.Finam
                     }
                 }
 
-                if (Convert.ToInt32(arrayMarkets[i]) == 200)
+                int marketId = Convert.ToInt32(arrayMarkets[i], CultureInfo.InvariantCulture);
+
+                if (marketId == 200)
                 {
                     finamSecurity.Market = "МосБиржа топ";
                 }
-                else if (Convert.ToInt32(arrayMarkets[i]) == 1)
+                else if (marketId == 1)
                 {
                     if(foreignSecHashSet.Contains(finamSecurity.Id))
                     {
@@ -299,47 +302,47 @@ namespace OsEngine.Market.Servers.Finam
                         finamSecurity.Market = "МосБиржа акции";
                     }
                 }
-                else if (Convert.ToInt32(arrayMarkets[i]) == 14)
+                else if (marketId == 14)
                 {
                     finamSecurity.Market = "МосБиржа фьючерсы";
                 }
-                else if (Convert.ToInt32(arrayMarkets[i]) == 41)
+                else if (marketId == 41)
                 {
                     finamSecurity.Market = "Курс рубля";
                 }
-                else if (Convert.ToInt32(arrayMarkets[i]) == 45)
+                else if (marketId == 45)
                 {
                     finamSecurity.Market = "МосБиржа валютный рынок";
                 }
-                else if (Convert.ToInt32(arrayMarkets[i]) == 2)
+                else if (marketId == 2)
                 {
                     finamSecurity.Market = "МосБиржа облигации";
                 }
-                else if (Convert.ToInt32(arrayMarkets[i]) == 12)
+                else if (marketId == 12)
                 {
                     finamSecurity.Market = "МосБиржа внесписочные облигации";
                 }
-                else if (Convert.ToInt32(arrayMarkets[i]) == 29)
+                else if (marketId == 29)
                 {
                     finamSecurity.Market = "МосБиржа пифы";
                 }
-                else if (Convert.ToInt32(arrayMarkets[i]) == 515)
+                else if (marketId == 515)
                 {
                     finamSecurity.Market = "Мосбиржа ETF";
                 }
-                else if (Convert.ToInt32(arrayMarkets[i]) == 8)
+                else if (marketId == 8)
                 {
                     finamSecurity.Market = "Расписки";
                 }
-                else if (Convert.ToInt32(arrayMarkets[i]) == 519)
+                else if (marketId == 519)
                 {
                     finamSecurity.Market = "Еврооблигации";
                 }
-                else if (Convert.ToInt32(arrayMarkets[i]) == 517)
+                else if (marketId == 517)
                 {
                     finamSecurity.Market = "Санкт-Петербургская биржа";
                 }
-                else if (Convert.ToInt32(arrayMarkets[i]) == 6)
+                else if (marketId == 6)
                 {
                     if (finamSecurity.Name == "Индекс МосБиржи, вечер. сессия")
                     {
@@ -353,39 +356,39 @@ namespace OsEngine.Market.Servers.Finam
                         finamSecurity.Market = "Индексы мировые";
                     }
                 }
-                else if (Convert.ToInt32(arrayMarkets[i]) == 24)
+                else if (marketId == 24)
                 {
                     finamSecurity.Market = "Товары";
                 }
-                else if (Convert.ToInt32(arrayMarkets[i]) == 5)
+                else if (marketId == 5)
                 {
                     finamSecurity.Market = "Мировые валюты";
                 }
-                else if (Convert.ToInt32(arrayMarkets[i]) == 25)
+                else if (marketId == 25)
                 {
                     finamSecurity.Market = "Акции США(BATS)";
                 }
-                else if (Convert.ToInt32(arrayMarkets[i]) == 7)
+                else if (marketId == 7)
                 {
                     finamSecurity.Market = "Фьючерсы США";
                 }
-                else if (Convert.ToInt32(arrayMarkets[i]) == 27)
+                else if (marketId == 27)
                 {
                     finamSecurity.Market = "Отрасли экономики США";
                 }
-                else if (Convert.ToInt32(arrayMarkets[i]) == 26)
+                else if (marketId == 26)
                 {
                     finamSecurity.Market = "Гособлигации США";
                 }
-                else if (Convert.ToInt32(arrayMarkets[i]) == 28)
+                else if (marketId == 28)
                 {
                     finamSecurity.Market = "ETF";
                 }
-                else if (Convert.ToInt32(arrayMarkets[i]) == 30)
+                else if (marketId == 30)
                 {
                     finamSecurity.Market = "Индексы мировой экономики";
                 }
-                else if (Convert.ToInt32(arrayMarkets[i]) == 91)
+                else if (marketId == 91)
                 {
                     if (_rusIndexNames.TryGetValue(finamSecurity.Id, out string fullName))
                     {
@@ -397,55 +400,55 @@ namespace OsEngine.Market.Servers.Finam
                         finamSecurity.Market = "Российские индексы";
                     }
                 }
-                else if (Convert.ToInt32(arrayMarkets[i]) == 3)
+                else if (marketId == 3)
                 {
                     finamSecurity.Market = "РТС";
                 }
-                else if (Convert.ToInt32(arrayMarkets[i]) == 20)
+                else if (marketId == 20)
                 {
                     finamSecurity.Market = "RTS Board";
                 }
-                else if (Convert.ToInt32(arrayMarkets[i]) == 10)
+                else if (marketId == 10)
                 {
                     finamSecurity.Market = "РТС-GAZ";
                 }
-                else if (Convert.ToInt32(arrayMarkets[i]) == 17)
+                else if (marketId == 17)
                 {
                     finamSecurity.Market = "ФОРТС Архив";
                 }
-                else if (Convert.ToInt32(arrayMarkets[i]) == 31)
+                else if (marketId == 31)
                 {
                     finamSecurity.Market = "Сырье Архив";
                 }
-                else if (Convert.ToInt32(arrayMarkets[i]) == 38)
+                else if (marketId == 38)
                 {
                     finamSecurity.Market = "RTS Standard Архив";
                 }
-                else if (Convert.ToInt32(arrayMarkets[i]) == 16)
+                else if (marketId == 16)
                 {
                     finamSecurity.Market = "ММВБ Архив";
                 }
-                else if (Convert.ToInt32(arrayMarkets[i]) == 18)
+                else if (marketId == 18)
                 {
                     finamSecurity.Market = "РТС Архив";
                 }
-                else if (Convert.ToInt32(arrayMarkets[i]) == 9)
+                else if (marketId == 9)
                 {
                     finamSecurity.Market = "СПФБ Архив";
                 }
-                else if (Convert.ToInt32(arrayMarkets[i]) == 32)
+                else if (marketId == 32)
                 {
                     finamSecurity.Market = "РТС-BOARD Архив";
                 }
-                else if (Convert.ToInt32(arrayMarkets[i]) == 39)
+                else if (marketId == 39)
                 {
                     finamSecurity.Market = "Расписки Архив";
                 }
-                else if (Convert.ToInt32(arrayMarkets[i]) == -1)
+                else if (marketId == -1)
                 {
                     finamSecurity.Market = "Отрасли";
                 }
-                else if (Convert.ToInt32(arrayMarkets[i]) == 520)
+                else if (marketId == 520)
                 {
                     finamSecurity.Market = "Криптовалюты";
                 }
@@ -711,4 +714,5 @@ namespace OsEngine.Market.Servers.Finam
 
     }
 }
+
 

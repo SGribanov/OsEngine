@@ -124,12 +124,12 @@ namespace OsEngine.OsOptimizer
             {
                 try
                 {
-                    if (Convert.ToInt32(TextBoxIterationCount.Text) <= 0)
+                    if (Convert.ToInt32(TextBoxIterationCount.Text, CultureInfo.InvariantCulture) <= 0)
                     {
                         TextBoxIterationCount.Text = _master.IterationCount.ToString();
                         return;
                     }
-                    _master.IterationCount = Convert.ToInt32(TextBoxIterationCount.Text);
+                    _master.IterationCount = Convert.ToInt32(TextBoxIterationCount.Text, CultureInfo.InvariantCulture);
 
                     Task.Run(PaintCountBotsInOptimization);
                 }
@@ -979,7 +979,7 @@ namespace OsEngine.OsOptimizer
                 _master.FilterMaxDrawDownValue = TextBoxMaxDrowDownValue.Text.ToDecimal();
                 _master.FilterMiddleProfitValue = TextBoxFilterMiddleProfitValue.Text.ToDecimal();
                 _master.FilterProfitFactorValue = TextBoxFilterProfitFactorValue.Text.ToDecimal();
-                _master.FilterDealsCountValue = Convert.ToInt32(TextBoxFilterDealsCount.Text);
+                _master.FilterDealsCountValue = Convert.ToInt32(TextBoxFilterDealsCount.Text, CultureInfo.InvariantCulture);
             }
             catch
             {
@@ -1056,7 +1056,7 @@ namespace OsEngine.OsOptimizer
         {
             try
             {
-                if (Convert.ToInt32(TextBoxStartPortfolio.Text) <= 0)
+                if (Convert.ToInt32(TextBoxStartPortfolio.Text, CultureInfo.InvariantCulture) <= 0)
                 {
                     throw new Exception();
                 }
@@ -1067,7 +1067,7 @@ namespace OsEngine.OsOptimizer
                 return;
             }
 
-            _master.StartDeposit = Convert.ToInt32(TextBoxStartPortfolio.Text);
+            _master.StartDeposit = Convert.ToInt32(TextBoxStartPortfolio.Text, CultureInfo.InvariantCulture);
         }
 
         private void CommissionValueTextBoxOnTextChanged(object sender, TextChangedEventArgs e)
@@ -1212,9 +1212,9 @@ namespace OsEngine.OsOptimizer
         {
             try
             {
-                int initialSamples = Convert.ToInt32(TextBoxBayesianInitialSamples.Text);
-                int maxIterations = Convert.ToInt32(TextBoxBayesianMaxIterations.Text);
-                int batchSize = Convert.ToInt32(TextBoxBayesianBatchSize.Text);
+                int initialSamples = Convert.ToInt32(TextBoxBayesianInitialSamples.Text, CultureInfo.InvariantCulture);
+                int maxIterations = Convert.ToInt32(TextBoxBayesianMaxIterations.Text, CultureInfo.InvariantCulture);
+                int batchSize = Convert.ToInt32(TextBoxBayesianBatchSize.Text, CultureInfo.InvariantCulture);
 
                 if (initialSamples < 1 || maxIterations < 1 || batchSize < 1)
                 {
@@ -1268,7 +1268,7 @@ namespace OsEngine.OsOptimizer
         {
             try
             {
-                int share = Convert.ToInt32(TextBoxBayesianTailSharePercent.Text);
+                int share = Convert.ToInt32(TextBoxBayesianTailSharePercent.Text, CultureInfo.InvariantCulture);
                 if (share < 1 || share > 50)
                 {
                     throw new Exception("Tail share must be in 1..50.");
@@ -2770,10 +2770,10 @@ namespace OsEngine.OsOptimizer
                     }
                     else if (parameter.Type == StrategyParameterType.Int)
                     {
-                        int valueDefoult = Convert.ToInt32(row.Cells[3].Value);
-                        int valueStart = Convert.ToInt32(row.Cells[4].Value);
-                        int valueStep = Convert.ToInt32(row.Cells[5].Value);
-                        int valueStop = Convert.ToInt32(row.Cells[6].Value);
+                        int valueDefoult = Convert.ToInt32(row.Cells[3].Value, CultureInfo.InvariantCulture);
+                        int valueStart = Convert.ToInt32(row.Cells[4].Value, CultureInfo.InvariantCulture);
+                        int valueStep = Convert.ToInt32(row.Cells[5].Value, CultureInfo.InvariantCulture);
+                        int valueStop = Convert.ToInt32(row.Cells[6].Value, CultureInfo.InvariantCulture);
 
                         if (valueStart > valueStop)
                         {

@@ -171,14 +171,14 @@ namespace OsEngine.OsTrader.Panels.Tab.Internal
         {
             try
             {
-                if (Convert.ToInt32(TextBoxSecondToOpen.Text) <= 0 ||
-                    Convert.ToInt32(TextBoxSecondToClose.Text) <= 0 ||
+                if (Convert.ToInt32(TextBoxSecondToOpen.Text, CultureInfo.InvariantCulture) <= 0 ||
+                    Convert.ToInt32(TextBoxSecondToClose.Text, CultureInfo.InvariantCulture) <= 0 ||
                     TextBoxStopPercentLength.Text.ToDecimal() <= 0 ||
                     TextBoxSlippageStop.Text.ToDecimal() <= 0 ||
                     TextBoxProfitPercentLength.Text.ToDecimal() <= 0 ||
                     TextBoxSlippageProfit.Text.ToDecimal() <= 0 ||
                     TextBoxSetbackToClose.Text.ToDecimal() <= 0 ||
-                    Convert.ToInt32(TextBoxSecondToOpen.Text) <= 0 ||
+                    Convert.ToInt32(TextBoxSecondToOpen.Text, CultureInfo.InvariantCulture) <= 0 ||
                     TextBoxSetbackToOpen.Text.ToDecimal() <= 0 ||
                     TextBoxSlippageDoubleExit.Text.ToDecimal() < -100)
                 {
@@ -213,7 +213,7 @@ namespace OsEngine.OsTrader.Panels.Tab.Internal
                 {
                     _strategySettings.SecondToCloseIsOn = CheckBoxSecondToCloseIsOn.IsChecked.Value;
                 }
-                _strategySettings.SecondToClose = new TimeSpan(0, 0, 0, Convert.ToInt32(TextBoxSecondToClose.Text));
+                _strategySettings.SecondToClose = new TimeSpan(0, 0, 0, Convert.ToInt32(TextBoxSecondToClose.Text, CultureInfo.InvariantCulture));
 
                 if (CheckBoxSetbackToCloseIsOn.IsChecked.HasValue)
                 {
@@ -238,7 +238,7 @@ namespace OsEngine.OsTrader.Panels.Tab.Internal
                 {
                     _strategySettings.SecondToOpenIsOn = CheckBoxSecondToOpenIsOn.IsChecked.Value;
                 }
-                _strategySettings.SecondToOpen = new TimeSpan(0, 0, 0, Convert.ToInt32(TextBoxSecondToOpen.Text));
+                _strategySettings.SecondToOpen = new TimeSpan(0, 0, 0, Convert.ToInt32(TextBoxSecondToOpen.Text, CultureInfo.InvariantCulture));
 
                 if (CheckBoxSetbackToOpenIsOn.IsChecked.HasValue)
                 {

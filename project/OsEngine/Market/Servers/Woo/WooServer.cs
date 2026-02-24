@@ -1318,7 +1318,7 @@ namespace OsEngine.Market.Servers.Woo
                         Funding data = new Funding();
 
                         data.SecurityNameCode = item.symbol;
-                        data.FundingIntervalHours = int.Parse(item.estFundingIntervalHours);
+                        data.FundingIntervalHours = int.Parse(item.estFundingIntervalHours, CultureInfo.InvariantCulture);
 
                         FundingUpdateEvent?.Invoke(data);
                     }

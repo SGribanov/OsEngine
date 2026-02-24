@@ -256,13 +256,13 @@ namespace OsEngine.Market.Servers.Mexc
                         security.Exchange = ServerType.MexcSpot.ToString();
                         security.State = SecurityStateType.Activ;
                         security.Lot = 1;
-                        security.PriceStep = GetStep(Convert.ToInt32(sec.quoteAssetPrecision));
+                        security.PriceStep = GetStep(Convert.ToInt32(sec.quoteAssetPrecision, CultureInfo.InvariantCulture));
                         security.PriceStepCost = security.PriceStep;
-                        security.Decimals = Convert.ToInt32(sec.quoteAssetPrecision);
-                        security.DecimalsVolume = Convert.ToInt32(sec.baseAssetPrecision);
+                        security.Decimals = Convert.ToInt32(sec.quoteAssetPrecision, CultureInfo.InvariantCulture);
+                        security.DecimalsVolume = Convert.ToInt32(sec.baseAssetPrecision, CultureInfo.InvariantCulture);
                         security.MinTradeAmount = sec.quoteAmountPrecision.ToDecimal();
                         security.MinTradeAmountType = MinTradeAmountType.C_Currency;
-                        security.VolumeStep = GetStep(Convert.ToInt32(sec.baseAssetPrecision));
+                        security.VolumeStep = GetStep(Convert.ToInt32(sec.baseAssetPrecision, CultureInfo.InvariantCulture));
 
                         securities.Add(security);
                     }
@@ -1708,7 +1708,7 @@ namespace OsEngine.Market.Servers.Mexc
 
                 try
                 {
-                    order.NumberUser = Convert.ToInt32(item.clientId);
+                    order.NumberUser = Convert.ToInt32(item.clientId, CultureInfo.InvariantCulture);
                 }
                 catch (System.Exception ex)
                 {
@@ -2229,7 +2229,7 @@ namespace OsEngine.Market.Servers.Mexc
 
             try
             {
-                order.NumberUser = Convert.ToInt32(baseOrder.clientOrderId);
+                order.NumberUser = Convert.ToInt32(baseOrder.clientOrderId, CultureInfo.InvariantCulture);
             }
             catch
             {

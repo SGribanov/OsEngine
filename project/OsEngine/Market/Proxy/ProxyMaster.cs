@@ -102,7 +102,7 @@ namespace OsEngine.Market.Proxy
             {
                 AutoPingIsOn = Convert.ToBoolean(lines[0]),
                 AutoPingLastTime = ParseDateInvariantOrCurrent(lines[1]),
-                AutoPingMinutes = Convert.ToInt32(lines[2])
+                AutoPingMinutes = Convert.ToInt32(lines[2], CultureInfo.InvariantCulture)
             };
         }
 

@@ -8,6 +8,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Windows.Forms;
 using OsEngine.Entity;
@@ -447,9 +448,9 @@ namespace OsEngine.OsData
 
         private void ButtonLeftInSearchResults_Click(object sender, RoutedEventArgs e)
         {
-            int indexRow = Convert.ToInt32(LabelCurrentResultShow.Content) - 1;
+            int indexRow = Convert.ToInt32(LabelCurrentResultShow.Content, CultureInfo.InvariantCulture) - 1;
 
-            int maxRowIndex = Convert.ToInt32(LabelCountResultsShow.Content);
+            int maxRowIndex = Convert.ToInt32(LabelCountResultsShow.Content, CultureInfo.InvariantCulture);
 
             if (indexRow <= 0)
             {
@@ -469,9 +470,9 @@ namespace OsEngine.OsData
 
         private void ButtonRightInSearchResults_Click(object sender, RoutedEventArgs e)
         {
-            int indexRow = Convert.ToInt32(LabelCurrentResultShow.Content) - 1 + 1;
+            int indexRow = Convert.ToInt32(LabelCurrentResultShow.Content, CultureInfo.InvariantCulture) - 1 + 1;
 
-            int maxRowIndex = Convert.ToInt32(LabelCountResultsShow.Content);
+            int maxRowIndex = Convert.ToInt32(LabelCountResultsShow.Content, CultureInfo.InvariantCulture);
 
             if (indexRow >= maxRowIndex)
             {

@@ -678,8 +678,8 @@ namespace OsEngine.OsTrader
                         continue;
                     }
 
-                    int numCur = Convert.ToInt32(grid.Rows[i].Cells[0].Value.ToString());
-                    int numPrev = Convert.ToInt32(grid.Rows[i - 1].Cells[0].Value.ToString());
+                    int numCur = Convert.ToInt32(grid.Rows[i].Cells[0].Value.ToString(), CultureInfo.InvariantCulture);
+                    int numPrev = Convert.ToInt32(grid.Rows[i - 1].Cells[0].Value.ToString(), CultureInfo.InvariantCulture);
 
                     if (numCur > numPrev)
                     {
@@ -701,13 +701,13 @@ namespace OsEngine.OsTrader
                 {
                     DataGridViewRow curRow = grid.Rows[i];
 
-                    int numCur = Convert.ToInt32(grid.Rows[i].Cells[0].Value.ToString());
+                    int numCur = Convert.ToInt32(grid.Rows[i].Cells[0].Value.ToString(), CultureInfo.InvariantCulture);
 
                     bool isInArray = false;
 
                     for (int i2 = 0; i2 < rows.Count; i2++)
                     {
-                        int numCurInRowsGrid = Convert.ToInt32(rows[i2].Cells[0].Value.ToString());
+                        int numCurInRowsGrid = Convert.ToInt32(rows[i2].Cells[0].Value.ToString(), CultureInfo.InvariantCulture);
 
                         if (numCur > numCurInRowsGrid)
                         {
@@ -856,7 +856,7 @@ namespace OsEngine.OsTrader
                     {
                         return;
                     }
-                    number = Convert.ToInt32(_gridClosePoses.Rows[_gridClosePoses.CurrentCell.RowIndex].Cells[0].Value);
+                    number = Convert.ToInt32(_gridClosePoses.Rows[_gridClosePoses.CurrentCell.RowIndex].Cells[0].Value, CultureInfo.InvariantCulture);
                 }
                 catch (Exception ex)
                 {
@@ -969,7 +969,7 @@ namespace OsEngine.OsTrader
                     {
                         return;
                     }
-                    number = Convert.ToInt32(_gridOpenPoses.Rows[_gridOpenPoses.CurrentCell.RowIndex].Cells[0].Value);
+                    number = Convert.ToInt32(_gridOpenPoses.Rows[_gridOpenPoses.CurrentCell.RowIndex].Cells[0].Value, CultureInfo.InvariantCulture);
                 }
                 catch (Exception ex)
                 {
@@ -1000,7 +1000,7 @@ namespace OsEngine.OsTrader
                     {
                         return;
                     }
-                    number = Convert.ToInt32(_gridOpenPoses.Rows[_gridOpenPoses.CurrentCell.RowIndex].Cells[0].Value);
+                    number = Convert.ToInt32(_gridOpenPoses.Rows[_gridOpenPoses.CurrentCell.RowIndex].Cells[0].Value, CultureInfo.InvariantCulture);
                 }
                 catch (Exception ex)
                 {
@@ -1030,7 +1030,7 @@ namespace OsEngine.OsTrader
                     {
                         return;
                     }
-                    number = Convert.ToInt32(_gridOpenPoses.Rows[_gridOpenPoses.CurrentCell.RowIndex].Cells[0].Value);
+                    number = Convert.ToInt32(_gridOpenPoses.Rows[_gridOpenPoses.CurrentCell.RowIndex].Cells[0].Value, CultureInfo.InvariantCulture);
                 }
                 catch (Exception ex)
                 {
@@ -1068,7 +1068,7 @@ namespace OsEngine.OsTrader
                     {
                         return;
                     }
-                    number = Convert.ToInt32(_gridOpenPoses.Rows[_gridOpenPoses.CurrentCell.RowIndex].Cells[0].Value);
+                    number = Convert.ToInt32(_gridOpenPoses.Rows[_gridOpenPoses.CurrentCell.RowIndex].Cells[0].Value, CultureInfo.InvariantCulture);
                 }
                 catch (Exception ex)
                 {

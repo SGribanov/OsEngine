@@ -8,6 +8,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using OsEngine.Entity;
 using OsEngine.Properties;
@@ -155,7 +156,7 @@ namespace OsEngine.Alerts
                 SignalType = signalType,
                 VolumeReaction = lines.Length > 5 ? lines[5].ToDecimal() : 0,
                 Slippage = lines.Length > 6 ? lines[6].ToDecimal() : 0,
-                NumberClosePosition = lines.Length > 7 ? Convert.ToInt32(lines[7]) : 0,
+                NumberClosePosition = lines.Length > 7 ? Convert.ToInt32(lines[7], CultureInfo.InvariantCulture) : 0,
                 OrderPriceType = orderPriceType,
                 TypeActivation = typeActivation,
                 PriceActivation = lines.Length > 10 ? lines[10].ToDecimal() : 0,

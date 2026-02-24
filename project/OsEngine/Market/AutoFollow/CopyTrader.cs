@@ -12,6 +12,7 @@ using OsEngine.Market.Servers;
 using OsEngine.OsTrader.Panels;
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
@@ -26,7 +27,7 @@ namespace OsEngine.Market.AutoFollow
         public CopyTrader(string saveStr)
         {
             string[] save = saveStr.Split('%');
-            Number = Convert.ToInt32(save[0]);
+            Number = Convert.ToInt32(save[0], CultureInfo.InvariantCulture);
             Name = save[1];
             IsOn = Convert.ToBoolean(save[2]);
             PanelsPosition = save[3];
@@ -431,13 +432,13 @@ namespace OsEngine.Market.AutoFollow
                 MasterAsset = lines[5],
                 SlaveAsset = lines[6],
                 OrderType = orderType,
-                IcebergCount = Convert.ToInt32(lines[8]),
+                IcebergCount = Convert.ToInt32(lines[8], CultureInfo.InvariantCulture),
                 SecuritiesSaveString = lines[9],
                 PanelsPosition = lines[10],
                 MinCurrencyQty = lines[11].ToDecimal(),
                 FailOpenOrdersReactionIsOn = Convert.ToBoolean(lines[12]),
-                FailOpenOrdersCountToReaction = Convert.ToInt32(lines[13]),
-                IcebergMillisecondsDelay = Convert.ToInt32(lines[14])
+                FailOpenOrdersCountToReaction = Convert.ToInt32(lines[13], CultureInfo.InvariantCulture),
+                IcebergMillisecondsDelay = Convert.ToInt32(lines[14], CultureInfo.InvariantCulture)
             };
         }
 

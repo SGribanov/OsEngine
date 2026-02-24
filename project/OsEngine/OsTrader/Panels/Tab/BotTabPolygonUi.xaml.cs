@@ -10,6 +10,7 @@ using OsEngine.Entity;
 using OsEngine.Language;
 using OsEngine.Layout;
 using System;
+using System.Globalization;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Windows;
@@ -389,7 +390,7 @@ namespace OsEngine.OsTrader.Panels.Tab
         {
             try
             {
-                Polygon.DelayMls = Convert.ToInt32(TextBoxDelayMls.Text.ToString());
+                Polygon.DelayMls = Convert.ToInt32(TextBoxDelayMls.Text.ToString(), CultureInfo.InvariantCulture);
                 Polygon.Save();
             }
             catch (Exception ex)

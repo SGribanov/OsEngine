@@ -245,9 +245,9 @@ namespace OsEngine.Market.Servers.AscendexSpot
                             newSecurity.Lot = 1;
                             newSecurity.State = SecurityStateType.Activ;
                             newSecurity.PriceStep = securityList.data[i].tickSize.ToDecimal();
-                            newSecurity.Decimals = Convert.ToInt32(securityList.data[i].priceScale);
+                            newSecurity.Decimals = Convert.ToInt32(securityList.data[i].priceScale, CultureInfo.InvariantCulture);
                             newSecurity.PriceStepCost = newSecurity.PriceStep;
-                            newSecurity.DecimalsVolume = Convert.ToInt32(securityList.data[i].qtyScale);
+                            newSecurity.DecimalsVolume = Convert.ToInt32(securityList.data[i].qtyScale, CultureInfo.InvariantCulture);
                             newSecurity.MinTradeAmount = securityList.data[i].minNotional.ToDecimal();
                             newSecurity.MinTradeAmountType = MinTradeAmountType.C_Currency;
                             newSecurity.VolumeStep = newSecurity.DecimalsVolume.GetValueByDecimals();

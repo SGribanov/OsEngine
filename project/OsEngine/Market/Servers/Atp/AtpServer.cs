@@ -1230,7 +1230,7 @@ namespace OsEngine.Market.Servers.Atp
                     string previousNum = (result[i2 - 1].Split('\\')[result[i2 - 1].Split('\\').Length - 1]).Replace(".txt", "");
                     string curNum = (result[i2].Split('\\')[result[i2].Split('\\').Length - 1]).Replace(".txt", "");
 
-                    if (Convert.ToInt32(previousNum) > Convert.ToInt32(curNum))
+                    if (Convert.ToInt32(previousNum, CultureInfo.InvariantCulture) > Convert.ToInt32(curNum, CultureInfo.InvariantCulture))
                     {
                         string prevAdress = result[i2];
                         result[i2] = result[i2 - 1];
@@ -1640,13 +1640,13 @@ namespace OsEngine.Market.Servers.Atp
 
             try
             {
-                order.NumberUser = Convert.ToInt32(ordArr[0]);
+                order.NumberUser = Convert.ToInt32(ordArr[0], CultureInfo.InvariantCulture);
             }
             catch
             {
                 try
                 {
-                    order.NumberUser = Convert.ToInt32(ordArr[1]);
+                    order.NumberUser = Convert.ToInt32(ordArr[1], CultureInfo.InvariantCulture);
                 }
                 catch
                 {
@@ -1723,7 +1723,7 @@ namespace OsEngine.Market.Servers.Atp
 
             try
             {
-                order.NumberUser = Convert.ToInt32(ordArr[1]);
+                order.NumberUser = Convert.ToInt32(ordArr[1], CultureInfo.InvariantCulture);
             }
             catch
             {
@@ -1909,9 +1909,9 @@ namespace OsEngine.Market.Servers.Atp
 
             try
             {
-                year = Convert.ToInt32(date.Substring(0, 4));
-                month = Convert.ToInt32(date.Substring(4, 2));
-                day = Convert.ToInt32(date.Substring(6, 2));
+                year = Convert.ToInt32(date.Substring(0, 4), CultureInfo.InvariantCulture);
+                month = Convert.ToInt32(date.Substring(4, 2), CultureInfo.InvariantCulture);
+                day = Convert.ToInt32(date.Substring(6, 2), CultureInfo.InvariantCulture);
             }
             catch
             {
@@ -1929,9 +1929,9 @@ namespace OsEngine.Market.Servers.Atp
 
             try
             {
-                hour = Convert.ToInt32(time.Substring(0, 2));
-                minute = Convert.ToInt32(time.Substring(3, 2));
-                second = Convert.ToInt32(time.Substring(6, 2));
+                hour = Convert.ToInt32(time.Substring(0, 2), CultureInfo.InvariantCulture);
+                minute = Convert.ToInt32(time.Substring(3, 2), CultureInfo.InvariantCulture);
+                second = Convert.ToInt32(time.Substring(6, 2), CultureInfo.InvariantCulture);
             }
             catch
             {

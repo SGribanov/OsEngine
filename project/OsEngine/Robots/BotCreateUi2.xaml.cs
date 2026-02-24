@@ -13,6 +13,7 @@ using OsEngine.OsTrader.Panels;
 using OsEngine.OsTrader.Panels.Tab;
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
@@ -307,7 +308,7 @@ namespace OsEngine.Robots
 
                         if (cellValue == BotCreationType.Script.ToString())
                         {
-                            int botNum = Convert.ToInt32(_grid.Rows[row].Cells[0].Value.ToString());
+                            int botNum = Convert.ToInt32(_grid.Rows[row].Cells[0].Value.ToString(), CultureInfo.InvariantCulture);
 
                             string className = _grid.Rows[row].Cells[1].Value.ToString();
 
@@ -341,7 +342,7 @@ namespace OsEngine.Robots
                     }
                     else if (col == 5)
                     {
-                        int botNum = Convert.ToInt32(_grid.Rows[row].Cells[0].Value.ToString());
+                        int botNum = Convert.ToInt32(_grid.Rows[row].Cells[0].Value.ToString(), CultureInfo.InvariantCulture);
 
                         string className = _grid.Rows[row].Cells[1].Value.ToString();
 
@@ -1361,9 +1362,9 @@ namespace OsEngine.Robots
         {
             try
             {
-                int indexRow = Convert.ToInt32(LabelCurrentResultShow.Content) - 1;
+                int indexRow = Convert.ToInt32(LabelCurrentResultShow.Content, CultureInfo.InvariantCulture) - 1;
 
-                int maxRowIndex = Convert.ToInt32(LabelCountResultsShow.Content);
+                int maxRowIndex = Convert.ToInt32(LabelCountResultsShow.Content, CultureInfo.InvariantCulture);
 
                 if (indexRow <= 0)
                 {
@@ -1403,9 +1404,9 @@ namespace OsEngine.Robots
         {
             try
             {
-                int indexRow = Convert.ToInt32(LabelCurrentResultShow.Content) - 1 + 1;
+                int indexRow = Convert.ToInt32(LabelCurrentResultShow.Content, CultureInfo.InvariantCulture) - 1 + 1;
 
-                int maxRowIndex = Convert.ToInt32(LabelCountResultsShow.Content);
+                int maxRowIndex = Convert.ToInt32(LabelCountResultsShow.Content, CultureInfo.InvariantCulture);
 
                 if (indexRow >= maxRowIndex)
                 {

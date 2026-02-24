@@ -3251,7 +3251,7 @@ namespace OsEngine.OsData
             TimeStart = ParseDateInvariantOrCurrent(saveArray[20]);
             TimeEnd = ParseDateInvariantOrCurrent(saveArray[21]);
 
-            MarketDepthDepth = Convert.ToInt32(saveArray[22]);
+            MarketDepthDepth = Convert.ToInt32(saveArray[22], CultureInfo.InvariantCulture);
             NeedToUpdate = Convert.ToBoolean(saveArray[23]);
 
             try
@@ -3572,7 +3572,7 @@ namespace OsEngine.OsData
             {
                 using (StreamReader reader = new StreamReader(pathToTempFile))
                 {
-                    _countTriesToLoadSet = Convert.ToInt32(reader.ReadLine());
+                    _countTriesToLoadSet = Convert.ToInt32(reader.ReadLine(), CultureInfo.InvariantCulture);
                 }
             }
             catch
@@ -3886,7 +3886,7 @@ namespace OsEngine.OsData
                     info.FirstFileDate = DateTime.ParseExact(datesStr[0], "yyyy-MM-dd", CultureInfo.InvariantCulture);
                     info.LastFileDate = DateTime.ParseExact(datesStr[1], "yyyy-MM-dd", CultureInfo.InvariantCulture);
 
-                    info.QshFilesCount = int.Parse(datesStr[2]);
+                    info.QshFilesCount = int.Parse(datesStr[2], CultureInfo.InvariantCulture);
                 }
             }
             catch
@@ -4017,7 +4017,7 @@ namespace OsEngine.OsData
 
                     Regime = setParts[0];
                     PathForDublicate = setParts[1];
-                    UpdatePeriod = new TimeSpan(0, Convert.ToInt32(setParts[2]), 0);
+                    UpdatePeriod = new TimeSpan(0, Convert.ToInt32(setParts[2], CultureInfo.InvariantCulture), 0);
                     TimeWriteOriginalSet = ParseDateInvariantOrCurrent(setParts[3]);
                 }
             }
@@ -4177,7 +4177,7 @@ namespace OsEngine.OsData
 
                     Regime = setParts[0];
                     Period = setParts[1];
-                    HourUpdate = int.Parse(setParts[2]);
+                    HourUpdate = int.Parse(setParts[2], CultureInfo.InvariantCulture);
 
                     DateTime timeNextUpdate = ParseDateInvariantOrCurrent(setParts[3]);
 

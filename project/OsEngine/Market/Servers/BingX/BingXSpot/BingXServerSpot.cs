@@ -1371,7 +1371,7 @@ namespace OsEngine.Market.Servers.BinGxSpot
 
                 try
                 {
-                    newOrder.NumberUser = Convert.ToInt32(responseOrder.data.C);
+                    newOrder.NumberUser = Convert.ToInt32(responseOrder.data.C, CultureInfo.InvariantCulture);
                 }
                 catch
                 {
@@ -1915,7 +1915,7 @@ namespace OsEngine.Market.Servers.BinGxSpot
 
                             try
                             {
-                                newOrder.NumberUser = Convert.ToInt32(itemOrders.clientOrderID);
+                                newOrder.NumberUser = Convert.ToInt32(itemOrders.clientOrderID, CultureInfo.InvariantCulture);
                             }
                             catch
                             {
@@ -2050,7 +2050,7 @@ namespace OsEngine.Market.Servers.BinGxSpot
 
                                 try
                                 {
-                                    newOrder.NumberUser = Convert.ToInt32(itemOrders.clientOrderID);
+                                    newOrder.NumberUser = Convert.ToInt32(itemOrders.clientOrderID, CultureInfo.InvariantCulture);
                                 }
                                 catch
                                 {

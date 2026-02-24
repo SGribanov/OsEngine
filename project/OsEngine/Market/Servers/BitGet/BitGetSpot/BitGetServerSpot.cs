@@ -249,7 +249,7 @@ namespace OsEngine.Market.Servers.BitGet.BitGetSpot
                         {
                             RestMessageSymbol item = symbols.data[i];
 
-                            decimal priceStep = GetPriceStep(Convert.ToInt32(item.pricePrecision));
+                            decimal priceStep = GetPriceStep(Convert.ToInt32(item.pricePrecision, CultureInfo.InvariantCulture));
 
                             if (item.status != "online")
                             {
@@ -259,14 +259,14 @@ namespace OsEngine.Market.Servers.BitGet.BitGetSpot
                             Security newSecurity = new Security();
 
                             newSecurity.Exchange = ServerType.BitGetSpot.ToString();
-                            newSecurity.DecimalsVolume = Convert.ToInt32(item.quantityPrecision);
+                            newSecurity.DecimalsVolume = Convert.ToInt32(item.quantityPrecision, CultureInfo.InvariantCulture);
                             newSecurity.Lot = 1;
                             newSecurity.Name = item.symbol;
                             newSecurity.NameFull = item.symbol;
                             newSecurity.NameClass = item.quoteCoin;
                             newSecurity.NameId = item.symbol;
                             newSecurity.SecurityType = SecurityType.CurrencyPair;
-                            newSecurity.Decimals = Convert.ToInt32(item.pricePrecision);
+                            newSecurity.Decimals = Convert.ToInt32(item.pricePrecision, CultureInfo.InvariantCulture);
                             newSecurity.PriceStep = priceStep;
                             newSecurity.PriceStepCost = priceStep;
                             newSecurity.State = SecurityStateType.Activ;
@@ -2252,7 +2252,7 @@ namespace OsEngine.Market.Servers.BitGet.BitGetSpot
 
                             try
                             {
-                                newOrder.NumberUser = Convert.ToInt32(item.clientOid);
+                                newOrder.NumberUser = Convert.ToInt32(item.clientOid, CultureInfo.InvariantCulture);
                             }
                             catch (System.Exception ex)
                             {
@@ -2598,7 +2598,7 @@ namespace OsEngine.Market.Servers.BitGet.BitGetSpot
 
                             try
                             {
-                                newOrder.NumberUser = Convert.ToInt32(item.clientOid);
+                                newOrder.NumberUser = Convert.ToInt32(item.clientOid, CultureInfo.InvariantCulture);
                             }
                             catch (System.Exception ex)
                             {

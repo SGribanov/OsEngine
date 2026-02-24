@@ -1609,7 +1609,7 @@ namespace OsEngine.Market.Servers.KuCoin.KuCoinFutures
                             funding.NextFundingTime = TimeManager.GetDateTimeFromTimeStamp(Convert.ToInt64(item.nextFundingRateDateTime, CultureInfo.InvariantCulture));
                             funding.MinFundingRate = item.fundingRateFloor.ToDecimal();
                             funding.MaxFundingRate = item.fundingRateCap.ToDecimal();
-                            funding.FundingIntervalHours = int.Parse(item.fundingRateGranularity) / 60000 / 60;
+                            funding.FundingIntervalHours = int.Parse(item.fundingRateGranularity, CultureInfo.InvariantCulture) / 60000 / 60;
 
                             FundingUpdateEvent?.Invoke(funding);
 

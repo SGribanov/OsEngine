@@ -1336,7 +1336,7 @@ namespace OsEngine.OsTrader.Panels.Tab
 
                 if (valOne[0] == 'A')
                 {
-                    int iOne = Convert.ToInt32(valOne.Split('A')[1]);
+                    int iOne = Convert.ToInt32(valOne.Split('A')[1], CultureInfo.InvariantCulture);
 
                     if (iOne >= Tabs.Count)
                     {
@@ -1441,7 +1441,7 @@ namespace OsEngine.OsTrader.Panels.Tab
 
             if (valOne[0] == 'A')
             {
-                int iOne = Convert.ToInt32(valOne.Split('A')[1]);
+                int iOne = Convert.ToInt32(valOne.Split('A')[1], CultureInfo.InvariantCulture);
                 if (iOne >= Tabs.Count)
                 {
                     return "";
@@ -1485,7 +1485,7 @@ namespace OsEngine.OsTrader.Panels.Tab
 
             if (valTwo[0] == 'A')
             {
-                int iOne = Convert.ToInt32(valTwo.Split('A')[1]);
+                int iOne = Convert.ToInt32(valTwo.Split('A')[1], CultureInfo.InvariantCulture);
 
                 if (iOne >= Tabs.Count)
                 {
@@ -1654,7 +1654,7 @@ namespace OsEngine.OsTrader.Panels.Tab
 
             if (valOne[0] == 'A')
             {
-                int iOne = Convert.ToInt32(valOne.Split('A')[1]);
+                int iOne = Convert.ToInt32(valOne.Split('A')[1], CultureInfo.InvariantCulture);
 
                 if (iOne >= Tabs.Count)
                 {
@@ -1785,7 +1785,7 @@ namespace OsEngine.OsTrader.Panels.Tab
 
             if (valTwo[0] == 'A')
             {
-                int iOne = Convert.ToInt32(valTwo.Split('A')[1]);
+                int iOne = Convert.ToInt32(valTwo.Split('A')[1], CultureInfo.InvariantCulture);
                 candlesTwo = Tabs[iOne].Candles(true);
 
                 if (candlesTwo != null &&

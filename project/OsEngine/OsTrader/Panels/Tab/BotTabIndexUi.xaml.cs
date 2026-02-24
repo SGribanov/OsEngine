@@ -11,6 +11,7 @@ using System.Windows.Forms;
 using OsEngine.Language;
 using OsEngine.Entity;
 using System;
+using System.Globalization;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Diagnostics;
@@ -194,7 +195,7 @@ namespace OsEngine.OsTrader.Panels.Tab
                     return;
                 }
 
-                int value = Convert.ToInt32(TextBoxDepth.Text);
+                int value = Convert.ToInt32(TextBoxDepth.Text, CultureInfo.InvariantCulture);
 
                 if (value < 5)
                 {
@@ -270,7 +271,7 @@ namespace OsEngine.OsTrader.Panels.Tab
         private void ComboBoxDaysLookBackInBuilding_SelectionChanged(object sender, System.Windows.Controls.SelectionChangedEventArgs e)
         {
             _spread.AutoFormulaBuilder.DaysLookBackInBuilding
-              = Convert.ToInt32(ComboBoxDaysLookBackInBuilding.SelectedItem.ToString());
+              = Convert.ToInt32(ComboBoxDaysLookBackInBuilding.SelectedItem.ToString(), CultureInfo.InvariantCulture);
         }
 
         private void ComboBoxIndexMultType_SelectionChanged(object sender, System.Windows.Controls.SelectionChangedEventArgs e)
@@ -300,7 +301,7 @@ namespace OsEngine.OsTrader.Panels.Tab
         private void ComboBoxIndexSecCount_SelectionChanged(object sender, System.Windows.Controls.SelectionChangedEventArgs e)
         {
             _spread.AutoFormulaBuilder.IndexSecCount
-               = Convert.ToInt32(ComboBoxIndexSecCount.SelectedItem.ToString());
+               = Convert.ToInt32(ComboBoxIndexSecCount.SelectedItem.ToString(), CultureInfo.InvariantCulture);
         }
 
         private void CheckBoxWriteLogMessageOnRebuild_Click(object sender, RoutedEventArgs e)
@@ -321,7 +322,7 @@ namespace OsEngine.OsTrader.Panels.Tab
         private void ComboBoxHourInDayToRebuildIndex_SelectionChanged(object sender, System.Windows.Controls.SelectionChangedEventArgs e)
         {
             _spread.AutoFormulaBuilder.HourInDayToRebuildIndex
-                = Convert.ToInt32(ComboBoxHourInDayToRebuildIndex.SelectedItem.ToString());
+                = Convert.ToInt32(ComboBoxHourInDayToRebuildIndex.SelectedItem.ToString(), CultureInfo.InvariantCulture);
         }
 
         private void ComboBoxDayOfWeekToRebuildIndex_SelectionChanged(object sender, System.Windows.Controls.SelectionChangedEventArgs e)

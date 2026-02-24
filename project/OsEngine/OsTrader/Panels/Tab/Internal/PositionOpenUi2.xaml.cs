@@ -7,6 +7,7 @@ using OsEngine.Layout;
 using OsEngine.Market;
 using System;
 using System.Diagnostics;
+using System.Globalization;
 using System.Windows;
 
 /*
@@ -356,7 +357,7 @@ namespace OsEngine.OsTrader.Panels.Tab.Internal
                 volume = TextBoxStopVolume.Text.ToDecimal();
                 priceActivation = TextBoxStopActivationPrice.Text.ToDecimal();
                 priceOrder = TextBoxStopPrice.Text.ToDecimal();
-                lifeTime = Convert.ToInt32(TextBoxStopLifeTime.Text);
+                lifeTime = Convert.ToInt32(TextBoxStopLifeTime.Text, CultureInfo.InvariantCulture);
                 Enum.TryParse(ComboBoxStopLimitType.SelectedItem.ToString(), out stopActivateType);
                 Enum.TryParse(ComboBoxStopLifetimeType.SelectedItem.ToString(), out lifeTimeType);
             }
@@ -388,7 +389,7 @@ namespace OsEngine.OsTrader.Panels.Tab.Internal
                 volume = TextBoxStopVolume.Text.ToDecimal();
                 priceActivation = TextBoxStopActivationPrice.Text.ToDecimal();
                 priceOrder = TextBoxStopPrice.Text.ToDecimal();
-                lifeTime = Convert.ToInt32(TextBoxStopLifeTime.Text);
+                lifeTime = Convert.ToInt32(TextBoxStopLifeTime.Text, CultureInfo.InvariantCulture);
                 Enum.TryParse(ComboBoxStopLimitType.SelectedItem.ToString(), out stopActivateType);
                 Enum.TryParse(ComboBoxStopLifetimeType.SelectedItem.ToString(), out lifeTimeType);
             }
@@ -441,8 +442,8 @@ namespace OsEngine.OsTrader.Panels.Tab.Internal
                 timeOpen = DatePickerFakeOpenDate.SelectedDate.Value;
                 string[] openTimeStr = TextBoxFakeOpenTime.Text.ToString().Split(':');
 
-                timeOpen = timeOpen.AddHours(Convert.ToInt32(openTimeStr[0]));
-                timeOpen = timeOpen.AddMinutes(Convert.ToInt32(openTimeStr[1]));
+                timeOpen = timeOpen.AddHours(Convert.ToInt32(openTimeStr[0], CultureInfo.InvariantCulture));
+                timeOpen = timeOpen.AddMinutes(Convert.ToInt32(openTimeStr[1], CultureInfo.InvariantCulture));
 
             }
             catch (Exception ex)
@@ -474,8 +475,8 @@ namespace OsEngine.OsTrader.Panels.Tab.Internal
                 timeOpen = DatePickerFakeOpenDate.SelectedDate.Value;
                 string[] openTimeStr = TextBoxFakeOpenTime.Text.ToString().Split(':');
 
-                timeOpen = timeOpen.AddHours(Convert.ToInt32(openTimeStr[0]));
-                timeOpen = timeOpen.AddMinutes(Convert.ToInt32(openTimeStr[1]));
+                timeOpen = timeOpen.AddHours(Convert.ToInt32(openTimeStr[0], CultureInfo.InvariantCulture));
+                timeOpen = timeOpen.AddMinutes(Convert.ToInt32(openTimeStr[1], CultureInfo.InvariantCulture));
 
             }
             catch (Exception ex)

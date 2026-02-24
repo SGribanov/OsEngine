@@ -16,6 +16,7 @@ using OsEngine.Market.Servers.Tester;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Globalization;
 using System.Windows;
 using System.Windows.Forms;
 using System.Windows.Input;
@@ -951,7 +952,7 @@ namespace OsEngine.OsTrader.Panels.Tab
 
             try
             {
-                maxOneNamePairsCount = Convert.ToInt32(TextBoxMaxPairsToSecurity.Text);
+                maxOneNamePairsCount = Convert.ToInt32(TextBoxMaxPairsToSecurity.Text, CultureInfo.InvariantCulture);
             }
             catch (Exception ex)
             {
@@ -1327,9 +1328,9 @@ namespace OsEngine.OsTrader.Panels.Tab
 
         private void ButtonLeftInSearchResults_Click(object sender, RoutedEventArgs e)
         {
-            int indexRow = Convert.ToInt32(LabelCurrentResultShow.Content) - 1;
+            int indexRow = Convert.ToInt32(LabelCurrentResultShow.Content, CultureInfo.InvariantCulture) - 1;
 
-            int maxRowIndex = Convert.ToInt32(LabelCountResultsShow.Content);
+            int maxRowIndex = Convert.ToInt32(LabelCountResultsShow.Content, CultureInfo.InvariantCulture);
 
             if (indexRow <= 0)
             {
@@ -1349,9 +1350,9 @@ namespace OsEngine.OsTrader.Panels.Tab
 
         private void ButtonRightInSearchResults_Click(object sender, RoutedEventArgs e)
         {
-            int indexRow = Convert.ToInt32(LabelCurrentResultShow.Content) - 1 + 1;
+            int indexRow = Convert.ToInt32(LabelCurrentResultShow.Content, CultureInfo.InvariantCulture) - 1 + 1;
 
-            int maxRowIndex = Convert.ToInt32(LabelCountResultsShow.Content);
+            int maxRowIndex = Convert.ToInt32(LabelCountResultsShow.Content, CultureInfo.InvariantCulture);
 
             if (indexRow >= maxRowIndex)
             {

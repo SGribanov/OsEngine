@@ -173,21 +173,21 @@ namespace OsEngine.OsTrader.Grids
 
                 // settings prime
 
-                Number = Convert.ToInt32(values[0]);
+                Number = Convert.ToInt32(values[0], CultureInfo.InvariantCulture);
                 Enum.TryParse(values[1], out GridType);
                 Enum.TryParse(values[2], out _regime);
                 Enum.TryParse(values[3], out RegimeLogicEntry);
                 AutoClearJournalIsOn = Convert.ToBoolean(values[4]);
-                MaxClosePositionsInJournal = Convert.ToInt32(values[5]);
-                MaxOpenOrdersInMarket = Convert.ToInt32(values[6]);
-                MaxCloseOrdersInMarket = Convert.ToInt32(values[7]);
+                MaxClosePositionsInJournal = Convert.ToInt32(values[5], CultureInfo.InvariantCulture);
+                MaxOpenOrdersInMarket = Convert.ToInt32(values[6], CultureInfo.InvariantCulture);
+                MaxCloseOrdersInMarket = Convert.ToInt32(values[7], CultureInfo.InvariantCulture);
                 _firstTradePrice = values[8].ToDecimal();
-                _openPositionsBySession = Convert.ToInt32(values[9]);
+                _openPositionsBySession = Convert.ToInt32(values[9], CultureInfo.InvariantCulture);
                 _firstTradeTime = ParseDateInvariantOrCurrent(values[10]);
 
                 try
                 {
-                    DelayInReal = Convert.ToInt32(values[11]);
+                    DelayInReal = Convert.ToInt32(values[11], CultureInfo.InvariantCulture);
                     CheckMicroVolumes = Convert.ToBoolean(values[12]);
                 }
                 catch
@@ -2893,3 +2893,4 @@ namespace OsEngine.OsTrader.Grids
         DepositPercent
     }
 }
+

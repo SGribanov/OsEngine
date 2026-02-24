@@ -1474,7 +1474,7 @@ namespace OsEngine.Market.Servers.BitMartFutures
                             Funding funding = new Funding();
 
                             funding.SecurityNameCode = item.symbol;
-                            funding.FundingIntervalHours = int.Parse(item.funding_interval_hours);
+                            funding.FundingIntervalHours = int.Parse(item.funding_interval_hours, CultureInfo.InvariantCulture);
 
                             FundingUpdateEvent?.Invoke(funding);
 
@@ -1933,7 +1933,7 @@ namespace OsEngine.Market.Servers.BitMartFutures
                 {
                     BitMartOrderAction baseOrderAction = baseOrderActions[k];
 
-                    Order order = ConvertToOsEngineOrder(baseOrderAction.order, Convert.ToInt32(baseOrderAction.action));
+                    Order order = ConvertToOsEngineOrder(baseOrderAction.order, Convert.ToInt32(baseOrderAction.action, CultureInfo.InvariantCulture));
 
                     if (order == null)
                     {
@@ -2000,7 +2000,7 @@ namespace OsEngine.Market.Servers.BitMartFutures
 
             try
             {
-                order.NumberUser = Convert.ToInt32(baseOrder.client_order_id);
+                order.NumberUser = Convert.ToInt32(baseOrder.client_order_id, CultureInfo.InvariantCulture);
             }
             catch
             {
@@ -2014,7 +2014,7 @@ namespace OsEngine.Market.Servers.BitMartFutures
             order.TimeCreate = TimeManager.GetDateTimeFromTimeStamp(Convert.ToInt64(baseOrder.create_time, CultureInfo.InvariantCulture));
             order.TimeCallBack = TimeManager.GetDateTimeFromTimeStamp(Convert.ToInt64(baseOrder.update_time, CultureInfo.InvariantCulture));
 
-            SetOrderSide(order, Convert.ToInt32(baseOrder.side));
+            SetOrderSide(order, Convert.ToInt32(baseOrder.side, CultureInfo.InvariantCulture));
 
             //Action
             //- 1 = match deal
@@ -2671,7 +2671,7 @@ namespace OsEngine.Market.Servers.BitMartFutures
 
             try
             {
-                order.NumberUser = Convert.ToInt32(baseOrder.client_order_id);
+                order.NumberUser = Convert.ToInt32(baseOrder.client_order_id, CultureInfo.InvariantCulture);
             }
             catch
             {

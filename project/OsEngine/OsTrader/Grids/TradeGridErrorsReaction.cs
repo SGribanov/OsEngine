@@ -13,6 +13,7 @@ using OsEngine.Market;
 using OsEngine.Market.Servers;
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 
 namespace OsEngine.OsTrader.Grids
 {
@@ -84,15 +85,15 @@ namespace OsEngine.OsTrader.Grids
 
                 FailOpenOrdersReactionIsOn = Convert.ToBoolean(values[0]);
                 //Enum.TryParse(values[1], out FailOpenOrdersReaction);
-                FailOpenOrdersCountToReaction = Convert.ToInt32(values[2]);
+                FailOpenOrdersCountToReaction = Convert.ToInt32(values[2], CultureInfo.InvariantCulture);
                 //Enum.TryParse(values[3], out FailCancelOrdersReaction);
-                FailCancelOrdersCountToReaction = Convert.ToInt32(values[4]);
+                FailCancelOrdersCountToReaction = Convert.ToInt32(values[4], CultureInfo.InvariantCulture);
                 FailCancelOrdersReactionIsOn = Convert.ToBoolean(values[5]);
 
                 try
                 {
                     WaitOnStartConnectorIsOn = Convert.ToBoolean(values[6]);
-                    WaitSecondsOnStartConnector = Convert.ToInt32(values[7]);
+                    WaitSecondsOnStartConnector = Convert.ToInt32(values[7], CultureInfo.InvariantCulture);
                     ReduceOrdersCountInMarketOnNoFundsError = Convert.ToBoolean(values[8]);
                 }
                 catch

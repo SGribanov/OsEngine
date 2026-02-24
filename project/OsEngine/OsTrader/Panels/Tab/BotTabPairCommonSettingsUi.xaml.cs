@@ -8,6 +8,7 @@
 
 using OsEngine.Language;
 using System;
+using System.Globalization;
 using System.Windows;
 using OsEngine.Entity;
 
@@ -189,8 +190,8 @@ namespace OsEngine.OsTrader.Panels.Tab
                 _tabPair.Sec1Volume = TextBoxVolume1.Text.ToDecimal();
                 _tabPair.Sec2Volume = TextBoxVolume2.Text.ToDecimal();
 
-                _tabPair.CorrelationLookBack = Convert.ToInt32(TextBoxCorrelationLookBack.Text);
-                _tabPair.CointegrationLookBack = Convert.ToInt32(TextBoxCointegrationLookBack.Text);
+                _tabPair.CorrelationLookBack = Convert.ToInt32(TextBoxCorrelationLookBack.Text, CultureInfo.InvariantCulture);
+                _tabPair.CointegrationLookBack = Convert.ToInt32(TextBoxCointegrationLookBack.Text, CultureInfo.InvariantCulture);
                 _tabPair.CointegrationDeviation = TextBoxCointegrationDeviation.Text.ToDecimal();
 
                 _tabPair.AutoRebuildCointegration = CheckBoxCointegrationAutoIsOn.IsChecked.Value;

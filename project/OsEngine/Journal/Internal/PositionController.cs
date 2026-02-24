@@ -1486,8 +1486,8 @@ namespace OsEngine.Journal.Internal
                         continue;
                     }
 
-                    int numCur = Convert.ToInt32(grid.Rows[i].Cells[0].Value.ToString());
-                    int numPrev = Convert.ToInt32(grid.Rows[i - 1].Cells[0].Value.ToString());
+                    int numCur = Convert.ToInt32(grid.Rows[i].Cells[0].Value.ToString(), CultureInfo.InvariantCulture);
+                    int numPrev = Convert.ToInt32(grid.Rows[i - 1].Cells[0].Value.ToString(), CultureInfo.InvariantCulture);
 
                     if (numCur > numPrev)
                     {
@@ -1509,13 +1509,13 @@ namespace OsEngine.Journal.Internal
                 {
                     DataGridViewRow curRow = grid.Rows[i];
 
-                    int numCur = Convert.ToInt32(grid.Rows[i].Cells[0].Value.ToString());
+                    int numCur = Convert.ToInt32(grid.Rows[i].Cells[0].Value.ToString(), CultureInfo.InvariantCulture);
 
                     bool isInArray = false;
 
                     for (int i2 = 0; i2 < rows.Count; i2++)
                     {
-                        int numCurInRowsGrid = Convert.ToInt32(rows[i2].Cells[0].Value.ToString());
+                        int numCurInRowsGrid = Convert.ToInt32(rows[i2].Cells[0].Value.ToString(), CultureInfo.InvariantCulture);
 
                         if (numCur > numCurInRowsGrid)
                         {
@@ -2101,7 +2101,7 @@ namespace OsEngine.Journal.Internal
                 int number;
                 try
                 {
-                    number = Convert.ToInt32(_gridCloseDeal.Rows[_gridCloseDeal.CurrentCell.RowIndex].Cells[0].Value);
+                    number = Convert.ToInt32(_gridCloseDeal.Rows[_gridCloseDeal.CurrentCell.RowIndex].Cells[0].Value, CultureInfo.InvariantCulture);
                 }
                 catch (Exception)
                 {
@@ -2135,7 +2135,7 @@ namespace OsEngine.Journal.Internal
                 int number = -1;
                 try
                 {
-                    number = Convert.ToInt32(_gridCloseDeal.Rows[_gridCloseDeal.CurrentCell.RowIndex].Cells[0].Value);
+                    number = Convert.ToInt32(_gridCloseDeal.Rows[_gridCloseDeal.CurrentCell.RowIndex].Cells[0].Value, CultureInfo.InvariantCulture);
                 }
                 catch (Exception)
                 {
@@ -2226,7 +2226,7 @@ namespace OsEngine.Journal.Internal
                     {
                         return;
                     }
-                    number = Convert.ToInt32(_gridOpenDeal.Rows[_gridOpenDeal.CurrentCell.RowIndex].Cells[0].Value);
+                    number = Convert.ToInt32(_gridOpenDeal.Rows[_gridOpenDeal.CurrentCell.RowIndex].Cells[0].Value, CultureInfo.InvariantCulture);
                 }
                 catch (Exception)
                 {
@@ -2257,7 +2257,7 @@ namespace OsEngine.Journal.Internal
                         return;
                     }
 
-                    number = Convert.ToInt32(_gridOpenDeal.Rows[_gridOpenDeal.CurrentCell.RowIndex].Cells[0].Value);
+                    number = Convert.ToInt32(_gridOpenDeal.Rows[_gridOpenDeal.CurrentCell.RowIndex].Cells[0].Value, CultureInfo.InvariantCulture);
                 }
                 catch (Exception)
                 {
@@ -2287,7 +2287,7 @@ namespace OsEngine.Journal.Internal
                         return;
                     }
 
-                    number = Convert.ToInt32(_gridOpenDeal.Rows[_gridOpenDeal.CurrentCell.RowIndex].Cells[0].Value);
+                    number = Convert.ToInt32(_gridOpenDeal.Rows[_gridOpenDeal.CurrentCell.RowIndex].Cells[0].Value, CultureInfo.InvariantCulture);
                 }
                 catch (Exception)
                 {
@@ -2325,7 +2325,7 @@ namespace OsEngine.Journal.Internal
                         return;
                     }
 
-                    number = Convert.ToInt32(_gridOpenDeal.Rows[_gridOpenDeal.CurrentCell.RowIndex].Cells[0].Value);
+                    number = Convert.ToInt32(_gridOpenDeal.Rows[_gridOpenDeal.CurrentCell.RowIndex].Cells[0].Value, CultureInfo.InvariantCulture);
                 }
                 catch (Exception)
                 {
@@ -2374,4 +2374,5 @@ namespace OsEngine.Journal.Internal
         #endregion
     }
 }
+
 

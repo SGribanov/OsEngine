@@ -461,7 +461,7 @@ namespace OsEngine.Entity
 
             Time = DateTimeParseHelper.ParseFromTwoStrings(save[0], save[1]);
 
-            Time = Time.AddMilliseconds(Convert.ToInt32(save[2]));
+            Time = Time.AddMilliseconds(Convert.ToInt32(save[2], CultureInfo.InvariantCulture));
 
             string[] bids = save[3].Split('*');
 

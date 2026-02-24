@@ -4,6 +4,7 @@
 */
 
 using System;
+using System.Globalization;
 using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
@@ -140,14 +141,14 @@ namespace OsEngine.Entity
 
             try
             {
-                result = Convert.ToInt32(resInString);
+                result = Convert.ToInt32(resInString, CultureInfo.InvariantCulture);
             }
             catch
             {
                 // интежер кончился сбрасываем на ноль нумерацию
                 _numberOrderForRealTrading = 0;
                 resInString = _dayOfYear + _numberOrderForRealTrading.ToString();
-                result = Convert.ToInt32(resInString);
+                result = Convert.ToInt32(resInString, CultureInfo.InvariantCulture);
             }
             _numberOrderForRealTrading++;
             _needToSave = true;
@@ -223,12 +224,12 @@ namespace OsEngine.Entity
                 return null;
             }
 
-            if (!int.TryParse(lines[0], out int dealNumber))
+            if (!int.TryParse(lines[0], NumberStyles.Integer, CultureInfo.InvariantCulture, out int dealNumber))
             {
                 return null;
             }
 
-            if (!int.TryParse(lines[1], out int orderNumber))
+            if (!int.TryParse(lines[1], NumberStyles.Integer, CultureInfo.InvariantCulture, out int orderNumber))
             {
                 return null;
             }

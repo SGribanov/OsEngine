@@ -1261,7 +1261,7 @@ namespace OsEngine.Entity
                 }
             }
 
-            Number = Convert.ToInt32(arraySave[6]);
+            Number = Convert.ToInt32(arraySave[6], CultureInfo.InvariantCulture);
 
             string commentsString = arraySave[7];
 

@@ -4,6 +4,7 @@
 using System;
 using System.Collections.Generic;
 using System.Drawing;
+using System.Globalization;
 
 namespace OsEngine.Indicators
 {
@@ -62,7 +63,7 @@ namespace OsEngine.Indicators
         {
             Name = array[0];
 
-            Color = Color.FromArgb(Convert.ToInt32(array[1]));
+            Color = Color.FromArgb(Convert.ToInt32(array[1], CultureInfo.InvariantCulture));
 
             Enum.TryParse(array[2], out ChartPaintType);
 

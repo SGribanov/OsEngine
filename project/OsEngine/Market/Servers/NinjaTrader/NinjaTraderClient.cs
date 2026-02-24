@@ -330,7 +330,7 @@ namespace OsEngine.Market.Servers.NinjaTrader
             {
                 Order errorOrder = new Order();
                 errorOrder.NumberMarket = array[1];
-                errorOrder.NumberUser = Convert.ToInt32(array[2]);
+                errorOrder.NumberUser = Convert.ToInt32(array[2], CultureInfo.InvariantCulture);
 
                 errorOrder.State = OrderStateType.Fail;
 
@@ -356,7 +356,7 @@ namespace OsEngine.Market.Servers.NinjaTrader
             if (str[0] == "Error")
             {
                 Order errorOrder = new Order();
-                errorOrder.NumberUser = Convert.ToInt32(str[2]);
+                errorOrder.NumberUser = Convert.ToInt32(str[2], CultureInfo.InvariantCulture);
 
                 errorOrder.State = OrderStateType.Fail;
 
@@ -370,7 +370,7 @@ namespace OsEngine.Market.Servers.NinjaTrader
             if (str[0] == "Accept")
             {
                 Order order = new Order();
-                order.NumberUser = Convert.ToInt32(str[1]);
+                order.NumberUser = Convert.ToInt32(str[1], CultureInfo.InvariantCulture);
                 order.NumberMarket = str[3];
                 order.State = OrderStateType.Active;
                 order.TimeCallBack = ParseDateInvariantOrCurrent(str[4]);
@@ -779,7 +779,7 @@ namespace OsEngine.Market.Servers.NinjaTrader
                 string[] ordStr = messageInArray[i].Split('#');
 
                 Order newOrder = new Order();
-                newOrder.NumberUser = Convert.ToInt32(ordStr[0]);
+                newOrder.NumberUser = Convert.ToInt32(ordStr[0], CultureInfo.InvariantCulture);
                 newOrder.NumberMarket= ordStr[1];
                 newOrder.SecurityNameCode = ordStr[2];
                 newOrder.Volume = ordStr[3].ToDecimal();

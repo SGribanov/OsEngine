@@ -62,10 +62,10 @@ namespace OsEngine.Robots.CounterTrend
             try
             {
                 if (TextBoxVolumeOne.Text.ToDecimal() <= 0 || 
-                    Convert.ToInt32(RsiUp.Text) <= 0 || 
-                    Convert.ToInt32(RsiDown.Text) <= 0 ||
+                    Convert.ToInt32(RsiUp.Text, CultureInfo.InvariantCulture) <= 0 || 
+                    Convert.ToInt32(RsiDown.Text, CultureInfo.InvariantCulture) <= 0 ||
                     TextBoxSlippage.Text.ToDecimal() < 0 ||
-                    Convert.ToInt32(TextBoxVolumeOne.Text) <= 0)
+                    Convert.ToInt32(TextBoxVolumeOne.Text, CultureInfo.InvariantCulture) <= 0)
                 {
                     throw new Exception("");
                 }

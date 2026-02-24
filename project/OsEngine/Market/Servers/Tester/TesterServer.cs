@@ -2732,7 +2732,7 @@ namespace OsEngine.Market.Servers.Tester
 
                         if (array[i].Length > 5)
                         {
-                            volDecimals = Convert.ToInt32(array[i][5]);
+                            volDecimals = Convert.ToInt32(array[i][5], CultureInfo.InvariantCulture);
                         }
 
                         if (array[i].Length > 6)

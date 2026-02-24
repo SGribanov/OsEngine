@@ -277,16 +277,16 @@ namespace OsEngine.Market.Servers.XT.XTSpot
 
                         if (string.IsNullOrEmpty(item.pricePrecision) == false)
                         {
-                            newSecurity.Decimals = Convert.ToInt32(item.pricePrecision);
+                            newSecurity.Decimals = Convert.ToInt32(item.pricePrecision, CultureInfo.InvariantCulture);
                         }
 
                         if (string.IsNullOrEmpty(item.quantityPrecision) == false)
                         {
-                            newSecurity.DecimalsVolume = Convert.ToInt32(item.quantityPrecision);
-                            newSecurity.VolumeStep = Convert.ToInt32(item.quantityPrecision).GetValueByDecimals();
+                            newSecurity.DecimalsVolume = Convert.ToInt32(item.quantityPrecision, CultureInfo.InvariantCulture);
+                            newSecurity.VolumeStep = Convert.ToInt32(item.quantityPrecision, CultureInfo.InvariantCulture).GetValueByDecimals();
                         }
 
-                        newSecurity.PriceStep = Convert.ToInt32(item.pricePrecision).GetValueByDecimals();
+                        newSecurity.PriceStep = Convert.ToInt32(item.pricePrecision, CultureInfo.InvariantCulture).GetValueByDecimals();
                         newSecurity.PriceStepCost = newSecurity.PriceStep;
                         newSecurity.State = SecurityStateType.Activ;
 
@@ -1798,7 +1798,7 @@ namespace OsEngine.Market.Servers.XT.XTSpot
                     {
                         try
                         {
-                            newOrder.NumberUser = Convert.ToInt32(item.ci) - 1000;
+                            newOrder.NumberUser = Convert.ToInt32(item.ci, CultureInfo.InvariantCulture) - 1000;
                         }
                         catch
                         {
@@ -2180,7 +2180,7 @@ namespace OsEngine.Market.Servers.XT.XTSpot
 
                 if (!string.IsNullOrEmpty(item.clientOrderId))
                 {
-                    newOrder.NumberUser = Convert.ToInt32(item.clientOrderId) - 1000;
+                    newOrder.NumberUser = Convert.ToInt32(item.clientOrderId, CultureInfo.InvariantCulture) - 1000;
                 }
 
                 newOrder.NumberMarket = item.orderId;

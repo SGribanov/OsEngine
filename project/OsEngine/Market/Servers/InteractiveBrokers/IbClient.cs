@@ -1348,7 +1348,7 @@ namespace OsEngine.Market.Servers.InteractiveBrokers
                 _orders = new List<Order>();
             }
 
-            Order osOrder = _orders.Find(order1 => Convert.ToInt32(order1.NumberMarket) == id);
+            Order osOrder = _orders.Find(order1 => Convert.ToInt32(order1.NumberMarket, CultureInfo.InvariantCulture) == id);
 
             if (osOrder == null)
             {

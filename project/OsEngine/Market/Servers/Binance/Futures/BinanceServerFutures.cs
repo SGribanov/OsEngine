@@ -2180,7 +2180,7 @@ namespace OsEngine.Market.Servers.Binance.Futures
 
             try
             {
-                orderNumUser = Convert.ToInt32(order.c.ToString().Replace("x-gnrPHWyE", ""));
+                orderNumUser = Convert.ToInt32(order.c.ToString().Replace("x-gnrPHWyE", ""), CultureInfo.InvariantCulture);
             }
             catch (Exception)
             {
@@ -2905,7 +2905,7 @@ namespace OsEngine.Market.Servers.Binance.Futures
                         try
                         {
                             newOrder.NumberUser =
-                                Convert.ToInt32(orderOnBoardResp.clientOrderId.Replace("x-gnrPHWyE", ""));
+                                Convert.ToInt32(orderOnBoardResp.clientOrderId.Replace("x-gnrPHWyE", ""), CultureInfo.InvariantCulture);
                         }
                         catch
                         {

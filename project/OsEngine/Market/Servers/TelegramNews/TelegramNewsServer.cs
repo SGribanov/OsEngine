@@ -7,6 +7,7 @@ using OsEngine.Market.Servers.Entity;
 using OsEngine.Market.Servers.TelegramNews.TGAuthEntity;
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.Net;
 using System.Text.RegularExpressions;
@@ -525,7 +526,7 @@ namespace OsEngine.Market.Servers.TelegramNews
         {
             // Пример ошибки: "FLOOD_WAIT_3" → вернет 3
             Match match = Regex.Match(errorMessage, @"FLOOD_WAIT_(\d+)");
-            return match.Success ? int.Parse(match.Groups[1].Value) : 10; // Дефолт: 10 сек
+            return match.Success ? int.Parse(match.Groups[1].Value, CultureInfo.InvariantCulture) : 10; // Дефолт: 10 сек
         }
 
         public event Action<News> NewsEvent;

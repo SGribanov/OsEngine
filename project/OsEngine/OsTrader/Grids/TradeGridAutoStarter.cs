@@ -13,6 +13,7 @@ using OsEngine.OsTrader.Panels.Tab;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Globalization;
 using static System.Windows.Forms.VisualStyles.VisualStyleElement;
 
 namespace OsEngine.OsTrader.Grids
@@ -76,9 +77,9 @@ namespace OsEngine.OsTrader.Grids
                 try
                 {
                     StartGridByTimeOfDayIsOn = Convert.ToBoolean(values[4]);
-                    StartGridByTimeOfDayHour = Convert.ToInt32(values[5]);
-                    StartGridByTimeOfDayMinute = Convert.ToInt32(values[6]);
-                    StartGridByTimeOfDaySecond = Convert.ToInt32(values[7]);
+                    StartGridByTimeOfDayHour = Convert.ToInt32(values[5], CultureInfo.InvariantCulture);
+                    StartGridByTimeOfDayMinute = Convert.ToInt32(values[6], CultureInfo.InvariantCulture);
+                    StartGridByTimeOfDaySecond = Convert.ToInt32(values[7], CultureInfo.InvariantCulture);
                     SingleActivationMode = Convert.ToBoolean(values[8]);
                 }
                 catch (Exception ex)

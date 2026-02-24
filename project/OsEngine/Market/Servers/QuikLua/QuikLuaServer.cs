@@ -608,9 +608,9 @@ namespace OsEngine.Market.Servers.QuikLua
                     newSec.SecurityType = SecurityType.Futures;
                     newSec.UsePriceStepCostToCalculateVolume = true;
                     string exp = oneSec.MatDate;
-                    newSec.Expiration = new DateTime(Convert.ToInt32(exp.Substring(0, 4))
-                        , Convert.ToInt32(exp.Substring(4, 2))
-                        , Convert.ToInt32(exp.Substring(6, 2)));
+                    newSec.Expiration = new DateTime(Convert.ToInt32(exp.Substring(0, 4), CultureInfo.InvariantCulture)
+                        , Convert.ToInt32(exp.Substring(4, 2), CultureInfo.InvariantCulture)
+                        , Convert.ToInt32(exp.Substring(6, 2), CultureInfo.InvariantCulture));
 
                     newSec.MarginBuy = QuikLua.Trading
                         .GetParamEx(classCode, secCode, "SELLDEPO")
@@ -627,9 +627,9 @@ namespace OsEngine.Market.Servers.QuikLua
                         : OptionType.Call;
 
                     string exp = oneSec.MatDate;
-                    newSec.Expiration = new DateTime(Convert.ToInt32(exp.Substring(0, 4))
-                        , Convert.ToInt32(exp.Substring(4, 2))
-                        , Convert.ToInt32(exp.Substring(6, 2)));
+                    newSec.Expiration = new DateTime(Convert.ToInt32(exp.Substring(0, 4), CultureInfo.InvariantCulture)
+                        , Convert.ToInt32(exp.Substring(4, 2), CultureInfo.InvariantCulture)
+                        , Convert.ToInt32(exp.Substring(6, 2), CultureInfo.InvariantCulture));
 
                     newSec.MarginBuy = QuikLua.Trading
                         .GetParamEx(classCode, secCode, "SELLDEPO")
@@ -661,7 +661,7 @@ namespace OsEngine.Market.Servers.QuikLua
                 newSec.Exchange = "MOEX";
                 newSec.VolumeStep = 1;
 
-                newSec.Decimals = Convert.ToInt32(oneSec.Scale);
+                newSec.Decimals = Convert.ToInt32(oneSec.Scale, CultureInfo.InvariantCulture);
 
                 if (oneSec.ClassCode != "SPBFUT")
                 {
@@ -1750,9 +1750,9 @@ namespace OsEngine.Market.Servers.QuikLua
                 trade.SecurityNameCode = allTrade.SecCode + "+" + allTrade.ClassCode;
                 trade.Id = allTrade.TradeNum.ToString();
                 trade.Price = Convert.ToDecimal(allTrade.Price);
-                trade.Volume = Convert.ToInt32(allTrade.Qty);
+                trade.Volume = Convert.ToInt32(allTrade.Qty, CultureInfo.InvariantCulture);
 
-                int side = Convert.ToInt32(allTrade.Flags);
+                int side = Convert.ToInt32(allTrade.Flags, CultureInfo.InvariantCulture);
 
                 if (side == 1025 || side == 1)
                 {
@@ -1768,7 +1768,7 @@ namespace OsEngine.Market.Servers.QuikLua
 
                 if (allTrade.OpenInterest != 0)
                 {
-                    trade.OpenInterest = Convert.ToInt32(allTrade.OpenInterest);
+                    trade.OpenInterest = Convert.ToInt32(allTrade.OpenInterest, CultureInfo.InvariantCulture);
                 }
 
                 if (NewTradesEvent != null)
@@ -1944,7 +1944,7 @@ namespace OsEngine.Market.Servers.QuikLua
                 {
                     for (int i = _sentOrders.Count - 1; i >= 0; i--)
                     {
-                        if (_sentOrders[i].NumberUser == Convert.ToInt32(qOrder.TransID))
+                        if (_sentOrders[i].NumberUser == Convert.ToInt32(qOrder.TransID, CultureInfo.InvariantCulture))
                         {
                             order = _sentOrders[i];
                             _sentOrders.RemoveAt(i);
@@ -1952,7 +1952,7 @@ namespace OsEngine.Market.Servers.QuikLua
                     }
                 }
 
-                order.NumberUser = Convert.ToInt32(qOrder.TransID);
+                order.NumberUser = Convert.ToInt32(qOrder.TransID, CultureInfo.InvariantCulture);
                 order.TimeCallBack = new DateTime(qOrder.Datetime.year, qOrder.Datetime.month,
                     qOrder.Datetime.day, qOrder.Datetime.hour,
                     qOrder.Datetime.min, qOrder.Datetime.sec, qOrder.Datetime.ms);
@@ -2405,7 +2405,7 @@ namespace OsEngine.Market.Servers.QuikLua
                         return OrderStateType.None;
                     }
 
-                    order.NumberUser = Convert.ToInt32(foundOrder.TransID);
+                    order.NumberUser = Convert.ToInt32(foundOrder.TransID, CultureInfo.InvariantCulture);
                     order.TimeCallBack = TimeManager.GetDateTimeFromTimeStamp(foundOrder.LuaTimeStamp);
                     order.SecurityNameCode = foundOrder.SecCode + "+" + foundOrder.ClassCode;
                     order.SecurityClassCode = order.SecurityNameCode.Split('+')[1];

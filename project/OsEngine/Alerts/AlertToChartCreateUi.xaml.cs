@@ -572,7 +572,7 @@ namespace OsEngine.Alerts
           //  MyAlert.ColorLabel = HostColorLabel.Child.BackColor;
 
            // MyAlert.ColorLine = HostColorLine.Child.BackColor;
-            MyAlert.BorderWidth = Convert.ToInt32(ComboBoxFatLine.SelectedItem);
+            MyAlert.BorderWidth = Convert.ToInt32(ComboBoxFatLine.SelectedItem, CultureInfo.InvariantCulture);
 
             MyAlert.Message = TextBoxAlertMessage.Text;
 
@@ -584,7 +584,7 @@ namespace OsEngine.Alerts
             MyAlert.Slippage = TextBoxSlippage.Text.ToDecimal();
             Enum.TryParse(ComboBoxSlippageType.SelectedItem.ToString(), true, out MyAlert.SlippageType);
 
-            MyAlert.NumberClosePosition = Convert.ToInt32(TextBoxClosePosition.Text);
+            MyAlert.NumberClosePosition = Convert.ToInt32(TextBoxClosePosition.Text, CultureInfo.InvariantCulture);
             Enum.TryParse(ComboBoxOrderType.Text, true, out MyAlert.OrderPriceType);
 
             Enum.TryParse(ComboBoxMusicType.Text,out MyAlert.Music);

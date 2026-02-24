@@ -11,6 +11,7 @@ using OsEngine.Language;
 using OsEngine.Logging;
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Windows.Forms.Integration;
 using System.Windows.Forms;
 using System.Threading;
@@ -496,7 +497,7 @@ namespace OsEngine.OsData
 
                         try
                         {
-                            realNum = Convert.ToInt32(_dataGrid.Rows[rowIndex].Cells[0].Value.ToString());
+                            realNum = Convert.ToInt32(_dataGrid.Rows[rowIndex].Cells[0].Value.ToString(), CultureInfo.InvariantCulture);
                         }
                         catch
                         {
@@ -514,7 +515,7 @@ namespace OsEngine.OsData
                         {
                             try
                             {
-                                numSecurity = Convert.ToInt32(_dataGrid.Rows[i].Cells[0].Value.ToString());
+                                numSecurity = Convert.ToInt32(_dataGrid.Rows[i].Cells[0].Value.ToString(), CultureInfo.InvariantCulture);
                                 break;
                             }
                             catch
@@ -600,7 +601,7 @@ namespace OsEngine.OsData
                         {
                             try
                             {
-                                numSecurity = Convert.ToInt32(_dataGrid.Rows[i].Cells[0].Value.ToString());
+                                numSecurity = Convert.ToInt32(_dataGrid.Rows[i].Cells[0].Value.ToString(), CultureInfo.InvariantCulture);
                                 break;
                             }
                             catch
@@ -652,7 +653,7 @@ namespace OsEngine.OsData
 
                         try
                         {
-                            realNum = Convert.ToInt32(_dataGrid.Rows[rowIndex].Cells[0].Value.ToString());
+                            realNum = Convert.ToInt32(_dataGrid.Rows[rowIndex].Cells[0].Value.ToString(), CultureInfo.InvariantCulture);
                         }
                         catch
                         {

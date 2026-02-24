@@ -474,7 +474,7 @@ namespace OsEngine.OsOptimizer
 
             TabType = save[0];
             SecurityName = save[1];
-            PositionsCount = Convert.ToInt32(save[2]);
+            PositionsCount = Convert.ToInt32(save[2], CultureInfo.InvariantCulture);
             TotalProfit = save[3].ToDecimal();
             MaxDrawDawn = save[4].ToDecimal();
             AverageProfit = save[5].ToDecimal();

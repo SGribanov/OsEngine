@@ -3,6 +3,7 @@
 
 using OsEngine.Market;
 using System;
+using System.Globalization;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
@@ -68,9 +69,9 @@ namespace OsEngine.Robots.AutoTestBots
 
             if (ValidateISuccess)
             {
-                int CountToReLoadServer = Convert.ToInt32(TextBoxCountToReLoadServer.Text);
-                int SecondToReloadServer = Convert.ToInt32(TextBoxSecondToReloadServer.Text);
-                int CountTabsToConnectServer = Convert.ToInt32(TextBoxCountTabsToConnectServer.Text);
+                int CountToReLoadServer = Convert.ToInt32(TextBoxCountToReLoadServer.Text, CultureInfo.InvariantCulture);
+                int SecondToReloadServer = Convert.ToInt32(TextBoxSecondToReloadServer.Text, CultureInfo.InvariantCulture);
+                int CountTabsToConnectServer = Convert.ToInt32(TextBoxCountTabsToConnectServer.Text, CultureInfo.InvariantCulture);
 
                 new Thread(() =>
                 {
@@ -189,9 +190,9 @@ namespace OsEngine.Robots.AutoTestBots
         private bool ValidateTextBox()
         {
             int number;
-            if (Int32.TryParse(TextBoxCountToReLoadServer.Text, out number) &&
-                Int32.TryParse(TextBoxSecondToReloadServer.Text, out number) &&
-                Int32.TryParse(TextBoxCountTabsToConnectServer.Text, out number))
+            if (Int32.TryParse(TextBoxCountToReLoadServer.Text, NumberStyles.Integer, CultureInfo.InvariantCulture, out number) &&
+                Int32.TryParse(TextBoxSecondToReloadServer.Text, NumberStyles.Integer, CultureInfo.InvariantCulture, out number) &&
+                Int32.TryParse(TextBoxCountTabsToConnectServer.Text, NumberStyles.Integer, CultureInfo.InvariantCulture, out number))
             {
                 return true;
             }

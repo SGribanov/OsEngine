@@ -502,7 +502,7 @@ namespace OsEngine.Market.Servers.GateIoData
                 Candle newCandle = new Candle();
 
                 newCandle.State = CandleState.Finished;
-                newCandle.TimeStart = TimeManager.GetDateTimeFromTimeStampSeconds(int.Parse(candleParts[0]));
+                newCandle.TimeStart = TimeManager.GetDateTimeFromTimeStampSeconds(int.Parse(candleParts[0], CultureInfo.InvariantCulture));
                 newCandle.Volume = candleParts[1].ToDecimal();
                 newCandle.Close = candleParts[2].ToDecimal();
                 newCandle.High = candleParts[3].ToDecimal();
@@ -640,7 +640,7 @@ namespace OsEngine.Market.Servers.GateIoData
                             Candle candle = new Candle();
 
                             candle.State = CandleState.Finished;
-                            candle.TimeStart = TimeManager.GetDateTimeFromTimeStampSeconds(int.Parse(current[0]));
+                            candle.TimeStart = TimeManager.GetDateTimeFromTimeStampSeconds(int.Parse(current[0], CultureInfo.InvariantCulture));
                             candle.Volume = current[1].ToDecimal();
                             candle.Close = current[2].ToDecimal();
                             candle.High = current[3].ToDecimal();
@@ -663,7 +663,7 @@ namespace OsEngine.Market.Servers.GateIoData
                             Candle candle = new Candle();
 
                             candle.State = CandleState.Finished;
-                            candle.TimeStart = TimeManager.GetDateTimeFromTimeStampSeconds(int.Parse(current.t));
+                            candle.TimeStart = TimeManager.GetDateTimeFromTimeStampSeconds(int.Parse(current.t, CultureInfo.InvariantCulture));
                             candle.Volume = current.sum.ToDecimal();
                             candle.Close = current.c.ToDecimal();
                             candle.High = current.h.ToDecimal();

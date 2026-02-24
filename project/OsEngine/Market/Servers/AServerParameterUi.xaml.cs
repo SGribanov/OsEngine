@@ -9,6 +9,7 @@
 using System;
 using System.Collections.Generic;
 using System.Drawing;
+using System.Globalization;
 using System.Windows;
 using System.Windows.Forms;
 using OsEngine.Entity;
@@ -1204,7 +1205,7 @@ namespace OsEngine.Market.Servers
                     }
 
                     string str = _gridServerParameters.Rows[i].Cells[1].Value.ToString();
-                    ((ServerParameterInt)param[i]).Value = Convert.ToInt32(str);
+                    ((ServerParameterInt)param[i]).Value = Convert.ToInt32(str, CultureInfo.InvariantCulture);
                 }
 
             }

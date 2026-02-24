@@ -8,6 +8,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using OsEngine.Entity;
 using OsEngine.Logging;
@@ -690,7 +691,7 @@ namespace OsEngine.Market.Connectors
             {
                 ServerType = serverType,
                 EventsIsOn = Convert.ToBoolean(lines[1]),
-                CountNewsToSave = Convert.ToInt32(lines[2]),
+                CountNewsToSave = Convert.ToInt32(lines[2], CultureInfo.InvariantCulture),
                 ServerFullName = lines.Length > 3 ? lines[3] : null
             };
         }

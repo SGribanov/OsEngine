@@ -9,6 +9,7 @@
 using OsEngine.Language;
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Forms;
@@ -180,7 +181,7 @@ namespace OsEngine.Market.Servers
                     return;
                 }
 
-                _comparePositionsModule.TimeDelaySeconds = Convert.ToInt32(TextBoxTimeDelaySeconds.Text);
+                _comparePositionsModule.TimeDelaySeconds = Convert.ToInt32(TextBoxTimeDelaySeconds.Text, CultureInfo.InvariantCulture);
                 _comparePositionsModule.Save();
             }
             catch (Exception ex)

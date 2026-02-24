@@ -486,11 +486,11 @@ namespace OsEngine.Robots.Trend
                 KTake = reader.ReadLine().ToDecimal();
                 Comiss = reader.ReadLine().ToDecimal();
                 KComiss = reader.ReadLine().ToDecimal();
-                AtrLength = Convert.ToInt32(reader.ReadLine());
+                AtrLength = Convert.ToInt32(reader.ReadLine(), CultureInfo.InvariantCulture);
                 Katr = reader.ReadLine().ToDecimal();
                 K2Atr = reader.ReadLine().ToDecimal();
-                Kalman1Length = Convert.ToInt32(reader.ReadLine());
-                Kalman2Length = Convert.ToInt32(reader.ReadLine());
+                Kalman1Length = Convert.ToInt32(reader.ReadLine(), CultureInfo.InvariantCulture);
+                Kalman2Length = Convert.ToInt32(reader.ReadLine(), CultureInfo.InvariantCulture);
                 VolumeType = Convert.ToString(reader.ReadLine());
                 TradeAssetInPortfolio = Convert.ToString(reader.ReadLine());
                 Volume = reader.ReadLine().ToDecimal();

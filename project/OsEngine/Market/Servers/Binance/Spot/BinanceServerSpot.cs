@@ -1831,7 +1831,7 @@ namespace OsEngine.Market.Servers.Binance.Spot
 
             try
             {
-                orderNumUser = Convert.ToInt32(orderNumUserInString);
+                orderNumUser = Convert.ToInt32(orderNumUserInString, CultureInfo.InvariantCulture);
             }
             catch
             {
@@ -2784,7 +2784,7 @@ namespace OsEngine.Market.Servers.Binance.Spot
                     string id = myOrder.clientOrderId.Replace("x-RKXTQ2AK", "");
                     try
                     {
-                        newOrder.NumberUser = Convert.ToInt32(id);
+                        newOrder.NumberUser = Convert.ToInt32(id, CultureInfo.InvariantCulture);
                     }
                     catch
                     {

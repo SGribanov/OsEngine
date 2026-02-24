@@ -1,4 +1,4 @@
-﻿/*
+/*
  * Your rights to use code governed by this license http://o-s-a.net/doc/license_simple_engine.pdf
  * Ваши права на использование кода регулируются данной лицензией http://o-s-a.net/doc/license_simple_engine.pdf
 */
@@ -156,9 +156,9 @@ namespace OsEngine.Entity
             {
                 Label = save[1];
                 Value = save[2];
-                RowHeight = Convert.ToInt32(save[3]);
-                TextHeight = Convert.ToInt32(save[4]);
-                Color = System.Drawing.Color.FromArgb(Convert.ToInt32(save[5]));
+                RowHeight = Convert.ToInt32(save[3], CultureInfo.InvariantCulture);
+                TextHeight = Convert.ToInt32(save[4], CultureInfo.InvariantCulture);
+                Color = System.Drawing.Color.FromArgb(Convert.ToInt32(save[5], CultureInfo.InvariantCulture));
             }
             catch
             {
@@ -251,14 +251,14 @@ namespace OsEngine.Entity
         /// <param name="save">line with saved parameters</param>
         public void LoadParamFromString(string[] save)
         {
-            _valueInt = Convert.ToInt32(save[1]);
+            _valueInt = Convert.ToInt32(save[1], CultureInfo.InvariantCulture);
 
             try
             {
-                _valueIntDefolt = Convert.ToInt32(save[2]);
-                _valueIntStart = Convert.ToInt32(save[3]);
-                _valueIntStop = Convert.ToInt32(save[4]);
-                _valueIntStep = Convert.ToInt32(save[5]);
+                _valueIntDefolt = Convert.ToInt32(save[2], CultureInfo.InvariantCulture);
+                _valueIntStart = Convert.ToInt32(save[3], CultureInfo.InvariantCulture);
+                _valueIntStop = Convert.ToInt32(save[4], CultureInfo.InvariantCulture);
+                _valueIntStep = Convert.ToInt32(save[5], CultureInfo.InvariantCulture);
             }
             catch
             {
@@ -1040,24 +1040,24 @@ namespace OsEngine.Entity
 
             bool paramUpdated = false;
 
-            if (Hour != Convert.ToInt32(array[0]))
+            if (Hour != Convert.ToInt32(array[0], CultureInfo.InvariantCulture))
             {
-                Hour = Convert.ToInt32(array[0]);
+                Hour = Convert.ToInt32(array[0], CultureInfo.InvariantCulture);
                 paramUpdated = true;
             }
-            if (Minute != Convert.ToInt32(array[1]))
+            if (Minute != Convert.ToInt32(array[1], CultureInfo.InvariantCulture))
             {
-                Minute = Convert.ToInt32(array[1]);
+                Minute = Convert.ToInt32(array[1], CultureInfo.InvariantCulture);
                 paramUpdated = true;
             }
-            if (Second != Convert.ToInt32(array[2]))
+            if (Second != Convert.ToInt32(array[2], CultureInfo.InvariantCulture))
             {
-                Second = Convert.ToInt32(array[2]);
+                Second = Convert.ToInt32(array[2], CultureInfo.InvariantCulture);
                 paramUpdated = true;
             }
-            if (Millisecond != Convert.ToInt32(array[3]))
+            if (Millisecond != Convert.ToInt32(array[3], CultureInfo.InvariantCulture))
             {
-                Millisecond = Convert.ToInt32(array[3]);
+                Millisecond = Convert.ToInt32(array[3], CultureInfo.InvariantCulture);
                 paramUpdated = true;
             }
 
@@ -1841,3 +1841,4 @@ namespace OsEngine.Entity
 		
     }
 }
+

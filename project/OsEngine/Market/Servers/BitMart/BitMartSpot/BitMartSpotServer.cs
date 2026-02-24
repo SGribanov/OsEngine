@@ -220,9 +220,9 @@ namespace OsEngine.Market.Servers.BitMart
                             newSecurity.NameId = item.symbol_id;
                             newSecurity.State = SecurityStateType.Activ;
 
-                            newSecurity.Decimals = Convert.ToInt32(item.price_max_precision);
+                            newSecurity.Decimals = Convert.ToInt32(item.price_max_precision, CultureInfo.InvariantCulture);
                             newSecurity.DecimalsVolume = item.quote_increment.DecimalsCount();
-                            newSecurity.PriceStep = GetStep(Convert.ToInt32(item.price_max_precision));
+                            newSecurity.PriceStep = GetStep(Convert.ToInt32(item.price_max_precision, CultureInfo.InvariantCulture));
                             newSecurity.PriceStepCost = newSecurity.PriceStep;
                             newSecurity.Lot = 1;
                             newSecurity.SecurityType = SecurityType.CurrencyPair;
@@ -1540,7 +1540,7 @@ namespace OsEngine.Market.Servers.BitMart
 
             try
             {
-                order.NumberUser = Convert.ToInt32(baseOrder.client_order_id);
+                order.NumberUser = Convert.ToInt32(baseOrder.client_order_id, CultureInfo.InvariantCulture);
             }
             catch
             {
@@ -1986,7 +1986,7 @@ namespace OsEngine.Market.Servers.BitMart
 
             try
             {
-                order.NumberUser = Convert.ToInt32(baseOrder.clientOrderId);
+                order.NumberUser = Convert.ToInt32(baseOrder.clientOrderId, CultureInfo.InvariantCulture);
             }
             catch
             {

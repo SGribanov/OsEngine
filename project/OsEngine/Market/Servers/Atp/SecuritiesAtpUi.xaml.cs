@@ -8,6 +8,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Windows;
 using System.Windows.Forms;
 using OsEngine.Language;
@@ -498,7 +499,7 @@ namespace OsEngine.Market.Servers.Atp
 
             try
             {
-                newSec.DecimalsVolume = Convert.ToInt32(row.Cells[7].Value.ToString());
+                newSec.DecimalsVolume = Convert.ToInt32(row.Cells[7].Value.ToString(), CultureInfo.InvariantCulture);
             }
             catch
             {
@@ -507,7 +508,7 @@ namespace OsEngine.Market.Servers.Atp
 
             try
             {
-                newSec.Decimals = Convert.ToInt32(row.Cells[8].Value.ToString());
+                newSec.Decimals = Convert.ToInt32(row.Cells[8].Value.ToString(), CultureInfo.InvariantCulture);
             }
             catch
             {

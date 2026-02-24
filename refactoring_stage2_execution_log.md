@@ -7139,6 +7139,51 @@
 - **Commit:** n/a (not committed in this session)
 - **Push:** n/a
 
+### Step 2.2 - CultureInfo Invariant Persistence (Incremental Adoption #497)
+
+- **Status:** In Progress (increment completed)
+- **Plan item:** `refactoring_stage2_plan.md` -> Phase 2 / Step 2.2
+- **Changes:**
+  - Hardened explicit invariant parsing of string-based int values in:
+    - `project/OsEngine/Robots/BotCreateUi2.xaml.cs`
+    - `project/OsEngine/Market/Connectors/MassSourcesCreateUi.xaml.cs`
+    - `project/OsEngine/Market/Connectors/ConnectorCandlesUi.xaml.cs`
+  - Replacements:
+    - `Convert.ToInt32(value)` -> `Convert.ToInt32(value, CultureInfo.InvariantCulture)` in UI textbox/config parsing paths.
+  - Scope:
+    - parser hardening only; runtime behavior unchanged for valid API payloads.
+- **Verification:**
+  - Executed outside sandbox.
+  - `dotnet restore project/OsEngine/OsEngine.csproj --nologo` succeeded.
+  - `dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo` succeeded.
+  - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` succeeded (0 warnings).
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` succeeded (`352/352`).
+- **Commit:** n/a (not committed in this session)
+- **Push:** n/a
+
+### Step 2.2 - CultureInfo Invariant Persistence (Incremental Adoption #498)
+
+- **Status:** In Progress (increment completed)
+- **Plan item:** `refactoring_stage2_plan.md` -> Phase 2 / Step 2.2
+- **Changes:**
+  - Hardened explicit invariant parsing of string-based int values in:
+    - `project/OsEngine/Market/Connectors/ConnectorNewsUi.xaml.cs`
+    - `project/OsEngine/Market/Connectors/ConnectorNews.cs`
+    - `project/OsEngine/Entity/DateTimeSelectionDialog.xaml.cs`
+    - `project/OsEngine/Entity/SecurityUi.xaml.cs`
+  - Replacements:
+    - `Convert.ToInt32(value)` -> `Convert.ToInt32(value, CultureInfo.InvariantCulture)` in textbox and legacy settings parsing paths.
+  - Scope:
+    - parser hardening only; runtime behavior unchanged for valid API payloads.
+- **Verification:**
+  - Executed outside sandbox.
+  - `dotnet restore project/OsEngine/OsEngine.csproj --nologo` succeeded.
+  - `dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo` succeeded.
+  - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` succeeded (0 warnings).
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` succeeded (`352/352`).
+- **Commit:** n/a (not committed in this session)
+- **Push:** n/a
+
 ### Step 2.2 - CultureInfo Invariant Persistence (Incremental Adoption #419)
 
 - **Status:** In Progress (increment completed)
@@ -10326,6 +10371,723 @@
     - `project/OsEngine/Market/Servers/Pionex/PionexServerSpot.cs`
   - Replacements:
     - `Convert.ToInt32(value)` -> `Convert.ToInt32(value, CultureInfo.InvariantCulture)` for KuCoin `clientOid`, Pionex `quotePrecision`/`basePrecision`, and Pionex `clientOrderId`.
+  - Scope:
+    - parser hardening only; runtime behavior unchanged for valid API payloads.
+- **Verification:**
+  - Executed outside sandbox.
+  - `dotnet restore project/OsEngine/OsEngine.csproj --nologo` succeeded.
+  - `dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo` succeeded.
+  - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` succeeded (0 warnings).
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` succeeded (`352/352`).
+- **Commit:** n/a (not committed in this session)
+- **Push:** n/a
+
+### Step 2.2 - CultureInfo Invariant Persistence (Incremental Adoption #475)
+
+- **Status:** In Progress (increment completed)
+- **Plan item:** `refactoring_stage2_plan.md` -> Phase 2 / Step 2.2
+- **Changes:**
+  - Hardened explicit invariant parsing of string-based int values in:
+    - `project/OsEngine/Market/Servers/BingX/BingXSpot/BingXServerSpot.cs`
+    - `project/OsEngine/Market/Servers/BingX/BingXFutures/BingXServerFutures.cs`
+    - `project/OsEngine/Market/Servers/ExMo/ExmoSpot/ExmoSpotServer.cs`
+    - `project/OsEngine/Market/Servers/BitGet/BitGetSpot/BitGetServerSpot.cs`
+    - `project/OsEngine/Market/Servers/BitGet/BitGetFutures/BitGetServerFutures.cs`
+  - Replacements:
+    - `Convert.ToInt32(value)` -> `Convert.ToInt32(value, CultureInfo.InvariantCulture)` for:
+      - BingX `clientOrderID`/`clientOrderId` and precision fields (`pricePrecision`, `quantityPrecision`).
+      - ExMo `client_id` and `price_precision`.
+      - BitGet `clientOid` and precision fields (`pricePrecision`, `quantityPrecision`, `pricePlace`, `priceEndStep`, `volumePlace`).
+  - Scope:
+    - parser hardening only; runtime behavior unchanged for valid API payloads.
+- **Verification:**
+  - Executed outside sandbox.
+  - `dotnet restore project/OsEngine/OsEngine.csproj --nologo` succeeded.
+  - `dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo` succeeded.
+  - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` succeeded (0 warnings).
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` succeeded (`352/352`).
+- **Commit:** n/a (not committed in this session)
+- **Push:** n/a
+
+### Step 2.2 - CultureInfo Invariant Persistence (Incremental Adoption #476)
+
+- **Status:** In Progress (increment completed)
+- **Plan item:** `refactoring_stage2_plan.md` -> Phase 2 / Step 2.2
+- **Changes:**
+  - Hardened explicit invariant parsing of string-based int values in:
+    - `project/OsEngine/Market/Servers/CoinEx/Spot/CoinExServerSpot.cs`
+    - `project/OsEngine/Market/Servers/CoinEx/Futures/CoinExServerFutures.cs`
+    - `project/OsEngine/Market/Servers/KiteConnect/KiteConnectServer.cs`
+    - `project/OsEngine/Market/Servers/Mexc/MexcSpot/MexcSpotServer.cs`
+    - `project/OsEngine/Market/Servers/XT/XTSpot/XTServerSpot.cs`
+    - `project/OsEngine/Market/Servers/XT/XTFutures/XTFuturesServer.cs`
+  - Replacements:
+    - `Convert.ToInt32(value)` -> `Convert.ToInt32(value, CultureInfo.InvariantCulture)` for:
+      - CoinEx `client_id` and precision fields (`quote_ccy_precision`, `base_ccy_precision`).
+      - KiteConnect `userNumber` mapping into order `NumberUser`.
+      - Mexc `clientId`/`clientOrderId` and precision fields (`quoteAssetPrecision`, `baseAssetPrecision`).
+      - XT spot/futures client order ids and precision fields (`pricePrecision`, `quantityPrecision`).
+  - Scope:
+    - parser hardening only; runtime behavior unchanged for valid API payloads.
+- **Verification:**
+  - Executed outside sandbox.
+  - `dotnet restore project/OsEngine/OsEngine.csproj --nologo` succeeded.
+  - `dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo` succeeded.
+  - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` succeeded (0 warnings).
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` succeeded (`352/352`).
+- **Commit:** n/a (not committed in this session)
+- **Push:** n/a
+
+### Step 2.2 - CultureInfo Invariant Persistence (Incremental Adoption #477)
+
+- **Status:** In Progress (increment completed)
+- **Plan item:** `refactoring_stage2_plan.md` -> Phase 2 / Step 2.2
+- **Changes:**
+  - Hardened explicit invariant parsing of string-based int values in:
+    - `project/OsEngine/Market/Servers/Binance/Spot/BinanceServerSpot.cs`
+    - `project/OsEngine/Market/Servers/Binance/Futures/BinanceServerFutures.cs`
+    - `project/OsEngine/Market/Servers/Bybit/BybitServer.cs`
+    - `project/OsEngine/Market/Servers/BitMart/BitMartSpot/BitMartSpotServer.cs`
+    - `project/OsEngine/Market/Servers/BitMart/BitMartFutures/BitMartFutures.cs`
+    - `project/OsEngine/Market/Servers/Transaq/TransaqServer.cs`
+    - `project/OsEngine/Market/Servers/QuikLua/QuikLuaServer.cs`
+  - Replacements:
+    - `Convert.ToInt32(value)` -> `Convert.ToInt32(value, CultureInfo.InvariantCulture)` for:
+      - Binance spot/futures client order ids.
+      - Bybit `orderLinkId` / `numUser`.
+      - BitMart spot/futures `client_order_id`, `clientOrderId`, and side/action fields.
+      - Transaq `Transactionid` and security decimals.
+      - QuikLua `TransID` order mapping.
+  - Scope:
+    - parser hardening only; runtime behavior unchanged for valid API payloads.
+- **Verification:**
+  - Executed outside sandbox.
+  - `dotnet restore project/OsEngine/OsEngine.csproj --nologo` succeeded.
+  - `dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo` succeeded.
+  - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` succeeded (0 warnings).
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` succeeded (`352/352`).
+- **Commit:** n/a (not committed in this session)
+- **Push:** n/a
+
+### Step 2.2 - CultureInfo Invariant Persistence (Incremental Adoption #478)
+
+- **Status:** In Progress (increment completed)
+- **Plan item:** `refactoring_stage2_plan.md` -> Phase 2 / Step 2.2
+- **Changes:**
+  - Hardened explicit invariant parsing of string-based int values in:
+    - `project/OsEngine/Market/Servers/Bitfinex/BitfinexSpot/BitfinexSpotServer.cs`
+    - `project/OsEngine/Market/Servers/Bitfinex/BitfinexFutures/BitfinexFuturesServer.cs`
+    - `project/OsEngine/Market/Servers/MoexFixFastTwimeFutures/MoexFixFastTwimeFuturesServer.cs`
+    - `project/OsEngine/Market/Servers/InteractiveBrokers/IbClient.cs`
+    - `project/OsEngine/Market/Servers/Plaza/PlazaServer.cs`
+  - Replacements:
+    - `Convert.ToInt32(value)` -> `Convert.ToInt32(value, CultureInfo.InvariantCulture)` for:
+      - Bitfinex websocket channel ids and order/user id mapping values.
+      - MoexFixFastTwimeFutures security-id conversion from string mappings.
+      - InteractiveBrokers order lookup by `NumberMarket`.
+      - Plaza security-id conversion from `NameId`.
+  - Scope:
+    - parser hardening only; runtime behavior unchanged for valid API payloads.
+- **Verification:**
+  - Executed outside sandbox.
+  - `dotnet restore project/OsEngine/OsEngine.csproj --nologo` succeeded.
+  - `dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo` succeeded.
+  - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` succeeded (0 warnings).
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` succeeded (`352/352`).
+- **Commit:** n/a (not committed in this session)
+- **Push:** n/a
+
+### Step 2.2 - CultureInfo Invariant Persistence (Incremental Adoption #479)
+
+- **Status:** In Progress (increment completed)
+- **Plan item:** `refactoring_stage2_plan.md` -> Phase 2 / Step 2.2
+- **Changes:**
+  - Hardened explicit invariant parsing of string-based int values in:
+    - `project/OsEngine/Market/Servers/MoexFixFastSpot/MoexFixFastSpotServer.cs`
+    - `project/OsEngine/Market/Servers/MoexFixFastCurrency/MoexFixFastCurrencyServer.cs`
+    - `project/OsEngine/Market/Servers/MoexFixFastTwimeFutures/MoexFixFastTwimeFuturesServer.cs`
+  - Replacements:
+    - `int.Parse(value)` -> `int.Parse(value, CultureInfo.InvariantCulture)` for:
+      - XML/FIX port values.
+      - FIX message integer fields (`SessionStatus`, `SecondaryClOrdID`).
+      - security decimals (`secDecimals`).
+      - FAST template ids (`tmplt.Id`).
+  - Scope:
+    - parser hardening only; runtime behavior unchanged for valid API payloads.
+- **Verification:**
+  - Executed outside sandbox.
+  - `dotnet restore project/OsEngine/OsEngine.csproj --nologo` succeeded.
+  - `dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo` succeeded.
+  - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` succeeded (0 warnings).
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` succeeded (`352/352`).
+- **Commit:** n/a (not committed in this session)
+- **Push:** n/a
+
+### Step 2.2 - CultureInfo Invariant Persistence (Incremental Adoption #480)
+
+- **Status:** In Progress (increment completed)
+- **Plan item:** `refactoring_stage2_plan.md` -> Phase 2 / Step 2.2
+- **Changes:**
+  - Hardened explicit invariant parsing of string-based int values in:
+    - `project/OsEngine/Market/Servers/GateIoData/GateIoDataServer.cs`
+    - `project/OsEngine/Market/Servers/GateIo/GateIoSpot/GateIoServerSpot.cs`
+    - `project/OsEngine/Market/Servers/GateIo/GateIoFutures/GateIoServerFutures.cs`
+    - `project/OsEngine/Market/Servers/BinanceData/BinanceDataServer.cs`
+    - `project/OsEngine/Market/Servers/KuCoin/KuCoinFutures/KuCoinFuturesServer.cs`
+    - `project/OsEngine/Market/Servers/BingX/BingXFutures/BingXServerFutures.cs`
+    - `project/OsEngine/Market/Servers/BitMart/BitMartFutures/BitMartFutures.cs`
+    - `project/OsEngine/Market/Servers/HTX/Swap/HTXSwapServer.cs`
+    - `project/OsEngine/Market/Servers/OKX/OkxServer.cs`
+    - `project/OsEngine/Market/Servers/CoinEx/Futures/CoinExServerFutures.cs`
+    - `project/OsEngine/Market/Servers/Woo/WooServer.cs`
+  - Replacements:
+    - `int.Parse(value)` -> `int.Parse(value, CultureInfo.InvariantCulture)` for:
+      - timestamp fields from external payloads.
+      - funding interval fields (`Hours`, `funding_interval`, `fundingRateGranularity`, etc.).
+      - BinanceData archive date/month extraction fields.
+  - Scope:
+    - parser hardening only; runtime behavior unchanged for valid API payloads.
+- **Verification:**
+  - Executed outside sandbox.
+  - `dotnet restore project/OsEngine/OsEngine.csproj --nologo` succeeded.
+  - `dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo` succeeded.
+  - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` succeeded (0 warnings).
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` succeeded (`352/352`).
+- **Commit:** n/a (not committed in this session)
+- **Push:** n/a
+
+### Step 2.2 - CultureInfo Invariant Persistence (Incremental Adoption #481)
+
+- **Status:** In Progress (increment completed)
+- **Plan item:** `refactoring_stage2_plan.md` -> Phase 2 / Step 2.2
+- **Changes:**
+  - Hardened explicit invariant parsing of string-based int values in:
+    - `project/OsEngine/Market/Servers/Alor/AlorServer.cs`
+  - Replacements:
+    - `Convert.ToInt32(value)` -> `Convert.ToInt32(value, CultureInfo.InvariantCulture)` for:
+      - cancellation date fragments (`year/month/day`).
+      - `baseMessage.comment` mapped to `order.NumberUser`.
+      - date/time fragment parsing in conversion helper (`year/month/day/hour/minute/second/ms`).
+  - Scope:
+    - parser hardening only; runtime behavior unchanged for valid API payloads.
+- **Verification:**
+  - Executed outside sandbox.
+  - `dotnet restore project/OsEngine/OsEngine.csproj --nologo` succeeded.
+  - `dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo` succeeded.
+  - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` succeeded (0 warnings).
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` succeeded (`352/352`).
+- **Commit:** n/a (not committed in this session)
+- **Push:** n/a
+
+### Step 2.2 - CultureInfo Invariant Persistence (Incremental Adoption #482)
+
+- **Status:** In Progress (increment completed)
+- **Plan item:** `refactoring_stage2_plan.md` -> Phase 2 / Step 2.2
+- **Changes:**
+  - Hardened explicit invariant parsing of string-based int values in:
+    - `project/OsEngine/Market/Servers/Finam/FinamServer.cs`
+    - `project/OsEngine/Market/Servers/Atp/AtpServer.cs`
+    - `project/OsEngine/Market/Servers/NinjaTrader/NinjaTraderClient.cs`
+  - Replacements:
+    - Finam: introduced `marketId = Convert.ToInt32(arrayMarkets[i], CultureInfo.InvariantCulture)` and switched repeated market-id comparisons to `marketId`.
+    - Atp: `Convert.ToInt32(value)` -> `Convert.ToInt32(value, CultureInfo.InvariantCulture)` in order id and date/time parsing paths.
+    - NinjaTrader: `Convert.ToInt32(value)` -> `Convert.ToInt32(value, CultureInfo.InvariantCulture)` for incoming `NumberUser` mappings.
+  - Scope:
+    - parser hardening only; runtime behavior unchanged for valid API payloads.
+- **Verification:**
+  - Executed outside sandbox.
+  - `dotnet restore project/OsEngine/OsEngine.csproj --nologo` succeeded.
+  - `dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo` succeeded.
+  - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` succeeded (0 warnings).
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` succeeded (`352/352`).
+- **Commit:** n/a (not committed in this session)
+- **Push:** n/a
+
+### Step 2.2 - CultureInfo Invariant Persistence (Incremental Adoption #483)
+
+- **Status:** In Progress (increment completed)
+- **Plan item:** `refactoring_stage2_plan.md` -> Phase 2 / Step 2.2
+- **Changes:**
+  - Hardened explicit invariant parsing of string-based int values in:
+    - `project/OsEngine/Market/Servers/QuikLua/QuikLuaServer.cs`
+    - `project/OsEngine/Market/Servers/TraderNet/TraderNetServer.cs`
+  - Replacements:
+    - QuikLua:
+      - `Convert.ToInt32(value)` -> `Convert.ToInt32(value, CultureInfo.InvariantCulture)` for expiration fragments, `Scale`, `Qty`, `Flags`, `OpenInterest`.
+    - TraderNet:
+      - `Convert.ToInt32(value)` -> `Convert.ToInt32(value, CultureInfo.InvariantCulture)` for `instr_type_c` and MD index fields (`del/ins/upd[*].k`).
+  - Scope:
+    - parser hardening only; runtime behavior unchanged for valid API payloads.
+- **Verification:**
+  - Executed outside sandbox.
+  - `dotnet restore project/OsEngine/OsEngine.csproj --nologo` succeeded.
+  - `dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo` succeeded.
+  - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` succeeded (0 warnings).
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` succeeded (`352/352`).
+- **Commit:** n/a (not committed in this session)
+- **Push:** n/a
+
+### Step 2.2 - CultureInfo Invariant Persistence (Incremental Adoption #484)
+
+- **Status:** In Progress (increment completed)
+- **Plan item:** `refactoring_stage2_plan.md` -> Phase 2 / Step 2.2
+- **Changes:**
+  - Hardened explicit invariant parsing of string-based numeric values in:
+    - `project/OsEngine/Market/Servers/AscendEX/AscendEXSpot/AscendexSpotServer.cs`
+    - `project/OsEngine/Market/Servers/BitGet/BitGetFutures/BitGetServerFutures.cs`
+    - `project/OsEngine/Market/Servers/MoexAlgopack/MoexAlgopackServer.cs`
+  - Replacements:
+    - AscendEX: `Convert.ToInt32(priceScale/qtyScale)` -> `Convert.ToInt32(..., CultureInfo.InvariantCulture)`.
+    - BitGet futures: `int.Parse(item.fundingRateInterval)` -> `int.Parse(item.fundingRateInterval, CultureInfo.InvariantCulture)`.
+    - MoexAlgopack: `Convert.ToInt32(item[5|8])` -> `Convert.ToInt32(..., CultureInfo.InvariantCulture)` for security decimals.
+  - Scope:
+    - parser hardening only; runtime behavior unchanged for valid API payloads.
+- **Verification:**
+  - Executed outside sandbox.
+  - `dotnet restore project/OsEngine/OsEngine.csproj --nologo` succeeded.
+  - `dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo` succeeded.
+  - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` succeeded (0 warnings).
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` succeeded (`352/352`).
+- **Commit:** n/a (not committed in this session)
+- **Push:** n/a
+
+### Step 2.2 - CultureInfo Invariant Persistence (Incremental Adoption #485)
+
+- **Status:** In Progress (increment completed)
+- **Plan item:** `refactoring_stage2_plan.md` -> Phase 2 / Step 2.2
+- **Changes:**
+  - Hardened explicit invariant parsing of string-based settings values in:
+    - `project/OsEngine/Market/Servers/Optimizer/OptimizerDataStorageUi.xaml.cs`
+    - `project/OsEngine/Market/Servers/Optimizer/OptimizerDataStorage.cs`
+    - `project/OsEngine/Market/Servers/Tester/TesterServerUi.xaml.cs`
+    - `project/OsEngine/Market/Servers/Tester/TesterServer.cs`
+  - Replacements:
+    - `Convert.ToInt32(TextBox*.Text)` -> `Convert.ToInt32(..., CultureInfo.InvariantCulture)`
+    - `int.Parse(values[i])` -> `int.Parse(..., CultureInfo.InvariantCulture)`
+    - `Convert.ToInt32(array[i][...])` -> `Convert.ToInt32(..., CultureInfo.InvariantCulture)`
+  - Scope:
+    - parser hardening only; runtime behavior unchanged for valid API payloads.
+- **Verification:**
+  - Executed outside sandbox.
+  - `dotnet restore project/OsEngine/OsEngine.csproj --nologo` succeeded.
+  - `dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo` succeeded.
+  - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` succeeded (0 warnings).
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` succeeded (`352/352`).
+- **Commit:** n/a (not committed in this session)
+- **Push:** n/a
+
+### Step 2.2 - CultureInfo Invariant Persistence (Incremental Adoption #486)
+
+- **Status:** In Progress (increment completed)
+- **Plan item:** `refactoring_stage2_plan.md` -> Phase 2 / Step 2.2
+- **Changes:**
+  - Hardened explicit invariant parsing of string-based values in:
+    - `project/OsEngine/Market/Servers/ComparePositionsModuleUi.xaml.cs`
+    - `project/OsEngine/Market/Servers/Atp/SecuritiesAtpUi.xaml.cs`
+    - `project/OsEngine/Market/Servers/Entity/ServerParameter.cs`
+    - `project/OsEngine/Market/Servers/MetaTrader5/MetaTrader5Server.cs`
+    - `project/OsEngine/Market/Servers/MOEX/MoexIssDataServer.cs`
+    - `project/OsEngine/Market/Servers/TelegramNews/TelegramNewsServer.cs`
+  - Replacements:
+    - `Convert.ToInt32(value)` -> `Convert.ToInt32(value, CultureInfo.InvariantCulture)` for UI/grid values, persisted parameter values, and string-derived id fragments.
+    - `int.Parse(value)` -> `int.Parse(value, CultureInfo.InvariantCulture)` for regex-derived Telegram interval values.
+  - Scope:
+    - parser hardening only; runtime behavior unchanged for valid API payloads.
+- **Verification:**
+  - Executed outside sandbox.
+  - `dotnet restore project/OsEngine/OsEngine.csproj --nologo` succeeded.
+  - `dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo` succeeded.
+  - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` succeeded (0 warnings).
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` succeeded (`352/352`).
+- **Commit:** n/a (not committed in this session)
+- **Push:** n/a
+
+### Step 2.2 - CultureInfo Invariant Persistence (Incremental Adoption #487)
+
+- **Status:** In Progress (increment completed)
+- **Plan item:** `refactoring_stage2_plan.md` -> Phase 2 / Step 2.2
+- **Changes:**
+  - Hardened explicit invariant parsing of string-based int values in:
+    - `project/OsEngine/Market/Servers/AServerParameterUi.xaml.cs`
+  - Replacements:
+    - `Convert.ToInt32(str)` -> `Convert.ToInt32(str, CultureInfo.InvariantCulture)` in server parameter UI int value mapping.
+  - Scope:
+    - parser hardening only; runtime behavior unchanged for valid API payloads.
+- **Verification:**
+  - Executed outside sandbox.
+  - `dotnet restore project/OsEngine/OsEngine.csproj --nologo` succeeded.
+  - `dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo` succeeded.
+  - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` succeeded (0 warnings).
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` succeeded (`352/352`).
+- **Commit:** n/a (not committed in this session)
+- **Push:** n/a
+
+### Step 2.2 - CultureInfo Invariant Persistence (Incremental Adoption #488)
+
+- **Status:** In Progress (increment completed)
+- **Plan item:** `refactoring_stage2_plan.md` -> Phase 2 / Step 2.2
+- **Changes:**
+  - Hardened explicit invariant parsing of string-based values in:
+    - `project/OsEngine/OsData/OsDataSet.cs`
+  - Replacements:
+    - `Convert.ToInt32(saveArray[22])` -> `Convert.ToInt32(..., CultureInfo.InvariantCulture)`
+    - `Convert.ToInt32(reader.ReadLine())` -> `Convert.ToInt32(..., CultureInfo.InvariantCulture)`
+    - `int.Parse(datesStr[2])` -> `int.Parse(..., CultureInfo.InvariantCulture)`
+    - `Convert.ToInt32(setParts[2])` -> `Convert.ToInt32(..., CultureInfo.InvariantCulture)`
+    - `int.Parse(setParts[2])` -> `int.Parse(..., CultureInfo.InvariantCulture)`
+  - Scope:
+    - parser hardening only; runtime behavior unchanged for valid payloads.
+- **Verification:**
+  - Executed outside sandbox.
+  - `dotnet restore project/OsEngine/OsEngine.csproj --nologo` succeeded.
+  - `dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo` succeeded.
+  - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` succeeded (0 warnings).
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` succeeded (`352/352`).
+- **Commit:** n/a (not committed in this session)
+- **Push:** n/a
+
+### Step 2.2 - CultureInfo Invariant Persistence (Incremental Adoption #489)
+
+- **Status:** In Progress (increment completed)
+- **Plan item:** `refactoring_stage2_plan.md` -> Phase 2 / Step 2.2
+- **Changes:**
+  - Hardened explicit invariant parsing of string-based values in:
+    - `project/OsEngine/OsData/OsDataSetUi.xaml.cs`
+    - `project/OsEngine/OsData/OsDataSetPainter.cs`
+    - `project/OsEngine/OsData/SetDuplicationUi.xaml.cs`
+    - `project/OsEngine/OsData/SetUpdatingUi.xaml.cs`
+    - `project/OsEngine/OsData/NewSecurityUi.xaml.cs`
+  - Replacements:
+    - `Convert.ToInt32(value)` -> `Convert.ToInt32(value, CultureInfo.InvariantCulture)`
+    - `int.Parse(value)` -> `int.Parse(value, CultureInfo.InvariantCulture)`
+    - applied to UI textbox/combo/label/grid string parsing paths.
+  - Scope:
+    - parser hardening only; runtime behavior unchanged for valid payloads.
+- **Verification:**
+  - Executed outside sandbox.
+  - `dotnet restore project/OsEngine/OsEngine.csproj --nologo` succeeded.
+  - `dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo` succeeded.
+  - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` succeeded (0 warnings).
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` succeeded (`352/352`).
+- **Commit:** n/a (not committed in this session)
+- **Push:** n/a
+
+### Step 2.2 - CultureInfo Invariant Persistence (Incremental Adoption #490)
+
+- **Status:** In Progress (increment completed)
+- **Plan item:** `refactoring_stage2_plan.md` -> Phase 2 / Step 2.2
+- **Changes:**
+  - Hardened explicit invariant parsing of string-based int values in:
+    - `project/OsEngine/Entity/StrategyParameter.cs`
+    - `project/OsEngine/Journal/Internal/PositionController.cs`
+    - `project/OsEngine/OsTrader/Grids/TradeGrid.cs`
+    - `project/OsEngine/OsTrader/Panels/Tab/BotTabPair.cs`
+  - Replacements:
+    - `Convert.ToInt32(value)` -> `Convert.ToInt32(value, CultureInfo.InvariantCulture)` in settings/load and grid parsing paths.
+    - Applied to `save[]/array[]/values[]/lines[]` and grid cell value parsing.
+  - Scope:
+    - parser hardening only; runtime behavior unchanged for valid API payloads.
+- **Verification:**
+  - Executed outside sandbox.
+  - `dotnet restore project/OsEngine/OsEngine.csproj --nologo` succeeded.
+  - `dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo` succeeded.
+  - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` succeeded (0 warnings).
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` succeeded (`352/352`).
+- **Commit:** n/a (not committed in this session)
+- **Push:** n/a
+
+### Step 2.2 - CultureInfo Invariant Persistence (Incremental Adoption #491)
+
+- **Status:** In Progress (increment completed)
+- **Plan item:** `refactoring_stage2_plan.md` -> Phase 2 / Step 2.2
+- **Changes:**
+  - Hardened explicit invariant parsing of string-based int values in:
+    - `project/OsEngine/OsTrader/GlobalPositionViewer.cs`
+    - `project/OsEngine/Entity/SecuritiesUi.xaml.cs`
+  - Replacements:
+    - `Convert.ToInt32(value)` -> `Convert.ToInt32(value, CultureInfo.InvariantCulture)` in UI/grid parsing paths.
+    - Applied to row ids, selected position ids, and label/grid precision values.
+  - Scope:
+    - parser hardening only; runtime behavior unchanged for valid API payloads.
+- **Verification:**
+  - Executed outside sandbox.
+  - `dotnet restore project/OsEngine/OsEngine.csproj --nologo` succeeded.
+  - `dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo` succeeded.
+  - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` succeeded (0 warnings).
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` succeeded (`352/352`).
+- **Commit:** n/a (not committed in this session)
+- **Push:** n/a
+
+### Step 2.2 - CultureInfo Invariant Persistence (Incremental Adoption #492)
+
+- **Status:** In Progress (increment completed)
+- **Plan item:** `refactoring_stage2_plan.md` -> Phase 2 / Step 2.2
+- **Changes:**
+  - Hardened explicit invariant parsing of string-based int values in:
+    - `project/OsEngine/Journal/JournalUi.xaml.cs`
+    - `project/OsEngine/Journal/JournalUi2.xaml.cs`
+  - Replacements:
+    - `Convert.ToInt32(value)` -> `Convert.ToInt32(value, CultureInfo.InvariantCulture)` in grid/string parsing paths.
+    - Applied to position ids from data-grid cells and split-string range values (`selectNum/selectNums`).
+  - Scope:
+    - parser hardening only; runtime behavior unchanged for valid API payloads.
+- **Verification:**
+  - Executed outside sandbox.
+  - `dotnet restore project/OsEngine/OsEngine.csproj --nologo` succeeded.
+  - `dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo` succeeded.
+  - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` succeeded (0 warnings).
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` succeeded (`352/352`).
+- **Commit:** n/a (not committed in this session)
+- **Push:** n/a
+
+### Step 2.2 - CultureInfo Invariant Persistence (Incremental Adoption #493)
+
+- **Status:** In Progress (increment completed)
+- **Plan item:** `refactoring_stage2_plan.md` -> Phase 2 / Step 2.2
+- **Changes:**
+  - Hardened explicit invariant parsing of string-based int values in:
+    - `project/OsEngine/OsTrader/Grids/TradeGridUi.xaml.cs`
+  - Replacements:
+    - `Convert.ToInt32(value)` -> `Convert.ToInt32(value, CultureInfo.InvariantCulture)` in UI textbox/grid parsing paths.
+    - Applied to `Fail*`, `WaitSeconds`, `LineCountStart`, `StopBy*`, `AutoStarter*`, `Max*`, `DelayInReal`, and grid row number parsing.
+  - Scope:
+    - parser hardening only; runtime behavior unchanged for valid API payloads.
+- **Verification:**
+  - Executed outside sandbox.
+  - `dotnet restore project/OsEngine/OsEngine.csproj --nologo` succeeded.
+  - `dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo` succeeded.
+  - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` succeeded (0 warnings).
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` succeeded (`352/352`).
+- **Commit:** n/a (not committed in this session)
+- **Push:** n/a
+
+### Step 2.2 - CultureInfo Invariant Persistence (Incremental Adoption #494)
+
+- **Status:** In Progress (increment completed)
+- **Plan item:** `refactoring_stage2_plan.md` -> Phase 2 / Step 2.2
+- **Changes:**
+  - Hardened explicit invariant parsing of string-based int values in:
+    - `project/OsEngine/OsOptimizer/OptimizerUi.xaml.cs`
+  - Replacements:
+    - `Convert.ToInt32(value)` -> `Convert.ToInt32(value, CultureInfo.InvariantCulture)` in optimizer UI text/grid parsing paths.
+    - Applied to iteration/filter/start-deposit fields, Bayesian integer fields, and optimizer parameter grid values.
+    - Kept computed non-string numeric casts unchanged (`sortedValue.Count * ...`).
+  - Scope:
+    - parser hardening only; runtime behavior unchanged for valid API payloads.
+- **Verification:**
+  - Executed outside sandbox.
+  - `dotnet restore project/OsEngine/OsEngine.csproj --nologo` succeeded.
+  - `dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo` succeeded.
+  - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` succeeded (0 warnings).
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` succeeded (`352/352`).
+- **Commit:** n/a (not committed in this session)
+- **Push:** n/a
+
+### Step 2.2 - CultureInfo Invariant Persistence (Incremental Adoption #495)
+
+- **Status:** In Progress (increment completed)
+- **Plan item:** `refactoring_stage2_plan.md` -> Phase 2 / Step 2.2
+- **Changes:**
+  - Hardened explicit invariant parsing of string-based int values in:
+    - `project/OsEngine/OsTrader/Panels/Tab/Internal/PositionOpenUi2.xaml.cs`
+    - `project/OsEngine/OsTrader/Panels/Tab/Internal/BotManualControlUi.xaml.cs`
+    - `project/OsEngine/OsTrader/Grids/TradeGridStopBy.cs`
+    - `project/OsEngine/OsTrader/Grids/TradeGridAutoStarter.cs`
+    - `project/OsEngine/OsTrader/Grids/TradeGridErrorsReaction.cs`
+  - Replacements:
+    - `Convert.ToInt32(value)` -> `Convert.ToInt32(value, CultureInfo.InvariantCulture)` for UI text parsing and `values[]` settings parsing.
+    - Applied to lifetime/time fields, manual control seconds, stop/autostart/error reaction settings.
+  - Scope:
+    - parser hardening only; runtime behavior unchanged for valid API payloads.
+- **Verification:**
+  - Executed outside sandbox.
+  - `dotnet restore project/OsEngine/OsEngine.csproj --nologo` succeeded.
+  - `dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo` succeeded.
+  - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` succeeded (0 warnings).
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` succeeded (`352/352`).
+- **Commit:** n/a (not committed in this session)
+- **Push:** n/a
+
+### Step 2.2 - CultureInfo Invariant Persistence (Incremental Adoption #496)
+
+- **Status:** In Progress (increment completed)
+- **Plan item:** `refactoring_stage2_plan.md` -> Phase 2 / Step 2.2
+- **Changes:**
+  - Hardened explicit invariant parsing of string-based int values in:
+    - `project/OsEngine/OsOptimizer/OptEntity/OptimizerSettings.cs`
+    - `project/OsEngine/OsOptimizer/OptimizerMaster.cs`
+    - `project/OsEngine/OsTrader/Panels/Tab/BotTabIndex.cs`
+  - Replacements:
+    - OptimizerSettings: string reads from config persisted file (`reader.ReadLine()`).
+    - OptimizerMaster: string-based `str[]` persisted values.
+    - BotTabIndex: parsed values from `Split('A')`.
+    - All updated to `Convert.ToInt32(..., CultureInfo.InvariantCulture)`.
+  - Scope:
+    - parser hardening only; runtime behavior unchanged for valid API payloads.
+- **Verification:**
+  - Executed outside sandbox.
+  - `dotnet restore project/OsEngine/OsEngine.csproj --nologo` succeeded.
+  - `dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo` succeeded.
+  - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` succeeded (0 warnings).
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` succeeded (`352/352`).
+- **Commit:** n/a (not committed in this session)
+- **Push:** n/a
+
+### Step 2.2 - CultureInfo Invariant Persistence (Incremental Adoption #499)
+
+- **Status:** In Progress (increment completed)
+- **Plan item:** `refactoring_stage2_plan.md` -> Phase 2 / Step 2.2
+- **Changes:**
+  - Hardened explicit invariant parsing of string-based int values in:
+    - `project/OsEngine/Alerts/AlertToPriceCreateUi.xaml.cs`
+    - `project/OsEngine/Alerts/AlertToPrice.cs`
+    - `project/OsEngine/Alerts/AlertToChartCreateUi.xaml.cs`
+    - `project/OsEngine/Alerts/AlertToChart.cs`
+  - Replacements:
+    - `Convert.ToInt32(value)` -> `Convert.ToInt32(value, CultureInfo.InvariantCulture)` in textbox and legacy alert settings parsing paths.
+  - Scope:
+    - parser hardening only; runtime behavior unchanged for valid API payloads.
+- **Verification:**
+  - Executed outside sandbox.
+  - `dotnet restore project/OsEngine/OsEngine.csproj --nologo` succeeded.
+  - `dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo` succeeded.
+  - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` succeeded (0 warnings).
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` succeeded (`352/352`).
+- **Commit:** n/a (not committed in this session)
+- **Push:** n/a
+
+### Step 2.2 - CultureInfo Invariant Persistence (Incremental Adoption #500)
+
+- **Status:** In Progress (increment completed)
+- **Plan item:** `refactoring_stage2_plan.md` -> Phase 2 / Step 2.2
+- **Changes:**
+  - Hardened explicit invariant parsing of string-based int values in:
+    - `project/OsEngine/Market/Proxy/ProxyOsa.cs`
+    - `project/OsEngine/Market/Proxy/ProxyMaster.cs`
+    - `project/OsEngine/Market/Proxy/ProxyMasterUi.xaml.cs`
+  - Replacements:
+    - `Convert.ToInt32(value)`/`int.Parse(value)` -> invariant-culture `Convert.ToInt32(..., CultureInfo.InvariantCulture)` for persisted proxy settings and UI/grid values.
+  - Scope:
+    - parser hardening only; runtime behavior unchanged for valid API payloads.
+- **Verification:**
+  - Executed outside sandbox.
+  - `dotnet restore project/OsEngine/OsEngine.csproj --nologo` succeeded.
+  - `dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo` succeeded.
+  - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` succeeded (0 warnings).
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` succeeded (`352/352`).
+- **Commit:** n/a (not committed in this session)
+- **Push:** n/a
+
+### Step 2.2 - CultureInfo Invariant Persistence (Incremental Adoption #501)
+
+- **Status:** In Progress (increment completed)
+- **Plan item:** `refactoring_stage2_plan.md` -> Phase 2 / Step 2.2
+- **Changes:**
+  - Hardened explicit invariant parsing of string-based int values in:
+    - `project/OsEngine/Entity/Order.cs`
+    - `project/OsEngine/Entity/Position.cs`
+    - `project/OsEngine/Entity/PositionOpenerToStop.cs`
+    - `project/OsEngine/Entity/Trade.cs`
+    - `project/OsEngine/Entity/Security.cs`
+    - `project/OsEngine/Entity/NumberGen.cs`
+  - Replacements:
+    - `Convert.ToInt32(value)` -> `Convert.ToInt32(value, CultureInfo.InvariantCulture)` for persisted `Split(...)` values.
+    - `int.TryParse(value, out ...)` -> `int.TryParse(value, NumberStyles.Integer, CultureInfo.InvariantCulture, out ...)` in legacy settings parsing.
+  - Scope:
+    - parser hardening only; runtime behavior unchanged for valid API payloads.
+- **Verification:**
+  - Executed outside sandbox.
+  - `dotnet restore project/OsEngine/OsEngine.csproj --nologo` succeeded.
+  - `dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo` succeeded.
+  - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` succeeded (0 warnings).
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` succeeded (`352/352`).
+- **Commit:** n/a (not committed in this session)
+- **Push:** n/a
+
+### Step 2.2 - CultureInfo Invariant Persistence (Incremental Adoption #502)
+
+- **Status:** In Progress (increment completed)
+- **Plan item:** `refactoring_stage2_plan.md` -> Phase 2 / Step 2.2
+- **Changes:**
+  - Hardened explicit invariant parsing of string-based int values in:
+    - `project/OsEngine/OsTrader/SystemAnalyze/SystemAnalizeUi.xaml.cs`
+    - `project/OsEngine/OsOptimizer/OptimizerReportCharting.cs`
+    - `project/OsEngine/OsOptimizer/OptimizerReport.cs`
+    - `project/OsEngine/Indicators/IndicatorParameter.cs`
+    - `project/OsEngine/Indicators/IndicatorDataSeries.cs`
+    - `project/OsEngine/Entity/MarketDepth.cs`
+  - Replacements:
+    - `Convert.ToInt32(value)` -> `Convert.ToInt32(value, CultureInfo.InvariantCulture)` in textbox, serialized settings, and persisted array parsing paths.
+  - Scope:
+    - parser hardening only; runtime behavior unchanged for valid API payloads.
+- **Verification:**
+  - Executed outside sandbox.
+  - `dotnet restore project/OsEngine/OsEngine.csproj --nologo` succeeded.
+  - `dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo` succeeded.
+  - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` succeeded (0 warnings).
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` succeeded (`352/352`).
+- **Commit:** n/a (not committed in this session)
+- **Push:** n/a
+
+### Step 2.2 - CultureInfo Invariant Persistence (Incremental Adoption #503)
+
+- **Status:** In Progress (increment completed)
+- **Plan item:** `refactoring_stage2_plan.md` -> Phase 2 / Step 2.2
+- **Changes:**
+  - Hardened explicit invariant parsing of string-based int values in:
+    - `project/OsEngine/Market/AutoFollow/CopyTrader.cs`
+    - `project/OsEngine/Market/AutoFollow/CopyPortfolioUi.xaml.cs`
+  - Replacements:
+    - `Convert.ToInt32(value)` -> `Convert.ToInt32(value, CultureInfo.InvariantCulture)` for saved settings arrays (`save[]/lines[]`) and UI/grid parsing paths.
+  - Scope:
+    - parser hardening only; runtime behavior unchanged for valid API payloads.
+- **Verification:**
+  - Executed outside sandbox.
+  - `dotnet restore project/OsEngine/OsEngine.csproj --nologo` succeeded.
+  - `dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo` succeeded.
+  - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` succeeded (0 warnings).
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` succeeded (`352/352`).
+- **Commit:** n/a (not committed in this session)
+- **Push:** n/a
+
+### Step 2.2 - CultureInfo Invariant Persistence (Incremental Adoption #504)
+
+- **Status:** In Progress (increment completed)
+- **Plan item:** `refactoring_stage2_plan.md` -> Phase 2 / Step 2.2
+- **Changes:**
+  - Hardened explicit invariant parsing of string-based int values in:
+    - `project/OsEngine/OsTrader/Panels/Tab/BotTabPairCommonSettingsUi.xaml.cs`
+    - `project/OsEngine/OsTrader/Panels/Tab/BotTabPairUi.xaml.cs`
+    - `project/OsEngine/OsTrader/Panels/Tab/BotTabPolygonUi.xaml.cs`
+    - `project/OsEngine/OsTrader/Panels/Tab/BotTabPolygonCommonSettingsUi.xaml.cs`
+    - `project/OsEngine/OsTrader/Panels/Tab/BotTabIndexUi.xaml.cs`
+    - `project/OsEngine/OsTrader/Panels/Tab/BotTabPairAutoSelectPairsUi.xaml.cs`
+    - `project/OsEngine/Robots/AutoTestBots/TestBotConnectionParams.xaml.cs`
+  - Replacements:
+    - `Convert.ToInt32(value)` -> `Convert.ToInt32(value, CultureInfo.InvariantCulture)` in textbox/combobox/label value parsing.
+    - `Int32.TryParse(value, out ...)` -> `Int32.TryParse(value, NumberStyles.Integer, CultureInfo.InvariantCulture, out ...)` in validation path.
+  - Scope:
+    - parser hardening only; runtime behavior unchanged for valid API payloads.
+- **Verification:**
+  - Executed outside sandbox.
+  - `dotnet restore project/OsEngine/OsEngine.csproj --nologo` succeeded.
+  - `dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo` succeeded.
+  - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` succeeded (0 warnings).
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` succeeded (`352/352`).
+- **Commit:** n/a (not committed in this session)
+- **Push:** n/a
+
+### Step 2.2 - CultureInfo Invariant Persistence (Incremental Adoption #505)
+
+- **Status:** In Progress (increment completed)
+- **Plan item:** `refactoring_stage2_plan.md` -> Phase 2 / Step 2.2
+- **Changes:**
+  - Hardened explicit invariant parsing of string-based int values in:
+    - `project/OsEngine/Robots/Trend/WsurfBot.cs`
+    - `project/OsEngine/Robots/MarketMaker/PairTraderSimple.cs`
+    - `project/OsEngine/Robots/CounterTrend/RsiContrtrendUi.xaml.cs`
+  - Replacements:
+    - `Convert.ToInt32(value)` -> `Convert.ToInt32(value, CultureInfo.InvariantCulture)` in settings load and UI validation paths.
   - Scope:
     - parser hardening only; runtime behavior unchanged for valid API payloads.
 - **Verification:**

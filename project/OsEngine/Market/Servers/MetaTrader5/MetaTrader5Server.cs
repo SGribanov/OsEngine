@@ -1069,7 +1069,7 @@ namespace OsEngine.Market.Servers.MetaTrader5
                         long orderTime = _mtApiClient.OrderGetInteger(ENUM_ORDER_PROPERTY_INTEGER.ORDER_TIME_SETUP);
                         long positionIdentifier = _mtApiClient.OrderGetInteger(ENUM_ORDER_PROPERTY_INTEGER.ORDER_POSITION_ID);
 
-                        order.NumberUser = Convert.ToInt32(magic);
+                        order.NumberUser = Convert.ToInt32(magic, CultureInfo.InvariantCulture);
                         order.State = GetOrderStateType(orderState);
 
                         order.Comment = positionIdentifier.ToString();
@@ -1123,7 +1123,7 @@ namespace OsEngine.Market.Servers.MetaTrader5
                         long positionIdentifier = _mtApiClient.HistoryOrderGetInteger(myTransaction.Trans.Order, ENUM_ORDER_PROPERTY_INTEGER.ORDER_POSITION_ID);
                         double volume = _mtApiClient.HistoryOrderGetDouble(myTransaction.Trans.Order, ENUM_ORDER_PROPERTY_DOUBLE.ORDER_VOLUME_INITIAL);
 
-                        order.NumberUser = Convert.ToInt32(magic);
+                        order.NumberUser = Convert.ToInt32(magic, CultureInfo.InvariantCulture);
                         order.State = GetOrderStateType(orderState);
 
                         order.Comment = positionIdentifier.ToString();

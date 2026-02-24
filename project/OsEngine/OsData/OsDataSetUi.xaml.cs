@@ -12,6 +12,7 @@ using OsEngine.Market;
 using OsEngine.Market.Servers;
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.Windows.Forms;
 using System.Windows.Threading;
@@ -489,7 +490,7 @@ namespace OsEngine.OsData
             _set.BaseSettings.TfDayIsOn = CheckBoxTfDayIsOn.IsChecked.Value;
 
             _set.BaseSettings.TfMarketDepthIsOn = CheckBoxTfMarketDepthIsOn.IsChecked.Value;
-            _set.BaseSettings.MarketDepthDepth = Convert.ToInt32(ComboBoxMarketDepthDepth.SelectedValue.ToString());
+            _set.BaseSettings.MarketDepthDepth = Convert.ToInt32(ComboBoxMarketDepthDepth.SelectedValue.ToString(), CultureInfo.InvariantCulture);
             _set.BaseSettings.TfMarketDepthHistIsOn = CheckBoxTfMarketDepthHistIsOn.IsChecked.Value;
 
             if (ComboBoxSource.SelectedItem != null)

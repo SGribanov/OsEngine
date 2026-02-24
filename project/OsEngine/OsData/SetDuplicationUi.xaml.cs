@@ -9,6 +9,7 @@
 using OsEngine.Language;
 using OsEngine.Market;
 using System;
+using System.Globalization;
 using System.IO;
 using System.Windows;
 using System.Windows.Controls;
@@ -181,7 +182,7 @@ namespace OsEngine.OsData
 
                     SetDublicator dublicator = new SetDublicator();
 
-                    int min = int.Parse(ComboBoxPeriods.Text);
+                    int min = int.Parse(ComboBoxPeriods.Text, CultureInfo.InvariantCulture);
 
                     dublicator.Regime = ComboBoxRegime.Text;
                     dublicator.PathForDublicate = PathForSetTextBox.Text;
@@ -256,7 +257,7 @@ namespace OsEngine.OsData
                 {
                     _set.Dublicator.Regime = "On";
 
-                    int min = int.Parse(ComboBoxPeriods.Text);
+                    int min = int.Parse(ComboBoxPeriods.Text, CultureInfo.InvariantCulture);
 
                     _set.Dublicator.UpdatePeriod = new TimeSpan(0, min, 0);
                 }

@@ -14,6 +14,7 @@ using OsEngine.Market.Servers;
 using OsEngine.OsData;
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.Threading;
 using System.Windows;
@@ -420,7 +421,7 @@ namespace OsEngine.Market.AutoFollow
         {
             try
             {
-                int ordersCount = Convert.ToInt32(ComboBoxIcebergCount.SelectedItem.ToString());
+                int ordersCount = Convert.ToInt32(ComboBoxIcebergCount.SelectedItem.ToString(), CultureInfo.InvariantCulture);
 
                 _portfolioToCopy.IcebergCount = ordersCount;
                 _portfolioToCopy.Save();
@@ -441,7 +442,7 @@ namespace OsEngine.Market.AutoFollow
                     return;
                 }
 
-                _portfolioToCopy.IcebergMillisecondsDelay = Convert.ToInt32(TextBoxIcebergMillisecondsDelay.Text);
+                _portfolioToCopy.IcebergMillisecondsDelay = Convert.ToInt32(TextBoxIcebergMillisecondsDelay.Text, CultureInfo.InvariantCulture);
                 _portfolioToCopy.Save();
             }
             catch (Exception ex)
@@ -491,7 +492,7 @@ namespace OsEngine.Market.AutoFollow
                     return;
                 }
 
-                _portfolioToCopy.FailOpenOrdersCountToReaction = Convert.ToInt32(TextBoxFailOpenOrdersCountToReaction.Text);
+                _portfolioToCopy.FailOpenOrdersCountToReaction = Convert.ToInt32(TextBoxFailOpenOrdersCountToReaction.Text, CultureInfo.InvariantCulture);
                 _portfolioToCopy.Save();
             }
             catch (Exception ex)
@@ -849,7 +850,7 @@ namespace OsEngine.Market.AutoFollow
                     && col == 5
                     && row < _portfolioToCopy.SecurityToCopy.Count)
                 {// удалить данные по отдельной бумаге
-                    int num = Convert.ToInt32(_gridSecurities.Rows[row].Cells[0].Value);
+                    int num = Convert.ToInt32(_gridSecurities.Rows[row].Cells[0].Value, CultureInfo.InvariantCulture);
                     DeleteSecurity(num);
                 }
                 else if (row == _gridSecurities.Rows.Count - 1

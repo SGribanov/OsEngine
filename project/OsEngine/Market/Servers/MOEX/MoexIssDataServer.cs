@@ -170,7 +170,7 @@ namespace OsEngine.Market.Servers.MOEX
 
         private List<Security> GetFuturesForOneYear(string futName, string idEnding, int year)
         {
-            int futEnd = Convert.ToInt32(year.ToString().Substring(1, 1));
+            int futEnd = Convert.ToInt32(year.ToString().Substring(1, 1), CultureInfo.InvariantCulture);
 
             // TATN-9.20
 

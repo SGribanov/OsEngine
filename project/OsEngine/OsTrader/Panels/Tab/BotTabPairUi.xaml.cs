@@ -11,6 +11,7 @@ using OsEngine.Entity;
 using OsEngine.Language;
 using OsEngine.Layout;
 using System;
+using System.Globalization;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Forms.DataVisualization.Charting;
@@ -691,7 +692,7 @@ namespace OsEngine.OsTrader.Panels.Tab
         {
             try
             {
-                _pair.CointegrationLookBack = Convert.ToInt32(TextBoxCointegrationLookBack.Text);
+                _pair.CointegrationLookBack = Convert.ToInt32(TextBoxCointegrationLookBack.Text, CultureInfo.InvariantCulture);
                 _pair.Save();
             }
             catch
@@ -704,7 +705,7 @@ namespace OsEngine.OsTrader.Panels.Tab
         {
             try
             {
-                _pair.CorrelationLookBack = Convert.ToInt32(TextBoxCorrelationLookBack.Text);
+                _pair.CorrelationLookBack = Convert.ToInt32(TextBoxCorrelationLookBack.Text, CultureInfo.InvariantCulture);
                 _pair.Save();
             }
             catch

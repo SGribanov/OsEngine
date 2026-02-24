@@ -14,6 +14,7 @@ using OsEngine.Market;
 using OsEngine.Market.Servers;
 using OsEngine.OsTrader.Panels.Tab.Internal;
 using System;
+using System.Globalization;
 using System.Collections.Generic;
 using System.IO;
 using System.Threading;
@@ -511,9 +512,9 @@ namespace OsEngine.OsTrader.Panels.Tab
                 Sec1Volume = lines[1].ToDecimal(),
                 Sec2Slippage = lines[2].ToDecimal(),
                 Sec2Volume = lines[3].ToDecimal(),
-                CorrelationLookBack = Convert.ToInt32(lines[4]),
+                CorrelationLookBack = Convert.ToInt32(lines[4], CultureInfo.InvariantCulture),
                 CointegrationDeviation = lines[5].ToDecimal(),
-                CointegrationLookBack = Convert.ToInt32(lines[6]),
+                CointegrationLookBack = Convert.ToInt32(lines[6], CultureInfo.InvariantCulture),
                 PairSortType = Enum.TryParse(lines[7], out MainGridPairSortType pairSortType) ? pairSortType : default,
                 Sec1SlippageType = Enum.TryParse(lines[8], out PairTraderSlippageType sec1SlippageType) ? sec1SlippageType : default,
                 Sec1VolumeType = Enum.TryParse(lines[9], out PairTraderVolumeType sec1VolumeType) ? sec1VolumeType : default,
@@ -2074,7 +2075,7 @@ namespace OsEngine.OsTrader.Panels.Tab
                             return;
                         }
 
-                        tabNum = Convert.ToInt32(_grid.Rows[row].Cells[0].Value.ToString());
+                        tabNum = Convert.ToInt32(_grid.Rows[row].Cells[0].Value.ToString(), CultureInfo.InvariantCulture);
                     }
                     catch (Exception ex)
                     {
@@ -2105,7 +2106,7 @@ namespace OsEngine.OsTrader.Panels.Tab
                     {
                         if (_grid.Rows[i].Cells[0].Value != null)
                         {
-                            pairNum = Convert.ToInt32(_grid.Rows[i].Cells[0].Value);
+                            pairNum = Convert.ToInt32(_grid.Rows[i].Cells[0].Value, CultureInfo.InvariantCulture);
 
                             if (i == row - 1)
                             {
@@ -2197,7 +2198,7 @@ namespace OsEngine.OsTrader.Panels.Tab
                             return;
                         }
 
-                        tabNum = Convert.ToInt32(_grid.Rows[row].Cells[0].Value.ToString());
+                        tabNum = Convert.ToInt32(_grid.Rows[row].Cells[0].Value.ToString(), CultureInfo.InvariantCulture);
                     }
                     catch (Exception ex)
                     {
@@ -2512,14 +2513,14 @@ namespace OsEngine.OsTrader.Panels.Tab
 
             return new PairToTradeSettingsDto
             {
-                PairNum = Convert.ToInt32(lines[0]),
+                PairNum = Convert.ToInt32(lines[0], CultureInfo.InvariantCulture),
                 Sec1Slippage = lines[1].ToDecimal(),
                 Sec1Volume = lines[2].ToDecimal(),
                 Sec2Slippage = lines[3].ToDecimal(),
                 Sec2Volume = lines[4].ToDecimal(),
-                CorrelationLookBack = Convert.ToInt32(lines[5]),
+                CorrelationLookBack = Convert.ToInt32(lines[5], CultureInfo.InvariantCulture),
                 CointegrationDeviation = lines[6].ToDecimal(),
-                CointegrationLookBack = Convert.ToInt32(lines[7]),
+                CointegrationLookBack = Convert.ToInt32(lines[7], CultureInfo.InvariantCulture),
                 Sec1SlippageType = Enum.TryParse(lines[8], out PairTraderSlippageType sec1SlippageType) ? sec1SlippageType : default,
                 Sec1VolumeType = Enum.TryParse(lines[9], out PairTraderVolumeType sec1VolumeType) ? sec1VolumeType : default,
                 Sec2SlippageType = Enum.TryParse(lines[10], out PairTraderSlippageType sec2SlippageType) ? sec2SlippageType : default,
@@ -3613,4 +3614,5 @@ namespace OsEngine.OsTrader.Panels.Tab
         Second
     }
 }
+
 

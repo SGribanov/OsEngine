@@ -1148,7 +1148,7 @@ namespace OsEngine.Market.Servers.MoexFixFastCurrency
 
                                 newSecurity.PriceStepCost = newSecurity.PriceStep;
                                 newSecurity.DecimalsVolume = 1;
-                                newSecurity.Decimals = int.Parse(secDecimals);
+                                newSecurity.Decimals = int.Parse(secDecimals, CultureInfo.InvariantCulture);
                                 newSecurity.Decimals = GetDecimals(newSecurity.PriceStep);
 
                                 securities.Add(newSecurity);
@@ -3315,7 +3315,7 @@ namespace OsEngine.Market.Servers.MoexFixFastCurrency
             for (int t = 0; t < _templates.Length; t++)
             {
                 MessageTemplate tmplt = _templates[t];
-                context.RegisterTemplate(int.Parse(tmplt.Id), tmplt);
+                context.RegisterTemplate(int.Parse(tmplt.Id, CultureInfo.InvariantCulture), tmplt);
             }
 
             return context;

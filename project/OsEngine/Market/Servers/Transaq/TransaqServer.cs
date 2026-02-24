@@ -717,7 +717,7 @@ namespace OsEngine.Market.Servers.Transaq
                         security.NameFull = securityData.Shortname;
                         security.NameClass = securityData.Board;
                         security.NameId = securityData.Secid;
-                        security.Decimals = Convert.ToInt32(securityData.Decimals);
+                        security.Decimals = Convert.ToInt32(securityData.Decimals, CultureInfo.InvariantCulture);
                         security.Exchange = securityData.Board;
                         security.VolumeStep = 1;
 
@@ -2761,7 +2761,7 @@ namespace OsEngine.Market.Servers.Transaq
                             }
                         }
 
-                        failOrder.NumberUser = Convert.ToInt32(order.Transactionid);
+                        failOrder.NumberUser = Convert.ToInt32(order.Transactionid, CultureInfo.InvariantCulture);
                         failOrder.NumberMarket = order.Orderno;
                         failOrder.TimeCallBack = order.Time != null ? ParseDateInvariantOrCurrentOrThrow(order.Time) : ServerTime;
                         failOrder.State = OrderStateType.Cancel;
@@ -2774,7 +2774,7 @@ namespace OsEngine.Market.Servers.Transaq
 
                 Order newOrder = new Order();
                 newOrder.SecurityNameCode = order.Seccode;
-                newOrder.NumberUser = Convert.ToInt32(order.Transactionid);
+                newOrder.NumberUser = Convert.ToInt32(order.Transactionid, CultureInfo.InvariantCulture);
                 newOrder.SecurityClassCode = order.Board;
                 newOrder.NumberMarket = order.Orderno;
 

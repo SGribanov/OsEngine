@@ -8,6 +8,7 @@
 
 using OsEngine.Language;
 using System;
+using System.Globalization;
 using System.Windows;
 using System.Collections.Generic;
 using System.Windows.Forms.DataVisualization.Charting;
@@ -295,7 +296,7 @@ namespace OsEngine.OsTrader.SystemAnalyze
                     return;
                 }
 
-                int result = Convert.ToInt32(TextBoxRamPointsMax.Text);
+                int result = Convert.ToInt32(TextBoxRamPointsMax.Text, CultureInfo.InvariantCulture);
 
                 if(result <= 0)
                 {
@@ -319,7 +320,7 @@ namespace OsEngine.OsTrader.SystemAnalyze
                     return;
                 }
 
-                int result = Convert.ToInt32(TextBoxCpuPointsMax.Text);
+                int result = Convert.ToInt32(TextBoxCpuPointsMax.Text, CultureInfo.InvariantCulture);
 
                 if (result <= 0)
                 {
@@ -343,7 +344,7 @@ namespace OsEngine.OsTrader.SystemAnalyze
                     return;
                 }
 
-                int result = Convert.ToInt32(TextBoxEcqPointsMax.Text);
+                int result = Convert.ToInt32(TextBoxEcqPointsMax.Text, CultureInfo.InvariantCulture);
 
                 if (result <= 0)
                 {
@@ -367,7 +368,7 @@ namespace OsEngine.OsTrader.SystemAnalyze
                     return;
                 }
 
-                int result = Convert.ToInt32(TextBoxMoqPointsMax.Text);
+                int result = Convert.ToInt32(TextBoxMoqPointsMax.Text, CultureInfo.InvariantCulture);
 
                 if (result <= 0)
                 {

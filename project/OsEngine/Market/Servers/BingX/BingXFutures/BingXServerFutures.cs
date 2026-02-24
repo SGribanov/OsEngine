@@ -378,11 +378,11 @@ namespace OsEngine.Market.Servers.BingX.BingXFutures
                     security.NameId = current.contractId;
                     security.Exchange = nameof(ServerType.BingXFutures);
                     security.State = SecurityStateType.Activ;
-                    security.Decimals = Convert.ToInt32(current.pricePrecision);
+                    security.Decimals = Convert.ToInt32(current.pricePrecision, CultureInfo.InvariantCulture);
                     security.PriceStep = security.Decimals.GetValueByDecimals();
                     security.PriceStepCost = security.PriceStep;
                     security.SecurityType = SecurityType.CurrencyPair;
-                    security.DecimalsVolume = Convert.ToInt32(current.quantityPrecision);
+                    security.DecimalsVolume = Convert.ToInt32(current.quantityPrecision, CultureInfo.InvariantCulture);
                     security.MinTradeAmount = current.tradeMinUSDT.ToDecimal();
                     security.MinTradeAmountType = MinTradeAmountType.C_Currency;
                     security.VolumeStep = current.size.ToDecimal();
@@ -1478,7 +1478,7 @@ namespace OsEngine.Market.Servers.BingX.BingXFutures
                             funding.SecurityNameCode = item.symbol;
                             funding.PreviousFundingTime = TimeManager.GetDateTimeFromTimeStamp((long)item.fundingTime.ToDecimal());
                             TimeSpan data = TimeManager.GetDateTimeFromTimeStamp((long)item.fundingTime.ToDecimal()) - TimeManager.GetDateTimeFromTimeStamp((long)response.data[1].fundingTime.ToDecimal());
-                            funding.FundingIntervalHours = int.Parse(data.Hours.ToString());
+                            funding.FundingIntervalHours = int.Parse(data.Hours.ToString(), CultureInfo.InvariantCulture);
 
                             FundingUpdateEvent?.Invoke(funding);
                         }
@@ -2044,7 +2044,7 @@ namespace OsEngine.Market.Servers.BingX.BingXFutures
 
                 try
                 {
-                    newOrder.NumberUser = Convert.ToInt32(responseOrder.o.c);
+                    newOrder.NumberUser = Convert.ToInt32(responseOrder.o.c, CultureInfo.InvariantCulture);
                 }
                 catch
                 {
@@ -2498,7 +2498,7 @@ namespace OsEngine.Market.Servers.BingX.BingXFutures
 
                             if (numberUser != "")
                             {
-                                openOrder.NumberUser = Convert.ToInt32(response.data.orders[i].clientOrderId);
+                                openOrder.NumberUser = Convert.ToInt32(response.data.orders[i].clientOrderId, CultureInfo.InvariantCulture);
                             }
                             openOrder.NumberMarket = response.data.orders[i].orderId.ToString();
                             openOrder.SecurityNameCode = response.data.orders[i].symbol;
@@ -2724,7 +2724,7 @@ namespace OsEngine.Market.Servers.BingX.BingXFutures
 
                         if (numberUser != "")
                         {
-                            openOrder.NumberUser = Convert.ToInt32(response.data.order.clientOrderId);
+                            openOrder.NumberUser = Convert.ToInt32(response.data.order.clientOrderId, CultureInfo.InvariantCulture);
                         }
                         openOrder.NumberMarket = response.data.order.orderId.ToString();
                         openOrder.SecurityNameCode = response.data.order.symbol;

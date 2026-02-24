@@ -7,6 +7,7 @@
 */
 
 using System;
+using System.Globalization;
 using System.Net;
 
 namespace OsEngine.Market.Proxy
@@ -62,10 +63,10 @@ namespace OsEngine.Market.Proxy
         public void LoadFromString(string saveStr)
         {
             IsOn = Convert.ToBoolean(saveStr.Split('%')[0]);
-            Number = Convert.ToInt32(saveStr.Split('%')[1]);
+            Number = Convert.ToInt32(saveStr.Split('%')[1], CultureInfo.InvariantCulture);
             Location = saveStr.Split('%')[2];
             Ip = saveStr.Split('%')[3];
-            Port = int.Parse(saveStr.Split('%')[4]);
+            Port = Convert.ToInt32(saveStr.Split('%')[4], CultureInfo.InvariantCulture);
             Login = saveStr.Split('%')[5];
             UserPassword = saveStr.Split('%')[6];
             AutoPingLastStatus = saveStr.Split('%')[7];

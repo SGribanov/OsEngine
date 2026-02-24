@@ -16,6 +16,7 @@ using RestSharp;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Net;
 using System.Threading;
 using OsEngine.Entity.WebSocketOsEngine;
@@ -517,9 +518,9 @@ namespace OsEngine.Market.Servers.Alor
                         newSecurity.SecurityType == SecurityType.Option ||
                         newSecurity.NameClass == "Futures spread"))
                     {
-                        int year = Convert.ToInt32(item.cancellation.Substring(0, 4));
-                        int month = Convert.ToInt32(item.cancellation.Substring(5, 2));
-                        int day = Convert.ToInt32(item.cancellation.Substring(8, 2));
+                        int year = Convert.ToInt32(item.cancellation.Substring(0, 4), CultureInfo.InvariantCulture);
+                        int month = Convert.ToInt32(item.cancellation.Substring(5, 2), CultureInfo.InvariantCulture);
+                        int day = Convert.ToInt32(item.cancellation.Substring(8, 2), CultureInfo.InvariantCulture);
 
                         newSecurity.Expiration = new DateTime(year, month, day);
                     }
@@ -2248,7 +2249,7 @@ namespace OsEngine.Market.Servers.Alor
 
             try
             {
-                order.NumberUser = Convert.ToInt32(baseMessage.comment);
+                order.NumberUser = Convert.ToInt32(baseMessage.comment, CultureInfo.InvariantCulture);
             }
             catch
             {
@@ -3183,13 +3184,13 @@ namespace OsEngine.Market.Servers.Alor
 
             string date = alorTime.Split('T')[0];
 
-            int year = Convert.ToInt32(date.Substring(0,4));
-            int month = Convert.ToInt32(date.Substring(5, 2));
-            int day = Convert.ToInt32(date.Substring(8, 2));
+            int year = Convert.ToInt32(date.Substring(0,4), CultureInfo.InvariantCulture);
+            int month = Convert.ToInt32(date.Substring(5, 2), CultureInfo.InvariantCulture);
+            int day = Convert.ToInt32(date.Substring(8, 2), CultureInfo.InvariantCulture);
 
             string time = alorTime.Split('T')[1];
 
-            int hour = Convert.ToInt32(time.Substring(0, 2));
+            int hour = Convert.ToInt32(time.Substring(0, 2), CultureInfo.InvariantCulture);
 
             if (alorTime.EndsWith("+00:00"))
             {
@@ -3205,9 +3206,9 @@ namespace OsEngine.Market.Servers.Alor
             {
                 hour += 1;
             }
-            int minute = Convert.ToInt32(time.Substring(3, 2));
-            int second = Convert.ToInt32(time.Substring(6, 2));
-            int ms = Convert.ToInt32(time.Substring(10, 3));
+            int minute = Convert.ToInt32(time.Substring(3, 2), CultureInfo.InvariantCulture);
+            int second = Convert.ToInt32(time.Substring(6, 2), CultureInfo.InvariantCulture);
+            int ms = Convert.ToInt32(time.Substring(10, 3), CultureInfo.InvariantCulture);
 
             DateTime dateTime = new DateTime(year, month, day, hour, minute, second, ms);
 

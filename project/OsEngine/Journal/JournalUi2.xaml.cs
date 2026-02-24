@@ -3056,8 +3056,8 @@ namespace OsEngine.Journal
                 {
                     string selectNum = ComboBoxOpenPosesShowNumbers.SelectedItem.ToString().Replace(" ", "");
 
-                    startNum = Convert.ToInt32(selectNum.Split('>')[0]);
-                    endNum = Convert.ToInt32(selectNum.Split('>')[1]);
+                    startNum = Convert.ToInt32(selectNum.Split('>')[0], CultureInfo.InvariantCulture);
+                    endNum = Convert.ToInt32(selectNum.Split('>')[1], CultureInfo.InvariantCulture);
                 }
 
                 for (int i = startNum; i < endNum && i < openPositions.Count; i++)
@@ -3207,7 +3207,7 @@ namespace OsEngine.Journal
                     return;
                 }
 
-                number = Convert.ToInt32(_openPositionGrid.Rows[_openPositionGrid.CurrentCell.RowIndex].Cells[0].Value);
+                number = Convert.ToInt32(_openPositionGrid.Rows[_openPositionGrid.CurrentCell.RowIndex].Cells[0].Value, CultureInfo.InvariantCulture);
             }
             catch (Exception)
             {
@@ -3358,7 +3358,7 @@ namespace OsEngine.Journal
                     return;
                 }
 
-                number = Convert.ToInt32(_openPositionGrid.Rows[_openPositionGrid.CurrentCell.RowIndex].Cells[0].Value);
+                number = Convert.ToInt32(_openPositionGrid.Rows[_openPositionGrid.CurrentCell.RowIndex].Cells[0].Value, CultureInfo.InvariantCulture);
             }
             catch (Exception)
             {
@@ -3379,7 +3379,7 @@ namespace OsEngine.Journal
 
             try
             {
-                number = Convert.ToInt32(_openPositionGrid.Rows[_openPositionGrid.CurrentCell.RowIndex].Cells[0].Value);
+                number = Convert.ToInt32(_openPositionGrid.Rows[_openPositionGrid.CurrentCell.RowIndex].Cells[0].Value, CultureInfo.InvariantCulture);
             }
             catch (Exception)
             {
@@ -3406,7 +3406,7 @@ namespace OsEngine.Journal
             {
                 for (int i = 0; i < _openPositionGrid.Rows.Count; i++)
                 {
-                    numbers.Add(Convert.ToInt32(_openPositionGrid.Rows[i].Cells[0].Value));
+                    numbers.Add(Convert.ToInt32(_openPositionGrid.Rows[i].Cells[0].Value, CultureInfo.InvariantCulture));
                 }
 
             }
@@ -3604,8 +3604,8 @@ namespace OsEngine.Journal
 
                 string selectNums = ComboBoxClosePosesShowNumbers.SelectedItem.ToString().Replace(" ", "");
 
-                int startNum = Convert.ToInt32(selectNums.Split('>')[0]);
-                int endNum = Convert.ToInt32(selectNums.Split('>')[1]);
+                int startNum = Convert.ToInt32(selectNums.Split('>')[0], CultureInfo.InvariantCulture);
+                int endNum = Convert.ToInt32(selectNums.Split('>')[1], CultureInfo.InvariantCulture);
 
                 List<Position> closePositions = GetClosePositions();
 
@@ -3764,7 +3764,7 @@ namespace OsEngine.Journal
 
                 try
                 {
-                    number = Convert.ToInt32(_closePositionGrid.Rows[_closePositionGrid.CurrentCell.RowIndex].Cells[0].Value);
+                    number = Convert.ToInt32(_closePositionGrid.Rows[_closePositionGrid.CurrentCell.RowIndex].Cells[0].Value, CultureInfo.InvariantCulture);
                 }
                 catch (Exception)
                 {
@@ -3897,7 +3897,7 @@ namespace OsEngine.Journal
                 {
                     return;
                 }
-                number = Convert.ToInt32(_closePositionGrid.Rows[_closePositionGrid.CurrentCell.RowIndex].Cells[0].Value);
+                number = Convert.ToInt32(_closePositionGrid.Rows[_closePositionGrid.CurrentCell.RowIndex].Cells[0].Value, CultureInfo.InvariantCulture);
             }
             catch (Exception)
             {
@@ -3918,7 +3918,7 @@ namespace OsEngine.Journal
                     {
                         return;
                     }
-                    number = Convert.ToInt32(_closePositionGrid.Rows[_closePositionGrid.CurrentCell.RowIndex].Cells[0].Value);
+                    number = Convert.ToInt32(_closePositionGrid.Rows[_closePositionGrid.CurrentCell.RowIndex].Cells[0].Value, CultureInfo.InvariantCulture);
                 }
                 catch (Exception)
                 {
@@ -3952,7 +3952,7 @@ namespace OsEngine.Journal
                 {
                     for (int i = 0; i < _closePositionGrid.Rows.Count; i++)
                     {
-                        numbers.Add(Convert.ToInt32(_closePositionGrid.Rows[i].Cells[0].Value));
+                        numbers.Add(Convert.ToInt32(_closePositionGrid.Rows[i].Cells[0].Value, CultureInfo.InvariantCulture));
                     }
                     List<Position> poses = new List<Position>();
 

@@ -9,6 +9,7 @@ using OsEngine.Market.Servers.Entity;
 using RestSharp;
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.IO.Compression;
 using System.Net;
@@ -818,15 +819,15 @@ namespace OsEngine.Market.Servers.BinanceData
 
             if (!string.IsNullOrEmpty(match.Groups[3].Value))
             {
-                int year = int.Parse(match.Groups[1].Value);
-                int month = int.Parse(match.Groups[2].Value);
-                int day = int.Parse(match.Groups[3].Value);
+                int year = int.Parse(match.Groups[1].Value, CultureInfo.InvariantCulture);
+                int month = int.Parse(match.Groups[2].Value, CultureInfo.InvariantCulture);
+                int day = int.Parse(match.Groups[3].Value, CultureInfo.InvariantCulture);
                 return new DateTime(year, month, day);
             }
             else
             {
-                int year = int.Parse(match.Groups[4].Value);
-                int month = int.Parse(match.Groups[5].Value);
+                int year = int.Parse(match.Groups[4].Value, CultureInfo.InvariantCulture);
+                int month = int.Parse(match.Groups[5].Value, CultureInfo.InvariantCulture);
                 return new DateTime(year, month, 1);
             }
         }
@@ -886,8 +887,8 @@ namespace OsEngine.Market.Servers.BinanceData
                 DateTime lastFullMonthEnd = DateTime.ParseExact(
                     fullMonths[fullMonths.Count - 1] + "-" +
                     DateTime.DaysInMonth(
-                        int.Parse(fullMonths[fullMonths.Count - 1].Split('-')[0]),
-                        int.Parse(fullMonths[fullMonths.Count - 1].Split('-')[1])),
+                        int.Parse(fullMonths[fullMonths.Count - 1].Split('-')[0], CultureInfo.InvariantCulture),
+                        int.Parse(fullMonths[fullMonths.Count - 1].Split('-')[1], CultureInfo.InvariantCulture)),
                     "yyyy-MM-dd", null);
 
                 if (lastFullMonthEnd < endTime)

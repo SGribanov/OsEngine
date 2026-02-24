@@ -4,6 +4,7 @@
 */
 
 using System;
+using System.Globalization;
 using System.Windows;
 using OsEngine.Language;
 
@@ -44,9 +45,9 @@ namespace OsEngine.Entity
         {
             try
             {
-                int hour = Convert.ToInt32(TextBoxHour.Text);
-                int min = Convert.ToInt32(TextBoxMinute.Text);
-                int sec = Convert.ToInt32(TextBoxSecond.Text);
+                int hour = Convert.ToInt32(TextBoxHour.Text, CultureInfo.InvariantCulture);
+                int min = Convert.ToInt32(TextBoxMinute.Text, CultureInfo.InvariantCulture);
+                int sec = Convert.ToInt32(TextBoxSecond.Text, CultureInfo.InvariantCulture);
 
                 Time = new DateTime(DateTimePicker.SelectedDate.Value.Year, DateTimePicker.SelectedDate.Value.Month, DateTimePicker.SelectedDate.Value.Day, hour, min, sec);
                 IsSaved = true;

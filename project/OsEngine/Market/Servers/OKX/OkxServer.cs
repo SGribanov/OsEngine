@@ -3123,7 +3123,7 @@ namespace OsEngine.Market.Servers.OKX
                     funding.MinFundingRate = item.minFundingRate.ToDecimal();
                     funding.MaxFundingRate = item.maxFundingRate.ToDecimal();
                     TimeSpan data = TimeManager.GetDateTimeFromTimeStamp((long)item.nextFundingTime.ToDecimal()) - TimeManager.GetDateTimeFromTimeStamp((long)item.fundingTime.ToDecimal());
-                    funding.FundingIntervalHours = int.Parse(data.Hours.ToString());
+                    funding.FundingIntervalHours = int.Parse(data.Hours.ToString(), CultureInfo.InvariantCulture);
 
                     FundingUpdateEvent?.Invoke(funding);
                 }

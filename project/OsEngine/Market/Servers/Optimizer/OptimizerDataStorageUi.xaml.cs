@@ -524,7 +524,7 @@ namespace OsEngine.Market.Servers.Optimizer
         {
             try
             {
-                _master.SlippageToSimpleOrder = Convert.ToInt32(TextBoxSlippageSimpleOrder.Text);
+                _master.SlippageToSimpleOrder = Convert.ToInt32(TextBoxSlippageSimpleOrder.Text, CultureInfo.InvariantCulture);
             }
             catch
             {
@@ -538,7 +538,7 @@ namespace OsEngine.Market.Servers.Optimizer
         {
             try
             {
-                _master.SlippageToStopOrder = Convert.ToInt32(TextBoxSlippageStop.Text);
+                _master.SlippageToStopOrder = Convert.ToInt32(TextBoxSlippageStop.Text, CultureInfo.InvariantCulture);
             }
             catch
             {
@@ -751,8 +751,8 @@ namespace OsEngine.Market.Servers.Optimizer
 
                     string[] values = value.Split(':');
 
-                    int hour = int.Parse(values[0]);
-                    int minute = int.Parse(values[1]);
+                    int hour = int.Parse(values[0], CultureInfo.InvariantCulture);
+                    int minute = int.Parse(values[1], CultureInfo.InvariantCulture);
 
                     _master.ClearingTimes[row].Time = new DateTime(2022, 1, 1, hour, minute, 0);
                     _master.SaveClearingInfo();

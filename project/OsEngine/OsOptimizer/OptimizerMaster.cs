@@ -1542,7 +1542,7 @@ namespace OsEngine.OsOptimizer
 
             _timeEnd = ParseDateInvariantOrCurrent(str[2]);
 
-            Days = Convert.ToInt32(str[3]);
+            Days = Convert.ToInt32(str[3], CultureInfo.InvariantCulture);
         }
 
         private static DateTime ParseDateInvariantOrCurrent(string value)
@@ -1601,7 +1601,7 @@ namespace OsEngine.OsOptimizer
         {
             string[] str = saveStr.Split('%');
 
-            NumberOfTab = Convert.ToInt32(str[0]);
+            NumberOfTab = Convert.ToInt32(str[0], CultureInfo.InvariantCulture);
             NameSecurity = str[1];
             Enum.TryParse(str[2], out TimeFrame);
         }
@@ -1641,7 +1641,7 @@ namespace OsEngine.OsOptimizer
         {
             string[] str = saveStr.Split('%');
 
-            NumberOfTab = Convert.ToInt32(str[0]);
+            NumberOfTab = Convert.ToInt32(str[0], CultureInfo.InvariantCulture);
             Enum.TryParse(str[1], out TimeFrame);
             Formula = str[2];
 

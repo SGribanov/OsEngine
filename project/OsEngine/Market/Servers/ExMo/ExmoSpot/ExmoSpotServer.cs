@@ -193,9 +193,9 @@ namespace OsEngine.Market.Servers.ExMo.ExmoSpot
 
                         newSecurity.NameId = symbol.Key + item.min_price;
                         newSecurity.State = SecurityStateType.Activ;
-                        newSecurity.Decimals = Convert.ToInt32(item.price_precision);
+                        newSecurity.Decimals = Convert.ToInt32(item.price_precision, CultureInfo.InvariantCulture);
                         newSecurity.DecimalsVolume = item.min_quantity.DecimalsCount();
-                        newSecurity.PriceStep = Convert.ToInt32(item.price_precision).GetValueByDecimals();
+                        newSecurity.PriceStep = Convert.ToInt32(item.price_precision, CultureInfo.InvariantCulture).GetValueByDecimals();
                         newSecurity.PriceStepCost = newSecurity.PriceStep;
                         newSecurity.Lot = 1;
                         newSecurity.SecurityType = SecurityType.CurrencyPair;
@@ -1394,7 +1394,7 @@ namespace OsEngine.Market.Servers.ExMo.ExmoSpot
 
                 try
                 {
-                    newOrder.NumberUser = Convert.ToInt32(item.client_id);
+                    newOrder.NumberUser = Convert.ToInt32(item.client_id, CultureInfo.InvariantCulture);
                 }
                 catch
                 {
@@ -1766,7 +1766,7 @@ namespace OsEngine.Market.Servers.ExMo.ExmoSpot
 
                             try
                             {
-                                newOrder.NumberUser = Convert.ToInt32(item.client_id);
+                                newOrder.NumberUser = Convert.ToInt32(item.client_id, CultureInfo.InvariantCulture);
                             }
                             catch
                             {
@@ -1922,7 +1922,7 @@ namespace OsEngine.Market.Servers.ExMo.ExmoSpot
 
                         try
                         {
-                            newOrder.NumberUser = Convert.ToInt32(item.client_id);
+                            newOrder.NumberUser = Convert.ToInt32(item.client_id, CultureInfo.InvariantCulture);
                         }
                         catch
                         {
@@ -2026,7 +2026,7 @@ namespace OsEngine.Market.Servers.ExMo.ExmoSpot
 
                             try
                             {
-                                newOrder.NumberUser = Convert.ToInt32(item.client_id);
+                                newOrder.NumberUser = Convert.ToInt32(item.client_id, CultureInfo.InvariantCulture);
                             }
                             catch
                             {

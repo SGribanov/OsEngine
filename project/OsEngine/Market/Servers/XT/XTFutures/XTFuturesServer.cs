@@ -245,7 +245,7 @@ namespace OsEngine.Market.Servers.XT.XTFutures
 
                                 newSecurity.State = SecurityStateType.Activ;
                                 newSecurity.PriceStep = symbols.minStepPrice.ToDecimal();
-                                newSecurity.Decimals = Convert.ToInt32(symbols.pricePrecision);
+                                newSecurity.Decimals = Convert.ToInt32(symbols.pricePrecision, CultureInfo.InvariantCulture);
                                 newSecurity.PriceStepCost = newSecurity.PriceStep;
                                 newSecurity.DecimalsVolume = symbols.contractSize.DecimalsCount();
                                 newSecurity.MinTradeAmount = symbols.contractSize.ToDecimal();
@@ -1834,7 +1834,7 @@ namespace OsEngine.Market.Servers.XT.XTFutures
                     updateOrder.TimeCreate = TimeManager.GetDateTimeFromTimeStamp(Convert.ToInt64(order.data.createdTime, CultureInfo.InvariantCulture));
                     updateOrder.TimeCallBack = TimeManager.GetDateTimeFromTimeStamp(Convert.ToInt64(order.data.updatedTime, CultureInfo.InvariantCulture));
                     updateOrder.NumberMarket = order.data.orderId;
-                    updateOrder.NumberUser = Convert.ToInt32(order.data.clientOrderId);
+                    updateOrder.NumberUser = Convert.ToInt32(order.data.clientOrderId, CultureInfo.InvariantCulture);
                     updateOrder.Side = order.data.orderSide.Equals("BUY", StringComparison.OrdinalIgnoreCase) ? Side.Buy : Side.Sell;
                     updateOrder.State = GetOrderState(order.data.state);
                     updateOrder.TypeOrder = MapOrderType(order.data.orderType);
@@ -2292,7 +2292,7 @@ namespace OsEngine.Market.Servers.XT.XTFutures
 
                                 try
                                 {
-                                    activeOrder.NumberUser = Convert.ToInt32(item.clientOrderId);
+                                    activeOrder.NumberUser = Convert.ToInt32(item.clientOrderId, CultureInfo.InvariantCulture);
                                 }
                                 catch (System.Exception ex)
                                 {
@@ -2599,7 +2599,7 @@ namespace OsEngine.Market.Servers.XT.XTFutures
                                 Order historyOrder = new Order();
 
                                 historyOrder.NumberMarket = item.orderId;
-                                historyOrder.NumberUser = Convert.ToInt32(item.clientOrderId);
+                                historyOrder.NumberUser = Convert.ToInt32(item.clientOrderId, CultureInfo.InvariantCulture);
                                 historyOrder.SecurityNameCode = item.symbol;
                                 historyOrder.Side = item.orderSide.Equals("BUY", StringComparison.OrdinalIgnoreCase) ? Side.Buy : Side.Sell;
                                 historyOrder.State = GetOrderState(item.state);

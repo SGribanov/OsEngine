@@ -77,7 +77,7 @@ namespace OsEngine.Entity
                 lot = TextBoxLot.Text.ToDecimal();
                 step = TextBoxStep.Text.ToDecimal();
                 stepCost = TextBoxStepCost.Text.ToDecimal();
-                volDecimals = Convert.ToInt32(TextBoxVolumeDecimals.Text);
+                volDecimals = Convert.ToInt32(TextBoxVolumeDecimals.Text, CultureInfo.InvariantCulture);
                 expiration = ParseDateInvariantOrCurrentOrThrow(TextBoxExpiration.Text);
 
                 string message = OsLocalization.Message.HintMessageError5 + "\n";

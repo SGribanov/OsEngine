@@ -216,7 +216,7 @@ namespace OsEngine.Market.Servers.Entity
         {
             string[] values = value.Split('^');
             _name = values[1];
-            _value = Convert.ToInt32(values[2]);
+            _value = Convert.ToInt32(values[2], CultureInfo.InvariantCulture);
         }
 
         public ServerParameterType Type

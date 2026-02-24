@@ -1564,11 +1564,11 @@ namespace OsEngine.Market.Servers.Optimizer
 
                         if (array[i].Length > 5)
                         {
-                            volDecimals = Convert.ToInt32(array[i][5]);
+                            volDecimals = Convert.ToInt32(array[i][5], CultureInfo.InvariantCulture);
                         }
                         if (array[i].Length > 6)
                         {
-                            goSell = Convert.ToInt32(array[i][6]);
+                            goSell = Convert.ToInt32(array[i][6], CultureInfo.InvariantCulture);
                         }
 
                         if (lot != 0)

@@ -539,7 +539,7 @@ namespace OsEngine.Entity
         public void SetOrderFromString(string saveString)
         {
             string[] saveArray = saveString.Split('@');
-            NumberUser = Convert.ToInt32(saveArray[0]);
+            NumberUser = Convert.ToInt32(saveArray[0], CultureInfo.InvariantCulture);
 
             Enum.TryParse(saveArray[1], true, out ServerType);
 
@@ -601,7 +601,7 @@ namespace OsEngine.Entity
                 if(cancelling.Length == 3)
                 {
                     IsSendToCancel = Convert.ToBoolean(cancelling[0]);
-                    CancellingTryCount = Convert.ToInt32(cancelling[1]);
+                    CancellingTryCount = Convert.ToInt32(cancelling[1], CultureInfo.InvariantCulture);
                     LastCancelTryLocalTime = ParseDateTimeInvariantWithRuFallback(cancelling[2]);
                 }
             }

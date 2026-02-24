@@ -447,7 +447,7 @@ namespace OsEngine.Market.Servers.MoexFixFastSpot
                         
                         IPAddress ipAddr = IPAddress.Parse(ipAddressString);
                         
-                        _historicalReplayEndPoint = new IPEndPoint(ipAddr, int.Parse(portString));
+                        _historicalReplayEndPoint = new IPEndPoint(ipAddr, int.Parse(portString, CultureInfo.InvariantCulture));
                                               
 
                         continue;
@@ -477,7 +477,7 @@ namespace OsEngine.Market.Servers.MoexFixFastSpot
                         //// Bind the socket to the port
                         //// Specify the local IP address and port to bind to.
                         IPAddress localAddress = IPAddress.Any; // Listen on all available interfaces
-                        IPEndPoint localEndPoint = new IPEndPoint(localAddress, int.Parse(port));
+                        IPEndPoint localEndPoint = new IPEndPoint(localAddress, int.Parse(port, CultureInfo.InvariantCulture));
 
                         socket.Bind(localEndPoint);
 
@@ -630,7 +630,7 @@ namespace OsEngine.Market.Servers.MoexFixFastSpot
             // 2. Создаем сокет и подключаемся
             // MFIX Trade Server
             IPAddress ipAddr = IPAddress.Parse(_MFIXTradeServerAddress);
-            IPEndPoint ipEndPoint = new IPEndPoint(ipAddr, int.Parse(_MFIXTradeServerPort));
+            IPEndPoint ipEndPoint = new IPEndPoint(ipAddr, int.Parse(_MFIXTradeServerPort, CultureInfo.InvariantCulture));
 
             //Создаем сокет для подключения
             _MFIXTradeSocket = new Socket(ipAddr.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
@@ -722,7 +722,7 @@ namespace OsEngine.Market.Servers.MoexFixFastSpot
 
                             if (fixMessage.Fields.ContainsKey("SessionStatus"))
                             {
-                                int SessionStatus = int.Parse(fixMessage.Fields["SessionStatus"]);
+                                int SessionStatus = int.Parse(fixMessage.Fields["SessionStatus"], CultureInfo.InvariantCulture);
 
                                 if (SessionStatus == 0) // set new password
                                 {
@@ -1405,7 +1405,7 @@ namespace OsEngine.Market.Servers.MoexFixFastSpot
 
                                 newSecurity.PriceStepCost = newSecurity.PriceStep;
                                 newSecurity.DecimalsVolume = 1;
-                                newSecurity.Decimals = int.Parse(secDecimals);
+                                newSecurity.Decimals = int.Parse(secDecimals, CultureInfo.InvariantCulture);
                                 newSecurity.Decimals = GetDecimals(newSecurity.PriceStep);                                
 
                                 securities.Add(newSecurity);
@@ -3419,7 +3419,7 @@ namespace OsEngine.Market.Servers.MoexFixFastSpot
 
                         try
                         {
-                            order.NumberUser = int.Parse(fixMessage.Fields["SecondaryClOrdID"]);
+                            order.NumberUser = int.Parse(fixMessage.Fields["SecondaryClOrdID"], CultureInfo.InvariantCulture);
                         }
                         catch
                         {
@@ -3835,7 +3835,7 @@ namespace OsEngine.Market.Servers.MoexFixFastSpot
             for (int t = 0; t < _templates.Count(); t++)
             {
                 MessageTemplate tmplt = _templates[t];
-                context.RegisterTemplate(int.Parse(tmplt.Id), tmplt);
+                context.RegisterTemplate(int.Parse(tmplt.Id, CultureInfo.InvariantCulture), tmplt);
             }
 
             return context;

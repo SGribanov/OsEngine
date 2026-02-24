@@ -9,6 +9,7 @@
 using OsEngine.Entity;
 using OsEngine.Language;
 using System;
+using System.Globalization;
 using System.IO;
 using System.Windows;
 using System.Windows.Controls;
@@ -97,7 +98,7 @@ namespace OsEngine.Market.Proxy
         {
             try
             {
-                _master.AutoPingMinutes = Convert.ToInt32(ComboBoxAutoPingInterval.SelectedItem.ToString());
+                _master.AutoPingMinutes = Convert.ToInt32(ComboBoxAutoPingInterval.SelectedItem.ToString(), CultureInfo.InvariantCulture);
                 _master.SaveSettings();
             }
             catch (Exception ex)
@@ -357,7 +358,7 @@ namespace OsEngine.Market.Proxy
                         return;
                     }
 
-                    int number = Convert.ToInt32(_grid.Rows[row].Cells[0].Value.ToString());
+                    int number = Convert.ToInt32(_grid.Rows[row].Cells[0].Value.ToString(), CultureInfo.InvariantCulture);
 
                     _master.RemoveProxy(number);
                     UpdateGrid();
@@ -410,7 +411,7 @@ namespace OsEngine.Market.Proxy
 
                 if (nRow.Cells[3].Value != null)
                 {
-                    proxy.Port = Convert.ToInt32(nRow.Cells[3].Value.ToString());
+                    proxy.Port = Convert.ToInt32(nRow.Cells[3].Value.ToString(), CultureInfo.InvariantCulture);
                 }
                 else
                 {

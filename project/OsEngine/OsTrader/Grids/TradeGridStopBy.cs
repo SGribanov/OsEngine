@@ -13,6 +13,7 @@ using OsEngine.Market;
 using OsEngine.OsTrader.Panels.Tab;
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 
 namespace OsEngine.OsTrader.Grids
 {
@@ -94,17 +95,17 @@ namespace OsEngine.OsTrader.Grids
                 Enum.TryParse(values[5], out StopGridByMoveDownReaction);
 
                 StopGridByPositionsCountIsOn = Convert.ToBoolean(values[6]);
-                StopGridByPositionsCountValue = Convert.ToInt32(values[7]);
+                StopGridByPositionsCountValue = Convert.ToInt32(values[7], CultureInfo.InvariantCulture);
                 Enum.TryParse(values[8], out StopGridByPositionsCountReaction);
 
                 StopGridByLifeTimeIsOn = Convert.ToBoolean(values[9]);
-                StopGridByLifeTimeSecondsToLife = Convert.ToInt32(values[10]);
+                StopGridByLifeTimeSecondsToLife = Convert.ToInt32(values[10], CultureInfo.InvariantCulture);
                 Enum.TryParse(values[11], out StopGridByLifeTimeReaction);
 
                 StopGridByTimeOfDayIsOn = Convert.ToBoolean(values[12]);
-                StopGridByTimeOfDayHour = Convert.ToInt32(values[13]);
-                StopGridByTimeOfDayMinute = Convert.ToInt32(values[14]);
-                StopGridByTimeOfDaySecond = Convert.ToInt32(values[15]);
+                StopGridByTimeOfDayHour = Convert.ToInt32(values[13], CultureInfo.InvariantCulture);
+                StopGridByTimeOfDayMinute = Convert.ToInt32(values[14], CultureInfo.InvariantCulture);
+                StopGridByTimeOfDaySecond = Convert.ToInt32(values[15], CultureInfo.InvariantCulture);
                 Enum.TryParse(values[16], out StopGridByTimeOfDayReaction);
             }
             catch (Exception e)

@@ -591,7 +591,7 @@ namespace OsEngine.OsOptimizer.OptEntity
             {
                 using (StreamReader reader = new StreamReader(GetSettingsPath()))
                 {
-                    _threadsCount = Convert.ToInt32(reader.ReadLine() ?? "0");
+                    _threadsCount = Convert.ToInt32(reader.ReadLine() ?? "0", CultureInfo.InvariantCulture);
                     _strategyName = reader.ReadLine() ?? string.Empty;
                     _startDeposit = (reader.ReadLine() ?? "0").ToDecimal();
                     _filterProfitValue = (reader.ReadLine() ?? "0").ToDecimal();
@@ -607,10 +607,10 @@ namespace OsEngine.OsOptimizer.OptEntity
                     _timeEnd = ParseDateInvariantOrCurrent(reader.ReadLine());
                     _percentOnFiltration = (reader.ReadLine() ?? "0").ToDecimal();
 
-                    _filterDealsCountValue = Convert.ToInt32(reader.ReadLine() ?? "0");
+                    _filterDealsCountValue = Convert.ToInt32(reader.ReadLine() ?? "0", CultureInfo.InvariantCulture);
                     _filterDealsCountIsOn = Convert.ToBoolean(reader.ReadLine() ?? bool.FalseString);
                     _isScript = Convert.ToBoolean(reader.ReadLine() ?? bool.FalseString);
-                    _iterationCount = ClampPositiveInt(Convert.ToInt32(reader.ReadLine() ?? "1"));
+                    _iterationCount = ClampPositiveInt(Convert.ToInt32(reader.ReadLine() ?? "1", CultureInfo.InvariantCulture));
                     _commissionType = (CommissionType)Enum.Parse(typeof(CommissionType),
                         reader.ReadLine() ?? CommissionType.None.ToString());
                     _commissionValue = (reader.ReadLine() ?? "0").ToDecimal();
@@ -621,8 +621,8 @@ namespace OsEngine.OsOptimizer.OptEntity
                     {
                         _orderExecutionType = orderExecutionType;
                     }
-                    _slippageToSimpleOrder = Convert.ToInt32(reader.ReadLine() ?? "0");
-                    _slippageToStopOrder = Convert.ToInt32(reader.ReadLine() ?? "0");
+                    _slippageToSimpleOrder = Convert.ToInt32(reader.ReadLine() ?? "0", CultureInfo.InvariantCulture);
+                    _slippageToStopOrder = Convert.ToInt32(reader.ReadLine() ?? "0", CultureInfo.InvariantCulture);
 
                     // V2 fields - optional for backward compatibility
                     string? line = reader.ReadLine();

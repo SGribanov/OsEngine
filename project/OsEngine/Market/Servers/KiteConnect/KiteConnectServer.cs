@@ -1393,7 +1393,7 @@ namespace OsEngine.Market.Servers.KiteConnect
                 newOrder.SecurityNameCode = nameSecurity;
                 newOrder.TimeCallBack = DateTimeOffset.Parse(responseOrder.data.order_timestamp).DateTime;
                 newOrder.TimeCreate = DateTimeOffset.Parse(responseOrder.data.order_timestamp).DateTime;
-                newOrder.NumberUser = Convert.ToInt32(userNumber);
+                newOrder.NumberUser = Convert.ToInt32(userNumber, CultureInfo.InvariantCulture);
                 newOrder.NumberMarket = responseOrder.data.order_id.ToString();
                 newOrder.Side = responseOrder.data.transaction_type.Equals("BUY") ? Side.Buy : Side.Sell;
                 newOrder.State = stateType;
@@ -1838,7 +1838,7 @@ namespace OsEngine.Market.Servers.KiteConnect
                             newOrder.SecurityNameCode = nameSecurity;
                             newOrder.TimeCallBack = DateTimeOffset.Parse(responseOrder.data[i].order_timestamp).DateTime;
                             newOrder.TimeCreate = DateTimeOffset.Parse(responseOrder.data[i].order_timestamp).DateTime;
-                            newOrder.NumberUser = Convert.ToInt32(userNumber);
+                            newOrder.NumberUser = Convert.ToInt32(userNumber, CultureInfo.InvariantCulture);
                             newOrder.NumberMarket = responseOrder.data[i].order_id.ToString();
                             newOrder.Side = responseOrder.data[i].transaction_type.Equals("BUY") ? Side.Buy : Side.Sell;
                             newOrder.State = stateType;
@@ -1982,7 +1982,7 @@ namespace OsEngine.Market.Servers.KiteConnect
                                 newOrder.SecurityNameCode = nameSecurity;
                                 newOrder.TimeCallBack = DateTimeOffset.Parse(responseOrder.data[i].order_timestamp).DateTime;
                                 newOrder.TimeCreate = DateTimeOffset.Parse(responseOrder.data[i].order_timestamp).DateTime;
-                                newOrder.NumberUser = Convert.ToInt32(userNumber);
+                                newOrder.NumberUser = Convert.ToInt32(userNumber, CultureInfo.InvariantCulture);
                                 newOrder.NumberMarket = responseOrder.data[i].order_id.ToString();
                                 newOrder.Side = responseOrder.data[i].transaction_type.Equals("BUY") ? Side.Buy : Side.Sell;
                                 newOrder.State = stateType;

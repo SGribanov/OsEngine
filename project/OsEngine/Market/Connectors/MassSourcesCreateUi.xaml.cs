@@ -1475,9 +1475,9 @@ namespace OsEngine.Market.Connectors
         {
             try
             {
-                int indexRow = Convert.ToInt32(LabelCurrentResultShow.Content) - 1;
+                int indexRow = Convert.ToInt32(LabelCurrentResultShow.Content, CultureInfo.InvariantCulture) - 1;
 
-                int maxRowIndex = Convert.ToInt32(LabelCountResultsShow.Content);
+                int maxRowIndex = Convert.ToInt32(LabelCountResultsShow.Content, CultureInfo.InvariantCulture);
 
                 if (indexRow <= 0)
                 {
@@ -1504,9 +1504,9 @@ namespace OsEngine.Market.Connectors
         {
             try
             {
-                int indexRow = Convert.ToInt32(LabelCurrentResultShow.Content) - 1 + 1;
+                int indexRow = Convert.ToInt32(LabelCurrentResultShow.Content, CultureInfo.InvariantCulture) - 1 + 1;
 
-                int maxRowIndex = Convert.ToInt32(LabelCountResultsShow.Content);
+                int maxRowIndex = Convert.ToInt32(LabelCountResultsShow.Content, CultureInfo.InvariantCulture);
 
                 if (indexRow >= maxRowIndex)
                 {
@@ -2025,7 +2025,7 @@ namespace OsEngine.Market.Connectors
                 {
                     try
                     {
-                        ((CandlesParameterInt)param).ValueInt = Convert.ToInt32(value);
+                        ((CandlesParameterInt)param).ValueInt = Convert.ToInt32(value, CultureInfo.InvariantCulture);
                     }
                     catch
                     {

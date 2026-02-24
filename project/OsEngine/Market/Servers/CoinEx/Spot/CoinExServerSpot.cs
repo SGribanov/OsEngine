@@ -210,9 +210,9 @@ namespace OsEngine.Market.Servers.CoinEx.Spot
                             security.NameFull = item.market;
                             security.NameClass = item.quote_ccy;
                             security.State = SecurityStateType.Activ;
-                            security.Decimals = Convert.ToInt32(item.quote_ccy_precision);
+                            security.Decimals = Convert.ToInt32(item.quote_ccy_precision, CultureInfo.InvariantCulture);
                             security.MinTradeAmount = item.min_amount.ToDecimal();
-                            security.DecimalsVolume = Convert.ToInt32(item.base_ccy_precision);
+                            security.DecimalsVolume = Convert.ToInt32(item.base_ccy_precision, CultureInfo.InvariantCulture);
                             security.PriceStep = security.Decimals.GetValueByDecimals();
                             security.PriceStepCost = security.PriceStep;
                             security.Lot = 1;
@@ -1570,7 +1570,7 @@ namespace OsEngine.Market.Servers.CoinEx.Spot
 
                 try
                 {
-                    order.NumberUser = Convert.ToInt32(cexOrder.client_id);
+                    order.NumberUser = Convert.ToInt32(cexOrder.client_id, CultureInfo.InvariantCulture);
                 }
                 catch (System.Exception ex)
                 {
@@ -2280,7 +2280,7 @@ namespace OsEngine.Market.Servers.CoinEx.Spot
 
             try
             {
-                order.NumberUser = Convert.ToInt32(cexOrder.client_id);
+                order.NumberUser = Convert.ToInt32(cexOrder.client_id, CultureInfo.InvariantCulture);
             }
             catch
             {

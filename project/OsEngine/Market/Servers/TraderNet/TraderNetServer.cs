@@ -345,7 +345,7 @@ namespace OsEngine.Market.Servers.TraderNet
                     newSecurity.Name = item.ticker;
                     newSecurity.NameFull = item.ticker;
                     newSecurity.NameId = item.instr_id;
-                    newSecurity.SecurityType = GetSecurityType(Convert.ToInt32(item.instr_type_c));
+                    newSecurity.SecurityType = GetSecurityType(Convert.ToInt32(item.instr_type_c, CultureInfo.InvariantCulture));
                     newSecurity.NameClass = $"{item.mkt_short_code}_{newSecurity.SecurityType}";
                     newSecurity.Decimals = item.min_step.DecimalsCount();
                     newSecurity.PriceStep = item.min_step.ToDecimal();
@@ -1654,7 +1654,7 @@ namespace OsEngine.Market.Servers.TraderNet
             {
                 for (int i = 0; i < responseDepth.del.Count; i++)
                 {
-                    _listMD[responseDepth.i].RemoveAt(Convert.ToInt32(responseDepth.del[i].k));
+                    _listMD[responseDepth.i].RemoveAt(Convert.ToInt32(responseDepth.del[i].k, CultureInfo.InvariantCulture));
                 }
             }
 
@@ -1667,7 +1667,7 @@ namespace OsEngine.Market.Servers.TraderNet
                     list.q = responseDepth.ins[i].q;
                     list.s = responseDepth.ins[i].s;
 
-                    _listMD[responseDepth.i].Insert(Convert.ToInt32(responseDepth.ins[i].k), list);
+                    _listMD[responseDepth.i].Insert(Convert.ToInt32(responseDepth.ins[i].k, CultureInfo.InvariantCulture), list);
                 }
             }
 
@@ -1680,8 +1680,8 @@ namespace OsEngine.Market.Servers.TraderNet
                     list.q = responseDepth.upd[i].q;
                     list.s = responseDepth.upd[i].s;
 
-                    _listMD[responseDepth.i].RemoveAt(Convert.ToInt32(responseDepth.upd[i].k));
-                    _listMD[responseDepth.i].Insert(Convert.ToInt32(responseDepth.upd[i].k), list);
+                    _listMD[responseDepth.i].RemoveAt(Convert.ToInt32(responseDepth.upd[i].k, CultureInfo.InvariantCulture));
+                    _listMD[responseDepth.i].Insert(Convert.ToInt32(responseDepth.upd[i].k, CultureInfo.InvariantCulture), list);
                 }
             }
         }

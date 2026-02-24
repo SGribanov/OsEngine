@@ -1884,7 +1884,7 @@ namespace OsEngine.Market.Servers.Bitfinex.BitfinexFutures
                     {
                         BitfinexFuturesSubscriptionResponse responseDepth = JsonConvert.DeserializeObject<BitfinexFuturesSubscriptionResponse>(message);
 
-                        int key = Convert.ToInt32(responseDepth.ChanId);
+                        int key = Convert.ToInt32(responseDepth.ChanId, CultureInfo.InvariantCulture);
 
                         if (!_depthDictionary.ContainsKey(key))
                         {
@@ -1897,7 +1897,7 @@ namespace OsEngine.Market.Servers.Bitfinex.BitfinexFutures
                     {
                         List<object> root = JsonConvert.DeserializeObject<List<object>>(message);
 
-                        int channelId = Convert.ToInt32(root[0]);
+                        int channelId = Convert.ToInt32(root[0], CultureInfo.InvariantCulture);
 
                         if (root == null || root.Count < 2)
                         {
@@ -1956,7 +1956,7 @@ namespace OsEngine.Market.Servers.Bitfinex.BitfinexFutures
                     {
                         BitfinexSubscriptionResponse responseTrade = JsonConvert.DeserializeObject<BitfinexSubscriptionResponse>(message);
 
-                        int key = Convert.ToInt32(responseTrade.ChanId);
+                        int key = Convert.ToInt32(responseTrade.ChanId, CultureInfo.InvariantCulture);
 
                         if (!_tradeDictionary.ContainsKey(key))
                         {
@@ -2129,7 +2129,7 @@ namespace OsEngine.Market.Servers.Bitfinex.BitfinexFutures
                     return;
                 }
 
-                int channelId = Convert.ToInt32(root[0]);
+                int channelId = Convert.ToInt32(root[0], CultureInfo.InvariantCulture);
 
                 string securityName = GetSymbolByKeyInDepth(channelId);
 
@@ -2238,7 +2238,7 @@ namespace OsEngine.Market.Servers.Bitfinex.BitfinexFutures
                     return;
                 }
 
-                int channelId = Convert.ToInt32(root[0]);
+                int channelId = Convert.ToInt32(root[0], CultureInfo.InvariantCulture);
                 string securityName = GetSymbolByKeyInDepth(channelId);
 
                 if (_marketDepths == null)
@@ -2380,7 +2380,7 @@ namespace OsEngine.Market.Servers.Bitfinex.BitfinexFutures
 
                 List<object> tradeData = JsonConvert.DeserializeObject<List<object>>(root[2].ToString());
 
-                int channelId = Convert.ToInt32(root[0]);
+                int channelId = Convert.ToInt32(root[0], CultureInfo.InvariantCulture);
 
                 if (tradeData == null && tradeData.Count < 4)
                 {
@@ -2502,7 +2502,7 @@ namespace OsEngine.Market.Servers.Bitfinex.BitfinexFutures
 
                 try
                 {
-                    updateOrder.NumberUser = Convert.ToInt32(orderDataList[2]);
+                    updateOrder.NumberUser = Convert.ToInt32(orderDataList[2], CultureInfo.InvariantCulture);
                 }
                 catch
                 {
@@ -2905,7 +2905,7 @@ namespace OsEngine.Market.Servers.Bitfinex.BitfinexFutures
 
                         try
                         {
-                            activeOrder.NumberUser = Convert.ToInt32(orderData[2]);
+                            activeOrder.NumberUser = Convert.ToInt32(orderData[2], CultureInfo.InvariantCulture);
 
                         }
                         catch
@@ -3033,7 +3033,7 @@ namespace OsEngine.Market.Servers.Bitfinex.BitfinexFutures
 
                             try
                             {
-                                userNumber = Convert.ToInt32(tradeData[11]);
+                                userNumber = Convert.ToInt32(tradeData[11], CultureInfo.InvariantCulture);
                             }
                             catch
                             {
@@ -3128,7 +3128,7 @@ namespace OsEngine.Market.Servers.Bitfinex.BitfinexFutures
 
                                 if (int.TryParse(orderData[2]?.ToString(), out int number))
                                 {
-                                    historyOrder.NumberUser = Convert.ToInt32(number);
+                                    historyOrder.NumberUser = Convert.ToInt32(number, CultureInfo.InvariantCulture);
                                 }
 
                                 historyOrder.NumberMarket = orderData[0]?.ToString();

@@ -13,6 +13,7 @@ using OsEngine.Layout;
 using OsEngine.Market;
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Drawing;
 using System.IO;
 using System.Linq;
@@ -913,7 +914,7 @@ namespace OsEngine.OsTrader.Grids
                     return;
                 }
 
-                TradeGrid.ErrorsReaction.FailOpenOrdersCountToReaction = Convert.ToInt32(TextBoxFailOpenOrdersCountToReaction.Text);
+                TradeGrid.ErrorsReaction.FailOpenOrdersCountToReaction = Convert.ToInt32(TextBoxFailOpenOrdersCountToReaction.Text, CultureInfo.InvariantCulture);
                 TradeGrid.Save();
             }
             catch
@@ -944,7 +945,7 @@ namespace OsEngine.OsTrader.Grids
                     return;
                 }
 
-                TradeGrid.ErrorsReaction.FailCancelOrdersCountToReaction = Convert.ToInt32(TextBoxFailCancelOrdersCountToReaction.Text);
+                TradeGrid.ErrorsReaction.FailCancelOrdersCountToReaction = Convert.ToInt32(TextBoxFailCancelOrdersCountToReaction.Text, CultureInfo.InvariantCulture);
                 TradeGrid.Save();
             }
             catch
@@ -975,7 +976,7 @@ namespace OsEngine.OsTrader.Grids
                     return;
                 }
 
-                TradeGrid.ErrorsReaction.WaitSecondsOnStartConnector = Convert.ToInt32(TextBoxWaitSecondsOnStartConnector.Text);
+                TradeGrid.ErrorsReaction.WaitSecondsOnStartConnector = Convert.ToInt32(TextBoxWaitSecondsOnStartConnector.Text, CultureInfo.InvariantCulture);
                 TradeGrid.Save();
             }
             catch
@@ -1417,7 +1418,7 @@ namespace OsEngine.OsTrader.Grids
                     return;
                 }
 
-                TradeGrid.GridCreator.LineCountStart = Convert.ToInt32(TextBoxLineCountStart.Text);
+                TradeGrid.GridCreator.LineCountStart = Convert.ToInt32(TextBoxLineCountStart.Text, CultureInfo.InvariantCulture);
                 TradeGrid.Save();
             }
             catch
@@ -2144,7 +2145,7 @@ namespace OsEngine.OsTrader.Grids
                         return;
                     }
 
-                    int number = Convert.ToInt32(_gridDataGrid.Rows[row].Cells[column].Value.ToString());
+                    int number = Convert.ToInt32(_gridDataGrid.Rows[row].Cells[column].Value.ToString(), CultureInfo.InvariantCulture);
 
                     Position pos = TradeGrid.Tab._journal.GetPositionForNumber(number);
 
@@ -2276,7 +2277,7 @@ namespace OsEngine.OsTrader.Grids
                     return;
                 }
 
-                TradeGrid.StopBy.StopGridByPositionsCountValue = Convert.ToInt32(TextBoxStopGridByPositionsCountValue.Text);
+                TradeGrid.StopBy.StopGridByPositionsCountValue = Convert.ToInt32(TextBoxStopGridByPositionsCountValue.Text, CultureInfo.InvariantCulture);
                 TradeGrid.Save();
             }
             catch
@@ -2320,7 +2321,7 @@ namespace OsEngine.OsTrader.Grids
                     return;
                 }
 
-                TradeGrid.StopBy.StopGridByLifeTimeSecondsToLife = Convert.ToInt32(TextBoxStopGridByLifeTimeSecondsToLife.Text);
+                TradeGrid.StopBy.StopGridByLifeTimeSecondsToLife = Convert.ToInt32(TextBoxStopGridByLifeTimeSecondsToLife.Text, CultureInfo.InvariantCulture);
                 TradeGrid.Save();
             }
             catch
@@ -2364,7 +2365,7 @@ namespace OsEngine.OsTrader.Grids
                     return;
                 }
 
-                TradeGrid.StopBy.StopGridByTimeOfDayHour = Convert.ToInt32(TextBoxStopGridByTimeOfDayHour.Text);
+                TradeGrid.StopBy.StopGridByTimeOfDayHour = Convert.ToInt32(TextBoxStopGridByTimeOfDayHour.Text, CultureInfo.InvariantCulture);
                 TradeGrid.Save();
             }
             catch
@@ -2382,7 +2383,7 @@ namespace OsEngine.OsTrader.Grids
                     return;
                 }
 
-                TradeGrid.StopBy.StopGridByTimeOfDayMinute = Convert.ToInt32(TextBoxStopGridByTimeOfDayMinute.Text);
+                TradeGrid.StopBy.StopGridByTimeOfDayMinute = Convert.ToInt32(TextBoxStopGridByTimeOfDayMinute.Text, CultureInfo.InvariantCulture);
                 TradeGrid.Save();
             }
             catch
@@ -2400,7 +2401,7 @@ namespace OsEngine.OsTrader.Grids
                     return;
                 }
 
-                TradeGrid.StopBy.StopGridByTimeOfDaySecond = Convert.ToInt32(TextBoxStopGridByTimeOfDaySecond.Text);
+                TradeGrid.StopBy.StopGridByTimeOfDaySecond = Convert.ToInt32(TextBoxStopGridByTimeOfDaySecond.Text, CultureInfo.InvariantCulture);
                 TradeGrid.Save();
             }
             catch
@@ -2516,7 +2517,7 @@ namespace OsEngine.OsTrader.Grids
                     return;
                 }
 
-                TradeGrid.AutoStarter.StartGridByTimeOfDayHour = Convert.ToInt32(TextBoxStartGridByTimeOfDayHour.Text);
+                TradeGrid.AutoStarter.StartGridByTimeOfDayHour = Convert.ToInt32(TextBoxStartGridByTimeOfDayHour.Text, CultureInfo.InvariantCulture);
                 TradeGrid.Save();
             }
             catch
@@ -2534,7 +2535,7 @@ namespace OsEngine.OsTrader.Grids
                     return;
                 }
 
-                TradeGrid.AutoStarter.StartGridByTimeOfDayMinute = Convert.ToInt32(TextBoxStartGridByTimeOfDayMinute.Text);
+                TradeGrid.AutoStarter.StartGridByTimeOfDayMinute = Convert.ToInt32(TextBoxStartGridByTimeOfDayMinute.Text, CultureInfo.InvariantCulture);
                 TradeGrid.Save();
             }
             catch
@@ -2552,7 +2553,7 @@ namespace OsEngine.OsTrader.Grids
                     return;
                 }
 
-                TradeGrid.AutoStarter.StartGridByTimeOfDaySecond = Convert.ToInt32(TextBoxStartGridByTimeOfDaySecond.Text);
+                TradeGrid.AutoStarter.StartGridByTimeOfDaySecond = Convert.ToInt32(TextBoxStartGridByTimeOfDaySecond.Text, CultureInfo.InvariantCulture);
                 TradeGrid.Save();
             }
             catch
@@ -2783,7 +2784,7 @@ namespace OsEngine.OsTrader.Grids
                     return;
                 }
 
-                TradeGrid.MaxClosePositionsInJournal = Convert.ToInt32(TextBoxMaxClosePositionsInJournal.Text);
+                TradeGrid.MaxClosePositionsInJournal = Convert.ToInt32(TextBoxMaxClosePositionsInJournal.Text, CultureInfo.InvariantCulture);
                 TradeGrid.Save();
             }
             catch
@@ -2933,7 +2934,7 @@ namespace OsEngine.OsTrader.Grids
                     return;
                 }
 
-                TradeGrid.MaxOpenOrdersInMarket = Convert.ToInt32(TextBoxMaxOpenOrdersInMarket.Text);
+                TradeGrid.MaxOpenOrdersInMarket = Convert.ToInt32(TextBoxMaxOpenOrdersInMarket.Text, CultureInfo.InvariantCulture);
                 TradeGrid.Save();
             }
             catch
@@ -2951,7 +2952,7 @@ namespace OsEngine.OsTrader.Grids
                     return;
                 }
 
-                TradeGrid.MaxCloseOrdersInMarket = Convert.ToInt32(TextBoxMaxCloseOrdersInMarket.Text);
+                TradeGrid.MaxCloseOrdersInMarket = Convert.ToInt32(TextBoxMaxCloseOrdersInMarket.Text, CultureInfo.InvariantCulture);
                 TradeGrid.Save();
             }
             catch
@@ -3069,7 +3070,7 @@ namespace OsEngine.OsTrader.Grids
                     return;
                 }
 
-                TradeGrid.DelayInReal = Convert.ToInt32(TextBoxDelayInReal.Text);
+                TradeGrid.DelayInReal = Convert.ToInt32(TextBoxDelayInReal.Text, CultureInfo.InvariantCulture);
                 TradeGrid.Save();
             }
             catch
@@ -3101,4 +3102,5 @@ namespace OsEngine.OsTrader.Grids
 
     }
 }
+
 

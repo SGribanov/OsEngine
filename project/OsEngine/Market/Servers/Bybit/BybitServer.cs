@@ -2755,7 +2755,7 @@ namespace OsEngine.Market.Servers.Bybit
                     {
                         if (string.IsNullOrEmpty(responseMyTrades.data[i].orderLinkId) == false)
                         {
-                            newOrder.NumberUser = Convert.ToInt32(responseMyTrades.data[i].orderLinkId);
+                            newOrder.NumberUser = Convert.ToInt32(responseMyTrades.data[i].orderLinkId, CultureInfo.InvariantCulture);
                         }
                     }
                     catch
@@ -4063,7 +4063,7 @@ namespace OsEngine.Market.Servers.Bybit
                         {
                             try
                             {
-                                newOrder.NumberUser = Convert.ToInt32(numUser);
+                                newOrder.NumberUser = Convert.ToInt32(numUser, CultureInfo.InvariantCulture);
                             }
                             catch
                             {

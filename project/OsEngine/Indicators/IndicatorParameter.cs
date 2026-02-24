@@ -185,7 +185,7 @@ namespace OsEngine.Indicators
         /// </summary>
         public override void LoadParamFromString(string[] save)
         {
-            _valueInt = Convert.ToInt32(save[1]);
+            _valueInt = Convert.ToInt32(save[1], CultureInfo.InvariantCulture);
         }
 
         /// <summary>

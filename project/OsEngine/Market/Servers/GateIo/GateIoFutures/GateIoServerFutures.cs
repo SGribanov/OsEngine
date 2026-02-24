@@ -921,7 +921,7 @@ namespace OsEngine.Market.Servers.GateIo.GateIoFutures
                         Candle candle = new Candle();
 
                         candle.State = CandleState.Finished;
-                        candle.TimeStart = TimeManager.GetDateTimeFromTimeStampSeconds(int.Parse(current.t));
+                        candle.TimeStart = TimeManager.GetDateTimeFromTimeStampSeconds(int.Parse(current.t, CultureInfo.InvariantCulture));
                         candle.Volume = current.sum.ToDecimal();
                         candle.Close = current.c.ToDecimal();
                         candle.High = current.h.ToDecimal();
@@ -1566,7 +1566,7 @@ namespace OsEngine.Market.Servers.GateIo.GateIoFutures
                     funding.NextFundingTime = TimeManager.GetDateTimeFromTimeStampSeconds((long)securities.funding_next_apply.ToDecimal());
                     //funding.MaxFundingRate = securities.maxFundingRate.ToDecimal();
                     //funding.MinFundingRate = securities.minFundingRate.ToDecimal();
-                    funding.FundingIntervalHours = int.Parse(securities.funding_interval) / 3600;
+                    funding.FundingIntervalHours = int.Parse(securities.funding_interval, CultureInfo.InvariantCulture) / 3600;
 
                     FundingUpdateEvent?.Invoke(funding);
                 }

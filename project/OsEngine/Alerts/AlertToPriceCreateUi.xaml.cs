@@ -123,7 +123,7 @@ namespace OsEngine.Alerts
 
             MyAlert.Slippage = TextBoxSlippage.Text.ToDecimal();
 
-            MyAlert.NumberClosePosition = Convert.ToInt32(TextBoxClosePosition.Text);
+            MyAlert.NumberClosePosition = Convert.ToInt32(TextBoxClosePosition.Text, CultureInfo.InvariantCulture);
 
             Enum.TryParse(ComboBoxSlippageType.SelectedItem.ToString(), true, out MyAlert.SlippageType);
 

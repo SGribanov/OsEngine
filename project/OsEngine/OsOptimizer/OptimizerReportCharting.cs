@@ -6,6 +6,7 @@
 using System;
 using System.Collections.Generic;
 using System.Drawing;
+using System.Globalization;
 using System.Windows.Forms;
 using System.Windows.Forms.DataVisualization.Charting;
 using System.Windows.Forms.Integration;
@@ -72,7 +73,7 @@ namespace OsEngine.OsOptimizer
         {
             try
             {
-                _sortBotPercent = Convert.ToInt32(_boxTypeSortBotNum.SelectedItem.ToString());
+                _sortBotPercent = Convert.ToInt32(_boxTypeSortBotNum.SelectedItem.ToString(), CultureInfo.InvariantCulture);
 
                 if (_reports != null)
                 {
