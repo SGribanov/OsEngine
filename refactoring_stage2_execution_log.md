@@ -12027,3 +12027,30 @@
   - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` succeeded (`352/352`).
 - **Commit:** n/a (not committed in this session)
 - **Push:** n/a
+
+### Step 2.2 - CultureInfo Invariant Persistence (Incremental Adoption #539)
+
+- **Status:** In Progress (increment completed)
+- **Plan item:** `refactoring_stage2_plan.md` -> Phase 2 / Step 2.2
+- **Changes:**
+  - Hardened timestamp serialization in signed/auth flows:
+    - `project/OsEngine/Market/Servers/AscendEX/AscendEXSpot/AscendexSpotServer.cs`
+    - `project/OsEngine/Market/Servers/CoinEx/Spot/CoinExServerSpot.cs`
+    - `project/OsEngine/Market/Servers/CoinEx/Futures/CoinExServerFutures.cs`
+    - `project/OsEngine/Market/Servers/Bybit/BybitServer.cs`
+    - `project/OsEngine/Market/Servers/OKX/Entity/Encryptor.cs`
+    - `project/OsEngine/Market/Servers/OKX/Entity/HttpInterceptor.cs`
+  - Replacements:
+    - numeric timestamp formatting: `timestamp.ToString()` -> `timestamp.ToString(CultureInfo.InvariantCulture)` in request headers/signature payloads.
+    - removed redundant `ToString()` calls where timestamp values are already strings (Bybit/OKX paths).
+    - added missing `using System.Globalization;` in `Encryptor.cs`.
+  - Scope:
+    - protocol timestamp serialization determinism and cleanup only; request logic unchanged.
+- **Verification:**
+  - Executed outside sandbox.
+  - `dotnet restore project/OsEngine/OsEngine.csproj --nologo` succeeded.
+  - `dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo` succeeded.
+  - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` succeeded (0 warnings).
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` succeeded (`352/352`).
+- **Commit:** n/a (not committed in this session)
+- **Push:** n/a
