@@ -913,7 +913,7 @@ namespace OsEngine.Market.Servers.CoinEx.Futures
             //if (_wsClients.Count > 1) return;
 
             long timestamp = TimeManager.GetUnixTimeStampMilliseconds();
-            string sign = Sign(timestamp.ToString());
+            string sign = Sign(timestamp.ToString(CultureInfo.InvariantCulture));
 
             wsClient.SendAsync($"{{\"method\":\"server.sign\",\"params\":{{\"access_id\":\"{_publicKey}\",\"signed_str\":\"{sign}\",\"timestamp\":{timestamp}}},\"id\":1}}");
         }

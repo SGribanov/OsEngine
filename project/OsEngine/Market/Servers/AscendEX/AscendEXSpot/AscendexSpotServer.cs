@@ -2483,7 +2483,7 @@ namespace OsEngine.Market.Servers.AscendexSpot
 
                 request.AddHeader("Content-Type", "application/json");
                 request.AddHeader("x-auth-key", _publicKey);
-                request.AddHeader("x-auth-timestamp", timestamp.ToString());
+                request.AddHeader("x-auth-timestamp", timestamp.ToString(CultureInfo.InvariantCulture));
                 request.AddHeader("x-auth-signature", signature);
 
                 if (body != null)

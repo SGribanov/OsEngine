@@ -4,6 +4,7 @@
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Security.Cryptography;
 using System.Text;
 
@@ -32,7 +33,7 @@ namespace OsEngine.Market.Servers.OKX.Entity
             requestAuth.args.Add(new AuthObject());
             requestAuth.args[0].apiKey = apiKey;
             requestAuth.args[0].passphrase = phrase;
-            requestAuth.args[0].timestamp = timeStamp.ToString();
+            requestAuth.args[0].timestamp = timeStamp.ToString(CultureInfo.InvariantCulture);
             requestAuth.args[0].sign = sign;
 
             string json = JsonConvert.SerializeObject(requestAuth);

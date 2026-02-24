@@ -371,6 +371,28 @@
 - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` -> success, 0 warnings, 0 errors
 - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed 352/352
 
+## 2026-02-24 - Step 2.2 (InvariantCulture in persistence/protocol) - Incremental Adoption #539
+
+- Hardened timestamp serialization in signed/auth flows across multiple exchange connectors:
+  - `project/OsEngine/Market/Servers/AscendEX/AscendEXSpot/AscendexSpotServer.cs`
+  - `project/OsEngine/Market/Servers/CoinEx/Spot/CoinExServerSpot.cs`
+  - `project/OsEngine/Market/Servers/CoinEx/Futures/CoinExServerFutures.cs`
+  - `project/OsEngine/Market/Servers/Bybit/BybitServer.cs`
+  - `project/OsEngine/Market/Servers/OKX/Entity/Encryptor.cs`
+  - `project/OsEngine/Market/Servers/OKX/Entity/HttpInterceptor.cs`
+- Replacements:
+  - numeric timestamp formatting: `timestamp.ToString()` -> `timestamp.ToString(CultureInfo.InvariantCulture)` for request headers/signature payloads.
+  - removed redundant `ToString()` calls on already-string timestamps in Bybit/OKX paths.
+- Scope:
+  - protocol timestamp serialization determinism and cleanup only; request logic unchanged.
+
+### Verification
+
+- `dotnet restore project/OsEngine/OsEngine.csproj --nologo` -> success
+- `dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo` -> success
+- `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` -> success, 0 warnings, 0 errors
+- `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed 352/352
+
 - Migrated `project/OsEngine/Logging/ServerTelegram.cs` persistence to `SettingsManager`:
   - `Save()` now writes JSON into `Engine\\telegramSet.txt`
   - `Load()` now reads JSON and falls back to legacy 3-line format parser

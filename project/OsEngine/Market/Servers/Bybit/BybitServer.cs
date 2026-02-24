@@ -4596,16 +4596,16 @@ namespace OsEngine.Market.Servers.Bybit
                         {
                             if (timeFromServer == null)
                             {
-                                return UtcNowUnixTimeMilliseconds.ToString();
+                                return UtcNowUnixTimeMilliseconds.ToString(CultureInfo.InvariantCulture);
                             }
                             string timeStamp = timeFromServer.time;
 
                             if (long.TryParse(timeStamp, NumberStyles.Integer, CultureInfo.InvariantCulture, out _))
                             {
-                                return timeStamp.ToString();
+                                return timeStamp;
                             }
 
-                            return UtcNowUnixTimeMilliseconds.ToString();
+                            return UtcNowUnixTimeMilliseconds.ToString(CultureInfo.InvariantCulture);
                         }
                         else
                         {

@@ -824,7 +824,7 @@ namespace OsEngine.Market.Servers.CoinEx.Spot
         {
 
             long timestamp = TimeManager.GetUnixTimeStampMilliseconds();
-            string sign = Sign(timestamp.ToString());
+            string sign = Sign(timestamp.ToString(CultureInfo.InvariantCulture));
 
             _webSocketPrivate?.SendAsync($"{{\"method\":\"server.sign\",\"params\":{{\"access_id\":\"{_publicKey}\",\"signed_str\":\"{sign}\",\"timestamp\":{timestamp}}},\"id\":1}}");
         }

@@ -67,7 +67,7 @@ namespace OsEngine.Market.Servers.OKX.Entity
             }
 
             request.Headers.Add("OK-ACCESS-SIGN", sign);
-            request.Headers.Add("OK-ACCESS-TIMESTAMP", timeStamp.ToString());
+            request.Headers.Add("OK-ACCESS-TIMESTAMP", timeStamp);
             request.Headers.Add("OK-ACCESS-PASSPHRASE", this._passPhrase);
 
             if (_demoMode)
