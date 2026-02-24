@@ -12006,3 +12006,24 @@
   - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` succeeded (`352/352`).
 - **Commit:** n/a (not committed in this session)
 - **Push:** n/a
+
+### Step 2.2 - CultureInfo Invariant Persistence (Incremental Adoption #538)
+
+- **Status:** In Progress (increment completed)
+- **Plan item:** `refactoring_stage2_plan.md` -> Phase 2 / Step 2.2
+- **Changes:**
+  - Hardened Bitfinex nonce serialization in:
+    - `project/OsEngine/Market/Servers/Bitfinex/BitfinexSpot/BitfinexSpotServer.cs`
+    - `project/OsEngine/Market/Servers/Bitfinex/BitfinexFutures/BitfinexFuturesServer.cs`
+  - Replacements:
+    - `DateTimeOffset.UtcNow.ToUnixTimeMilliseconds().ToString()` -> `ToString(CultureInfo.InvariantCulture)` in signed private-request nonce generation.
+  - Scope:
+    - protocol nonce serialization determinism hardening only; request semantics unchanged.
+- **Verification:**
+  - Executed outside sandbox.
+  - `dotnet restore project/OsEngine/OsEngine.csproj --nologo` succeeded.
+  - `dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo` succeeded.
+  - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` succeeded (0 warnings).
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` succeeded (`352/352`).
+- **Commit:** n/a (not committed in this session)
+- **Push:** n/a
