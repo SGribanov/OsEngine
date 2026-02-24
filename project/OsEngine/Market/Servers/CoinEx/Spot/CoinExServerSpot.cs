@@ -73,7 +73,7 @@ namespace OsEngine.Market.Servers.CoinEx.Spot
         {
             _publicKey = ((ServerParameterString)ServerParameters[0]).Value;
             _secretKey = ((ServerParameterPassword)ServerParameters[1]).Value;
-            _marketDepth = Int16.Parse(((ServerParameterEnum)ServerParameters[2]).Value);
+            _marketDepth = Int16.Parse(((ServerParameterEnum)ServerParameters[2]).Value, NumberStyles.Integer, CultureInfo.InvariantCulture);
             _marketMode = ((ServerParameterEnum)ServerParameters[3]).Value;
 
             if (string.IsNullOrEmpty(_publicKey)
@@ -1832,7 +1832,7 @@ namespace OsEngine.Market.Servers.CoinEx.Spot
                 parameters.Add("market_type", _marketMode);
                 parameters.Add("side", order.Side == Side.Buy ? "buy" : "sell");
                 parameters.Add("amount", order.Volume.ToString(CultureInfo.InvariantCulture));
-                parameters.Add("client_id", order.NumberUser.ToString());
+                parameters.Add("client_id", order.NumberUser.ToString(CultureInfo.InvariantCulture));
                 parameters.Add("ccy", order.SecurityNameCode.Replace("USDT", ""));
 
                 if (order.TypeOrder == OrderPriceType.Limit)
@@ -2136,7 +2136,7 @@ namespace OsEngine.Market.Servers.CoinEx.Spot
             if (orderFromExchange == null
                 || orderFromExchange.Count == 0)
             {
-                orderFromExchange = GetOrderFromExchange(order.SecurityNameCode, order.NumberUser.ToString());
+                orderFromExchange = GetOrderFromExchange(order.SecurityNameCode, order.NumberUser.ToString(CultureInfo.InvariantCulture));
             }
 
             if (orderFromExchange == null
@@ -2423,7 +2423,7 @@ namespace OsEngine.Market.Servers.CoinEx.Spot
         {
             try
             {
-                string timestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds().ToString();
+                string timestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds().ToString(CultureInfo.InvariantCulture);
                 string signature = GenerateSignature(path, method.ToString(), timestamp, body);
 
                 RestRequest requestRest = new RestRequest(path, method);

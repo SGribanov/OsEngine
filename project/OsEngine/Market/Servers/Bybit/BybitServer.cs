@@ -717,7 +717,7 @@ namespace OsEngine.Market.Servers.Bybit
                             security.NameClass = oneSec.contractType;
                         }
 
-                        int.TryParse(oneSec.priceScale, out int ps);
+                        int.TryParse(oneSec.priceScale, NumberStyles.Integer, CultureInfo.InvariantCulture, out int ps);
                         security.Decimals = ps;
 
                         security.PriceStep = oneSec.priceFilter.tickSize.ToDecimal();
@@ -2139,7 +2139,7 @@ namespace OsEngine.Market.Servers.Bybit
                         Funding data = new Funding();
 
                         data.SecurityNameCode = sec;
-                        int.TryParse(item.fundingInterval, out data.FundingIntervalHours);
+                        int.TryParse(item.fundingInterval, NumberStyles.Integer, CultureInfo.InvariantCulture, out data.FundingIntervalHours);
                         data.MaxFundingRate = item.upperFundingRate.ToDecimal();
                         data.MinFundingRate = item.lowerFundingRate.ToDecimal();
                         data.FundingIntervalHours = data.FundingIntervalHours / 60;
@@ -3632,7 +3632,7 @@ namespace OsEngine.Market.Servers.Bybit
                     parameters["marketUnit"] = "baseCoin";
                 }
 
-                parameters["orderLinkId"] = order.NumberUser.ToString();
+                parameters["orderLinkId"] = order.NumberUser.ToString(CultureInfo.InvariantCulture);
 
                 if (_hedgeMode)
                 {
@@ -3722,7 +3722,7 @@ namespace OsEngine.Market.Servers.Bybit
                 }
 
                 parameters["symbol"] = order.SecurityNameCode.Split('.')[0];
-                parameters["orderLinkId"] = order.NumberUser.ToString();
+                parameters["orderLinkId"] = order.NumberUser.ToString(CultureInfo.InvariantCulture);
                 parameters["price"] = newPrice.ToString(CultureInfo.InvariantCulture);
 
                 IRestResponse responseMessage = CreatePrivateQuery(parameters, Method.POST, "/v5/order/amend");
@@ -3789,7 +3789,7 @@ namespace OsEngine.Market.Servers.Bybit
             }
             else
             {
-                parameters["orderLinkId"] = order.NumberUser.ToString();
+                parameters["orderLinkId"] = order.NumberUser.ToString(CultureInfo.InvariantCulture);
             }
 
             try
@@ -4426,7 +4426,7 @@ namespace OsEngine.Market.Servers.Bybit
 
             try
             {
-                string timestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds().ToString();//GetServerTime();
+                string timestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds().ToString(CultureInfo.InvariantCulture);//GetServerTime();
                 RestRequest request = null;
                 string jsonPayload = "";
                 string signature = "";
@@ -4600,7 +4600,7 @@ namespace OsEngine.Market.Servers.Bybit
                             }
                             string timeStamp = timeFromServer.time;
 
-                            if (long.TryParse(timeStamp.ToString(), out long timestampServer))
+                            if (long.TryParse(timeStamp, NumberStyles.Integer, CultureInfo.InvariantCulture, out _))
                             {
                                 return timeStamp.ToString();
                             }
@@ -4628,7 +4628,7 @@ namespace OsEngine.Market.Servers.Bybit
                     SendLogMessage(ex.Message, LogMessageType.Error);
                 }
 
-                return DateTimeOffset.UtcNow.ToUnixTimeMilliseconds().ToString();
+                return DateTimeOffset.UtcNow.ToUnixTimeMilliseconds().ToString(CultureInfo.InvariantCulture);
             }
         }
 

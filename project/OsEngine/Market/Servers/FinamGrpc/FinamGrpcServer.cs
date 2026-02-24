@@ -1401,7 +1401,7 @@ namespace OsEngine.Market.Servers.FinamGrpc
 
             Order myOrder = new Order();
             FOrder fOrder = orderState.Order;
-            if (int.TryParse(fOrder.ClientOrderId, out int numUser))
+            if (int.TryParse(fOrder.ClientOrderId, NumberStyles.Integer, CultureInfo.InvariantCulture, out int numUser))
             {
                 myOrder.NumberUser = numUser;
             }
@@ -1554,7 +1554,7 @@ namespace OsEngine.Market.Servers.FinamGrpc
             fOrder.Symbol = order.SecurityNameCode;
             fOrder.Quantity = new Google.Type.Decimal { Value = order.Volume.ToString(CultureInfo.InvariantCulture) };
             fOrder.Side = GetFSide(order.Side);
-            fOrder.ClientOrderId = order.NumberUser.ToString();
+            fOrder.ClientOrderId = order.NumberUser.ToString(CultureInfo.InvariantCulture);
             if (order.TypeOrder == OrderPriceType.Limit)
             {
                 fOrder.Type = OrderType.Limit;

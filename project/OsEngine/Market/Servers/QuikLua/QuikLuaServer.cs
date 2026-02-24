@@ -2000,7 +2000,7 @@ namespace OsEngine.Market.Servers.QuikLua
                     order.TimeCancel = order.TimeCallBack;
                 }
 
-                order.NumberMarket = qOrder.OrderNum.ToString() + "+" + order.NumberUser.ToString();
+                order.NumberMarket = qOrder.OrderNum.ToString() + "+" + order.NumberUser.ToString(CultureInfo.InvariantCulture);
 
                 if (qOrder.Operation == Operation.Buy)
                 {
@@ -2281,11 +2281,11 @@ namespace OsEngine.Market.Servers.QuikLua
 
                 if (((ServerParameterBool)ServerParameters[6]).Value == false)
                 {
-                    qOrder.Comment = order.NumberUser.ToString();
+                    qOrder.Comment = order.NumberUser.ToString(CultureInfo.InvariantCulture);
                 }
                 else if (((ServerParameterBool)ServerParameters[6]).Value == true)
                 {
-                    qOrder.Comment = order.PortfolioNumber.Split(_portfolioSeparator)[1] + "//" + order.NumberUser.ToString();
+                    qOrder.Comment = order.PortfolioNumber.Split(_portfolioSeparator)[1] + "//" + order.NumberUser.ToString(CultureInfo.InvariantCulture);
                 }
 
                 lock (_serverLocker)
@@ -2464,7 +2464,7 @@ namespace OsEngine.Market.Servers.QuikLua
                         order.Side = Side.Sell;
                     }
 
-                    order.NumberMarket = foundOrder.OrderNum.ToString() + "+" + order.NumberUser.ToString();
+                    order.NumberMarket = foundOrder.OrderNum.ToString() + "+" + order.NumberUser.ToString(CultureInfo.InvariantCulture);
 
                     if (MyOrderEvent != null)
                     {

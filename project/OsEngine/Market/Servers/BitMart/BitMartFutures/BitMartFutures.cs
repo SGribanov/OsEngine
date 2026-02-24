@@ -900,7 +900,7 @@ namespace OsEngine.Market.Servers.BitMartFutures
 
         private void CreateAuthMessageWebSocKet()
         {
-            string timestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds().ToString();
+            string timestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds().ToString(CultureInfo.InvariantCulture);
             string sign = GenerateSignature(timestamp, "bitmart.WebSocket");
 
             _webSocketPrivate.SendAsync($"{{\"action\": \"access\", \"args\": [\"{_publicKey}\", \"{timestamp}\", \"{sign}\",\"web\"]}}");
@@ -2302,7 +2302,7 @@ namespace OsEngine.Market.Servers.BitMartFutures
             requestObj.open_type = "cross";
             requestObj.symbol = order.SecurityNameCode;
             requestObj.size = (int)order.Volume;
-            requestObj.client_order_id = order.NumberUser.ToString();
+            requestObj.client_order_id = order.NumberUser.ToString(CultureInfo.InvariantCulture);
 
             return requestObj;
         }
@@ -2807,7 +2807,7 @@ namespace OsEngine.Market.Servers.BitMartFutures
         {
             try
             {
-                string timestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds().ToString();
+                string timestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds().ToString(CultureInfo.InvariantCulture);
 
                 RestRequest requestRest = new RestRequest(path, method);
                 requestRest.AddHeader("X-BM-KEY", _publicKey);

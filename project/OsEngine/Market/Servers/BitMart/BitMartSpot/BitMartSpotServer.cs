@@ -735,7 +735,7 @@ namespace OsEngine.Market.Servers.BitMart
 
         private void CreateAuthMessageWebSocekt()
         {
-            string timeStamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds().ToString();
+            string timeStamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds().ToString(CultureInfo.InvariantCulture);
             string sign = GenerateSignature(timeStamp, "bitmart.WebSocket");
 
             _webSocketPrivate.SendAsync($"{{\"op\": \"login\", \"args\": [\"{_publicKey}\", \"{timeStamp}\", \"{sign}\"]}}");
@@ -1734,7 +1734,7 @@ namespace OsEngine.Market.Servers.BitMart
 
             requestObj.symbol = order.SecurityNameCode;
             requestObj.size = order.Volume.ToString(CultureInfo.InvariantCulture);
-            requestObj.client_order_id = order.NumberUser.ToString();
+            requestObj.client_order_id = order.NumberUser.ToString(CultureInfo.InvariantCulture);
 
             return requestObj;
         }
@@ -1763,7 +1763,7 @@ namespace OsEngine.Market.Servers.BitMart
                 string endPoint = "/spot/v3/cancel_order";
 
                 CancelOrderBitMartRequest body = new CancelOrderBitMartRequest();
-                body.client_order_id = order.NumberUser.ToString();
+                body.client_order_id = order.NumberUser.ToString(CultureInfo.InvariantCulture);
                 body.symbol = order.SecurityNameCode;
 
                 string bodyStr = JsonConvert.SerializeObject(body);
@@ -1947,7 +1947,7 @@ namespace OsEngine.Market.Servers.BitMart
 
         public OrderStateType GetOrderStatus(Order order)
         {
-            Order myOrder = GetOrderFromExchange(order.NumberUser.ToString());
+            Order myOrder = GetOrderFromExchange(order.NumberUser.ToString(CultureInfo.InvariantCulture));
 
             if (myOrder == null)
             {
@@ -2148,7 +2148,7 @@ namespace OsEngine.Market.Servers.BitMart
         {
             try
             {
-                string timestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds().ToString();
+                string timestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds().ToString(CultureInfo.InvariantCulture);
 
                 RestRequest requestRest = new RestRequest(path, method);
                 requestRest.AddHeader("X-BM-KEY", _publicKey);

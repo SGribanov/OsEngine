@@ -1827,7 +1827,7 @@ namespace OsEngine.Market.Servers.BitGet.BitGetSpot
                     Order newOrder = new Order();
                     newOrder.SecurityNameCode = item.instId;
                     newOrder.TimeCallBack = TimeManager.GetDateTimeFromTimeStamp(Convert.ToInt64(item.cTime, CultureInfo.InvariantCulture));
-                    int.TryParse(item.clientOid, out newOrder.NumberUser);
+                    int.TryParse(item.clientOid, NumberStyles.Integer, CultureInfo.InvariantCulture, out newOrder.NumberUser);
                     newOrder.NumberMarket = item.orderId.ToString();
                     newOrder.Side = item.side.Equals("buy") ? Side.Buy : Side.Sell;
                     newOrder.State = stateType;
@@ -2669,7 +2669,7 @@ namespace OsEngine.Market.Servers.BitGet.BitGetSpot
             {
                 RestRequest requestRest = new RestRequest(path, method);
 
-                string timestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds().ToString();
+                string timestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds().ToString(CultureInfo.InvariantCulture);
                 string signature = GenerateSignature(timestamp, method.ToString(), path, queryString, body, SeckretKey);
 
                 requestRest.AddHeader("ACCESS-KEY", PublicKey);
@@ -2710,7 +2710,7 @@ namespace OsEngine.Market.Servers.BitGet.BitGetSpot
 
                 string requestPath = path;
                 string url = $"{BaseUrl}{requestPath}";
-                string timestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds().ToString();
+                string timestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds().ToString(CultureInfo.InvariantCulture);
                 string signature = GenerateSignature(timestamp, method.ToString(), requestPath, queryString, body, SeckretKey);
 
                 requestRest.AddHeader("ACCESS-KEY", PublicKey);

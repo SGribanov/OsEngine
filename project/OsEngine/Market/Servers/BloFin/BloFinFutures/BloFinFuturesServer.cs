@@ -863,7 +863,7 @@ namespace OsEngine.Market.Servers.BloFin
             try
             {
                 string path = $"/users/self/verify";
-                string timestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds().ToString();
+                string timestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds().ToString(CultureInfo.InvariantCulture);
                 string nonce = Guid.NewGuid().ToString();
                 string signature = GenerateSignature(timestamp, Method.GET.ToString(), path, null, nonce);
 
@@ -1683,7 +1683,7 @@ namespace OsEngine.Market.Servers.BloFin
                 newOrder.TimeCancel = newOrder.TimeCallBack;
             }
 
-            int.TryParse(item.clientOrderId, out newOrder.NumberUser);
+            int.TryParse(item.clientOrderId, NumberStyles.Integer, CultureInfo.InvariantCulture, out newOrder.NumberUser);
 
             newOrder.NumberMarket = item.orderId.ToString();
             newOrder.Side = item.side.Equals("buy") ? Side.Buy : Side.Sell;
@@ -1951,7 +1951,7 @@ namespace OsEngine.Market.Servers.BloFin
                 orderRequest.Add("orderType", order.TypeOrder.ToString().ToLower());
                 orderRequest.Add("price", order.Price.ToString(CultureInfo.InvariantCulture));
                 orderRequest.Add("size", volume.ToString(CultureInfo.InvariantCulture));
-                orderRequest.Add("clientOrderId", order.NumberUser.ToString());
+                orderRequest.Add("clientOrderId", order.NumberUser.ToString(CultureInfo.InvariantCulture));
                 orderRequest.Add("brokerId", "0f43c3141c50b7e3");
 
                 string jsonRequest = JsonConvert.SerializeObject(orderRequest);
@@ -2038,7 +2038,7 @@ namespace OsEngine.Market.Servers.BloFin
                 }
                 else
                 {
-                    orderRequest.Add("clientOrderId", order.NumberUser.ToString());
+                    orderRequest.Add("clientOrderId", order.NumberUser.ToString(CultureInfo.InvariantCulture));
                 }
 
                 string jsonRequest = JsonConvert.SerializeObject(orderRequest);
@@ -2171,7 +2171,7 @@ namespace OsEngine.Market.Servers.BloFin
 
                             newOrder.SecurityNameCode = item.instId;
                             newOrder.TimeCallBack = TimeManager.GetDateTimeFromTimeStamp(Convert.ToInt64(item.createTime, CultureInfo.InvariantCulture));
-                            int.TryParse(item.clientOrderId, out newOrder.NumberUser);
+                            int.TryParse(item.clientOrderId, NumberStyles.Integer, CultureInfo.InvariantCulture, out newOrder.NumberUser);
                             newOrder.NumberMarket = item.orderId.ToString();
                             newOrder.Side = item.side == "buy" ? Side.Buy : Side.Sell;
                             newOrder.State = stateType;
@@ -2291,7 +2291,7 @@ namespace OsEngine.Market.Servers.BloFin
 
                             newOrder.SecurityNameCode = item.instId;
                             newOrder.TimeCallBack = TimeManager.GetDateTimeFromTimeStamp(Convert.ToInt64(item.createTime, CultureInfo.InvariantCulture));
-                            int.TryParse(item.clientOrderId, out newOrder.NumberUser);
+                            int.TryParse(item.clientOrderId, NumberStyles.Integer, CultureInfo.InvariantCulture, out newOrder.NumberUser);
                             newOrder.NumberMarket = item.orderId.ToString();
                             newOrder.Side = item.side == "buy" ? Side.Buy : Side.Sell;
                             newOrder.State = stateType;
@@ -2398,7 +2398,7 @@ namespace OsEngine.Market.Servers.BloFin
         {
             try
             {
-                string timestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds().ToString();
+                string timestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds().ToString(CultureInfo.InvariantCulture);
                 string nonce = Guid.NewGuid().ToString();
 
                 string signature = GenerateSignature(timestamp, method.ToString(), path, body, nonce);

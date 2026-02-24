@@ -16,6 +16,7 @@ using OsEngine.Market.Servers.Entity;
 using OsEngine.OsTrader;
 using OsEngine.OsTrader.Panels;
 using System;
+using System.Globalization;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
@@ -327,7 +328,7 @@ namespace OsEngine.Market.Servers.AE
 
                 data.MarkIV = q.Volatility.ToString();
                 data.SecurityName = q.Ticker;
-                data.TimeCreate = new DateTimeOffset(q.Timestamp).ToUnixTimeMilliseconds().ToString();
+                data.TimeCreate = new DateTimeOffset(q.Timestamp).ToUnixTimeMilliseconds().ToString(CultureInfo.InvariantCulture);
                 data.UnderlyingAsset = sec?.UnderlyingAsset ?? "";
 
                 AdditionalMarketDataEvent!(data);

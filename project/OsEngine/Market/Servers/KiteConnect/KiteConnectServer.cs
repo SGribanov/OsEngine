@@ -973,8 +973,8 @@ namespace OsEngine.Market.Servers.KiteConnect
 
             try
             {
-                string end = endTime.ToString("yyyy-MM-dd HH:mm:ss");
-                string start = startTime.ToString("yyyy-MM-dd HH:mm:ss");
+                string end = endTime.ToString("yyyy-MM-dd HH:mm:ss", CultureInfo.InvariantCulture);
+                string start = startTime.ToString("yyyy-MM-dd HH:mm:ss", CultureInfo.InvariantCulture);
 
                 string instrumentToken = security.NameId.Split('_')[0];
                 string path = $"/instruments/historical/{instrumentToken}/{tf}";
@@ -1617,7 +1617,7 @@ namespace OsEngine.Market.Servers.KiteConnect
                 string exchange = GetExchange(order.SecurityClassCode.Split('_')[0]);
                 string nameSecurity = order.SecurityNameCode.Split('_')[0];
 
-                string tag = $"{order.NumberUser.ToString()}_{order.SecurityNameCode}";
+                string tag = $"{order.NumberUser.ToString(CultureInfo.InvariantCulture)}_{order.SecurityNameCode}";
 
                 RestClient client = new RestClient(_baseUrl);
                 RestRequest request = new RestRequest(path, Method.POST);
@@ -1768,7 +1768,7 @@ namespace OsEngine.Market.Servers.KiteConnect
 
         public OrderStateType GetOrderStatus(Order order)
         {
-            Order myOrder = GetOrderFromExchange(order.NumberUser.ToString());
+            Order myOrder = GetOrderFromExchange(order.NumberUser.ToString(CultureInfo.InvariantCulture));
 
             if (myOrder == null)
             {

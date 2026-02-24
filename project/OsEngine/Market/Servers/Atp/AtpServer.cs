@@ -746,7 +746,7 @@ namespace OsEngine.Market.Servers.Atp
             int decimals = 0;
             if (array.Length > 11)
             {
-                int.TryParse(array[11], out decimals);
+                int.TryParse(array[11], NumberStyles.Integer, CultureInfo.InvariantCulture, out decimals);
             }
 
             DateTime expiration = DateTime.MinValue;
@@ -1990,7 +1990,7 @@ namespace OsEngine.Market.Servers.Atp
         {
             rateGateSendOrder.WaitToProceed();
 
-            order.NumberMarket = order.NumberUser.ToString();
+            order.NumberMarket = order.NumberUser.ToString(CultureInfo.InvariantCulture);
 
             string orderToTcp = "O@";
 

@@ -1953,7 +1953,7 @@ namespace OsEngine.Market.Servers.AscendexSpot
                 string secName = order.SecurityNameCode;
                 string orderSide = order.Side == Side.Buy ? "Buy" : "Sell";
                 string typeOrder = order.TypeOrder == OrderPriceType.Limit ? "Limit" : "Market";
-                string numberUser = order.NumberUser.ToString();
+                string numberUser = order.NumberUser.ToString(CultureInfo.InvariantCulture);
                 string price = order.Price.ToString(CultureInfo.InvariantCulture);
                 string volume = order.Volume.ToString(CultureInfo.InvariantCulture);
                 string body;

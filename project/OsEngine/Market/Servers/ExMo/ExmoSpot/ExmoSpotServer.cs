@@ -236,7 +236,7 @@ namespace OsEngine.Market.Servers.ExMo.ExmoSpot
 
             try
             {
-                string timeStamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds().ToString();
+                string timeStamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds().ToString(CultureInfo.InvariantCulture);
                 string queryParam = $"nonce={timeStamp}";
 
                 string sign = Sign(queryParam);
@@ -716,7 +716,7 @@ namespace OsEngine.Market.Servers.ExMo.ExmoSpot
 
         private void CreateAuthMessageWebSocekt()
         {
-            string timeStamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds().ToString();
+            string timeStamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds().ToString(CultureInfo.InvariantCulture);
             string sign = GenerateSignature(timeStamp);
 
             _webSocketPrivate.SendAsync($"{{\"method\":\"login\",\"id\": 1,\"api_key\":\"{_publicKey}\",\"sign\":\"{sign}\",\"nonce\":{timeStamp}}}");
@@ -1523,7 +1523,7 @@ namespace OsEngine.Market.Servers.ExMo.ExmoSpot
 
             try
             {
-                string timeStamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds().ToString();
+                string timeStamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds().ToString(CultureInfo.InvariantCulture);
 
                 string queryParam = $"pair={order.SecurityNameCode}&";
                 queryParam += $"quantity={order.Volume.ToString(CultureInfo.InvariantCulture)}&";
@@ -1621,7 +1621,7 @@ namespace OsEngine.Market.Servers.ExMo.ExmoSpot
 
             try
             {
-                string timeStamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds().ToString();
+                string timeStamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds().ToString(CultureInfo.InvariantCulture);
 
                 string queryParam = $"order_id={order.NumberMarket}&";
                 queryParam += $"nonce={timeStamp}";
@@ -1722,7 +1722,7 @@ namespace OsEngine.Market.Servers.ExMo.ExmoSpot
 
             try
             {
-                string timeStamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds().ToString();
+                string timeStamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds().ToString(CultureInfo.InvariantCulture);
                 string queryParam = $"nonce={timeStamp}";
                 string sign = Sign(queryParam);
 
@@ -1858,7 +1858,7 @@ namespace OsEngine.Market.Servers.ExMo.ExmoSpot
 
             if (orderOnMarket == null)
             {
-                orderOnMarket = GetOrderFromExchange(order.SecurityNameCode, order.NumberUser.ToString());
+                orderOnMarket = GetOrderFromExchange(order.SecurityNameCode, order.NumberUser.ToString(CultureInfo.InvariantCulture));
 
             }
 
@@ -1882,7 +1882,7 @@ namespace OsEngine.Market.Servers.ExMo.ExmoSpot
 
             try
             {
-                string timeStamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds().ToString();
+                string timeStamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds().ToString(CultureInfo.InvariantCulture);
                 string queryParam = $"nonce={timeStamp}";
                 string sign = Sign(queryParam);
 
@@ -1979,7 +1979,7 @@ namespace OsEngine.Market.Servers.ExMo.ExmoSpot
 
             try
             {
-                string timeStamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds().ToString();
+                string timeStamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds().ToString(CultureInfo.InvariantCulture);
                 string queryParam = $"pair={nameSecurity}&";
                 queryParam += $"nonce={timeStamp}";
 

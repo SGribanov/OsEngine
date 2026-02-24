@@ -1751,7 +1751,7 @@ namespace OsEngine.Market.Servers.MoexFixFastTwimeFutures
                                 string timePart = timeTrade.Substring(0, 6); // "143249" - Время (ччммсс)
                                 string nanosecondsPart = timeTrade.Substring(6); // "756700432" - Наносекунды
 
-                                timeTrade = DateTime.UtcNow.ToString("ddMMyyyy") + timePart;
+                                timeTrade = DateTime.UtcNow.ToString("ddMMyyyy", CultureInfo.InvariantCulture) + timePart;
                                 DateTime tradeDateTime = DateTime.ParseExact(timeTrade, "ddMMyyyyHHmmss", System.Globalization.CultureInfo.InvariantCulture);
                                 long nanoseconds = long.Parse(nanosecondsPart, System.Globalization.CultureInfo.InvariantCulture);
                                 tradeDateTime = tradeDateTime.AddTicks(nanoseconds / 100); // Переводим наносекунды в тики
@@ -3387,7 +3387,7 @@ namespace OsEngine.Market.Servers.MoexFixFastTwimeFutures
                 }
             }
 
-            if (int.TryParse(fixValues["11"], out order.NumberUser))
+            if (int.TryParse(fixValues["11"], NumberStyles.Integer, CultureInfo.InvariantCulture, out order.NumberUser))
             {
 
             }
@@ -3458,7 +3458,7 @@ namespace OsEngine.Market.Servers.MoexFixFastTwimeFutures
 
             if (ExecType == "I")
             {
-                string key = order.NumberUser.ToString();
+                string key = order.NumberUser.ToString(CultureInfo.InvariantCulture);
                 order.Price = _newOrdersFix[key].Price;
                 _newOrdersFix.Remove(key);
             }
@@ -4034,7 +4034,7 @@ namespace OsEngine.Market.Servers.MoexFixFastTwimeFutures
 
                     string newOrder = _fixTradeMessages.NewOrderMessage
                                 (
-                                    order.NumberUser.ToString(),
+                                    order.NumberUser.ToString(CultureInfo.InvariantCulture),
                                     ordType,
                                     symbol,
                                     CFICode,
@@ -4083,16 +4083,16 @@ namespace OsEngine.Market.Servers.MoexFixFastTwimeFutures
                 }
                 else
                 {
-                    string origClOrdID = order.NumberUser.ToString();
+                    string origClOrdID = order.NumberUser.ToString(CultureInfo.InvariantCulture);
 
                     // проверяем менялся ли этот ордер
-                    if (_modifiedOrders.Exists(o => o.NumUserInSystem == order.NumberUser.ToString()))
+                    if (_modifiedOrders.Exists(o => o.NumUserInSystem == order.NumberUser.ToString(CultureInfo.InvariantCulture)))
                     {
-                        origClOrdID = _modifiedOrders.Find(o => o.NumUserInSystem == order.NumberUser.ToString()).NewNumUser;
+                        origClOrdID = _modifiedOrders.Find(o => o.NumUserInSystem == order.NumberUser.ToString(CultureInfo.InvariantCulture)).NewNumUser;
                     }
 
                     string orderID = order.NumberMarket.ToString();
-                    string clOrdID = DateTime.UtcNow.Ticks.ToString();
+                    string clOrdID = DateTime.UtcNow.Ticks.ToString(CultureInfo.InvariantCulture);
                     string CFICode = string.Empty;
 
                     if (!order.SecurityClassCode.Equals("Futures"))
@@ -4185,16 +4185,16 @@ namespace OsEngine.Market.Servers.MoexFixFastTwimeFutures
                     string origClOrdID;
 
                     // проверяем менялся ли этот ордер
-                    if (_modifiedOrders.Exists(o => o.NumUserInSystem == order.NumberUser.ToString()))
+                    if (_modifiedOrders.Exists(o => o.NumUserInSystem == order.NumberUser.ToString(CultureInfo.InvariantCulture)))
                     {
-                        origClOrdID = _modifiedOrders.Find(o => o.NumUserInSystem == order.NumberUser.ToString()).NewNumUser;
+                        origClOrdID = _modifiedOrders.Find(o => o.NumUserInSystem == order.NumberUser.ToString(CultureInfo.InvariantCulture)).NewNumUser;
                     }
                     else
                     {
-                        origClOrdID = order.NumberUser.ToString();
+                        origClOrdID = order.NumberUser.ToString(CultureInfo.InvariantCulture);
                     }
 
-                    string clOrdID = DateTime.UtcNow.Ticks.ToString();   // идентификатор заявки на снятие/изменение
+                    string clOrdID = DateTime.UtcNow.Ticks.ToString(CultureInfo.InvariantCulture);   // идентификатор заявки на снятие/изменение
                     string orderID = order.NumberMarket;
                     string side = order.Side == Side.Buy ? "1" : "2";
                     string orderQty = order.Volume.ToString(CultureInfo.InvariantCulture);
@@ -4267,7 +4267,7 @@ namespace OsEngine.Market.Servers.MoexFixFastTwimeFutures
                 }
                 else
                 {
-                    string clOrdID = DateTime.UtcNow.Ticks.ToString(); // идентификатор заявки на снятие
+                    string clOrdID = DateTime.UtcNow.Ticks.ToString(CultureInfo.InvariantCulture); // идентификатор заявки на снятие
                     string account = _TradeAccount.Substring(4); // 3-х символьный код клиента.
                     string massCancelReqType = "8"; // "8" или "9" - Отмена всех заявок на конкретном сегменте рынка.
                     string marketSegmentID = "F";
@@ -4316,7 +4316,7 @@ namespace OsEngine.Market.Servers.MoexFixFastTwimeFutures
                 }
                 else
                 {
-                    string clOrdID = DateTime.UtcNow.Ticks.ToString(); // идентификатор заявки на снятие
+                    string clOrdID = DateTime.UtcNow.Ticks.ToString(CultureInfo.InvariantCulture); // идентификатор заявки на снятие
                     string tradingSessionID = security.NameClass;
                     string account = _TradeAccount.Substring(4); // 3-х символьный код клиента.
                     string MarketSegmentID = security.NameClass.Equals("Futures") ? "F" : "O";
@@ -4359,14 +4359,14 @@ namespace OsEngine.Market.Servers.MoexFixFastTwimeFutures
                     return OrderStateType.None;
                 }
 
-                string ClOrdID = order.NumberUser.ToString();
+                string ClOrdID = order.NumberUser.ToString(CultureInfo.InvariantCulture);
 
                 _newOrdersFix[ClOrdID] = order; // сохраняем, чтобы извлечь цену ордера для отчета
 
                 // проверяем менялся ли этот ордер
-                if (_modifiedOrders.Exists(o => o.NumUserInSystem == order.NumberUser.ToString()))
+                if (_modifiedOrders.Exists(o => o.NumUserInSystem == order.NumberUser.ToString(CultureInfo.InvariantCulture)))
                 {
-                    ClOrdID = _modifiedOrders.Find(o => o.NumUserInSystem == order.NumberUser.ToString()).NewNumUser;
+                    ClOrdID = _modifiedOrders.Find(o => o.NumUserInSystem == order.NumberUser.ToString(CultureInfo.InvariantCulture)).NewNumUser;
                 }
 
                 string orderID = order.NumberMarket.ToString();

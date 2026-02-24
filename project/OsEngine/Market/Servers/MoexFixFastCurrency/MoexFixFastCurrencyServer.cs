@@ -1393,7 +1393,7 @@ namespace OsEngine.Market.Servers.MoexFixFastCurrency
                                         time = "0" + time;
                                     }
 
-                                    time = DateTime.UtcNow.ToString("ddMMyyyy") + time;
+                                    time = DateTime.UtcNow.ToString("ddMMyyyy", CultureInfo.InvariantCulture) + time;
                                     DateTime tradeDateTime = DateTime.ParseExact(time, "ddMMyyyyHHmmssfff", System.Globalization.CultureInfo.InvariantCulture);
 
                                     trade.Time = tradeDateTime;
@@ -1480,7 +1480,7 @@ namespace OsEngine.Market.Servers.MoexFixFastCurrency
                                         time = "0" + time;
                                     }
 
-                                    time = DateTime.UtcNow.ToString("ddMMyyyy") + time;
+                                    time = DateTime.UtcNow.ToString("ddMMyyyy", CultureInfo.InvariantCulture) + time;
                                     DateTime tradeDateTime = DateTime.ParseExact(time, "ddMMyyyyHHmmssfff", System.Globalization.CultureInfo.InvariantCulture);
 
                                     trade.Time = tradeDateTime;
@@ -1863,7 +1863,7 @@ namespace OsEngine.Market.Servers.MoexFixFastCurrency
                                     time = "0" + time;
                                 }
 
-                                time = DateTime.UtcNow.ToString("ddMMyyyy") + time;
+                                time = DateTime.UtcNow.ToString("ddMMyyyy", CultureInfo.InvariantCulture) + time;
                                 DateTime orderDateTime = DateTime.ParseExact(time, "ddMMyyyyHHmmssfff", System.Globalization.CultureInfo.InvariantCulture);
 
                                 string id = groupVal.GetString("MDEntryID");
@@ -1980,7 +1980,7 @@ namespace OsEngine.Market.Servers.MoexFixFastCurrency
                                     time = "0" + time;
                                 }
 
-                                time = DateTime.UtcNow.ToString("ddMMyyyy") + time;
+                                time = DateTime.UtcNow.ToString("ddMMyyyy", CultureInfo.InvariantCulture) + time;
                                 DateTime orderDateTime = DateTime.ParseExact(time, "ddMMyyyyHHmmssfff", System.Globalization.CultureInfo.InvariantCulture);
 
                                 level.Price = price;
@@ -2535,7 +2535,7 @@ namespace OsEngine.Market.Servers.MoexFixFastCurrency
                 }
             }
 
-            if (int.TryParse(fixValues["11"], out order.NumberUser))
+            if (int.TryParse(fixValues["11"], NumberStyles.Integer, CultureInfo.InvariantCulture, out order.NumberUser))
             {
 
             }
@@ -2992,7 +2992,7 @@ namespace OsEngine.Market.Servers.MoexFixFastCurrency
 
                 string newOrder = _fxMFIXTradeMessages.NewOrderMessage
                             (
-                                order.NumberUser.ToString(),
+                                order.NumberUser.ToString(CultureInfo.InvariantCulture),
                                 new string[] { "1", _MFIXTradeClientCode, "D", "1" },   // группа Parties
                                 order.SecurityNameCode,
                                 order.Volume.ToString(CultureInfo.InvariantCulture),
@@ -3020,15 +3020,15 @@ namespace OsEngine.Market.Servers.MoexFixFastCurrency
 
             try
             {
-                string origClOrdID = order.NumberUser.ToString();
+                string origClOrdID = order.NumberUser.ToString(CultureInfo.InvariantCulture);
                 // проверяем менялся ли этот ордер
-                if (_modifiedOrders.Exists(o => o.NumUserInSystem == order.NumberUser.ToString()))
+                if (_modifiedOrders.Exists(o => o.NumUserInSystem == order.NumberUser.ToString(CultureInfo.InvariantCulture)))
                 {
-                    origClOrdID = _modifiedOrders.Find(o => o.NumUserInSystem == order.NumberUser.ToString()).NewNumUser;
+                    origClOrdID = _modifiedOrders.Find(o => o.NumUserInSystem == order.NumberUser.ToString(CultureInfo.InvariantCulture)).NewNumUser;
                 }
 
                 string orderID = order.NumberMarket.ToString();
-                string clOrdID = DateTime.UtcNow.Ticks.ToString();
+                string clOrdID = DateTime.UtcNow.Ticks.ToString(CultureInfo.InvariantCulture);
                 string side = order.Side == Side.Buy ? "1" : "2";
 
                 string orderDelMsg = _fxMFIXTradeMessages.OrderCanselMessage(origClOrdID, orderID, clOrdID, side, _msgSeqNum);
@@ -3069,16 +3069,16 @@ namespace OsEngine.Market.Servers.MoexFixFastCurrency
                 string origClOrdID;
                 // проверяем менялся ли этот ордер
 
-                if (_modifiedOrders.Exists(o => o.NumUserInSystem == order.NumberUser.ToString()))
+                if (_modifiedOrders.Exists(o => o.NumUserInSystem == order.NumberUser.ToString(CultureInfo.InvariantCulture)))
                 {
-                    origClOrdID = _modifiedOrders.Find(o => o.NumUserInSystem == order.NumberUser.ToString()).NewNumUser;
+                    origClOrdID = _modifiedOrders.Find(o => o.NumUserInSystem == order.NumberUser.ToString(CultureInfo.InvariantCulture)).NewNumUser;
                 }
                 else
                 {
-                    origClOrdID = order.NumberUser.ToString();
+                    origClOrdID = order.NumberUser.ToString(CultureInfo.InvariantCulture);
                 }
 
-                string clOrdID = DateTime.UtcNow.Ticks.ToString();   // идентификатор заявки на снятие/изменение
+                string clOrdID = DateTime.UtcNow.Ticks.ToString(CultureInfo.InvariantCulture);   // идентификатор заявки на снятие/изменение
                 string orderID = order.NumberMarket;
                 string tradingSessionID = order.SecurityClassCode;
                 string side = order.Side == Side.Buy ? "1" : "2";
@@ -3118,7 +3118,7 @@ namespace OsEngine.Market.Servers.MoexFixFastCurrency
 
             try
             {
-                string clOrdID = DateTime.UtcNow.Ticks.ToString(); // идентификатор заявки на снятие
+                string clOrdID = DateTime.UtcNow.Ticks.ToString(CultureInfo.InvariantCulture); // идентификатор заявки на снятие
                 string account = _MFIXTradeAccount;
                 string orderMassCancelMsg = _fxMFIXTradeMessages.OrderMassCanselMessage(clOrdID, "7", null, null, account, _msgSeqNum);
 
@@ -3136,7 +3136,7 @@ namespace OsEngine.Market.Servers.MoexFixFastCurrency
 
             try
             {
-                string clOrdID = DateTime.UtcNow.Ticks.ToString(); // идентификатор заявки на снятие
+                string clOrdID = DateTime.UtcNow.Ticks.ToString(CultureInfo.InvariantCulture); // идентификатор заявки на снятие
                 string tradingSessionID = security.NameClass;
                 string symbol = security.NameId;
                 string account = _MFIXTradeAccount;

@@ -11,6 +11,7 @@ using OsEngine.Entity;
 using OsEngine.Logging;
 using OsEngine.Market.Servers.Entity;
 using System;
+using System.Globalization;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Net.Http;
@@ -1156,7 +1157,7 @@ namespace OsEngine.Market.Servers.Deribit
             jsonRequest.@params = new JsonRequest.Params();
             jsonRequest.@params.instrument_name = order.SecurityNameCode;
             jsonRequest.@params.amount = order.Volume;
-            jsonRequest.@params.label = order.NumberUser.ToString();
+            jsonRequest.@params.label = order.NumberUser.ToString(CultureInfo.InvariantCulture);
             jsonRequest.@params.price = order.Price;
 
             if (order.TypeOrder == OrderPriceType.Limit)

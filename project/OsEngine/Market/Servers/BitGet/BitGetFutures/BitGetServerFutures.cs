@@ -2307,7 +2307,7 @@ namespace OsEngine.Market.Servers.BitGet.BitGetFutures
                     Order newOrder = new Order();
                     newOrder.SecurityNameCode = item.instId;
                     newOrder.TimeCallBack = TimeManager.GetDateTimeFromTimeStamp(Convert.ToInt64(item.cTime, CultureInfo.InvariantCulture));
-                    int.TryParse(item.clientOId, out newOrder.NumberUser);
+                    int.TryParse(item.clientOId, NumberStyles.Integer, CultureInfo.InvariantCulture, out newOrder.NumberUser);
                     newOrder.NumberMarket = item.orderId.ToString();
                     newOrder.Side = GetSide(item.tradeSide, item.side);
                     newOrder.State = stateType;
@@ -2797,7 +2797,7 @@ namespace OsEngine.Market.Servers.BitGet.BitGetFutures
                         newOrder.SecurityNameCode = stateResponse.data.symbol;
                         newOrder.SecurityClassCode = stateResponse.data.marginCoin + "-FUTURES";
                         newOrder.TimeCallBack = TimeManager.GetDateTimeFromTimeStamp(Convert.ToInt64(stateResponse.data.cTime, CultureInfo.InvariantCulture));
-                        int.TryParse(stateResponse.data.clientOid, out newOrder.NumberUser);
+                        int.TryParse(stateResponse.data.clientOid, NumberStyles.Integer, CultureInfo.InvariantCulture, out newOrder.NumberUser);
                         newOrder.NumberMarket = stateResponse.data.orderId.ToString();
                         newOrder.Side = stateResponse.data.side == "buy" ? Side.Buy : Side.Sell;
                         newOrder.State = stateType;
@@ -2948,7 +2948,7 @@ namespace OsEngine.Market.Servers.BitGet.BitGetFutures
                     string requestPath = "/api/v2/mix/order/orders-pending";
                     requestPath += $"?productType={_listCoin[i]}&";
                     requestPath += $"limit=100";
-                    //requestPath += $"clientOrderId={order.NumberUser.ToString()}";
+                    //requestPath += $"clientOrderId={order.NumberUser.ToString(CultureInfo.InvariantCulture)}";
 
                     IRestResponse responseMessage = CreatePrivateQuery(requestPath, Method.GET, null, null);
 
@@ -3171,7 +3171,7 @@ namespace OsEngine.Market.Servers.BitGet.BitGetFutures
                     string requestPath = "/api/v2/mix/order/orders-history";
                     requestPath += $"?productType={_listCoin[i]}&";
                     requestPath += $"limit=100";
-                    //requestPath += $"clientOrderId={order.NumberUser.ToString()}";
+                    //requestPath += $"clientOrderId={order.NumberUser.ToString(CultureInfo.InvariantCulture)}";
 
                     IRestResponse responseMessage = CreatePrivateQuery(requestPath, Method.GET, null, null);
 
@@ -3247,7 +3247,7 @@ namespace OsEngine.Market.Servers.BitGet.BitGetFutures
             {
                 RestRequest requestRest = new RestRequest(path, method);
 
-                string timestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds().ToString();
+                string timestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds().ToString(CultureInfo.InvariantCulture);
                 string signature = GenerateSignature(timestamp, method.ToString(), path, queryString, body, SeckretKey);
 
                 requestRest.AddHeader("ACCESS-KEY", PublicKey);
@@ -3282,7 +3282,7 @@ namespace OsEngine.Market.Servers.BitGet.BitGetFutures
 
                 string requestPath = path;
                 string url = $"{BaseUrl}{requestPath}";
-                string timestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds().ToString();
+                string timestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds().ToString(CultureInfo.InvariantCulture);
                 string signature = GenerateSignature(timestamp, method.ToString(), requestPath, queryString, body, SeckretKey);
 
                 requestRest.AddHeader("ACCESS-KEY", PublicKey);

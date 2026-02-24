@@ -311,7 +311,7 @@ namespace OsEngine.Market.Servers.InteractiveBrokers
                     TcpWrite(contract.LocalSymbol);
                     TcpWrite(contract.TradingClass);
                     TcpWrite(0);
-                    string time = endDateTime.ToString("yyyyMMdd HH:mm:ss");// + " GMT";
+                    string time = endDateTime.ToString("yyyyMMdd HH:mm:ss", CultureInfo.InvariantCulture);// + " GMT";
                     TcpWrite(time);
                     TcpWrite(barSizeSetting);
                     string period = ConvertPeriodToIb(endDateTime, startTime);
@@ -438,7 +438,7 @@ namespace OsEngine.Market.Servers.InteractiveBrokers
                         _orders.Add(order);
                     }
                     _nextOrderNum++;
-                    order.NumberMarket = order.NumberUser.ToString();
+                    order.NumberMarket = order.NumberUser.ToString(CultureInfo.InvariantCulture);
 
                     TcpWrite(3);
                     TcpWrite(43);
@@ -2037,7 +2037,7 @@ namespace OsEngine.Market.Servers.InteractiveBrokers
                 {
                     return 0;
                 }
-                else return Int32.Parse(str);
+                else return Int32.Parse(str, NumberStyles.Integer, CultureInfo.InvariantCulture);
             }
             catch
             {

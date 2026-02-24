@@ -2627,7 +2627,7 @@ namespace OsEngine.Market.Servers.Bitfinex.BitfinexFutures
 
                 BitfinexFuturesOrderData newOrder = new BitfinexFuturesOrderData();
 
-                newOrder.Cid = order.NumberUser.ToString();
+                newOrder.Cid = order.NumberUser.ToString(CultureInfo.InvariantCulture);
                 newOrder.Symbol = order.SecurityNameCode;
                 order.PortfolioNumber = "BitfinexFuturesPortfolio";
                 int leverage = 2;
@@ -3126,7 +3126,7 @@ namespace OsEngine.Market.Servers.Bitfinex.BitfinexFutures
                             {
                                 Order historyOrder = new Order();
 
-                                if (int.TryParse(orderData[2]?.ToString(), out int number))
+                                if (int.TryParse(orderData[2]?.ToString(), NumberStyles.Integer, CultureInfo.InvariantCulture, out int number))
                                 {
                                     historyOrder.NumberUser = Convert.ToInt32(number, CultureInfo.InvariantCulture);
                                 }

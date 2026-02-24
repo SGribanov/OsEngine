@@ -2443,7 +2443,7 @@ namespace OsEngine.Market.Servers.Alor
 
                 RestRequest requestRest = new RestRequest(endPoint, Method.POST);
                 requestRest.AddHeader("Authorization", "Bearer " + _apiTokenReal);
-                requestRest.AddHeader("X-REQID", order.NumberUser.ToString() + "|" + GetGuid());
+                requestRest.AddHeader("X-REQID", order.NumberUser.ToString(CultureInfo.InvariantCulture) + "|" + GetGuid());
                 requestRest.AddHeader("accept", "application/json");
 
                 if(order.TypeOrder == OrderPriceType.Market)
@@ -2528,7 +2528,7 @@ namespace OsEngine.Market.Servers.Alor
             requestObj.type = "limit";
             requestObj.quantity = Convert.ToInt32(order.Volume);
             requestObj.price = order.Price;
-            requestObj.comment = order.NumberUser.ToString();
+            requestObj.comment = order.NumberUser.ToString(CultureInfo.InvariantCulture);
             requestObj.instrument = new instrumentAlor();
             requestObj.instrument.symbol = order.SecurityNameCode;
             requestObj.user = new User();
@@ -2560,7 +2560,7 @@ namespace OsEngine.Market.Servers.Alor
             }
             requestObj.type = "market";
             requestObj.quantity = Convert.ToInt32(order.Volume);
-            requestObj.comment = order.NumberUser.ToString();
+            requestObj.comment = order.NumberUser.ToString(CultureInfo.InvariantCulture);
             requestObj.instrument = new instrumentAlor();
             requestObj.instrument.symbol = order.SecurityNameCode;
             requestObj.user = new User();
@@ -2596,7 +2596,7 @@ namespace OsEngine.Market.Servers.Alor
 
                 RestRequest requestRest = new RestRequest(endPoint, Method.PUT);
                 requestRest.AddHeader("Authorization", "Bearer " + _apiTokenReal);
-                requestRest.AddHeader("X-REQID", order.NumberUser.ToString() + "|" + GetGuid()); ;
+                requestRest.AddHeader("X-REQID", order.NumberUser.ToString(CultureInfo.InvariantCulture) + "|" + GetGuid()); ;
                 requestRest.AddHeader("accept", "application/json");
 
                 LimitOrderAlorRequest body = GetLimitRequestObj(order);

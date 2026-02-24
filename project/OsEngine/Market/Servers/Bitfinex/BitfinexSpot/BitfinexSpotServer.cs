@@ -2503,7 +2503,7 @@ namespace OsEngine.Market.Servers.Bitfinex
 
                 BitfinexOrderData newOrder = new BitfinexOrderData();
 
-                newOrder.Cid = order.NumberUser.ToString();
+                newOrder.Cid = order.NumberUser.ToString(CultureInfo.InvariantCulture);
                 newOrder.Symbol = order.SecurityNameCode;
                 order.PortfolioNumber = "BitfinexSpotPortfolio";
 
@@ -2993,7 +2993,7 @@ namespace OsEngine.Market.Servers.Bitfinex
                             {
                                 Order historyOrder = new Order();
 
-                                if (int.TryParse(orderData[2]?.ToString(), out int number))
+                                if (int.TryParse(orderData[2]?.ToString(), NumberStyles.Integer, CultureInfo.InvariantCulture, out int number))
                                 {
                                     historyOrder.NumberUser = Convert.ToInt32(number, CultureInfo.InvariantCulture);
                                 }

@@ -208,8 +208,8 @@ namespace OsEngine.Market.Servers.Transaq
 
             int hoursFrom, minutesFrom, hoursTo, minutesTo;
 
-            if (!int.TryParse(from[0], out hoursFrom) || !int.TryParse(from[1], out minutesFrom)
-                || !int.TryParse(to[0], out hoursTo) || !int.TryParse(to[1], out minutesTo))
+            if (!int.TryParse(from[0], NumberStyles.Integer, CultureInfo.InvariantCulture, out hoursFrom) || !int.TryParse(from[1], NumberStyles.Integer, CultureInfo.InvariantCulture, out minutesFrom)
+                || !int.TryParse(to[0], NumberStyles.Integer, CultureInfo.InvariantCulture, out hoursTo) || !int.TryParse(to[1], NumberStyles.Integer, CultureInfo.InvariantCulture, out minutesTo))
             {
                 SendLogMessage($"Данные содержат не числовое значение: {time}", LogMessageType.Error);
                 return false;
@@ -1955,7 +1955,7 @@ namespace OsEngine.Market.Servers.Transaq
                 cmd += "<brokerref>" + order.NumberUser + "</brokerref>";
                 cmd += "<unfilled> PutInQueue </unfilled>";
 
-                order.Comment = order.NumberUser.ToString();
+                order.Comment = order.NumberUser.ToString(CultureInfo.InvariantCulture);
 
                 if (needSec.NameClass == "TQBR")
                 {

@@ -2547,7 +2547,7 @@ namespace OsEngine.Market.Servers.MoexFixFastSpot
                                         time = "0" + time;
                                     }
 
-                                    time = DateTime.UtcNow.ToString("ddMMyyyy") + time;
+                                    time = DateTime.UtcNow.ToString("ddMMyyyy", CultureInfo.InvariantCulture) + time;
 
                                     DateTime tradeDateTime = DateTime.ParseExact(time, "ddMMyyyyHHmmssfff", System.Globalization.CultureInfo.InvariantCulture);
 
@@ -2708,7 +2708,7 @@ namespace OsEngine.Market.Servers.MoexFixFastSpot
                                     time = "0" + time;
                                 }
 
-                                time = DateTime.UtcNow.ToString("ddMMyyyy") + time;
+                                time = DateTime.UtcNow.ToString("ddMMyyyy", CultureInfo.InvariantCulture) + time;
 
                                 DateTime tradeDateTime = DateTime.ParseExact(time, "ddMMyyyyHHmmssfff", System.Globalization.CultureInfo.InvariantCulture);
 
@@ -3604,8 +3604,8 @@ namespace OsEngine.Market.Servers.MoexFixFastSpot
                 header.MsgSeqNum = _MFIXTradeMsgSeqNum++;
 
                 NewOrderSingleMessage msg = new NewOrderSingleMessage();
-                msg.ClOrdID = _MFIXTradeClientCode + _MFIXTag11Separator + (_MFIXTag11ContainsOrderIDs ? order.NumberUser.ToString() : _MFIXTradeClientCode);
-                msg.SecondaryClOrdID = order.NumberUser.ToString();
+                msg.ClOrdID = _MFIXTradeClientCode + _MFIXTag11Separator + (_MFIXTag11ContainsOrderIDs ? order.NumberUser.ToString(CultureInfo.InvariantCulture) : _MFIXTradeClientCode);
+                msg.SecondaryClOrdID = order.NumberUser.ToString(CultureInfo.InvariantCulture);
                 msg.NoPartyID = "1";
                 msg.PartyID = _MFIXTradeClientCode;
                 msg.Account = _MFIXTradeAccount;
@@ -3613,7 +3613,7 @@ namespace OsEngine.Market.Servers.MoexFixFastSpot
                 msg.TradingSessionID = order.SecurityClassCode;
                 msg.Symbol = order.SecurityNameCode;
                 msg.Side = order.Side == Side.Buy ? "1" : "2";
-                msg.TransactTime = DateTime.UtcNow.ToString("yyyyMMdd-HH:mm:ss.fff");
+                msg.TransactTime = DateTime.UtcNow.ToString("yyyyMMdd-HH:mm:ss.fff", CultureInfo.InvariantCulture);
                 msg.OrdType = order.TypeOrder == OrderPriceType.Market ? "1" : "2"; // 1 - Market, 2 - Limit
                 msg.OrderQty = order.Volume.ToString(CultureInfo.InvariantCulture);
                 msg.Price = order.TypeOrder == OrderPriceType.Limit ? order.Price.ToString(CultureInfo.InvariantCulture) : "0";
@@ -3668,16 +3668,16 @@ namespace OsEngine.Market.Servers.MoexFixFastSpot
                 header.MsgSeqNum = _MFIXTradeMsgSeqNum++;
 
                 OrderCancelReplaceRequestMessage msg = new OrderCancelReplaceRequestMessage();
-                msg.ClOrdID = _MFIXTradeClientCode + _MFIXTag11Separator + (_MFIXTag11ContainsOrderIDs ? DateTime.UtcNow.Ticks.ToString() : _MFIXTradeClientCode);
-                msg.OrigClOrdID = _MFIXTradeClientCode + _MFIXTag11Separator + (_MFIXTag11ContainsOrderIDs ?  order.NumberUser.ToString() : _MFIXTradeClientCode);
-                msg.SecondaryClOrdID = order.NumberUser.ToString();
+                msg.ClOrdID = _MFIXTradeClientCode + _MFIXTag11Separator + (_MFIXTag11ContainsOrderIDs ? DateTime.UtcNow.Ticks.ToString(CultureInfo.InvariantCulture) : _MFIXTradeClientCode);
+                msg.OrigClOrdID = _MFIXTradeClientCode + _MFIXTag11Separator + (_MFIXTag11ContainsOrderIDs ?  order.NumberUser.ToString(CultureInfo.InvariantCulture) : _MFIXTradeClientCode);
+                msg.SecondaryClOrdID = order.NumberUser.ToString(CultureInfo.InvariantCulture);
                 msg.OrderID = order.NumberMarket;
                 msg.PartyID = _MFIXTradeClientCode;
                 msg.Account = _MFIXTradeAccount;
                 msg.TradingSessionID = order.SecurityClassCode;
                 msg.Symbol = order.SecurityNameCode;
                 msg.Side = order.Side == Side.Buy ? "1" : "2";
-                msg.TransactTime = DateTime.UtcNow.ToString("yyyyMMdd-HH:mm:ss.fff");
+                msg.TransactTime = DateTime.UtcNow.ToString("yyyyMMdd-HH:mm:ss.fff", CultureInfo.InvariantCulture);
                 msg.OrdType = order.TypeOrder == OrderPriceType.Market ? "1" : "2"; // 1 - Market, 2 - Limit
                 msg.OrderQty = order.Volume.ToString(CultureInfo.InvariantCulture);
                 msg.Price = order.TypeOrder == OrderPriceType.Limit ? newPrice.ToString(CultureInfo.InvariantCulture) : "0";
@@ -3705,13 +3705,13 @@ namespace OsEngine.Market.Servers.MoexFixFastSpot
 
                 OrderCancelRequestMessage msg = new OrderCancelRequestMessage();
 
-                msg.ClOrdID = _MFIXTradeClientCode + _MFIXTag11Separator + (_MFIXTag11ContainsOrderIDs ? DateTime.UtcNow.Ticks.ToString() : _MFIXTradeClientCode);
-                msg.OrigClOrdID = _MFIXTradeClientCode + _MFIXTag11Separator + (_MFIXTag11ContainsOrderIDs ?  order.NumberUser.ToString() : _MFIXTradeClientCode);
+                msg.ClOrdID = _MFIXTradeClientCode + _MFIXTag11Separator + (_MFIXTag11ContainsOrderIDs ? DateTime.UtcNow.Ticks.ToString(CultureInfo.InvariantCulture) : _MFIXTradeClientCode);
+                msg.OrigClOrdID = _MFIXTradeClientCode + _MFIXTag11Separator + (_MFIXTag11ContainsOrderIDs ?  order.NumberUser.ToString(CultureInfo.InvariantCulture) : _MFIXTradeClientCode);
 
                 msg.OrderID = order.NumberMarket.ToString();
 
                 msg.Side = order.Side == Side.Buy ? "1" : "2";
-                msg.TransactTime = DateTime.UtcNow.ToString("yyyyMMdd-HH:mm:ss.fff");
+                msg.TransactTime = DateTime.UtcNow.ToString("yyyyMMdd-HH:mm:ss.fff", CultureInfo.InvariantCulture);
 
                 string orderMessage = SendFIXMessage(_MFIXTradeSocket, header, msg);
                 WriteLogOutgoingFIXMessage(orderMessage);
@@ -3738,8 +3738,8 @@ namespace OsEngine.Market.Servers.MoexFixFastSpot
                 header.MsgSeqNum = _MFIXTradeMsgSeqNum++;                
 
                 OrderMassCancelRequestMessage msg = new OrderMassCancelRequestMessage();
-                msg.ClOrdID = _MFIXTradeClientCode + _MFIXTag11Separator + (_MFIXTag11ContainsOrderIDs ? DateTime.UtcNow.Ticks.ToString() : _MFIXTradeClientCode);
-                msg.TransactTime = DateTime.UtcNow.ToString("yyyyMMdd-HH:mm:ss.fff");
+                msg.ClOrdID = _MFIXTradeClientCode + _MFIXTag11Separator + (_MFIXTag11ContainsOrderIDs ? DateTime.UtcNow.Ticks.ToString(CultureInfo.InvariantCulture) : _MFIXTradeClientCode);
+                msg.TransactTime = DateTime.UtcNow.ToString("yyyyMMdd-HH:mm:ss.fff", CultureInfo.InvariantCulture);
                 msg.Account = _MFIXTradeAccount;
                 msg.PartyID = _MFIXTradeClientCode;
 
@@ -3765,11 +3765,11 @@ namespace OsEngine.Market.Servers.MoexFixFastSpot
                 header.MsgSeqNum = _MFIXTradeMsgSeqNum++;
 
                 OrderMassCancelRequestMessage msg = new OrderMassCancelRequestMessage();
-                msg.ClOrdID = _MFIXTradeClientCode + _MFIXTag11Separator + (_MFIXTag11ContainsOrderIDs ? DateTime.UtcNow.Ticks.ToString() : _MFIXTradeClientCode);
+                msg.ClOrdID = _MFIXTradeClientCode + _MFIXTag11Separator + (_MFIXTag11ContainsOrderIDs ? DateTime.UtcNow.Ticks.ToString(CultureInfo.InvariantCulture) : _MFIXTradeClientCode);
                 msg.MassCancelRequestType = "1";
                 msg.TradingSessionID = security.NameClass;
                 msg.Symbol = security.NameId;
-                msg.TransactTime = DateTime.UtcNow.ToString("yyyyMMdd-HH:mm:ss.fff");
+                msg.TransactTime = DateTime.UtcNow.ToString("yyyyMMdd-HH:mm:ss.fff", CultureInfo.InvariantCulture);
                 msg.Account = _MFIXTradeAccount;
                 msg.PartyID = _MFIXTradeClientCode;
 

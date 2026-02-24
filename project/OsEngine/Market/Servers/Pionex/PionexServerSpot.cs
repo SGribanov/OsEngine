@@ -262,7 +262,7 @@ namespace OsEngine.Market.Servers.Pionex
             try
             {
                 DateTime EndTime = DateTime.UtcNow.AddSeconds(-10);
-                string endTimeMs = new DateTimeOffset(EndTime).ToUnixTimeMilliseconds().ToString();
+                string endTimeMs = new DateTimeOffset(EndTime).ToUnixTimeMilliseconds().ToString(CultureInfo.InvariantCulture);
                 string endPoint = _prefix + "market/klines?symbol=" + name;
 
                 endPoint += "&interval=15M";
@@ -311,7 +311,7 @@ namespace OsEngine.Market.Servers.Pionex
 
             try
             {
-                string timestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds().ToString();
+                string timestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds().ToString(CultureInfo.InvariantCulture);
 
                 _pathUrl = "account/balances";
 
@@ -429,7 +429,7 @@ namespace OsEngine.Market.Servers.Pionex
                 }
 
                 DateTime EndTime = DateTime.UtcNow.AddSeconds(-10);
-                string endTimeMs = new DateTimeOffset(EndTime).ToUnixTimeMilliseconds().ToString();
+                string endTimeMs = new DateTimeOffset(EndTime).ToUnixTimeMilliseconds().ToString(CultureInfo.InvariantCulture);
                 string endPoint = _prefix + "market/klines?symbol=" + security.Name;
 
                 endPoint += "&interval=" + interval;
@@ -583,7 +583,7 @@ namespace OsEngine.Market.Servers.Pionex
                     return;
                 }
 
-                string timestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds().ToString();
+                string timestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds().ToString(CultureInfo.InvariantCulture);
 
                 string preHash = "/ws?key=" + _publicKey + "&timestamp=" + timestamp + "websocket_auth";
 
@@ -1113,7 +1113,7 @@ namespace OsEngine.Market.Servers.Pionex
                             if (webSocketPublic != null
                                 && webSocketPublic?.ReadyState == WebSocketState.Open)
                             {
-                                string timeStamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds().ToString();
+                                string timeStamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds().ToString(CultureInfo.InvariantCulture);
                                 string pong = $"{{\"op\": \"PONG\", \"timestamp\": {timeStamp}}}";
                                 webSocketPublic.SendAsync(pong);
                             }
@@ -1187,7 +1187,7 @@ namespace OsEngine.Market.Servers.Pionex
 
                     if (message.Contains("PING"))
                     {
-                        string timeStamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds().ToString();
+                        string timeStamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds().ToString(CultureInfo.InvariantCulture);
                         string pong = $"{{\"op\": \"PONG\", \"timestamp\": {timeStamp}}}";
                         _webSocketPrivate.SendAsync(pong);
                         continue;
@@ -1497,7 +1497,7 @@ namespace OsEngine.Market.Servers.Pionex
             try
             {
                 SendNewOrder data = new SendNewOrder();
-                data.clientOrderId = order.NumberUser.ToString();
+                data.clientOrderId = order.NumberUser.ToString(CultureInfo.InvariantCulture);
                 data.symbol = order.SecurityNameCode;
                 data.side = order.Side.ToString().ToUpper();
                 data.type = order.TypeOrder.ToString().ToUpper();
@@ -1506,7 +1506,7 @@ namespace OsEngine.Market.Servers.Pionex
                 data.amount = (order.Volume * order.Price).ToString(CultureInfo.InvariantCulture); // для BUY MARKET ORDER указывается размер в USDT не меньше 10
                 data.IOC = false;
 
-                string timestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds().ToString();
+                string timestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds().ToString(CultureInfo.InvariantCulture);
 
                 _pathUrl = "trade/order";
 
@@ -1561,7 +1561,7 @@ namespace OsEngine.Market.Servers.Pionex
 
             try
             {
-                string timestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds().ToString();
+                string timestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds().ToString(CultureInfo.InvariantCulture);
 
                 _pathUrl = "trade/allOrders";
 
@@ -1601,7 +1601,7 @@ namespace OsEngine.Market.Servers.Pionex
 
             try
             {
-                string timestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds().ToString();
+                string timestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds().ToString(CultureInfo.InvariantCulture);
 
                 _pathUrl = "trade/order";
 
@@ -1692,7 +1692,7 @@ namespace OsEngine.Market.Servers.Pionex
 
             try
             {
-                string timestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds().ToString();
+                string timestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds().ToString(CultureInfo.InvariantCulture);
 
                 _pathUrl = "trade/openOrders";
 
@@ -1763,7 +1763,7 @@ namespace OsEngine.Market.Servers.Pionex
 
         public OrderStateType GetOrderStatus(Order order)
         {
-            Order myOrder = GetOrderFromExchange(order.SecurityNameCode, order.NumberUser.ToString());
+            Order myOrder = GetOrderFromExchange(order.SecurityNameCode, order.NumberUser.ToString(CultureInfo.InvariantCulture));
 
             if (myOrder == null)
             {
@@ -1786,7 +1786,7 @@ namespace OsEngine.Market.Servers.Pionex
 
             try
             {
-                string timestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds().ToString();
+                string timestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds().ToString(CultureInfo.InvariantCulture);
 
                 _pathUrl = "trade/orderByClientOrderId";
 
@@ -1866,7 +1866,7 @@ namespace OsEngine.Market.Servers.Pionex
 
             try
             {
-                string timestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds().ToString();
+                string timestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds().ToString(CultureInfo.InvariantCulture);
 
                 _pathUrl = "trade/fillsByOrderId";
 
