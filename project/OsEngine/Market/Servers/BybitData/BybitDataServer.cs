@@ -282,7 +282,7 @@ namespace OsEngine.Market.Servers.BybitData
                 Dictionary<string, object> parametrs = new Dictionary<string, object>();
                 parametrs["category"] = category;
                 parametrs["symbol"] = security.Name.Split('.')[0];
-                parametrs["interval"] = timeFrameBuilder.TimeFrameTimeSpan.TotalMinutes.ToString();
+                parametrs["interval"] = timeFrameBuilder.TimeFrameTimeSpan.TotalMinutes.ToString(CultureInfo.InvariantCulture);
                 parametrs["limit"] = 1000;
                 parametrs["start"] = TimeManager.GetTimeStampMilliSecondsToDateTime(startTime);
                 parametrs["end"] = TimeManager.GetTimeStampMilliSecondsToDateTime(endTime);
@@ -666,7 +666,7 @@ namespace OsEngine.Market.Servers.BybitData
 
                 if (security.SecurityType == SecurityType.CurrencyPair)
                 {
-                    string newId = DateTime.UtcNow.Ticks.ToString();
+                    string newId = DateTime.UtcNow.Ticks.ToString(CultureInfo.InvariantCulture);
 
                     trade.Time = DateTimeOffset.FromUnixTimeMilliseconds(long.Parse(tradeParts[1], CultureInfo.InvariantCulture)).DateTime;
                     trade.Price = tradeParts[2].ToDecimal();

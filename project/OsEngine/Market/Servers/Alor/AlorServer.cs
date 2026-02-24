@@ -956,7 +956,7 @@ namespace OsEngine.Market.Servers.Alor
             }
             else
             {
-                result = timeFrameBuilder.TimeFrameTimeSpan.TotalSeconds.ToString();
+                result = timeFrameBuilder.TimeFrameTimeSpan.TotalSeconds.ToString(CultureInfo.InvariantCulture);
             }
 
             return result;

@@ -7,6 +7,7 @@
 */
 
 using System;
+using System.Globalization;
 using System.Collections.Generic;
 using System.Threading;
 
@@ -22,7 +23,7 @@ namespace OsEngine.Layout
             {
                 if(ui.Uid == "")
                 {
-                    ui.Uid = (DateTime.Now - DateTime.MinValue).TotalMilliseconds.ToString();
+                    ui.Uid = (DateTime.Now - DateTime.MinValue).TotalMilliseconds.ToString(CultureInfo.InvariantCulture);
                 }
 
                 MoveWindow window = new MoveWindow();

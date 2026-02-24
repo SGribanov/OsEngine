@@ -393,6 +393,27 @@
 - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` -> success, 0 warnings, 0 errors
 - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed 352/352
 
+## 2026-02-24 - Step 2.2 (InvariantCulture in persistence/protocol) - Incremental Adoption #540
+
+- Hardened `TimeSpan/elapsed` numeric serialization with explicit invariant culture:
+  - `project/OsEngine/Market/Servers/Alor/AlorServer.cs`
+  - `project/OsEngine/Market/Servers/BybitData/BybitDataServer.cs`
+  - `project/OsEngine/Layout/StickyBorders.cs`
+- Replacements:
+  - `TotalSeconds.ToString()` -> `TotalSeconds.ToString(CultureInfo.InvariantCulture)`
+  - `TotalMinutes.ToString()` -> `TotalMinutes.ToString(CultureInfo.InvariantCulture)`
+  - `TotalMilliseconds.ToString()` -> `TotalMilliseconds.ToString(CultureInfo.InvariantCulture)`
+- Added missing `using System.Globalization;` in `StickyBorders.cs`.
+- Scope:
+  - deterministic numeric serialization only; runtime behavior unchanged.
+
+### Verification
+
+- `dotnet restore project/OsEngine/OsEngine.csproj --nologo` -> success
+- `dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo` -> success
+- `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` -> success, 0 warnings, 0 errors
+- `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed 352/352
+
 - Migrated `project/OsEngine/Logging/ServerTelegram.cs` persistence to `SettingsManager`:
   - `Save()` now writes JSON into `Engine\\telegramSet.txt`
   - `Load()` now reads JSON and falls back to legacy 3-line format parser
