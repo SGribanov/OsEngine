@@ -461,7 +461,7 @@ namespace OsEngine.Market.Servers.MoexFixFastCurrency
                     {
                         // send TestRequest
                         SendLogMessage($"Not get Heartbeat on time. Need send test request.", LogMessageType.System);
-                        _fxMFIXTradeMessages.TestRequestMessage(_msgSeqNum, DateTime.UtcNow.ToString("OsEngine"));
+                        _fxMFIXTradeMessages.TestRequestMessage(_msgSeqNum, DateTime.UtcNow.ToString("OsEngine", CultureInfo.InvariantCulture));
                         _isThereFirstHearbeat = false;
                         lastMFIXTradeTestRequestTime = DateTime.Now;
                     }

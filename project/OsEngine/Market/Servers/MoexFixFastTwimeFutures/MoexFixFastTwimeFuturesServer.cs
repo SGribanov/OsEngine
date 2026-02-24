@@ -605,7 +605,7 @@ namespace OsEngine.Market.Servers.MoexFixFastTwimeFutures
                             {
                                 // send TestRequest
                                 SendLogMessage($"Not get Heartbeat on time. Need send test request.", LogMessageType.System);
-                                _fixTradeMessages.TestRequestMessage(_msgSeqNum, DateTime.UtcNow.ToString("OsEngine"));
+                                _fixTradeMessages.TestRequestMessage(_msgSeqNum, DateTime.UtcNow.ToString("OsEngine", CultureInfo.InvariantCulture));
                                 _isThereFirstHearbeat = false;
                                 lastFIXTradeTestRequestTime = DateTime.Now;
                             }

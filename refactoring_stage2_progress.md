@@ -337,6 +337,23 @@
 - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` -> success, 0 warnings, 0 errors
 - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed 352/352
 
+## 2026-02-24 - Step 2.2 (InvariantCulture in persistence/protocol) - Incremental Adoption #537
+
+- Hardened MOEX FIX heartbeat `TestRequest` payload formatting with explicit invariant culture:
+  - `project/OsEngine/Market/Servers/MoexFixFastTwimeFutures/MoexFixFastTwimeFuturesServer.cs`
+  - `project/OsEngine/Market/Servers/MoexFixFastCurrency/MoexFixFastCurrencyServer.cs`
+- Replacements:
+  - `DateTime.UtcNow.ToString("OsEngine")` -> `DateTime.UtcNow.ToString("OsEngine", CultureInfo.InvariantCulture)`
+- Scope:
+  - protocol string formatting determinism only; heartbeat/test-request behavior unchanged.
+
+### Verification
+
+- `dotnet restore project/OsEngine/OsEngine.csproj --nologo` -> success
+- `dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo` -> success
+- `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` -> success, 0 warnings, 0 errors
+- `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed 352/352
+
 - Migrated `project/OsEngine/Logging/ServerTelegram.cs` persistence to `SettingsManager`:
   - `Save()` now writes JSON into `Engine\\telegramSet.txt`
   - `Load()` now reads JSON and falls back to legacy 3-line format parser
