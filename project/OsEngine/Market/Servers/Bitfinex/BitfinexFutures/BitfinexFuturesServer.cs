@@ -1514,7 +1514,7 @@ namespace OsEngine.Market.Servers.Bitfinex.BitfinexFutures
         {
             try
             {
-                string nonce = (DateTimeOffset.UtcNow.ToUnixTimeMilliseconds()).ToString();
+                string nonce = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds().ToString(CultureInfo.InvariantCulture);
                 string authPayload = "AUTH" + nonce;
                 string authSig;
 
@@ -3267,7 +3267,7 @@ namespace OsEngine.Market.Servers.Bitfinex.BitfinexFutures
         {
             try
             {
-                string nonce = (DateTimeOffset.UtcNow.ToUnixTimeMilliseconds()).ToString();
+                string nonce = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds().ToString(CultureInfo.InvariantCulture);
                 string signature = $"/api/{path}{nonce}{body}";
                 string sig = ComputeHmacSha384(_secretKey, signature);
 

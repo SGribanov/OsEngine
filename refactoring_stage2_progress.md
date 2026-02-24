@@ -354,6 +354,23 @@
 - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` -> success, 0 warnings, 0 errors
 - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed 352/352
 
+## 2026-02-24 - Step 2.2 (InvariantCulture in persistence/protocol) - Incremental Adoption #538
+
+- Hardened Bitfinex nonce serialization with explicit invariant culture:
+  - `project/OsEngine/Market/Servers/Bitfinex/BitfinexSpot/BitfinexSpotServer.cs`
+  - `project/OsEngine/Market/Servers/Bitfinex/BitfinexFutures/BitfinexFuturesServer.cs`
+- Replacements:
+  - `DateTimeOffset.UtcNow.ToUnixTimeMilliseconds().ToString()` -> `ToString(CultureInfo.InvariantCulture)` in signed private-request nonce generation.
+- Scope:
+  - protocol nonce serialization determinism only; request semantics unchanged.
+
+### Verification
+
+- `dotnet restore project/OsEngine/OsEngine.csproj --nologo` -> success
+- `dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo` -> success
+- `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` -> success, 0 warnings, 0 errors
+- `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed 352/352
+
 - Migrated `project/OsEngine/Logging/ServerTelegram.cs` persistence to `SettingsManager`:
   - `Save()` now writes JSON into `Engine\\telegramSet.txt`
   - `Load()` now reads JSON and falls back to legacy 3-line format parser
