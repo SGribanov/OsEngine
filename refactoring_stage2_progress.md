@@ -320,6 +320,23 @@
 - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` -> success, 0 warnings, 0 errors
 - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed 352/352
 
+## 2026-02-24 - Step 2.2 (InvariantCulture in persistence/protocol) - Incremental Adoption #536
+
+- Hardened remaining unix-seconds timestamp serialization in BitGet connectors:
+  - `project/OsEngine/Market/Servers/BitGet/BitGetSpot/BitGetServerSpot.cs`
+  - `project/OsEngine/Market/Servers/BitGet/BitGetFutures/BitGetServerFutures.cs`
+- Replacements:
+  - `DateTimeOffset.UtcNow.ToUnixTimeSeconds().ToString()` -> `ToString(CultureInfo.InvariantCulture)` in auth/signature timestamp paths.
+- Scope:
+  - protocol timestamp serialization determinism only; runtime behavior unchanged.
+
+### Verification
+
+- `dotnet restore project/OsEngine/OsEngine.csproj --nologo` -> success
+- `dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo` -> success
+- `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` -> success, 0 warnings, 0 errors
+- `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed 352/352
+
 - Migrated `project/OsEngine/Logging/ServerTelegram.cs` persistence to `SettingsManager`:
   - `Save()` now writes JSON into `Engine\\telegramSet.txt`
   - `Load()` now reads JSON and falls back to legacy 3-line format parser

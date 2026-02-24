@@ -997,7 +997,7 @@ namespace OsEngine.Market.Servers.BitGet.BitGetSpot
         {
             try
             {
-                string TimeStamp = DateTimeOffset.UtcNow.ToUnixTimeSeconds().ToString();
+                string TimeStamp = DateTimeOffset.UtcNow.ToUnixTimeSeconds().ToString(CultureInfo.InvariantCulture);
                 string Sign = GenerateSignature(TimeStamp, "GET", "/user/verify", null, null, SeckretKey);
 
                 RequestWebsocketAuth requestWebsocketAuth = new RequestWebsocketAuth();
