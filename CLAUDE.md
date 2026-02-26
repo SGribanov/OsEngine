@@ -12,21 +12,36 @@ OsEngine is an open-source algorithmic trading platform written in C# / WPF. It 
 # Solution file
 project/OsEngine.sln
 
-# Build from command line (requires .NET 9 SDK)
-dotnet build project/OsEngine.sln
+# Restore
+dotnet restore project/OsEngine.sln
 
-# Build Release
-dotnet build project/OsEngine.sln -c Release
+# Build (required after any change)
+dotnet build project/OsEngine/OsEngine.csproj --configuration Release
+
+# Test (required after any change)
+dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --configuration Release
 
 # Run (WPF desktop app, Windows only)
 dotnet run --project project/OsEngine/OsEngine.csproj
 ```
 
-- Target framework: `net9.0-windows` (WPF + WinForms interop)
+- SDK baseline: `.NET 10`
+- Language baseline: `C# 14`
+- Target framework: `net10.0-windows` (WPF + WinForms interop)
 - Platform: `x64` only
 - Output goes to `project/OsEngine/bin/Debug/` or `bin/Release/` (no TFM subfolder appended)
 - Many DLL dependencies live directly in `bin/Debug/` and are referenced by HintPath (not NuGet)
-- No test projects exist in this repository
+- Test project exists: `project/OsEngine.Tests/OsEngine.Tests.csproj` (xUnit)
+
+## Engineering Baseline (Mandatory)
+
+This baseline is mandatory for this repository and should be treated as default guidance for .NET projects unless a project-specific policy says otherwise.
+
+- Prioritize reliability and security over convenience and speed of delivery.
+- Apply modern .NET/C# best practices only when they are reasonable for the context and improve maintainability, runtime efficiency, or memory allocation profile.
+- Prefer explicit, deterministic, and culture-safe behavior in protocol/serialization/boundary code.
+- For every code change, run build and tests before moving to the next task.
+- Aim to cover every changed method/function/module with tests; if full coverage is not feasible, document the gap and risk explicitly.
 
 ## Architecture
 
