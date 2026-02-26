@@ -162,9 +162,9 @@ namespace OsEngine.Market.Servers.Finam.Entity
                             listTrades.Add(newTrade);
                             TimeActual = newTrade.Time;
                         }
-                        catch
+                        catch (Exception ex)
                         {
-                            // ignore
+                            _server.SendLogMessage($"FinamDataSeries trade parse error in '{trades[i]}': {ex.Message}", LogMessageType.Error);
                         }
 
                     }

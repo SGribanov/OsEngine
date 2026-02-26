@@ -1561,8 +1561,9 @@ namespace OsEngine.Market.Servers.Transaq
 
                 return osCandles;
             }
-            catch
+            catch (Exception ex)
             {
+                SendLogMessage($"ParseCandles error: {ex.Message}", LogMessageType.Error);
                 return null;
             }
         }

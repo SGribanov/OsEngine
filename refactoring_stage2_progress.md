@@ -11395,3 +11395,26 @@
   - `dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo` -> success
   - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` -> success, 0 warnings, 0 errors
   - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed `391/391`
+
+## 2026-02-26 - Step 0.3 (silent-catch visibility) - XT+Alor+Transaq+Finam catch logging hardening follow-up
+
+- Added explicit exception visibility for remaining bare catches in:
+  - `project/OsEngine/Market/Servers/XT/XTSpot/XTServerSpot.cs`
+  - `project/OsEngine/Market/Servers/Alor/AlorServer.cs`
+  - `project/OsEngine/Market/Servers/Transaq/TransaqServer.cs`
+  - `project/OsEngine/Market/Servers/Finam/Entity/FinamDataSeries.cs`
+- Changes:
+  - `catch` -> `catch (Exception ex)` in order-id parsing and parsing fallbacks.
+  - added parse-failure details to existing log paths.
+  - preserved existing fallback/return control flow.
+- Scope:
+  - observability-only hardening
+  - no behavior changes on successful paths.
+
+### Verification
+
+- Host-context verification (outside sandbox):
+  - `dotnet restore project/OsEngine/OsEngine.csproj --nologo` -> success
+  - `dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo` -> success
+  - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` -> success, 0 warnings, 0 errors
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed `391/391`

@@ -1800,9 +1800,9 @@ namespace OsEngine.Market.Servers.XT.XTSpot
                         {
                             newOrder.NumberUser = Convert.ToInt32(item.ci, CultureInfo.InvariantCulture) - 1000;
                         }
-                        catch
+                        catch (Exception ex)
                         {
-                            SendLogMessage("Strange order num: " + item.ci, LogMessageType.Error);
+                            SendLogMessage($"Strange order num: {item.ci}. {ex.Message}", LogMessageType.Error);
                             return;
                         }
                     }

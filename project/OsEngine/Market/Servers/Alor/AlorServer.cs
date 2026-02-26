@@ -2326,8 +2326,9 @@ namespace OsEngine.Market.Servers.Alor
                             order.State = OrderStateType.Cancel;
                         }
                     }
-                    catch
+                    catch (Exception ex)
                     {
+                        SendLogMessage($"Can not parse filledQtyUnits '{baseMessage.filledQtyUnits}': {ex.Message}", LogMessageType.Error);
                         order.State = OrderStateType.Cancel;
                     }
                 }
