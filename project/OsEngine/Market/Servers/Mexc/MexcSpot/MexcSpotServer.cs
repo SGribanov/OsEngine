@@ -755,9 +755,9 @@ namespace OsEngine.Market.Servers.Mexc
                         _webSocketPrivate.OnError -= _webSocketPrivate_OnError;
                         _webSocketPrivate.CloseAsync();
                     }
-                    catch
+                    catch (Exception ex)
                     {
-                        // ignore
+                        SendLogMessage(ex.ToString(), LogMessageType.Error);
                     }
 
                     _webSocketPrivate = null;

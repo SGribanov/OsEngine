@@ -547,9 +547,9 @@ namespace OsEngine.Market.Servers.Deribit
                 {
                     webSocket.CloseAsync();
                 }
-                catch
+                catch (Exception ex)
                 {
-                    // ignore
+                    SendLogMessage(ex.ToString(), LogMessageType.Error);
                 }
 
                 webSocket.OnOpen -= WebSocket_Opened;
@@ -1350,9 +1350,9 @@ namespace OsEngine.Market.Servers.Deribit
                                 {
                                     newOrder.NumberUser = Convert.ToInt32(item[j].label, System.Globalization.CultureInfo.InvariantCulture);
                                 }
-                                catch
+                                catch (Exception ex)
                                 {
-                                    // ignore
+                                    SendLogMessage(ex.ToString(), LogMessageType.Error);
                                 }
                                 newOrder.NumberMarket = item[j].order_id.ToString();
                                 newOrder.Side = item[j].direction.Equals("buy") ? Side.Buy : Side.Sell;
