@@ -396,7 +396,7 @@ namespace OsEngine.Market.Servers.Tester
                 }
                 catch (Exception ex)
                 {
-                    SendLogMessage(ex.ToString(), LogMessageType.Error);
+                    _server?.SendLogMessage(ex.ToString(), LogMessageType.Error);
                 }
             }
         }
@@ -1131,7 +1131,7 @@ namespace OsEngine.Market.Servers.Tester
                 }
                 catch (Exception ex)
                 {
-                    SendLogMessage(ex.ToString(), LogMessageType.Error);
+                    _server?.SendLogMessage(ex.ToString(), LogMessageType.Error);
                 }
             }
         }
@@ -1371,7 +1371,7 @@ namespace OsEngine.Market.Servers.Tester
                 }
                 catch (Exception ex)
                 {
-                    SendLogMessage(ex.ToString(), LogMessageType.Error);
+                    _server?.SendLogMessage(ex.ToString(), LogMessageType.Error);
                 }
             }
         }
@@ -1679,7 +1679,7 @@ namespace OsEngine.Market.Servers.Tester
                 }
                 catch (Exception ex)
                 {
-                    SendLogMessage(ex.ToString(), LogMessageType.Error);
+                    _server?.SendLogMessage(ex.ToString(), LogMessageType.Error);
                 }
             }
         }
