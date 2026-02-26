@@ -11185,3 +11185,22 @@
 - Host-context verification (outside sandbox):
   - `dotnet vstest project/OsEngine.Tests/bin/Release/net10.0-windows/OsEngine.Tests.dll` -> passed `352/352`
   - `dotnet build ... --no-restore` remains environment-sensitive in sandbox due NuGet TLS (`NU1301`).
+
+## 2026-02-26 - Step 0.3 (silent-catch visibility) - KiteConnect + InteractiveBrokersServer catch logging hardening block
+
+- Added explicit exception visibility for previously silent catch blocks in:
+  - `project/OsEngine/Market/Servers/KiteConnect/KiteConnectServer.cs`
+  - `project/OsEngine/Market/Servers/InteractiveBrokers/InteractiveBrokersServer.cs`
+- Changes:
+  - bare `catch` blocks with comments `// ignore` / `// ignored` converted to `catch (Exception ex)`.
+  - added `SendLogMessage(ex.ToString(), LogMessageType.Error)` in affected branches.
+  - existing branch control flow preserved.
+- Scope:
+  - observability-only hardening
+  - no behavior changes on successful paths.
+
+### Verification
+
+- Host-context verification (outside sandbox):
+  - `dotnet vstest project/OsEngine.Tests/bin/Release/net10.0-windows/OsEngine.Tests.dll` -> passed `352/352`
+  - `dotnet build ... --no-restore` remains environment-sensitive in sandbox due NuGet TLS (`NU1301`).
