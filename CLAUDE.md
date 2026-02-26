@@ -25,6 +25,8 @@ dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --configuration Release
 dotnet run --project project/OsEngine/OsEngine.csproj
 ```
 
+All `restore/build/test` commands must be executed in host context (outside sandbox).
+
 - SDK baseline: `.NET 10`
 - Language baseline: `C# 14`
 - Target framework: `net10.0-windows` (WPF + WinForms interop)
@@ -41,6 +43,7 @@ This baseline is mandatory for this repository and should be treated as default 
 - Apply modern .NET/C# best practices only when they are reasonable for the context and improve maintainability, runtime efficiency, or memory allocation profile.
 - Prefer explicit, deterministic, and culture-safe behavior in protocol/serialization/boundary code.
 - For every code change, run build and tests before moving to the next task.
+- Always run package restore, build, and tests outside sandbox (host context).
 - Aim to cover every changed method/function/module with tests; if full coverage is not feasible, document the gap and risk explicitly.
 
 ## Architecture
