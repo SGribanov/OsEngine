@@ -11227,3 +11227,24 @@
   - `dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo` -> success
   - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` -> success
   - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo -p:IsTestProject=true --settings .coverage.runsettings` -> passed `360/360`
+
+## 2026-02-26 - Step 0.3 (silent-catch visibility) - MoexAlgopack + TraderNet catch logging hardening block
+
+- Added explicit exception visibility for previously silent catch blocks in:
+  - `project/OsEngine/Market/Servers/MoexAlgopack/MoexAlgopackServer.cs`
+  - `project/OsEngine/Market/Servers/TraderNet/TraderNetServer.cs`
+- Changes:
+  - bare `catch` blocks with `//ignore` / `// ignore` converted to `catch (Exception ex)`.
+  - added `SendLogMessage(ex.ToString(), LogMessageType.Error)`.
+  - preserved existing branch control flow.
+- Scope:
+  - observability-only hardening
+  - no behavior changes on successful paths.
+
+### Verification
+
+- Host-context verification (outside sandbox):
+  - `dotnet restore project/OsEngine/OsEngine.csproj --nologo` -> success
+  - `dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo` -> success
+  - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` -> success
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo -p:IsTestProject=true --settings .coverage.runsettings` -> passed `360/360`
