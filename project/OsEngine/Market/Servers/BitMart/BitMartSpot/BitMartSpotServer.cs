@@ -1542,9 +1542,9 @@ namespace OsEngine.Market.Servers.BitMart
             {
                 order.NumberUser = Convert.ToInt32(baseOrder.client_order_id, CultureInfo.InvariantCulture);
             }
-            catch
+            catch (Exception ex)
             {
-                SendLogMessage("strage order num: " + baseOrder.client_order_id, LogMessageType.Error);
+                SendLogMessage($"strage order num: {baseOrder.client_order_id}. {ex.Message}", LogMessageType.Error);
                 return null;
             }
 
@@ -1988,8 +1988,9 @@ namespace OsEngine.Market.Servers.BitMart
             {
                 order.NumberUser = Convert.ToInt32(baseOrder.clientOrderId, CultureInfo.InvariantCulture);
             }
-            catch
+            catch (Exception ex)
             {
+                SendLogMessage($"strage order num: {baseOrder.clientOrderId}. {ex.Message}", LogMessageType.Error);
                 return null;
             }
 
