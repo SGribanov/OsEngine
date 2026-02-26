@@ -1215,9 +1215,9 @@ namespace OsEngine.Market.Servers.MetaTrader5
                 {
                     lastTicks = _mtApiClient.CopyTicks(ticks.Instrument, CopyTicksFlag.All, 0, 50);
                 }
-                catch
+                catch (Exception ex)
                 {
-                    //ignore
+                    SendLogMessage(ex.ToString(), LogMessageType.Error);
                 }
 
                 if (lastTicks == null || lastTicks.Count == 0) return;
@@ -1354,9 +1354,9 @@ namespace OsEngine.Market.Servers.MetaTrader5
                         }
                     }
                 }
-                catch
+                catch (Exception ex)
                 {
-                    // ignore
+                    SendLogMessage(ex.ToString(), LogMessageType.Error);
                 }
 
                 depth.Asks.Reverse();

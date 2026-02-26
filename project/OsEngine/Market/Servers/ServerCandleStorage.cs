@@ -312,9 +312,9 @@ namespace OsEngine.Market.Servers
                         reader.Close();
                     }
                 }
-                catch
+                catch (Exception ex)
                 {
-                    // ignore
+                    SendNewLogMessage(ex.ToString(), LogMessageType.Error);
                 }
             }
 
@@ -342,9 +342,9 @@ namespace OsEngine.Market.Servers
                         reader.Close();
                     }
                 }
-                catch
+                catch (Exception ex)
                 {
-                    // ignore
+                    SendNewLogMessage(ex.ToString(), LogMessageType.Error);
                 }
             }
 
