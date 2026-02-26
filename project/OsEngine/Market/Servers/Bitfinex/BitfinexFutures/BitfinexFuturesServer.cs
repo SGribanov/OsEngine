@@ -1157,9 +1157,9 @@ namespace OsEngine.Market.Servers.Bitfinex.BitfinexFutures
                         webSocketPublicMarketDepthsNew = null;
                     }
                 }
-                catch
+                catch (Exception ex)
                 {
-                    // ignore
+                    SendLogMessage(ex.ToString(), LogMessageType.Error);
                 }
 
                 _webSocketPublicMarketDepths.Clear();
@@ -1185,9 +1185,9 @@ namespace OsEngine.Market.Servers.Bitfinex.BitfinexFutures
                         webSocketPublicTradesNew = null;
                     }
                 }
-                catch
+                catch (Exception ex)
                 {
-                    // ignore
+                    SendLogMessage(ex.ToString(), LogMessageType.Error);
                 }
 
                 _webSocketPublicTrades.Clear();
@@ -1203,9 +1203,9 @@ namespace OsEngine.Market.Servers.Bitfinex.BitfinexFutures
                     _webSocketPrivate.OnError -= WebSocketPrivate_Error;
                     _webSocketPrivate.CloseAsync();
                 }
-                catch
+                catch (Exception ex)
                 {
-                    // ignore
+                    SendLogMessage(ex.ToString(), LogMessageType.Error);
                 }
 
                 _webSocketPrivate = null;
@@ -2504,9 +2504,9 @@ namespace OsEngine.Market.Servers.Bitfinex.BitfinexFutures
                 {
                     updateOrder.NumberUser = Convert.ToInt32(orderDataList[2], CultureInfo.InvariantCulture);
                 }
-                catch
+                catch (Exception ex)
                 {
-                    // ignore
+                    SendLogMessage(ex.ToString(), LogMessageType.Error);
                 }
 
                 updateOrder.NumberMarket = (orderDataList[0]).ToString();
@@ -2908,9 +2908,9 @@ namespace OsEngine.Market.Servers.Bitfinex.BitfinexFutures
                             activeOrder.NumberUser = Convert.ToInt32(orderData[2], CultureInfo.InvariantCulture);
 
                         }
-                        catch
+                        catch (Exception ex)
                         {
-                            // ignore
+                            SendLogMessage(ex.ToString(), LogMessageType.Error);
                         }
 
                         activeOrder.NumberMarket = orderData[0].ToString();
@@ -3035,9 +3035,9 @@ namespace OsEngine.Market.Servers.Bitfinex.BitfinexFutures
                             {
                                 userNumber = Convert.ToInt32(tradeData[11], CultureInfo.InvariantCulture);
                             }
-                            catch
+                            catch (Exception ex)
                             {
-                                // ignore
+                                SendLogMessage(ex.ToString(), LogMessageType.Error);
                             }
 
                             if (numberUser == userNumber)
