@@ -25,6 +25,7 @@ using OsEngine.Entity.WebSocketOsEngine;
 using TradeResponse = OsEngine.Market.Servers.Binance.Spot.BinanceSpotEntity.TradeResponse;
 using System.Net;
 using System.Linq;
+using System.Diagnostics;
 
 namespace OsEngine.Market.Servers.Binance.Futures
 {
@@ -135,9 +136,9 @@ namespace OsEngine.Market.Servers.Binance.Futures
                     }
                 }
             }
-            catch
+            catch (Exception ex)
             {
-                SendLogMessage("Can`t run Binance Futures connector. No internet connection", LogMessageType.Error);
+                SendLogMessage($"Can`t run Binance Futures connector. No internet connection. {ex.Message}", LogMessageType.Error);
                 return;
             }
 
@@ -1279,9 +1280,9 @@ namespace OsEngine.Market.Servers.Binance.Futures
 
                     return oldTrades;
                 }
-                catch
+                catch (Exception ex)
                 {
-                    SendLogMessage(OsLocalization.Market.Message95 + security, LogMessageType.Error);
+                    SendLogMessage($"{OsLocalization.Market.Message95}{security}. {ex.Message}", LogMessageType.Error);
 
                     return null;
                 }
@@ -1958,11 +1959,11 @@ namespace OsEngine.Market.Servers.Binance.Futures
                                 {
                                     _err = JsonConvert.DeserializeAnonymousType(mes, new ErrorMessage());
                                 }
-                                catch
+                                catch (Exception ex)
                                 {
                                     // если не смогли распарсить, то просто покажем что пришло
                                     _err.code = 9999;
-                                    _err.msg = mes;
+                                    _err.msg = $"{mes}. ParseError: {ex.Message}";
                                 }
                                 SendLogMessage("ConverterUserData ERORR. Code: " + _err.code.ToString() + ", msg: " + _err.msg, LogMessageType.Error);
                             }
@@ -2020,8 +2021,9 @@ namespace OsEngine.Market.Servers.Binance.Futures
                 }
                 return false;
             }
-            catch
+            catch (Exception ex)
             {
+                Trace.TraceWarning(ex.ToString());
                 return false;
             }
         }

@@ -102,9 +102,9 @@ namespace OsEngine.Market.Servers.Binance.Spot
                     return;
                 }
             }
-            catch
+            catch (Exception ex)
             {
-                SendLogMessage("Can`t run Binance Spot connector. No internet connection", LogMessageType.Error);
+                SendLogMessage($"Can`t run Binance Spot connector. No internet connection. {ex.Message}", LogMessageType.Error);
                 Disconnect();
                 return;
             }
