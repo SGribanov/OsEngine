@@ -1054,8 +1054,9 @@ namespace OsEngine.Market.Servers.FinamGrpc
                     {
                         hasData = stream.ResponseStream.MoveNext().Result;
                     }
-                    catch
+                    catch (Exception ex)
                     {
+                        System.Diagnostics.Trace.TraceWarning($"FinamGrpc trades stream MoveNext error for {security.NameId}: {ex.Message}");
                         Thread.Sleep(5);
                     }
 
@@ -1125,8 +1126,9 @@ namespace OsEngine.Market.Servers.FinamGrpc
                     {
                         hasData = stream.ResponseStream.MoveNext(token).Result;
                     }
-                    catch
+                    catch (Exception ex)
                     {
+                        System.Diagnostics.Trace.TraceWarning($"FinamGrpc market depth stream MoveNext error for {security.NameId}: {ex.Message}");
                         Thread.Sleep(5);
                         continue;
                     }

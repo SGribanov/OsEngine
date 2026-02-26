@@ -4048,8 +4048,9 @@ namespace OsEngine.Market.Servers.Tester
                     }
                     else return;
                 }
-                catch
+                catch (Exception ex)
                 {
+                    SendLogMessage($"TesterServer binary data parse error: {ex.Message}", LogMessageType.Error);
                     return;
                 }
             }

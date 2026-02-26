@@ -245,8 +245,9 @@ namespace OsEngine.Market.Servers
 
                         nameSecurity = array[2].Split('.')[0];
                     }
-                    catch
+                    catch (Exception ex)
                     {
+                        SendNewLogMessage($"ServerTickStorage: path parse error for '{saves[i]}'. {ex.Message}", LogMessageType.System);
                         continue;
                     }
 
@@ -276,8 +277,9 @@ namespace OsEngine.Market.Servers
                             {
                                 newTrade.SetTradeFromString(curTrade);
                             }
-                            catch
+                            catch (Exception ex)
                             {
+                                SendNewLogMessage($"ServerTickStorage: trade parse error for '{saves[i]}'. {ex.Message}", LogMessageType.System);
                                 continue;
                             }
 
