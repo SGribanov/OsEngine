@@ -2231,8 +2231,9 @@ namespace OsEngine.Market.Servers.Mexc
             {
                 order.NumberUser = Convert.ToInt32(baseOrder.clientOrderId, CultureInfo.InvariantCulture);
             }
-            catch
+            catch (Exception ex)
             {
+                SendLogMessage($"strage order num: {baseOrder.clientOrderId}. {ex.Message}", LogMessageType.Error);
                 return null;
             }
 

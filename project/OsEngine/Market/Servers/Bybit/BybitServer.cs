@@ -974,8 +974,9 @@ namespace OsEngine.Market.Servers.Bybit
 
                 return portfolio;
             }
-            catch
+            catch (Exception ex)
             {
+                System.Diagnostics.Trace.TraceWarning($"GetPortfolios spot parse error: {ex}");
                 return new Portfolio();
             }
         }
@@ -1100,8 +1101,9 @@ namespace OsEngine.Market.Servers.Bybit
 
                 return pb;
             }
-            catch
+            catch (Exception ex)
             {
+                SendLogMessage($"GetPositionsSpot parse error: {ex.Message}", LogMessageType.Error);
                 return null;
             }
         }
