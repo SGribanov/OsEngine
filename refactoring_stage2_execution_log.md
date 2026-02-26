@@ -12498,3 +12498,20 @@
   - `dotnet build ... --no-restore` intermittently blocked by sandbox TLS/NuGet (`NU1301`).
 - **Commit:** n/a (not committed in this session)
 - **Push:** n/a
+
+### Step 0.3 - Silent Catch Visibility (Incremental Adoption #563)
+
+- **Status:** In Progress (increment completed)
+- **Plan item:** `refactoring_stage2_plan.md` -> Phase 0 / Step 0.3
+- **Changes:**
+  - Added logging for silent catches in:
+    - `project/OsEngine/Market/Servers/Tester/TesterServer.cs`
+    - `project/OsEngine/Market/Servers/Tester/TesterServerUi.xaml.cs`
+  - Replaced bare catches with `catch (Exception ex)` and `SendLogMessage(ex.ToString(), LogMessageType.Error)`.
+  - Preserved existing branch control flow.
+- **Verification:**
+  - Executed outside sandbox.
+  - `dotnet vstest project/OsEngine.Tests/bin/Release/net10.0-windows/OsEngine.Tests.dll` succeeded (`352/352`).
+  - `dotnet build ... --no-restore` intermittently blocked by sandbox TLS/NuGet (`NU1301`).
+- **Commit:** n/a (not committed in this session)
+- **Push:** n/a
