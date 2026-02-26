@@ -646,9 +646,9 @@ namespace OsEngine.Market.Servers.ExMo.ExmoSpot
                         webSocketPublic = null;
                     }
                 }
-                catch
+                catch (Exception ex)
                 {
-                    // ignore
+                    SendLogMessage(ex.ToString(), LogMessageType.Error);
                 }
 
                 _webSocketPublic.Clear();
@@ -664,9 +664,9 @@ namespace OsEngine.Market.Servers.ExMo.ExmoSpot
                     _webSocketPrivate.OnError -= _webSocketPrivate_OnError;
                     _webSocketPrivate.CloseAsync();
                 }
-                catch
+                catch (Exception ex)
                 {
-                    // ignore
+                    SendLogMessage(ex.ToString(), LogMessageType.Error);
                 }
 
                 _webSocketPrivate = null;
@@ -1060,9 +1060,9 @@ namespace OsEngine.Market.Servers.ExMo.ExmoSpot
                     }
                 }
             }
-            catch
+            catch (Exception ex)
             {
-                // ignore
+                SendLogMessage(ex.ToString(), LogMessageType.Error);
             }
 
             if (_webSocketPrivate != null
@@ -1072,9 +1072,9 @@ namespace OsEngine.Market.Servers.ExMo.ExmoSpot
                 {
                     _webSocketPrivate.SendAsync($"{{ \"id\":22,\"method\":\"unsubscribe\",\"topics\":[\"spot/orders\",\"spot/user_trades\",\"spot/wallet\"]}}");
                 }
-                catch
+                catch (Exception ex)
                 {
-                    // ignore
+                    SendLogMessage(ex.ToString(), LogMessageType.Error);
                 }
             }
         }
@@ -1396,9 +1396,9 @@ namespace OsEngine.Market.Servers.ExMo.ExmoSpot
                 {
                     newOrder.NumberUser = Convert.ToInt32(item.client_id, CultureInfo.InvariantCulture);
                 }
-                catch
+                catch (Exception ex)
                 {
-                    // ignore
+                    SendLogMessage(ex.ToString(), LogMessageType.Error);
                 }
 
                 newOrder.NumberMarket = item.order_id;
@@ -1768,9 +1768,9 @@ namespace OsEngine.Market.Servers.ExMo.ExmoSpot
                             {
                                 newOrder.NumberUser = Convert.ToInt32(item.client_id, CultureInfo.InvariantCulture);
                             }
-                            catch
+                            catch (Exception ex)
                             {
-                                // ignore
+                                SendLogMessage(ex.ToString(), LogMessageType.Error);
                             }
 
                             newOrder.NumberMarket = item.order_id;
@@ -1924,9 +1924,9 @@ namespace OsEngine.Market.Servers.ExMo.ExmoSpot
                         {
                             newOrder.NumberUser = Convert.ToInt32(item.client_id, CultureInfo.InvariantCulture);
                         }
-                        catch
+                        catch (Exception ex)
                         {
-                            // ignore
+                            SendLogMessage(ex.ToString(), LogMessageType.Error);
                         }
 
                         newOrder.NumberMarket = item.order_id;
@@ -2028,9 +2028,9 @@ namespace OsEngine.Market.Servers.ExMo.ExmoSpot
                             {
                                 newOrder.NumberUser = Convert.ToInt32(item.client_id, CultureInfo.InvariantCulture);
                             }
-                            catch
+                            catch (Exception ex)
                             {
-                                // ignore
+                                SendLogMessage(ex.ToString(), LogMessageType.Error);
                             }
 
                             newOrder.NumberMarket = item.order_id;
@@ -2188,5 +2188,4 @@ namespace OsEngine.Market.Servers.ExMo.ExmoSpot
         #endregion
     }
 }
-
 

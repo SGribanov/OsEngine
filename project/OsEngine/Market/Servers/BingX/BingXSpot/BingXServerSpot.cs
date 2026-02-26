@@ -782,9 +782,9 @@ namespace OsEngine.Market.Servers.BinGxSpot
                         webSocketPublic = null;
                     }
                 }
-                catch
+                catch (Exception ex)
                 {
-                    // ignore
+                    SendLogMessage(ex.ToString(), LogMessageType.Error);
                 }
 
                 _webSocketPublic.Clear();
@@ -801,9 +801,9 @@ namespace OsEngine.Market.Servers.BinGxSpot
                     _webSocketPrivate.OnError -= _webSocketPrivate_OnError;
                     _webSocketPrivate.CloseAsync();
                 }
-                catch
+                catch (Exception ex)
                 {
-                    // ignore
+                    SendLogMessage(ex.ToString(), LogMessageType.Error);
                 }
 
                 _webSocketPrivate = null;
@@ -1240,9 +1240,9 @@ namespace OsEngine.Market.Servers.BinGxSpot
                     }
                 }
             }
-            catch
+            catch (Exception ex)
             {
-                // ignore
+                SendLogMessage(ex.ToString(), LogMessageType.Error);
             }
 
             if (_webSocketPrivate != null
@@ -1252,9 +1252,9 @@ namespace OsEngine.Market.Servers.BinGxSpot
                 {
                     _webSocketPrivate.SendAsync($"{{\"id\":\"{GenerateNewId()}\", \"reqType\": \"unsub\", \"dataType\": \"spot.executionReport\"}}");
                 }
-                catch
+                catch (Exception ex)
                 {
-                    // ignore
+                    SendLogMessage(ex.ToString(), LogMessageType.Error);
                 }
             }
         }
@@ -1373,9 +1373,9 @@ namespace OsEngine.Market.Servers.BinGxSpot
                 {
                     newOrder.NumberUser = Convert.ToInt32(responseOrder.data.C, CultureInfo.InvariantCulture);
                 }
-                catch
+                catch (Exception ex)
                 {
-                    // ignore
+                    SendLogMessage(ex.ToString(), LogMessageType.Error);
                 }
 
                 newOrder.NumberMarket = responseOrder.data.i.ToString();
@@ -1918,9 +1918,9 @@ namespace OsEngine.Market.Servers.BinGxSpot
                             {
                                 newOrder.NumberUser = Convert.ToInt32(itemOrders.clientOrderID, CultureInfo.InvariantCulture);
                             }
-                            catch
+                            catch (Exception ex)
                             {
-                                // ignore
+                                SendLogMessage(ex.ToString(), LogMessageType.Error);
                             }
 
                             newOrder.NumberMarket = itemOrders.orderId.ToString();
@@ -2053,9 +2053,9 @@ namespace OsEngine.Market.Servers.BinGxSpot
                                 {
                                     newOrder.NumberUser = Convert.ToInt32(itemOrders.clientOrderID, CultureInfo.InvariantCulture);
                                 }
-                                catch
+                                catch (Exception ex)
                                 {
-                                    // ignore
+                                    SendLogMessage(ex.ToString(), LogMessageType.Error);
                                 }
 
                                 newOrder.NumberMarket = itemOrders.orderId.ToString();

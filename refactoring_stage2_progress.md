@@ -10900,3 +10900,22 @@
 - Host-context verification (outside sandbox):
   - `dotnet vstest project/OsEngine.Tests/bin/Release/net10.0-windows/OsEngine.Tests.dll` -> passed `352/352`
   - `dotnet build ... --no-restore` remains environment-sensitive due NuGet TLS in sandbox (`NU1301`), so regression check used test-assembly run.
+
+## 2026-02-26 - Step 0.3 (silent-catch visibility) - ExMo Spot + BingX Spot catch logging hardening block
+
+- Added explicit exception visibility for previously silent catch blocks in:
+  - `project/OsEngine/Market/Servers/ExMo/ExmoSpot/ExmoSpotServer.cs`
+  - `project/OsEngine/Market/Servers/BingX/BingXSpot/BingXServerSpot.cs`
+- Changes:
+  - bare `catch { // ignore }` converted to `catch (Exception ex)`.
+  - added `SendLogMessage(ex.ToString(), LogMessageType.Error)` in socket-dispose and order-sync parse branches.
+  - preserved existing control flow semantics (`continue/break/return`) in surrounding logic.
+- Scope:
+  - observability-only hardening
+  - no behavior changes on successful paths.
+
+### Verification
+
+- Host-context verification (outside sandbox):
+  - `dotnet vstest project/OsEngine.Tests/bin/Release/net10.0-windows/OsEngine.Tests.dll` -> passed `352/352`
+  - `dotnet build ... --no-restore` remains environment-sensitive in sandbox due NuGet TLS (`NU1301`).
