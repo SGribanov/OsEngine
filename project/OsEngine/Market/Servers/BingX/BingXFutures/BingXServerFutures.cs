@@ -733,10 +733,10 @@ namespace OsEngine.Market.Servers.BingX.BingXFutures
                             SendLogMessage($"RequestCandleHistory> Error: code {response.code}", LogMessageType.Error);
                         }
                     }
-                    catch
+                    catch (Exception ex)
                     {
                         JsonErrorResponse responseError = JsonConvert.DeserializeAnonymousType(responseMessage.Content, new JsonErrorResponse());
-                        SendLogMessage($"RequestCandleHistory> Http State Code: {responseError.code} - message: {responseError.msg}", LogMessageType.Error);
+                        SendLogMessage($"RequestCandleHistory> Http State Code: {responseError.code} - message: {responseError.msg}. Parse error: {ex.Message}", LogMessageType.Error);
                     }
                 }
                 else
@@ -2863,9 +2863,9 @@ namespace OsEngine.Market.Servers.BingX.BingXFutures
 
                     _timeLastUpdateListenKey = DateTime.Now;
                 }
-                catch
+                catch (Exception ex)
                 {
-                    SendLogMessage("Request Listen Key Error", LogMessageType.Error);
+                    SendLogMessage($"Request Listen Key Error: {ex.Message}", LogMessageType.Error);
                 }
             }
         }
@@ -2917,9 +2917,9 @@ namespace OsEngine.Market.Servers.BingX.BingXFutures
                     }
                 }
             }
-            catch
+            catch (Exception ex)
             {
-                SendLogMessage("Decompress error", LogMessageType.Error);
+                SendLogMessage($"Decompress error: {ex.Message}", LogMessageType.Error);
                 return null;
             }
         }

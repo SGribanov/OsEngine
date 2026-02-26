@@ -2334,9 +2334,9 @@ namespace OsEngine.Market.Servers.BinGxSpot
                     }
                 }
             }
-            catch
+            catch (Exception ex)
             {
-                SendLogMessage("Decompress error", LogMessageType.Error);
+                SendLogMessage($"Decompress error: {ex.Message}", LogMessageType.Error);
                 return null;
             }
         }

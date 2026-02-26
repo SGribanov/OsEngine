@@ -11311,3 +11311,24 @@
   - `dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo` -> success
   - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` -> success, 0 warnings, 0 errors
   - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed `391/391`
+
+## 2026-02-26 - Step 0.3 (silent-catch visibility) - BingX Spot/Futures catch logging hardening follow-up
+
+- Added explicit exception visibility for remaining bare catches in:
+  - `project/OsEngine/Market/Servers/BingX/BingXSpot/BingXServerSpot.cs`
+  - `project/OsEngine/Market/Servers/BingX/BingXFutures/BingXServerFutures.cs`
+- Changes:
+  - `catch` -> `catch (Exception ex)` in decompression, listen-key renew and candle-history parse fallback paths.
+  - parse fallback now includes parse exception details in log message.
+  - preserved existing return/control-flow behavior.
+- Scope:
+  - observability-only hardening
+  - no behavior changes on successful paths.
+
+### Verification
+
+- Host-context verification (outside sandbox):
+  - `dotnet restore project/OsEngine/OsEngine.csproj --nologo` -> success
+  - `dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo` -> success
+  - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` -> success, 0 warnings, 0 errors
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed `391/391`
