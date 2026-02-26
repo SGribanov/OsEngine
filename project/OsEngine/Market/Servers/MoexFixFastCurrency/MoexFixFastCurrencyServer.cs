@@ -254,9 +254,9 @@ namespace OsEngine.Market.Servers.MoexFixFastCurrency
                         {
                             _historicalReplaySocket.Close();
                         }
-                        catch
+                        catch (Exception ex)
                         {
-                            // ignore
+                            System.Diagnostics.Trace.TraceWarning(ex.ToString());
                         }
 
                         _historicalReplaySocket = null;
@@ -272,18 +272,18 @@ namespace OsEngine.Market.Servers.MoexFixFastCurrency
                         {
                             _socketSecurityStreamA.Close();
                         }
-                        catch
+                        catch (Exception ex)
                         {
-                            // ignore
+                            System.Diagnostics.Trace.TraceWarning(ex.ToString());
                         }
 
                         try
                         {
                             _socketSecurityStreamB.Close();
                         }
-                        catch
+                        catch (Exception ex)
                         {
-                            // ignore
+                            System.Diagnostics.Trace.TraceWarning(ex.ToString());
                         }
 
                         _socketSecurityStreamA = null;
@@ -300,18 +300,18 @@ namespace OsEngine.Market.Servers.MoexFixFastCurrency
                         {
                             _tradesIncrementalSocketA.Close();
                         }
-                        catch
+                        catch (Exception ex)
                         {
-                            // ignore
+                            System.Diagnostics.Trace.TraceWarning(ex.ToString());
                         }
 
                         try
                         {
                             _tradesIncrementalSocketB.Close();
                         }
-                        catch
+                        catch (Exception ex)
                         {
-                            // ignore
+                            System.Diagnostics.Trace.TraceWarning(ex.ToString());
                         }
 
                         _tradesIncrementalSocketA = null;
@@ -327,18 +327,18 @@ namespace OsEngine.Market.Servers.MoexFixFastCurrency
                         {
                             _tradesSnapshotSocketA.Close();
                         }
-                        catch
+                        catch (Exception ex)
                         {
-                            // ignore
+                            System.Diagnostics.Trace.TraceWarning(ex.ToString());
                         }
 
                         try
                         {
                             _tradesSnapshotSocketB.Close();
                         }
-                        catch
+                        catch (Exception ex)
                         {
-                            // ignore
+                            System.Diagnostics.Trace.TraceWarning(ex.ToString());
                         }
 
                         _tradesSnapshotSocketA = null;
@@ -355,18 +355,18 @@ namespace OsEngine.Market.Servers.MoexFixFastCurrency
                         {
                             _ordersIncrementalSocketA.Close();
                         }
-                        catch
+                        catch (Exception ex)
                         {
-                            // ignore
+                            System.Diagnostics.Trace.TraceWarning(ex.ToString());
                         }
 
                         try
                         {
                             _ordersIncrementalSocketB.Close();
                         }
-                        catch
+                        catch (Exception ex)
                         {
-                            // ignore
+                            System.Diagnostics.Trace.TraceWarning(ex.ToString());
                         }
 
                         _ordersIncrementalSocketA = null;
@@ -382,18 +382,18 @@ namespace OsEngine.Market.Servers.MoexFixFastCurrency
                         {
                             _ordersSnapshotSocketA.Close();
                         }
-                        catch
+                        catch (Exception ex)
                         {
-                            // ignore
+                            System.Diagnostics.Trace.TraceWarning(ex.ToString());
                         }
 
                         try
                         {
                             _ordersSnapshotSocketB.Close();
                         }
-                        catch
+                        catch (Exception ex)
                         {
-                            // ignore
+                            System.Diagnostics.Trace.TraceWarning(ex.ToString());
                         }
 
                         _ordersSnapshotSocketA = null;
@@ -412,9 +412,9 @@ namespace OsEngine.Market.Servers.MoexFixFastCurrency
                             SendFXMFIXTradeMessage(logout);
                             _logoutInitiator = true;
                         }
-                        catch
+                        catch (Exception ex)
                         {
-                            // ignore
+                            System.Diagnostics.Trace.TraceWarning(ex.ToString());
                         }
 
                         while (_fxMFIXTradeTcpClient != null || _fxMFIXTradeStream != null)
@@ -1580,18 +1580,18 @@ namespace OsEngine.Market.Servers.MoexFixFastCurrency
                                         {
                                             _tradesSnapshotSocketA.Close();
                                         }
-                                        catch
+                                        catch (Exception ex)
                                         {
-                                            // ignore
+                                            System.Diagnostics.Trace.TraceWarning(ex.ToString());
                                         }
 
                                         try
                                         {
                                             _tradesSnapshotSocketB.Close();
                                         }
-                                        catch
+                                        catch (Exception ex)
                                         {
-                                            // ignore
+                                            System.Diagnostics.Trace.TraceWarning(ex.ToString());
                                         }
 
                                         _tradesSnapshotSocketA = null;
@@ -2068,18 +2068,18 @@ namespace OsEngine.Market.Servers.MoexFixFastCurrency
                                         {
                                             _ordersSnapshotSocketA.Close();
                                         }
-                                        catch
+                                        catch (Exception ex)
                                         {
-                                            // ignore
+                                            System.Diagnostics.Trace.TraceWarning(ex.ToString());
                                         }
 
                                         try
                                         {
                                             _ordersSnapshotSocketB.Close();
                                         }
-                                        catch
+                                        catch (Exception ex)
                                         {
-                                            // ignore
+                                            System.Diagnostics.Trace.TraceWarning(ex.ToString());
                                         }
 
                                         _ordersSnapshotSocketA = null;

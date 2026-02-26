@@ -300,9 +300,9 @@ namespace OsEngine.Market.Servers.MoexFixFastTwimeFutures
                         {
                             _historicalReplaySocket.Close();
                         }
-                        catch
+                        catch (Exception ex)
                         {
-                            // ignore
+                            System.Diagnostics.Trace.TraceWarning(ex.ToString());
                         }
 
                         _historicalReplaySocket = null;
@@ -318,18 +318,18 @@ namespace OsEngine.Market.Servers.MoexFixFastTwimeFutures
                         {
                             _socketFuturesStreamA.Close();
                         }
-                        catch
+                        catch (Exception ex)
                         {
-                            // ignore
+                            System.Diagnostics.Trace.TraceWarning(ex.ToString());
                         }
 
                         try
                         {
                             _socketFuturesStreamB.Close();
                         }
-                        catch
+                        catch (Exception ex)
                         {
-                            // ignore
+                            System.Diagnostics.Trace.TraceWarning(ex.ToString());
                         }
 
                         _socketFuturesStreamA = null;
@@ -342,18 +342,18 @@ namespace OsEngine.Market.Servers.MoexFixFastTwimeFutures
                         {
                             _socketOptionsStreamA.Close();
                         }
-                        catch
+                        catch (Exception ex)
                         {
-                            // ignore
+                            System.Diagnostics.Trace.TraceWarning(ex.ToString());
                         }
 
                         try
                         {
                             _socketOptionsStreamB.Close();
                         }
-                        catch
+                        catch (Exception ex)
                         {
-                            // ignore
+                            System.Diagnostics.Trace.TraceWarning(ex.ToString());
                         }
 
                         _socketOptionsStreamA = null;
@@ -370,18 +370,18 @@ namespace OsEngine.Market.Servers.MoexFixFastTwimeFutures
                         {
                             _tradesIncrementalSocketA.Close();
                         }
-                        catch
+                        catch (Exception ex)
                         {
-                            // ignore
+                            System.Diagnostics.Trace.TraceWarning(ex.ToString());
                         }
 
                         try
                         {
                             _tradesIncrementalSocketB.Close();
                         }
-                        catch
+                        catch (Exception ex)
                         {
-                            // ignore
+                            System.Diagnostics.Trace.TraceWarning(ex.ToString());
                         }
 
                         _tradesIncrementalSocketA = null;
@@ -397,18 +397,18 @@ namespace OsEngine.Market.Servers.MoexFixFastTwimeFutures
                         {
                             _tradesSnapshotSocketA.Close();
                         }
-                        catch
+                        catch (Exception ex)
                         {
-                            // ignore
+                            System.Diagnostics.Trace.TraceWarning(ex.ToString());
                         }
 
                         try
                         {
                             _tradesSnapshotSocketB.Close();
                         }
-                        catch
+                        catch (Exception ex)
                         {
-                            // ignore
+                            System.Diagnostics.Trace.TraceWarning(ex.ToString());
                         }
 
                         _tradesSnapshotSocketA = null;
@@ -425,18 +425,18 @@ namespace OsEngine.Market.Servers.MoexFixFastTwimeFutures
                         {
                             _ordersIncrementalSocketA.Close();
                         }
-                        catch
+                        catch (Exception ex)
                         {
-                            // ignore
+                            System.Diagnostics.Trace.TraceWarning(ex.ToString());
                         }
 
                         try
                         {
                             _ordersIncrementalSocketB.Close();
                         }
-                        catch
+                        catch (Exception ex)
                         {
-                            // ignore
+                            System.Diagnostics.Trace.TraceWarning(ex.ToString());
                         }
 
                         _ordersIncrementalSocketA = null;
@@ -452,18 +452,18 @@ namespace OsEngine.Market.Servers.MoexFixFastTwimeFutures
                         {
                             _ordersSnapshotSocketA.Close();
                         }
-                        catch
+                        catch (Exception ex)
                         {
-                            // ignore
+                            System.Diagnostics.Trace.TraceWarning(ex.ToString());
                         }
 
                         try
                         {
                             _ordersSnapshotSocketB.Close();
                         }
-                        catch
+                        catch (Exception ex)
                         {
-                            // ignore
+                            System.Diagnostics.Trace.TraceWarning(ex.ToString());
                         }
 
                         _ordersSnapshotSocketA = null;
@@ -483,9 +483,9 @@ namespace OsEngine.Market.Servers.MoexFixFastTwimeFutures
 
                             _TwimeTradeStream.Write(termMsg, 0, termMsg.Length);
                         }
-                        catch
+                        catch (Exception ex)
                         {
-                            // ignore
+                            System.Diagnostics.Trace.TraceWarning(ex.ToString());
                         }
 
                         while (_TwimeTcpClient != null || _TwimeTradeStream != null)
@@ -506,9 +506,9 @@ namespace OsEngine.Market.Servers.MoexFixFastTwimeFutures
                             SendFIXTradeMessage(logout);
                             _logoutInitiator = true;
                         }
-                        catch
+                        catch (Exception ex)
                         {
-                            // ignore
+                            System.Diagnostics.Trace.TraceWarning(ex.ToString());
                         }
 
                         while (_fixTradeTcpClient != null || _fixTradeStream != null)
@@ -2233,18 +2233,18 @@ namespace OsEngine.Market.Servers.MoexFixFastTwimeFutures
                                     {
                                         _ordersSnapshotSocketA.Close();
                                     }
-                                    catch
+                                    catch (Exception ex)
                                     {
-                                        // ignore
+                                        System.Diagnostics.Trace.TraceWarning(ex.ToString());
                                     }
 
                                     try
                                     {
                                         _ordersSnapshotSocketB.Close();
                                     }
-                                    catch
+                                    catch (Exception ex)
                                     {
-                                        // ignore
+                                        System.Diagnostics.Trace.TraceWarning(ex.ToString());
                                     }
 
                                     _ordersSnapshotSocketA = null;
