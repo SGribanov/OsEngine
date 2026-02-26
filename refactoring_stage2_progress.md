@@ -11204,3 +11204,26 @@
 - Host-context verification (outside sandbox):
   - `dotnet vstest project/OsEngine.Tests/bin/Release/net10.0-windows/OsEngine.Tests.dll` -> passed `352/352`
   - `dotnet build ... --no-restore` remains environment-sensitive in sandbox due NuGet TLS (`NU1301`).
+
+## 2026-02-26 - Step 0.3 (silent-catch visibility) - ServerCandleStorage + MetaTrader5 catch logging hardening block
+
+- Added explicit exception visibility for previously silent catch blocks in:
+  - `project/OsEngine/Market/Servers/ServerCandleStorage.cs`
+  - `project/OsEngine/Market/Servers/MetaTrader5/MetaTrader5Server.cs`
+- Changes:
+  - bare `catch` blocks with `// ignore` / `//ignore` converted to `catch (Exception ex)`.
+  - logging routed to available context logger:
+    - `SendNewLogMessage(ex.ToString(), LogMessageType.Error)` in `ServerCandleStorage`.
+    - `SendLogMessage(ex.ToString(), LogMessageType.Error)` in `MetaTrader5Server`.
+  - preserved existing branch control flow.
+- Scope:
+  - observability-only hardening
+  - no behavior changes on successful paths.
+
+### Verification
+
+- Host-context verification (outside sandbox):
+  - `dotnet restore project/OsEngine/OsEngine.csproj --nologo` -> success
+  - `dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo` -> success
+  - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` -> success
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo -p:IsTestProject=true --settings .coverage.runsettings` -> passed `360/360`
