@@ -12893,3 +12893,21 @@
   - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` succeeded (`391/391`).
 - **Commit:** n/a (not committed in this session)
 - **Push:** n/a
+
+### Step 2.2 - InvariantCulture Coverage (Incremental Adoption #584)
+
+- **Status:** In Progress (increment completed)
+- **Plan item:** `refactoring_stage2_plan.md` -> Phase 2 / Step 2.2
+- **Changes:**
+  - Added test coverage for `Order` persistence parsing:
+    - `project/OsEngine.Tests/OrderPersistenceTests.cs`
+  - Added roundtrip test for `GetStringForSave` / `SetOrderFromString` including trade and cancel metadata fields.
+  - Added legacy RU datetime parse test to lock fallback behavior in `SetOrderFromString`.
+- **Verification:**
+  - Executed outside sandbox.
+  - `dotnet restore project/OsEngine/OsEngine.csproj --nologo` succeeded.
+  - `dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo` succeeded.
+  - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` succeeded (0 warnings, 0 errors).
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` succeeded (`393/393`).
+- **Commit:** n/a (not committed in this session)
+- **Push:** n/a
