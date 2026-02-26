@@ -1074,7 +1074,7 @@ namespace OsEngine.Market.Servers.Binance.Spot
             {
                 Thread.Sleep(1000); // do not remove! RateGate does not help in CreateQuery
 
-                string timeStamp = TimeManager.GetUnixTimeStampMilliseconds().ToString();
+                string timeStamp = TimeManager.GetUnixTimeStampMilliseconds().ToString(CultureInfo.InvariantCulture);
                 Dictionary<string, string> param = new Dictionary<string, string>();
 
                 if (startTime != new DateTime() && endTime != new DateTime())
@@ -2447,7 +2447,7 @@ namespace OsEngine.Market.Servers.Binance.Spot
                     {
                         param.Add("&timeInForce=", "GTC");
                     }
-                    param.Add("&newClientOrderId=", "x-RKXTQ2AK" + order.NumberUser.ToString());
+                    param.Add("&newClientOrderId=", "x-RKXTQ2AK" + order.NumberUser.ToString(CultureInfo.InvariantCulture));
 
                     if (order.PositionConditionType == OrderPositionConditionType.Open)
                     {
@@ -2508,7 +2508,7 @@ namespace OsEngine.Market.Servers.Binance.Spot
                     {
                         param.Add("&timeInForce=", "GTC");
                     }
-                    param.Add("&newClientOrderId=", "x-RKXTQ2AK" + order.NumberUser.ToString());
+                    param.Add("&newClientOrderId=", "x-RKXTQ2AK" + order.NumberUser.ToString(CultureInfo.InvariantCulture));
                     param.Add("&quantity=",
                         order.Volume.ToString(CultureInfo.InvariantCulture)
                             .Replace(CultureInfo.InvariantCulture.NumberFormat.NumberDecimalSeparator, "."));
@@ -2664,8 +2664,9 @@ namespace OsEngine.Market.Servers.Binance.Spot
                     }
                 }
 
+                string oldOrderNumberUser = oldOrder.NumberUser.ToString(CultureInfo.InvariantCulture);
                 HistoryOrderReport orderOnBoard =
-                    allOrders.Find(ord => ord.clientOrderId.Replace("x-RKXTQ2AK", "") == oldOrder.NumberUser.ToString());
+                    allOrders.Find(ord => ord.clientOrderId.Replace("x-RKXTQ2AK", "") == oldOrderNumberUser);
 
                 if (orderOnBoard == null)
                 {

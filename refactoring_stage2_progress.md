@@ -10844,3 +10844,21 @@
   - `dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo` -> success
   - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` -> success (0 warnings, 0 errors)
   - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed `352/352`
+
+## 2026-02-26 - Step 2.2 (CultureInfo.InvariantCulture) - Binance Spot timestamp/clientOrderId formatting hardening block
+
+- Standardized invariant formatting in Binance Spot protocol request paths:
+  - `project/OsEngine/Market/Servers/Binance/Spot/BinanceServerSpot.cs`
+- Changes:
+  - `TimeManager.GetUnixTimeStampMilliseconds().ToString()` -> `ToString(CultureInfo.InvariantCulture)`.
+  - `order.NumberUser.ToString()` -> `order.NumberUser.ToString(CultureInfo.InvariantCulture)` for `newClientOrderId` generation.
+  - historical order matching now compares against precomputed invariant `oldOrderNumberUser` string.
+- Scope:
+  - protocol timestamp/client-order-id serialization determinism hardening only
+  - runtime behavior unchanged for valid payloads.
+
+### Verification
+
+- Host-context verification (outside sandbox):
+  - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` -> success (0 warnings, 0 errors)
+  - `dotnet vstest project/OsEngine.Tests/bin/Release/net10.0-windows/OsEngine.Tests.dll` -> passed `352/352`
