@@ -11485,3 +11485,23 @@
   - `dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo` -> success
   - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` -> success, 0 warnings, 0 errors
   - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed `391/391`
+
+## 2026-02-26 - Step 0.3 (silent-catch visibility) - PlazaServer catch logging hardening block
+
+- Added explicit exception visibility for remaining bare catches in:
+  - `project/OsEngine/Market/Servers/Plaza/PlazaServer.cs`
+- Changes:
+  - replaced outer and nested bare catches in listener/publisher reconnect/dispose flows with explicit `Exception` handling.
+  - routed diagnostics to existing connector logger (`SendLogMessage(..., LogMessageType.System)`).
+  - preserved existing reconnect/dispose control flow and non-throwing behavior.
+- Scope:
+  - observability-only hardening
+  - no behavior changes on successful paths.
+
+### Verification
+
+- Host-context verification (outside sandbox):
+  - `dotnet restore project/OsEngine/OsEngine.csproj --nologo` -> success
+  - `dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo` -> success
+  - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` -> success, 0 warnings, 0 errors
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed `391/391`

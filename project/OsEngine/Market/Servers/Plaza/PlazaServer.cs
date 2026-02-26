@@ -714,17 +714,18 @@ namespace OsEngine.Market.Servers.Plaza
                     }
                 }
             }
-            catch
+            catch (Exception ex)
             {
+                SendLogMessage($"CheckListnerInfo failed: {ex.Message}", LogMessageType.System);
                 if (_listenerInfo != null)
                 {
                     try
                     {
                         _listenerInfo.Dispose();
                     }
-                    catch
+                    catch (Exception innerEx)
                     {
-                        // ignore
+                        SendLogMessage($"CheckListnerInfo dispose failed: {innerEx.Message}", LogMessageType.System);
                     }
                 }
 
@@ -812,9 +813,9 @@ namespace OsEngine.Market.Servers.Plaza
                     {
                         _listenerPortfolio.Dispose();
                     }
-                    catch
+                    catch (Exception innerEx)
                     {
-                        // ignore
+                        SendLogMessage($"CheckListnerPortfolio dispose failed: {innerEx.Message}", LogMessageType.System);
                     }
                 }
 
@@ -894,17 +895,18 @@ namespace OsEngine.Market.Servers.Plaza
                     }
                 }
             }
-            catch
+            catch (Exception ex)
             {
+                SendLogMessage($"CheckListnerPosition failed: {ex.Message}", LogMessageType.System);
                 if (_listenerPosition != null)
                 {
                     try
                     {
                         _listenerPosition.Dispose();
                     }
-                    catch
+                    catch (Exception innerEx)
                     {
-                        // ignore
+                        SendLogMessage($"CheckListnerPosition dispose failed: {innerEx.Message}", LogMessageType.System);
                     }
                 }
 
@@ -983,17 +985,18 @@ namespace OsEngine.Market.Servers.Plaza
                 }
 
             }
-            catch
+            catch (Exception ex)
             {
+                SendLogMessage($"CheckListnerTrades failed: {ex.Message}", LogMessageType.System);
                 if (_listenerTrade != null)
                 {
                     try
                     {
                         _listenerTrade.Dispose();
                     }
-                    catch
+                    catch (Exception innerEx)
                     {
-                        // ignore
+                        SendLogMessage($"CheckListnerTrades dispose failed: {innerEx.Message}", LogMessageType.System);
                     }
                 }
 
@@ -1058,17 +1061,18 @@ namespace OsEngine.Market.Servers.Plaza
                     _listenerMarketDepth.Open("mode=snapshot+online");
                 }
             }
-            catch
+            catch (Exception ex)
             {
+                SendLogMessage($"CheckListnerMarketDepth failed: {ex.Message}", LogMessageType.System);
                 if (_listenerMarketDepth != null)
                 {
                     try
                     {
                         _listenerMarketDepth.Dispose();
                     }
-                    catch
+                    catch (Exception innerEx)
                     {
-                        // ignore
+                        SendLogMessage($"CheckListnerMarketDepth dispose failed: {innerEx.Message}", LogMessageType.System);
                     }
                 }
 
@@ -1149,17 +1153,18 @@ namespace OsEngine.Market.Servers.Plaza
                     }
                 }
             }
-            catch
+            catch (Exception ex)
             {
+                SendLogMessage($"CheckListnerMyTrades failed: {ex.Message}", LogMessageType.System);
                 if (_listenerOrderAndMyDeal != null)
                 {
                     try
                     {
                         _listenerOrderAndMyDeal.Dispose();
                     }
-                    catch
+                    catch (Exception innerEx)
                     {
-                        // ignore
+                        SendLogMessage($"CheckListnerMyTrades dispose failed: {innerEx.Message}", LogMessageType.System);
                     }
                 }
 
@@ -1215,17 +1220,18 @@ namespace OsEngine.Market.Servers.Plaza
                     _listenerUserOrderBook.Open("mode=online");
                 }
             }
-            catch
+            catch (Exception ex)
             {
+                SendLogMessage($"CheckUserOrderBook failed: {ex.Message}", LogMessageType.System);
                 if (_listenerUserOrderBook != null)
                 {
                     try
                     {
                         _listenerUserOrderBook.Dispose();
                     }
-                    catch
+                    catch (Exception innerEx)
                     {
-                        // ignore
+                        SendLogMessage($"CheckUserOrderBook dispose failed: {innerEx.Message}", LogMessageType.System);
                     }
                 }
 
@@ -1290,17 +1296,18 @@ namespace OsEngine.Market.Servers.Plaza
                     _publisher = null;
                 }
             }
-            catch
+            catch (Exception ex)
             {
+                SendLogMessage($"CheckOrderSender publisher branch failed: {ex.Message}", LogMessageType.System);
                 if (_publisher != null)
                 {
                     try
                     {
                         _publisher.Dispose();
                     }
-                    catch
+                    catch (Exception innerEx)
                     {
-                        // ignore
+                        SendLogMessage($"CheckOrderSender publisher dispose failed: {innerEx.Message}", LogMessageType.System);
                     }
                 }
 
@@ -1349,17 +1356,18 @@ namespace OsEngine.Market.Servers.Plaza
                     _listenerOrderSendMirror.Open("mode=online");
                 }
             }
-            catch
+            catch (Exception ex)
             {
+                SendLogMessage($"CheckOrderSender mirror listener branch failed: {ex.Message}", LogMessageType.System);
                 if (_listenerOrderSendMirror != null)
                 {
                     try
                     {
                         _listenerOrderSendMirror.Dispose();
                     }
-                    catch
+                    catch (Exception innerEx)
                     {
-                        // ignore
+                        SendLogMessage($"CheckOrderSender mirror dispose failed: {innerEx.Message}", LogMessageType.System);
                     }
                 }
 
