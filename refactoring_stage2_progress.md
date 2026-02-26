@@ -10957,3 +10957,22 @@
 - Host-context verification (outside sandbox):
   - `dotnet vstest project/OsEngine.Tests/bin/Release/net10.0-windows/OsEngine.Tests.dll` -> passed `352/352`
   - `dotnet build ... --no-restore` remains environment-sensitive in sandbox due NuGet TLS (`NU1301`).
+
+## 2026-02-26 - Step 0.3 (silent-catch visibility) - CoinEx Spot/Futures catch logging hardening block
+
+- Added explicit exception visibility for previously silent catch blocks in:
+  - `project/OsEngine/Market/Servers/CoinEx/Spot/CoinExServerSpot.cs`
+  - `project/OsEngine/Market/Servers/CoinEx/Futures/CoinExServerFutures.cs`
+- Changes:
+  - bare `catch { // ignore }` converted to `catch (Exception ex)`.
+  - added `SendLogMessage(ex.ToString(), LogMessageType.Error)` in websocket dispose and order-id parse branches.
+  - existing branch control flow preserved (`continue/break/return`).
+- Scope:
+  - observability-only hardening
+  - no behavior changes on successful paths.
+
+### Verification
+
+- Host-context verification (outside sandbox):
+  - `dotnet vstest project/OsEngine.Tests/bin/Release/net10.0-windows/OsEngine.Tests.dll` -> passed `352/352`
+  - `dotnet build ... --no-restore` remains environment-sensitive in sandbox due NuGet TLS (`NU1301`).
