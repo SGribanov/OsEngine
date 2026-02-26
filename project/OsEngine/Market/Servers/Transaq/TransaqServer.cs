@@ -820,8 +820,9 @@ namespace OsEngine.Market.Servers.Transaq
                         {
                             pointCost = securityData.Point_cost.ToDecimal();
                         }
-                        catch
+                        catch (Exception ex)
                         {
+                            SendLogMessage($"Point_cost parse fallback for '{securityData.Point_cost}'. {ex.Message}", LogMessageType.System);
                             decimal.TryParse(securityData.Point_cost, NumberStyles.Float, CultureInfo.InvariantCulture, out pointCost);
                         }
 

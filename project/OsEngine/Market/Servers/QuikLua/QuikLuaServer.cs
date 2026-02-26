@@ -1402,9 +1402,9 @@ namespace OsEngine.Market.Servers.QuikLua
                             newTrade.SecurityNameCode = security.Name;
                             AllHistoricalTrades.Add(newTrade);
                         }
-                        catch
+                        catch (Exception ex)
                         {
-                            // ignore	
+                            SendLogMessage($"QuikLua trade parse error in '{files[i]}': {ex.Message}", LogMessageType.System);
                         }
                     }
                 }

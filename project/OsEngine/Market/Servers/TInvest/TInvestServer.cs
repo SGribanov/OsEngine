@@ -114,9 +114,9 @@ namespace OsEngine.Market.Servers.TInvest
                     }
 
                 }
-                catch
+                catch (Exception ex)
                 {
-                    // ignore
+                    System.Diagnostics.Trace.TraceWarning($"TInvest OS description check failed: {ex.Message}");
                 }
 
                 _pollSubscribedSecurities.Clear();
@@ -325,15 +325,15 @@ namespace OsEngine.Market.Servers.TInvest
                                 streamWrapper.StreamClient.ResponseStream.ReadAllAsync();
                                 streamWrapper.StreamClient.Dispose();
                             }
-                            catch
+                            catch (Exception ex)
                             {
-                                // ignore
+                                System.Diagnostics.Trace.TraceWarning($"TInvest Dispose market stream wrapper failed: {ex.Message}");
                             }
                         }
                     }
-                    catch
+                    catch (Exception ex)
                     {
-                        // ignore
+                        System.Diagnostics.Trace.TraceWarning($"TInvest Dispose market streams loop failed: {ex.Message}");
                     }
                 }
 
@@ -343,9 +343,9 @@ namespace OsEngine.Market.Servers.TInvest
                     {
                         _cancellationTokenSource.Cancel();
                     }
-                    catch
+                    catch (Exception ex)
                     {
-                        // ignore
+                        System.Diagnostics.Trace.TraceWarning($"TInvest cancellation token cancel failed: {ex.Message}");
                     }
                 }
 
@@ -356,9 +356,9 @@ namespace OsEngine.Market.Servers.TInvest
                         _portfolioDataStream.ResponseStream.ReadAllAsync();
                         _portfolioDataStream.Dispose();
                     }
-                    catch
+                    catch (Exception ex)
                     {
-                        // ignore
+                        System.Diagnostics.Trace.TraceWarning($"TInvest portfolio stream dispose failed: {ex.Message}");
                     }
                 }
 
@@ -369,9 +369,9 @@ namespace OsEngine.Market.Servers.TInvest
                         _positionsDataStream.ResponseStream.ReadAllAsync();
                         _positionsDataStream.Dispose();
                     }
-                    catch
+                    catch (Exception ex)
                     {
-                        // ignore
+                        System.Diagnostics.Trace.TraceWarning($"TInvest positions stream dispose failed: {ex.Message}");
                     }
                 }
 
@@ -382,9 +382,9 @@ namespace OsEngine.Market.Servers.TInvest
                         _myOrderStateDataStream.ResponseStream.ReadAllAsync();
                         _myOrderStateDataStream.Dispose();
                     }
-                    catch
+                    catch (Exception ex)
                     {
-                        // ignore
+                        System.Diagnostics.Trace.TraceWarning($"TInvest order state stream dispose failed: {ex.Message}");
                     }
                 }
 
@@ -395,9 +395,9 @@ namespace OsEngine.Market.Servers.TInvest
                         _channel.Dispose();
                         _channel = null;
                     }
-                    catch
+                    catch (Exception ex)
                     {
-                        // ignore
+                        System.Diagnostics.Trace.TraceWarning($"TInvest channel dispose failed: {ex.Message}");
                     }
                 }
 
@@ -1043,9 +1043,9 @@ namespace OsEngine.Market.Servers.TInvest
                         {
                             portfolioResponse = _operationsClient.GetPortfolio(portfolioRequest, _gRpcMetadata);
                         }
-                        catch
+                        catch (Exception ex)
                         {
-                            // ignore
+                            System.Diagnostics.Trace.TraceWarning($"TInvest GetPortfolio for account failed: {ex.Message}");
                         }
 
                         if (portfolioResponse != null)
@@ -1054,9 +1054,9 @@ namespace OsEngine.Market.Servers.TInvest
                             UpdatePositionsInPortfolio(portfolioResponse);
                         }
                     }
-                    catch (Exception)
+                    catch (Exception ex)
                     {
-                        // ignore
+                        System.Diagnostics.Trace.TraceWarning($"TInvest account portfolio loop failed: {ex.Message}");
                     }
                 }
 
@@ -1146,9 +1146,9 @@ namespace OsEngine.Market.Servers.TInvest
                 string message = GetGRPCErrorMessage(ex);
                 SendLogMessage($"Error getting positions in portfolio. Info: {message}", LogMessageType.System);
             }
-            catch
+            catch (Exception ex)
             {
-                SendLogMessage("Error getting positions in portfolio", LogMessageType.System);
+                SendLogMessage($"Error getting positions in portfolio. {ex.Message}", LogMessageType.System);
             }
 
             // переменные для учёта позиций
@@ -1944,9 +1944,9 @@ namespace OsEngine.Market.Servers.TInvest
                         _portfolioDataStream.ResponseStream.ReadAllAsync();
                         _portfolioDataStream.Dispose();
                     }
-                    catch
+                    catch (Exception ex)
                     {
-                        // ignore
+                        System.Diagnostics.Trace.TraceWarning($"TInvest reconnect portfolio stream dispose failed: {ex.Message}");
                     }
                 }
 
@@ -1961,8 +1961,9 @@ namespace OsEngine.Market.Servers.TInvest
                         headers: _gRpcMetadata, cancellationToken: _cancellationTokenSource.Token);
                 _lastPortfolioDataTime = DateTime.UtcNow;
             }
-            catch
+            catch (Exception ex)
             {
+                System.Diagnostics.Trace.TraceWarning($"TInvest TryReconnectPortfolioStream failed: {ex.Message}");
                 return false;
             }
 
@@ -1970,9 +1971,9 @@ namespace OsEngine.Market.Servers.TInvest
             {
                 GetPortfolios();
             }
-            catch
+            catch (Exception ex)
             {
-                // ignore
+                System.Diagnostics.Trace.TraceWarning($"TInvest GetPortfolios after portfolio reconnect failed: {ex.Message}");
             }
 
             return true;
@@ -1999,9 +2000,9 @@ namespace OsEngine.Market.Servers.TInvest
                         _positionsDataStream.ResponseStream.ReadAllAsync();
                         _positionsDataStream.Dispose();
                     }
-                    catch
+                    catch (Exception ex)
                     {
-                        // ignore
+                        System.Diagnostics.Trace.TraceWarning($"TInvest reconnect positions stream dispose failed: {ex.Message}");
                     }
                 }
 
@@ -2024,8 +2025,9 @@ namespace OsEngine.Market.Servers.TInvest
 
                 _lastPositionsDataTime = DateTime.UtcNow;
             }
-            catch
+            catch (Exception ex)
             {
+                System.Diagnostics.Trace.TraceWarning($"TInvest TryReconnectPositionsStream failed: {ex.Message}");
                 return false;
             }
 
@@ -2033,9 +2035,9 @@ namespace OsEngine.Market.Servers.TInvest
             {
                 GetPortfolios();
             }
-            catch
+            catch (Exception ex)
             {
-                // ignore
+                System.Diagnostics.Trace.TraceWarning($"TInvest GetPortfolios after positions reconnect failed: {ex.Message}");
             }
 
             return true;
@@ -2062,9 +2064,9 @@ namespace OsEngine.Market.Servers.TInvest
                         _myOrderStateDataStream.ResponseStream.ReadAllAsync();
                         _myOrderStateDataStream.Dispose();
                     }
-                    catch
+                    catch (Exception ex)
                     {
-                        // ignore
+                        System.Diagnostics.Trace.TraceWarning($"TInvest reconnect orders stream dispose failed: {ex.Message}");
                     }
                 }
 
@@ -2080,8 +2082,9 @@ namespace OsEngine.Market.Servers.TInvest
                 }, headers: _gRpcMetadata, cancellationToken: _cancellationTokenSource.Token);
 
             }
-            catch
+            catch (Exception ex)
             {
+                System.Diagnostics.Trace.TraceWarning($"TInvest TryReconnectOrdersStream failed: {ex.Message}");
                 return false;
             }
 
@@ -2102,9 +2105,9 @@ namespace OsEngine.Market.Servers.TInvest
                             streamWrapper.StreamClient.ResponseStream.ReadAllAsync();
                             streamWrapper.StreamClient.Dispose();
                         }
-                        catch
+                        catch (Exception ex)
                         {
-                            // ignore
+                            System.Diagnostics.Trace.TraceWarning($"TInvest reconnect market data stream dispose failed: {ex.Message}");
                         }
                     }
 
@@ -2174,8 +2177,9 @@ namespace OsEngine.Market.Servers.TInvest
                     }
                 }
             }
-            catch
+            catch (Exception ex)
             {
+                System.Diagnostics.Trace.TraceWarning($"TInvest TryReconnectDataStream failed: {ex.Message}");
                 return false;
             }
 
