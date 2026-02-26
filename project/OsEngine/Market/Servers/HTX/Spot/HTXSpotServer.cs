@@ -943,9 +943,9 @@ namespace OsEngine.Market.Servers.HTX.Spot
                         webSocketPublic = null;
                     }
                 }
-                catch
+                catch (Exception ex)
                 {
-                    // ignore
+                    SendLogMessage(ex.ToString(), LogMessageType.Error);
                 }
 
                 _webSocketPublic.Clear();
@@ -961,9 +961,9 @@ namespace OsEngine.Market.Servers.HTX.Spot
                     _webSocketPrivate.OnClose -= webSocketPrivate_OnClose;
                     _webSocketPrivate.CloseAsync();
                 }
-                catch
+                catch (Exception ex)
                 {
-                    // ignore
+                    SendLogMessage(ex.ToString(), LogMessageType.Error);
                 }
 
                 _webSocketPrivate = null;
@@ -1488,9 +1488,9 @@ namespace OsEngine.Market.Servers.HTX.Spot
                     _webSocketPrivate.SendAsync($"{{\"action\": \"unsub\",\"ch\": \"{chOrders}\"}}");
                     _webSocketPrivate.SendAsync($"{{\"action\": \"unsub\",\"ch\": \"{chTrades}\"}}");
                 }
-                catch
+                catch (Exception ex)
                 {
-                    // ignore
+                    SendLogMessage(ex.ToString(), LogMessageType.Error);
                 }
             }
         }
@@ -1934,9 +1934,9 @@ namespace OsEngine.Market.Servers.HTX.Spot
                             string numUser = numberFull.Replace("AAe2ccbd47", "");
                             newOrder.NumberUser = Convert.ToInt32(numUser, CultureInfo.InvariantCulture);
                         }
-                        catch
+                        catch (Exception ex)
                         {
-                            // ignore
+                            SendLogMessage(ex.ToString(), LogMessageType.Error);
                         }
                     }
 
@@ -2027,9 +2027,9 @@ namespace OsEngine.Market.Servers.HTX.Spot
                             string numUser = numberFull.Replace("AAe2ccbd47", "");
                             newOrder.NumberUser = Convert.ToInt32(numUser, CultureInfo.InvariantCulture);
                         }
-                        catch
+                        catch (Exception ex)
                         {
-                            // ignore
+                            SendLogMessage(ex.ToString(), LogMessageType.Error);
                         }
                     }
 
@@ -2368,9 +2368,9 @@ namespace OsEngine.Market.Servers.HTX.Spot
                                         string numUser = numberFull.Replace("AAe2ccbd47", "");
                                         newOrder.NumberUser = Convert.ToInt32(numUser, CultureInfo.InvariantCulture);
                                     }
-                                    catch
+                                    catch (Exception ex)
                                     {
-                                        // ignore
+                                        SendLogMessage(ex.ToString(), LogMessageType.Error);
                                     }
                                 }
 
@@ -2567,9 +2567,9 @@ namespace OsEngine.Market.Servers.HTX.Spot
                             string numUser = numberFull.Replace("AAe2ccbd47", "");
                             newOrder.NumberUser = Convert.ToInt32(numUser, CultureInfo.InvariantCulture);
                         }
-                        catch
+                        catch (Exception ex)
                         {
-                            // ignore
+                            SendLogMessage(ex.ToString(), LogMessageType.Error);
                         }
                     }
 
@@ -2811,9 +2811,9 @@ namespace OsEngine.Market.Servers.HTX.Spot
                                         string numUser = numberFull.Replace("AAe2ccbd47", "");
                                         newOrder.NumberUser = Convert.ToInt32(numUser, CultureInfo.InvariantCulture);
                                     }
-                                    catch
+                                    catch (Exception ex)
                                     {
-                                        // ignore
+                                        SendLogMessage(ex.ToString(), LogMessageType.Error);
                                     }
                                 }
 
@@ -3046,3 +3046,4 @@ namespace OsEngine.Market.Servers.HTX.Spot
         #endregion
     }
 }
+

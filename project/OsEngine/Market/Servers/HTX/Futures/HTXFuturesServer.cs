@@ -768,9 +768,9 @@ namespace OsEngine.Market.Servers.HTX.Futures
                         webSocketPublic = null;
                     }
                 }
-                catch
+                catch (Exception ex)
                 {
-                    // ignore
+                    SendLogMessage(ex.ToString(), LogMessageType.Error);
                 }
 
                 _webSocketPublic.Clear();
@@ -786,9 +786,9 @@ namespace OsEngine.Market.Servers.HTX.Futures
                     _webSocketPrivate.OnClose -= webSocketPrivate_OnClose;
                     _webSocketPrivate.CloseAsync();
                 }
-                catch
+                catch (Exception ex)
                 {
-                    // ignore
+                    SendLogMessage(ex.ToString(), LogMessageType.Error);
                 }
 
                 _webSocketPrivate = null;
@@ -1294,9 +1294,9 @@ namespace OsEngine.Market.Servers.HTX.Futures
                     _webSocketPrivate.SendAsync($"{{\"action\": \"unsub\",\"ch\": \"{channelPositions}\"}}");
 
                 }
-                catch
+                catch (Exception ex)
                 {
-                    // ignore
+                    SendLogMessage(ex.ToString(), LogMessageType.Error);
                 }
             }
         }
@@ -1716,9 +1716,9 @@ namespace OsEngine.Market.Servers.HTX.Futures
                 {
                     newOrder.NumberUser = Convert.ToInt32(response.client_order_id, CultureInfo.InvariantCulture);
                 }
-                catch
+                catch (Exception ex)
                 {
-                    // ignore
+                    SendLogMessage(ex.ToString(), LogMessageType.Error);
                 }
 
                 newOrder.NumberMarket = response.order_id.ToString();
@@ -2100,9 +2100,9 @@ namespace OsEngine.Market.Servers.HTX.Futures
                                 {
                                     newOrder.NumberUser = Convert.ToInt32(item[i].client_order_id, CultureInfo.InvariantCulture);
                                 }
-                                catch
+                                catch (Exception ex)
                                 {
-                                    // ignore
+                                    SendLogMessage(ex.ToString(), LogMessageType.Error);
                                 }
 
                                 newOrder.NumberMarket = item[i].order_id.ToString();
@@ -2242,9 +2242,9 @@ namespace OsEngine.Market.Servers.HTX.Futures
                             {
                                 newOrder.NumberUser = Convert.ToInt32(item[0].client_order_id, CultureInfo.InvariantCulture);
                             }
-                            catch
+                            catch (Exception ex)
                             {
-                                // ignore
+                                SendLogMessage(ex.ToString(), LogMessageType.Error);
                             }
 
                             newOrder.NumberMarket = item[0].order_id.ToString();
@@ -2501,3 +2501,4 @@ namespace OsEngine.Market.Servers.HTX.Futures
         #endregion
     }
 }
+

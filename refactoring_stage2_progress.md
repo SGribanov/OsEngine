@@ -10881,3 +10881,22 @@
 - Host-context verification (outside sandbox):
   - `dotnet vstest project/OsEngine.Tests/bin/Release/net10.0-windows/OsEngine.Tests.dll` -> passed `352/352`
   - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release` -> blocked in sandbox by external NuGet TLS error (`NU1301`, `SEC_E_NO_CREDENTIALS`).
+
+## 2026-02-26 - Step 0.3 (silent-catch visibility) - HTX Spot/Futures catch logging hardening block
+
+- Added explicit exception visibility for previously silent catch blocks in:
+  - `project/OsEngine/Market/Servers/HTX/Spot/HTXSpotServer.cs`
+  - `project/OsEngine/Market/Servers/HTX/Futures/HTXFuturesServer.cs`
+- Changes:
+  - bare `catch { // ignore }` and `catch (Exception) { //ignore }` converted to `catch (Exception ex)`.
+  - added `SendLogMessage(ex.ToString(), LogMessageType.Error)` in socket-dispose and order-sync parse paths.
+  - existing control flow preserved (`continue/break/return` semantics unchanged).
+- Scope:
+  - observability-only hardening
+  - no behavior changes on successful execution paths.
+
+### Verification
+
+- Host-context verification (outside sandbox):
+  - `dotnet vstest project/OsEngine.Tests/bin/Release/net10.0-windows/OsEngine.Tests.dll` -> passed `352/352`
+  - `dotnet build ... --no-restore` remains environment-sensitive due NuGet TLS in sandbox (`NU1301`), so regression check used test-assembly run.
