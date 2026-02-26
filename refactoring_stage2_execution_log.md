@@ -12260,3 +12260,20 @@
   - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release` blocked by environment NuGet TLS failure (`NU1301`, `SEC_E_NO_CREDENTIALS`).
 - **Commit:** n/a (not committed in this session)
 - **Push:** n/a
+
+### Step 0.3 - Silent Catch Visibility (Incremental Adoption #549)
+
+- **Status:** In Progress (increment completed)
+- **Plan item:** `refactoring_stage2_plan.md` -> Phase 0 / Step 0.3
+- **Changes:**
+  - Added logging for previously silent catches in:
+    - `project/OsEngine/Market/Servers/HTX/Spot/HTXSpotServer.cs`
+    - `project/OsEngine/Market/Servers/HTX/Futures/HTXFuturesServer.cs`
+  - Replaced bare `catch` / `catch (Exception)` with `catch (Exception ex)` and `SendLogMessage(ex.ToString(), LogMessageType.Error)`.
+  - Preserved original control flow in affected branches.
+- **Verification:**
+  - Executed outside sandbox.
+  - `dotnet vstest project/OsEngine.Tests/bin/Release/net10.0-windows/OsEngine.Tests.dll` succeeded (`352/352`).
+  - `dotnet build ... --no-restore` remains blocked intermittently by sandbox TLS/NuGet (`NU1301`).
+- **Commit:** n/a (not committed in this session)
+- **Push:** n/a
