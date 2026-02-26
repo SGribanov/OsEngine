@@ -10821,3 +10821,26 @@
   - `dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo` -> success
   - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` -> success (0 warnings, 0 errors)
   - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed `352/352`
+
+## 2026-02-26 - Step 0.3 (silent-catch visibility) - NonTradePeriods and OptimizerDataStorage logging hardening block
+
+- Added explicit exception visibility for previously silent catch blocks in:
+  - `project/OsEngine/Entity/NonTradePeriods.cs`
+  - `project/OsEngine/Market/Servers/Optimizer/OptimizerDataStorage.cs`
+- Changes in `NonTradePeriods.cs`:
+  - Replaced `catch { }` with `catch (Exception ex)` and `Trace.TraceWarning(ex.ToString())` in legacy-load/delete paths.
+  - Added `using System.Diagnostics;`.
+- Changes in `OptimizerDataStorage.cs`:
+  - Replaced remaining bare `catch` blocks with `catch (Exception ex)`.
+  - Added `SendLogMessage(ex.ToString(), LogMessageType.Error);` while preserving prior control flow (`continue`, `break`, `remove`).
+- Scope:
+  - observability-only hardening
+  - no behavioral changes for successful paths.
+
+### Verification
+
+- Host-context verification (outside sandbox):
+  - `dotnet restore project/OsEngine/OsEngine.csproj --nologo` -> success
+  - `dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo` -> success
+  - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` -> success (0 warnings, 0 errors)
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed `352/352`

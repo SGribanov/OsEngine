@@ -1236,8 +1236,9 @@ namespace OsEngine.Market.Servers.Optimizer
                     trade2.SetMarketDepthFromString(lastString2);
                     security[security.Count - 1].TimeEnd = trade2.Time;
                 }
-                catch
+                catch (Exception ex)
                 {
+                    SendLogMessage(ex.ToString(), LogMessageType.Error);
                     security.Remove(security[security.Count - 1]);
                 }
             }
@@ -1461,9 +1462,9 @@ namespace OsEngine.Market.Servers.Optimizer
                     fileName,
                     SecuritiesTester.ConvertAll(security => security.Security.Name + "#" + security.TimeFrame));
             }
-            catch
+            catch (Exception ex)
             {
-                // ignored
+                SendLogMessage(ex.ToString(), LogMessageType.Error);
             }
         }
 
@@ -1524,9 +1525,9 @@ namespace OsEngine.Market.Servers.Optimizer
                     }
                 }
             }
-            catch
+            catch (Exception ex)
             {
-                // ignored
+                SendLogMessage(ex.ToString(), LogMessageType.Error);
             }
 
         }
@@ -1922,9 +1923,9 @@ namespace OsEngine.Market.Servers.Optimizer
                             candle.SetCandleFromString(reader.ReadLine());
                             candle.State = CandleState.Finished;
                         }
-                        catch
+                        catch (Exception ex)
                         {
-                            //SendLogMessage(OsLocalization.Market.Message31 + sec.FileAdress, LogMessageType.Error);
+                            SendLogMessage(ex.ToString(), LogMessageType.Error);
                             continue;
                         }
                         if (candle.TimeStart < timeStart)
@@ -1987,8 +1988,9 @@ namespace OsEngine.Market.Servers.Optimizer
                         trade.IdInTester = _tradesId++;
                         trade.SecurityNameCode = security.Name;
                     }
-                    catch
+                    catch (Exception ex)
                     {
+                        SendLogMessage(ex.ToString(), LogMessageType.Error);
                         SendLogMessage(OsLocalization.Market.Message31 + sec.FileAddress, LogMessageType.Error);
                         break;
                     }
@@ -2048,8 +2050,9 @@ namespace OsEngine.Market.Servers.Optimizer
                         depth.SetMarketDepthFromString(reader.ReadLine());
                         depth.SecurityNameCode = sec.Security.Name;
                     }
-                    catch
+                    catch (Exception ex)
                     {
+                        SendLogMessage(ex.ToString(), LogMessageType.Error);
                         SendLogMessage(OsLocalization.Market.Message31 + sec.FileAddress, LogMessageType.Error);
                         break;
                     }

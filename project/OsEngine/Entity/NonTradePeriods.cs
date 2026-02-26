@@ -7,6 +7,7 @@ using OsEngine.Logging;
 using OsEngine.Market;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 
 #nullable enable
@@ -229,9 +230,9 @@ namespace OsEngine.Entity
                 NonTradePeriodSaturday.LoadFromString(array[7]);
                 NonTradePeriodSunday.LoadFromString(array[8]);
             }
-            catch
+            catch (Exception ex)
             {
-                // ignore
+                Trace.TraceWarning(ex.ToString());
             }
         }
 
@@ -244,9 +245,9 @@ namespace OsEngine.Entity
                     File.Delete(GetStoragePath());
                 }
             }
-            catch
+            catch (Exception ex)
             {
-                // ignore
+                Trace.TraceWarning(ex.ToString());
             }
         }
 
@@ -913,9 +914,9 @@ namespace OsEngine.Entity
                 NonTradePeriod5End.LoadFromString(values[14]);
 
             }
-            catch
+            catch (Exception ex)
             {
-                // ignore
+                Trace.TraceWarning(ex.ToString());
             }
         }
 
