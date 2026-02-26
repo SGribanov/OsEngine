@@ -255,9 +255,9 @@ namespace OsEngine.Market.Servers.InteractiveBrokers
                     defaultValue: null,
                     legacyLoader: ParseLegacyIbSecurities);
             }
-            catch
+            catch (Exception ex)
             {
-                // ignored
+                SendLogMessage(ex.ToString(), LogMessageType.Error);
             }
 
             if (settings == null || settings.Securities == null || settings.Securities.Count == 0)

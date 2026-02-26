@@ -1157,9 +1157,9 @@ namespace OsEngine.Market.Servers.KiteConnect
                         _listWebSocket[i].OnClose -= _webSocket_OnClose;
                         _listWebSocket[i].CloseAsync();
                     }
-                    catch
+                    catch (Exception ex)
                     {
-                        // ignore
+                        SendLogMessage(ex.ToString(), LogMessageType.Error);
                     }
                     _listWebSocket[i] = null;
                 }
