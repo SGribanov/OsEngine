@@ -12587,3 +12587,22 @@
   - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo -p:IsTestProject=true --settings .coverage.runsettings` succeeded (`360/360`).
 - **Commit:** n/a (not committed in this session)
 - **Push:** n/a
+
+### Step 0.3 - Silent Catch Visibility (Incremental Adoption #568)
+
+- **Status:** In Progress (increment completed)
+- **Plan item:** `refactoring_stage2_plan.md` -> Phase 0 / Step 0.3
+- **Changes:**
+  - Added logging for silent catches in:
+    - `project/OsEngine/Market/Servers/ComparePositionsModule.cs`
+    - `project/OsEngine/Market/Servers/Atp/AtpServer.cs`
+  - Replaced bare catches with `catch (Exception ex)` and `SendLogMessage(ex.ToString(), LogMessageType.Error)`.
+  - Preserved existing branch control flow.
+- **Verification:**
+  - Executed outside sandbox.
+  - `dotnet restore project/OsEngine/OsEngine.csproj --nologo` succeeded.
+  - `dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo` succeeded.
+  - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` succeeded.
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo -p:IsTestProject=true --settings .coverage.runsettings` succeeded (`360/360`).
+- **Commit:** n/a (not committed in this session)
+- **Push:** n/a
