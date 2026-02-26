@@ -12243,3 +12243,20 @@
   - `dotnet vstest project/OsEngine.Tests/bin/Release/net10.0-windows/OsEngine.Tests.dll` succeeded (`352/352`).
 - **Commit:** n/a (not committed in this session)
 - **Push:** n/a
+
+### Step 0.3 - Silent Catch Visibility (Incremental Adoption #548)
+
+- **Status:** In Progress (increment completed)
+- **Plan item:** `refactoring_stage2_plan.md` -> Phase 0 / Step 0.3
+- **Changes:**
+  - Added explicit exception logging in Binance connectors:
+    - `project/OsEngine/Market/Servers/Binance/Spot/BinanceServerSpot.cs`
+    - `project/OsEngine/Market/Servers/Binance/Futures/BinanceServerFutures.cs`
+  - Replaced remaining bare catches with `catch (Exception ex)` + `SendLogMessage(ex.ToString(), LogMessageType.Error)` while preserving existing return/continue/break semantics.
+  - For expected spot history tail condition, converted silent ignore into `System` log entry.
+- **Verification:**
+  - Executed outside sandbox.
+  - `dotnet vstest project/OsEngine.Tests/bin/Release/net10.0-windows/OsEngine.Tests.dll` succeeded (`352/352`).
+  - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release` blocked by environment NuGet TLS failure (`NU1301`, `SEC_E_NO_CREDENTIALS`).
+- **Commit:** n/a (not committed in this session)
+- **Push:** n/a
