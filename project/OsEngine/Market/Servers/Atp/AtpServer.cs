@@ -1642,15 +1642,16 @@ namespace OsEngine.Market.Servers.Atp
             {
                 order.NumberUser = Convert.ToInt32(ordArr[0], CultureInfo.InvariantCulture);
             }
-            catch
+            catch (Exception ex)
             {
+                SendLogMessage($"LoadMyOrder parse NumberUser fallback for '{ordArr[0]}': {ex.Message}", LogMessageType.System);
                 try
                 {
                     order.NumberUser = Convert.ToInt32(ordArr[1], CultureInfo.InvariantCulture);
                 }
-                catch (Exception ex)
+                catch (Exception innerEx)
                 {
-                    SendLogMessage(ex.ToString(), LogMessageType.Error);
+                    SendLogMessage(innerEx.ToString(), LogMessageType.Error);
                 }
             }
 
@@ -1913,8 +1914,9 @@ namespace OsEngine.Market.Servers.Atp
                 month = Convert.ToInt32(date.Substring(4, 2), CultureInfo.InvariantCulture);
                 day = Convert.ToInt32(date.Substring(6, 2), CultureInfo.InvariantCulture);
             }
-            catch
+            catch (Exception ex)
             {
+                SendLogMessage($"GetTimeFromStrings date parse fallback for '{date}': {ex.Message}", LogMessageType.System);
                 DateTime now = DateTime.Now;
                 year = now.Year;
                 month = now.Month;
@@ -1933,8 +1935,9 @@ namespace OsEngine.Market.Servers.Atp
                 minute = Convert.ToInt32(time.Substring(3, 2), CultureInfo.InvariantCulture);
                 second = Convert.ToInt32(time.Substring(6, 2), CultureInfo.InvariantCulture);
             }
-            catch
+            catch (Exception ex)
             {
+                SendLogMessage($"GetTimeFromStrings time parse fallback for '{time}': {ex.Message}", LogMessageType.System);
                 DateTime now = DateTime.Now;
                 hour = now.Hour;
                 minute = now.Minute;

@@ -9,6 +9,7 @@
 #pragma warning disable SYSLIB0006 // Thread.Abort is obsolete
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Globalization;
 using System.IO;
 using System.Net.Sockets;
@@ -2000,9 +2001,9 @@ namespace OsEngine.Market.Servers.InteractiveBrokers
                 }
                 else return Double.Parse(str, NumberFormatInfo.InvariantInfo);
             }
-            catch
+            catch (Exception ex)
             {
-                //SendLogMessage(error.ToString(),LogMessageType.Error);
+                Trace.TraceWarning($"IbClient.TcpReadDouble parse/read error: {ex.Message}");
                 return 0;
             }
 
@@ -2020,9 +2021,9 @@ namespace OsEngine.Market.Servers.InteractiveBrokers
                 }
                 else return Decimal.Parse(str, NumberFormatInfo.InvariantInfo);
             }
-            catch
+            catch (Exception ex)
             {
-                //SendLogMessage(error.ToString(), LogMessageType.Error);
+                Trace.TraceWarning($"IbClient.TcpReadDecimal parse/read error: {ex.Message}");
                 return 0;
             }
 
@@ -2039,9 +2040,9 @@ namespace OsEngine.Market.Servers.InteractiveBrokers
                 }
                 else return Int32.Parse(str, NumberStyles.Integer, CultureInfo.InvariantCulture);
             }
-            catch
+            catch (Exception ex)
             {
-                //SendLogMessage(error.ToString(), LogMessageType.Error);
+                Trace.TraceWarning($"IbClient.TcpReadInt parse/read error: {ex.Message}");
                 return 0;
             }
         }
@@ -2075,9 +2076,9 @@ namespace OsEngine.Market.Servers.InteractiveBrokers
                     return str.ToString();
                 }
             }
-            catch
+            catch (Exception ex)
             {
-                //SendLogMessage(error.ToString(), LogMessageType.Error);
+                Trace.TraceWarning($"IbClient.TcpReadString read error: {ex.Message}");
                 return null;
             }
         }

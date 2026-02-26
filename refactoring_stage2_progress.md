@@ -11418,3 +11418,26 @@
   - `dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo` -> success
   - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` -> success, 0 warnings, 0 errors
   - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed `391/391`
+
+## 2026-02-26 - Step 0.3 (silent-catch visibility) - Atp+FixEntity+IbClient catch logging hardening follow-up
+
+- Added explicit exception visibility for remaining bare catches in:
+  - `project/OsEngine/Market/Servers/Atp/AtpServer.cs`
+  - `project/OsEngine/Market/Servers/FixProtocolEntities/FixEntity.cs`
+  - `project/OsEngine/Market/Servers/InteractiveBrokers/IbClient.cs`
+- Changes:
+  - `catch` -> `catch (Exception ex)` in ATP order/time parsing fallbacks with system-level diagnostics.
+  - `FixEntity.GetFieldByTag` now preserves inner exception (`ArgumentException(..., ex)`).
+  - IB low-level TCP parse/read fallbacks now emit `Trace.TraceWarning(...)` and keep prior return defaults.
+  - preserved existing fallback/return control flow.
+- Scope:
+  - observability-only hardening
+  - no behavior changes on successful paths.
+
+### Verification
+
+- Host-context verification (outside sandbox):
+  - `dotnet restore project/OsEngine/OsEngine.csproj --nologo` -> success
+  - `dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo` -> success
+  - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` -> success, 0 warnings, 0 errors
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed `391/391`
