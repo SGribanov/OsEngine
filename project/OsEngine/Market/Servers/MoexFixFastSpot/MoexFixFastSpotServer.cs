@@ -952,9 +952,9 @@ namespace OsEngine.Market.Servers.MoexFixFastSpot
                         {
                             _historicalReplaySocket.Close();
                         }
-                        catch
+                        catch (Exception ex)
                         {
-                            // ignore
+                            System.Diagnostics.Trace.TraceWarning(ex.ToString());
                         }
 
                         _historicalReplaySocket = null;
@@ -970,18 +970,18 @@ namespace OsEngine.Market.Servers.MoexFixFastSpot
                         {
                             _instrumentSocketA.Close();
                         }
-                        catch
+                        catch (Exception ex)
                         {
-                            // ignore
+                            System.Diagnostics.Trace.TraceWarning(ex.ToString());
                         }
 
                         try
                         {
                             _instrumentSocketB.Close();
                         }
-                        catch
+                        catch (Exception ex)
                         {
-                            // ignore
+                            System.Diagnostics.Trace.TraceWarning(ex.ToString());
                         }
 
                         _instrumentSocketA = null;
@@ -998,18 +998,18 @@ namespace OsEngine.Market.Servers.MoexFixFastSpot
                         {
                             _tradesIncrementalSocketA.Close();
                         }
-                        catch
+                        catch (Exception ex)
                         {
-                            // ignore
+                            System.Diagnostics.Trace.TraceWarning(ex.ToString());
                         }
 
                         try
                         {
                             _tradesIncrementalSocketB.Close();
                         }
-                        catch
+                        catch (Exception ex)
                         {
-                            // ignore
+                            System.Diagnostics.Trace.TraceWarning(ex.ToString());
                         }
 
                         _tradesIncrementalSocketA = null;
@@ -1022,18 +1022,18 @@ namespace OsEngine.Market.Servers.MoexFixFastSpot
                         {
                             _tradesSnapshotSocketA.Close();
                         }
-                        catch
+                        catch (Exception ex)
                         {
-                            // ignore
+                            System.Diagnostics.Trace.TraceWarning(ex.ToString());
                         }
 
                         try
                         {
                             _tradesSnapshotSocketB.Close();
                         }
-                        catch
+                        catch (Exception ex)
                         {
-                            // ignore
+                            System.Diagnostics.Trace.TraceWarning(ex.ToString());
                         }
 
                         _tradesSnapshotSocketA = null;
@@ -1050,18 +1050,18 @@ namespace OsEngine.Market.Servers.MoexFixFastSpot
                         {
                             _ordersIncrementalSocketA.Close();
                         }
-                        catch
+                        catch (Exception ex)
                         {
-                            // ignore
+                            System.Diagnostics.Trace.TraceWarning(ex.ToString());
                         }
 
                         try
                         {
                             _ordersIncrementalSocketB.Close();
                         }
-                        catch
+                        catch (Exception ex)
                         {
-                            // ignore
+                            System.Diagnostics.Trace.TraceWarning(ex.ToString());
                         }
 
                         _ordersIncrementalSocketA = null;
@@ -1075,18 +1075,18 @@ namespace OsEngine.Market.Servers.MoexFixFastSpot
                         {
                             _ordersSnapshotSocketA.Close();
                         }
-                        catch
+                        catch (Exception ex)
                         {
-                            // ignore
+                            System.Diagnostics.Trace.TraceWarning(ex.ToString());
                         }
 
                         try
                         {
                             _ordersSnapshotSocketB.Close();
                         }
-                        catch
+                        catch (Exception ex)
                         {
-                            // ignore
+                            System.Diagnostics.Trace.TraceWarning(ex.ToString());
                         }
 
                         _ordersSnapshotSocketA = null;
@@ -3421,9 +3421,9 @@ namespace OsEngine.Market.Servers.MoexFixFastSpot
                         {
                             order.NumberUser = int.Parse(fixMessage.Fields["SecondaryClOrdID"], CultureInfo.InvariantCulture);
                         }
-                        catch
+                        catch (Exception ex)
                         {
-                            // ignore
+                            System.Diagnostics.Trace.TraceWarning(ex.ToString());
                         }
 
                         if (order.NumberUser == 0) // ищем номер пользователя по биржевому номеру
