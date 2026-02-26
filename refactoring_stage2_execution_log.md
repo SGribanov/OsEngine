@@ -12201,3 +12201,25 @@
   - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` succeeded (`352/352`).
 - **Commit:** n/a (not committed in this session)
 - **Push:** n/a
+
+### Step 0.3 - Silent Catch Visibility (Incremental Adoption #546)
+
+- **Status:** In Progress (increment completed)
+- **Plan item:** `refactoring_stage2_plan.md` -> Phase 0 / Step 0.3
+- **Changes:**
+  - Added explicit logging to previously silent catch blocks in:
+    - `project/OsEngine/Entity/NonTradePeriods.cs`
+    - `project/OsEngine/Market/Servers/Optimizer/OptimizerDataStorage.cs`
+  - In `NonTradePeriods.cs`:
+    - `catch { }` converted to `catch (Exception ex)` with `Trace.TraceWarning(ex.ToString())`.
+  - In `OptimizerDataStorage.cs`:
+    - remaining bare catches converted to `catch (Exception ex)`.
+    - added `SendLogMessage(ex.ToString(), LogMessageType.Error)` while preserving existing branch behavior (`continue`, `break`, `remove`).
+- **Verification:**
+  - Executed outside sandbox.
+  - `dotnet restore project/OsEngine/OsEngine.csproj --nologo` succeeded.
+  - `dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo` succeeded.
+  - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` succeeded (0 warnings).
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` succeeded (`352/352`).
+- **Commit:** n/a (not committed in this session)
+- **Push:** n/a
