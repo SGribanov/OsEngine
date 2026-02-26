@@ -1003,9 +1003,9 @@ namespace OsEngine.Market.Servers.MoexAlgopack
                             return null;
                         }
                     }
-                    catch
+                    catch (Exception ex)
                     {
-                        //ignore
+                        SendLogMessage(ex.ToString(), LogMessageType.Error);
                     }
                 }
                 
@@ -1063,9 +1063,9 @@ namespace OsEngine.Market.Servers.MoexAlgopack
 
                     return null;
                 }
-                catch
+                catch (Exception ex)
                 {
-                    //ignore
+                    SendLogMessage(ex.ToString(), LogMessageType.Error);
                 }
 
                 return null;

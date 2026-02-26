@@ -1065,9 +1065,9 @@ namespace OsEngine.Market.Servers.TraderNet
                     _webSocket.OnError -= WebSocket_Error;
                     _webSocket.CloseAsync();
                 }
-                catch
+                catch (Exception ex)
                 {
-                    // ignore
+                    SendLogMessage(ex.ToString(), LogMessageType.Error);
                 }
 
                 _webSocket = null;
