@@ -2082,9 +2082,9 @@ namespace OsEngine.Market.Servers.KuCoin.KuCoinFutures
                     {
                         newOrder.NumberUser = Convert.ToInt32(item.clientOid, CultureInfo.InvariantCulture);
                     }
-                    catch
+                    catch (Exception ex)
                     {
-                        SendLogMessage("Strange order num: " + item.clientOid, LogMessageType.Error);
+                        SendLogMessage($"Strange order num: {item.clientOid}. {ex.Message}", LogMessageType.Error);
                         return;
                     }
                 }
