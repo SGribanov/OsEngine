@@ -59,9 +59,9 @@ namespace OsEngine.Market.Servers
                     File.Delete(GetNonTradePeriodsPath());
                 }
             }
-            catch
+            catch (Exception ex)
             {
-                // ignore
+                SendLogMessage(ex.ToString(), LogMessageType.System);
             }
 
             try
@@ -93,9 +93,9 @@ namespace OsEngine.Market.Servers
                     //_serverRealization = null;
                 }
             }
-            catch
+            catch (Exception ex)
             {
-                // ignore
+                SendLogMessage(ex.ToString(), LogMessageType.System);
             }
 
             try
@@ -110,9 +110,9 @@ namespace OsEngine.Market.Servers
                     _ordersHub = null;
                 }
             }
-            catch
+            catch (Exception ex)
             {
-                // ignore
+                SendLogMessage(ex.ToString(), LogMessageType.System);
             }
 
             try
@@ -124,9 +124,9 @@ namespace OsEngine.Market.Servers
                     _tickStorage = null;
                 }
             }
-            catch
+            catch (Exception ex)
             {
-                // ignore
+                SendLogMessage(ex.ToString(), LogMessageType.System);
             }
 
             try
@@ -137,9 +137,9 @@ namespace OsEngine.Market.Servers
                     _candleStorage = null;
                 }
             }
-            catch
+            catch (Exception ex)
             {
-                // ignore
+                SendLogMessage(ex.ToString(), LogMessageType.System);
             }
 
             try
@@ -149,9 +149,9 @@ namespace OsEngine.Market.Servers
                     Log.Delete();
                 }
             }
-            catch
+            catch (Exception ex)
             {
-                // ignore
+                SendLogMessage(ex.ToString(), LogMessageType.System);
             }
 
             try
@@ -162,9 +162,9 @@ namespace OsEngine.Market.Servers
                     _asyncOrdersSender = null;
                 }
             }
-            catch
+            catch (Exception ex)
             {
-                // ignore
+                SendLogMessage(ex.ToString(), LogMessageType.System);
             }
         }
 
@@ -1094,9 +1094,9 @@ namespace OsEngine.Market.Servers
                     _serverPrefix = settings.ServerPrefix;
                 }
             }
-            catch
+            catch (Exception ex)
             {
-                // ignore
+                SendLogMessage(ex.ToString(), LogMessageType.System);
             }
         }
 
@@ -1114,9 +1114,9 @@ namespace OsEngine.Market.Servers
                         ServerPrefix = _serverPrefix
                     });
             }
-            catch
+            catch (Exception ex)
             {
-                // ignore
+                SendLogMessage(ex.ToString(), LogMessageType.System);
             }
         }
 
@@ -2310,9 +2310,9 @@ namespace OsEngine.Market.Servers
                     return mySecurity;
                 }
             }
-            catch
+            catch (Exception ex)
             {
-                // ignore
+                SendLogMessage(ex.ToString(), LogMessageType.System);
             }
 
             return null;
@@ -4426,9 +4426,9 @@ namespace OsEngine.Market.Servers
             {
                 _ordersHub.ForceCheckOrdersAfterReconnect();
             }
-            catch
+            catch (Exception ex)
             {
-                // ignore
+                SendLogMessage(ex.ToString(), LogMessageType.System);
             }
         }
 

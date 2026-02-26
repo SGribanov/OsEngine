@@ -11546,3 +11546,23 @@
   - `dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo` -> success
   - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` -> success, 0 warnings, 0 errors
   - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed `391/391`
+
+## 2026-02-26 - Step 0.3 (silent-catch visibility) - AServer core catch logging hardening block
+
+- Added explicit exception visibility for remaining bare catches in:
+  - `project/OsEngine/Market/Servers/AServer.cs`
+- Changes:
+  - replaced bare `catch` blocks in server delete/dispose, settings load/save, security lookup fallback and reconnect-order-check hook with explicit exception handling.
+  - diagnostics routed to existing base-server logger: `SendLogMessage(ex.ToString(), LogMessageType.System)`.
+  - preserved existing non-throwing fallback behavior.
+- Scope:
+  - observability-only hardening
+  - no behavior changes on successful paths.
+
+### Verification
+
+- Host-context verification (outside sandbox):
+  - `dotnet restore project/OsEngine/OsEngine.csproj --nologo` -> success
+  - `dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo` -> success
+  - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` -> success, 0 warnings, 0 errors
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed `391/391`
