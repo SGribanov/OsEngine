@@ -1109,7 +1109,10 @@ namespace OsEngine.Market.Servers.TInvest
             }
             else
             {
-                // ignore
+                if(portfolioResponse.TotalAmountPortfolio != null)
+                {
+                    myPortfolio.ValueCurrent = GetValue(portfolioResponse.TotalAmountPortfolio);
+                }
             }
         }
 

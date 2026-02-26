@@ -91,6 +91,10 @@ namespace OsEngine.Language
            "Eng:Os Engine is already running from this directory. You cannot run a second one!_" +
            "Ru:Os Engine уже запущен из данной директории. Второй запускать нельзя!_");
 
+        public string NewCommits => OsLocalization.ConvertToLocString(
+         "Eng:0 commits_" +
+         "Ru:0 коммитов_");
+
     }
 }
 

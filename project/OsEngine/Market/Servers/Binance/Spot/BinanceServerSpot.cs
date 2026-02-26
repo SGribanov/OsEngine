@@ -1,28 +1,25 @@
-#nullable enable
-#pragma warning disable CS8600, CS8601, CS8602, CS8603, CS8604, CS8605, CS8618, CS8619, CS8622, CS8625, CS8629
-
-/*
+﻿/*
  *Your rights to use the code are governed by this license https://github.com/AlexWan/OsEngine/blob/master/LICENSE
  *Ваши права на использование кода регулируются данной лицензией http://o-s-a.net/doc/license_simple_engine.pdf
 */
 
-using System;
-using System.Collections.Generic;
-using System.Globalization;
-using System.Linq;
-using System.Threading;
+using Newtonsoft.Json;
+using NSec.Cryptography;
 using OsEngine.Entity;
+using OsEngine.Entity.WebSocketOsEngine;
 using OsEngine.Language;
 using OsEngine.Logging;
 using OsEngine.Market.Servers.Binance.Spot.BinanceSpotEntity;
 using OsEngine.Market.Servers.Entity;
 using RestSharp;
+using System;
 using System.Collections.Concurrent;
+using System.Collections.Generic;
+using System.Globalization;
+using System.Linq;
 using System.Net;
-using System.Security.Cryptography;
 using System.Text;
-using Newtonsoft.Json;
-using OsEngine.Entity.WebSocketOsEngine;
+using System.Threading;
 using TradeResponse = OsEngine.Market.Servers.Binance.Spot.BinanceSpotEntity.TradeResponse;
 
 namespace OsEngine.Market.Servers.Binance.Spot
@@ -55,22 +52,18 @@ namespace OsEngine.Market.Servers.Binance.Spot
 
             Thread worker1 = new Thread(KeepaliveUserDataStream);
             worker1.Name = "BinanceSpotThread_KeepaliveUserDataStream";
-            worker1.IsBackground = true;
             worker1.Start();
 
             Thread worker2 = new Thread(ConverterPublicData);
             worker2.Name = "BinanceSpotThread_ConverterPublicData";
-            worker2.IsBackground = true;
             worker2.Start();
 
             Thread worker3 = new Thread(ConverterUserData);
             worker3.Name = "BinanceSpotThread_ConverterUserData";
-            worker3.IsBackground = true;
             worker3.Start();
 
             Thread worker4 = new Thread(ConverterPublicDataMarketDepth);
             worker4.Name = "BinanceSpotThread_ConverterUserDataMarketDepth";
-            worker4.IsBackground = true;
             worker4.Start();
         }
 
@@ -105,18 +98,14 @@ namespace OsEngine.Market.Servers.Binance.Spot
                 if (response.StatusCode != HttpStatusCode.OK)
                 {
                     SendLogMessage("Can`t run Binance Spot connector. No internet connection", LogMessageType.Error);
-
-                    if (ServerStatus != ServerConnectStatus.Disconnect)
-                    {
-                        ServerStatus = ServerConnectStatus.Disconnect;
-                        DisconnectEvent();
-                        return;
-                    }
+                    Disconnect();
+                    return;
                 }
             }
             catch
             {
                 SendLogMessage("Can`t run Binance Spot connector. No internet connection", LogMessageType.Error);
+                Disconnect();
                 return;
             }
 
@@ -134,22 +123,30 @@ namespace OsEngine.Market.Servers.Binance.Spot
 
         public void Dispose()
         {
-            if (ServerStatus != ServerConnectStatus.Disconnect)
+            try
             {
-                ServerStatus = ServerConnectStatus.Disconnect;
-
-                if (DisconnectEvent != null)
-                {
-                    DisconnectEvent();
-                }
+                DisposeSockets();
             }
-
-            DisposeSockets();
+            catch (Exception exception)
+            {
+                SendLogMessage(exception.ToString(), LogMessageType.Error);
+            }
 
             _subscribedSecurities.Clear();
             _newMessagePrivate = new ConcurrentQueue<BinanceUserMessage>();
             _newMessagePublic = new ConcurrentQueue<string>();
             _newMessagePublicMarketDepth = new ConcurrentQueue<string>();
+
+            Disconnect();
+        }
+
+        public void Disconnect()
+        {
+            if (ServerStatus != ServerConnectStatus.Disconnect)
+            {
+                ServerStatus = ServerConnectStatus.Disconnect;
+                DisconnectEvent();
+            }
         }
 
         public ServerType ServerType
@@ -180,10 +177,6 @@ namespace OsEngine.Market.Servers.Binance.Spot
         public string SecretKey;
 
         private string _baseUrl = "https://api.binance.com/api";
-
-        private string _spotListenKey = "";
-
-        private string _marginListenKey = "";
 
         private bool _notMargineAccount;
 
@@ -262,15 +255,11 @@ namespace OsEngine.Market.Servers.Binance.Spot
                         decimal minQty = sec.filters[1].minQty.ToDecimal();
 
                         security.Lot = 1;
-                        string qtyInStr = minQty.ToStringWithNoEndZero();
-                        int dotIndex = qtyInStr.LastIndexOf('.');
-                        int commaIndex = qtyInStr.LastIndexOf(',');
-                        int separatorIndex = Math.Max(dotIndex, commaIndex);
+                        string qtyInStr = minQty.ToStringWithNoEndZero().Replace(",", ".");
 
-                        if (separatorIndex >= 0 &&
-                            separatorIndex < qtyInStr.Length - 1)
+                        if (qtyInStr.Split('.').Length > 1)
                         {
-                            security.DecimalsVolume = qtyInStr.Length - separatorIndex - 1;
+                            security.DecimalsVolume = qtyInStr.Split('.')[1].Length;
                         }
                     }
 
@@ -640,11 +629,11 @@ namespace OsEngine.Market.Servers.Binance.Spot
 
             var timeStampStart = timeStart - yearBegin;
             var r = timeStampStart.TotalMilliseconds;
-            string startTime = Convert.ToInt64(r).ToString(CultureInfo.InvariantCulture);
+            string startTime = Convert.ToInt64(r).ToString();
 
             var timeStampEnd = timeEnd - yearBegin;
             var rEnd = timeStampEnd.TotalMilliseconds;
-            string endTime = Convert.ToInt64(rEnd).ToString(CultureInfo.InvariantCulture);
+            string endTime = Convert.ToInt64(rEnd).ToString();
 
             string needTf = "";
 
@@ -1013,7 +1002,7 @@ namespace OsEngine.Market.Servers.Binance.Spot
 
                     Trade firstTrade = firstTrades.First();
 
-                    lastId = Convert.ToInt64(firstTrade.Id, CultureInfo.InvariantCulture);
+                    lastId = Convert.ToInt64(firstTrade.Id);
 
                     newTrades.Add(firstTrade);
                 }
@@ -1023,12 +1012,9 @@ namespace OsEngine.Market.Servers.Binance.Spot
 
                     try
                     {
-                        lastId = Convert.ToInt64(newTrades[newTrades.Count - 1].Id, CultureInfo.InvariantCulture);
+                        lastId = Convert.ToInt64(newTrades[newTrades.Count - 1].Id);
                     }
-                    catch (Exception ex) // If the date for which we download the candles is greater than today: Ignore
-                    {
-                        SendLogMessage($"Binance Spot trade history pagination skipped tail update: {ex.Message}", LogMessageType.System);
-                    }
+                    catch { } // If the date for which we download the candles is greater than today: Ignore
                 }
 
                 if (newTrades != null && newTrades.Count != 0)
@@ -1088,7 +1074,7 @@ namespace OsEngine.Market.Servers.Binance.Spot
             {
                 Thread.Sleep(1000); // do not remove! RateGate does not help in CreateQuery
 
-                string timeStamp = TimeManager.GetUnixTimeStampMilliseconds().ToString(CultureInfo.InvariantCulture);
+                string timeStamp = TimeManager.GetUnixTimeStampMilliseconds().ToString();
                 Dictionary<string, string> param = new Dictionary<string, string>();
 
                 if (startTime != new DateTime() && endTime != new DateTime())
@@ -1097,14 +1083,14 @@ namespace OsEngine.Market.Servers.Binance.Spot
                     long to = TimeManager.GetTimeStampMilliSecondsToDateTime(endTime);
 
                     param.Add("symbol=", security);
-                    param.Add("&startTime=", from.ToString(CultureInfo.InvariantCulture));
-                    param.Add("&endTime=", to.ToString(CultureInfo.InvariantCulture));
+                    param.Add("&startTime=", from.ToString());
+                    param.Add("&endTime=", to.ToString());
                     param.Add("&limit=", "1000");
                 }
                 else if (fromId != 0)
                 {
                     param.Add("symbol=", security);
-                    param.Add("&fromId=", fromId.ToString(CultureInfo.InvariantCulture));
+                    param.Add("&fromId=", fromId.ToString());
                     param.Add("&limit=", "1000");
                 }
 
@@ -1134,7 +1120,7 @@ namespace OsEngine.Market.Servers.Binance.Spot
             {
                 var trade = new Trade();
 
-                trade.Time = new DateTime(1970, 1, 1).AddMilliseconds(jtTrade.T.ToDouble());
+                trade.Time = new DateTime(1970, 1, 1).AddMilliseconds(Convert.ToDouble(jtTrade.T));
                 trade.Price = jtTrade.p.ToDecimal();
                 trade.MicroSeconds = 0;
                 trade.Id = jtTrade.a.ToString();
@@ -1175,43 +1161,55 @@ namespace OsEngine.Market.Servers.Binance.Spot
 
         private Dictionary<string, WebSocket> _wsStreamsSecurityData = new Dictionary<string, WebSocket>();
 
+        private string _webSocketUrlPrivate = "wss://ws-api.binance.com:443/ws-api/v3";
+
         private RateGate _rateGateCreateDisposeSockets = new RateGate(1, TimeSpan.FromSeconds(2));
 
         private void CreateDataStreams()
         {
-            _rateGateCreateDisposeSockets.WaitToProceed();
-
-            if (_spotSocketClient == null)
+            try
             {
-                _spotSocketClient = CreateUserDataStream("api/v3/userDataStream", BinanceExchangeType.SpotExchange);
-
-                if (_spotSocketClient == null)
+                if (_spotSocketClient != null)
                 {
                     return;
                 }
 
-                _spotSocketClient.OnMessage += _spotSocketClient_MessageReceived;
-            }
+                _spotSocketClient = new WebSocket(_webSocketUrlPrivate);
 
-            try
-            {
-                if (_marginSocketClient == null)
+                if (_myProxy != null)
                 {
-                    _marginSocketClient = CreateUserDataStream("/sapi/v1/userDataStream", BinanceExchangeType.MarginExchange);
-
-                    if (_marginSocketClient != null)
-                    {
-                        _marginSocketClient.OnMessage += _marginSocketClient_MessageReceived;
-                    }
-                    else
-                    {
-                        _notMargineAccount = true;
-                    }
+                    _spotSocketClient.SetProxy(_myProxy);
                 }
+
+                _spotSocketClient.EmitOnPing = true;
+                _spotSocketClient.OnOpen += _spotSocketClient_OnOpen;
+                _spotSocketClient.OnError += _spotSocketClient_OnError;
+                _spotSocketClient.OnMessage += _spotSocketClient_MessageReceived;
+                _spotSocketClient.OnClose += _spotSocketClient_OnClose;
+                _spotSocketClient.ConnectAsync();
+
+                if (_marginSocketClient != null)
+                {
+                    return;
+                }
+
+                _marginSocketClient = new WebSocket(_webSocketUrlPrivate);
+
+                if (_myProxy != null)
+                {
+                    _marginSocketClient.SetProxy(_myProxy);
+                }
+
+                _marginSocketClient.EmitOnPing = true;
+                _marginSocketClient.OnOpen += _marginSocketClient_OnOpen;
+                _marginSocketClient.OnError += _marginSocketClient_OnError;
+                _marginSocketClient.OnMessage += _marginSocketClient_MessageReceived;
+                _marginSocketClient.OnClose += _marginSocketClient_OnClose;
+                _marginSocketClient.ConnectAsync();
             }
-            catch
+            catch (Exception exception)
             {
-                _notMargineAccount = true;
+                SendLogMessage(exception.ToString(), LogMessageType.Error);
             }
         }
 
@@ -1223,10 +1221,10 @@ namespace OsEngine.Market.Servers.Binance.Spot
 
                 if (_spotSocketClient != null)
                 {
-                    _spotSocketClient.OnOpen -= Client_Opened;
-                    _spotSocketClient.OnClose -= Client_Closed;
-                    _spotSocketClient.OnError -= Client_Error;
+                    _spotSocketClient.OnOpen -= _spotSocketClient_OnOpen;
+                    _spotSocketClient.OnError -= _spotSocketClient_OnError;
                     _spotSocketClient.OnMessage -= _spotSocketClient_MessageReceived;
+                    _spotSocketClient.OnClose -= _spotSocketClient_OnClose;
                     _spotSocketClient.CloseAsync();
                 }
             }
@@ -1241,10 +1239,10 @@ namespace OsEngine.Market.Servers.Binance.Spot
             {
                 if (_marginSocketClient != null)
                 {
-                    _marginSocketClient.OnOpen -= Client_Opened;
-                    _marginSocketClient.OnClose -= Client_Closed;
-                    _marginSocketClient.OnError -= Client_Error;
-                    _marginSocketClient.OnMessage -= _spotSocketClient_MessageReceived;
+                    _marginSocketClient.OnOpen -= _marginSocketClient_OnOpen;
+                    _marginSocketClient.OnError -= _marginSocketClient_OnError;
+                    _marginSocketClient.OnMessage -= _marginSocketClient_MessageReceived;
+                    _marginSocketClient.OnClose -= _marginSocketClient_OnClose;
                     _marginSocketClient.CloseAsync();
                 }
             }
@@ -1307,50 +1305,254 @@ namespace OsEngine.Market.Servers.Binance.Spot
             }
         }
 
-        private WebSocket CreateUserDataStream(string url, BinanceExchangeType exType)
+        private string _socketActivateLocker = "socketActivateLocker";
+
+        private void CheckSocketsActivate()
         {
+            lock (_socketActivateLocker)
+            {
+
+                if (_spotSocketClient == null
+                    || _spotSocketClient.ReadyState != WebSocketState.Open)
+                {
+                    Disconnect();
+                    return;
+                }
+
+                if (_marginSocketClient == null
+                    || _marginSocketClient.ReadyState != WebSocketState.Open)
+                {
+                    Disconnect();
+                    return;
+                }
+
+                if (ServerStatus == ServerConnectStatus.Disconnect)
+                {
+                    ServerStatus = ServerConnectStatus.Connect;
+
+                    if (ConnectEvent != null)
+                    {
+                        ConnectEvent();
+                    }
+                }
+            }
+        }
+
+        private void CreateAuthMessageWebSocektSpot()
+        {
+            _rateGateCreateDisposeSockets.WaitToProceed();
+
             try
             {
-                var res = CreateQuery(BinanceExchangeType.SpotExchange, Method.POST, url, null, false);
+                long timestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
+                string payload = $"apiKey={ApiKey}&timestamp={timestamp}";
+                string signature = SignEd25519(payload);
 
-                string urlStr = "";
+                _spotSocketClient.SendAsync($"{{\"id\": \"1\",\"method\": \"session.logon\",\"params\": {{\"apiKey\": \"{ApiKey}\",\"signature\": \"{signature}\",\"timestamp\": {timestamp}}}}}");
+            }
+            catch (Exception ex)
+            {
+                SendLogMessage(ex.Message, LogMessageType.Error);
+            }
+        }
+
+        private void CreateAuthMessageWebSocektMargin()
+        {
+            _rateGateCreateDisposeSockets.WaitToProceed();
+
+            try
+            {
+                var res = CreateQuery(BinanceExchangeType.MarginExchange, Method.POST, "/sapi/v1/userListenToken", null, false);
 
                 if (string.IsNullOrEmpty(res))
                 {
-                    SendLogMessage("Socket don`t open. Internet error", LogMessageType.Connect);
-                    return null;
+                    SendLogMessage("Margin Socket don`t ListenKey", LogMessageType.Connect);
+                    _notMargineAccount = true;
+                    return;
                 }
 
-                if (exType == BinanceExchangeType.SpotExchange)
+                string marginKey = JsonConvert.DeserializeAnonymousType(res, new ListenKey()).token;
+
+                if (string.IsNullOrEmpty(marginKey))
                 {
-                    _spotListenKey = JsonConvert.DeserializeAnonymousType(res, new ListenKey()).listenKey;
-                    urlStr = "wss://stream.binance.com:9443/ws/" + _spotListenKey;
-                }
-                else if (exType == BinanceExchangeType.MarginExchange)
-                {
-                    _marginListenKey = JsonConvert.DeserializeAnonymousType(res, new ListenKey()).listenKey;
-                    urlStr = "wss://stream.binance.com:9443/ws/" + _marginListenKey;
+                    SendLogMessage("Margin Socket don`t ListenKey", LogMessageType.Connect);
+                    _notMargineAccount = true;
+                    return;
                 }
 
-                WebSocket client = new WebSocket(urlStr); //create a web socket / создаем вебсокет
-
-                if (_myProxy != null)
-                {
-                    client.SetProxy(_myProxy);
-                }
-
-                client.OnOpen += Client_Opened;
-                client.OnError += Client_Error;
-                client.OnClose += Client_Closed;
-                client.ConnectAsync();
-
-                return client;
+                _marginSocketClient.SendAsync($"{{\"id\": \"2\",\"method\": \"userDataStream.subscribe.listenToken\",\"params\": {{\"listenToken\": \"{marginKey}\" }}}}");
             }
-            catch (Exception exception)
+            catch (Exception ex)
             {
-                SendLogMessage(exception.Message, LogMessageType.Connect);
-                return null;
+                SendLogMessage(ex.Message, LogMessageType.Error);
             }
+        }
+
+        #endregion
+
+        #region 7 WebSocket events
+
+        private ConcurrentQueue<BinanceUserMessage> _newMessagePrivate = new ConcurrentQueue<BinanceUserMessage>();
+
+        private ConcurrentQueue<string> _newMessagePublic = new ConcurrentQueue<string>();
+
+        private ConcurrentQueue<string> _newMessagePublicMarketDepth = new ConcurrentQueue<string>();
+
+        private void _spotSocketClient_OnClose(object sender, CloseEventArgs e)
+        {
+            try
+            {
+                if (ServerStatus != ServerConnectStatus.Disconnect)
+                {
+                    string message = this.GetType().Name + OsLocalization.Market.Message101 + "\n";
+                    message += OsLocalization.Market.Message102;
+
+                    SendLogMessage(message, LogMessageType.Error);
+                    ServerStatus = ServerConnectStatus.Disconnect;
+                    DisconnectEvent();
+                }
+            }
+            catch (Exception ex)
+            {
+                SendLogMessage(ex.ToString(), LogMessageType.Error);
+            }
+        }
+
+        private void _spotSocketClient_OnError(object sender, ErrorEventArgs e)
+        {
+            try
+            {
+                if (ServerStatus == ServerConnectStatus.Disconnect)
+                {
+                    return;
+                }
+
+                if (e.Exception != null)
+                {
+                    string message = e.Exception.ToString();
+
+                    if (message.Contains("The remote party closed the spot WebSocket connection"))
+                    {
+                        // ignore
+                    }
+                    else
+                    {
+                        SendLogMessage(e.Exception.ToString(), LogMessageType.Error);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                SendLogMessage("Data spot socket error" + ex.ToString(), LogMessageType.Error);
+            }
+        }
+
+        private void _spotSocketClient_OnOpen(object sender, EventArgs e)
+        {
+            try
+            {
+                if (ServerStatus == ServerConnectStatus.Disconnect)
+                {
+                    CreateAuthMessageWebSocektSpot();
+                    SendLogMessage("Binance Spot WebSocket private connection open", LogMessageType.System);
+                    CheckSocketsActivate();
+
+                }
+            }
+            catch (Exception ex)
+            {
+                SendLogMessage(ex.ToString(), LogMessageType.Error);
+            }
+        }
+
+        private void _marginSocketClient_OnClose(object sender, CloseEventArgs e)
+        {
+            try
+            {
+                if (ServerStatus != ServerConnectStatus.Disconnect)
+                {
+                    string message = this.GetType().Name + OsLocalization.Market.Message101 + "\n";
+                    message += OsLocalization.Market.Message102;
+
+                    SendLogMessage(message, LogMessageType.Error);
+                    ServerStatus = ServerConnectStatus.Disconnect;
+                    DisconnectEvent();
+                }
+            }
+            catch (Exception ex)
+            {
+                SendLogMessage(ex.ToString(), LogMessageType.Error);
+            }
+        }
+
+        private void _marginSocketClient_OnError(object sender, ErrorEventArgs e)
+        {
+            try
+            {
+                if (ServerStatus == ServerConnectStatus.Disconnect)
+                {
+                    return;
+                }
+
+                if (e.Exception != null)
+                {
+                    string message = e.Exception.ToString();
+
+                    if (message.Contains("The remote party closed the margin WebSocket connection"))
+                    {
+                        // ignore
+                    }
+                    else
+                    {
+                        SendLogMessage(e.Exception.ToString(), LogMessageType.Error);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                SendLogMessage("Data margin socket error" + ex.ToString(), LogMessageType.Error);
+            }
+        }
+
+        private void _marginSocketClient_OnOpen(object sender, EventArgs e)
+        {
+            try
+            {
+                if (ServerStatus == ServerConnectStatus.Disconnect)
+                {
+                    SendLogMessage("Binance Margin WebSocket private connection open", LogMessageType.System);
+                    CheckSocketsActivate();
+                    CreateAuthMessageWebSocektMargin();
+                }
+            }
+            catch (Exception ex)
+            {
+                SendLogMessage(ex.ToString(), LogMessageType.Error);
+            }
+        }
+
+        private void _marginSocketClient_MessageReceived(object sender, MessageEventArgs e)
+        {
+            UserDataMessageHandler(sender, e, BinanceExchangeType.MarginExchange);
+        }
+
+        private void _spotSocketClient_MessageReceived(object sender, MessageEventArgs e)
+        {
+            UserDataMessageHandler(sender, e, BinanceExchangeType.SpotExchange);
+        }
+
+        private void UserDataMessageHandler(object sender, MessageEventArgs e, BinanceExchangeType type)
+        {
+            if (ServerStatus == ServerConnectStatus.Disconnect)
+            {
+                return;
+            }
+
+            BinanceUserMessage message = new BinanceUserMessage();
+            message.MessageStr = e.Data;
+            message.ExchangeType = type;
+
+            _newMessagePrivate.Enqueue(message);
         }
 
         private void Client_Opened(object sender, EventArgs e)
@@ -1358,13 +1560,23 @@ namespace OsEngine.Market.Servers.Binance.Spot
             if (ServerStatus != ServerConnectStatus.Connect)
             {
                 SendLogMessage("Websockets activate. Connection status", LogMessageType.System);
+            }
+        }
 
-                ServerStatus = ServerConnectStatus.Connect;
+        private void _publicSocketClient_MessageReceived(object sender, MessageEventArgs e)
+        {
+            if (ServerStatus == ServerConnectStatus.Disconnect)
+            {
+                return;
+            }
 
-                if (ConnectEvent != null)
-                {
-                    ConnectEvent();
-                }
+            if (e.Data.Contains("\"lastUpdateId\""))
+            {
+                _newMessagePublicMarketDepth.Enqueue(e.Data);
+            }
+            else
+            {
+                _newMessagePublic.Enqueue(e.Data);
             }
         }
 
@@ -1419,57 +1631,6 @@ namespace OsEngine.Market.Servers.Binance.Spot
 
         #endregion
 
-        #region 7 WebSocket events
-
-        private ConcurrentQueue<BinanceUserMessage> _newMessagePrivate = new ConcurrentQueue<BinanceUserMessage>();
-
-        private ConcurrentQueue<string> _newMessagePublic = new ConcurrentQueue<string>();
-
-        private ConcurrentQueue<string> _newMessagePublicMarketDepth = new ConcurrentQueue<string>();
-
-        private void _marginSocketClient_MessageReceived(object sender, MessageEventArgs e)
-        {
-            UserDataMessageHandler(sender, e, BinanceExchangeType.MarginExchange);
-        }
-
-        private void _spotSocketClient_MessageReceived(object sender, MessageEventArgs e)
-        {
-            UserDataMessageHandler(sender, e, BinanceExchangeType.SpotExchange);
-        }
-
-        private void UserDataMessageHandler(object sender, MessageEventArgs e, BinanceExchangeType type)
-        {
-            if (ServerStatus == ServerConnectStatus.Disconnect)
-            {
-                return;
-            }
-
-            BinanceUserMessage message = new BinanceUserMessage();
-            message.MessageStr = e.Data;
-            message.ExchangeType = type;
-
-            _newMessagePrivate.Enqueue(message);
-        }
-
-        private void _publicSocketClient_MessageReceived(object sender, MessageEventArgs e)
-        {
-            if (ServerStatus == ServerConnectStatus.Disconnect)
-            {
-                return;
-            }
-
-            if (e.Data.Contains("\"lastUpdateId\""))
-            {
-                _newMessagePublicMarketDepth.Enqueue(e.Data);
-            }
-            else
-            {
-                _newMessagePublic.Enqueue(e.Data);
-            }
-        }
-
-        #endregion
-
         #region 8 WebSocket check alive
 
         private void KeepaliveUserDataStream()
@@ -1487,12 +1648,6 @@ namespace OsEngine.Market.Servers.Binance.Spot
                         return;
                     }
 
-                    if (_spotListenKey == "" &&
-                        _marginListenKey == "")
-                    {
-                        continue;
-                    }
-
                     if (ServerStatus == ServerConnectStatus.Disconnect)
                     {
                         _timeStart = DateTime.Now;
@@ -1503,15 +1658,11 @@ namespace OsEngine.Market.Servers.Binance.Spot
                     {
                         _timeStart = DateTime.Now;
 
-                        CreateQuery(BinanceExchangeType.SpotExchange, Method.PUT,
-                            "api/v1/userDataStream", new Dictionary<string, string>()
-                                { { "listenKey=", _spotListenKey } }, false);
+                        CreateAuthMessageWebSocektSpot();
 
                         if (_notMargineAccount == false)
                         {
-                            CreateQuery(BinanceExchangeType.MarginExchange, Method.PUT,
-                                "sapi/v1/userDataStream", new Dictionary<string, string>()
-                                    { { "listenKey=", _marginListenKey } }, false);
+                            CreateAuthMessageWebSocektMargin();
                         }
                     }
                 }
@@ -1575,7 +1726,7 @@ namespace OsEngine.Market.Servers.Binance.Spot
                     urlStr += "/" + security.Name.ToLower() + "@miniTicker";
                 }
 
-                WebSocket _wsClient = new WebSocket(urlStr); // create web-socket 
+                WebSocket _wsClient = new WebSocket(urlStr);
 
                 if (_myProxy != null)
                 {
@@ -1583,7 +1734,7 @@ namespace OsEngine.Market.Servers.Binance.Spot
                 }
 
                 _wsClient.EmitOnPing = true;
-
+                _wsClient.OnOpen += Client_Opened;
                 _wsClient.OnMessage += _publicSocketClient_MessageReceived;
                 _wsClient.OnError += Client_Error;
                 _wsClient.OnClose += Client_Closed;
@@ -1710,11 +1861,14 @@ namespace OsEngine.Market.Servers.Binance.Spot
                         {
                             string mes = messsage.MessageStr;
 
-                            if (mes.Contains("code"))
+                            if (mes.Contains("\"id\":\"1"))
+                            {
+                                SubscribeToTheUserDataStream(mes);
+                            }
+                            else if (mes.Contains("code"))
                             {
                                 SendLogMessage(JsonConvert.DeserializeAnonymousType(mes, new ErrorMessage()).msg, LogMessageType.Error);
                             }
-
                             else if (mes.Contains("\"e\"" + ":" + "\"executionReport\""))
                             {
                                 UpdateOrderAndMyTrade(mes);
@@ -1731,7 +1885,6 @@ namespace OsEngine.Market.Servers.Binance.Spot
                                 {
                                     UpdatePortfolio(portfolios, BinanceExchangeType.MarginExchange);
                                 }
-
                             }
                         }
                     }
@@ -1741,6 +1894,27 @@ namespace OsEngine.Market.Servers.Binance.Spot
                     SendLogMessage(exception.ToString(), LogMessageType.Error);
                     Thread.Sleep(5000);
                 }
+            }
+        }
+
+        private void SubscribeToTheUserDataStream(string messsage)
+        {
+            try
+            {
+                AuthenticationResponse auth = JsonConvert.DeserializeAnonymousType(messsage, new AuthenticationResponse());
+
+                if (auth.status == "200")
+                {
+                    _spotSocketClient.SendAsync($"{{\"id\": \"3\",\"method\": \"userDataStream.subscribe\"}}");
+                }
+                else
+                {
+
+                }
+            }
+            catch (Exception error)
+            {
+                SendLogMessage(error.ToString(), LogMessageType.Error);
             }
         }
 
@@ -1774,7 +1948,7 @@ namespace OsEngine.Market.Servers.Binance.Spot
                     return;
                 }
 
-                foreach (var onePortf in portfs.B)
+                foreach (var onePortf in portfs.@event.B)
                 {
                     if (onePortf == null ||
                         onePortf.f == null ||
@@ -1817,133 +1991,242 @@ namespace OsEngine.Market.Servers.Binance.Spot
 
         private void UpdateOrderAndMyTrade(string mes)
         {
-            var order = JsonConvert.DeserializeAnonymousType(mes, new ExecutionReport());
-
-            string orderNumUserInString = order.C.Replace("x-RKXTQ2AK", "");
-
-            if (string.IsNullOrEmpty(orderNumUserInString) ||
-                orderNumUserInString == "null")
-            {
-                orderNumUserInString = order.c.Replace("x-RKXTQ2AK", "");
-            }
-
-            int orderNumUser = 0;
-
             try
             {
-                orderNumUser = Convert.ToInt32(orderNumUserInString, CultureInfo.InvariantCulture);
-            }
-            catch
-            {
-                // ignore
-            }
+                ExecutionReportEvent orders = JsonConvert.DeserializeAnonymousType(mes, new ExecutionReportEvent());
 
-            if (order.x == "NEW")
-            {
-                Order newOrder = new Order();
-                newOrder.SecurityNameCode = order.s;
-                newOrder.TimeCallBack = new DateTime(1970, 1, 1).AddMilliseconds(order.E.ToDouble());
-                newOrder.NumberUser = orderNumUser;
+                ExecutionReport order = orders.@event;
 
-                newOrder.NumberMarket = order.i.ToString();
-                //newOrder.PortfolioNumber = order.PortfolioNumber; add to server
-                newOrder.Side = order.S == "BUY" ? Side.Buy : Side.Sell;
-                newOrder.State = OrderStateType.Active;
-                newOrder.Volume = order.q.ToDecimal();
-                newOrder.Price = order.p.ToDecimal();
-                newOrder.ServerType = ServerType.Binance;
-                newOrder.PortfolioNumber = "Binance";
+                string orderNumUserInString = order.C.Replace("x-RKXTQ2AK", "");
 
-                if (order.o == "MARKET")
+                if (string.IsNullOrEmpty(orderNumUserInString) ||
+                    orderNumUserInString == "null")
                 {
-                    newOrder.TypeOrder = OrderPriceType.Market;
-                }
-                else
-                {
-                    newOrder.TypeOrder = OrderPriceType.Limit;
+                    orderNumUserInString = order.c.Replace("x-RKXTQ2AK", "");
                 }
 
-                if (MyOrderEvent != null)
-                {
-                    MyOrderEvent(newOrder);
-                }
-                SetOrderOnBoard(newOrder);
-            }
-            else if (order.x == "CANCELED")
-            {
-                Order newOrder = new Order();
-                newOrder.SecurityNameCode = order.s;
-                newOrder.TimeCallBack = new DateTime(1970, 1, 1).AddMilliseconds(order.E.ToDouble());
-                newOrder.TimeCancel = newOrder.TimeCallBack;
-                newOrder.NumberUser = orderNumUser;
-                newOrder.NumberMarket = order.i.ToString();
-                newOrder.Side = order.S == "BUY" ? Side.Buy : Side.Sell;
-                newOrder.State = OrderStateType.Cancel;
-                newOrder.Volume = order.q.ToDecimal();
-                newOrder.Price = order.p.ToDecimal();
-                newOrder.ServerType = ServerType.Binance;
-                newOrder.PortfolioNumber = "Binance";
+                int orderNumUser = 0;
 
-                if (order.o == "MARKET")
+                try
                 {
-                    newOrder.TypeOrder = OrderPriceType.Market;
+                    orderNumUser = Convert.ToInt32(orderNumUserInString);
                 }
-                else
+                catch
                 {
-                    newOrder.TypeOrder = OrderPriceType.Limit;
+                    // ignore
                 }
 
-                if (MyOrderEvent != null)
+                if (order.x == "NEW")
                 {
-                    MyOrderEvent(newOrder);
-                }
-            }
-            else if (order.x == "REJECTED")
-            {
-                Order newOrder = new Order();
-                newOrder.SecurityNameCode = order.s;
-                newOrder.TimeCallBack = new DateTime(1970, 1, 1).AddMilliseconds(order.E.ToDouble());
-                newOrder.NumberUser = orderNumUser;
-                newOrder.NumberMarket = order.i.ToString();
-                newOrder.Side = order.S == "BUY" ? Side.Buy : Side.Sell;
-                newOrder.State = OrderStateType.Fail;
-                newOrder.Volume = order.q.ToDecimal();
-                newOrder.Price = order.p.ToDecimal();
-                newOrder.ServerType = ServerType.Binance;
-                newOrder.PortfolioNumber = "Binance";
-
-                if (order.o == "MARKET")
-                {
-                    newOrder.TypeOrder = OrderPriceType.Market;
-                }
-                else
-                {
-                    newOrder.TypeOrder = OrderPriceType.Limit;
-                }
-
-                if (MyOrderEvent != null)
-                {
-                    MyOrderEvent(newOrder);
-                }
-
-                SendLogMessage("Binance spot order fail. Order num: " + newOrder.NumberUser +
-                    " \n Reasons in order request: " + order.r, LogMessageType.Error);
-            }
-            else if (order.x == "TRADE")
-            {
-                Order oldOrder = GetOrderFromBoard(order.i.ToLower());
-
-                if (oldOrder != null &&
-                    order.z != null &&
-                    oldOrder.Volume == order.z.ToString().ToDecimal())
-                {// Order Done
                     Order newOrder = new Order();
                     newOrder.SecurityNameCode = order.s;
                     newOrder.TimeCallBack = new DateTime(1970, 1, 1).AddMilliseconds(order.E.ToDouble());
                     newOrder.NumberUser = orderNumUser;
 
                     newOrder.NumberMarket = order.i.ToString();
-                    //newOrder.PortfolioNumber = order.PortfolioNumber; 
+                    //newOrder.PortfolioNumber = order.PortfolioNumber; add to server
+                    newOrder.Side = order.S == "BUY" ? Side.Buy : Side.Sell;
+                    newOrder.State = OrderStateType.Active;
+                    newOrder.Volume = order.q.ToDecimal();
+                    newOrder.Price = order.p.ToDecimal();
+                    newOrder.ServerType = ServerType.Binance;
+                    newOrder.PortfolioNumber = "Binance";
+
+                    if (order.o == "MARKET")
+                    {
+                        newOrder.TypeOrder = OrderPriceType.Market;
+                    }
+                    else
+                    {
+                        newOrder.TypeOrder = OrderPriceType.Limit;
+                    }
+
+                    if (MyOrderEvent != null)
+                    {
+                        MyOrderEvent(newOrder);
+                    }
+                    SetOrderOnBoard(newOrder);
+                }
+                else if (order.x == "CANCELED")
+                {
+                    Order newOrder = new Order();
+                    newOrder.SecurityNameCode = order.s;
+                    newOrder.TimeCallBack = new DateTime(1970, 1, 1).AddMilliseconds(order.E.ToDouble());
+                    newOrder.TimeCancel = newOrder.TimeCallBack;
+                    newOrder.NumberUser = orderNumUser;
+                    newOrder.NumberMarket = order.i.ToString();
+                    newOrder.Side = order.S == "BUY" ? Side.Buy : Side.Sell;
+                    newOrder.State = OrderStateType.Cancel;
+                    newOrder.Volume = order.q.ToDecimal();
+                    newOrder.Price = order.p.ToDecimal();
+                    newOrder.ServerType = ServerType.Binance;
+                    newOrder.PortfolioNumber = "Binance";
+
+                    if (order.o == "MARKET")
+                    {
+                        newOrder.TypeOrder = OrderPriceType.Market;
+                    }
+                    else
+                    {
+                        newOrder.TypeOrder = OrderPriceType.Limit;
+                    }
+
+                    if (MyOrderEvent != null)
+                    {
+                        MyOrderEvent(newOrder);
+                    }
+                }
+                else if (order.x == "REJECTED")
+                {
+                    Order newOrder = new Order();
+                    newOrder.SecurityNameCode = order.s;
+                    newOrder.TimeCallBack = new DateTime(1970, 1, 1).AddMilliseconds(order.E.ToDouble());
+                    newOrder.NumberUser = orderNumUser;
+                    newOrder.NumberMarket = order.i.ToString();
+                    newOrder.Side = order.S == "BUY" ? Side.Buy : Side.Sell;
+                    newOrder.State = OrderStateType.Fail;
+                    newOrder.Volume = order.q.ToDecimal();
+                    newOrder.Price = order.p.ToDecimal();
+                    newOrder.ServerType = ServerType.Binance;
+                    newOrder.PortfolioNumber = "Binance";
+
+                    if (order.o == "MARKET")
+                    {
+                        newOrder.TypeOrder = OrderPriceType.Market;
+                    }
+                    else
+                    {
+                        newOrder.TypeOrder = OrderPriceType.Limit;
+                    }
+
+                    if (MyOrderEvent != null)
+                    {
+                        MyOrderEvent(newOrder);
+                    }
+
+                    SendLogMessage("Binance spot order fail. Order num: " + newOrder.NumberUser +
+                        " \n Reasons in order request: " + order.r, LogMessageType.Error);
+                }
+                else if (order.x == "TRADE")
+                {
+                    Order oldOrder = GetOrderFromBoard(order.i.ToLower());
+
+                    if (oldOrder != null &&
+                        order.z != null &&
+                        oldOrder.Volume == order.z.ToString().ToDecimal())
+                    {// Order Done
+                        Order newOrder = new Order();
+                        newOrder.SecurityNameCode = order.s;
+                        newOrder.TimeCallBack = new DateTime(1970, 1, 1).AddMilliseconds(order.E.ToDouble());
+                        newOrder.NumberUser = orderNumUser;
+
+                        newOrder.NumberMarket = order.i.ToString();
+                        //newOrder.PortfolioNumber = order.PortfolioNumber; 
+                        newOrder.Side = order.S == "BUY" ? Side.Buy : Side.Sell;
+                        newOrder.State = OrderStateType.Done;
+                        newOrder.Volume = order.q.ToDecimal();
+                        newOrder.Price = order.p.ToDecimal();
+                        newOrder.ServerType = ServerType.Binance;
+                        newOrder.PortfolioNumber = "Binance";
+
+                        if (order.o == "MARKET")
+                        {
+                            newOrder.TypeOrder = OrderPriceType.Market;
+                        }
+                        else
+                        {
+                            newOrder.TypeOrder = OrderPriceType.Limit;
+                        }
+
+                        if (MyOrderEvent != null)
+                        {
+                            MyOrderEvent(newOrder);
+                        }
+                    }
+
+                    MyTrade trade = new MyTrade();
+                    trade.Time = new DateTime(1970, 1, 1).AddMilliseconds(order.T.ToDouble());
+                    trade.NumberOrderParent = order.i.ToString();
+                    trade.NumberTrade = order.t.ToString();
+                    trade.Price = order.L.ToDecimal();
+                    trade.SecurityNameCode = order.s;
+                    trade.Side = order.S == "BUY" ? Side.Buy : Side.Sell;
+
+                    if (string.IsNullOrEmpty(order.n)
+                        || order.n.ToDecimal() == 0)
+                    {// there is no commission. just put it in trade
+                        trade.Volume = order.l.ToDecimal();
+                    }
+                    else
+                    {
+                        if (order.N != null &&
+                            string.IsNullOrEmpty(order.N.ToString()) == false)
+                        {// the commission is taken in some coin
+                            string commissionSecName = order.N.ToString();
+
+                            if (trade.SecurityNameCode.StartsWith("BNB")
+                                || trade.SecurityNameCode.StartsWith(commissionSecName))
+                            {
+                                trade.Volume = order.l.ToDecimal() - order.n.ToDecimal();
+
+                                int decimalVolum = GetDecimalsVolume(trade.SecurityNameCode);
+                                if (decimalVolum > 0)
+                                {
+                                    trade.Volume = Math.Floor(trade.Volume * (decimal)Math.Pow(10, decimalVolum)) / (decimal)Math.Pow(10, decimalVolum);
+                                }
+                            }
+                            else
+                            {
+                                trade.Volume = order.l.ToDecimal();
+                            }
+                        }
+                        else
+                        {// unknown coin commission. We take the entire volume
+                            trade.Volume = order.l.ToDecimal();
+                        }
+                    }
+
+                    if (MyTradeEvent != null)
+                    {
+                        MyTradeEvent(trade);
+                    }
+                }
+                else if (order.x == "EXPIRED")
+                {
+                    Order newOrder = new Order();
+                    newOrder.SecurityNameCode = order.s;
+                    newOrder.TimeCallBack = new DateTime(1970, 1, 1).AddMilliseconds(order.E.ToDouble());
+                    newOrder.TimeCancel = newOrder.TimeCallBack;
+                    newOrder.NumberUser = orderNumUser;
+                    newOrder.NumberMarket = order.i.ToString();
+                    newOrder.Side = order.S == "BUY" ? Side.Buy : Side.Sell;
+                    newOrder.State = OrderStateType.Cancel;
+                    newOrder.Volume = order.q.ToDecimal();
+                    newOrder.Price = order.p.ToDecimal();
+                    newOrder.ServerType = ServerType.Binance;
+                    newOrder.PortfolioNumber = "Binance";
+
+                    if (order.o == "MARKET")
+                    {
+                        newOrder.TypeOrder = OrderPriceType.Market;
+                    }
+                    else
+                    {
+                        newOrder.TypeOrder = OrderPriceType.Limit;
+                    }
+
+                    if (MyOrderEvent != null)
+                    {
+                        MyOrderEvent(newOrder);
+                    }
+                }
+                else if (order.x == "FILLED")
+                {
+                    Order newOrder = new Order();
+                    newOrder.SecurityNameCode = order.s;
+                    newOrder.TimeCallBack = new DateTime(1970, 1, 1).AddMilliseconds(order.E.ToDouble());
+                    newOrder.NumberUser = orderNumUser;
+                    newOrder.NumberMarket = order.i.ToString();
                     newOrder.Side = order.S == "BUY" ? Side.Buy : Side.Sell;
                     newOrder.State = OrderStateType.Done;
                     newOrder.Volume = order.q.ToDecimal();
@@ -1965,110 +2248,10 @@ namespace OsEngine.Market.Servers.Binance.Spot
                         MyOrderEvent(newOrder);
                     }
                 }
-
-                MyTrade trade = new MyTrade();
-                trade.Time = new DateTime(1970, 1, 1).AddMilliseconds(order.T.ToDouble());
-                trade.NumberOrderParent = order.i.ToString();
-                trade.NumberTrade = order.t.ToString();
-                trade.Price = order.L.ToDecimal();
-                trade.SecurityNameCode = order.s;
-                trade.Side = order.S == "BUY" ? Side.Buy : Side.Sell;
-
-                if (string.IsNullOrEmpty(order.n)
-                    || order.n.ToDecimal() == 0)
-                {// there is no commission. just put it in trade
-                    trade.Volume = order.l.ToDecimal();
-                }
-                else
-                {
-                    if (order.N != null &&
-                        string.IsNullOrEmpty(order.N.ToString()) == false)
-                    {// the commission is taken in some coin
-                        string commissionSecName = order.N.ToString();
-
-                        if (trade.SecurityNameCode.StartsWith("BNB")
-                            || trade.SecurityNameCode.StartsWith(commissionSecName))
-                        {
-                            trade.Volume = order.l.ToDecimal() - order.n.ToDecimal();
-
-                            int decimalVolum = GetDecimalsVolume(trade.SecurityNameCode);
-                            if (decimalVolum > 0)
-                            {
-                                trade.Volume = Math.Floor(trade.Volume * (decimal)Math.Pow(10, decimalVolum)) / (decimal)Math.Pow(10, decimalVolum);
-                            }
-                        }
-                        else
-                        {
-                            trade.Volume = order.l.ToDecimal();
-                        }
-                    }
-                    else
-                    {// unknown coin commission. We take the entire volume
-                        trade.Volume = order.l.ToDecimal();
-                    }
-                }
-
-                if (MyTradeEvent != null)
-                {
-                    MyTradeEvent(trade);
-                }
             }
-            else if (order.x == "EXPIRED")
+            catch (Exception error)
             {
-                Order newOrder = new Order();
-                newOrder.SecurityNameCode = order.s;
-                newOrder.TimeCallBack = new DateTime(1970, 1, 1).AddMilliseconds(order.E.ToDouble());
-                newOrder.TimeCancel = newOrder.TimeCallBack;
-                newOrder.NumberUser = orderNumUser;
-                newOrder.NumberMarket = order.i.ToString();
-                newOrder.Side = order.S == "BUY" ? Side.Buy : Side.Sell;
-                newOrder.State = OrderStateType.Cancel;
-                newOrder.Volume = order.q.ToDecimal();
-                newOrder.Price = order.p.ToDecimal();
-                newOrder.ServerType = ServerType.Binance;
-                newOrder.PortfolioNumber = "Binance";
-
-                if (order.o == "MARKET")
-                {
-                    newOrder.TypeOrder = OrderPriceType.Market;
-                }
-                else
-                {
-                    newOrder.TypeOrder = OrderPriceType.Limit;
-                }
-
-                if (MyOrderEvent != null)
-                {
-                    MyOrderEvent(newOrder);
-                }
-            }
-            else if (order.x == "FILLED")
-            {
-                Order newOrder = new Order();
-                newOrder.SecurityNameCode = order.s;
-                newOrder.TimeCallBack = new DateTime(1970, 1, 1).AddMilliseconds(order.E.ToDouble());
-                newOrder.NumberUser = orderNumUser;
-                newOrder.NumberMarket = order.i.ToString();
-                newOrder.Side = order.S == "BUY" ? Side.Buy : Side.Sell;
-                newOrder.State = OrderStateType.Done;
-                newOrder.Volume = order.q.ToDecimal();
-                newOrder.Price = order.p.ToDecimal();
-                newOrder.ServerType = ServerType.Binance;
-                newOrder.PortfolioNumber = "Binance";
-
-                if (order.o == "MARKET")
-                {
-                    newOrder.TypeOrder = OrderPriceType.Market;
-                }
-                else
-                {
-                    newOrder.TypeOrder = OrderPriceType.Limit;
-                }
-
-                if (MyOrderEvent != null)
-                {
-                    MyOrderEvent(newOrder);
-                }
+                SendLogMessage(error.ToString(), LogMessageType.Error);
             }
         }
 
@@ -2163,7 +2346,7 @@ namespace OsEngine.Market.Servers.Binance.Spot
 
                 needDepth.Asks = ascs;
                 needDepth.Bids = bids;
-                needDepth.Time = ServerTime;
+                needDepth.Time = DateTime.UtcNow;// ServerTime;
 
                 if (needDepth.Time == DateTime.MinValue)
                 {
@@ -2245,7 +2428,7 @@ namespace OsEngine.Market.Servers.Binance.Spot
             }
         }
 
-        private readonly Lock _lockOrder = new();
+        private string _lockOrder = "lockOrder";
 
         private void ExecuteOrderOnMarginExchange(Order order)
         {
@@ -2264,7 +2447,7 @@ namespace OsEngine.Market.Servers.Binance.Spot
                     {
                         param.Add("&timeInForce=", "GTC");
                     }
-                    param.Add("&newClientOrderId=", "x-RKXTQ2AK" + order.NumberUser.ToString(CultureInfo.InvariantCulture));
+                    param.Add("&newClientOrderId=", "x-RKXTQ2AK" + order.NumberUser.ToString());
 
                     if (order.PositionConditionType == OrderPositionConditionType.Open)
                     {
@@ -2285,7 +2468,7 @@ namespace OsEngine.Market.Servers.Binance.Spot
                             .Replace(CultureInfo.InvariantCulture.NumberFormat.NumberDecimalSeparator, "."));
                     }
 
-                    var res = CreateQuery(BinanceExchangeType.SpotExchange, Method.POST, "/sapi/v1/margin/order", param, true);
+                    var res = CreateQuery(BinanceExchangeType.MarginExchange, Method.POST, "/sapi/v1/margin/order", param, true);
 
                     if (res != null && res.Contains("clientOrderId"))
                     {
@@ -2325,7 +2508,7 @@ namespace OsEngine.Market.Servers.Binance.Spot
                     {
                         param.Add("&timeInForce=", "GTC");
                     }
-                    param.Add("&newClientOrderId=", "x-RKXTQ2AK" + order.NumberUser.ToString(CultureInfo.InvariantCulture));
+                    param.Add("&newClientOrderId=", "x-RKXTQ2AK" + order.NumberUser.ToString());
                     param.Add("&quantity=",
                         order.Volume.ToString(CultureInfo.InvariantCulture)
                             .Replace(CultureInfo.InvariantCulture.NumberFormat.NumberDecimalSeparator, "."));
@@ -2421,12 +2604,12 @@ namespace OsEngine.Market.Servers.Binance.Spot
                     }
                     else if (order.PortfolioNumber == "BinanceMargin")
                     {
-                        CreateQuery(BinanceExchangeType.SpotExchange, Method.DELETE, "/sapi/v1/margin/order", param, true);
+                        CreateQuery(BinanceExchangeType.MarginExchange, Method.DELETE, "/sapi/v1/margin/order", param, true);
                     }
                     else
                     {
                         CreateQuery(BinanceExchangeType.SpotExchange, Method.DELETE, "api/v3/order", param, true);
-                        CreateQuery(BinanceExchangeType.SpotExchange, Method.DELETE, "/sapi/v1/margin/order", param, true);
+                        CreateQuery(BinanceExchangeType.MarginExchange, Method.DELETE, "/sapi/v1/margin/order", param, true);
                     }
                 }
                 catch (Exception ex)
@@ -2463,7 +2646,7 @@ namespace OsEngine.Market.Servers.Binance.Spot
                     }
                     else if (oldOrder.PortfolioNumber == "BinanceMargin")
                     {
-                        res = CreateQuery(BinanceExchangeType.SpotExchange, Method.GET, "/sapi/v1/margin/allOrders", param, true);
+                        res = CreateQuery(BinanceExchangeType.MarginExchange, Method.GET, "/sapi/v1/margin/allOrders", param, true);
                     }
 
                     //res = CreateQuery(BinanceExchangeType.SpotExchange, Method.GET, endPoint, param, true);
@@ -2482,7 +2665,7 @@ namespace OsEngine.Market.Servers.Binance.Spot
                 }
 
                 HistoryOrderReport orderOnBoard =
-                    allOrders.Find(ord => ord.clientOrderId.Replace("x-RKXTQ2AK", "") == oldOrder.NumberUser.ToString(CultureInfo.InvariantCulture));
+                    allOrders.Find(ord => ord.clientOrderId.Replace("x-RKXTQ2AK", "") == oldOrder.NumberUser.ToString());
 
                 if (orderOnBoard == null)
                 {
@@ -2677,7 +2860,7 @@ namespace OsEngine.Market.Servers.Binance.Spot
                 }
                 else if (order.PortfolioNumber == "BinanceMargin")
                 {
-                    res = CreateQuery(BinanceExchangeType.SpotExchange, Method.GET, "/sapi/v1/margin/myTrades", param, true);
+                    res = CreateQuery(BinanceExchangeType.MarginExchange, Method.GET, "/sapi/v1/margin/myTrades", param, true);
                 }
 
                 if (res == null)
@@ -2740,7 +2923,7 @@ namespace OsEngine.Market.Servers.Binance.Spot
                     }
                 }
 
-                string res2 = CreateQuery(BinanceExchangeType.SpotExchange, Method.GET, "/sapi/v1/margin/allOrders", param, true);
+                string res2 = CreateQuery(BinanceExchangeType.MarginExchange, Method.GET, "/sapi/v1/margin/allOrders", param, true);
 
                 if (!string.IsNullOrEmpty(res2))
                 {
@@ -2784,7 +2967,7 @@ namespace OsEngine.Market.Servers.Binance.Spot
                     string id = myOrder.clientOrderId.Replace("x-RKXTQ2AK", "");
                     try
                     {
-                        newOrder.NumberUser = Convert.ToInt32(id, CultureInfo.InvariantCulture);
+                        newOrder.NumberUser = Convert.ToInt32(id);
                     }
                     catch
                     {
@@ -2876,7 +3059,7 @@ namespace OsEngine.Market.Servers.Binance.Spot
                     }
                 }
 
-                string res2 = CreateQuery(BinanceExchangeType.SpotExchange, Method.GET, "/sapi/v1/margin/openOrders", param, true);
+                string res2 = CreateQuery(BinanceExchangeType.MarginExchange, Method.GET, "/sapi/v1/margin/openOrders", param, true);
 
                 if (!string.IsNullOrEmpty(res2))
                 {
@@ -2953,7 +3136,7 @@ namespace OsEngine.Market.Servers.Binance.Spot
 
         #region 12 Queries
 
-        private readonly Lock _queryHttpLocker = new();
+        private object _queryHttpLocker = new object();
 
         private RateGate _rateGate = new RateGate(1, TimeSpan.FromMilliseconds(100));
 
@@ -2986,12 +3169,12 @@ namespace OsEngine.Market.Servers.Binance.Spot
 
                         if (fullUrl == "")
                         {
-                            fullUrl = "?timestamp=" + timeStamp + "&signature=" + CreateSignature(message);
+                            fullUrl = "?timestamp=" + timeStamp + "&signature=" + SignEd25519(message);
                         }
                         else
                         {
                             message = fullUrl + "&timestamp=" + timeStamp;
-                            fullUrl += "&timestamp=" + timeStamp + "&signature=" + CreateSignature(message.Trim('?'));
+                            fullUrl += "&timestamp=" + timeStamp + "&signature=" + SignEd25519(message.Trim('?'));
                         }
                     }
 
@@ -3021,7 +3204,7 @@ namespace OsEngine.Market.Servers.Binance.Spot
                     if (response.Contains("code"))
                     {
                         var error = JsonConvert.DeserializeAnonymousType(response, new ErrorMessage());
-                        throw new Exception(error.msg);
+                        throw new Exception($"{startUri}. {error.msg}");
                     }
 
                     return response;
@@ -3051,7 +3234,7 @@ namespace OsEngine.Market.Servers.Binance.Spot
 
             if (result != null)
             {
-                return (result.serverTime + 500).ToString(CultureInfo.InvariantCulture);
+                return (result.serverTime + 500).ToString();
             }
             else
             {
@@ -3060,18 +3243,46 @@ namespace OsEngine.Market.Servers.Binance.Spot
                 var r = timeStamp.TotalMilliseconds;
                 var re = Convert.ToInt64(r);
 
-                return re.ToString(CultureInfo.InvariantCulture);
+                return re.ToString();
             }
         }
 
-        private string CreateSignature(string message)
+        public string SignEd25519(string payload)
         {
-            var messageBytes = Encoding.UTF8.GetBytes(message);
-            var keyBytes = Encoding.UTF8.GetBytes(SecretKey);
-            var hash = new HMACSHA256(keyBytes);
-            var computedHash = hash.ComputeHash(messageBytes);
-            return BitConverter.ToString(computedHash).Replace("-", "").ToLower();
+            try
+            {
+                byte[] privateKeyBytes = Convert.FromBase64String(SecretKey);
+                byte[] payloadBytes = Encoding.ASCII.GetBytes(payload);
+                var algorithm = SignatureAlgorithm.Ed25519;
+
+                byte[] rawPrivateKey = ExtractRawPrivateKeyFromPKCS8(privateKeyBytes);
+
+                using (var key = Key.Import(algorithm, rawPrivateKey, KeyBlobFormat.RawPrivateKey))
+                {
+                    byte[] signatureBytes = algorithm.Sign(key, payloadBytes);
+                    return Convert.ToBase64String(signatureBytes);
+                }
+            }
+            catch (Exception ex)
+            {
+                SendLogMessage(ex.ToString(), LogMessageType.Error);
+                return null;
+            }
         }
+
+        private static byte[] ExtractRawPrivateKeyFromPKCS8(byte[] pkcs8Bytes)
+        {
+            if (pkcs8Bytes.Length >= 32)
+            {
+                byte[] rawKey = new byte[32];
+                Array.Copy(pkcs8Bytes, pkcs8Bytes.Length - 32, rawKey, 0, 32);
+                return rawKey;
+            }
+
+            throw new Exception("Не удалось извлечь raw ключ из PKCS#8");
+        }
+
+        public void SetLeverage(Security security, decimal leverage) { }
 
         public void SetLeverage(string securityName, string className, string leverage, string leverageLong, string leverageShort) { }
 
@@ -3115,4 +3326,3 @@ namespace OsEngine.Market.Servers.Binance.Spot
         public BinanceExchangeType ExchangeType;
     }
 }
-

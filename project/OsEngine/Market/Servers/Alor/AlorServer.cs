@@ -2495,7 +2495,8 @@ namespace OsEngine.Market.Servers.Alor
                     if(response.Content != null)
                     {
                         SendLogMessage("Fail reasons: "
-                      + response.Content, LogMessageType.Error);
+                      + response.Content 
+                      + "\n Security: " + order.SecurityNameCode, LogMessageType.Error);
                     }
 
                     order.State = OrderStateType.Fail;

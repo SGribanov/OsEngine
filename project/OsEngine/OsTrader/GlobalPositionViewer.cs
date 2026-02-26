@@ -1,23 +1,22 @@
-#nullable enable
-#pragma warning disable CS8600, CS8601, CS8602, CS8603, CS8604, CS8605, CS8618, CS8619, CS8620, CS8622, CS8625, CS8629, CS8765, CS8767
-
-/*
+﻿/*
  * Your rights to use code governed by this license https://github.com/AlexWan/OsEngine/blob/master/LICENSE
  * Ваши права на использование кода регулируются данной лицензией http://o-s-a.net/doc/license_simple_engine.pdf
 */
 
+using OsEngine.Alerts;
+using OsEngine.Entity;
+using OsEngine.Language;
+using OsEngine.Logging;
 using System;
 using System.Collections.Generic;
+using System.Drawing;
+using System.Globalization;
+using System.Linq;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Windows.Forms.Integration;
-using OsEngine.Entity;
-using OsEngine.Logging;
-using System.Drawing;
-using OsEngine.Language;
-using OsEngine.Alerts;
-using System.Globalization;
-using System.Diagnostics;
+using static Grpc.Tradeapi.V1.Marketdata.OrderBook.Types;
+using static OsEngine.OsTrader.GlobalPositionViewer;
 
 namespace OsEngine.OsTrader
 {
@@ -45,7 +44,7 @@ namespace OsEngine.OsTrader
                     _journals = new List<Journal.Journal>();
                 }
 
-                if(journals == null
+                if (journals == null
                     || journals.Count == 0)
                 {
                     return;
@@ -81,9 +80,9 @@ namespace OsEngine.OsTrader
         {
             List<Position> deals = new List<Position>();
 
-            for(int i = 0;i < _journals.Count;i++)
+            for (int i = 0; i < _journals.Count; i++)
             {
-                if(_journals[i] != null)
+                if (_journals[i] != null)
                 {
                     List<Position> curPoses = _journals[i].OpenPositions;
 
@@ -136,32 +135,34 @@ namespace OsEngine.OsTrader
         {
             _journals = null;
 
-            if(_hostOpenPoses != null)
+            if (_hostOpenPoses != null)
             {
                 _hostOpenPoses.Child = null;
                 _hostOpenPoses = null;
             }
 
-            if(_hostClosePoses != null)
+            if (_hostClosePoses != null)
             {
                 _hostClosePoses.Child = null;
                 _hostClosePoses = null;
             }
 
-            if(_gridOpenPoses != null)
+            if (_gridOpenPoses != null)
             {
                 DataGridFactory.ClearLinks(_gridOpenPoses);
                 _gridOpenPoses.Click -= _gridAllPositions_Click;
+                _gridOpenPoses.CellClick -= _gridOpenPoses_CellClick;
                 _gridOpenPoses.DoubleClick -= _gridOpenPoses_DoubleClick;
                 _gridOpenPoses.DataError -= _gridOpenPoses_DataError;
                 _gridOpenPoses = null;
             }
 
-            if(_gridClosePoses != null)
+            if (_gridClosePoses != null)
             {
                 DataGridFactory.ClearLinks(_gridClosePoses);
                 _gridClosePoses.Click -= _gridClosePoses_Click;
                 _gridClosePoses.DoubleClick -= _gridClosePoses_DoubleClick;
+                _gridClosePoses.CellClick -= _gridClosePoses_CellClick;
                 _gridClosePoses.DataError -= _gridOpenPoses_DataError;
                 _gridClosePoses = null;
             }
@@ -185,14 +186,14 @@ namespace OsEngine.OsTrader
         {
             try
             {
-                if(_hostOpenPoses == null)
+                if (_hostOpenPoses == null)
                 {
                     return;
                 }
 
                 if (!_hostOpenPoses.CheckAccess())
                 {
-                    _hostOpenPoses.Dispatcher.InvokeAsync(StopPaint);
+                    _hostOpenPoses.Dispatcher.Invoke(StopPaint);
                     return;
                 }
 
@@ -222,29 +223,31 @@ namespace OsEngine.OsTrader
                 _hostOpenPoses = openPositionHost;
                 _hostClosePoses = closePositionHost;
 
-                if(_hostOpenPoses == null &&
+                if (_hostOpenPoses == null &&
                     _hostClosePoses == null)
                 {
                     return;
                 }
 
-                if(_hostOpenPoses == null)
+                if (_hostOpenPoses == null)
                 {
                     return;
                 }
 
                 if (!_hostOpenPoses.CheckAccess())
                 {
-                    _hostOpenPoses.Dispatcher.InvokeAsync(new Action(() => StartPaint(openPositionHost, closePositionHost)));
+                    _hostOpenPoses.Dispatcher.Invoke(
+                        new Action<WindowsFormsHost, WindowsFormsHost>(StartPaint), openPositionHost, closePositionHost);
                     return;
                 }
 
-                if(_hostOpenPoses != null)
+                if (_hostOpenPoses != null)
                 {
                     if (_gridOpenPoses == null)
                     {
                         _gridOpenPoses = CreateNewTable();
                         _gridOpenPoses.Click += _gridAllPositions_Click;
+                        _gridOpenPoses.CellClick += _gridOpenPoses_CellClick;
                         _gridOpenPoses.DoubleClick += _gridOpenPoses_DoubleClick;
                         _gridOpenPoses.DataError += _gridOpenPoses_DataError;
                     }
@@ -257,13 +260,14 @@ namespace OsEngine.OsTrader
                     }
                 }
 
-                if(_hostClosePoses != null)
+                if (_hostClosePoses != null)
                 {
                     if (_gridClosePoses == null)
                     {
                         _gridClosePoses = CreateNewTable();
                         _gridClosePoses.Click += _gridClosePoses_Click;
                         _gridClosePoses.DoubleClick += _gridClosePoses_DoubleClick;
+                        _gridClosePoses.CellClick += _gridClosePoses_CellClick;
                         _gridClosePoses.DataError += _gridOpenPoses_DataError;
                     }
 
@@ -417,20 +421,19 @@ namespace OsEngine.OsTrader
 
         private void TryRePaint(Position position, DataGridViewRow nRow)
         {
-            if(position == null)
+            if (position == null)
             {
                 return;
             }
 
-            if (nRow.Cells[1].Value == null
-                || nRow.Cells[1].Value.ToString() != position.TimeCreate.ToString(_currentCulture))// == false) //AVP убрал, потому что  во вкладке все позиции, дату позиции не обновляло
+            if (nRow.Cells[1].Value == null || nRow.Cells[1].Value.ToString() != position.TimeCreate.ToString(_currentCulture))
             {
                 nRow.Cells[1].Value = position.TimeCreate.ToString(_currentCulture);
             }
+
             if (position.TimeClose != position.TimeOpen)
             {
-                if (nRow.Cells[2].Value == null
-    || nRow.Cells[2].Value.ToString() != position.TimeClose.ToString(_currentCulture))// == false) //AVP убрал потому что во вкладке все позиции, дату позиции не обновляло
+                if (nRow.Cells[2].Value == null || nRow.Cells[2].Value.ToString() != position.TimeClose.ToString(_currentCulture))
                 {
                     nRow.Cells[2].Value = position.TimeClose.ToString(_currentCulture);
                 }
@@ -524,7 +527,7 @@ namespace OsEngine.OsTrader
                 nRow.Cells[14].Value = stopPrice.ToStringWithNoEndZero();
             }
 
-            decimal profitRedLine = Math.Round(position.ProfitOrderRedLine,decimalsPrice);
+            decimal profitRedLine = Math.Round(position.ProfitOrderRedLine, decimalsPrice);
 
             if (nRow.Cells[15].Value == null ||
                  nRow.Cells[15].Value.ToString() != profitRedLine.ToStringWithNoEndZero())
@@ -532,7 +535,7 @@ namespace OsEngine.OsTrader
                 nRow.Cells[15].Value = profitRedLine.ToStringWithNoEndZero();
             }
 
-            decimal profitPrice = Math.Round(position.ProfitOrderPrice,decimalsPrice);
+            decimal profitPrice = Math.Round(position.ProfitOrderPrice, decimalsPrice);
 
             if (nRow.Cells[16].Value == null ||
                 nRow.Cells[16].Value.ToString() != profitPrice.ToStringWithNoEndZero())
@@ -549,6 +552,7 @@ namespace OsEngine.OsTrader
                     nRow.Cells[17].Value = position.SignalTypeOpen;
                 }
             }
+
             if (string.IsNullOrEmpty(position.SignalTypeClose) == false)
             {
                 if (nRow.Cells[18].Value == null ||
@@ -561,7 +565,7 @@ namespace OsEngine.OsTrader
 
         private async void WatcherThreadWorkArea()
         {
-            if(_startProgram != StartProgram.IsTester &&
+            if (_startProgram != StartProgram.IsTester &&
                 _startProgram != StartProgram.IsOsTrader)
             {
                 return;
@@ -586,11 +590,13 @@ namespace OsEngine.OsTrader
                         for (int i = 0; _journals != null && i < _journals.Count; i++)
                         {
                             Journal.Journal journal = _journals[i];
+
                             if (journal.OpenPositions != null
                                 && journal.OpenPositions.Count != 0)
                             {
                                 openPositions.AddRange(journal.OpenPositions);
                             }
+
                             if (journal.CloseAllPositions != null)
                             {
                                 for (int i2 = journal.CloseAllPositions.Count - 1;
@@ -602,9 +608,8 @@ namespace OsEngine.OsTrader
                             }
                         }
                     }
-                    catch (Exception ex)
+                    catch
                     {
-                        Trace.TraceWarning(ex.ToString());
                         continue;
                     }
 
@@ -621,9 +626,9 @@ namespace OsEngine.OsTrader
                         }
                     }
 
-                    if(openPositions.Count > 100)
+                    if (openPositions.Count > 100)
                     {
-                        openPositions = openPositions.GetRange(openPositions.Count - 100,100);
+                        openPositions = openPositions.GetRange(openPositions.Count - 100, 100);
                     }
 
                     if (closePositions.Count > 100)
@@ -633,155 +638,184 @@ namespace OsEngine.OsTrader
 
                     if (_gridOpenPoses != null)
                     {
-                        CheckPosition(_gridOpenPoses, openPositions);
-                        Sort(_gridOpenPoses);
+                        SortRowPosition(_gridOpenPoses, openPositions, _sortModeOpenPoses);
                     }
 
                     if (_gridClosePoses != null)
                     {
-                        CheckPosition(_gridClosePoses, closePositions);
-                        Sort(_gridClosePoses);
+                        SortRowPosition(_gridClosePoses, closePositions, _sortModeClosePoses);
                     }
-
-                    
                 }
-                catch(Exception e)
+                catch (Exception e)
                 {
-                    SendNewLogMessage(e.ToString(),LogMessageType.Error);
+                    SendNewLogMessage(e.ToString(), LogMessageType.Error);
                     await Task.Delay(5000);
                 }
             }
         }
 
-        private void Sort(DataGridView grid)
-        {
-            try
-            {
-                if(grid == null)
-                {
-                    return;
-                }
-
-                if (grid.InvokeRequired)
-                {
-                    grid.Invoke(new Action<DataGridView>(Sort), grid);
-                    return;
-                }
-
-                bool needToSort = false;
-
-                for (int i = 1; i < grid.Rows.Count; i++)
-                {
-                    if (grid.Rows[i].Cells[0].Value == null
-                        || grid.Rows[i - 1].Cells[0].Value == null)
-                    {
-                        continue;
-                    }
-
-                    int numCur = Convert.ToInt32(grid.Rows[i].Cells[0].Value.ToString(), CultureInfo.InvariantCulture);
-                    int numPrev = Convert.ToInt32(grid.Rows[i - 1].Cells[0].Value.ToString(), CultureInfo.InvariantCulture);
-
-                    if (numCur > numPrev)
-                    {
-                        needToSort = true;
-                        break;
-                    }
-                }
-
-                if (needToSort == false)
-                {
-                    return;
-                }
-
-                List<DataGridViewRow> rows = new List<DataGridViewRow>();
-
-                rows.Add(grid.Rows[0]);
-
-                for (int i = 1; i < grid.Rows.Count; i++)
-                {
-                    DataGridViewRow curRow = grid.Rows[i];
-
-                    int numCur = Convert.ToInt32(grid.Rows[i].Cells[0].Value.ToString(), CultureInfo.InvariantCulture);
-
-                    bool isInArray = false;
-
-                    for (int i2 = 0; i2 < rows.Count; i2++)
-                    {
-                        int numCurInRowsGrid = Convert.ToInt32(rows[i2].Cells[0].Value.ToString(), CultureInfo.InvariantCulture);
-
-                        if (numCur > numCurInRowsGrid)
-                        {
-                            rows.Insert(i2, curRow);
-                            isInArray = true;
-                            break;
-                        }
-                    }
-
-                    if (isInArray == false)
-                    {
-                        rows.Add(curRow);
-                    }
-                }
-
-                grid.Rows.Clear();
-                grid.Rows.AddRange(rows.ToArray());
-            }
-            catch(Exception ex)
-            {
-                SendNewLogMessage(ex.ToString(), LogMessageType.Error);
-            }
-        }
-
-        private void CheckPosition(DataGridView grid, List<Position> positions)
+        private void SortRowPosition(DataGridView grid, List<Position> positions, SortedMode sortedMode)
         {
             if (grid.InvokeRequired)
             {
-                grid.Invoke(new Action<DataGridView, List<Position>>(CheckPosition),grid, positions);
+                grid.Invoke(new Action<DataGridView, List<Position>, SortedMode>(SortRowPosition), grid, positions, sortedMode);
                 return;
             }
+
             try
             {
-                for (int i1 = 0; i1 < positions.Count; i1++)
+                List<Position> sortPositions = new List<Position>();
+
+                if (sortedMode == SortedMode.NumberPositionFromMoreToLess)
                 {
-                    Position position = positions[i1];
-
-                    if(position == null)
+                    for (int i = 0; i < positions.Count; i++)
                     {
-                        continue;
-                    }
+                        Position pos = positions[i];
+                        int index = 0;
 
-                    bool isIn = false;
-
-                    for (int i = 0; i < grid.Rows.Count; i++)
-                    {
-                        if (grid.Rows[i].Cells[0].Value != null &&
-                            grid.Rows[i].Cells[0].Value.ToString() == position.Number.ToString())
+                        while (index < sortPositions.Count && sortPositions[index].Number >= pos.Number)
                         {
-                            TryRePaint(position, grid.Rows[i]);
-                            isIn = true;
-                            break;
+                            index++;
+                        }
+
+                        sortPositions.Insert(index, pos);
+                    }
+                }
+                else if (sortedMode == SortedMode.NumberPositionFromLessToMore)
+                {
+                    for (int i = 0; i < positions.Count; i++)
+                    {
+                        Position pos = positions[i];
+                        int index = 0;
+
+                        while (index < sortPositions.Count && sortPositions[index].Number <= pos.Number)
+                        {
+                            index++;
+                        }
+
+                        sortPositions.Insert(index, pos);
+                    }
+                }
+                else if (sortedMode == SortedMode.OpenTimeFromMoreToLess)
+                {
+                    for (int i = 0; i < positions.Count; i++)
+                    {
+                        Position pos = positions[i];
+                        int index = 0;
+
+                        while (index < sortPositions.Count && sortPositions[index].TimeCreate >= pos.TimeCreate)
+                        {
+                            index++;
+                        }
+
+                        sortPositions.Insert(index, pos);
+                    }
+                }
+                else if (sortedMode == SortedMode.OpenTimeFromLessToMore)
+                {
+                    for (int i = 0; i < positions.Count; i++)
+                    {
+                        Position pos = positions[i];
+                        int index = 0;
+
+                        while (index < sortPositions.Count && sortPositions[index].TimeCreate <= pos.TimeCreate)
+                        {
+                            index++;
+                        }
+
+                        sortPositions.Insert(index, pos);
+                    }
+                }
+                else if (sortedMode == SortedMode.CloseTimeFromMoreToLess)
+                {
+                    for (int i = 0; i < positions.Count; i++)
+                    {
+                        Position pos = positions[i];
+                        int index = 0;
+
+                        while (index < sortPositions.Count && sortPositions[index].TimeClose >= pos.TimeClose)
+                        {
+                            index++;
+                        }
+
+                        sortPositions.Insert(index, pos);
+                    }
+                }
+                else if (sortedMode == SortedMode.CloseTimeFromLessToMore)
+                {
+                    for (int i = 0; i < positions.Count; i++)
+                    {
+                        Position pos = positions[i];
+                        int index = 0;
+
+                        while (index < sortPositions.Count && sortPositions[index].TimeClose <= pos.TimeClose)
+                        {
+                            index++;
+                        }
+
+                        sortPositions.Insert(index, pos);
+                    }
+                }
+                else if (sortedMode == SortedMode.SecurityNameFromMoreToLess)
+                {
+                    sortPositions = positions.OrderBy(o => o.SecurityName).ToList();
+                }
+                else if (sortedMode == SortedMode.SecurityNameFromLessToMore)
+                {
+                    sortPositions = positions.OrderBy(o => o.SecurityName).ToList();
+                    sortPositions.Reverse();
+                }
+                else if (sortedMode == SortedMode.BotNameFromMoreToLess)
+                {
+                    sortPositions = positions.OrderBy(o => o.NameBot).ToList();
+                }
+                else if (sortedMode == SortedMode.BotNameFromLessToMore)
+                {
+                    sortPositions = positions.OrderBy(o => o.NameBot).ToList();
+                    sortPositions.Reverse();
+                }
+
+                Dictionary<int, DataGridViewRow> rowsByNumber = new Dictionary<int, DataGridViewRow>();
+                foreach (DataGridViewRow row in grid.Rows)
+                {
+                    if (row.Cells[0].Value != null && int.TryParse(row.Cells[0].Value.ToString(), out int number))
+                    {
+                        if (!rowsByNumber.ContainsKey(number))
+                            rowsByNumber[number] = row;
+                    }
+                }
+
+                for (int i = 0; i < sortPositions.Count; i++)
+                {
+                    Position pos = sortPositions[i];
+                    int number = pos.Number;
+
+                    if (rowsByNumber.TryGetValue(number, out DataGridViewRow existingRow))
+                    {
+                        rowsByNumber.Remove(number);
+
+                        TryRePaint(pos, existingRow);
+
+                        if (existingRow.Index != i)
+                        {
+                            grid.Rows.RemoveAt(existingRow.Index);
+                            grid.Rows.Insert(i, existingRow);
                         }
                     }
-                    
-                    if (isIn == false)
+                    else
                     {
-                        DataGridViewRow row = GetRow(position);
-
-                        if(row != null)
+                        DataGridViewRow newRow = GetRow(pos);
+                        if (newRow != null)
                         {
-                            grid.Rows.Insert(0,row);
+                            grid.Rows.Insert(i, newRow);
                         }
                     }
                 }
 
-                for (int i = 0; i < grid.Rows.Count; i++)
+                foreach (var row in rowsByNumber.Values)
                 {
-                    if (positions.Find(pos => pos != null && pos.Number == (int)grid.Rows[i].Cells[0].Value) == null)
-                    {
-                        grid.Rows.Remove(grid.Rows[i]);
-                    }
+                    grid.Rows.Remove(row);
                 }
-
             }
             catch (Exception error)
             {
@@ -799,9 +833,9 @@ namespace OsEngine.OsTrader
             {
                 PaintPos(_gridClosePoses);
             }
-            catch (Exception ex)
+            catch
             {
-                SendNewLogMessage(ex.ToString(), LogMessageType.Error);
+                // ignore
             }
         }
 
@@ -813,7 +847,7 @@ namespace OsEngine.OsTrader
 
                 if (mouse.Button != MouseButtons.Right)
                 {
-                    if(_gridClosePoses.ContextMenuStrip != null)
+                    if (_gridClosePoses.ContextMenuStrip != null)
                     {
                         _gridClosePoses.ContextMenuStrip = null;
                     }
@@ -825,7 +859,7 @@ namespace OsEngine.OsTrader
                 items[0] = new ToolStripMenuItem { Text = OsLocalization.Journal.PositionMenuItem7 };
                 items[0].Click += ClosePositionClearDelete_Click;
 
-                ContextMenuStrip menu = new ContextMenuStrip(); 
+                ContextMenuStrip menu = new ContextMenuStrip();
                 menu.Items.AddRange(items);
 
                 _gridClosePoses.ContextMenuStrip = menu;
@@ -856,11 +890,10 @@ namespace OsEngine.OsTrader
                     {
                         return;
                     }
-                    number = Convert.ToInt32(_gridClosePoses.Rows[_gridClosePoses.CurrentCell.RowIndex].Cells[0].Value, CultureInfo.InvariantCulture);
+                    number = Convert.ToInt32(_gridClosePoses.Rows[_gridClosePoses.CurrentCell.RowIndex].Cells[0].Value);
                 }
-                catch (Exception ex)
+                catch (Exception)
                 {
-                    Trace.TraceWarning(ex.ToString());
                     return;
                 }
 
@@ -875,6 +908,17 @@ namespace OsEngine.OsTrader
             }
         }
 
+        private void _gridClosePoses_CellClick(object sender, DataGridViewCellEventArgs e)
+        {
+            if (e.RowIndex != -1)
+                return;
+
+            DataGridView grid = sender as DataGridView;
+            if (grid == null) return;
+
+            UpdateGridSortMod(ref grid, e, ref _sortModeClosePoses);
+        }
+
         #endregion
 
         #region Active positions
@@ -885,10 +929,21 @@ namespace OsEngine.OsTrader
             {
                 PaintPos(_gridOpenPoses);
             }
-            catch (Exception ex)
+            catch
             {
-                SendNewLogMessage(ex.ToString(), LogMessageType.Error);
+                // ignore
             }
+        }
+
+        private void _gridOpenPoses_CellClick(object sender, DataGridViewCellEventArgs e)
+        {
+            if (e.RowIndex != -1)
+                return;
+
+            DataGridView grid = sender as DataGridView;
+            if (grid == null) return;
+
+            UpdateGridSortMod(ref grid, e, ref _sortModeOpenPoses);
         }
 
         private void _gridAllPositions_Click(object sender, EventArgs e)
@@ -899,10 +954,19 @@ namespace OsEngine.OsTrader
 
                 if (mouse.Button != MouseButtons.Right)
                 {
-                    if(_gridOpenPoses.ContextMenuStrip != null)
+                    if (_gridOpenPoses.ContextMenuStrip != null)
                     {
                         _gridOpenPoses.ContextMenuStrip = null;
                     }
+
+                    if (_gridOpenPoses.SelectedCells == null ||
+                        _gridOpenPoses.SelectedCells.Count == 0)
+                    {
+                        return;
+                    }
+
+                    int tabRow = _gridOpenPoses.SelectedCells[0].RowIndex;
+                    int tabColumn = _gridOpenPoses.SelectedCells[0].ColumnIndex;
 
                     return;
                 }
@@ -941,8 +1005,8 @@ namespace OsEngine.OsTrader
             {
                 AcceptDialogUi ui = new AcceptDialogUi(OsLocalization.Journal.Message5);
                 ui.ShowDialog();
-                
-                if(ui.UserAcceptAction == false)
+
+                if (ui.UserAcceptAction == false)
                 {
                     return;
                 }
@@ -965,18 +1029,16 @@ namespace OsEngine.OsTrader
                 int number;
                 try
                 {
-                    if(_gridOpenPoses.CurrentCell == null)
+                    if (_gridOpenPoses.CurrentCell == null)
                     {
                         return;
                     }
-                    number = Convert.ToInt32(_gridOpenPoses.Rows[_gridOpenPoses.CurrentCell.RowIndex].Cells[0].Value, CultureInfo.InvariantCulture);
+                    number = Convert.ToInt32(_gridOpenPoses.Rows[_gridOpenPoses.CurrentCell.RowIndex].Cells[0].Value);
                 }
-                catch (Exception ex)
+                catch (Exception)
                 {
-                    Trace.TraceWarning(ex.ToString());
                     return;
                 }
-
 
                 if (UserSelectActionEvent != null)
                 {
@@ -996,15 +1058,14 @@ namespace OsEngine.OsTrader
                 int number;
                 try
                 {
-                    if(_gridOpenPoses.CurrentCell == null)
+                    if (_gridOpenPoses.CurrentCell == null)
                     {
                         return;
                     }
-                    number = Convert.ToInt32(_gridOpenPoses.Rows[_gridOpenPoses.CurrentCell.RowIndex].Cells[0].Value, CultureInfo.InvariantCulture);
+                    number = Convert.ToInt32(_gridOpenPoses.Rows[_gridOpenPoses.CurrentCell.RowIndex].Cells[0].Value);
                 }
-                catch (Exception ex)
+                catch (Exception)
                 {
-                    Trace.TraceWarning(ex.ToString());
                     return;
                 }
 
@@ -1026,15 +1087,14 @@ namespace OsEngine.OsTrader
                 int number;
                 try
                 {
-                    if(_gridOpenPoses.CurrentCell == null)
+                    if (_gridOpenPoses.CurrentCell == null)
                     {
                         return;
                     }
-                    number = Convert.ToInt32(_gridOpenPoses.Rows[_gridOpenPoses.CurrentCell.RowIndex].Cells[0].Value, CultureInfo.InvariantCulture);
+                    number = Convert.ToInt32(_gridOpenPoses.Rows[_gridOpenPoses.CurrentCell.RowIndex].Cells[0].Value);
                 }
-                catch (Exception ex)
+                catch (Exception)
                 {
-                    Trace.TraceWarning(ex.ToString());
                     return;
                 }
 
@@ -1064,15 +1124,14 @@ namespace OsEngine.OsTrader
                 int number;
                 try
                 {
-                    if(_gridOpenPoses.CurrentCell == null)
+                    if (_gridOpenPoses.CurrentCell == null)
                     {
                         return;
                     }
-                    number = Convert.ToInt32(_gridOpenPoses.Rows[_gridOpenPoses.CurrentCell.RowIndex].Cells[0].Value, CultureInfo.InvariantCulture);
+                    number = Convert.ToInt32(_gridOpenPoses.Rows[_gridOpenPoses.CurrentCell.RowIndex].Cells[0].Value);
                 }
-                catch (Exception ex)
+                catch (Exception)
                 {
-                    Trace.TraceWarning(ex.ToString());
                     return;
                 }
 
@@ -1103,13 +1162,12 @@ namespace OsEngine.OsTrader
 
                 botTabName = grid.Rows[grid.CurrentCell.RowIndex].Cells[3].Value.ToString();
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                Trace.TraceWarning(ex.ToString());
                 return;
             }
 
-            if(UserClickOnPositionShowBotInTableEvent != null)
+            if (UserClickOnPositionShowBotInTableEvent != null)
             {
                 UserClickOnPositionShowBotInTableEvent(botTabName);
             }
@@ -1123,6 +1181,10 @@ namespace OsEngine.OsTrader
         DataGridView _lastClickGrid;
 
         private int _rowToPaintInOpenPoses;
+
+        private SortedMode _sortModeOpenPoses;
+
+        private SortedMode _sortModeClosePoses;
 
         private async void PaintPos()
         {
@@ -1144,9 +1206,8 @@ namespace OsEngine.OsTrader
 
                 _lastClickGrid.Rows[_rowToPaintInOpenPoses].DefaultCellStyle.SelectionBackColor = color;
             }
-            catch (Exception ex)
+            catch
             {
-                Trace.TraceWarning(ex.ToString());
                 return;
             }
         }
@@ -1175,6 +1236,131 @@ namespace OsEngine.OsTrader
 
         #endregion
 
+        #region Helpers
+
+        private void UpdateGridSortMod(ref DataGridView grid, DataGridViewCellEventArgs e, ref SortedMode sortMode)
+        {
+            if (grid.Columns[e.ColumnIndex] is DataGridViewButtonColumn)
+            {
+                string header = grid.Columns[e.ColumnIndex].HeaderText;
+
+                if (header == OsLocalization.Entity.PositionColumn1 || header == OsLocalization.Entity.PositionColumn1 + " ⌃")
+                {
+                    sortMode = SortedMode.NumberPositionFromMoreToLess;
+                    grid.Columns[0].HeaderText = OsLocalization.Entity.PositionColumn1 + " ⌄";
+
+                    grid.Columns[1].HeaderText = OsLocalization.Entity.PositionColumn2;
+                    grid.Columns[2].HeaderText = OsLocalization.Entity.PositionColumn3;
+                    grid.Columns[3].HeaderText = OsLocalization.Entity.PositionColumn4;
+                    grid.Columns[4].HeaderText = OsLocalization.Entity.PositionColumn5;
+                }
+                else if (header == OsLocalization.Entity.PositionColumn1 + " ⌄")
+                {
+                    sortMode = SortedMode.NumberPositionFromLessToMore;
+                    grid.Columns[0].HeaderText = OsLocalization.Entity.PositionColumn1 + " ⌃";
+
+                    grid.Columns[1].HeaderText = OsLocalization.Entity.PositionColumn2;
+                    grid.Columns[2].HeaderText = OsLocalization.Entity.PositionColumn3;
+                    grid.Columns[3].HeaderText = OsLocalization.Entity.PositionColumn4;
+                    grid.Columns[4].HeaderText = OsLocalization.Entity.PositionColumn5;
+                }
+                else if (header == OsLocalization.Entity.PositionColumn2 || header == OsLocalization.Entity.PositionColumn2 + " ⌃")
+                {
+                    sortMode = SortedMode.OpenTimeFromMoreToLess;
+                    grid.Columns[1].HeaderText = OsLocalization.Entity.PositionColumn2 + " ⌄";
+
+                    grid.Columns[0].HeaderText = OsLocalization.Entity.PositionColumn1;
+                    grid.Columns[2].HeaderText = OsLocalization.Entity.PositionColumn3;
+                    grid.Columns[3].HeaderText = OsLocalization.Entity.PositionColumn4;
+                    grid.Columns[4].HeaderText = OsLocalization.Entity.PositionColumn5;
+                }
+                else if (header == OsLocalization.Entity.PositionColumn2 + " ⌄")
+                {
+                    sortMode = SortedMode.OpenTimeFromLessToMore;
+                    grid.Columns[1].HeaderText = OsLocalization.Entity.PositionColumn2 + " ⌃";
+
+                    grid.Columns[0].HeaderText = OsLocalization.Entity.PositionColumn1;
+                    grid.Columns[2].HeaderText = OsLocalization.Entity.PositionColumn3;
+                    grid.Columns[3].HeaderText = OsLocalization.Entity.PositionColumn4;
+                    grid.Columns[4].HeaderText = OsLocalization.Entity.PositionColumn5;
+                }
+                else if (header == OsLocalization.Entity.PositionColumn3 || header == OsLocalization.Entity.PositionColumn3 + " ⌃")
+                {
+                    sortMode = SortedMode.CloseTimeFromMoreToLess;
+                    grid.Columns[2].HeaderText = OsLocalization.Entity.PositionColumn3 + " ⌄";
+
+                    grid.Columns[0].HeaderText = OsLocalization.Entity.PositionColumn1;
+                    grid.Columns[1].HeaderText = OsLocalization.Entity.PositionColumn2;
+                    grid.Columns[3].HeaderText = OsLocalization.Entity.PositionColumn4;
+                    grid.Columns[4].HeaderText = OsLocalization.Entity.PositionColumn5;
+                }
+                else if (header == OsLocalization.Entity.PositionColumn3 + " ⌄")
+                {
+                    sortMode = SortedMode.CloseTimeFromLessToMore;
+                    grid.Columns[2].HeaderText = OsLocalization.Entity.PositionColumn3 + " ⌃";
+
+                    grid.Columns[0].HeaderText = OsLocalization.Entity.PositionColumn1;
+                    grid.Columns[1].HeaderText = OsLocalization.Entity.PositionColumn2;
+                    grid.Columns[3].HeaderText = OsLocalization.Entity.PositionColumn4;
+                    grid.Columns[4].HeaderText = OsLocalization.Entity.PositionColumn5;
+                }
+                else if (header == OsLocalization.Entity.PositionColumn4 || header == OsLocalization.Entity.PositionColumn4 + " ⌃")
+                {
+                    sortMode = SortedMode.BotNameFromMoreToLess;
+                    grid.Columns[3].HeaderText = OsLocalization.Entity.PositionColumn4 + " ⌄";
+
+                    grid.Columns[0].HeaderText = OsLocalization.Entity.PositionColumn1;
+                    grid.Columns[1].HeaderText = OsLocalization.Entity.PositionColumn2;
+                    grid.Columns[2].HeaderText = OsLocalization.Entity.PositionColumn3;
+                    grid.Columns[4].HeaderText = OsLocalization.Entity.PositionColumn5;
+                }
+                else if (header == OsLocalization.Entity.PositionColumn4 + " ⌄")
+                {
+                    sortMode = SortedMode.BotNameFromLessToMore;
+                    grid.Columns[3].HeaderText = OsLocalization.Entity.PositionColumn4 + " ⌃";
+
+                    grid.Columns[0].HeaderText = OsLocalization.Entity.PositionColumn1;
+                    grid.Columns[1].HeaderText = OsLocalization.Entity.PositionColumn2;
+                    grid.Columns[2].HeaderText = OsLocalization.Entity.PositionColumn3;
+                    grid.Columns[4].HeaderText = OsLocalization.Entity.PositionColumn5;
+                }
+                else if (header == OsLocalization.Entity.PositionColumn5 || header == OsLocalization.Entity.PositionColumn5 + " ⌃")
+                {
+                    sortMode = SortedMode.SecurityNameFromMoreToLess;
+                    grid.Columns[4].HeaderText = OsLocalization.Entity.PositionColumn5 + " ⌄";
+
+                    grid.Columns[0].HeaderText = OsLocalization.Entity.PositionColumn1;
+                    grid.Columns[1].HeaderText = OsLocalization.Entity.PositionColumn2;
+                    grid.Columns[2].HeaderText = OsLocalization.Entity.PositionColumn3;
+                    grid.Columns[3].HeaderText = OsLocalization.Entity.PositionColumn4;
+                }
+                else if (header == OsLocalization.Entity.PositionColumn5 + " ⌄")
+                {
+                    sortMode = SortedMode.SecurityNameFromLessToMore;
+                    grid.Columns[4].HeaderText = OsLocalization.Entity.PositionColumn5 + " ⌃";
+
+                    grid.Columns[0].HeaderText = OsLocalization.Entity.PositionColumn1;
+                    grid.Columns[1].HeaderText = OsLocalization.Entity.PositionColumn2;
+                    grid.Columns[2].HeaderText = OsLocalization.Entity.PositionColumn3;
+                    grid.Columns[3].HeaderText = OsLocalization.Entity.PositionColumn4;
+                }
+            }
+        }
+
+        public enum SortedMode
+        {
+            NumberPositionFromMoreToLess,
+            NumberPositionFromLessToMore,
+            OpenTimeFromMoreToLess,
+            OpenTimeFromLessToMore,
+            CloseTimeFromMoreToLess,
+            CloseTimeFromLessToMore,
+            BotNameFromMoreToLess,
+            BotNameFromLessToMore,
+            SecurityNameFromMoreToLess,
+            SecurityNameFromLessToMore
+        }
+
+        #endregion
     }
 }
-
