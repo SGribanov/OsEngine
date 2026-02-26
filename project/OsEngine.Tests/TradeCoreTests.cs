@@ -64,6 +64,38 @@ public class TradeCoreTests
     }
 
     [Fact]
+    public void SetTradeFromString_ShouldParseIqFeedLegacyRuDate()
+    {
+        Trade trade = new Trade();
+
+        trade.SetTradeFromString("31.01.2024 15:30:45,100.4,7.25,100.4,100.6,C");
+
+        Assert.Equal(new DateTime(2024, 1, 31, 15, 30, 45), trade.Time);
+        Assert.Equal(100.4m, trade.Price);
+        Assert.Equal(7.25m, trade.Volume);
+        Assert.Equal(100.4m, trade.Bid);
+        Assert.Equal(100.6m, trade.Ask);
+        Assert.Equal(Side.Sell, trade.Side);
+    }
+
+    [Fact]
+    public void SetTradeFromString_ShouldParseStandardFormatWithoutOptionalDepthBlock()
+    {
+        Trade trade = new Trade();
+
+        trade.SetTradeFromString("20240102,153045,100.5,7.25,Buy,123,id-1");
+
+        Assert.Equal(new DateTime(2024, 1, 2, 15, 30, 45), trade.Time);
+        Assert.Equal(100.5m, trade.Price);
+        Assert.Equal(7.25m, trade.Volume);
+        Assert.Equal(Side.Buy, trade.Side);
+        Assert.Equal(123, trade.MicroSeconds);
+        Assert.Equal("id-1", trade.Id);
+        Assert.Equal(0m, trade.Bid);
+        Assert.Equal(0m, trade.Ask);
+    }
+
+    [Fact]
     public void SetTradeFromString_ShouldIgnoreEmptyInput()
     {
         Trade trade = new Trade
