@@ -824,9 +824,9 @@ namespace OsEngine.Market.Servers.XT.XTSpot
                             webSocketPublic = null;
                         }
                     }
-                    catch
+                    catch (Exception ex)
                     {
-                        // ignore
+                        SendLogMessage(ex.ToString(), LogMessageType.Error);
                     }
 
                     _webSocketPublic.Clear();
@@ -842,9 +842,9 @@ namespace OsEngine.Market.Servers.XT.XTSpot
                         _webSocketPrivate.OnError -= _webSocketPrivate_OnError;
                         _webSocketPrivate.CloseAsync();
                     }
-                    catch
+                    catch (Exception ex)
                     {
-                        // ignore
+                        SendLogMessage(ex.ToString(), LogMessageType.Error);
                     }
 
                     _webSocketPrivate = null;
@@ -1256,9 +1256,9 @@ namespace OsEngine.Market.Servers.XT.XTSpot
                         }
                     }
                 }
-                catch
+                catch (Exception ex)
                 {
-                    // ignore
+                    SendLogMessage(ex.ToString(), LogMessageType.Error);
                 }
 
                 if (_webSocketPrivate != null
@@ -1268,9 +1268,9 @@ namespace OsEngine.Market.Servers.XT.XTSpot
                     {
                         _webSocketPrivate.SendAsync($"{{\"method\":\"unsubscribe\",\"params\":[\"order\",\"balance\",\"trade\"],\"listenKey\":\"{_listenKey}\",\"id\":\"{TimeManager.GetUnixTimeStampMilliseconds()}\"}}");
                     }
-                    catch
+                    catch (Exception ex)
                     {
-                        // ignore
+                        SendLogMessage(ex.ToString(), LogMessageType.Error);
                     }
                 }
             }

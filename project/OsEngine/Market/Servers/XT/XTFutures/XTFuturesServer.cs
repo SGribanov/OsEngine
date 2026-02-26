@@ -854,9 +854,9 @@ namespace OsEngine.Market.Servers.XT.XTFutures
                             webSocketPublic = null;
                         }
                     }
-                    catch
+                    catch (Exception ex)
                     {
-                        // ignore
+                        SendLogMessage(ex.ToString(), LogMessageType.Error);
                     }
 
                     _webSocketPublic.Clear();
@@ -872,9 +872,9 @@ namespace OsEngine.Market.Servers.XT.XTFutures
                         _webSocketPrivate.OnError -= _webSocketPrivate_OnError;
                         _webSocketPrivate.CloseAsync();
                     }
-                    catch
+                    catch (Exception ex)
                     {
-                        // ignore
+                        SendLogMessage(ex.ToString(), LogMessageType.Error);
                     }
 
                     _webSocketPrivate = null;
@@ -1290,9 +1290,9 @@ namespace OsEngine.Market.Servers.XT.XTFutures
                         }
                     }
                 }
-                catch
+                catch (Exception ex)
                 {
-                    // ignore
+                    SendLogMessage(ex.ToString(), LogMessageType.Error);
                 }
 
                 if (_webSocketPrivate != null
@@ -1302,9 +1302,9 @@ namespace OsEngine.Market.Servers.XT.XTFutures
                     {
                         _webSocketPrivate.SendAsync($"{{\"method\":\"UNSUBSCRIBE\",\"params\":[\"order@{_listenKey}\",\"trade@{_listenKey}\",\"position@{_listenKey}\",\"balance@{_listenKey}\",\"notify@{_listenKey}\"],\"id\":\"{1254}\"}}");
                     }
-                    catch
+                    catch (Exception ex)
                     {
-                        // ignore
+                        SendLogMessage(ex.ToString(), LogMessageType.Error);
                     }
                 }
             }
