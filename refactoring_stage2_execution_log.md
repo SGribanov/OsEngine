@@ -12079,3 +12079,125 @@
   - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` succeeded (`352/352`).
 - **Commit:** n/a (not committed in this session)
 - **Push:** n/a
+
+### Step 2.2 - CultureInfo Invariant Persistence (Incremental Adoption #541)
+
+- **Status:** In Progress (increment completed)
+- **Plan item:** `refactoring_stage2_plan.md` -> Phase 2 / Step 2.2
+- **Changes:**
+  - Hardened GateIo unix-seconds timestamp serialization in signed/public REST flows:
+    - `project/OsEngine/Market/Servers/GateIo/GateIoSpot/GateIoServerSpot.cs`
+    - `project/OsEngine/Market/Servers/GateIo/GateIoFutures/GateIoServerFutures.cs`
+  - Replacements:
+    - `TimeManager.GetUnixTimeStampSeconds().ToString()` -> `ToString(CultureInfo.InvariantCulture)` in request timestamp/signature construction paths.
+  - Scope:
+    - protocol timestamp serialization determinism hardening only; runtime behavior unchanged.
+- **Verification:**
+  - Executed outside sandbox.
+  - `dotnet restore project/OsEngine/OsEngine.csproj --nologo` succeeded.
+  - `dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo` succeeded.
+  - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` succeeded (0 warnings).
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` succeeded (`352/352`).
+- **Commit:** n/a (not committed in this session)
+- **Push:** n/a
+
+### Step 2.2 - CultureInfo Invariant Persistence (Incremental Adoption #542)
+
+- **Status:** In Progress (increment completed)
+- **Plan item:** `refactoring_stage2_plan.md` -> Phase 2 / Step 2.2
+- **Changes:**
+  - Hardened GateIo WebSocket payload/signature numeric formatting in:
+    - `project/OsEngine/Market/Servers/GateIo/GateIoSpot/GateIoServerSpot.cs`
+    - `project/OsEngine/Market/Servers/GateIo/GateIoFutures/GateIoServerFutures.cs`
+  - Replacements:
+    - wrapped interpolated JSON payload strings with `FormattableString.Invariant(...)` for timestamp/id fields.
+    - wrapped interpolated auth/signature parameter strings (`time=...`) with `FormattableString.Invariant(...)`.
+    - replaced `string.Format`-based subscribe/unsubscribe auth params in futures with invariant interpolated strings.
+  - Scope:
+    - protocol payload/signature serialization determinism hardening only; runtime behavior unchanged.
+- **Verification:**
+  - Executed outside sandbox.
+  - `dotnet restore project/OsEngine/OsEngine.csproj --nologo` succeeded.
+  - `dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo` succeeded.
+  - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` succeeded (0 warnings).
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` succeeded (`352/352`).
+- **Commit:** n/a (not committed in this session)
+- **Push:** n/a
+
+### Step 2.2 - CultureInfo Invariant Persistence (Incremental Adoption #543)
+
+- **Status:** In Progress (increment completed)
+- **Plan item:** `refactoring_stage2_plan.md` -> Phase 2 / Step 2.2
+- **Changes:**
+  - Hardened explicit invariant formatting of user-order IDs in request/signature/query strings in:
+    - `project/OsEngine/Market/Servers/BingX/BingXSpot/BingXServerSpot.cs`
+    - `project/OsEngine/Market/Servers/BingX/BingXFutures/BingXServerFutures.cs`
+    - `project/OsEngine/Market/Servers/ExMo/ExmoSpot/ExmoSpotServer.cs`
+    - `project/OsEngine/Market/Servers/BitGet/BitGetFutures/BitGetServerFutures.cs`
+    - `project/OsEngine/Market/Servers/GateIo/GateIoSpot/GateIoServerSpot.cs`
+    - `project/OsEngine/Market/Servers/GateIo/GateIoFutures/GateIoServerFutures.cs`
+  - Replacements:
+    - used `order.NumberUser.ToString(CultureInfo.InvariantCulture)` for `newClientOrderId`/`clientOrderID`/`client_id`/`clientOid`/GateIo `text` payload fields participating in signed or persisted request strings.
+  - Scope:
+    - request/signature/query serialization determinism hardening only; runtime behavior unchanged.
+- **Verification:**
+  - Executed outside sandbox.
+  - `dotnet restore project/OsEngine/OsEngine.csproj --nologo` succeeded.
+  - `dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo` succeeded.
+  - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` succeeded (0 warnings).
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` succeeded (`352/352`).
+- **Commit:** n/a (not committed in this session)
+- **Push:** n/a
+
+### Step 2.2 - CultureInfo Invariant Persistence (Incremental Adoption #544)
+
+- **Status:** In Progress (increment completed)
+- **Plan item:** `refactoring_stage2_plan.md` -> Phase 2 / Step 2.2
+- **Changes:**
+  - Hardened culture-invariant protocol string formatting in:
+    - `project/OsEngine/Market/Servers/CoinEx/Spot/CoinExServerSpot.cs`
+    - `project/OsEngine/Market/Servers/CoinEx/Futures/CoinExServerFutures.cs`
+    - `project/OsEngine/Market/Servers/BingX/BingXSpot/BingXServerSpot.cs`
+    - `project/OsEngine/Market/Servers/BingX/BingXFutures/BingXServerFutures.cs`
+  - Replacements:
+    - `string.Format(...)` -> `string.Format(CultureInfo.InvariantCulture, ...)` for CoinEx kline URLs.
+    - standardized `clientOrderId` as invariant string for BingX signing and request parameter paths.
+  - Scope:
+    - protocol serialization determinism hardening only; runtime behavior unchanged.
+- **Verification:**
+  - Executed outside sandbox.
+  - `dotnet restore project/OsEngine/OsEngine.csproj --nologo` succeeded.
+  - `dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo` succeeded.
+  - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` succeeded (0 warnings).
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` succeeded (`352/352`).
+- **Commit:** n/a (not committed in this session)
+- **Push:** n/a
+
+### Step 2.2 - CultureInfo Invariant Persistence (Incremental Adoption #545)
+
+- **Status:** In Progress (increment completed)
+- **Plan item:** `refactoring_stage2_plan.md` -> Phase 2 / Step 2.2
+- **Changes:**
+  - Hardened invariant formatting of historical-query timestamp/range protocol parameters in:
+    - `project/OsEngine/Market/Servers/Deribit/DeribitServer.cs`
+    - `project/OsEngine/Market/Servers/GateIo/GateIoSpot/GateIoServerSpot.cs`
+    - `project/OsEngine/Market/Servers/GateIo/GateIoFutures/GateIoServerFutures.cs`
+    - `project/OsEngine/Market/Servers/HTX/Swap/HTXSwapServer.cs`
+    - `project/OsEngine/Market/Servers/HTX/Futures/HTXFuturesServer.cs`
+    - `project/OsEngine/Market/Servers/Woo/WooServer.cs`
+    - `project/OsEngine/Market/Servers/YahooFinance/YahooServer.cs`
+    - `project/OsEngine/Market/Servers/OKX/OkxServer.cs`
+    - `project/OsEngine/Market/Servers/OKXData/OKXDataServer.cs`
+  - Replacements:
+    - explicit invariant serialization for `from/to/start/end/after/period1/period2/limit/timestamp` numeric values in URL/query/signature generation paths.
+    - Deribit auth/signature timestamp string construction made explicit invariant.
+  - Scope:
+    - protocol URL/query/signature serialization determinism hardening only; runtime behavior unchanged.
+- **Verification:**
+  - Executed outside sandbox.
+  - `dotnet restore project/OsEngine/OsEngine.csproj --nologo` succeeded.
+  - `dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo` succeeded.
+  - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` succeeded (0 warnings).
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` succeeded (`352/352`).
+- **Commit:** n/a (not committed in this session)
+- **Push:** n/a
