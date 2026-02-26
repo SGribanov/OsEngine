@@ -138,9 +138,9 @@ namespace OsEngine.Market.Servers.InteractiveBrokers
                 {
                     _listenThread.Abort();
                 }
-                catch
+                catch (Exception ex)
                 {
-                    // ignore
+                    SendLogMessage(ex.ToString(), LogMessageType.Error);
                 }
             }
 
@@ -871,9 +871,9 @@ namespace OsEngine.Market.Servers.InteractiveBrokers
 
                     series.CandlesArray.Add(candle);
                 }
-                catch
+                catch (Exception ex)
                 {
-                    // ignore
+                    SendLogMessage(ex.ToString(), LogMessageType.Error);
                 }
 
             }
@@ -2091,9 +2091,9 @@ namespace OsEngine.Market.Servers.InteractiveBrokers
                     TcpReadString();
                 }
             }
-            catch
+            catch (Exception ex)
             {
-                // ignore
+                SendLogMessage(ex.ToString(), LogMessageType.Error);
             }
         }
 

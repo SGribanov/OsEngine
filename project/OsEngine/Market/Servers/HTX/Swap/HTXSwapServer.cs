@@ -1208,9 +1208,9 @@ namespace OsEngine.Market.Servers.HTX.Swap
                         webSocketPublic = null;
                     }
                 }
-                catch
+                catch (Exception ex)
                 {
-                    // ignore
+                    SendLogMessage(ex.ToString(), LogMessageType.Error);
                 }
 
                 _webSocketPublic.Clear();
@@ -1226,9 +1226,9 @@ namespace OsEngine.Market.Servers.HTX.Swap
                     _webSocketPrivate.OnClose -= webSocketPrivate_OnClose;
                     _webSocketPrivate.CloseAsync();
                 }
-                catch
+                catch (Exception ex)
                 {
-                    // ignore
+                    SendLogMessage(ex.ToString(), LogMessageType.Error);
                 }
 
                 _webSocketPrivate = null;
@@ -1824,9 +1824,9 @@ namespace OsEngine.Market.Servers.HTX.Swap
                         _webSocketPrivate.SendAsync($"{{\"action\": \"unsub\",\"ch\": \"public.*.funding_rate\"}}");
                     }
                 }
-                catch
+                catch (Exception ex)
                 {
-                    // ignore
+                    SendLogMessage(ex.ToString(), LogMessageType.Error);
                 }
             }
         }
