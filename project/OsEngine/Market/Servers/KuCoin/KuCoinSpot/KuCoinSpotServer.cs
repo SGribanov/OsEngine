@@ -2221,17 +2221,11 @@ namespace OsEngine.Market.Servers.KuCoin.KuCoinSpot
                 string requestPath = path;
                 string timestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds().ToString(CultureInfo.InvariantCulture);
                 string signature = GenerateSignature(timestamp, method.ToString(), path, body, _secretKey);
-                string signaturePartner = GenerateSignaturePartner(timestamp);
-
                 RestRequest requestRest = new RestRequest(path, method);
                 requestRest.AddHeader("KC-API-KEY", _publicKey);
                 requestRest.AddHeader("KC-API-SIGN", signature);
                 requestRest.AddHeader("KC-API-TIMESTAMP", timestamp);
                 requestRest.AddHeader("KC-API-PASSPHRASE", SignHMACSHA256(_passphrase, _secretKey));
-                requestRest.AddHeader("KC-API-PARTNER", "VANTECHNOLOGIES");
-                requestRest.AddHeader("KC-API-PARTNER-SIGN", signaturePartner);
-                requestRest.AddHeader("KC-BROKER-NAME", "VANTECHNOLOGIES");
-                requestRest.AddHeader("KC-API-PARTNER-VERIFY", "true");
                 requestRest.AddHeader("KC-API-KEY-VERSION", "2");
 
                 if (body != null)
@@ -2312,13 +2306,6 @@ namespace OsEngine.Market.Servers.KuCoin.KuCoinSpot
             string preHash = timestamp + method + Uri.UnescapeDataString(requestPath) + body;
 
             return SignHMACSHA256(preHash, secretKey);
-        }
-
-        private string GenerateSignaturePartner(string timestamp)
-        {
-            string preHash = timestamp + "VANTECHNOLOGIES" + _publicKey;
-
-            return SignHMACSHA256(preHash, "3efbc50d-16ef-45c3-a524-36d7ede4fa1a");
         }
 
         public void SetLeverage(string securityName, string className, string leverage, string leverageLong, string leverageShort) { }

@@ -1952,8 +1952,6 @@ namespace OsEngine.Market.Servers.BloFin
                 orderRequest.Add("price", order.Price.ToString(CultureInfo.InvariantCulture));
                 orderRequest.Add("size", volume.ToString(CultureInfo.InvariantCulture));
                 orderRequest.Add("clientOrderId", order.NumberUser.ToString(CultureInfo.InvariantCulture));
-                orderRequest.Add("brokerId", "0f43c3141c50b7e3");
-
                 string jsonRequest = JsonConvert.SerializeObject(orderRequest);
                 string path = $"/api/v1/trade/order";
 

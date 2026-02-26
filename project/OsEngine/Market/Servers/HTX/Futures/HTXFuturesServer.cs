@@ -1920,8 +1920,6 @@ namespace OsEngine.Market.Servers.HTX.Futures
 
                 jsonContent.Add("lever_rate", "10");
                 jsonContent.Add("order_price_type", "limit");
-                jsonContent.Add("channel_code", "AAe2ccbd47");
-
                 string jsonRequest = JsonConvert.SerializeObject(jsonContent);
 
                 IRestResponse responseMessage = CreatePrivateQuery("/api/v1/contract_order", Method.POST, jsonRequest);
