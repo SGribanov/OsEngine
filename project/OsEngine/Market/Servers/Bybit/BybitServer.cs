@@ -2770,9 +2770,9 @@ namespace OsEngine.Market.Servers.Bybit
                             newOrder.NumberUser = Convert.ToInt32(responseMyTrades.data[i].orderLinkId, CultureInfo.InvariantCulture);
                         }
                     }
-                    catch
+                    catch (Exception ex)
                     {
-                        // ignore
+                        SendLogMessage(ex.ToString(), LogMessageType.Error);
                     }
 
                     newOrder.TypeOrder = responseMyTrades.data[i].orderType.ToLower() == "market" ? OrderPriceType.Market : OrderPriceType.Limit;
@@ -4077,9 +4077,9 @@ namespace OsEngine.Market.Servers.Bybit
                             {
                                 newOrder.NumberUser = Convert.ToInt32(numUser, CultureInfo.InvariantCulture);
                             }
-                            catch
+                            catch (Exception ex)
                             {
-                                // ignore
+                                SendLogMessage(ex.ToString(), LogMessageType.Error);
                             }
                         }
 
