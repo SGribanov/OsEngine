@@ -1024,9 +1024,9 @@ namespace OsEngine.Market.Servers.BingX.BingXFutures
                         webSocketPublic = null;
                     }
                 }
-                catch
+                catch (Exception ex)
                 {
-                    // ignore
+                    SendLogMessage(ex.ToString(), LogMessageType.Error);
                 }
 
                 _webSocketPublic.Clear();
@@ -1043,9 +1043,9 @@ namespace OsEngine.Market.Servers.BingX.BingXFutures
                     _webSocketPrivate.OnError -= _webSocketPrivate_OnError;
                     _webSocketPrivate.CloseAsync();
                 }
-                catch
+                catch (Exception ex)
                 {
-                    // ignore
+                    SendLogMessage(ex.ToString(), LogMessageType.Error);
                 }
 
                 _webSocketPrivate = null;
@@ -1540,9 +1540,9 @@ namespace OsEngine.Market.Servers.BingX.BingXFutures
                     }
                 }
             }
-            catch
+            catch (Exception ex)
             {
-                // ignore
+                SendLogMessage(ex.ToString(), LogMessageType.Error);
             }
         }
 
@@ -2046,9 +2046,9 @@ namespace OsEngine.Market.Servers.BingX.BingXFutures
                 {
                     newOrder.NumberUser = Convert.ToInt32(responseOrder.o.c, CultureInfo.InvariantCulture);
                 }
-                catch
+                catch (Exception ex)
                 {
-                    // ignore
+                    SendLogMessage(ex.ToString(), LogMessageType.Error);
                 }
 
                 newOrder.NumberMarket = responseOrder.o.i.ToString();

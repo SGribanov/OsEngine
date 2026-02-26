@@ -787,9 +787,9 @@ namespace OsEngine.Market.Servers.BloFin
                         webSocketPublic = null;
                     }
                 }
-                catch
+                catch (Exception ex)
                 {
-                    // ignore
+                    SendLogMessage(ex.ToString(), LogMessageType.Error);
                 }
 
                 _webSocketPublic.Clear();
@@ -806,9 +806,9 @@ namespace OsEngine.Market.Servers.BloFin
                     _webSocketPrivate.OnError -= _webSocketPrivate_OnError;
                     _webSocketPrivate.CloseAsync();
                 }
-                catch
+                catch (Exception ex)
                 {
-                    // ignore
+                    SendLogMessage(ex.ToString(), LogMessageType.Error);
                 }
 
                 _webSocketPrivate = null;
@@ -1258,9 +1258,9 @@ namespace OsEngine.Market.Servers.BloFin
                     }
                 }
             }
-            catch
+            catch (Exception ex)
             {
-                // ignore
+                SendLogMessage(ex.ToString(), LogMessageType.Error);
             }
 
             if (_webSocketPrivate != null
@@ -1272,9 +1272,9 @@ namespace OsEngine.Market.Servers.BloFin
                     _webSocketPrivate?.SendAsync("{\"op\":\"unsubscribe\",\"args\":[{\"channel\":\"positions\"}]}");
                     _webSocketPrivate?.SendAsync("{\"op\":\"unsubscribe\",\"args\":[{\"channel\":\"account\"}]}");
                 }
-                catch
+                catch (Exception ex)
                 {
-                    // ignore
+                    SendLogMessage(ex.ToString(), LogMessageType.Error);
                 }
             }
         }
