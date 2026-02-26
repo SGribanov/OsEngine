@@ -793,9 +793,9 @@ namespace OsEngine.Market.Servers.CoinEx.Spot
                         webSocketPublic = null;
                     }
                 }
-                catch
+                catch (Exception ex)
                 {
-                    // ignore
+                    SendLogMessage(ex.ToString(), LogMessageType.Error);
                 }
 
                 _webSocketPublic.Clear();
@@ -811,9 +811,9 @@ namespace OsEngine.Market.Servers.CoinEx.Spot
                     _webSocketPrivate.OnError -= _webSocketPrivate_OnError;
                     _webSocketPrivate.CloseAsync();
                 }
-                catch
+                catch (Exception ex)
                 {
-                    // ignore
+                    SendLogMessage(ex.ToString(), LogMessageType.Error);
                 }
 
                 _webSocketPrivate = null;
@@ -1266,9 +1266,9 @@ namespace OsEngine.Market.Servers.CoinEx.Spot
                     }
                 }
             }
-            catch
+            catch (Exception ex)
             {
-                // ignore
+                SendLogMessage(ex.ToString(), LogMessageType.Error);
             }
 
             if (_webSocketPrivate != null
@@ -1280,9 +1280,9 @@ namespace OsEngine.Market.Servers.CoinEx.Spot
                     _webSocketPrivate.SendAsync($"{{\"method\":\"order.unsubscribe\",\"params\":{{\"market_list\":[]}},\"id\":5}}");
                     _webSocketPrivate.SendAsync($"{{\"method\":\"user_deals.unsubscribe\",\"params\":{{\"market_list\":[]}},\"id\":7}}");
                 }
-                catch
+                catch (Exception ex)
                 {
-                    // ignore
+                    SendLogMessage(ex.ToString(), LogMessageType.Error);
                 }
             }
         }
@@ -2282,9 +2282,9 @@ namespace OsEngine.Market.Servers.CoinEx.Spot
             {
                 order.NumberUser = Convert.ToInt32(cexOrder.client_id, CultureInfo.InvariantCulture);
             }
-            catch
+            catch (Exception ex)
             {
-                // ignore
+                SendLogMessage(ex.ToString(), LogMessageType.Error);
             }
 
             order.SecurityNameCode = cexOrder.market;
