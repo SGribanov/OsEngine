@@ -665,9 +665,9 @@ namespace OsEngine.Market.Servers.BitMart
                         webSocketPublic = null;
                     }
                 }
-                catch
+                catch (Exception ex)
                 {
-                    // ignore
+                    SendLogMessage(ex.ToString(), LogMessageType.Error);
                 }
 
                 _webSocketPublic.Clear();
@@ -683,9 +683,9 @@ namespace OsEngine.Market.Servers.BitMart
                     _webSocketPrivate.OnError -= _webSocketPrivate_OnError;
                     _webSocketPrivate.CloseAsync();
                 }
-                catch
+                catch (Exception ex)
                 {
-                    // ignore
+                    SendLogMessage(ex.ToString(), LogMessageType.Error);
                 }
 
                 _webSocketPrivate = null;
@@ -1174,9 +1174,9 @@ namespace OsEngine.Market.Servers.BitMart
                     }
                 }
             }
-            catch
+            catch (Exception ex)
             {
-                // ignore
+                SendLogMessage(ex.ToString(), LogMessageType.Error);
             }
 
             if (_webSocketPrivate != null
@@ -1187,9 +1187,9 @@ namespace OsEngine.Market.Servers.BitMart
                     _webSocketPrivate.SendAsync($"{{\"op\": \"unsubscribe\", \"args\": [\"spot/user/orders:ALL_SYMBOLS\"]}}");
                     _webSocketPrivate.SendAsync($"{{\"op\": \"unsubscribe\", \"args\": [\"spot/user/balance:BALANCE_UPDATE\"]}}");
                 }
-                catch
+                catch (Exception ex)
                 {
-                    // ignore
+                    SendLogMessage(ex.ToString(), LogMessageType.Error);
                 }
             }
         }
