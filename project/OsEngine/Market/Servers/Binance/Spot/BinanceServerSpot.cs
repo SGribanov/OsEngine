@@ -1014,7 +1014,10 @@ namespace OsEngine.Market.Servers.Binance.Spot
                     {
                         lastId = Convert.ToInt64(newTrades[newTrades.Count - 1].Id);
                     }
-                    catch { } // If the date for which we download the candles is greater than today: Ignore
+                    catch (Exception ex) // If the date for which we download the candles is greater than today
+                    {
+                        SendLogMessage(ex.ToString(), LogMessageType.System);
+                    }
                 }
 
                 if (newTrades != null && newTrades.Count != 0)
@@ -1104,8 +1107,9 @@ namespace OsEngine.Market.Servers.Binance.Spot
 
                 return oldTrades;
             }
-            catch
+            catch (Exception ex)
             {
+                SendLogMessage(ex.ToString(), LogMessageType.Error);
                 SendLogMessage(OsLocalization.Market.Message95 + security, LogMessageType.Error);
 
                 return null;
@@ -1228,9 +1232,9 @@ namespace OsEngine.Market.Servers.Binance.Spot
                     _spotSocketClient.CloseAsync();
                 }
             }
-            catch
+            catch (Exception ex)
             {
-                // ignore
+                SendLogMessage(ex.ToString(), LogMessageType.Error);
             }
 
             _spotSocketClient = null;
@@ -1246,9 +1250,9 @@ namespace OsEngine.Market.Servers.Binance.Spot
                     _marginSocketClient.CloseAsync();
                 }
             }
-            catch
+            catch (Exception ex)
             {
-                // ignore
+                SendLogMessage(ex.ToString(), LogMessageType.Error);
             }
 
             _marginSocketClient = null;
@@ -1265,9 +1269,9 @@ namespace OsEngine.Market.Servers.Binance.Spot
                     }
                 }
             }
-            catch
+            catch (Exception ex)
             {
-                // ignore
+                SendLogMessage(ex.ToString(), LogMessageType.Error);
             }
 
             try
@@ -1280,16 +1284,16 @@ namespace OsEngine.Market.Servers.Binance.Spot
                         {
                             ws.Value.CloseAsync();
                         }
-                        catch
+                        catch (Exception ex)
                         {
-                            // ignore
+                            SendLogMessage(ex.ToString(), LogMessageType.Error);
                         }
                     }
                 }
             }
-            catch
+            catch (Exception ex)
             {
-                // ignore
+                SendLogMessage(ex.ToString(), LogMessageType.Error);
             }
 
             try
@@ -1299,9 +1303,9 @@ namespace OsEngine.Market.Servers.Binance.Spot
                     _wsStreamsSecurityData.Clear();
                 }
             }
-            catch
+            catch (Exception ex)
             {
-                // ignore
+                SendLogMessage(ex.ToString(), LogMessageType.Error);
             }
         }
 
@@ -2011,9 +2015,9 @@ namespace OsEngine.Market.Servers.Binance.Spot
                 {
                     orderNumUser = Convert.ToInt32(orderNumUserInString);
                 }
-                catch
+                catch (Exception ex)
                 {
-                    // ignore
+                    SendLogMessage(ex.ToString(), LogMessageType.Error);
                 }
 
                 if (order.x == "NEW")
@@ -2970,9 +2974,9 @@ namespace OsEngine.Market.Servers.Binance.Spot
                     {
                         newOrder.NumberUser = Convert.ToInt32(id);
                     }
-                    catch
+                    catch (Exception ex)
                     {
-                        // ignore
+                        SendLogMessage(ex.ToString(), LogMessageType.Error);
                     }
                 }
 

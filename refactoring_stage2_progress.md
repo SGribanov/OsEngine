@@ -10862,3 +10862,22 @@
 - Host-context verification (outside sandbox):
   - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` -> success (0 warnings, 0 errors)
   - `dotnet vstest project/OsEngine.Tests/bin/Release/net10.0-windows/OsEngine.Tests.dll` -> passed `352/352`
+
+## 2026-02-26 - Step 0.3 (silent-catch visibility) - Binance Spot/Futures catch logging hardening block
+
+- Added explicit logging for previously silent `catch` blocks in:
+  - `project/OsEngine/Market/Servers/Binance/Spot/BinanceServerSpot.cs`
+  - `project/OsEngine/Market/Servers/Binance/Futures/BinanceServerFutures.cs`
+- Changes:
+  - bare `catch` / `catch (Exception)` blocks in socket-dispose, parsing and order-sync paths were converted to `catch (Exception ex)`.
+  - added `SendLogMessage(ex.ToString(), LogMessageType.Error)` preserving existing control flow (`return/continue/break`).
+  - in expected “future date / no tail trade id” branch in spot history loader, added `System`-level log instead of silent ignore.
+- Scope:
+  - observability-only hardening
+  - no behavioral changes for successful paths.
+
+### Verification
+
+- Host-context verification (outside sandbox):
+  - `dotnet vstest project/OsEngine.Tests/bin/Release/net10.0-windows/OsEngine.Tests.dll` -> passed `352/352`
+  - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release` -> blocked in sandbox by external NuGet TLS error (`NU1301`, `SEC_E_NO_CREDENTIALS`).

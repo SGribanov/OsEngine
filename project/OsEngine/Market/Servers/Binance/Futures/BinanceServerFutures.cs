@@ -1409,9 +1409,9 @@ namespace OsEngine.Market.Servers.Binance.Futures
                     _socketPrivateData.OnClose -= _socketClient_Closed;
                 }
             }
-            catch
+            catch (Exception ex)
             {
-                // ignore
+                SendLogMessage(ex.ToString(), LogMessageType.Error);
             }
 
             _socketPrivateData = null;
@@ -1430,16 +1430,16 @@ namespace OsEngine.Market.Servers.Binance.Futures
                         {
                             ws.Value.CloseAsync();
                         }
-                        catch
+                        catch (Exception ex)
                         {
-                            // ignore
+                            SendLogMessage(ex.ToString(), LogMessageType.Error);
                         }
                     }
                 }
             }
-            catch
+            catch (Exception ex)
             {
-                // ignore
+                SendLogMessage(ex.ToString(), LogMessageType.Error);
             }
 
             try
@@ -1449,9 +1449,9 @@ namespace OsEngine.Market.Servers.Binance.Futures
                     _socketsArray.Clear();
                 }
             }
-            catch
+            catch (Exception ex)
             {
-                // ignore
+                SendLogMessage(ex.ToString(), LogMessageType.Error);
             }
         }
 
@@ -2863,9 +2863,9 @@ namespace OsEngine.Market.Servers.Binance.Futures
 
                 return trades;
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                //ignore
+                SendLogMessage(ex.ToString(), LogMessageType.Error);
             }
             return null;
         }
@@ -2907,9 +2907,9 @@ namespace OsEngine.Market.Servers.Binance.Futures
                             newOrder.NumberUser =
                                 Convert.ToInt32(orderOnBoardResp.clientOrderId.Replace("x-gnrPHWyE", ""), CultureInfo.InvariantCulture);
                         }
-                        catch
+                        catch (Exception ex)
                         {
-                            // ignore
+                            SendLogMessage(ex.ToString(), LogMessageType.Error);
                         }
                     }
 
@@ -3019,9 +3019,9 @@ namespace OsEngine.Market.Servers.Binance.Futures
                                 break;
                             }
                         }
-                        catch
+                        catch (Exception ex)
                         {
-                            // ignore
+                            SendLogMessage(ex.ToString(), LogMessageType.Error);
                         }
                     }
                     else
