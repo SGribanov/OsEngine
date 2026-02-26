@@ -1052,9 +1052,9 @@ namespace OsEngine.Market.Servers.GateIo.GateIoFutures
                         webSocketPublic = null;
                     }
                 }
-                catch
+                catch (Exception ex)
                 {
-                    // ignore
+                    SendLogMessage(ex.ToString(), LogMessageType.Error);
                 }
 
                 _webSocketPublic.Clear();
@@ -1070,9 +1070,9 @@ namespace OsEngine.Market.Servers.GateIo.GateIoFutures
                     _webSocketPrivate.OnError -= _webSocketPrivate_OnError;
                     _webSocketPrivate.CloseAsync();
                 }
-                catch
+                catch (Exception ex)
                 {
-                    // ignore
+                    SendLogMessage(ex.ToString(), LogMessageType.Error);
                 }
 
                 _webSocketPrivate = null;
@@ -1745,9 +1745,9 @@ namespace OsEngine.Market.Servers.GateIo.GateIoFutures
                     }
                 }
             }
-            catch
+            catch (Exception ex)
             {
-                // ignore
+                SendLogMessage(ex.ToString(), LogMessageType.Error);
             }
 
             if (_webSocketPrivate != null)
@@ -1764,9 +1764,9 @@ namespace OsEngine.Market.Servers.GateIo.GateIoFutures
                         UnsubscribeMyTrades(name);
                     }
                 }
-                catch
+                catch (Exception ex)
                 {
-                    // ignore
+                    SendLogMessage(ex.ToString(), LogMessageType.Error);
                 }
             }
         }
@@ -2271,9 +2271,9 @@ namespace OsEngine.Market.Servers.GateIo.GateIoFutures
                     {
                         newOrder.NumberUser = Convert.ToInt32(responseOrders.result[i].text.Replace("t-", ""), CultureInfo.InvariantCulture);
                     }
-                    catch
+                    catch (Exception ex)
                     {
-                        // ignore
+                        SendLogMessage(ex.ToString(), LogMessageType.Error);
                     }
 
                     newOrder.NumberMarket = responseOrders.result[i].id;
@@ -2611,9 +2611,9 @@ namespace OsEngine.Market.Servers.GateIo.GateIoFutures
                         {
                             newOrder.NumberUser = Convert.ToInt32(responseOrders[i].text.Replace("t-", ""), CultureInfo.InvariantCulture);
                         }
-                        catch
+                        catch (Exception ex)
                         {
-                            // ignore
+                            SendLogMessage(ex.ToString(), LogMessageType.Error);
                         }
 
                         newOrder.NumberMarket = responseOrders[i].id;
@@ -2905,3 +2905,4 @@ namespace OsEngine.Market.Servers.GateIo.GateIoFutures
         #endregion
     }
 }
+
