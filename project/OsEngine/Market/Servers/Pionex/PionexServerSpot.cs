@@ -634,9 +634,9 @@ namespace OsEngine.Market.Servers.Pionex
                         webSocketPublic = null;
                     }
                 }
-                catch
+                catch (Exception ex)
                 {
-                    // ignore
+                    SendLogMessage(ex.ToString(), LogMessageType.Error);
                 }
 
                 _webSocketPublic.Clear();
@@ -652,9 +652,9 @@ namespace OsEngine.Market.Servers.Pionex
                     _webSocketPrivate.OnError -= _webSocketPrivate_OnError;
                     _webSocketPrivate.CloseAsync();
                 }
-                catch
+                catch (Exception ex)
                 {
-                    // ignore
+                    SendLogMessage(ex.ToString(), LogMessageType.Error);
                 }
 
                 _webSocketPrivate = null;
@@ -1030,9 +1030,9 @@ namespace OsEngine.Market.Servers.Pionex
                     }
                 }
             }
-            catch
+            catch (Exception ex)
             {
-                // ignore
+                SendLogMessage(ex.ToString(), LogMessageType.Error);
             }
 
             if (_webSocketPrivate != null
@@ -1053,9 +1053,9 @@ namespace OsEngine.Market.Servers.Pionex
 
                     _webSocketPrivate.SendAsync("{\"op\": \"UNSUBSCRIBE\", \"topic\": \"BALANCE\"}");
                 }
-                catch
+                catch (Exception ex)
                 {
-                    // ignore
+                    SendLogMessage(ex.ToString(), LogMessageType.Error);
                 }
             }
         }
