@@ -925,9 +925,9 @@ namespace OsEngine.Market.Servers.BitGet.BitGetSpot
                         webSocketPublic = null;
                     }
                 }
-                catch
+                catch (Exception ex)
                 {
-                    // ignore
+                    SendLogMessage(ex.ToString(), LogMessageType.Error);
                 }
 
                 _webSocketPublic.Clear();
@@ -943,9 +943,9 @@ namespace OsEngine.Market.Servers.BitGet.BitGetSpot
                     _webSocketPrivate.OnError -= WebSocketPrivate_Error;
                     _webSocketPrivate.CloseAsync();
                 }
-                catch
+                catch (Exception ex)
                 {
-                    // ignore
+                    SendLogMessage(ex.ToString(), LogMessageType.Error);
                 }
 
                 _webSocketPrivate = null;
@@ -1434,9 +1434,9 @@ namespace OsEngine.Market.Servers.BitGet.BitGetSpot
                     }
                 }
             }
-            catch
+            catch (Exception ex)
             {
-                // ignore
+                SendLogMessage(ex.ToString(), LogMessageType.Error);
             }
 
 
@@ -1463,9 +1463,9 @@ namespace OsEngine.Market.Servers.BitGet.BitGetSpot
                         _webSocketPrivate.SendAsync(unsubscribeMessage);
                     }
                 }
-                catch
+                catch (Exception ex)
                 {
-                    // ignore
+                    SendLogMessage(ex.ToString(), LogMessageType.Error);
                 }
             }
         }
