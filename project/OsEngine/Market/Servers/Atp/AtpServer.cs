@@ -278,9 +278,9 @@ namespace OsEngine.Market.Servers.Atp
                         SendMessage("Disconnect", _socketMarketData, "MarketServer");
                         _socketMarketData.Shutdown(SocketShutdown.Send);
                     }
-                    catch
+                    catch (Exception ex)
                     {
-                        // ignore
+                        SendLogMessage(ex.ToString(), LogMessageType.Error);
                     }
 
                     _socketMarketData.Close();
@@ -318,9 +318,9 @@ namespace OsEngine.Market.Servers.Atp
                         SendMessage("Disconnect", _socketToTrade, "TradeServer");
                         _socketToTrade.Shutdown(SocketShutdown.Send);
                     }
-                    catch
+                    catch (Exception ex)
                     {
-                        // ignore
+                        SendLogMessage(ex.ToString(), LogMessageType.Error);
                     }
 
                     _socketToTrade.Close();
@@ -1648,9 +1648,9 @@ namespace OsEngine.Market.Servers.Atp
                 {
                     order.NumberUser = Convert.ToInt32(ordArr[1], CultureInfo.InvariantCulture);
                 }
-                catch
+                catch (Exception ex)
                 {
-                    // ignore
+                    SendLogMessage(ex.ToString(), LogMessageType.Error);
                 }
             }
 
@@ -1725,9 +1725,9 @@ namespace OsEngine.Market.Servers.Atp
             {
                 order.NumberUser = Convert.ToInt32(ordArr[1], CultureInfo.InvariantCulture);
             }
-            catch
+            catch (Exception ex)
             {
-                // ignore
+                SendLogMessage(ex.ToString(), LogMessageType.Error);
             }
 
             order.State = OrderStateType.Cancel;

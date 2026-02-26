@@ -73,9 +73,9 @@ namespace OsEngine.Market.Servers
 
                 SettingsManager.Save(GetSettingsPath(), settings);
             }
-            catch
+            catch (Exception ex)
             {
-                // ignore
+                SendLogMessage(ex.ToString(), LogMessageType.Error);
             }
         }
 
@@ -109,9 +109,9 @@ namespace OsEngine.Market.Servers
                     }
                 }
             }
-            catch
+            catch (Exception ex)
             {
-                // ignore
+                SendLogMessage(ex.ToString(), LogMessageType.Error);
             }
         }
 
@@ -730,9 +730,9 @@ namespace OsEngine.Market.Servers
 
                 SettingsManager.Save(GetIgnoredSettingsPath(), settings);
             }
-            catch
+            catch (Exception ex)
             {
-                // ignore
+                SendLogMessage(ex.ToString(), LogMessageType.Error);
             }
         }
 
@@ -788,9 +788,9 @@ namespace OsEngine.Market.Servers
                     IgnoredSecurities.Add(newCompareSecurity);
                 }
             }
-            catch
+            catch (Exception ex)
             {
-                // ignore
+                SendLogMessage(ex.ToString(), LogMessageType.Error);
             }
         }
 
