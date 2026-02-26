@@ -2,6 +2,7 @@
 #pragma warning disable CS8600, CS8601, CS8602, CS8603, CS8604, CS8605, CS8618, CS8619, CS8620, CS8622, CS8625, CS8629, CS8765, CS8767
 
 using System;
+using System.Globalization;
 using System.Windows;
 using System.Windows.Forms;
 using OsEngine.Entity;
@@ -212,7 +213,7 @@ namespace OsEngine.Indicators
                     }
                     else if (_indicator.Parameters[i].Type == IndicatorParameterType.Int)
                     {
-                        ((IndicatorParameterInt)_indicator.Parameters[i]).ValueInt = Convert.ToInt32(_gridParam.Rows[i].Cells[1].EditedFormattedValue.ToString());
+                        ((IndicatorParameterInt)_indicator.Parameters[i]).ValueInt = Convert.ToInt32(_gridParam.Rows[i].Cells[1].EditedFormattedValue.ToString(), CultureInfo.InvariantCulture);
                     }
                     else if (_indicator.Parameters[i].Type == IndicatorParameterType.Bool)
                     {

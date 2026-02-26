@@ -249,8 +249,8 @@ namespace OsEngine.Charts.CandleChart.Indicators
 
             return new ParabolicSarSettingsDto
             {
-                ColorUpArgb = Convert.ToInt32(lines[0]),
-                ColorDownArgb = Convert.ToInt32(lines[1]),
+                ColorUpArgb = Convert.ToInt32(lines[0], CultureInfo.InvariantCulture),
+                ColorDownArgb = Convert.ToInt32(lines[1], CultureInfo.InvariantCulture),
                 Af = ParseDoubleLegacy(lines[2]),
                 MaxAf = ParseDoubleLegacy(lines[3]),
                 PaintOn = Convert.ToBoolean(lines[4])

@@ -7,6 +7,7 @@
 */
 
 using System;
+using System.Globalization;
 using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
@@ -248,9 +249,9 @@ namespace OsEngine.Charts.CandleChart.Indicators
 
             return new VolumeOscillatorSettingsDto
             {
-                ColorBaseArgb = Convert.ToInt32(lines[0]),
-                Length1 = Convert.ToInt32(lines[1]),
-                Length2 = Convert.ToInt32(lines[2]),
+                ColorBaseArgb = Convert.ToInt32(lines[0], CultureInfo.InvariantCulture),
+                Length1 = Convert.ToInt32(lines[1], CultureInfo.InvariantCulture),
+                Length2 = Convert.ToInt32(lines[2], CultureInfo.InvariantCulture),
                 PaintOn = Convert.ToBoolean(lines[3])
             };
         }

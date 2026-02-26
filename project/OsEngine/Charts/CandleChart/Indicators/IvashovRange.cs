@@ -6,6 +6,7 @@
  *Ваши права на использование кода регулируются данной лицензией http://o-s-a.net/doc/license_simple_engine.pdf
 */
 using System;
+using System.Globalization;
 using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
@@ -259,14 +260,14 @@ namespace OsEngine.Charts.CandleChart.Indicators
             MovingAverageTypeCalculation typeCalculationAverage = MovingAverageTypeCalculation.Simple;
             Enum.TryParse(lines[3], true, out typeCalculationAverage);
 
-            int lengthMa = Convert.ToInt32(lines[1]);
+            int lengthMa = Convert.ToInt32(lines[1], CultureInfo.InvariantCulture);
             int lengthAverage = lines.Length >= 5
-                ? Convert.ToInt32(lines[4])
+                ? Convert.ToInt32(lines[4], CultureInfo.InvariantCulture)
                 : lengthMa;
 
             return new IvashovRangeSettingsDto
             {
-                ColorArgb = Convert.ToInt32(lines[0]),
+                ColorArgb = Convert.ToInt32(lines[0], CultureInfo.InvariantCulture),
                 LengthMa = lengthMa,
                 PaintOn = Convert.ToBoolean(lines[2]),
                 TypeCalculationAverage = typeCalculationAverage,

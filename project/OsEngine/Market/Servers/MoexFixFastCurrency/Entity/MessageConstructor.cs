@@ -2,6 +2,7 @@
 #pragma warning disable CS8600, CS8601, CS8602, CS8603, CS8604, CS8605, CS8618, CS8619, CS8622, CS8625, CS8629
 
 using System;
+using System.Globalization;
 using System.Text;
 
 
@@ -85,7 +86,7 @@ namespace OsEngine.Market.Servers.MoexFixFastCurrency.Entity
             body.Append("336=" + tradingSessionID + "|");
             body.Append("55=" + symbol + "|");
             body.Append("54=" + side + "|");
-            body.Append("60=" + DateTime.UtcNow.ToString("yyMMdd-HH:mm:ss.fffffff").Insert(16, "00") + "|");
+            body.Append("60=" + DateTime.UtcNow.ToString("yyMMdd-HH:mm:ss.fffffff", CultureInfo.InvariantCulture).Insert(16, "00") + "|");
             body.Append("38=" + orderQty + "|");
             body.Append("40=" + ordType + "|");
 
@@ -135,7 +136,7 @@ namespace OsEngine.Market.Servers.MoexFixFastCurrency.Entity
             body.Append("37=" + orderID + "|");
             body.Append("11=" + clordId + "|");
             body.Append("54=" + side + "|");
-            body.Append("60=" + DateTime.UtcNow.ToString("yyMMdd-HH:mm:ss.fffffff").Insert(16, "00") + "|");
+            body.Append("60=" + DateTime.UtcNow.ToString("yyMMdd-HH:mm:ss.fffffff", CultureInfo.InvariantCulture).Insert(16, "00") + "|");
 
             string header = ConstructHeader(SessionMessageCode(MessageType.OrderCancel), messageSequenceNumber, body.ToString());
             string headerAndBody = header + body;
@@ -167,7 +168,7 @@ namespace OsEngine.Market.Servers.MoexFixFastCurrency.Entity
                 body.Append("55=" + symbol + "|");
             }
 
-            body.Append("60=" + DateTime.UtcNow.ToString("yyMMdd-HH:mm:ss.fffffff").Insert(16, "00") + "|");
+            body.Append("60=" + DateTime.UtcNow.ToString("yyMMdd-HH:mm:ss.fffffff", CultureInfo.InvariantCulture).Insert(16, "00") + "|");
             body.Append("1=" + account + "|");
 
             string header = ConstructHeader(SessionMessageCode(MessageType.OrderMassCancel), messageSequenceNumber, body.ToString());
@@ -212,7 +213,7 @@ namespace OsEngine.Market.Servers.MoexFixFastCurrency.Entity
             body.Append("336=" + tradingSessionID + "|");
             body.Append("40=" + ordType + "|");
             body.Append("54=" + side + "|");
-            body.Append("60=" + DateTime.UtcNow.ToString("yyMMdd-HH:mm:ss.fffffff").Insert(16, "00") + "|");
+            body.Append("60=" + DateTime.UtcNow.ToString("yyMMdd-HH:mm:ss.fffffff", CultureInfo.InvariantCulture).Insert(16, "00") + "|");
 
             string header = ConstructHeader(SessionMessageCode(MessageType.OrderReplace), messageSequenceNumber, body.ToString());
             string headerAndBody = header + body;
@@ -409,7 +410,7 @@ namespace OsEngine.Market.Servers.MoexFixFastCurrency.Entity
             message.Append("49=" + _senderCompID + "|");
             message.Append("56=" + _targetCompID + "|");
             message.Append("34=" + messageSequenceNumber + "|");
-            message.Append("52=" + DateTime.UtcNow.ToString("yyMMdd-HH:mm:ss.fffffff").Insert(16, "00") + "|");
+            message.Append("52=" + DateTime.UtcNow.ToString("yyMMdd-HH:mm:ss.fffffff", CultureInfo.InvariantCulture).Insert(16, "00") + "|");
 
             int length = message.Length + bodyMessage.Length;
 
@@ -431,7 +432,7 @@ namespace OsEngine.Market.Servers.MoexFixFastCurrency.Entity
             message.Append("49=" + _senderCompID + "|");
             message.Append("56=" + _targetCompID + "|");
             message.Append("34=" + messageSequenceNumber + "|");
-            message.Append("52=" + DateTime.UtcNow.ToString("yyMMddHHmmssffffff") + "|");
+            message.Append("52=" + DateTime.UtcNow.ToString("yyMMddHHmmssffffff", CultureInfo.InvariantCulture) + "|");
 
             int length = message.Length + bodyMessage.Length;
 

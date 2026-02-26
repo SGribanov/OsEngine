@@ -152,7 +152,7 @@ namespace OsEngine.OsOptimizer
             get
             {
                 string num = BotName.Replace(" OpT OutOfSample", "").Replace(" OpT InSample", "");
-                return int.TryParse(num, out int parsed) ? parsed : 0;
+                return int.TryParse(num, NumberStyles.Integer, CultureInfo.InvariantCulture, out int parsed) ? parsed : 0;
             }
 
         }
@@ -454,7 +454,7 @@ namespace OsEngine.OsOptimizer
 
             result += TabType + "*";
             result += SecurityName + "*";
-            result += PositionsCount + "*";
+            result += PositionsCount.ToString(CultureInfo.InvariantCulture) + "*";
             result += TotalProfit.ToString(CultureInfo.InvariantCulture) + "*";
             result += MaxDrawDawn.ToString(CultureInfo.InvariantCulture) + "*";
             result += AverageProfit.ToString(CultureInfo.InvariantCulture) + "*";

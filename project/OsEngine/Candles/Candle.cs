@@ -416,7 +416,7 @@ namespace OsEngine.Entity
                 //20131001,100000,97.8000000,97.9900000,97.7500000,97.9000000,1,0.97
                 //<DATE>,<TIME>,<OPEN>,<HIGH>,<LOW>,<CLOSE>,<VOLUME>,<OPEN INTEREST>
 
-                string timeStart = TimeStart.ToString("yyyyMMdd,HHmmss");
+                string timeStart = TimeStart.ToString("yyyyMMdd,HHmmss", CultureInfo.InvariantCulture);
                 string open = Open.ToString("G29", CultureInfo.InvariantCulture);
                 string high = High.ToString("G29", CultureInfo.InvariantCulture);
                 string low = Low.ToString("G29", CultureInfo.InvariantCulture);

@@ -7,6 +7,7 @@
 */
 
 using System;
+using System.Globalization;
 using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
@@ -254,8 +255,8 @@ namespace OsEngine.Charts.CandleChart.Indicators
 
             return new DynamicTrendDetectorSettingsDto
             {
-                ColorArgb = Convert.ToInt32(lines[0]),
-                Length = Convert.ToInt32(lines[1]),
+                ColorArgb = Convert.ToInt32(lines[0], CultureInfo.InvariantCulture),
+                Length = Convert.ToInt32(lines[1], CultureInfo.InvariantCulture),
                 CorrectionCoeff = lines[2].ToDecimal(),
                 PaintOn = Convert.ToBoolean(lines[3])
             };
@@ -515,4 +516,5 @@ namespace OsEngine.Charts.CandleChart.Indicators
         }
     }
 }
+
 

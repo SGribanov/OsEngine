@@ -7,6 +7,7 @@
 */
 
 using System;
+using System.Globalization;
 using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
@@ -243,8 +244,8 @@ namespace OsEngine.Charts.CandleChart.Indicators
             return new FractalSettingsDto
             {
                 PaintOn = Convert.ToBoolean(lines[0]),
-                ColorUpArgb = Convert.ToInt32(lines[1]),
-                ColorDownArgb = Convert.ToInt32(lines[2])
+                ColorUpArgb = Convert.ToInt32(lines[1], CultureInfo.InvariantCulture),
+                ColorDownArgb = Convert.ToInt32(lines[2], CultureInfo.InvariantCulture)
             };
         }
 
@@ -468,4 +469,5 @@ namespace OsEngine.Charts.CandleChart.Indicators
 
     }
 }
+
 

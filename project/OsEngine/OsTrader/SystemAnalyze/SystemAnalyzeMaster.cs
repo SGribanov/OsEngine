@@ -8,6 +8,7 @@
 
 using OsEngine.Market;
 using System;
+using System.Globalization;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
@@ -576,7 +577,7 @@ namespace OsEngine.OsTrader.SystemAnalyze
             }
 
             int pointsMax = 100;
-            if (lines.Length > 2 && int.TryParse(lines[2], out int parsedPointsMax))
+            if (lines.Length > 2 && int.TryParse(lines[2], NumberStyles.Integer, CultureInfo.InvariantCulture, out int parsedPointsMax))
             {
                 pointsMax = parsedPointsMax;
             }
@@ -821,7 +822,7 @@ namespace OsEngine.OsTrader.SystemAnalyze
             }
 
             int pointsMax = 100;
-            if (lines.Length > 2 && int.TryParse(lines[2], out int parsedPointsMax))
+            if (lines.Length > 2 && int.TryParse(lines[2], NumberStyles.Integer, CultureInfo.InvariantCulture, out int parsedPointsMax))
             {
                 pointsMax = parsedPointsMax;
             }
@@ -1066,7 +1067,7 @@ namespace OsEngine.OsTrader.SystemAnalyze
             }
 
             int pointsMax = 100;
-            if (lines.Length > 2 && int.TryParse(lines[2], out int parsedPointsMax))
+            if (lines.Length > 2 && int.TryParse(lines[2], NumberStyles.Integer, CultureInfo.InvariantCulture, out int parsedPointsMax))
             {
                 pointsMax = parsedPointsMax;
             }
@@ -1321,7 +1322,7 @@ namespace OsEngine.OsTrader.SystemAnalyze
             }
 
             int pointsMax = 100;
-            if (lines.Length > 2 && int.TryParse(lines[2], out int parsedPointsMax))
+            if (lines.Length > 2 && int.TryParse(lines[2], NumberStyles.Integer, CultureInfo.InvariantCulture, out int parsedPointsMax))
             {
                 pointsMax = parsedPointsMax;
             }

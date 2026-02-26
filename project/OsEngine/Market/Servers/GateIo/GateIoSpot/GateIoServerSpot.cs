@@ -277,9 +277,9 @@ namespace OsEngine.Market.Servers.GateIo.GateIoSpot
 
                         security.SecurityType = SecurityType.CurrencyPair;
 
-                        security.DecimalsVolume = Int32.Parse(current.amount_precision);
+                        security.DecimalsVolume = Int32.Parse(current.amount_precision, NumberStyles.Integer, CultureInfo.InvariantCulture);
                         security.Lot = 1;
-                        security.Decimals = Int32.Parse(current.precision);
+                        security.Decimals = Int32.Parse(current.precision, NumberStyles.Integer, CultureInfo.InvariantCulture);
                         security.PriceStep = security.Decimals.GetValueByDecimals();
                         security.PriceStepCost = security.PriceStep;
 
@@ -336,7 +336,7 @@ namespace OsEngine.Market.Servers.GateIo.GateIoSpot
                 string query_param = "";
                 string bodyParam = "";
 
-                string timeStamp = TimeManager.GetUnixTimeStampSeconds().ToString();
+                string timeStamp = TimeManager.GetUnixTimeStampSeconds().ToString(CultureInfo.InvariantCulture);
                 string bodyHash = GetHash(bodyParam);
                 string signString = $"{method}\n{_prefix}{url}\n{query_param}\n{bodyHash}\n{timeStamp}";
                 string sign = GetHashHMAC(signString, _secretKey);
@@ -567,8 +567,8 @@ namespace OsEngine.Market.Servers.GateIo.GateIoSpot
             {
                 string queryParam = $"currency_pair={security}&";
                 queryParam += $"interval={interval}&";
-                queryParam += $"from={fromTimeStamp}&";
-                queryParam += $"to={toTimeStamp}";
+                queryParam += "from=" + fromTimeStamp.ToString(CultureInfo.InvariantCulture) + "&";
+                queryParam += "to=" + toTimeStamp.ToString(CultureInfo.InvariantCulture);
 
                 string requestStr = "/spot/candlesticks?" + queryParam;
                 RestRequest requestRest = new RestRequest(requestStr, Method.GET);
@@ -1261,7 +1261,7 @@ namespace OsEngine.Market.Servers.GateIo.GateIoSpot
                             && webSocketPublic?.ReadyState == WebSocketState.Open)
                         {
                             long time = TimeManager.GetUnixTimeStampSeconds();
-                            webSocketPublic.SendAsync($"{{\"time\":{time},\"channel\":\"spot.ping\"}}");
+                            webSocketPublic.SendAsync(FormattableString.Invariant($"{{\"time\":{time},\"channel\":\"spot.ping\"}}"));
                         }
                         else
                         {
@@ -1275,7 +1275,7 @@ namespace OsEngine.Market.Servers.GateIo.GateIoSpot
                         )
                     {
                         long time = TimeManager.GetUnixTimeStampSeconds();
-                        _webSocketPrivate.SendAsync($"{{\"time\":{time},\"channel\":\"spot.ping\"}}");
+                        _webSocketPrivate.SendAsync(FormattableString.Invariant($"{{\"time\":{time},\"channel\":\"spot.ping\"}}"));
                     }
                     else
                     {
@@ -1382,7 +1382,7 @@ namespace OsEngine.Market.Servers.GateIo.GateIoSpot
             try
             {
                 long time = TimeManager.GetUnixTimeStampSeconds();
-                webSocketPublic?.SendAsync($"{{\"time\":{time},\"channel\":\"spot.tickers\",\"event\":\"subscribe\",\"payload\":[\"{security}\"]}}");
+                webSocketPublic?.SendAsync(FormattableString.Invariant($"{{\"time\":{time},\"channel\":\"spot.tickers\",\"event\":\"subscribe\",\"payload\":[\"{security}\"]}}"));
             }
             catch (Exception exception)
             {
@@ -1404,7 +1404,7 @@ namespace OsEngine.Market.Servers.GateIo.GateIoSpot
                 }
 
                 long time = TimeManager.GetUnixTimeStampSeconds();
-                webSocketPublic?.SendAsync($"{{\"time\":{time},\"channel\":\"spot.order_book\",\"event\":\"subscribe\",\"payload\":[\"{security}\",\"{level}\",\"100ms\"]}}");
+                webSocketPublic?.SendAsync(FormattableString.Invariant($"{{\"time\":{time},\"channel\":\"spot.order_book\",\"event\":\"subscribe\",\"payload\":[\"{security}\",\"{level}\",\"100ms\"]}}"));
             }
             catch (Exception exception)
             {
@@ -1425,7 +1425,7 @@ namespace OsEngine.Market.Servers.GateIo.GateIoSpot
             try
             {
                 long time = TimeManager.GetUnixTimeStampSeconds();
-                webSocketPublic?.SendAsync($"{{\"time\":{time},\"channel\":\"spot.trades\",\"event\":\"subscribe\",\"payload\":[\"{security}\"]}}");
+                webSocketPublic?.SendAsync(FormattableString.Invariant($"{{\"time\":{time},\"channel\":\"spot.trades\",\"event\":\"subscribe\",\"payload\":[\"{security}\"]}}"));
             }
             catch (Exception exception)
             {
@@ -1438,10 +1438,10 @@ namespace OsEngine.Market.Servers.GateIo.GateIoSpot
             try
             {
                 long timeStamp = TimeManager.GetUnixTimeStampSeconds();
-                string param = $"channel=spot.orders&event=subscribe&time={timeStamp}";
+                string param = FormattableString.Invariant($"channel=spot.orders&event=subscribe&time={timeStamp}");
                 string sign = SingData(param);
 
-                _webSocketPrivate.SendAsync($"{{\"id\": {timeStamp * 1000000},\"time\": {timeStamp},\"channel\": \"spot.orders\",\"event\": \"subscribe\",\"payload\": [\"{security}\"],\"auth\": {{\"method\": \"api_key\",\"KEY\": \"{_publicKey}\",\"SIGN\": \"{sign}\"}}}}");
+                _webSocketPrivate.SendAsync(FormattableString.Invariant($"{{\"id\": {timeStamp * 1000000},\"time\": {timeStamp},\"channel\": \"spot.orders\",\"event\": \"subscribe\",\"payload\": [\"{security}\"],\"auth\": {{\"method\": \"api_key\",\"KEY\": \"{_publicKey}\",\"SIGN\": \"{sign}\"}}}}"));
             }
             catch (Exception exception)
             {
@@ -1454,10 +1454,10 @@ namespace OsEngine.Market.Servers.GateIo.GateIoSpot
             try
             {
                 long timeStamp = TimeManager.GetUnixTimeStampSeconds();
-                string param = $"channel=spot.usertrades&event=subscribe&time={timeStamp}";
+                string param = FormattableString.Invariant($"channel=spot.usertrades&event=subscribe&time={timeStamp}");
                 string sign = SingData(param);
 
-                _webSocketPrivate.SendAsync($"{{\"id\": {timeStamp * 1000000},\"time\": {timeStamp},\"channel\": \"spot.usertrades\",\"event\": \"subscribe\",\"payload\": [\"{security}\"],\"auth\": {{\"method\": \"api_key\",\"KEY\": \"{_publicKey}\",\"SIGN\": \"{sign}\"}}}}");
+                _webSocketPrivate.SendAsync(FormattableString.Invariant($"{{\"id\": {timeStamp * 1000000},\"time\": {timeStamp},\"channel\": \"spot.usertrades\",\"event\": \"subscribe\",\"payload\": [\"{security}\"],\"auth\": {{\"method\": \"api_key\",\"KEY\": \"{_publicKey}\",\"SIGN\": \"{sign}\"}}}}"));
             }
             catch (Exception exception)
             {
@@ -1470,10 +1470,10 @@ namespace OsEngine.Market.Servers.GateIo.GateIoSpot
             try
             {
                 long timeStamp = TimeManager.GetUnixTimeStampSeconds();
-                string param = $"channel=spot.balances&event=subscribe&time={timeStamp}";
+                string param = FormattableString.Invariant($"channel=spot.balances&event=subscribe&time={timeStamp}");
                 string sign = SingData(param);
 
-                _webSocketPrivate.SendAsync($"{{\"id\": {timeStamp * 1000000},\"time\": {timeStamp},\"channel\": \"spot.balances\",\"event\": \"subscribe\",\"auth\": {{\"method\": \"api_key\",\"KEY\": \"{_publicKey}\",\"SIGN\": \"{sign}\"}}}}");
+                _webSocketPrivate.SendAsync(FormattableString.Invariant($"{{\"id\": {timeStamp * 1000000},\"time\": {timeStamp},\"channel\": \"spot.balances\",\"event\": \"subscribe\",\"auth\": {{\"method\": \"api_key\",\"KEY\": \"{_publicKey}\",\"SIGN\": \"{sign}\"}}}}"));
             }
             catch (Exception exception)
             {
@@ -1507,12 +1507,12 @@ namespace OsEngine.Market.Servers.GateIo.GateIoSpot
                                         level = "20";
                                     }
 
-                                    webSocketPublic?.SendAsync($"{{\"time\":{time},\"channel\":\"spot.order_book\",\"event\":\"unsubscribe\",\"payload\":[\"{name}\",\"{level}\",\"100ms\"]}}");
-                                    webSocketPublic?.SendAsync($"{{\"time\":{time},\"channel\":\"spot.trades\",\"event\":\"unsubscribe\",\"payload\":[\"{name}\"]}}");
+                                    webSocketPublic?.SendAsync(FormattableString.Invariant($"{{\"time\":{time},\"channel\":\"spot.order_book\",\"event\":\"unsubscribe\",\"payload\":[\"{name}\",\"{level}\",\"100ms\"]}}"));
+                                    webSocketPublic?.SendAsync(FormattableString.Invariant($"{{\"time\":{time},\"channel\":\"spot.trades\",\"event\":\"unsubscribe\",\"payload\":[\"{name}\"]}}"));
 
                                     if (_extendedMarketData)
                                     {
-                                        webSocketPublic?.SendAsync($"{{\"time\":{time},\"channel\":\"spot.tickers\",\"event\":\"unsubscribe\",\"payload\":[\"{name}\"]}}");
+                                        webSocketPublic?.SendAsync(FormattableString.Invariant($"{{\"time\":{time},\"channel\":\"spot.tickers\",\"event\":\"unsubscribe\",\"payload\":[\"{name}\"]}}"));
                                     }
                                 }
                             }
@@ -1553,28 +1553,28 @@ namespace OsEngine.Market.Servers.GateIo.GateIoSpot
         private void UnsubscribeOrders(string security)
         {
             long timeStamp = TimeManager.GetUnixTimeStampSeconds();
-            string param = $"channel=spot.orders&event=subscribe&time={timeStamp}";
+            string param = FormattableString.Invariant($"channel=spot.orders&event=subscribe&time={timeStamp}");
             string sign = SingData(param);
 
-            _webSocketPrivate.SendAsync($"{{\"id\": {timeStamp * 1000000},\"time\": {timeStamp},\"channel\": \"spot.orders\",\"event\": \"unsubscribe\",\"payload\": [\"{security}\"],\"auth\": {{\"method\": \"api_key\",\"KEY\": \"{_publicKey}\",\"SIGN\": \"{sign}\"}}}}");
+            _webSocketPrivate.SendAsync(FormattableString.Invariant($"{{\"id\": {timeStamp * 1000000},\"time\": {timeStamp},\"channel\": \"spot.orders\",\"event\": \"unsubscribe\",\"payload\": [\"{security}\"],\"auth\": {{\"method\": \"api_key\",\"KEY\": \"{_publicKey}\",\"SIGN\": \"{sign}\"}}}}"));
         }
 
         private void UnsubscribeMyTrades(string security)
         {
             long timeStamp = TimeManager.GetUnixTimeStampSeconds();
-            string param = $"channel=spot.usertrades&event=subscribe&time={timeStamp}";
+            string param = FormattableString.Invariant($"channel=spot.usertrades&event=subscribe&time={timeStamp}");
             string sign = SingData(param);
 
-            _webSocketPrivate.SendAsync($"{{\"id\": {timeStamp * 1000000},\"time\": {timeStamp},\"channel\": \"spot.usertrades\",\"event\": \"unsubscribe\",\"payload\": [\"{security}\"],\"auth\": {{\"method\": \"api_key\",\"KEY\": \"{_publicKey}\",\"SIGN\": \"{sign}\"}}}}");
+            _webSocketPrivate.SendAsync(FormattableString.Invariant($"{{\"id\": {timeStamp * 1000000},\"time\": {timeStamp},\"channel\": \"spot.usertrades\",\"event\": \"unsubscribe\",\"payload\": [\"{security}\"],\"auth\": {{\"method\": \"api_key\",\"KEY\": \"{_publicKey}\",\"SIGN\": \"{sign}\"}}}}"));
         }
 
         private void UnsubscribePortfolio()
         {
             long timeStamp = TimeManager.GetUnixTimeStampSeconds();
-            string param = $"channel=spot.balances&event=subscribe&time={timeStamp}";
+            string param = FormattableString.Invariant($"channel=spot.balances&event=subscribe&time={timeStamp}");
             string sign = SingData(param);
 
-            _webSocketPrivate.SendAsync($"{{\"id\": {timeStamp * 1000000},\"time\": {timeStamp},\"channel\": \"spot.balances\",\"event\": \"unsubscribe\",\"auth\": {{\"method\": \"api_key\",\"KEY\": \"{_publicKey}\",\"SIGN\": \"{sign}\"}}}}");
+            _webSocketPrivate.SendAsync(FormattableString.Invariant($"{{\"id\": {timeStamp * 1000000},\"time\": {timeStamp},\"channel\": \"spot.balances\",\"event\": \"unsubscribe\",\"auth\": {{\"method\": \"api_key\",\"KEY\": \"{_publicKey}\",\"SIGN\": \"{sign}\"}}}}"));
         }
 
         public bool SubscribeNews()
@@ -2067,17 +2067,18 @@ namespace OsEngine.Market.Servers.GateIo.GateIoSpot
                 string secName = order.SecurityNameCode;
                 string price = order.Price.ToString(CultureInfo.InvariantCulture);
                 string volume = order.Volume.ToString(CultureInfo.InvariantCulture);
+                string clientOrderId = order.NumberUser.ToString(CultureInfo.InvariantCulture);
 
                 string method = "POST";
                 string url = "/spot/orders";
                 string query_param = "";
 
-                string bodyParam = $"{{\"text\":\"t-{order.NumberUser}\",\"currency_pair\":" +
+                string bodyParam = $"{{\"text\":\"t-{clientOrderId}\",\"currency_pair\":" +
                                     $"\"{secName}\",\"type\":\"limit\",\"account\":\"spot\",\"side\":\"{side}\",\"iceberg\":\"0\",\"amount\":\"{volume}\",\"price\":\"{price}\",\"time_in_force\":\"gtc\"}}";
 
                 string bodyHash = GetHash(bodyParam);
 
-                string timeStamp = TimeManager.GetUnixTimeStampSeconds().ToString();
+                string timeStamp = TimeManager.GetUnixTimeStampSeconds().ToString(CultureInfo.InvariantCulture);
 
                 string signString = $"{method}\n{_prefix}{url}\n{query_param}\n{bodyHash}\n{timeStamp}";
                 string sign = GetHashHMAC(signString, _secretKey);
@@ -2135,7 +2136,7 @@ namespace OsEngine.Market.Servers.GateIo.GateIoSpot
                 string url = $"/spot/orders/{order.NumberMarket}";
                 string queryParam = $"currency_pair={order.SecurityNameCode}";
                 string bodyParam = "";
-                string timeStamp = TimeManager.GetUnixTimeStampSeconds().ToString();
+                string timeStamp = TimeManager.GetUnixTimeStampSeconds().ToString(CultureInfo.InvariantCulture);
                 string bodyHash = GetHash(bodyParam);
                 string signString = $"{method}\n{_prefix}{url}\n{queryParam}\n{bodyHash}\n{timeStamp}";
                 string sign = GetHashHMAC(signString, _secretKey);
@@ -2215,7 +2216,7 @@ namespace OsEngine.Market.Servers.GateIo.GateIoSpot
                 string url = $"/spot/open_orders";
                 string queryParam = "";
                 string bodyParam = "";
-                string timeStamp = TimeManager.GetUnixTimeStampSeconds().ToString();
+                string timeStamp = TimeManager.GetUnixTimeStampSeconds().ToString(CultureInfo.InvariantCulture);
                 string bodyHash = GetHash(bodyParam);
                 string signString = $"{method}\n{_prefix}{url}\n{queryParam}\n{bodyHash}\n{timeStamp}";
                 string sign = GetHashHMAC(signString, _secretKey);
@@ -2375,7 +2376,7 @@ namespace OsEngine.Market.Servers.GateIo.GateIoSpot
                 string url = $"/spot/orders";
 
                 string bodyParam = "";
-                string timeStamp = TimeManager.GetUnixTimeStampSeconds().ToString();
+                string timeStamp = TimeManager.GetUnixTimeStampSeconds().ToString(CultureInfo.InvariantCulture);
                 string bodyHash = GetHash(bodyParam);
                 string signString = $"{method}\n{_prefix}{url}\n{queryParam}\n{bodyHash}\n{timeStamp}";
                 string sign = GetHashHMAC(signString, _secretKey);
@@ -2481,7 +2482,7 @@ namespace OsEngine.Market.Servers.GateIo.GateIoSpot
                 string url = $"/spot/my_trades";
 
                 string bodyParam = "";
-                string timeStamp = TimeManager.GetUnixTimeStampSeconds().ToString();
+                string timeStamp = TimeManager.GetUnixTimeStampSeconds().ToString(CultureInfo.InvariantCulture);
                 string bodyHash = GetHash(bodyParam);
                 string signString = $"{method}\n{_prefix}{url}\n{queryParam}\n{bodyHash}\n{timeStamp}";
                 string sign = GetHashHMAC(signString, _secretKey);

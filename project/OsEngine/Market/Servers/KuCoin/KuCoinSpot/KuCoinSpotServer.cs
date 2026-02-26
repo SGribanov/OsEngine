@@ -1681,7 +1681,7 @@ namespace OsEngine.Market.Servers.KuCoin.KuCoinSpot
             try
             {
                 SendOrderRequestData data = new SendOrderRequestData();
-                data.clientOid = order.NumberUser.ToString();
+                data.clientOid = order.NumberUser.ToString(CultureInfo.InvariantCulture);
                 data.symbol = order.SecurityNameCode;
                 data.side = order.Side.ToString().ToLower();
                 data.type = order.TypeOrder.ToString().ToLower();
@@ -2219,7 +2219,7 @@ namespace OsEngine.Market.Servers.KuCoin.KuCoinSpot
             try
             {
                 string requestPath = path;
-                string timestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds().ToString();
+                string timestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds().ToString(CultureInfo.InvariantCulture);
                 string signature = GenerateSignature(timestamp, method.ToString(), path, body, _secretKey);
                 string signaturePartner = GenerateSignaturePartner(timestamp);
 
@@ -2262,7 +2262,7 @@ namespace OsEngine.Market.Servers.KuCoin.KuCoinSpot
             try
             {
                 string requestPath = path;
-                string timestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds().ToString();
+                string timestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds().ToString(CultureInfo.InvariantCulture);
                 string signature = GenerateSignature(timestamp, method.ToString(), path, body, _secretKey);
 
                 RestRequest requestRest = new RestRequest(path, method);

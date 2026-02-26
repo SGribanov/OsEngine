@@ -14,6 +14,7 @@ using OsEngine.OsTrader.Panels.Attributes;
 using OsEngine.OsTrader.Panels.Tab;
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.Windows.Forms;
 using System.Windows.Forms.Integration;
@@ -134,7 +135,7 @@ namespace OsEngine.Robots.TechSamples
                 for (int i = 0; i < Lines.Count; i++)
                 {
                     Lines[i].Security = _tableDataGrid.Rows[i].Cells[0].Value.ToString();
-                    Lines[i].CandleCount = Convert.ToInt32(_tableDataGrid.Rows[i].Cells[1].Value.ToString());
+                    Lines[i].CandleCount = Convert.ToInt32(_tableDataGrid.Rows[i].Cells[1].Value.ToString(), CultureInfo.InvariantCulture);
                     Lines[i].MovementToEnter = _tableDataGrid.Rows[i].Cells[2].Value.ToString().ToDecimal();
                     Lines[i].Side = (Side)Enum.Parse(typeof(Side), _tableDataGrid.Rows[i].Cells[4].Value.ToString(), true);
                 }
@@ -755,7 +756,7 @@ namespace OsEngine.Robots.TechSamples
             string[] saveArray = str.Split('%');
 
             Security = saveArray[0].ToString();
-            CandleCount = Convert.ToInt32(saveArray[1]);
+            CandleCount = Convert.ToInt32(saveArray[1], CultureInfo.InvariantCulture);
             MovementToEnter = saveArray[2].ToDecimal();
             CurrentMovement = saveArray[3].ToDecimal();
             Enum.TryParse(saveArray[4], out Side);

@@ -6,6 +6,7 @@
  *Ваши права на использование кода регулируются данной лицензией http://o-s-a.net/doc/license_simple_engine.pdf
 */
 using System;
+using System.Globalization;
 using System.Windows;
 using System.Windows.Forms;
 using OsEngine.Entity;
@@ -90,9 +91,9 @@ namespace OsEngine.Charts.CandleChart.Indicators
         {
             try
             {
-                if (Convert.ToInt32(TextBoxLength.Text) <= 0||
-                    Convert.ToInt32(TextBoxLength2.Text) <= 0 ||
-                    Convert.ToInt32(TextBoxLength3.Text) <= 0)
+                if (Convert.ToInt32(TextBoxLength.Text, CultureInfo.InvariantCulture) <= 0||
+                    Convert.ToInt32(TextBoxLength2.Text, CultureInfo.InvariantCulture) <= 0 ||
+                    Convert.ToInt32(TextBoxLength3.Text, CultureInfo.InvariantCulture) <= 0)
                 {
                     throw new Exception("error");
                 }
@@ -106,9 +107,9 @@ namespace OsEngine.Charts.CandleChart.Indicators
             _so.ColorUp = HostColor1.Child.BackColor;
             _so.ColorDown = HostColor2.Child.BackColor;
 
-            _so.P1 = Convert.ToInt32(TextBoxLength.Text);
-            _so.P2 = Convert.ToInt32(TextBoxLength2.Text);
-            _so.P3 = Convert.ToInt32(TextBoxLength3.Text);
+            _so.P1 = Convert.ToInt32(TextBoxLength.Text, CultureInfo.InvariantCulture);
+            _so.P2 = Convert.ToInt32(TextBoxLength2.Text, CultureInfo.InvariantCulture);
+            _so.P3 = Convert.ToInt32(TextBoxLength3.Text, CultureInfo.InvariantCulture);
 
             _so.PaintOn = CheckBoxPaintOnOff.IsChecked.Value;
 

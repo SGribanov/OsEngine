@@ -577,8 +577,8 @@ namespace OsEngine.Market.Servers.HTX.Futures
             {
                 string queryParam = $"symbol={security}&";
                 queryParam += $"period={interval}&";
-                queryParam += $"from={fromTimeStamp}&";
-                queryParam += $"to={toTimeStamp}";
+                queryParam += "from=" + fromTimeStamp.ToString(CultureInfo.InvariantCulture) + "&";
+                queryParam += "to=" + toTimeStamp.ToString(CultureInfo.InvariantCulture);
 
                 string url = $"https://{_baseUrl}/market/history/kline?{queryParam}";
                 RestClient client = new RestClient(url);
@@ -1062,7 +1062,7 @@ namespace OsEngine.Market.Servers.HTX.Futures
                         _webSocketPrivate.ReadyState == WebSocketState.Connecting)
                     {
                         // Supports one-way heartbeat.
-                        string timestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds().ToString();
+                        string timestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds().ToString(CultureInfo.InvariantCulture);
                         //_webSocketPrivate.Send($"{{\"op\": \"ping\",\"ts\": \"{timestamp}\"}}");
                     }
                     else
@@ -1078,7 +1078,7 @@ namespace OsEngine.Market.Servers.HTX.Futures
                             && webSocketPublic?.ReadyState == WebSocketState.Open)
                         {
                             // Supports two-way heartbeat
-                            string timestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds().ToString();
+                            string timestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds().ToString(CultureInfo.InvariantCulture);
                             webSocketPublic.SendAsync($"{{\"ping\": \"{timestamp}\"}}");
                         }
                         else
@@ -1904,7 +1904,7 @@ namespace OsEngine.Market.Servers.HTX.Futures
 
                 jsonContent.Add("symbol", order.SecurityNameCode.Split('_')[0]);
                 jsonContent.Add("contract_type", contractType);
-                jsonContent.Add("client_order_id", order.NumberUser.ToString());
+                jsonContent.Add("client_order_id", order.NumberUser.ToString(CultureInfo.InvariantCulture));
                 jsonContent.Add("price", order.Price.ToString(CultureInfo.InvariantCulture));
                 jsonContent.Add("volume", order.Volume.ToString(CultureInfo.InvariantCulture));
                 jsonContent.Add("direction", order.Side == Side.Buy ? "buy" : "sell");
@@ -2365,7 +2365,7 @@ namespace OsEngine.Market.Servers.HTX.Futures
 
         private IRestResponse CreatePrivateQuery(string path, Method method, string body = null)
         {
-            string strDateTime = DateTime.UtcNow.ToString("s");
+            string strDateTime = DateTime.UtcNow.ToString("s", CultureInfo.InvariantCulture);
 
             Dictionary<string, string> parameters = new Dictionary<string, string>
             {
@@ -2408,7 +2408,7 @@ namespace OsEngine.Market.Servers.HTX.Futures
 
         public string BuildSign()
         {
-            string strDateTime = DateTime.UtcNow.ToString("s");
+            string strDateTime = DateTime.UtcNow.ToString("s", CultureInfo.InvariantCulture);
 
             Dictionary<string, string> parameters = new Dictionary<string, string>
             {

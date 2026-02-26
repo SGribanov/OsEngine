@@ -599,8 +599,8 @@ namespace OsEngine.Market.Servers.XT.XTSpot
 
                 try
                 {
-                    string startTime = TimeManager.GetTimeStampMilliSecondsToDateTime(timeFrom).ToString();
-                    string endTime = TimeManager.GetTimeStampMilliSecondsToDateTime(timeTo).ToString();
+                    string startTime = TimeManager.GetTimeStampMilliSecondsToDateTime(timeFrom).ToString(CultureInfo.InvariantCulture);
+                    string endTime = TimeManager.GetTimeStampMilliSecondsToDateTime(timeTo).ToString(CultureInfo.InvariantCulture);
                     string limit = "1000";
 
                     string uriCandles = "/v4/public/kline?symbol=" + nameSec + "&interval=" + stringInterval
@@ -1920,7 +1920,7 @@ namespace OsEngine.Market.Servers.XT.XTSpot
                 {
                     SendOrderRequestData data = new SendOrderRequestData();
                     data.symbol = order.SecurityNameCode;
-                    data.clientOrderId = (order.NumberUser + 1000).ToString();
+                    data.clientOrderId = (order.NumberUser + 1000).ToString(CultureInfo.InvariantCulture);
                     data.side = order.Side.ToString().ToUpper();
                     data.type = order.TypeOrder.ToString().ToUpper();
                     data.timeInForce = "GTC";
@@ -2269,7 +2269,7 @@ namespace OsEngine.Market.Servers.XT.XTSpot
                 {
                     string url = "/v4/order";
 
-                    string numberUser = (order.NumberUser + 1000).ToString();
+                    string numberUser = (order.NumberUser + 1000).ToString(CultureInfo.InvariantCulture);
 
                     string query = null;
 
@@ -2478,7 +2478,7 @@ namespace OsEngine.Market.Servers.XT.XTSpot
                 try
                 {
                     string requestPath = path;
-                    string timestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds().ToString();
+                    string timestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds().ToString(CultureInfo.InvariantCulture);
 
                     string signature = GetHMACSHA256(queryString, timestamp, method.ToString(), requestPath);
 

@@ -2780,7 +2780,7 @@ namespace OsEngine.Market.Servers.BitGet.BitGetFutures
             {
                 _rateGateOrder.WaitToProceed();
 
-                string path = "/api/v2/mix/order/detail?symbol=" + order.SecurityNameCode + "&productType=" + order.SecurityClassCode + "&clientOid=" + order.NumberUser;
+                string path = "/api/v2/mix/order/detail?symbol=" + order.SecurityNameCode + "&productType=" + order.SecurityClassCode + "&clientOid=" + order.NumberUser.ToString(CultureInfo.InvariantCulture);
 
                 IRestResponse responseMessage = CreatePrivateQuery(path, Method.GET, null, null);
 

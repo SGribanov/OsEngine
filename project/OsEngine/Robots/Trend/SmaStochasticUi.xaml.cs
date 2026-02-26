@@ -65,9 +65,9 @@ namespace OsEngine.Robots.Trend
             {
 
                 if (TextBoxVolumeOne.Text.ToDecimal() <= 0 ||
-                    Convert.ToInt32(StochUp.Text) <= 0 ||
-                    Convert.ToInt32(StochDown.Text) <= 0 ||
-                    Convert.ToInt32(Step.Text) <= 0 ||
+                    Convert.ToInt32(StochUp.Text, CultureInfo.InvariantCulture) <= 0 ||
+                    Convert.ToInt32(StochDown.Text, CultureInfo.InvariantCulture) <= 0 ||
+                    Convert.ToInt32(Step.Text, CultureInfo.InvariantCulture) <= 0 ||
                     TextBoxSlippage.Text.ToDecimal() < 0)
                 {
                     throw new Exception("");

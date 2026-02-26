@@ -4,6 +4,7 @@
 */
 
 using System;
+using System.Globalization;
 using System.Collections.Generic;
 using System.Windows.Forms;
 using System.Windows.Controls;
@@ -894,7 +895,7 @@ namespace OsEngine.Entity
                     }
                     else if (_parameters[i].Type == StrategyParameterType.Int)
                     {
-                        ((StrategyParameterInt)_parameters[i]).ValueInt = Convert.ToInt32(_grid.Rows[i].Cells[1].EditedFormattedValue.ToString());
+                        ((StrategyParameterInt)_parameters[i]).ValueInt = Convert.ToInt32(_grid.Rows[i].Cells[1].EditedFormattedValue.ToString(), CultureInfo.InvariantCulture);
                     }
                     else if (_parameters[i].Type == StrategyParameterType.Bool)
                     {

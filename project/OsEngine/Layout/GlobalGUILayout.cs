@@ -427,19 +427,19 @@ namespace OsEngine.Layout
             int width = 0;
             if (lines.Length > 0)
             {
-                int.TryParse(lines[0], out width);
+                int.TryParse(lines[0], NumberStyles.Integer, CultureInfo.InvariantCulture, out width);
             }
 
             int height = 0;
             if (lines.Length > 1)
             {
-                int.TryParse(lines[1], out height);
+                int.TryParse(lines[1], NumberStyles.Integer, CultureInfo.InvariantCulture, out height);
             }
 
             int monitorCount = 0;
             if (lines.Length > 2)
             {
-                int.TryParse(lines[2], out monitorCount);
+                int.TryParse(lines[2], NumberStyles.Integer, CultureInfo.InvariantCulture, out monitorCount);
             }
 
             return new ScreenResolutionSettingsDto

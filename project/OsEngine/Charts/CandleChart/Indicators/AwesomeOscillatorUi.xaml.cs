@@ -7,6 +7,7 @@
 */
 
 using System;
+using System.Globalization;
 using System.Windows;
 using System.Windows.Forms;
 using OsEngine.Entity;
@@ -83,8 +84,8 @@ namespace OsEngine.Charts.CandleChart.Indicators
         {
             try
             {
-                if (Convert.ToInt32(TextBoxLengthLong.Text) <= 0 ||
-                    Convert.ToInt32(TextBoxLengthShort.Text) <= 0)
+                if (Convert.ToInt32(TextBoxLengthLong.Text, CultureInfo.InvariantCulture) <= 0 ||
+                    Convert.ToInt32(TextBoxLengthShort.Text, CultureInfo.InvariantCulture) <= 0)
                 {
                     throw new Exception("error");
                 }
@@ -98,8 +99,8 @@ namespace OsEngine.Charts.CandleChart.Indicators
             _awesomeOscillatoro.ColorUp = HostColorUp.Child.BackColor;
             _awesomeOscillatoro.ColorDown = HostColorDown.Child.BackColor;
 
-            _awesomeOscillatoro.LengthLong = Convert.ToInt32(TextBoxLengthLong.Text);
-            _awesomeOscillatoro.LengthShort = Convert.ToInt32(TextBoxLengthShort.Text);
+            _awesomeOscillatoro.LengthLong = Convert.ToInt32(TextBoxLengthLong.Text, CultureInfo.InvariantCulture);
+            _awesomeOscillatoro.LengthShort = Convert.ToInt32(TextBoxLengthShort.Text, CultureInfo.InvariantCulture);
 
             if (CheckBoxPaintOnOff.IsChecked.HasValue)
             {
@@ -141,4 +142,5 @@ namespace OsEngine.Charts.CandleChart.Indicators
         }
     }
 }
+
 

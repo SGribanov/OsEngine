@@ -9,6 +9,7 @@
 using System;
 using System.Collections.Generic;
 using System.Drawing;
+using System.Globalization;
 using System.IO;
 using OsEngine.Entity;
 using OsEngine.Indicators;
@@ -242,8 +243,8 @@ namespace OsEngine.Charts.CandleChart.Indicators
 
             return new AdaptiveLookBackSettingsDto
             {
-                ColorArgb = Convert.ToInt32(lines[0]),
-                Length = Convert.ToInt32(lines[1]),
+                ColorArgb = Convert.ToInt32(lines[0], CultureInfo.InvariantCulture),
+                Length = Convert.ToInt32(lines[1], CultureInfo.InvariantCulture),
                 PaintOn = Convert.ToBoolean(lines[2])
             };
         }

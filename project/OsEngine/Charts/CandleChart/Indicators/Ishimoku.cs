@@ -7,6 +7,7 @@
 */
 
 using System;
+using System.Globalization;
 using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
@@ -363,21 +364,21 @@ namespace OsEngine.Charts.CandleChart.Indicators
                 return null;
             }
 
-            int lengthSdvig = Convert.ToInt32(lines[9]);
+            int lengthSdvig = Convert.ToInt32(lines[9], CultureInfo.InvariantCulture);
             int lengthChinkou = lines.Length >= 11
-                ? Convert.ToInt32(lines[10])
+                ? Convert.ToInt32(lines[10], CultureInfo.InvariantCulture)
                 : lengthSdvig;
 
             return new IchimokuSettingsDto
             {
-                LengthFirst = Convert.ToInt32(lines[0]),
-                LengthSecond = Convert.ToInt32(lines[1]),
-                LengthFird = Convert.ToInt32(lines[2]),
-                ColorEtalonLineArgb = Convert.ToInt32(lines[3]),
-                ColorLineRoundedArgb = Convert.ToInt32(lines[4]),
-                ColorLineLateArgb = Convert.ToInt32(lines[5]),
-                ColorLineFirstArgb = Convert.ToInt32(lines[6]),
-                ColorLineSecondArgb = Convert.ToInt32(lines[7]),
+                LengthFirst = Convert.ToInt32(lines[0], CultureInfo.InvariantCulture),
+                LengthSecond = Convert.ToInt32(lines[1], CultureInfo.InvariantCulture),
+                LengthFird = Convert.ToInt32(lines[2], CultureInfo.InvariantCulture),
+                ColorEtalonLineArgb = Convert.ToInt32(lines[3], CultureInfo.InvariantCulture),
+                ColorLineRoundedArgb = Convert.ToInt32(lines[4], CultureInfo.InvariantCulture),
+                ColorLineLateArgb = Convert.ToInt32(lines[5], CultureInfo.InvariantCulture),
+                ColorLineFirstArgb = Convert.ToInt32(lines[6], CultureInfo.InvariantCulture),
+                ColorLineSecondArgb = Convert.ToInt32(lines[7], CultureInfo.InvariantCulture),
                 PaintOn = Convert.ToBoolean(lines[8]),
                 LengthSdvig = lengthSdvig,
                 LengthChinkou = lengthChinkou

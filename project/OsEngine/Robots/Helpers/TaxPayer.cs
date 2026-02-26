@@ -14,6 +14,7 @@ using OsEngine.OsTrader.Panels.Tab;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
+using System.Globalization;
 using System.IO;
 using System.Windows.Forms;
 using System.Windows.Forms.Integration;
@@ -180,7 +181,7 @@ namespace OsEngine.Robots.Helpers
         {
             int year = 0;
 
-            if (int.TryParse(_dgv[0, rowIndex].Value?.ToString(), out year))
+            if (int.TryParse(_dgv[0, rowIndex].Value?.ToString(), NumberStyles.Integer, CultureInfo.InvariantCulture, out year))
             {
                 int deleteIndex = _listTable.FindIndex(x => x.Year == year);
 
@@ -202,7 +203,7 @@ namespace OsEngine.Robots.Helpers
                 if (e.RowIndex != _dgv.RowCount - 1 && e.ColumnIndex != 2)
                 {
                     int year = 0;
-                    int.TryParse(_dgv.Rows[e.RowIndex].Cells[0].Value?.ToString(), out year);
+                    int.TryParse(_dgv.Rows[e.RowIndex].Cells[0].Value?.ToString(), NumberStyles.Integer, CultureInfo.InvariantCulture, out year);
 
                     if (year == 0)
                     {
@@ -218,7 +219,7 @@ namespace OsEngine.Robots.Helpers
                     for (int i = 0; i < _dgv.RowCount - 1; i++)
                     {
                         int valueYear = 0;
-                        int.TryParse(_dgv.Rows[i].Cells[0].Value?.ToString(), out valueYear);
+                        int.TryParse(_dgv.Rows[i].Cells[0].Value?.ToString(), NumberStyles.Integer, CultureInfo.InvariantCulture, out valueYear);
 
                         if (valueYear == year)
                         {
@@ -254,7 +255,7 @@ namespace OsEngine.Robots.Helpers
                         for (int j = 0; j < _dgv.RowCount - 1; j++)
                         {
                             int valueYear = 0;
-                            int.TryParse(_dgv.Rows[j].Cells[0].Value?.ToString(), out valueYear);
+                            int.TryParse(_dgv.Rows[j].Cells[0].Value?.ToString(), NumberStyles.Integer, CultureInfo.InvariantCulture, out valueYear);
 
                             if (_listTable[i].Year == valueYear)
                             {

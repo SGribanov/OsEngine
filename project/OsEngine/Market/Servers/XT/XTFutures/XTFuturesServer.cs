@@ -672,9 +672,9 @@ namespace OsEngine.Market.Servers.XT.XTFutures
 
                 try
                 {
-                    string startTime = TimeManager.GetTimeStampMilliSecondsToDateTime(timeStart).ToString();
-                    string endTime = TimeManager.GetTimeStampMilliSecondsToDateTime(timeEnd).ToString();
-                    string limit = count.ToString();
+                    string startTime = TimeManager.GetTimeStampMilliSecondsToDateTime(timeStart).ToString(CultureInfo.InvariantCulture);
+                    string endTime = TimeManager.GetTimeStampMilliSecondsToDateTime(timeEnd).ToString(CultureInfo.InvariantCulture);
+                    string limit = count.ToString(CultureInfo.InvariantCulture);
 
                     string param = "symbol=" + nameSec
                                  + "&interval=" + stringInterval
@@ -1943,7 +1943,7 @@ namespace OsEngine.Market.Servers.XT.XTFutures
 
                     XTFuturesSendOrder data = new XTFuturesSendOrder();
                     data.symbol = order.SecurityNameCode;
-                    data.clientOrderId = order.NumberUser.ToString();
+                    data.clientOrderId = order.NumberUser.ToString(CultureInfo.InvariantCulture);
                     data.orderSide = order.Side.ToString().ToUpper();
 
                     decimal volume = order.Volume / GetVolume(order.SecurityNameCode);
@@ -2781,7 +2781,7 @@ namespace OsEngine.Market.Servers.XT.XTFutures
                         bodyString = body is string s ? s : JsonConvert.SerializeObject(body, Formatting.None);
                     }
 
-                    string ts = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds().ToString();
+                    string ts = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds().ToString(CultureInfo.InvariantCulture);
                     string X = $"validate-appkey={_publicKey}&validate-timestamp={ts}";
 
                     StringBuilder yb = new StringBuilder().Append('#').Append(path);

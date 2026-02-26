@@ -175,7 +175,7 @@ namespace OsEngine.OsData
 
             for (int i = 0; i < 24; i++)
             {
-                hours.Add(i.ToString("00"));
+                hours.Add(i.ToString("00", CultureInfo.InvariantCulture));
             }
 
             TimeBox.ItemsSource = hours;

@@ -7,6 +7,7 @@
 */
 
 using System;
+using System.Globalization;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Threading;
@@ -277,11 +278,11 @@ namespace OsEngine.Charts.CandleChart.Indicators
 
             return new StochRsiSettingsDto
             {
-                ColorKArgb = Convert.ToInt32(lines[0]),
-                RsiLength = Convert.ToInt32(lines[1]),
-                StochasticLength = Convert.ToInt32(lines[2]),
-                K = Convert.ToInt32(lines[3]),
-                D = Convert.ToInt32(lines[4])
+                ColorKArgb = Convert.ToInt32(lines[0], CultureInfo.InvariantCulture),
+                RsiLength = Convert.ToInt32(lines[1], CultureInfo.InvariantCulture),
+                StochasticLength = Convert.ToInt32(lines[2], CultureInfo.InvariantCulture),
+                K = Convert.ToInt32(lines[3], CultureInfo.InvariantCulture),
+                D = Convert.ToInt32(lines[4], CultureInfo.InvariantCulture)
             };
         }
 

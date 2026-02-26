@@ -7,6 +7,7 @@
 */
 
 using System;
+using System.Globalization;
 using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
@@ -334,10 +335,10 @@ namespace OsEngine.Charts.CandleChart.Indicators
 
             return new AwesomeOscillatorSettingsDto
             {
-                ColorUpArgb = Convert.ToInt32(lines[0]),
-                ColorDownArgb = Convert.ToInt32(lines[1]),
-                LengthShort = Convert.ToInt32(lines[2]),
-                LengthLong = Convert.ToInt32(lines[3]),
+                ColorUpArgb = Convert.ToInt32(lines[0], CultureInfo.InvariantCulture),
+                ColorDownArgb = Convert.ToInt32(lines[1], CultureInfo.InvariantCulture),
+                LengthShort = Convert.ToInt32(lines[2], CultureInfo.InvariantCulture),
+                LengthLong = Convert.ToInt32(lines[3], CultureInfo.InvariantCulture),
                 PaintOn = Convert.ToBoolean(lines[4]),
                 TypeCalculationAverage = typeCalculationAverage
             };
@@ -547,4 +548,5 @@ namespace OsEngine.Charts.CandleChart.Indicators
         public event Action<IIndicator> NeedToReloadEvent;
     }
 }
+
 

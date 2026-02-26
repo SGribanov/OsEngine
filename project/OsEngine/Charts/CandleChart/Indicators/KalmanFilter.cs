@@ -8,6 +8,7 @@
 
 
 using System;
+using System.Globalization;
 using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
@@ -256,7 +257,7 @@ namespace OsEngine.Charts.CandleChart.Indicators
 
             return new KalmanFilterSettingsDto
             {
-                ColorArgb = Convert.ToInt32(lines[0]),
+                ColorArgb = Convert.ToInt32(lines[0], CultureInfo.InvariantCulture),
                 Sharpness = lines[1].ToDecimal(),
                 K = lines[2].ToDecimal(),
                 PaintOn = Convert.ToBoolean(lines[3]),
@@ -452,4 +453,5 @@ namespace OsEngine.Charts.CandleChart.Indicators
         }
     }
 }
+
 

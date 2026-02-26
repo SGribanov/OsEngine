@@ -12,6 +12,7 @@ using System.IO;
 using RestSharp;
 using BytesRoad.Net.Ftp;
 using System.Net;
+using System.Globalization;
 
 namespace OsEngine.Market.Servers.YahooFinance
 {
@@ -399,8 +400,8 @@ namespace OsEngine.Market.Servers.YahooFinance
                 string queryParam = $"{security}?";
                 queryParam += $"symbol={security}&";
                 queryParam += $"interval={resolution}&";
-                queryParam += $"period1={fromTimeStamp}&";
-                queryParam += $"period2={toTimeStamp}&";
+                queryParam += "period1=" + fromTimeStamp.ToString(CultureInfo.InvariantCulture) + "&";
+                queryParam += "period2=" + toTimeStamp.ToString(CultureInfo.InvariantCulture) + "&";
                 queryParam += $"includePrePost={_premarket}";
                 
                 RestRequest request = new RestRequest(queryParam, Method.GET);

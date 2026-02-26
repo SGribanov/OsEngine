@@ -838,7 +838,7 @@ namespace OsEngine.Market.Connectors
 
                 foreach (DateTime date in sortedExpirations)
                 {
-                    ComboBoxExpiration.Items.Add(date.ToString("dd/MM/yyyy"));
+                    ComboBoxExpiration.Items.Add(date.ToString("dd.MM.yyyy", CultureInfo.InvariantCulture));
                 }
 
                 foreach (decimal strike in sortedStrikes)

@@ -8,6 +8,7 @@
 
 
 using System;
+using System.Globalization;
 using System.Windows;
 using System.Windows.Forms;
 using OsEngine.Entity;
@@ -93,10 +94,10 @@ namespace OsEngine.Charts.CandleChart.Indicators
         {
             try
             {
-                if (Convert.ToInt32(TextBoxPeriodOne.Text) <= 0 ||
-                    Convert.ToInt32(TextBoxPerionTwo.Text) <= 0 ||
-                    Convert.ToInt32(TextBoxPerionThree.Text) <= 0 ||
-                    Convert.ToInt32(TextBoxShift.Text) <= 0)
+                if (Convert.ToInt32(TextBoxPeriodOne.Text, CultureInfo.InvariantCulture) <= 0 ||
+                    Convert.ToInt32(TextBoxPerionTwo.Text, CultureInfo.InvariantCulture) <= 0 ||
+                    Convert.ToInt32(TextBoxPerionThree.Text, CultureInfo.InvariantCulture) <= 0 ||
+                    Convert.ToInt32(TextBoxShift.Text, CultureInfo.InvariantCulture) <= 0)
                 {
                     throw new Exception("error");
                 }
@@ -107,11 +108,11 @@ namespace OsEngine.Charts.CandleChart.Indicators
                 return;
             }
 
-            _ishimoku.LengthFirst = Convert.ToInt32(TextBoxPeriodOne.Text);
-            _ishimoku.LengthSecond = Convert.ToInt32(TextBoxPerionTwo.Text);
-            _ishimoku.LengthFird = Convert.ToInt32(TextBoxPerionThree.Text);
-            _ishimoku.LengthSdvig = Convert.ToInt32(TextBoxShift.Text);
-            _ishimoku.LengthChinkou = Convert.ToInt32(TextBoxChinkou.Text);
+            _ishimoku.LengthFirst = Convert.ToInt32(TextBoxPeriodOne.Text, CultureInfo.InvariantCulture);
+            _ishimoku.LengthSecond = Convert.ToInt32(TextBoxPerionTwo.Text, CultureInfo.InvariantCulture);
+            _ishimoku.LengthFird = Convert.ToInt32(TextBoxPerionThree.Text, CultureInfo.InvariantCulture);
+            _ishimoku.LengthSdvig = Convert.ToInt32(TextBoxShift.Text, CultureInfo.InvariantCulture);
+            _ishimoku.LengthChinkou = Convert.ToInt32(TextBoxChinkou.Text, CultureInfo.InvariantCulture);
 
             _ishimoku.ColorEtalonLine = HostEtalonLine.Child.BackColor;
             _ishimoku.ColorLineRounded = HostLineRounded.Child.BackColor;

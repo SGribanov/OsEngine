@@ -7,6 +7,7 @@
 */
 
 using System;
+using System.Globalization;
 using System.Windows;
 using System.Windows.Forms;
 using OsEngine.Entity;
@@ -71,7 +72,7 @@ namespace OsEngine.Charts.CandleChart.Indicators
         {
             try
             {
-                if (Convert.ToInt32(TextBoxLength.Text) <= 0)
+                if (Convert.ToInt32(TextBoxLength.Text, CultureInfo.InvariantCulture) <= 0)
                 {
                     throw new Exception("error");
                 }
@@ -83,7 +84,7 @@ namespace OsEngine.Charts.CandleChart.Indicators
             }
 
             _dtd.ColorBase = HostColorBase.Child.BackColor;
-            _dtd.Length= Convert.ToInt32(TextBoxLength.Text);
+            _dtd.Length= Convert.ToInt32(TextBoxLength.Text, CultureInfo.InvariantCulture);
             _dtd.PaintOn = CheckBoxPaintOnOff.IsChecked.Value;
             _dtd.CorrectionCoeff = TextBoxCorrectionCoeff.Text.ToDecimal();
             _dtd.Save();
@@ -105,4 +106,5 @@ namespace OsEngine.Charts.CandleChart.Indicators
         }
     }
 }
+
 

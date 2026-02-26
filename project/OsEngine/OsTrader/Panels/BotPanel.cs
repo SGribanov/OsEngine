@@ -1963,7 +1963,7 @@ position => position.State != PositionStateType.OpeningFail
                     }
                     if (_tabBotTab.SelectedItem != null)
                     {
-                        return Convert.ToInt32(_tabBotTab.SelectedItem.ToString());
+                        return Convert.ToInt32(_tabBotTab.SelectedItem.ToString(), CultureInfo.InvariantCulture);
                     }
                     return 0;
                 }

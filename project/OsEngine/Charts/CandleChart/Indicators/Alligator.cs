@@ -7,6 +7,7 @@
 */
 
 using System;
+using System.Globalization;
 using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
@@ -382,15 +383,15 @@ namespace OsEngine.Charts.CandleChart.Indicators
 
             return new AlligatorSettingsDto
             {
-                LengthBase = Convert.ToInt32(lines[0]),
-                ShiftBase = Convert.ToInt32(lines[1]),
-                ColorBaseArgb = Convert.ToInt32(lines[2]),
-                LengthUp = Convert.ToInt32(lines[3]),
-                ShiftUp = Convert.ToInt32(lines[4]),
-                ColorUpArgb = Convert.ToInt32(lines[5]),
-                LengthDown = Convert.ToInt32(lines[6]),
-                ShiftDown = Convert.ToInt32(lines[7]),
-                ColorDownArgb = Convert.ToInt32(lines[8]),
+                LengthBase = Convert.ToInt32(lines[0], CultureInfo.InvariantCulture),
+                ShiftBase = Convert.ToInt32(lines[1], CultureInfo.InvariantCulture),
+                ColorBaseArgb = Convert.ToInt32(lines[2], CultureInfo.InvariantCulture),
+                LengthUp = Convert.ToInt32(lines[3], CultureInfo.InvariantCulture),
+                ShiftUp = Convert.ToInt32(lines[4], CultureInfo.InvariantCulture),
+                ColorUpArgb = Convert.ToInt32(lines[5], CultureInfo.InvariantCulture),
+                LengthDown = Convert.ToInt32(lines[6], CultureInfo.InvariantCulture),
+                ShiftDown = Convert.ToInt32(lines[7], CultureInfo.InvariantCulture),
+                ColorDownArgb = Convert.ToInt32(lines[8], CultureInfo.InvariantCulture),
                 PaintOn = Convert.ToBoolean(lines[9]),
                 TypeCalculationAverage = typeCalculationAverage
             };
@@ -679,4 +680,5 @@ namespace OsEngine.Charts.CandleChart.Indicators
         }
     }
 }
+
 

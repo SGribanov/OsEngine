@@ -10,6 +10,7 @@ using OsEngine.Entity;
 using OsEngine.Language;
 using OsEngine.Layout;
 using System;
+using System.Globalization;
 using System.Windows;
 using System.Windows.Forms;
 using System.Collections.Generic;
@@ -261,7 +262,7 @@ namespace OsEngine.Market.AutoFollow
                          return;
                      }
 
-                     int number = Convert.ToInt32(_grid.Rows[row].Cells[0].Value.ToString());
+                     int number = Convert.ToInt32(_grid.Rows[row].Cells[0].Value.ToString(), CultureInfo.InvariantCulture);
                      _master.RemoveCopyTraderAt(number);
                      UpdateGrid();
                  }
@@ -269,7 +270,7 @@ namespace OsEngine.Market.AutoFollow
                     && column == 3)
                 { // show dialog
 
-                    int number = Convert.ToInt32(_grid.Rows[row].Cells[0].Value.ToString());
+                    int number = Convert.ToInt32(_grid.Rows[row].Cells[0].Value.ToString(), CultureInfo.InvariantCulture);
                     ShowCopyTraderDialog(number);
                     UpdateGrid();
                 }

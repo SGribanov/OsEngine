@@ -299,7 +299,7 @@ namespace OsEngine.OsTrader
                     {
                         return;
                     }
-                    number = Convert.ToInt32(_grid.Rows[_grid.CurrentCell.RowIndex].Cells[0].Value);
+                    number = Convert.ToInt32(_grid.Rows[_grid.CurrentCell.RowIndex].Cells[0].Value, CultureInfo.InvariantCulture);
                 }
                 catch (Exception ex)
                 {

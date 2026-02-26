@@ -57,14 +57,14 @@ namespace OsEngine.OsTrader.Grids
 
             result += FailOpenOrdersReactionIsOn + "@";
             result += "@";
-            result += FailOpenOrdersCountToReaction + "@";
+            result += FailOpenOrdersCountToReaction.ToString(CultureInfo.InvariantCulture) + "@";
 
             result += "@";
-            result += FailCancelOrdersCountToReaction + "@";
+            result += FailCancelOrdersCountToReaction.ToString(CultureInfo.InvariantCulture) + "@";
             result += FailCancelOrdersReactionIsOn + "@";
 
             result += WaitOnStartConnectorIsOn + "@";
-            result += WaitSecondsOnStartConnector + "@";
+            result += WaitSecondsOnStartConnector.ToString(CultureInfo.InvariantCulture) + "@";
 
             result += ReduceOrdersCountInMarketOnNoFundsError + "@";
 

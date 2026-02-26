@@ -13,6 +13,7 @@ using OsEngine.Market;
 using OsEngine.OsTrader.Panels.Tab;
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.Windows.Forms;
 using System.Windows.Forms.Integration;
@@ -327,7 +328,7 @@ namespace OsEngine.OsTrader.Grids
                         continue;
                     }
 
-                    int num = Convert.ToInt32(gridSettings.Split('@')[0]);
+                    int num = Convert.ToInt32(gridSettings.Split('@')[0], CultureInfo.InvariantCulture);
 
                     TradeGrid newGrid = new TradeGrid(_startProgram, _tab, num);
 
@@ -552,7 +553,7 @@ namespace OsEngine.OsTrader.Grids
                     && column == 4)
                 { // Delete
 
-                    int number = Convert.ToInt32(_gridViewInstances.Rows[row].Cells[0].Value.ToString());
+                    int number = Convert.ToInt32(_gridViewInstances.Rows[row].Cells[0].Value.ToString(), CultureInfo.InvariantCulture);
 
                     DeleteAtNum(number, false);
                 }
@@ -561,7 +562,7 @@ namespace OsEngine.OsTrader.Grids
                     && column == 3)
                 { // Settings
 
-                    int number = Convert.ToInt32(_gridViewInstances.Rows[row].Cells[0].Value.ToString());
+                    int number = Convert.ToInt32(_gridViewInstances.Rows[row].Cells[0].Value.ToString(), CultureInfo.InvariantCulture);
 
                     ShowDialog(number);
                 }

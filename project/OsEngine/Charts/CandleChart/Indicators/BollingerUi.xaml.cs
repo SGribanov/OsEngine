@@ -7,6 +7,7 @@
 */
 
 using System;
+using System.Globalization;
 using System.Windows;
 using System.Windows.Forms;
 using OsEngine.Entity;
@@ -75,7 +76,7 @@ namespace OsEngine.Charts.CandleChart.Indicators
         {
             try
             {
-                if (Convert.ToInt32(TextBoxLength.Text) <= 0 ||
+                if (Convert.ToInt32(TextBoxLength.Text, CultureInfo.InvariantCulture) <= 0 ||
                    TextBoxDeviation.Text.ToDecimal() <= 0)
                 {
                     throw new Exception("error");
@@ -91,7 +92,7 @@ namespace OsEngine.Charts.CandleChart.Indicators
             _bollinger.ColorDown = HostColorDown.Child.BackColor;
             _bollinger.Deviation = TextBoxDeviation.Text.ToDecimal();
 
-            _bollinger.Length = Convert.ToInt32(TextBoxLength.Text);
+            _bollinger.Length = Convert.ToInt32(TextBoxLength.Text, CultureInfo.InvariantCulture);
 
             if (CheckBoxPaintOnOff.IsChecked.HasValue)
             {
@@ -128,4 +129,5 @@ namespace OsEngine.Charts.CandleChart.Indicators
         }
     }
 }
+
 

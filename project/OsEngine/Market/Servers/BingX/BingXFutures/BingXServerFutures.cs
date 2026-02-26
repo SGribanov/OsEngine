@@ -204,7 +204,7 @@ namespace OsEngine.Market.Servers.BingX.BingXFutures
 
                 RestRequest request = new RestRequest("/openApi/swap/v1/positionSide/dual", Method.POST);
 
-                string timeStamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds().ToString();
+                string timeStamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds().ToString(CultureInfo.InvariantCulture);
                 string parameters = $"dualSidePosition={HedgeMode}&timestamp={timeStamp}";
                 string sign = CalculateHmacSha256(parameters);
 
@@ -314,7 +314,7 @@ namespace OsEngine.Market.Servers.BingX.BingXFutures
 
                 RestRequest request = new RestRequest("/openApi/swap/v2/quote/contracts", Method.GET);
 
-                string timeStamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds().ToString();
+                string timeStamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds().ToString(CultureInfo.InvariantCulture);
                 string parameters = $"timestamp={timeStamp}";
                 string sign = CalculateHmacSha256(parameters);
 
@@ -474,7 +474,7 @@ namespace OsEngine.Market.Servers.BingX.BingXFutures
 
                 RestRequest request = new RestRequest("/openApi/swap/v2/user/positions", Method.GET);
 
-                string timeStamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds().ToString();
+                string timeStamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds().ToString(CultureInfo.InvariantCulture);
                 string parameters = $"timestamp={timeStamp}";
                 string sign = CalculateHmacSha256(parameters);
 
@@ -584,7 +584,7 @@ namespace OsEngine.Market.Servers.BingX.BingXFutures
 
                 RestRequest request = new RestRequest("/openApi/swap/v2/user/balance", Method.GET);
 
-                string timeStamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds().ToString();
+                string timeStamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds().ToString(CultureInfo.InvariantCulture);
                 string parameters = $"timestamp={timeStamp}&recvWindow=20000";
                 string sign = CalculateHmacSha256(parameters);
 
@@ -682,7 +682,7 @@ namespace OsEngine.Market.Servers.BingX.BingXFutures
             try
             {
                 string endPoint = "/openApi/swap/v3/quote/klines";
-                string timeStamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds().ToString();
+                string timeStamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds().ToString(CultureInfo.InvariantCulture);
 
                 string parameters = "";
                 if (fromTimeStamp != 0 && toTimeStamp != 0)
@@ -1453,7 +1453,7 @@ namespace OsEngine.Market.Servers.BingX.BingXFutures
                         client.Proxy = _myProxy;
                     }
 
-                    string timeStamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds().ToString();
+                    string timeStamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds().ToString(CultureInfo.InvariantCulture);
                     string parameters = $"symbol={_subscribedSecutiries[i]}&timestamp={timeStamp}";
                     string sign = CalculateHmacSha256(parameters);
                     string requestUri = $"/openApi/swap/v2/quote/fundingRate?{parameters}";
@@ -1606,7 +1606,7 @@ namespace OsEngine.Market.Servers.BingX.BingXFutures
                         client.Proxy = _myProxy;
                     }
 
-                    string timeStamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds().ToString();
+                    string timeStamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds().ToString(CultureInfo.InvariantCulture);
                     string parameters = $"symbol={_subscribedSecutiries[i]}&timestamp={timeStamp}";
                     string sign = CalculateHmacSha256(parameters);
                     string requestUri = $"/openApi/swap/v2/quote/premiumIndex?{parameters}";
@@ -1671,7 +1671,7 @@ namespace OsEngine.Market.Servers.BingX.BingXFutures
                         client.Proxy = _myProxy;
                     }
 
-                    string timeStamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds().ToString();
+                    string timeStamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds().ToString(CultureInfo.InvariantCulture);
                     string parameters = $"symbol={_subscribedSecutiries[i]}&timestamp={timeStamp}";
                     string sign = CalculateHmacSha256(parameters);
                     string requestUri = $"/openApi/swap/v2/quote/openInterest?{parameters}";
@@ -2088,7 +2088,7 @@ namespace OsEngine.Market.Servers.BingX.BingXFutures
                 newTrade.SecurityNameCode = responseOrder.o.s;
                 newTrade.NumberOrderParent = responseOrder.o.i;
                 newTrade.Price = responseOrder.o.ap.ToDecimal();
-                newTrade.NumberTrade = TimeManager.GetTimeStampMilliSecondsToDateTime(DateTime.Now).ToString();
+                newTrade.NumberTrade = TimeManager.GetTimeStampMilliSecondsToDateTime(DateTime.Now).ToString(CultureInfo.InvariantCulture);
                 newTrade.Side = responseOrder.o.S.Contains("BUY") ? Side.Buy : Side.Sell;
 
                 decimal previousVolume = GetExecuteVolumeInOrder(newTrade.NumberOrderParent);
@@ -2224,8 +2224,9 @@ namespace OsEngine.Market.Servers.BingX.BingXFutures
 
                 string positionSide = CheckPositionSide(order);
 
-                string timeStamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds().ToString();
+                string timeStamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds().ToString(CultureInfo.InvariantCulture);
                 string quantity = order.Volume.ToString(CultureInfo.InvariantCulture);
+                string clientOrderId = order.NumberUser.ToString(CultureInfo.InvariantCulture);
                 string typeOrder = "";
                 string parameters = "";
                 string price = "";
@@ -2234,14 +2235,14 @@ namespace OsEngine.Market.Servers.BingX.BingXFutures
                 {
                     typeOrder = "MARKET";
                     parameters = $"timestamp={timeStamp}&symbol={symbol}&side={side}&positionSide={positionSide}" +
-                        $"&type={typeOrder}&quantity={quantity}&clientOrderID={order.NumberUser}";
+                        $"&type={typeOrder}&quantity={quantity}&clientOrderID={clientOrderId}";
                 }
                 else if (order.TypeOrder == OrderPriceType.Limit)
                 {
                     typeOrder = "LIMIT";
                     price = order.Price.ToString(CultureInfo.InvariantCulture);
                     parameters = $"timestamp={timeStamp}&symbol={symbol}&side={side}&positionSide={positionSide}" +
-                        $"&type={typeOrder}&quantity={quantity}&price={price}&clientOrderID={order.NumberUser}";
+                        $"&type={typeOrder}&quantity={quantity}&price={price}&clientOrderID={clientOrderId}";
                 }
                 string sign = CalculateHmacSha256(parameters);
 
@@ -2255,7 +2256,7 @@ namespace OsEngine.Market.Servers.BingX.BingXFutures
                 if (typeOrder == "LIMIT")
                     request.AddParameter("price", price);
 
-                request.AddParameter("clientOrderID", order.NumberUser);
+                request.AddParameter("clientOrderID", clientOrderId);
                 request.AddParameter("signature", sign);
                 request.AddHeader("X-BX-APIKEY", _publicKey);
 
@@ -2360,14 +2361,15 @@ namespace OsEngine.Market.Servers.BingX.BingXFutures
 
                 RestRequest request = new RestRequest("/openApi/swap/v2/trade/order", Method.DELETE);
 
-                string timeStamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds().ToString();
-                string parameters = $"timestamp={timeStamp}&symbol={order.SecurityNameCode}&orderId={order.NumberMarket}&clientOrderID={order.NumberUser}";
+                string timeStamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds().ToString(CultureInfo.InvariantCulture);
+                string clientOrderId = order.NumberUser.ToString(CultureInfo.InvariantCulture);
+                string parameters = $"timestamp={timeStamp}&symbol={order.SecurityNameCode}&orderId={order.NumberMarket}&clientOrderID={clientOrderId}";
                 string sign = CalculateHmacSha256(parameters);
 
                 request.AddParameter("timestamp", timeStamp);
                 request.AddParameter("symbol", order.SecurityNameCode);
                 request.AddParameter("orderId", order.NumberMarket);
-                request.AddParameter("clientOrderID", order.NumberUser);
+                request.AddParameter("clientOrderID", clientOrderId);
                 request.AddParameter("signature", sign);
                 request.AddHeader("X-BX-APIKEY", _publicKey);
 
@@ -2450,7 +2452,7 @@ namespace OsEngine.Market.Servers.BingX.BingXFutures
 
                 RestRequest request = new RestRequest("/openApi/swap/v2/trade/openOrders", Method.GET);
 
-                string timeStamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds().ToString();
+                string timeStamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds().ToString(CultureInfo.InvariantCulture);
                 string parameters = $"timestamp={timeStamp}";
                 string sign = CalculateHmacSha256(parameters);
 
@@ -2560,10 +2562,10 @@ namespace OsEngine.Market.Servers.BingX.BingXFutures
 
                 RestRequest request = new RestRequest("/openApi/swap/v2/trade/allFillOrders", Method.GET);
 
-                string startTs = TimeManager.GetTimeStampMilliSecondsToDateTime(DateTime.Now.AddDays(-1)).ToString();
-                string endTs = TimeManager.GetTimeStampMilliSecondsToDateTime(DateTime.Now.AddDays(1)).ToString();
+                string startTs = TimeManager.GetTimeStampMilliSecondsToDateTime(DateTime.Now.AddDays(-1)).ToString(CultureInfo.InvariantCulture);
+                string endTs = TimeManager.GetTimeStampMilliSecondsToDateTime(DateTime.Now.AddDays(1)).ToString(CultureInfo.InvariantCulture);
 
-                string timeStamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds().ToString();
+                string timeStamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds().ToString(CultureInfo.InvariantCulture);
                 string parameters = $"timestamp={timeStamp}&orderId={order.NumberMarket}&tradingUnit=COIN&startTs={startTs}&endTs={endTs}";
                 string sign = CalculateHmacSha256(parameters);
 
@@ -2596,7 +2598,7 @@ namespace OsEngine.Market.Servers.BingX.BingXFutures
                             newTrade.SecurityNameCode = response.data.fill_orders[i].symbol;
                             newTrade.NumberOrderParent = response.data.fill_orders[i].orderId;
                             newTrade.Price = response.data.fill_orders[i].price.ToDecimal();
-                            newTrade.NumberTrade = TimeManager.GetTimeStampMilliSecondsToDateTime(DateTime.Now).ToString();
+                            newTrade.NumberTrade = TimeManager.GetTimeStampMilliSecondsToDateTime(DateTime.Now).ToString(CultureInfo.InvariantCulture);
                             newTrade.Side = response.data.fill_orders[i].side.Contains("BUY") ? Side.Buy : Side.Sell;
                             newTrade.Volume = response.data.fill_orders[i].volume.ToDecimal();
 
@@ -2675,14 +2677,15 @@ namespace OsEngine.Market.Servers.BingX.BingXFutures
 
                 RestRequest request = new RestRequest("/openApi/swap/v2/trade/order", Method.GET);
 
-                string timeStamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds().ToString();
-                string parameters = $"timestamp={timeStamp}&symbol={order.SecurityNameCode}&orderId={order.NumberMarket}&clientOrderID={order.NumberUser}";
+                string timeStamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds().ToString(CultureInfo.InvariantCulture);
+                string clientOrderId = order.NumberUser.ToString(CultureInfo.InvariantCulture);
+                string parameters = $"timestamp={timeStamp}&symbol={order.SecurityNameCode}&orderId={order.NumberMarket}&clientOrderID={clientOrderId}";
                 string sign = CalculateHmacSha256(parameters);
 
                 request.AddParameter("timestamp", timeStamp);
                 request.AddParameter("symbol", order.SecurityNameCode);
                 request.AddParameter("orderId", order.NumberMarket);
-                request.AddParameter("clientOrderID", order.NumberUser);
+                request.AddParameter("clientOrderID", clientOrderId);
                 request.AddParameter("signature", sign);
                 request.AddHeader("X-BX-APIKEY", _publicKey);
 

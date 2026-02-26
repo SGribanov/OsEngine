@@ -7,6 +7,7 @@
 */
 
 using System;
+using System.Globalization;
 using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
@@ -312,7 +313,7 @@ namespace OsEngine.Charts.CandleChart.Indicators
 
             return new PriceOscillatorSettingsDto
             {
-                ColorArgb = Convert.ToInt32(lines[0]),
+                ColorArgb = Convert.ToInt32(lines[0], CultureInfo.InvariantCulture),
                 PaintOn = Convert.ToBoolean(lines[1]),
                 TypeSerch = typeSerch
             };

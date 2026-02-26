@@ -5,6 +5,7 @@ using OsEngine.Indicators;
 using OsEngine.OsTrader.Panels;
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Text.RegularExpressions;
 
 namespace OsEngine.Attributes
@@ -43,7 +44,7 @@ namespace OsEngine.Attributes
             if (match.Success)
             {
                 // Извлекаем текущее число
-                int currentNumber = int.Parse(match.Groups[1].Value);
+                int currentNumber = int.Parse(match.Groups[1].Value, NumberStyles.Integer, CultureInfo.InvariantCulture);
                 int newNumber = currentNumber + 1;
 
                 // Заменяем старый уникализатор на новый

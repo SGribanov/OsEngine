@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using Newtonsoft.Json;
 using OsEngine.Entity;
 using OsEngine.Logging;
@@ -522,8 +523,8 @@ namespace OsEngine.Market.Servers.Polygon
 
                 string interval = GetInterval(timeFrameBuilder.TimeFrameTimeSpan);
 
-                string fromData = startTime.ToString("yyyy-MM-dd");
-                string toData = endTime.ToString("yyyy-MM-dd");
+                string fromData = startTime.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture);
+                string toData = endTime.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture);
 
                 List<Candle> allCandles = new List<Candle>();
 

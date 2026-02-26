@@ -85,7 +85,7 @@ namespace OsEngine.Robots.MarketMaker
                         TextBoxSlippage2.Text.ToDecimal() < 0 ||
                         TextBoxVolume1.Text.ToDecimal() < 0 ||
                         TextBoxVolume2.Text.ToDecimal() < 0 ||
-                        Convert.ToInt32(TextBoxCandleCount.Text) < 0 ||
+                        Convert.ToInt32(TextBoxCandleCount.Text, CultureInfo.InvariantCulture) < 0 ||
                         TextBoxDivergention.Text.ToDecimal() < 0)
                     {
                         throw new Exception();
@@ -103,7 +103,7 @@ namespace OsEngine.Robots.MarketMaker
                 _strategy.Slippage1 = TextBoxSlippage1.Text.ToDecimal();
                 _strategy.Slippage2 = TextBoxSlippage2.Text.ToDecimal();
                 Enum.TryParse(ComboBoxRegime.Text, true, out _strategy.Regime);
-                _strategy.CountCandles = Convert.ToInt32(TextBoxCandleCount.Text);
+                _strategy.CountCandles = Convert.ToInt32(TextBoxCandleCount.Text, CultureInfo.InvariantCulture);
 
                 _strategy.Volume2 = TextBoxVolume2.Text.ToDecimal();
                 _strategy.Volume1 = TextBoxVolume1.Text.ToDecimal();

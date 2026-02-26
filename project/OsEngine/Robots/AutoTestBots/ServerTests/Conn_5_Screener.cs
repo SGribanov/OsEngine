@@ -11,6 +11,7 @@ using OsEngine.OsTrader.Panels.Tab;
 using OsEngine.Robots.Engines;
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Threading;
 
 namespace OsEngine.Robots.AutoTestBots.ServerTests
@@ -88,7 +89,7 @@ namespace OsEngine.Robots.AutoTestBots.ServerTests
 
             if (_botToShowDialog == null)
             {
-                _botToShowDialog = new CandleEngine(DateTime.Now.Ticks.ToString(), StartProgram.IsOsTrader);
+                _botToShowDialog = new CandleEngine(DateTime.Now.Ticks.ToString(CultureInfo.InvariantCulture), StartProgram.IsOsTrader);
                 _botToShowDialog.TabsScreener.Add(_screener);
                 _botToShowDialog.GetTabs().Add(_screener);
             }
@@ -343,7 +344,7 @@ namespace OsEngine.Robots.AutoTestBots.ServerTests
         private void StartScreener(List<Security> securities,
             Portfolio portfolio, TimeFrame timeFrame)
         {
-            BotTabScreener newScreener = new BotTabScreener(DateTime.Now.Ticks.ToString(), StartProgram.IsOsTrader);
+            BotTabScreener newScreener = new BotTabScreener(DateTime.Now.Ticks.ToString(CultureInfo.InvariantCulture), StartProgram.IsOsTrader);
 
             _screener = newScreener;
             _screener.CandleUpdateEvent += _screener_CandleUpdateEvent;

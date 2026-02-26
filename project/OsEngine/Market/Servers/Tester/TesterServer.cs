@@ -270,7 +270,7 @@ namespace OsEngine.Market.Servers.Tester
             }
 
             int slippageToSimpleOrder = 0;
-            if (lines.Length > 1 && int.TryParse(lines[1], out int parsedSimpleSlippage))
+            if (lines.Length > 1 && int.TryParse(lines[1], NumberStyles.Integer, CultureInfo.InvariantCulture, out int parsedSimpleSlippage))
             {
                 slippageToSimpleOrder = parsedSimpleSlippage;
             }
@@ -282,7 +282,7 @@ namespace OsEngine.Market.Servers.Tester
             }
 
             int slippageToStopOrder = 0;
-            if (lines.Length > 6 && int.TryParse(lines[6], out int parsedStopSlippage))
+            if (lines.Length > 6 && int.TryParse(lines[6], NumberStyles.Integer, CultureInfo.InvariantCulture, out int parsedStopSlippage))
             {
                 slippageToStopOrder = parsedStopSlippage;
             }

@@ -10,6 +10,7 @@ using OsEngine.Entity;
 using OsEngine.Language;
 using OsEngine.Logging;
 using System;
+using System.Globalization;
 using System.Collections.Generic;
 using System.IO;
 using System.Windows.Forms;
@@ -400,7 +401,7 @@ namespace OsEngine.OsTrader.Panels.Tab
             if (lines.Length > 4) settings.CommissionValue = lines[4].ToDecimal();
             if (lines.Length > 5 && bool.TryParse(lines[5], out bool commissionIsSubstract)) settings.CommissionIsSubstract = commissionIsSubstract;
             if (lines.Length > 6 && Enum.TryParse(lines[6], out DelayPolygonType delayType)) settings.DelayType = delayType;
-            if (lines.Length > 7 && int.TryParse(lines[7], out int delayMls)) settings.DelayMls = delayMls;
+            if (lines.Length > 7 && int.TryParse(lines[7], NumberStyles.Integer, CultureInfo.InvariantCulture, out int delayMls)) settings.DelayMls = delayMls;
             if (lines.Length > 8) settings.QtyStart = lines[8].ToDecimal();
             if (lines.Length > 9) settings.SlippagePercent = lines[9].ToDecimal();
             if (lines.Length > 10) settings.ProfitToSignal = lines[10].ToDecimal();
@@ -1486,7 +1487,7 @@ namespace OsEngine.OsTrader.Panels.Tab
                             return;
                         }
 
-                        tabNum = Convert.ToInt32(_grid.Rows[row].Cells[0].Value.ToString());
+                        tabNum = Convert.ToInt32(_grid.Rows[row].Cells[0].Value.ToString(), CultureInfo.InvariantCulture);
                     }
                     catch (Exception ex)
                     {
@@ -1538,7 +1539,7 @@ namespace OsEngine.OsTrader.Panels.Tab
                             return;
                         }
 
-                        tabNum = Convert.ToInt32(_grid.Rows[row].Cells[0].Value.ToString());
+                        tabNum = Convert.ToInt32(_grid.Rows[row].Cells[0].Value.ToString(), CultureInfo.InvariantCulture);
                     }
                     catch (Exception ex)
                     {
@@ -1589,7 +1590,7 @@ namespace OsEngine.OsTrader.Panels.Tab
                             return;
                         }
 
-                        tabNum = Convert.ToInt32(_grid.Rows[row].Cells[0].Value.ToString());
+                        tabNum = Convert.ToInt32(_grid.Rows[row].Cells[0].Value.ToString(), CultureInfo.InvariantCulture);
                     }
                     catch (Exception ex)
                     {
@@ -1942,7 +1943,7 @@ namespace OsEngine.OsTrader.Panels.Tab
                 ShowTradePanelOnChart = true
             };
 
-            if (lines.Length > 0 && int.TryParse(lines[0], out int pairNum)) settings.PairNum = pairNum;
+            if (lines.Length > 0 && int.TryParse(lines[0], NumberStyles.Integer, CultureInfo.InvariantCulture, out int pairNum)) settings.PairNum = pairNum;
             if (lines.Length > 1 && bool.TryParse(lines[1], out bool showTradePanelOnChart)) settings.ShowTradePanelOnChart = showTradePanelOnChart;
             if (lines.Length > 2) settings.BaseCurrency = lines[2];
             if (lines.Length > 3 && Enum.TryParse(lines[3], out Side tab1TradeSide)) settings.Tab1TradeSide = tab1TradeSide;
@@ -1953,7 +1954,7 @@ namespace OsEngine.OsTrader.Panels.Tab
             if (lines.Length > 8) settings.CommissionValue = lines[8].ToDecimal();
             if (lines.Length > 9 && bool.TryParse(lines[9], out bool commissionIsSubstract)) settings.CommissionIsSubstract = commissionIsSubstract;
             if (lines.Length > 10 && Enum.TryParse(lines[10], out DelayPolygonType delayType)) settings.DelayType = delayType;
-            if (lines.Length > 11 && int.TryParse(lines[11], out int delayMls)) settings.DelayMls = delayMls;
+            if (lines.Length > 11 && int.TryParse(lines[11], NumberStyles.Integer, CultureInfo.InvariantCulture, out int delayMls)) settings.DelayMls = delayMls;
             if (lines.Length > 12) settings.QtyStart = lines[12].ToDecimal();
             if (lines.Length > 13) settings.SlippagePercent = lines[13].ToDecimal();
             if (lines.Length > 14) settings.ProfitToSignal = lines[14].ToDecimal();

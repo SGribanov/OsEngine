@@ -7,6 +7,7 @@
 */
 
 using System;
+using System.Globalization;
 using System.Windows;
 using OsEngine.Language;
 using OsEngine.Logging;
@@ -92,7 +93,7 @@ namespace OsEngine.Market.Servers.AstsBridge
 
             try
             {
-                if (Convert.ToInt32(TextBoxCountDaysSave.Text) < 0 && Convert.ToInt32(TextBoxCountDaysSave.Text) > 50)
+                if (Convert.ToInt32(TextBoxCountDaysSave.Text, CultureInfo.InvariantCulture) < 0 && Convert.ToInt32(TextBoxCountDaysSave.Text, CultureInfo.InvariantCulture) > 50)
                 {
                     return;
                 }
@@ -103,7 +104,7 @@ namespace OsEngine.Market.Servers.AstsBridge
             }
 
 
-            _server.CountDaysTickNeedToSave = Convert.ToInt32(TextBoxCountDaysSave.Text);
+            _server.CountDaysTickNeedToSave = Convert.ToInt32(TextBoxCountDaysSave.Text, CultureInfo.InvariantCulture);
 
             _server.Save();
             _server.StartServer();

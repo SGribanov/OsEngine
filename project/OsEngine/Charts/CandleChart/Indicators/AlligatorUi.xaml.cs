@@ -7,6 +7,7 @@
 */
 
 using System;
+using System.Globalization;
 using System.Windows;
 using System.Windows.Forms;
 using OsEngine.Entity;
@@ -104,12 +105,12 @@ namespace OsEngine.Charts.CandleChart.Indicators
         {
             try
             {
-                if (Convert.ToInt32(TextBoxLengthBase.Text) <= 0 ||
-                    Convert.ToInt32(TextBoxLengthDown.Text) <= 0 ||
-                    Convert.ToInt32(TextBoxLengthUp.Text) <= 0 ||
-                    Convert.ToInt32(TextBoxShiftBase.Text) <= 0 ||
-                    Convert.ToInt32(TextBoxShiftDown.Text) <= 0 ||
-                    Convert.ToInt32(TextBoxShiftUp.Text) <= 0)
+                if (Convert.ToInt32(TextBoxLengthBase.Text, CultureInfo.InvariantCulture) <= 0 ||
+                    Convert.ToInt32(TextBoxLengthDown.Text, CultureInfo.InvariantCulture) <= 0 ||
+                    Convert.ToInt32(TextBoxLengthUp.Text, CultureInfo.InvariantCulture) <= 0 ||
+                    Convert.ToInt32(TextBoxShiftBase.Text, CultureInfo.InvariantCulture) <= 0 ||
+                    Convert.ToInt32(TextBoxShiftDown.Text, CultureInfo.InvariantCulture) <= 0 ||
+                    Convert.ToInt32(TextBoxShiftUp.Text, CultureInfo.InvariantCulture) <= 0)
                 {
                     throw new Exception("error");
                 }
@@ -122,16 +123,16 @@ namespace OsEngine.Charts.CandleChart.Indicators
 
 
 
-            _alligator.LengthBase = Convert.ToInt32(TextBoxLengthBase.Text);
-            _alligator.ShiftBase = Convert.ToInt32(TextBoxShiftBase.Text);
+            _alligator.LengthBase = Convert.ToInt32(TextBoxLengthBase.Text, CultureInfo.InvariantCulture);
+            _alligator.ShiftBase = Convert.ToInt32(TextBoxShiftBase.Text, CultureInfo.InvariantCulture);
             _alligator.ColorBase = HostColorBase.Child.BackColor;
 
-            _alligator.LengthUp = Convert.ToInt32(TextBoxLengthUp.Text);
-            _alligator.ShiftUp = Convert.ToInt32(TextBoxShiftUp.Text);
+            _alligator.LengthUp = Convert.ToInt32(TextBoxLengthUp.Text, CultureInfo.InvariantCulture);
+            _alligator.ShiftUp = Convert.ToInt32(TextBoxShiftUp.Text, CultureInfo.InvariantCulture);
             _alligator.ColorUp = HostColorUp.Child.BackColor;
 
-            _alligator.LengthDown = Convert.ToInt32(TextBoxLengthDown.Text);
-            _alligator.ShiftDown = Convert.ToInt32(TextBoxShiftDown.Text);
+            _alligator.LengthDown = Convert.ToInt32(TextBoxLengthDown.Text, CultureInfo.InvariantCulture);
+            _alligator.ShiftDown = Convert.ToInt32(TextBoxShiftDown.Text, CultureInfo.InvariantCulture);
             _alligator.ColorDown = HostColorDown.Child.BackColor;
 
             if (CheckBoxPaintOnOff.IsChecked.HasValue)
@@ -188,4 +189,5 @@ namespace OsEngine.Charts.CandleChart.Indicators
         }
     }
 }
+
 

@@ -349,9 +349,9 @@ namespace OsEngine.Market.Servers.GateIoData
             }
             else if (startTime < currMonthStart && endTime < currMonthStart) // закачиваем месячный архив
             {
-                string startArchiveDate = startTime.ToString("yyyyMM");
+                string startArchiveDate = startTime.ToString("yyyyMM", CultureInfo.InvariantCulture);
 
-                string endArchiveDate = endTime.ToString("yyyyMM");
+                string endArchiveDate = endTime.ToString("yyyyMM", CultureInfo.InvariantCulture);
 
                 if (startTime.Year < 2022)
                 {
@@ -535,7 +535,7 @@ namespace OsEngine.Market.Servers.GateIoData
 
             while (current <= end)
             {
-                result.Add(current.ToString("yyyyMM"));
+                result.Add(current.ToString("yyyyMM", CultureInfo.InvariantCulture));
                 current = current.AddMonths(1);
             }
 
@@ -729,9 +729,9 @@ namespace OsEngine.Market.Servers.GateIoData
 
             List<Trade> allTrades = new List<Trade>();
 
-            string startArchiveDate = startTime.ToString("yyyyMM");
+            string startArchiveDate = startTime.ToString("yyyyMM", CultureInfo.InvariantCulture);
 
-            string endArchiveDate = endTime.ToString("yyyyMM");
+            string endArchiveDate = endTime.ToString("yyyyMM", CultureInfo.InvariantCulture);
 
             if (startTime.Year < 2022)
             {
@@ -745,7 +745,7 @@ namespace OsEngine.Market.Servers.GateIoData
 
             while (needDate < endTime)
             {
-                needsDayPaths.Add(_tempDirectory + security.Name + needDate.ToString("yyyyMMdd") + ".csv");
+                needsDayPaths.Add(_tempDirectory + security.Name + needDate.ToString("yyyyMMdd", CultureInfo.InvariantCulture) + ".csv");
 
                 needDate = needDate.AddDays(1);
             }

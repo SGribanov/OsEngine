@@ -121,7 +121,7 @@ namespace OsEngine.Candles.Factory
 
         public override void LoadParamFromString(string save)
         {
-            _valueInt = Convert.ToInt32(save);
+            _valueInt = Convert.ToInt32(save, CultureInfo.InvariantCulture);
         }
 
         public override event Action ValueChange;

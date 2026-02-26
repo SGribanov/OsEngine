@@ -6,6 +6,7 @@
  *Ваши права на использование кода регулируются данной лицензией http://o-s-a.net/doc/license_simple_engine.pdf
 */
 
+using System.Globalization;
 using System.Windows;
 using OsEngine.Language;
 
@@ -44,7 +45,7 @@ namespace OsEngine.Logging
             ServerTelegram serverTelegram = ServerTelegram.GetServer();
             serverTelegram.BotToken = TextBoxMyBotToken.Text;
 
-            if (long.TryParse(TextBoxChatId.Text, out serverTelegram.ChatId))
+            if (long.TryParse(TextBoxChatId.Text, NumberStyles.Integer, CultureInfo.InvariantCulture, out serverTelegram.ChatId))
             {
                 if(CheckBoxTelegramProcessingCommand.IsChecked == null || !CheckBoxTelegramProcessingCommand.IsChecked.Value)
                 {

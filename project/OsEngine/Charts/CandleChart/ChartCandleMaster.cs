@@ -8,6 +8,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.Windows;
 using System.Windows.Forms;
@@ -916,7 +917,7 @@ namespace OsEngine.Charts.CandleChart
             {
                 ToolStripMenuItem item = (ToolStripMenuItem)sender;
 
-                int num = Convert.ToInt32(item.ToolTipText.Split('*')[1]);
+                int num = Convert.ToInt32(item.ToolTipText.Split('*')[1], CultureInfo.InvariantCulture);
 
                 if(_indicators == null 
                     || num >= _indicators.Count)
@@ -954,7 +955,7 @@ namespace OsEngine.Charts.CandleChart
             {
                 ToolStripMenuItem item = (ToolStripMenuItem)sender;
 
-                int number = Convert.ToInt32(item.ToolTipText.Split('*')[1]);
+                int number = Convert.ToInt32(item.ToolTipText.Split('*')[1], CultureInfo.InvariantCulture);
 
 
                 if ((_indicators == null || number >= _indicators.Count))

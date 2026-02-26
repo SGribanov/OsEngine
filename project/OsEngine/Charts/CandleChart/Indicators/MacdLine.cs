@@ -7,6 +7,7 @@
 */
 
 using System;
+using System.Globalization;
 using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
@@ -271,8 +272,8 @@ namespace OsEngine.Charts.CandleChart.Indicators
 
             return new MacdLineSettingsDto
             {
-                ColorUpArgb = Convert.ToInt32(lines[0]),
-                ColorDownArgb = Convert.ToInt32(lines[1]),
+                ColorUpArgb = Convert.ToInt32(lines[0], CultureInfo.InvariantCulture),
+                ColorDownArgb = Convert.ToInt32(lines[1], CultureInfo.InvariantCulture),
                 PaintOn = Convert.ToBoolean(lines[2])
             };
         }
@@ -572,4 +573,5 @@ namespace OsEngine.Charts.CandleChart.Indicators
         }
     }
 }
+
 

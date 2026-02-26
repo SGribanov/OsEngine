@@ -7,6 +7,7 @@
 */
 
 using System;
+using System.Globalization;
 using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
@@ -272,9 +273,9 @@ namespace OsEngine.Charts.CandleChart.Indicators
 
             return new RocSettingsDto
             {
-                Period = Convert.ToInt32(lines[0]),
+                Period = Convert.ToInt32(lines[0], CultureInfo.InvariantCulture),
                 TypePoint = typePoint,
-                ColorArgb = Convert.ToInt32(lines[2]),
+                ColorArgb = Convert.ToInt32(lines[2], CultureInfo.InvariantCulture),
                 PaintOn = Convert.ToBoolean(lines[3])
             };
         }

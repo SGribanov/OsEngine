@@ -6,6 +6,7 @@
 */
 
 using System;
+using System.Globalization;
 using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
@@ -261,10 +262,10 @@ namespace OsEngine.Charts.CandleChart.Indicators
 
             return new DonchianChannelSettingsDto
             {
-                ColorUpArgb = Convert.ToInt32(lines[0]),
-                ColorAvgArgb = Convert.ToInt32(lines[1]),
-                ColorDownArgb = Convert.ToInt32(lines[2]),
-                Length = Convert.ToInt32(lines[3]),
+                ColorUpArgb = Convert.ToInt32(lines[0], CultureInfo.InvariantCulture),
+                ColorAvgArgb = Convert.ToInt32(lines[1], CultureInfo.InvariantCulture),
+                ColorDownArgb = Convert.ToInt32(lines[2], CultureInfo.InvariantCulture),
+                Length = Convert.ToInt32(lines[3], CultureInfo.InvariantCulture),
                 PaintOn = Convert.ToBoolean(lines[4])
             };
         }
@@ -452,4 +453,5 @@ namespace OsEngine.Charts.CandleChart.Indicators
         }
     }
 }
+
 

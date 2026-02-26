@@ -222,7 +222,7 @@ namespace OsEngine.Market.Servers.BinGxSpot
 
                 RestRequest request = new RestRequest("/openApi/spot/v1/common/symbols", Method.GET);
 
-                string timeStamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds().ToString();
+                string timeStamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds().ToString(CultureInfo.InvariantCulture);
                 string parameters = $"timestamp={timeStamp}";
                 string sign = CalculateHmacSha256(parameters);
 
@@ -346,7 +346,7 @@ namespace OsEngine.Market.Servers.BinGxSpot
 
                 RestRequest request = new RestRequest("/openApi/spot/v1/account/balance", Method.GET);
 
-                string timeStamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds().ToString();
+                string timeStamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds().ToString(CultureInfo.InvariantCulture);
                 string parameters = $"timestamp={timeStamp}";
                 string sign = CalculateHmacSha256(parameters);
 
@@ -448,7 +448,7 @@ namespace OsEngine.Market.Servers.BinGxSpot
             try
             {
                 string endPoint = "/openApi/spot/v2/market/kline";
-                string timeStamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds().ToString();
+                string timeStamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds().ToString(CultureInfo.InvariantCulture);
 
                 string parameters = "";
                 if (fromTimeStamp != 0 && toTimeStamp != 0)
@@ -1638,8 +1638,9 @@ namespace OsEngine.Market.Servers.BinGxSpot
 
                 string secName = order.SecurityNameCode;
                 string side = order.Side == Side.Buy ? "BUY" : "SELL";
-                string timeStamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds().ToString();
+                string timeStamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds().ToString(CultureInfo.InvariantCulture);
                 string quantity = order.Volume.ToString(CultureInfo.InvariantCulture);
+                string clientOrderId = order.NumberUser.ToString(CultureInfo.InvariantCulture);
                 string typeOrder = "";
                 string parameters = "";
                 string price = "";
@@ -1647,13 +1648,13 @@ namespace OsEngine.Market.Servers.BinGxSpot
                 if (order.TypeOrder == OrderPriceType.Market)
                 {
                     typeOrder = "MARKET";
-                    parameters = $"timestamp={timeStamp}&symbol={secName}&side={side}&type={typeOrder}&quantity={quantity}&newClientOrderId={order.NumberUser}";
+                    parameters = $"timestamp={timeStamp}&symbol={secName}&side={side}&type={typeOrder}&quantity={quantity}&newClientOrderId={clientOrderId}";
                 }
                 else if (order.TypeOrder == OrderPriceType.Limit)
                 {
                     typeOrder = "LIMIT";
                     price = order.Price.ToString(CultureInfo.InvariantCulture);
-                    parameters = $"timestamp={timeStamp}&symbol={secName}&side={side}&type={typeOrder}&quantity={quantity}&price={price}&newClientOrderId={order.NumberUser}";
+                    parameters = $"timestamp={timeStamp}&symbol={secName}&side={side}&type={typeOrder}&quantity={quantity}&price={price}&newClientOrderId={clientOrderId}";
                 }
                 string sign = CalculateHmacSha256(parameters);
 
@@ -1666,7 +1667,7 @@ namespace OsEngine.Market.Servers.BinGxSpot
                 if (typeOrder == "LIMIT")
                     request.AddParameter("price", price);
 
-                request.AddParameter("newClientOrderId", order.NumberUser);
+                request.AddParameter("newClientOrderId", clientOrderId);
                 request.AddParameter("signature", sign);
                 request.AddHeader("X-BX-APIKEY", _publicKey);
 
@@ -1722,7 +1723,7 @@ namespace OsEngine.Market.Servers.BinGxSpot
 
                 RestRequest request = new RestRequest("/openApi/spot/v1/trade/cancelOpenOrders", Method.POST);
 
-                string timeStamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds().ToString();
+                string timeStamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds().ToString(CultureInfo.InvariantCulture);
                 string symbol = security.Name;
                 string parameters = $"timestamp={timeStamp}&symbol={symbol}";
                 string sign = CalculateHmacSha256(parameters);
@@ -1773,7 +1774,7 @@ namespace OsEngine.Market.Servers.BinGxSpot
 
                 RestRequest request = new RestRequest("/openApi/spot/v1/trade/cancel", Method.POST);
 
-                string timeStamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds().ToString();
+                string timeStamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds().ToString(CultureInfo.InvariantCulture);
                 string symbol = order.SecurityNameCode.ToString();
                 string orderId = order.NumberMarket.ToString();
                 string parameters = $"timestamp={timeStamp}&symbol={symbol}&orderId={orderId}";
@@ -1887,7 +1888,7 @@ namespace OsEngine.Market.Servers.BinGxSpot
 
                 RestRequest request = new RestRequest("/openApi/spot/v1/trade/openOrders", Method.GET);
 
-                string timeStamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds().ToString();
+                string timeStamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds().ToString(CultureInfo.InvariantCulture);
                 string parameters = $"timestamp={timeStamp}";
                 string sign = CalculateHmacSha256(parameters);
 
@@ -1964,7 +1965,7 @@ namespace OsEngine.Market.Servers.BinGxSpot
             if (orders == null
                 || orders.Count == 0)
             {
-                GetOrderFromExchange(order.SecurityNameCode, order.NumberUser.ToString());
+                GetOrderFromExchange(order.SecurityNameCode, order.NumberUser.ToString(CultureInfo.InvariantCulture));
                 return OrderStateType.None;
             }
 
@@ -2019,7 +2020,7 @@ namespace OsEngine.Market.Servers.BinGxSpot
 
                 RestRequest request = new RestRequest("/openApi/spot/v1/trade/historyOrders", Method.GET);
 
-                string timeStamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds().ToString();
+                string timeStamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds().ToString(CultureInfo.InvariantCulture);
                 string parameters = $"timestamp={timeStamp}&symbol={securityNameCode}";
                 string sign = CalculateHmacSha256(parameters);
 
@@ -2114,7 +2115,7 @@ namespace OsEngine.Market.Servers.BinGxSpot
 
                 RestRequest request = new RestRequest("/openApi/spot/v1/trade/myTrades", Method.GET);
 
-                string timeStamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds().ToString();
+                string timeStamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds().ToString(CultureInfo.InvariantCulture);
                 string parameters = $"timestamp={timeStamp}&symbol={itemOrders.SecurityNameCode}&orderId={itemOrders.NumberMarket}";
                 string sign = CalculateHmacSha256(parameters);
 

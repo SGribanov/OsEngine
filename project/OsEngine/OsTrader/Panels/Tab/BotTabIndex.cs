@@ -745,7 +745,7 @@ namespace OsEngine.OsTrader.Panels.Tab
             }
 
             int calculationDepth = 1000;
-            if (lines.Length > 3 && int.TryParse(lines[3], out int parsedDepth))
+            if (lines.Length > 3 && int.TryParse(lines[3], NumberStyles.Integer, CultureInfo.InvariantCulture, out int parsedDepth))
             {
                 calculationDepth = parsedDepth;
             }
@@ -2454,7 +2454,7 @@ namespace OsEngine.OsTrader.Panels.Tab
 
         private static int TryParseInt(string value, int defaultValue)
         {
-            if (int.TryParse(value, out int parsed))
+            if (int.TryParse(value, NumberStyles.Integer, CultureInfo.InvariantCulture, out int parsed))
             {
                 return parsed;
             }

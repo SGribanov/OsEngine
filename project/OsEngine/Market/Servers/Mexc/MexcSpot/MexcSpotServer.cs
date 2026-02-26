@@ -1874,7 +1874,7 @@ namespace OsEngine.Market.Servers.Mexc
                     {"type", "LIMIT"},
                     {"quantity", order.Volume.ToString(CultureInfo.InvariantCulture) },
                     {"price",  order.Price.ToString(CultureInfo.InvariantCulture) },
-                    {"newClientOrderId", order.NumberUser.ToString() },
+                    {"newClientOrderId", order.NumberUser.ToString(CultureInfo.InvariantCulture) },
                 };
 
                 IRestResponse response = CreatePrivateQuery(Method.POST, endPoint, query);
@@ -1934,7 +1934,7 @@ namespace OsEngine.Market.Servers.Mexc
 
                 Dictionary<string, string> query = new Dictionary<string, string>();
                 query.Add("symbol", order.SecurityNameCode);
-                query.Add("origClientOrderId", order.NumberUser.ToString());
+                query.Add("origClientOrderId", order.NumberUser.ToString(CultureInfo.InvariantCulture));
 
                 IRestResponse response = CreatePrivateQuery(Method.DELETE, endPoint, query);
 
@@ -2190,7 +2190,7 @@ namespace OsEngine.Market.Servers.Mexc
                 _activeSecurities.Add(order.SecurityNameCode);
             }
 
-            Order myOrder = GetOrderFromExchange(order.NumberUser.ToString(), order.SecurityNameCode);
+            Order myOrder = GetOrderFromExchange(order.NumberUser.ToString(CultureInfo.InvariantCulture), order.SecurityNameCode);
 
             if (myOrder == null)
             {
@@ -2440,7 +2440,7 @@ namespace OsEngine.Market.Servers.Mexc
         {
             string query = GetQueryString(queryParams);
 
-            string timestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds().ToString();
+            string timestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds().ToString(CultureInfo.InvariantCulture);
 
             if (query.Length > 0)
                 query += "&";

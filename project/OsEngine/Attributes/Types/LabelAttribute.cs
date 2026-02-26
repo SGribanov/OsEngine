@@ -5,6 +5,7 @@ using OsEngine.Entity;
 using OsEngine.OsTrader.Panels;
 using System;
 using System.Drawing;
+using System.Globalization;
 
 namespace OsEngine.Attributes
 {
@@ -28,8 +29,8 @@ namespace OsEngine.Attributes
             object parameter = null;
             string[] arguments = Data.Split(Separator);
 
-            int rowHeight = int.Parse(arguments[2]);
-            int textHeight = int.Parse(arguments[3]);
+            int rowHeight = int.Parse(arguments[2], NumberStyles.Integer, CultureInfo.InvariantCulture);
+            int textHeight = int.Parse(arguments[3], NumberStyles.Integer, CultureInfo.InvariantCulture);
             Color color = Color.FromName(arguments[4]);
 
             parameter = bot.CreateParameterLabel(Name, arguments[0], arguments[1], rowHeight, textHeight, color, TabControlName);

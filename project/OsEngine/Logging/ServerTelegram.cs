@@ -400,7 +400,10 @@ namespace OsEngine.Logging
             return new ServerTelegramSettingsDto
             {
                 BotToken = lines.Length > 0 ? lines[0] : string.Empty,
-                ChatId = lines.Length > 1 && long.TryParse(lines[1], out long chatId) ? chatId : 0,
+                ChatId = lines.Length > 1
+                    && long.TryParse(lines[1], NumberStyles.Integer, CultureInfo.InvariantCulture, out long chatId)
+                    ? chatId
+                    : 0,
                 ProcessingCommand = lines.Length > 2
                     && lines[2].Equals("true", StringComparison.OrdinalIgnoreCase)
             };

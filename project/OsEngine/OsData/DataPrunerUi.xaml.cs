@@ -10,6 +10,7 @@ using OsEngine.Entity;
 using OsEngine.Language;
 using OsEngine.Market;
 using System;
+using System.Globalization;
 using System.Collections.Generic;
 using System.Windows;
 using System.Windows.Threading;
@@ -182,7 +183,7 @@ namespace OsEngine.OsData
         {
             try
             {
-                if (!Int32.TryParse(TextBoxObjs.Text, out int needObjects))
+                if (!Int32.TryParse(TextBoxObjs.Text, NumberStyles.Integer, CultureInfo.InvariantCulture, out int needObjects))
                 {
                     ServerMaster.Log?.ProcessMessage(OsLocalization.Data.Label74, Logging.LogMessageType.Error);
                     return;
@@ -365,7 +366,7 @@ namespace OsEngine.OsData
         {
             try
             {
-                if (!Int32.TryParse(TextBoxMaxDigits.Text, out int maxDigit) || !Int32.TryParse(TextBoxMinDigits.Text, out int minDigit))
+                if (!Int32.TryParse(TextBoxMaxDigits.Text, NumberStyles.Integer, CultureInfo.InvariantCulture, out int maxDigit) || !Int32.TryParse(TextBoxMinDigits.Text, NumberStyles.Integer, CultureInfo.InvariantCulture, out int minDigit))
                 {
                     ServerMaster.Log?.ProcessMessage(OsLocalization.Data.Label74, Logging.LogMessageType.Error);
                     return;

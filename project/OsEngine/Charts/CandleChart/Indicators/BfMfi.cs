@@ -9,6 +9,7 @@
 using System;
 using System.Collections.Generic;
 using System.Drawing;
+using System.Globalization;
 using System.IO;
 using OsEngine.Entity;
 using OsEngine.Indicators;
@@ -226,7 +227,7 @@ namespace OsEngine.Charts.CandleChart.Indicators
 
             return new BfMfiSettingsDto
             {
-                ColorArgb = Convert.ToInt32(lines[0]),
+                ColorArgb = Convert.ToInt32(lines[0], CultureInfo.InvariantCulture),
                 PaintOn = Convert.ToBoolean(lines[1])
             };
         }

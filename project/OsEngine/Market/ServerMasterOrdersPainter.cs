@@ -336,16 +336,16 @@ namespace OsEngine.Market
                                 {
                                     try
                                     {
-                                        ActivePage = Convert.ToInt32(RobotUiLite.Instance.LabelNumberThisPageActive.Content);
-                                        ActivePageSize = Convert.ToInt32(RobotUiLite.Instance.ComboBoxQuantityPerPageActive.SelectedValue);
+                                        ActivePage = Convert.ToInt32(RobotUiLite.Instance.LabelNumberThisPageActive.Content, CultureInfo.InvariantCulture);
+                                        ActivePageSize = Convert.ToInt32(RobotUiLite.Instance.ComboBoxQuantityPerPageActive.SelectedValue, CultureInfo.InvariantCulture);
 
                                         if (ActivePage > GetTotalPages(activeOrders.Count, ActivePageSize))
                                         {
                                             RobotUiLite.Instance.LabelNumberThisPageActive.Content = "1";
                                         }
 
-                                        ActivePage = Convert.ToInt32(RobotUiLite.Instance.LabelNumberThisPageActive.Content);
-                                        ActivePageSize = Convert.ToInt32(RobotUiLite.Instance.ComboBoxQuantityPerPageActive.SelectedValue);
+                                        ActivePage = Convert.ToInt32(RobotUiLite.Instance.LabelNumberThisPageActive.Content, CultureInfo.InvariantCulture);
+                                        ActivePageSize = Convert.ToInt32(RobotUiLite.Instance.ComboBoxQuantityPerPageActive.SelectedValue, CultureInfo.InvariantCulture);
 
                                         RobotUiLite.Instance.LabelNumberAllPageActive.Content = GetTotalPages(activeOrders.Count, ActivePageSize).ToString();
                                     }
@@ -365,16 +365,16 @@ namespace OsEngine.Market
                                 {
                                     try
                                     {
-                                        ActivePage = Convert.ToInt32(RobotUi.Instance.LabelNumberThisPageActive.Content);
-                                        ActivePageSize = Convert.ToInt32(RobotUi.Instance.ComboBoxQuantityPerPageActive.SelectedValue);
+                                        ActivePage = Convert.ToInt32(RobotUi.Instance.LabelNumberThisPageActive.Content, CultureInfo.InvariantCulture);
+                                        ActivePageSize = Convert.ToInt32(RobotUi.Instance.ComboBoxQuantityPerPageActive.SelectedValue, CultureInfo.InvariantCulture);
 
                                         if (ActivePage > GetTotalPages(activeOrders.Count, ActivePageSize))
                                         {
                                             RobotUi.Instance.LabelNumberThisPageActive.Content = "1";
                                         }
 
-                                        ActivePage = Convert.ToInt32(RobotUi.Instance.LabelNumberThisPageActive.Content);
-                                        ActivePageSize = Convert.ToInt32(RobotUi.Instance.ComboBoxQuantityPerPageActive.SelectedValue);
+                                        ActivePage = Convert.ToInt32(RobotUi.Instance.LabelNumberThisPageActive.Content, CultureInfo.InvariantCulture);
+                                        ActivePageSize = Convert.ToInt32(RobotUi.Instance.ComboBoxQuantityPerPageActive.SelectedValue, CultureInfo.InvariantCulture);
 
                                         RobotUi.Instance.LabelNumberAllPageActive.Content = GetTotalPages(activeOrders.Count, ActivePageSize).ToString();
                                     }
@@ -394,16 +394,16 @@ namespace OsEngine.Market
                                 {
                                     try
                                     {
-                                        ActivePage = Convert.ToInt32(TesterUiLite.Instance.LabelNumberThisPageActive.Content);
-                                        ActivePageSize = Convert.ToInt32(TesterUiLite.Instance.ComboBoxQuantityPerPageActive.SelectedValue);
+                                        ActivePage = Convert.ToInt32(TesterUiLite.Instance.LabelNumberThisPageActive.Content, CultureInfo.InvariantCulture);
+                                        ActivePageSize = Convert.ToInt32(TesterUiLite.Instance.ComboBoxQuantityPerPageActive.SelectedValue, CultureInfo.InvariantCulture);
 
                                         if (ActivePage > GetTotalPages(activeOrders.Count, ActivePageSize))
                                         {
                                             TesterUiLite.Instance.LabelNumberThisPageActive.Content = "1";
                                         }
 
-                                        ActivePage = Convert.ToInt32(TesterUiLite.Instance.LabelNumberThisPageActive.Content);
-                                        ActivePageSize = Convert.ToInt32(TesterUiLite.Instance.ComboBoxQuantityPerPageActive.SelectedValue);
+                                        ActivePage = Convert.ToInt32(TesterUiLite.Instance.LabelNumberThisPageActive.Content, CultureInfo.InvariantCulture);
+                                        ActivePageSize = Convert.ToInt32(TesterUiLite.Instance.ComboBoxQuantityPerPageActive.SelectedValue, CultureInfo.InvariantCulture);
 
                                         TesterUiLite.Instance.LabelNumberAllPageActive.Content = GetTotalPages(activeOrders.Count, ActivePageSize).ToString();
                                     }
@@ -423,16 +423,16 @@ namespace OsEngine.Market
                                 {
                                     try
                                     {
-                                        ActivePage = Convert.ToInt32(TesterUi.Instance.LabelNumberThisPageActive.Content);
-                                        ActivePageSize = Convert.ToInt32(TesterUi.Instance.ComboBoxQuantityPerPageActive.SelectedValue);
+                                        ActivePage = Convert.ToInt32(TesterUi.Instance.LabelNumberThisPageActive.Content, CultureInfo.InvariantCulture);
+                                        ActivePageSize = Convert.ToInt32(TesterUi.Instance.ComboBoxQuantityPerPageActive.SelectedValue, CultureInfo.InvariantCulture);
 
                                         if (ActivePage > GetTotalPages(activeOrders.Count, ActivePageSize))
                                         {
                                             TesterUi.Instance.LabelNumberThisPageActive.Content = "1";
                                         }
 
-                                        ActivePage = Convert.ToInt32(TesterUi.Instance.LabelNumberThisPageActive.Content);
-                                        ActivePageSize = Convert.ToInt32(TesterUi.Instance.ComboBoxQuantityPerPageActive.SelectedValue);
+                                        ActivePage = Convert.ToInt32(TesterUi.Instance.LabelNumberThisPageActive.Content, CultureInfo.InvariantCulture);
+                                        ActivePageSize = Convert.ToInt32(TesterUi.Instance.ComboBoxQuantityPerPageActive.SelectedValue, CultureInfo.InvariantCulture);
 
                                         TesterUi.Instance.LabelNumberAllPageActive.Content = GetTotalPages(activeOrders.Count, ActivePageSize).ToString();
                                     }
@@ -458,16 +458,16 @@ namespace OsEngine.Market
                                 {
                                     try
                                     {
-                                        HistoricalPage = Convert.ToInt32(RobotUiLite.Instance.LabelNumberThisPageHistorical.Content);
-                                        HistoricalPageSize = Convert.ToInt32(RobotUiLite.Instance.ComboBoxQuantityPerPageHistorical.SelectedValue);
+                                        HistoricalPage = Convert.ToInt32(RobotUiLite.Instance.LabelNumberThisPageHistorical.Content, CultureInfo.InvariantCulture);
+                                        HistoricalPageSize = Convert.ToInt32(RobotUiLite.Instance.ComboBoxQuantityPerPageHistorical.SelectedValue, CultureInfo.InvariantCulture);
 
                                         if (HistoricalPage > GetTotalPages(historicalOrders.Count, HistoricalPageSize))
                                         {
                                             RobotUiLite.Instance.LabelNumberThisPageHistorical.Content = "1";
                                         }
 
-                                        HistoricalPage = Convert.ToInt32(RobotUiLite.Instance.LabelNumberThisPageHistorical.Content);
-                                        HistoricalPageSize = Convert.ToInt32(RobotUiLite.Instance.ComboBoxQuantityPerPageHistorical.SelectedValue);
+                                        HistoricalPage = Convert.ToInt32(RobotUiLite.Instance.LabelNumberThisPageHistorical.Content, CultureInfo.InvariantCulture);
+                                        HistoricalPageSize = Convert.ToInt32(RobotUiLite.Instance.ComboBoxQuantityPerPageHistorical.SelectedValue, CultureInfo.InvariantCulture);
 
                                         RobotUiLite.Instance.LabelNumberAllPageHistorical.Content = GetTotalPages(historicalOrders.Count, HistoricalPageSize).ToString();
                                     }
@@ -487,16 +487,16 @@ namespace OsEngine.Market
                                 {
                                     try
                                     {
-                                        HistoricalPage = Convert.ToInt32(TesterUiLite.Instance.LabelNumberThisPageHistorical.Content);
-                                        HistoricalPageSize = Convert.ToInt32(TesterUiLite.Instance.ComboBoxQuantityPerPageHistorical.SelectedValue);
+                                        HistoricalPage = Convert.ToInt32(TesterUiLite.Instance.LabelNumberThisPageHistorical.Content, CultureInfo.InvariantCulture);
+                                        HistoricalPageSize = Convert.ToInt32(TesterUiLite.Instance.ComboBoxQuantityPerPageHistorical.SelectedValue, CultureInfo.InvariantCulture);
 
                                         if (HistoricalPage > GetTotalPages(historicalOrders.Count, HistoricalPageSize))
                                         {
                                             TesterUiLite.Instance.LabelNumberThisPageHistorical.Content = "1";
                                         }
 
-                                        HistoricalPage = Convert.ToInt32(TesterUiLite.Instance.LabelNumberThisPageHistorical.Content);
-                                        HistoricalPageSize = Convert.ToInt32(TesterUiLite.Instance.ComboBoxQuantityPerPageHistorical.SelectedValue);
+                                        HistoricalPage = Convert.ToInt32(TesterUiLite.Instance.LabelNumberThisPageHistorical.Content, CultureInfo.InvariantCulture);
+                                        HistoricalPageSize = Convert.ToInt32(TesterUiLite.Instance.ComboBoxQuantityPerPageHistorical.SelectedValue, CultureInfo.InvariantCulture);
 
                                         TesterUiLite.Instance.LabelNumberAllPageHistorical.Content = GetTotalPages(historicalOrders.Count, HistoricalPageSize).ToString();
                                     }
@@ -525,10 +525,10 @@ namespace OsEngine.Market
             {
                 if (_startAllProgram == StartUiToPainter.IsTesterLight)
                 {
-                    if (Convert.ToInt32(TesterUiLite.Instance.LabelNumberThisPageActive.Content) > 1)
+                    if (Convert.ToInt32(TesterUiLite.Instance.LabelNumberThisPageActive.Content, CultureInfo.InvariantCulture) > 1)
                     {
                         TesterUiLite.Instance.LabelNumberThisPageActive.Content =
-                            Convert.ToInt32(TesterUiLite.Instance.LabelNumberThisPageActive.Content) - 1;
+                            Convert.ToInt32(TesterUiLite.Instance.LabelNumberThisPageActive.Content, CultureInfo.InvariantCulture) - 1;
 
                         ForcePaint();
                     }
@@ -536,10 +536,10 @@ namespace OsEngine.Market
 
                 if (_startAllProgram == StartUiToPainter.IsTester)
                 {
-                    if (Convert.ToInt32(TesterUi.Instance.LabelNumberThisPageActive.Content) > 1)
+                    if (Convert.ToInt32(TesterUi.Instance.LabelNumberThisPageActive.Content, CultureInfo.InvariantCulture) > 1)
                     {
                         TesterUi.Instance.LabelNumberThisPageActive.Content =
-                            Convert.ToInt32(TesterUi.Instance.LabelNumberThisPageActive.Content) - 1;
+                            Convert.ToInt32(TesterUi.Instance.LabelNumberThisPageActive.Content, CultureInfo.InvariantCulture) - 1;
 
                         ForcePaint();
                     }
@@ -547,10 +547,10 @@ namespace OsEngine.Market
 
                 if (_startAllProgram == StartUiToPainter.IsOsTraderLight)
                 {
-                    if (Convert.ToInt32(RobotUiLite.Instance.LabelNumberThisPageActive.Content) > 1)
+                    if (Convert.ToInt32(RobotUiLite.Instance.LabelNumberThisPageActive.Content, CultureInfo.InvariantCulture) > 1)
                     {
                         RobotUiLite.Instance.LabelNumberThisPageActive.Content =
-                            Convert.ToInt32(RobotUiLite.Instance.LabelNumberThisPageActive.Content) - 1;
+                            Convert.ToInt32(RobotUiLite.Instance.LabelNumberThisPageActive.Content, CultureInfo.InvariantCulture) - 1;
 
                         ForcePaint();
                     }
@@ -558,10 +558,10 @@ namespace OsEngine.Market
 
                 if (_startAllProgram == StartUiToPainter.IsOsTrader)
                 {
-                    if (Convert.ToInt32(RobotUi.Instance.LabelNumberThisPageActive.Content) > 1)
+                    if (Convert.ToInt32(RobotUi.Instance.LabelNumberThisPageActive.Content, CultureInfo.InvariantCulture) > 1)
                     {
                         RobotUi.Instance.LabelNumberThisPageActive.Content =
-                            Convert.ToInt32(RobotUi.Instance.LabelNumberThisPageActive.Content) - 1;
+                            Convert.ToInt32(RobotUi.Instance.LabelNumberThisPageActive.Content, CultureInfo.InvariantCulture) - 1;
 
                         ForcePaint();
                     }
@@ -579,11 +579,11 @@ namespace OsEngine.Market
             {
                 if (_startAllProgram == StartUiToPainter.IsTesterLight)
                 {
-                    if (Convert.ToInt32(TesterUiLite.Instance.LabelNumberThisPageActive.Content) !=
-                        Convert.ToInt32(TesterUiLite.Instance.LabelNumberAllPageActive.Content))
+                    if (Convert.ToInt32(TesterUiLite.Instance.LabelNumberThisPageActive.Content, CultureInfo.InvariantCulture) !=
+                        Convert.ToInt32(TesterUiLite.Instance.LabelNumberAllPageActive.Content, CultureInfo.InvariantCulture))
                     {
                         TesterUiLite.Instance.LabelNumberThisPageActive.Content =
-                            Convert.ToInt32(TesterUiLite.Instance.LabelNumberThisPageActive.Content) + 1;
+                            Convert.ToInt32(TesterUiLite.Instance.LabelNumberThisPageActive.Content, CultureInfo.InvariantCulture) + 1;
 
                         ForcePaint();
                     }
@@ -591,11 +591,11 @@ namespace OsEngine.Market
 
                 if (_startAllProgram == StartUiToPainter.IsTester)
                 {
-                    if (Convert.ToInt32(TesterUi.Instance.LabelNumberThisPageActive.Content) !=
-                        Convert.ToInt32(TesterUi.Instance.LabelNumberAllPageActive.Content))
+                    if (Convert.ToInt32(TesterUi.Instance.LabelNumberThisPageActive.Content, CultureInfo.InvariantCulture) !=
+                        Convert.ToInt32(TesterUi.Instance.LabelNumberAllPageActive.Content, CultureInfo.InvariantCulture))
                     {
                         TesterUi.Instance.LabelNumberThisPageActive.Content =
-                            Convert.ToInt32(TesterUi.Instance.LabelNumberThisPageActive.Content) + 1;
+                            Convert.ToInt32(TesterUi.Instance.LabelNumberThisPageActive.Content, CultureInfo.InvariantCulture) + 1;
 
                         ForcePaint();
                     }
@@ -603,11 +603,11 @@ namespace OsEngine.Market
 
                 if (_startAllProgram == StartUiToPainter.IsOsTraderLight)
                 {
-                    if (Convert.ToInt32(RobotUiLite.Instance.LabelNumberThisPageActive.Content) !=
-                        Convert.ToInt32(RobotUiLite.Instance.LabelNumberAllPageActive.Content))
+                    if (Convert.ToInt32(RobotUiLite.Instance.LabelNumberThisPageActive.Content, CultureInfo.InvariantCulture) !=
+                        Convert.ToInt32(RobotUiLite.Instance.LabelNumberAllPageActive.Content, CultureInfo.InvariantCulture))
                     {
                         RobotUiLite.Instance.LabelNumberThisPageActive.Content =
-                            Convert.ToInt32(RobotUiLite.Instance.LabelNumberThisPageActive.Content) + 1;
+                            Convert.ToInt32(RobotUiLite.Instance.LabelNumberThisPageActive.Content, CultureInfo.InvariantCulture) + 1;
 
                         ForcePaint();
                     }
@@ -615,11 +615,11 @@ namespace OsEngine.Market
 
                 if (_startAllProgram == StartUiToPainter.IsOsTrader)
                 {
-                    if (Convert.ToInt32(RobotUi.Instance.LabelNumberThisPageActive.Content) !=
-                        Convert.ToInt32(RobotUi.Instance.LabelNumberAllPageActive.Content))
+                    if (Convert.ToInt32(RobotUi.Instance.LabelNumberThisPageActive.Content, CultureInfo.InvariantCulture) !=
+                        Convert.ToInt32(RobotUi.Instance.LabelNumberAllPageActive.Content, CultureInfo.InvariantCulture))
                     {
                         RobotUi.Instance.LabelNumberThisPageActive.Content =
-                            Convert.ToInt32(RobotUi.Instance.LabelNumberThisPageActive.Content) + 1;
+                            Convert.ToInt32(RobotUi.Instance.LabelNumberThisPageActive.Content, CultureInfo.InvariantCulture) + 1;
 
                         ForcePaint();
                     }
@@ -637,10 +637,10 @@ namespace OsEngine.Market
             {
                 if (_startAllProgram == StartUiToPainter.IsTesterLight)
                 {
-                    if (Convert.ToInt32(TesterUiLite.Instance.LabelNumberThisPageHistorical.Content) > 1)
+                    if (Convert.ToInt32(TesterUiLite.Instance.LabelNumberThisPageHistorical.Content, CultureInfo.InvariantCulture) > 1)
                     {
                         TesterUiLite.Instance.LabelNumberThisPageHistorical.Content =
-                            Convert.ToInt32(TesterUiLite.Instance.LabelNumberThisPageHistorical.Content) - 1;
+                            Convert.ToInt32(TesterUiLite.Instance.LabelNumberThisPageHistorical.Content, CultureInfo.InvariantCulture) - 1;
 
                         ForcePaint();
                     }
@@ -648,10 +648,10 @@ namespace OsEngine.Market
 
                 if (_startAllProgram == StartUiToPainter.IsOsTraderLight)
                 {
-                    if (Convert.ToInt32(RobotUiLite.Instance.LabelNumberThisPageHistorical.Content) > 1)
+                    if (Convert.ToInt32(RobotUiLite.Instance.LabelNumberThisPageHistorical.Content, CultureInfo.InvariantCulture) > 1)
                     {
                         RobotUiLite.Instance.LabelNumberThisPageHistorical.Content =
-                            Convert.ToInt32(RobotUiLite.Instance.LabelNumberThisPageHistorical.Content) - 1;
+                            Convert.ToInt32(RobotUiLite.Instance.LabelNumberThisPageHistorical.Content, CultureInfo.InvariantCulture) - 1;
 
                         ForcePaint();
                     }
@@ -669,11 +669,11 @@ namespace OsEngine.Market
             {
                 if (_startAllProgram == StartUiToPainter.IsTesterLight)
                 {
-                    if (Convert.ToInt32(TesterUiLite.Instance.LabelNumberThisPageHistorical.Content) !=
-                        Convert.ToInt32(TesterUiLite.Instance.LabelNumberAllPageHistorical.Content))
+                    if (Convert.ToInt32(TesterUiLite.Instance.LabelNumberThisPageHistorical.Content, CultureInfo.InvariantCulture) !=
+                        Convert.ToInt32(TesterUiLite.Instance.LabelNumberAllPageHistorical.Content, CultureInfo.InvariantCulture))
                     {
                         TesterUiLite.Instance.LabelNumberThisPageHistorical.Content =
-                            Convert.ToInt32(TesterUiLite.Instance.LabelNumberThisPageHistorical.Content) + 1;
+                            Convert.ToInt32(TesterUiLite.Instance.LabelNumberThisPageHistorical.Content, CultureInfo.InvariantCulture) + 1;
 
                         ForcePaint();
                     }
@@ -681,11 +681,11 @@ namespace OsEngine.Market
 
                 if (_startAllProgram == StartUiToPainter.IsOsTraderLight)
                 {
-                    if (Convert.ToInt32(RobotUiLite.Instance.LabelNumberThisPageHistorical.Content) !=
-                        Convert.ToInt32(RobotUiLite.Instance.LabelNumberAllPageHistorical.Content))
+                    if (Convert.ToInt32(RobotUiLite.Instance.LabelNumberThisPageHistorical.Content, CultureInfo.InvariantCulture) !=
+                        Convert.ToInt32(RobotUiLite.Instance.LabelNumberAllPageHistorical.Content, CultureInfo.InvariantCulture))
                     {
                         RobotUiLite.Instance.LabelNumberThisPageHistorical.Content =
-                            Convert.ToInt32(RobotUiLite.Instance.LabelNumberThisPageHistorical.Content) + 1;
+                            Convert.ToInt32(RobotUiLite.Instance.LabelNumberThisPageHistorical.Content, CultureInfo.InvariantCulture) + 1;
 
                         ForcePaint();
                     }

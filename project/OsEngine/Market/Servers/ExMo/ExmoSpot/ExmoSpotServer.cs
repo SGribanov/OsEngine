@@ -1555,7 +1555,7 @@ namespace OsEngine.Market.Servers.ExMo.ExmoSpot
                     }
                 }
 
-                queryParam += $"client_id={order.NumberUser}&";
+                queryParam += "client_id=" + order.NumberUser.ToString(CultureInfo.InvariantCulture) + "&";
                 queryParam += $"nonce={timeStamp}";
 
                 string sign = Sign(queryParam);

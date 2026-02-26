@@ -14,6 +14,7 @@ using OsEngine.Market.Servers;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Globalization;
 using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
@@ -261,11 +262,9 @@ namespace OsEngine.OsTrader.Panels.Tab.Internal
                 Array.Resize(ref lines, lines.Length - 1);
             }
 
-            TimeSpan secondToOpen = TimeSpan.Zero;
-            TimeSpan.TryParse(GetLineAt(lines, 6), out secondToOpen);
+            TimeSpan secondToOpen = ParseTimeSpanInvariantOrCurrent(GetLineAt(lines, 6));
 
-            TimeSpan secondToClose = TimeSpan.Zero;
-            TimeSpan.TryParse(GetLineAt(lines, 7), out secondToClose);
+            TimeSpan secondToClose = ParseTimeSpanInvariantOrCurrent(GetLineAt(lines, 7));
 
             OrderPriceType typeDoubleExitOrder = OrderPriceType.Limit;
             Enum.TryParse(GetLineAt(lines, 16), out typeDoubleExitOrder);
@@ -332,6 +331,21 @@ namespace OsEngine.OsTrader.Panels.Tab.Internal
             }
 
             return value.ToDecimal();
+        }
+
+        private static TimeSpan ParseTimeSpanInvariantOrCurrent(string value)
+        {
+            if (TimeSpan.TryParse(value, CultureInfo.InvariantCulture, out TimeSpan parsed))
+            {
+                return parsed;
+            }
+
+            if (TimeSpan.TryParse(value, CultureInfo.CurrentCulture, out parsed))
+            {
+                return parsed;
+            }
+
+            return TimeSpan.Zero;
         }
 
         private sealed class BotManualControlSettingsDto

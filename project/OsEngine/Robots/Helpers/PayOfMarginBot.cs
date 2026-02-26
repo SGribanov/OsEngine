@@ -181,7 +181,7 @@ namespace OsEngine.Robots.Helpers
             if (e.ColumnIndex == 1)
             {
                 int year = 0;
-                int.TryParse(_dgvSumm.Rows[e.RowIndex].Cells[0].Value.ToString(), out year);
+                int.TryParse(_dgvSumm.Rows[e.RowIndex].Cells[0].Value.ToString(), NumberStyles.Integer, CultureInfo.InvariantCulture, out year);
 
                 if (year != 0)
                 {
@@ -383,7 +383,7 @@ namespace OsEngine.Robots.Helpers
         {
             int year = 0;
 
-            if (int.TryParse(_dgv[0, rowIndex].Value?.ToString(), out year))
+            if (int.TryParse(_dgv[0, rowIndex].Value?.ToString(), NumberStyles.Integer, CultureInfo.InvariantCulture, out year))
             {
                 int deleteIndex = _listTable.FindIndex(x => x.Year == year);
 
@@ -405,7 +405,7 @@ namespace OsEngine.Robots.Helpers
                 if (e.RowIndex != _dgv.RowCount - 1 && e.ColumnIndex != 2)
                 {
                     int year = 0;
-                    int.TryParse(_dgv.Rows[e.RowIndex].Cells[0].Value?.ToString(), out year);
+                    int.TryParse(_dgv.Rows[e.RowIndex].Cells[0].Value?.ToString(), NumberStyles.Integer, CultureInfo.InvariantCulture, out year);
 
                     if (year == 0)
                     {
@@ -421,7 +421,7 @@ namespace OsEngine.Robots.Helpers
                     for (int i = 0; i < _dgv.RowCount - 1; i++)
                     {
                         int valueYear = 0;
-                        int.TryParse(_dgv.Rows[i].Cells[0].Value?.ToString(), out valueYear);
+                        int.TryParse(_dgv.Rows[i].Cells[0].Value?.ToString(), NumberStyles.Integer, CultureInfo.InvariantCulture, out valueYear);
 
                         if (valueYear == year)
                         {
@@ -457,7 +457,7 @@ namespace OsEngine.Robots.Helpers
                         for (int j = 0; j < _dgv.RowCount - 1; j++)
                         {
                             int valueYear = 0;
-                            int.TryParse(_dgv.Rows[j].Cells[0].Value?.ToString(), out valueYear);
+                            int.TryParse(_dgv.Rows[j].Cells[0].Value?.ToString(), NumberStyles.Integer, CultureInfo.InvariantCulture, out valueYear);
 
                             if (_listTable[i].Year == valueYear)
                             {
@@ -613,7 +613,7 @@ namespace OsEngine.Robots.Helpers
         {
             if (_fullLogIsOn.ValueBool == true)
             {
-                SendNewLogMessage("Logic entry. Date: " + timeStart.ToString("dd.MM.yyyy"), Logging.LogMessageType.System);
+                SendNewLogMessage("Logic entry. Date: " + timeStart.ToString("dd.MM.yyyy", CultureInfo.InvariantCulture), Logging.LogMessageType.System);
             }
 
             decimal volumeLong = 0;
@@ -699,7 +699,7 @@ namespace OsEngine.Robots.Helpers
             {
                 if (_fullLogIsOn.ValueBool == true)
                 {
-                    SendNewLogMessage("No margin. Date: " + timeStart.ToString("dd.MM.yyyy") + " Amount positions: " + volumeLong + volumeShort + " Deposit: " + deposit, Logging.LogMessageType.System);
+                    SendNewLogMessage("No margin. Date: " + timeStart.ToString("dd.MM.yyyy", CultureInfo.InvariantCulture) + " Amount positions: " + volumeLong + volumeShort + " Deposit: " + deposit, Logging.LogMessageType.System);
                 }
             }
         }
@@ -820,7 +820,7 @@ namespace OsEngine.Robots.Helpers
                     {
                         if (_fullLogIsOn.ValueBool == true)
                         {
-                            SendNewLogMessage("No Rate. Date: " + timeStart.ToString("dd.MM.yyyy") + " Rate: " + rate, Logging.LogMessageType.System);
+                            SendNewLogMessage("No Rate. Date: " + timeStart.ToString("dd.MM.yyyy", CultureInfo.InvariantCulture) + " Rate: " + rate, Logging.LogMessageType.System);
                         }
 
                         return 0;
@@ -835,7 +835,7 @@ namespace OsEngine.Robots.Helpers
 
                     if (_fullLogIsOn.ValueBool == true)
                     {
-                        SendNewLogMessage($"Date: {timeStart.ToString("dd.MM.yyyy")}, Margin: {margin}, Rate: {rate}, TypeRate: {typeValue}, Comission: {marginComission}", LogMessageType.System);
+                        SendNewLogMessage($"Date: {timeStart.ToString("dd.MM.yyyy", CultureInfo.InvariantCulture)}, Margin: {margin}, Rate: {rate}, TypeRate: {typeValue}, Comission: {marginComission}", LogMessageType.System);
                     }
 
                     return marginComission;
@@ -856,7 +856,7 @@ namespace OsEngine.Robots.Helpers
 
                     if (_fullLogIsOn.ValueBool == true)
                     {
-                        SendNewLogMessage($"Date: {timeStart.ToString("dd.MM.yyyy")}, Margin: {margin}, Rate: {rate}, TypeRate: {typeValue}, Comission: {marginComission}", LogMessageType.System);
+                        SendNewLogMessage($"Date: {timeStart.ToString("dd.MM.yyyy", CultureInfo.InvariantCulture)}, Margin: {margin}, Rate: {rate}, TypeRate: {typeValue}, Comission: {marginComission}", LogMessageType.System);
                     }
 
                     return marginComission;

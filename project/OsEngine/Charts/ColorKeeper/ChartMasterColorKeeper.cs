@@ -7,6 +7,7 @@
 */
 
 using System;
+using System.Globalization;
 using System.Drawing;
 using System.IO;
 using System.Threading;
@@ -307,14 +308,14 @@ namespace OsEngine.Charts.ColorKeeper
 
             return new ChartColorKeeperSettingsDto
             {
-                ColorUpBodyCandleArgb = lines.Length > 0 ? Convert.ToInt32(lines[0]) : Color.FromArgb(57, 157, 54).ToArgb(),
-                ColorUpBorderCandleArgb = lines.Length > 1 ? Convert.ToInt32(lines[1]) : Color.FromArgb(57, 157, 54).ToArgb(),
-                ColorDownBodyCandleArgb = lines.Length > 2 ? Convert.ToInt32(lines[2]) : Color.FromArgb(17, 18, 23).ToArgb(),
-                ColorDownBorderCandleArgb = lines.Length > 3 ? Convert.ToInt32(lines[3]) : Color.FromArgb(255, 83, 0).ToArgb(),
-                ColorBackSecondArgb = lines.Length > 4 ? Convert.ToInt32(lines[4]) : Color.FromArgb(17, 18, 23).ToArgb(),
-                ColorBackChartArgb = lines.Length > 5 ? Convert.ToInt32(lines[5]) : Color.FromArgb(17, 18, 23).ToArgb(),
-                ColorBackCursorArgb = lines.Length > 6 ? Convert.ToInt32(lines[6]) : Color.FromArgb(255, 83, 0).ToArgb(),
-                ColorTextArgb = lines.Length > 7 ? Convert.ToInt32(lines[7]) : Color.FromArgb(255, 147, 147, 147).ToArgb(),
+                ColorUpBodyCandleArgb = lines.Length > 0 ? Convert.ToInt32(lines[0], CultureInfo.InvariantCulture) : Color.FromArgb(57, 157, 54).ToArgb(),
+                ColorUpBorderCandleArgb = lines.Length > 1 ? Convert.ToInt32(lines[1], CultureInfo.InvariantCulture) : Color.FromArgb(57, 157, 54).ToArgb(),
+                ColorDownBodyCandleArgb = lines.Length > 2 ? Convert.ToInt32(lines[2], CultureInfo.InvariantCulture) : Color.FromArgb(17, 18, 23).ToArgb(),
+                ColorDownBorderCandleArgb = lines.Length > 3 ? Convert.ToInt32(lines[3], CultureInfo.InvariantCulture) : Color.FromArgb(255, 83, 0).ToArgb(),
+                ColorBackSecondArgb = lines.Length > 4 ? Convert.ToInt32(lines[4], CultureInfo.InvariantCulture) : Color.FromArgb(17, 18, 23).ToArgb(),
+                ColorBackChartArgb = lines.Length > 5 ? Convert.ToInt32(lines[5], CultureInfo.InvariantCulture) : Color.FromArgb(17, 18, 23).ToArgb(),
+                ColorBackCursorArgb = lines.Length > 6 ? Convert.ToInt32(lines[6], CultureInfo.InvariantCulture) : Color.FromArgb(255, 83, 0).ToArgb(),
+                ColorTextArgb = lines.Length > 7 ? Convert.ToInt32(lines[7], CultureInfo.InvariantCulture) : Color.FromArgb(255, 147, 147, 147).ToArgb(),
                 PointType = pointType,
                 ColorScheme = colorScheme
             };

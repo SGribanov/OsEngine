@@ -20,6 +20,7 @@ using OsEngine.PrimeSettings;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Globalization;
 using System.IO;
 using System.Net.Sockets;
 using System.Text;
@@ -418,7 +419,7 @@ namespace OsEngine
                 {
                     return false;
                 }
-                int releaseKey = Convert.ToInt32(ndpKey.GetValue("Release"));
+                int releaseKey = Convert.ToInt32(ndpKey.GetValue("Release"), CultureInfo.InvariantCulture);
 
                 if (releaseKey >= 393295)
                 {

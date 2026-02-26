@@ -8,6 +8,7 @@
 
 #pragma warning disable SYSLIB0014 // WebRequest is obsolete
 using System;
+using System.Globalization;
 using System.IO;
 using System.Net;
 using System.Text;
@@ -173,7 +174,7 @@ namespace OsEngine.Logging
 
             if (SmscDebug) 
             {
-                if (Convert.ToInt32(m[1]) <= 0)
+                if (Convert.ToInt32(m[1], CultureInfo.InvariantCulture) <= 0)
                     //_print_debug("Сообщение отправлено успешно. ID: " + m[0] + ", всего SMS: " + m[1] + ", стоимость: " + m[2] + ", баланс: " + m[3]);
                     _print_debug("Send SMS Error №" + m[1].Substring(1, 1) + (m[0] != "0" ? ", ID: " + m[0] : ""));
             }
@@ -208,7 +209,7 @@ namespace OsEngine.Logging
                 if (SmscPost) {
                     request.Method = "POST";
 
-                    string postHeader, boundary = "----------" + DateTime.Now.Ticks.ToString("x");
+                    string postHeader, boundary = "----------" + DateTime.Now.Ticks.ToString("x", CultureInfo.InvariantCulture);
                     byte[] postHeaderBytes, boundaryBytes = Encoding.ASCII.GetBytes("--" + boundary + "--\r\n"), tbuf;
                     StringBuilder sb = new StringBuilder();
                     int bytesRead;

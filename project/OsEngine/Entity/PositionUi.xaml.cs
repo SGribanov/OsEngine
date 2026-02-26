@@ -841,7 +841,7 @@ namespace OsEngine.Entity
             try
             {
                 string str = ((ToolStripMenuItem)sender).Text.ToString().Split(' ')[1];
-                int ordNum = Convert.ToInt32(str);
+                int ordNum = Convert.ToInt32(str, CultureInfo.InvariantCulture);
                 Order myOrd = _position.OpenOrders.Find(o => o.NumberUser == ordNum);
 
                 if (myOrd == null)
@@ -890,7 +890,7 @@ namespace OsEngine.Entity
                 }
 
                 string str = ((ToolStripMenuItem)sender).Text.ToString().Split(' ')[1];
-                int ordNum = Convert.ToInt32(str);
+                int ordNum = Convert.ToInt32(str, CultureInfo.InvariantCulture);
                 Order myOrd = _position.CloseOrders.Find(o => o.NumberUser == ordNum);
 
                 if (myOrd == null)

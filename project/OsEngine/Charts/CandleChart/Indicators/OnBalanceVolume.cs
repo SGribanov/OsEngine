@@ -6,6 +6,7 @@
  *Ваши права на использование кода регулируются данной лицензией http://o-s-a.net/doc/license_simple_engine.pdf
 */
 using System;
+using System.Globalization;
 using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
@@ -235,7 +236,7 @@ namespace OsEngine.Charts.CandleChart.Indicators
 
             return new OnBalanceVolumeSettingsDto
             {
-                ColorArgb = Convert.ToInt32(lines[0]),
+                ColorArgb = Convert.ToInt32(lines[0], CultureInfo.InvariantCulture),
                 PaintOn = Convert.ToBoolean(lines[1])
             };
         }

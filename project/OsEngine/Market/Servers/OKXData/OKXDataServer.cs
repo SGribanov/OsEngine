@@ -451,14 +451,14 @@ namespace OsEngine.Market.Servers.OKXData
                         limit = 300;
                     }
 
-                    string after = $"&after={Convert.ToString(DataEnd)}";
+                    string after = "&after=" + Convert.ToString(DataEnd, CultureInfo.InvariantCulture);
 
                     if (candlesResponse.data.Count != 0)
                     {
-                        after = $"&after={candlesResponse.data[candlesResponse.data.Count - 1][0]}";
+                        after = "&after=" + candlesResponse.data[candlesResponse.data.Count - 1][0];
                     }
 
-                    string url = _baseUrl + $"/api/v5/market/history-candles?instId={nameSec}&bar={bar}&limit={limit}" + after;
+                    string url = _baseUrl + "/api/v5/market/history-candles?instId=" + nameSec + "&bar=" + bar + "&limit=" + limit.ToString(CultureInfo.InvariantCulture) + after;
 
                     RestClient client = new RestClient(url);
                     RestRequest request = new RestRequest(Method.GET);
@@ -576,9 +576,9 @@ namespace OsEngine.Market.Servers.OKXData
 
                 while (startLoop <= endTime)
                 {
-                    string date1 = startLoop.ToString("yyyyMMdd");
+                    string date1 = startLoop.ToString("yyyyMMdd", CultureInfo.InvariantCulture);
 
-                    string date2 = startLoop.ToString("yyyy-MM-dd");
+                    string date2 = startLoop.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture);
 
                     string path = $"https://static.okx.com/cdn/okex/traderecords/trades/daily/{date1}/{security.Name}-trades-{date2}.zip";
 

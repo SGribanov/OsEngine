@@ -1088,7 +1088,7 @@ namespace OsEngine.Market.Servers.Binance.Spot
             {
                 Thread.Sleep(1000); // do not remove! RateGate does not help in CreateQuery
 
-                string timeStamp = TimeManager.GetUnixTimeStampMilliseconds().ToString();
+                string timeStamp = TimeManager.GetUnixTimeStampMilliseconds().ToString(CultureInfo.InvariantCulture);
                 Dictionary<string, string> param = new Dictionary<string, string>();
 
                 if (startTime != new DateTime() && endTime != new DateTime())
@@ -1097,14 +1097,14 @@ namespace OsEngine.Market.Servers.Binance.Spot
                     long to = TimeManager.GetTimeStampMilliSecondsToDateTime(endTime);
 
                     param.Add("symbol=", security);
-                    param.Add("&startTime=", from.ToString());
-                    param.Add("&endTime=", to.ToString());
+                    param.Add("&startTime=", from.ToString(CultureInfo.InvariantCulture));
+                    param.Add("&endTime=", to.ToString(CultureInfo.InvariantCulture));
                     param.Add("&limit=", "1000");
                 }
                 else if (fromId != 0)
                 {
                     param.Add("symbol=", security);
-                    param.Add("&fromId=", fromId.ToString());
+                    param.Add("&fromId=", fromId.ToString(CultureInfo.InvariantCulture));
                     param.Add("&limit=", "1000");
                 }
 
@@ -2264,7 +2264,7 @@ namespace OsEngine.Market.Servers.Binance.Spot
                     {
                         param.Add("&timeInForce=", "GTC");
                     }
-                    param.Add("&newClientOrderId=", "x-RKXTQ2AK" + order.NumberUser.ToString());
+                    param.Add("&newClientOrderId=", "x-RKXTQ2AK" + order.NumberUser.ToString(CultureInfo.InvariantCulture));
 
                     if (order.PositionConditionType == OrderPositionConditionType.Open)
                     {
@@ -2325,7 +2325,7 @@ namespace OsEngine.Market.Servers.Binance.Spot
                     {
                         param.Add("&timeInForce=", "GTC");
                     }
-                    param.Add("&newClientOrderId=", "x-RKXTQ2AK" + order.NumberUser.ToString());
+                    param.Add("&newClientOrderId=", "x-RKXTQ2AK" + order.NumberUser.ToString(CultureInfo.InvariantCulture));
                     param.Add("&quantity=",
                         order.Volume.ToString(CultureInfo.InvariantCulture)
                             .Replace(CultureInfo.InvariantCulture.NumberFormat.NumberDecimalSeparator, "."));
@@ -2482,7 +2482,7 @@ namespace OsEngine.Market.Servers.Binance.Spot
                 }
 
                 HistoryOrderReport orderOnBoard =
-                    allOrders.Find(ord => ord.clientOrderId.Replace("x-RKXTQ2AK", "") == oldOrder.NumberUser.ToString());
+                    allOrders.Find(ord => ord.clientOrderId.Replace("x-RKXTQ2AK", "") == oldOrder.NumberUser.ToString(CultureInfo.InvariantCulture));
 
                 if (orderOnBoard == null)
                 {
@@ -3051,7 +3051,7 @@ namespace OsEngine.Market.Servers.Binance.Spot
 
             if (result != null)
             {
-                return (result.serverTime + 500).ToString();
+                return (result.serverTime + 500).ToString(CultureInfo.InvariantCulture);
             }
             else
             {

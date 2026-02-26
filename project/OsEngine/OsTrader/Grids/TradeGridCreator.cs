@@ -7,6 +7,7 @@
 */
 
 using System;
+using System.Globalization;
 using System.Collections.Generic;
 using OsEngine.Entity;
 using OsEngine.Logging;
@@ -50,17 +51,17 @@ namespace OsEngine.OsTrader.Grids
             string result = "";
 
             result += GridSide + "@";
-            result += FirstPrice + "@";
-            result += LineCountStart + "@";
+            result += FirstPrice.ToString(CultureInfo.InvariantCulture) + "@";
+            result += LineCountStart.ToString(CultureInfo.InvariantCulture) + "@";
             result += TypeStep + "@";
-            result += LineStep + "@";
-            result += StepMultiplicator + "@";
+            result += LineStep.ToString(CultureInfo.InvariantCulture) + "@";
+            result += StepMultiplicator.ToString(CultureInfo.InvariantCulture) + "@";
             result += TypeProfit + "@";
-            result += ProfitStep + "@";
-            result += ProfitMultiplicator + "@";
+            result += ProfitStep.ToString(CultureInfo.InvariantCulture) + "@";
+            result += ProfitMultiplicator.ToString(CultureInfo.InvariantCulture) + "@";
             result += TypeVolume + "@";
-            result += StartVolume + "@";
-            result += MartingaleMultiplicator + "@";
+            result += StartVolume.ToString(CultureInfo.InvariantCulture) + "@";
+            result += MartingaleMultiplicator.ToString(CultureInfo.InvariantCulture) + "@";
             result += TradeAssetInPortfolio + "@";
             result += GetSaveLinesString() + "@";
             result += "@";
@@ -79,7 +80,7 @@ namespace OsEngine.OsTrader.Grids
 
                 Enum.TryParse(values[0], out GridSide);
                 FirstPrice = values[1].ToDecimal();
-                LineCountStart = Convert.ToInt32(values[2]);
+                LineCountStart = Convert.ToInt32(values[2], CultureInfo.InvariantCulture);
                 Enum.TryParse(values[3], out TypeStep);
                 LineStep = values[4].ToDecimal();
                 StepMultiplicator = values[5].ToDecimal();
@@ -482,11 +483,11 @@ namespace OsEngine.OsTrader.Grids
         {
             string result = "";
 
-            result += PriceEnter + "|";
-            result += Volume + "|";
+            result += PriceEnter.ToString(CultureInfo.InvariantCulture) + "|";
+            result += Volume.ToString(CultureInfo.InvariantCulture) + "|";
             result += Side + "|";
-            result += PriceExit + "|";
-            result += PositionNum + "|";
+            result += PriceExit.ToString(CultureInfo.InvariantCulture) + "|";
+            result += PositionNum.ToString(CultureInfo.InvariantCulture) + "|";
 
             return result;
         }
@@ -499,7 +500,7 @@ namespace OsEngine.OsTrader.Grids
             Volume = saveArray[1].ToDecimal();
             Enum.TryParse(saveArray[2], out Side);
             PriceExit = saveArray[3].ToDecimal();
-            PositionNum = Convert.ToInt32(saveArray[4]);
+            PositionNum = Convert.ToInt32(saveArray[4], CultureInfo.InvariantCulture);
         }
 
     }

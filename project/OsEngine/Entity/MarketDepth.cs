@@ -509,10 +509,10 @@ namespace OsEngine.Entity
 
             string result = "";
 
-            result += Time.ToString("yyyyMMdd_HHmmss") + "_";
+            result += Time.ToString("yyyyMMdd_HHmmss", CultureInfo.InvariantCulture) + "_";
 
 
-            result += Time.Millisecond + "_";
+            result += Time.Millisecond.ToString(CultureInfo.InvariantCulture) + "_";
 
             for (int i = 0; i < Asks.Count && i < depth; i++)
             {

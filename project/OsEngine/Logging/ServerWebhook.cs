@@ -724,12 +724,12 @@ namespace OsEngine.Logging
 
         private string WebUtcTime(DateTime time)
         {
-            return time.ToUniversalTime().ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'");
+            return time.ToUniversalTime().ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'", CultureInfo.InvariantCulture);
         }
 
         private string UnixEpochTimestamp(DateTime time)
         {
-            return (time.ToUniversalTime() - new DateTime(1970, 1, 1)).TotalSeconds.ToString();
+            return (time.ToUniversalTime() - new DateTime(1970, 1, 1)).TotalSeconds.ToString(CultureInfo.InvariantCulture);
         }
         #endregion
     }

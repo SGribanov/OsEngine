@@ -633,7 +633,7 @@ namespace OsEngine.Entity
         /// </summary>
         public static void ParseDateOrTimeString(string dateOrTimeString, out int yearHour, out int monthMinute, out int daySecond)
         {
-            int dateOrTimeInt = Convert.ToInt32(dateOrTimeString);
+            int dateOrTimeInt = Convert.ToInt32(dateOrTimeString, CultureInfo.InvariantCulture);
             yearHour = dateOrTimeInt / 10000;
             monthMinute = dateOrTimeInt / 100 % 100;
             daySecond = dateOrTimeInt % 100;

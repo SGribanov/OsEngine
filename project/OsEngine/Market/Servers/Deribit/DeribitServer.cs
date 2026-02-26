@@ -446,8 +446,8 @@ namespace OsEngine.Market.Servers.Deribit
             {
                 string queryParam = $"instrument_name={security}&";
                 queryParam += $"resolution={resolution}&";
-                queryParam += $"start_timestamp={fromTimeStamp}&";
-                queryParam += $"end_timestamp={toTimeStamp}";
+                queryParam += "start_timestamp=" + fromTimeStamp.ToString(CultureInfo.InvariantCulture) + "&";
+                queryParam += "end_timestamp=" + toTimeStamp.ToString(CultureInfo.InvariantCulture);
 
                 string requestUri = _baseUrl + $"/api/v2/public/get_tradingview_chart_data?" + queryParam;
 
@@ -1772,7 +1772,10 @@ namespace OsEngine.Market.Servers.Deribit
             string data = requestData;
             string signature = GenerateSignature(_secretKey, timestamp, nonce, data);
             string url = _baseUrl + requestPath;
-            string authValue = $"id={_clientID},ts={timestamp},sig={signature},nonce={nonce}";
+            string authValue = "id=" + _clientID
+                + ",ts=" + timestamp.ToString(CultureInfo.InvariantCulture)
+                + ",sig=" + signature
+                + ",nonce=" + nonce;
 
             _httpClient.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("deri-hmac-sha256", authValue);
 
@@ -1790,7 +1793,7 @@ namespace OsEngine.Market.Servers.Deribit
         {
             using (HMACSHA256 hmac = new HMACSHA256(Encoding.UTF8.GetBytes(clientSecret)))
             {
-                string message = $"{timestamp}\n{nonce}\n{data}";
+                string message = timestamp.ToString(CultureInfo.InvariantCulture) + "\n" + nonce + "\n" + data;
                 byte[] hash = hmac.ComputeHash(Encoding.UTF8.GetBytes(message));
                 return BitConverter.ToString(hash).Replace("-", "").ToLower();
             }

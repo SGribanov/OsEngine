@@ -351,7 +351,7 @@ namespace OsEngine.Market.Servers.InteractiveBrokers
                 CreateMarketDepthFromTrades = true
             };
 
-            if (int.TryParse(parts[1], out int conId))
+            if (int.TryParse(parts[1], NumberStyles.Integer, CultureInfo.InvariantCulture, out int conId))
             {
                 item.ConId = conId;
             }

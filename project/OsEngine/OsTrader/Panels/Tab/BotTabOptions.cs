@@ -1049,7 +1049,7 @@ namespace OsEngine.OsTrader.Panels.Tab
                 var strike = (double)grid.Rows[e.RowIndex].Cells["Strike"].Value;
                 var valueStr = grid.Rows[e.RowIndex].Cells[e.ColumnIndex].Value?.ToString();
 
-                if (!int.TryParse(valueStr, out int quantity))
+                if (!int.TryParse(valueStr, NumberStyles.Integer, CultureInfo.InvariantCulture, out int quantity))
                 {
                     // Optional: handle invalid input, for now we just ignore
                     return;
@@ -1122,7 +1122,7 @@ namespace OsEngine.OsTrader.Panels.Tab
                 var uaName = grid.Rows[e.RowIndex].Cells["Name"].Value.ToString();
                 var valueStr = grid.Rows[e.RowIndex].Cells[e.ColumnIndex].Value?.ToString();
 
-                if (!int.TryParse(valueStr, out int quantity))
+                if (!int.TryParse(valueStr, NumberStyles.Integer, CultureInfo.InvariantCulture, out int quantity))
                 {
                     return;
                 }

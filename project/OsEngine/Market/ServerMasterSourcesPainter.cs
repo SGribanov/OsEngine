@@ -9,6 +9,7 @@
 using System;
 using System.Collections.Generic;
 using System.Drawing;
+using System.Globalization;
 using System.Windows;
 using System.Windows.Forms;
 using OsEngine.Entity;
@@ -926,9 +927,9 @@ namespace OsEngine.Market
         {
             try
             {
-                int indexRow = Convert.ToInt32(_labelCurrentResultShow.Content) - 1;
+                int indexRow = Convert.ToInt32(_labelCurrentResultShow.Content, CultureInfo.InvariantCulture) - 1;
 
-                int maxRowIndex = Convert.ToInt32(_labelCountResultsShow.Content);
+                int maxRowIndex = Convert.ToInt32(_labelCountResultsShow.Content, CultureInfo.InvariantCulture);
 
                 if (indexRow <= 0)
                 {
@@ -955,9 +956,9 @@ namespace OsEngine.Market
         {
             try
             {
-                int indexRow = Convert.ToInt32(_labelCurrentResultShow.Content) - 1 + 1;
+                int indexRow = Convert.ToInt32(_labelCurrentResultShow.Content, CultureInfo.InvariantCulture) - 1 + 1;
 
-                int maxRowIndex = Convert.ToInt32(_labelCountResultsShow.Content);
+                int maxRowIndex = Convert.ToInt32(_labelCountResultsShow.Content, CultureInfo.InvariantCulture);
 
                 if (indexRow >= maxRowIndex)
                 {

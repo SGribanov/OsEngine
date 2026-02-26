@@ -7,6 +7,7 @@
 */
 
 using System;
+using System.Globalization;
 using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
@@ -263,10 +264,10 @@ namespace OsEngine.Charts.CandleChart.Indicators
 
             return new UltimateOscillatorSettingsDto
             {
-                ColorArgb = Convert.ToInt32(lines[0]),
-                Period1 = Convert.ToInt32(lines[1]),
-                Period2 = Convert.ToInt32(lines[2]),
-                Period3 = Convert.ToInt32(lines[3]),
+                ColorArgb = Convert.ToInt32(lines[0], CultureInfo.InvariantCulture),
+                Period1 = Convert.ToInt32(lines[1], CultureInfo.InvariantCulture),
+                Period2 = Convert.ToInt32(lines[2], CultureInfo.InvariantCulture),
+                Period3 = Convert.ToInt32(lines[3], CultureInfo.InvariantCulture),
                 PaintOn = Convert.ToBoolean(lines[4])
             };
         }

@@ -877,8 +877,8 @@ namespace OsEngine.Market.Servers.TraderNet
                 reqData.q.@params.id = security.Name;
                 reqData.q.@params.timeframe = interval;
                 reqData.q.@params.count = 200;
-                reqData.q.@params.date_from = startTime.ToString("dd.MM.yyyy HH:mm");
-                reqData.q.@params.date_to = endTime.ToString("dd.MM.yyyy HH:mm");
+                reqData.q.@params.date_from = startTime.ToString("dd.MM.yyyy HH:mm", CultureInfo.InvariantCulture);
+                reqData.q.@params.date_to = endTime.ToString("dd.MM.yyyy HH:mm", CultureInfo.InvariantCulture);
 
                 HttpResponseMessage responseMessage = CreateQuery($"/api/", "POST", null, reqData);
                 string JsonResponse = responseMessage.Content.ReadAsStringAsync().Result;
@@ -1724,7 +1724,7 @@ namespace OsEngine.Market.Servers.TraderNet
                 paramsDict.Add("qty", volume.ToString(CultureInfo.InvariantCulture));
                 paramsDict.Add("limit_price", order.Price.ToString(CultureInfo.InvariantCulture));
                 paramsDict.Add("expiration_id", "3");
-                paramsDict.Add("user_order_id", order.NumberUser.ToString());
+                paramsDict.Add("user_order_id", order.NumberUser.ToString(CultureInfo.InvariantCulture));
 
                 data.Add("apiKey", _publicKey);
                 data.Add("cmd", "putTradeOrder");
@@ -1889,7 +1889,7 @@ namespace OsEngine.Market.Servers.TraderNet
                         continue;
                     }
 
-                    Int32.TryParse(strNumber[1], out int number);
+                    Int32.TryParse(strNumber[1], NumberStyles.Integer, CultureInfo.InvariantCulture, out int number);
 
                     if (number != order.NumberUser)
                     {
@@ -1981,7 +1981,7 @@ namespace OsEngine.Market.Servers.TraderNet
             {
                 int count = responseOrder.userOrderId.IndexOf(":");
                 string str = responseOrder.userOrderId.Remove(0, count + 1);
-                int.TryParse(str, out newOrder.NumberUser);
+                int.TryParse(str, NumberStyles.Integer, CultureInfo.InvariantCulture, out newOrder.NumberUser);
             }
 
             return newOrder;

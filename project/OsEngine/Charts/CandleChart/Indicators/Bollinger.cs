@@ -7,6 +7,7 @@
 */
 
 using System;
+using System.Globalization;
 using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
@@ -276,9 +277,9 @@ namespace OsEngine.Charts.CandleChart.Indicators
 
             return new BollingerSettingsDto
             {
-                ColorUpArgb = Convert.ToInt32(lines[0]),
-                ColorDownArgb = Convert.ToInt32(lines[1]),
-                Length = Convert.ToInt32(lines[2]),
+                ColorUpArgb = Convert.ToInt32(lines[0], CultureInfo.InvariantCulture),
+                ColorDownArgb = Convert.ToInt32(lines[1], CultureInfo.InvariantCulture),
+                Length = Convert.ToInt32(lines[2], CultureInfo.InvariantCulture),
                 Deviation = lines[3].ToDecimal(),
                 PaintOn = Convert.ToBoolean(lines[4])
             };
@@ -530,4 +531,5 @@ namespace OsEngine.Charts.CandleChart.Indicators
         }
     }
 }
+
 

@@ -7,6 +7,7 @@ using OsEngine.Layout;
 using OsEngine.Market;
 using System;
 using System.Diagnostics;
+using System.Globalization;
 using System.Windows;
 using System.Threading.Tasks;
 using System.Windows.Media;
@@ -451,8 +452,8 @@ namespace OsEngine.OsTrader.Panels.Tab.Internal
                 timeOpen = DatePickerFakeOpenDate.SelectedDate.Value;
                 string[] openTimeStr = TextBoxFakeOpenTime.Text.ToString().Split(':');
 
-                timeOpen = timeOpen.AddHours(Convert.ToInt32(openTimeStr[0]));
-                timeOpen = timeOpen.AddMinutes(Convert.ToInt32(openTimeStr[1]));
+                timeOpen = timeOpen.AddHours(Convert.ToInt32(openTimeStr[0], CultureInfo.InvariantCulture));
+                timeOpen = timeOpen.AddMinutes(Convert.ToInt32(openTimeStr[1], CultureInfo.InvariantCulture));
 
             }
             catch (Exception ex)

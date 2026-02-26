@@ -7,6 +7,7 @@
 */
 
 using System;
+using System.Globalization;
 using System.Windows;
 using System.Windows.Markup;
 using OsEngine.Language;
@@ -115,7 +116,7 @@ namespace OsEngine.Market.Servers.Tester
 
             _sliderIsChanging = true;
 
-            int daysFromStart = Convert.ToInt32(DateSlider.Value);
+            int daysFromStart = Convert.ToInt32(DateSlider.Value, CultureInfo.InvariantCulture);
 
             TimeGoTo = TimeStart.AddDays(daysFromStart);
             CalendarSelectData.SelectedDate = TimeGoTo;

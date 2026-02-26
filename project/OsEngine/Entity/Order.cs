@@ -462,7 +462,7 @@ namespace OsEngine.Entity
 
             StringBuilder result = new StringBuilder();
 
-            result.Append(NumberUser + "@");
+            result.Append(NumberUser.ToString(Invariant) + "@");
 
             result.Append(ServerType + "@");
 
@@ -520,7 +520,7 @@ namespace OsEngine.Entity
 
             result.Append(ServerName + "@");
 
-            result.Append(IsSendToCancel + "&" + CancellingTryCount + "&" + LastCancelTryLocalTime.ToString("O", CultureInfo.InvariantCulture));
+            result.Append(IsSendToCancel + "&" + CancellingTryCount.ToString(Invariant) + "&" + LastCancelTryLocalTime.ToString("O", CultureInfo.InvariantCulture));
 
             if (State == OrderStateType.Done && Volume == VolumeExecute &&
                 _trades != null && _trades.Count > 0)
@@ -561,7 +561,7 @@ namespace OsEngine.Entity
             TimeCancel = ParseDateTimeInvariantWithRuFallback(saveArray[14]);
             TimeCallBack = ParseDateTimeInvariantWithRuFallback(saveArray[15]);
 
-            TimeSpan.TryParse(saveArray[16], out LifeTime);
+            LifeTime = ParseTimeSpanInvariantWithCurrentFallback(saveArray[16]);
 
             // deals with which the order was opened and the order execution price was calculated
 
@@ -630,6 +630,26 @@ namespace OsEngine.Entity
             }
 
             return DateTime.MinValue;
+        }
+
+        private static TimeSpan ParseTimeSpanInvariantWithCurrentFallback(string value)
+        {
+            if (TimeSpan.TryParse(value, Invariant, out TimeSpan parsed))
+            {
+                return parsed;
+            }
+
+            if (TimeSpan.TryParse(value, CultureInfo.CurrentCulture, out parsed))
+            {
+                return parsed;
+            }
+
+            if (TimeSpan.TryParse(value, LegacyRu, out parsed))
+            {
+                return parsed;
+            }
+
+            return TimeSpan.Zero;
         }
     }
 

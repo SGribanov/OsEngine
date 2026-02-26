@@ -7,6 +7,7 @@
 */
 
 using System;
+using System.Globalization;
 using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
@@ -259,9 +260,9 @@ namespace OsEngine.Charts.CandleChart.Indicators
 
             return new LinearRegressionCurveSettingsDto
             {
-                ColorBaseArgb = Convert.ToInt32(lines[0]),
-                Length = Convert.ToInt32(lines[1]),
-                Lag = Convert.ToInt32(lines[2]),
+                ColorBaseArgb = Convert.ToInt32(lines[0], CultureInfo.InvariantCulture),
+                Length = Convert.ToInt32(lines[1], CultureInfo.InvariantCulture),
+                Lag = Convert.ToInt32(lines[2], CultureInfo.InvariantCulture),
                 PaintOn = Convert.ToBoolean(lines[3]),
                 TypePointsToSearch = typePointsToSearch
             };
@@ -644,4 +645,5 @@ namespace OsEngine.Charts.CandleChart.Indicators
 
     }
 }
+
 

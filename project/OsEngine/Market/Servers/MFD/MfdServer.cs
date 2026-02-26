@@ -7,6 +7,7 @@ using OsEngine.Market.Servers.Entity;
 using RestSharp;
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.Net;
 using System.Text;
@@ -328,8 +329,8 @@ namespace OsEngine.Market.Servers.MFD
             requestStr += "&Tickers=" + security.NameId.Split('#')[1];
             requestStr += "&Alias=false&Period=" + minutesCount;
             requestStr += "&timeframeValue =" + minutesCount;
-            requestStr += "&timeframeDatePart=day&StartDate=" + startTime.Date.ToString("dd/MM/yyyy").Replace("/", ".");
-            requestStr += "&EndDate=" + endTime.Date.ToString("dd/MM/yyyy").Replace("/", ".");
+            requestStr += "&timeframeDatePart=day&StartDate=" + startTime.Date.ToString("dd/MM/yyyy", CultureInfo.InvariantCulture).Replace("/", ".");
+            requestStr += "&EndDate=" + endTime.Date.ToString("dd/MM/yyyy", CultureInfo.InvariantCulture).Replace("/", ".");
             requestStr += "&SaveFormat=0&SaveMode=1&FileName=" + fileName;
             requestStr += "&FieldSeparator=%253b&DecimalSeparator=.&DateFormat=yyyyMMdd&TimeFormat=HHmmss&DateFormatCustom=&TimeFormatCustom=&AddHeader=true&RecordFormat=0&Fill=false";
 
@@ -411,8 +412,8 @@ namespace OsEngine.Market.Servers.MFD
             requestStr += "&Tickers=" + security.NameId.Split('#')[1];
             requestStr += "&Alias=false&Period=" + "0";
             requestStr += "&timeframeValue=" + "1";
-            requestStr += "&timeframeDatePart=day&StartDate=" + startTime.Date.ToString("dd/MM/yyyy").Replace("/", ".");
-            requestStr += "&EndDate=" + endTime.Date.ToString("dd/MM/yyyy").Replace("/", ".");
+            requestStr += "&timeframeDatePart=day&StartDate=" + startTime.Date.ToString("dd/MM/yyyy", CultureInfo.InvariantCulture).Replace("/", ".");
+            requestStr += "&EndDate=" + endTime.Date.ToString("dd/MM/yyyy", CultureInfo.InvariantCulture).Replace("/", ".");
             requestStr += "&SaveFormat=0&SaveMode=1&FileName=" + fileName;
             requestStr += "&FieldSeparator=%253b&DecimalSeparator=.&DateFormat=yyyyMMdd&TimeFormat=HHmmss&DateFormatCustom=&TimeFormatCustom=&AddHeader=false&RecordFormat=2&Fill=false";
 

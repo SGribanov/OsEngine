@@ -108,20 +108,20 @@ namespace OsEngine.OsTrader.Grids
 
             // settings prime
 
-            result += Number + "@";
+            result += Number.ToString(CultureInfo.InvariantCulture) + "@";
             result += GridType + "@";
             result += Regime + "@";
             result += RegimeLogicEntry + "@";
             result += AutoClearJournalIsOn + "@";
-            result += MaxClosePositionsInJournal + "@";
-            result += MaxOpenOrdersInMarket + "@";
-            result += MaxCloseOrdersInMarket + "@";
-            result += _firstTradePrice + "@";
-            result += _openPositionsBySession + "@";
+            result += MaxClosePositionsInJournal.ToString(CultureInfo.InvariantCulture) + "@";
+            result += MaxOpenOrdersInMarket.ToString(CultureInfo.InvariantCulture) + "@";
+            result += MaxCloseOrdersInMarket.ToString(CultureInfo.InvariantCulture) + "@";
+            result += _firstTradePrice.ToString(CultureInfo.InvariantCulture) + "@";
+            result += _openPositionsBySession.ToString(CultureInfo.InvariantCulture) + "@";
             result += _firstTradeTime.ToString("O", CultureInfo.InvariantCulture) + "@";
-            result += DelayInReal + "@";
+            result += DelayInReal.ToString(CultureInfo.InvariantCulture) + "@";
             result += CheckMicroVolumes + "@";
-            result += MaxDistanceToOrdersPercent + "@";
+            result += MaxDistanceToOrdersPercent.ToString(CultureInfo.InvariantCulture) + "@";
             result += OpenOrdersMakerOnly + "@";
             result += "@";
             result += "@";

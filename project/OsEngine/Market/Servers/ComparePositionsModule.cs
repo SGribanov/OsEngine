@@ -10,6 +10,7 @@ using OsEngine.Logging;
 using OsEngine.OsTrader.Panels;
 using OsEngine.OsTrader;
 using System;
+using System.Globalization;
 using System.Collections.Generic;
 using System.Threading;
 using OsEngine.Entity;
@@ -161,7 +162,7 @@ namespace OsEngine.Market.Servers
 
             if (firstSaveStr.Length > 1 && string.IsNullOrEmpty(firstSaveStr[1]) == false)
             {
-                if (int.TryParse(firstSaveStr[1], out int parsedDelay))
+                if (int.TryParse(firstSaveStr[1], NumberStyles.Integer, CultureInfo.InvariantCulture, out int parsedDelay))
                 {
                     settings.TimeDelaySeconds = parsedDelay;
                 }

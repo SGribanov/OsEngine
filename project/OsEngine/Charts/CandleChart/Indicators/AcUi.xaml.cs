@@ -6,6 +6,7 @@
  *Ваши права на использования кода регулируются данной лицензией http://o-s-a.net/doc/license_simple_engine.pdf
 */
 using System;
+using System.Globalization;
 using System.Windows;
 using System.Windows.Forms;
 using OsEngine.Entity;
@@ -74,8 +75,8 @@ namespace OsEngine.Charts.CandleChart.Indicators
         {
             try
             {
-                if (Convert.ToInt32(TextBoxLength.Text) <= 0
-                    || Convert.ToInt32(TextBoxLengthAverage.Text) <= 0)
+                if (Convert.ToInt32(TextBoxLength.Text, CultureInfo.InvariantCulture) <= 0
+                    || Convert.ToInt32(TextBoxLengthAverage.Text, CultureInfo.InvariantCulture) <= 0)
                 {
                     throw new Exception("error");
                 }
@@ -89,9 +90,9 @@ namespace OsEngine.Charts.CandleChart.Indicators
             _ac.ColorUp = HostColorUp.Child.BackColor;
             _ac.ColorDown = HostColorDown.Child.BackColor;
 
-            _ac.LengthLong = Convert.ToInt32(TextBoxLength.Text);
+            _ac.LengthLong = Convert.ToInt32(TextBoxLength.Text, CultureInfo.InvariantCulture);
             _ac.PaintOn = CheckBoxPaintOnOff.IsChecked.Value;
-            _ac.LengthShort = Convert.ToInt32(TextBoxLengthAverage.Text);
+            _ac.LengthShort = Convert.ToInt32(TextBoxLengthAverage.Text, CultureInfo.InvariantCulture);
             _ac.Save();
 
             IsChange = true;

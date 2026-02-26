@@ -94,7 +94,7 @@ namespace OsEngine.OsOptimizer.OptEntity
             string[] str = saveStr.Split('@');
 
             report.BotName = str[0];
-            report.PositionsCount = Convert.ToInt32(str[1]);
+            report.PositionsCount = Convert.ToInt32(str[1], CultureInfo.InvariantCulture);
             report.TotalProfit = str[2].ToDecimal();
             report.MaxDrawDawn = str[3].ToDecimal();
             report.AverageProfit = str[4].ToDecimal();

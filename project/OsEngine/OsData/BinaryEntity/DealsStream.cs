@@ -4,6 +4,7 @@
 using OsEngine.Entity;
 using OsEngine.Market.Servers.Entity;
 using System;
+using System.Globalization;
 
 namespace OsEngine.OsData.BinaryEntity
 {
@@ -80,7 +81,7 @@ namespace OsEngine.OsData.BinaryEntity
             }
 
             long deltaId = 0;
-            if (long.TryParse(trade.Id, out long numericId))
+            if (long.TryParse(trade.Id, NumberStyles.Integer, CultureInfo.InvariantCulture, out long numericId))
             {
                 deltaId = numericId - lastId;
 

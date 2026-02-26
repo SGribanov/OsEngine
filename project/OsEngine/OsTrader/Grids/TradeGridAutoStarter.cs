@@ -45,13 +45,13 @@ namespace OsEngine.OsTrader.Grids
             string result = "";
 
             result += AutoStartRegime + "@";
-            result += AutoStartPrice + "@";
+            result += AutoStartPrice.ToString(CultureInfo.InvariantCulture) + "@";
             result += RebuildGridRegime + "@";
-            result += ShiftFirstPrice + "@";
+            result += ShiftFirstPrice.ToString(CultureInfo.InvariantCulture) + "@";
             result += StartGridByTimeOfDayIsOn +"@";
-            result += StartGridByTimeOfDayHour + "@";
-            result += StartGridByTimeOfDayMinute + "@";
-            result += StartGridByTimeOfDaySecond + "@";
+            result += StartGridByTimeOfDayHour.ToString(CultureInfo.InvariantCulture) + "@";
+            result += StartGridByTimeOfDayMinute.ToString(CultureInfo.InvariantCulture) + "@";
+            result += StartGridByTimeOfDaySecond.ToString(CultureInfo.InvariantCulture) + "@";
             result += SingleActivationMode;
             result += "@";
             result += "@";

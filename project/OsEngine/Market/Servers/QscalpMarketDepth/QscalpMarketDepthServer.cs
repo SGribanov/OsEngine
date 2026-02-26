@@ -176,7 +176,7 @@ namespace OsEngine.Market.Servers.QscalpMarketDepth
         {
             for (int i = 0; i < dates.Count; i++)
             {
-                string secOnDate = GetStringRequest(_mainFtpUrl + dates[i].ToString("yyyy-MM-dd") + "/");
+                string secOnDate = GetStringRequest(_mainFtpUrl + dates[i].ToString("yyyy-MM-dd", CultureInfo.InvariantCulture) + "/");
 
                 if (secOnDate != null)
                 {
@@ -365,7 +365,7 @@ namespace OsEngine.Market.Servers.QscalpMarketDepth
 
                 for (int i = 0; i < dates.Count; i++)
                 {
-                    string dayStr = dates[i].ToString("yyyy-MM-dd");
+                    string dayStr = dates[i].ToString("yyyy-MM-dd", CultureInfo.InvariantCulture);
 
                     string secOnDate = GetStringRequest(_mainFtpUrl + dayStr + "/");
 

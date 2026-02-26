@@ -9,6 +9,7 @@
 using System;
 using System.Collections.Generic;
 using System.Drawing;
+using System.Globalization;
 using System.IO;
 using OsEngine.Entity;
 using OsEngine.Indicators;
@@ -263,9 +264,9 @@ namespace OsEngine.Charts.CandleChart.Indicators
 
             return new BullsPowerSettingsDto
             {
-                Period = Convert.ToInt32(lines[0]),
-                ColorUpArgb = Convert.ToInt32(lines[1]),
-                ColorDownArgb = Convert.ToInt32(lines[2]),
+                Period = Convert.ToInt32(lines[0], CultureInfo.InvariantCulture),
+                ColorUpArgb = Convert.ToInt32(lines[1], CultureInfo.InvariantCulture),
+                ColorDownArgb = Convert.ToInt32(lines[2], CultureInfo.InvariantCulture),
                 PaintOn = Convert.ToBoolean(lines[3])
             };
         }

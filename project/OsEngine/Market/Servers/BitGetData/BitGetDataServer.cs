@@ -9,6 +9,7 @@ using OsEngine.Market.Servers.Entity;
 using RestSharp;
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.IO.Compression;
 using System.Net;
@@ -334,7 +335,7 @@ namespace OsEngine.Market.Servers.BitGetData
 
                 for (int i = 0; i < dates.Count; i++)
                 {
-                    string dayStr = dates[i].ToString("yyyyMMdd");
+                    string dayStr = dates[i].ToString("yyyyMMdd", CultureInfo.InvariantCulture);
 
                     string prefix = "";
 
@@ -491,7 +492,7 @@ namespace OsEngine.Market.Servers.BitGetData
                 // timestamp (column A)
                 string timestampValue = cellNodes[0].InnerText;
 
-                if (!string.IsNullOrEmpty(timestampValue) && int.TryParse(timestampValue, out int timestamp))
+                if (!string.IsNullOrEmpty(timestampValue) && int.TryParse(timestampValue, NumberStyles.Integer, CultureInfo.InvariantCulture, out int timestamp))
                 {
                     candle.TimeStart = TimeManager.GetDateTimeFromTimeStampSeconds(timestamp);
                 }
@@ -571,7 +572,7 @@ namespace OsEngine.Market.Servers.BitGetData
 
                     int dailyArchiveCount = 1;
 
-                    string dayStr = dates[i].ToString("yyyyMMdd");
+                    string dayStr = dates[i].ToString("yyyyMMdd", CultureInfo.InvariantCulture);
 
                     while (!isLastArchiveByCurrDay)
                     {

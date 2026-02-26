@@ -926,18 +926,18 @@ namespace OsEngine.Market.Servers.OKX
                         limit = 300;
                     }
 
-                    string after = $"&after={Convert.ToString(DataEnd)}";
+                    string after = "&after=" + Convert.ToString(DataEnd, CultureInfo.InvariantCulture);
 
                     if (candlesResponse.data.Count != 0)
                     {
-                        after = $"&after={candlesResponse.data[candlesResponse.data.Count - 1][0]}";
+                        after = "&after=" + candlesResponse.data[candlesResponse.data.Count - 1][0];
                     }
 
-                    string url = _baseUrl + $"/api/v5/market/candles?instId={nameSec}&bar={bar}&limit={limit}" + after;
+                    string url = _baseUrl + "/api/v5/market/candles?instId=" + nameSec + "&bar=" + bar + "&limit=" + limit.ToString(CultureInfo.InvariantCulture) + after;
 
                     if (isOsData)
                     {
-                        url = _baseUrl + $"/api/v5/market/candles?instId={nameSec}&bar={bar}&limit={limit}" + after;
+                        url = _baseUrl + "/api/v5/market/candles?instId=" + nameSec + "&bar=" + bar + "&limit=" + limit.ToString(CultureInfo.InvariantCulture) + after;
                     }
 
                     RestClient client = new RestClient(url);
@@ -3210,7 +3210,7 @@ namespace OsEngine.Market.Servers.OKX
 
                 orderRequest.Add("instId", order.SecurityNameCode);
                 orderRequest.Add("tdMode", "cash");
-                orderRequest.Add("clOrdId", order.NumberUser.ToString());
+                orderRequest.Add("clOrdId", order.NumberUser.ToString(CultureInfo.InvariantCulture));
                 orderRequest.Add("side", order.Side == Side.Buy ? "buy" : "sell");
                 orderRequest.Add("ordType", order.TypeOrder.ToString().ToLower());
 
@@ -3281,7 +3281,7 @@ namespace OsEngine.Market.Servers.OKX
 
                 orderRequest.Add("instId", order.SecurityNameCode);
                 orderRequest.Add("tdMode", _marginMode);
-                orderRequest.Add("clOrdId", order.NumberUser.ToString());
+                orderRequest.Add("clOrdId", order.NumberUser.ToString(CultureInfo.InvariantCulture));
                 orderRequest.Add("side", order.Side == Side.Buy ? "buy" : "sell");
                 orderRequest.Add("ordType", order.TypeOrder.ToString().ToLower());
                 orderRequest.Add("px", order.Price.ToString(CultureInfo.InvariantCulture));

@@ -9,6 +9,7 @@
 using System;
 using System.Collections.Generic;
 using System.Drawing;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -390,7 +391,7 @@ namespace OsEngine.Charts.CandleChart.Indicators
 
         private static Color ParseColorLegacy(string value)
         {
-            if (int.TryParse(value, out int argb))
+            if (int.TryParse(value, NumberStyles.Integer, CultureInfo.InvariantCulture, out int argb))
             {
                 return Color.FromArgb(argb);
             }
@@ -424,7 +425,7 @@ namespace OsEngine.Charts.CandleChart.Indicators
                     string key = token.Substring(0, separatorIndex).Trim();
                     string number = token.Substring(separatorIndex + 1).Trim();
 
-                    if (!int.TryParse(number, out int parsedValue))
+                    if (!int.TryParse(number, NumberStyles.Integer, CultureInfo.InvariantCulture, out int parsedValue))
                     {
                         continue;
                     }

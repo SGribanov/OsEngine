@@ -690,7 +690,7 @@ namespace OsEngine.Market.Servers.Woo
 
             try
             {
-                string queryParam = $"after={fromTimeStamp}&";
+                string queryParam = "after=" + fromTimeStamp.ToString(CultureInfo.InvariantCulture) + "&";
                 queryParam += $"symbol={security}&";
                 queryParam += $"limit=1000&";
                 queryParam += $"type={resolution}";
@@ -1181,7 +1181,8 @@ namespace OsEngine.Market.Servers.Woo
                             && webSocketPublic?.ReadyState == WebSocketState.Open)
                         {
                             long timestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
-                            webSocketPublic.SendAsync($"{{ \"cmd\": \"PING\", \"ts\": {timestamp} }}");
+                            string timestampStr = timestamp.ToString(CultureInfo.InvariantCulture);
+                            webSocketPublic.SendAsync($"{{ \"cmd\": \"PING\", \"ts\": {timestampStr} }}");
                         }
                         else
                         {
@@ -1194,7 +1195,8 @@ namespace OsEngine.Market.Servers.Woo
                         _webSocketPrivate.ReadyState == WebSocketState.Connecting))
                     {
                         long timestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
-                        _webSocketPrivate.SendAsync($"{{ \"cmd\": \"PING\", \"ts\": {timestamp} }}");
+                        string timestampStr = timestamp.ToString(CultureInfo.InvariantCulture);
+                        _webSocketPrivate.SendAsync($"{{ \"cmd\": \"PING\", \"ts\": {timestampStr} }}");
                     }
                     else
                     {
@@ -2374,7 +2376,7 @@ namespace OsEngine.Market.Servers.Woo
                 jsonContent.Add("symbol", order.SecurityNameCode);
                 jsonContent.Add("side", order.Side.ToString() == "Buy" ? "BUY" : "SELL");
                 jsonContent.Add("type", order.TypeOrder.ToString() == "Limit" ? "LIMIT" : "MARKET");
-                jsonContent.Add("clientOrderId", order.NumberUser.ToString());
+                jsonContent.Add("clientOrderId", order.NumberUser.ToString(CultureInfo.InvariantCulture));
                 jsonContent.Add("positionSide", posSide);
                 jsonContent.Add("price", order.Price.ToString(CultureInfo.InvariantCulture));
                 jsonContent.Add("quantity", order.Volume.ToString(CultureInfo.InvariantCulture));
@@ -2429,7 +2431,7 @@ namespace OsEngine.Market.Servers.Woo
 
                 Dictionary<string, string> jsonContent = new Dictionary<string, string>();
                 jsonContent.Add("orderId", order.NumberMarket);
-                jsonContent.Add("clientOrderId", order.NumberUser.ToString());
+                jsonContent.Add("clientOrderId", order.NumberUser.ToString(CultureInfo.InvariantCulture));
                 jsonContent.Add("price", newPrice.ToString(CultureInfo.InvariantCulture));
 
                 string requestBody = JsonConvert.SerializeObject(jsonContent);
@@ -2482,7 +2484,7 @@ namespace OsEngine.Market.Servers.Woo
                 string requestPath = "/v3/trade/order";
                 requestPath += $"?orderId={order.NumberMarket}&";
                 requestPath += $"symbol={order.SecurityNameCode}&";
-                requestPath += $"clientOrderId={order.NumberUser.ToString()}";
+                requestPath += $"clientOrderId={order.NumberUser.ToString(CultureInfo.InvariantCulture)}";
 
                 IRestResponse responseMessage = CreatePrivateQuery(requestPath, Method.DELETE);
 
@@ -2630,7 +2632,7 @@ namespace OsEngine.Market.Servers.Woo
 
         public OrderStateType GetOrderStatus(Order order)
         {
-            Order myOrder = GetOrderFromExchange(order.SecurityNameCode, order.NumberUser.ToString(), order.NumberMarket);
+            Order myOrder = GetOrderFromExchange(order.SecurityNameCode, order.NumberUser.ToString(CultureInfo.InvariantCulture), order.NumberMarket);
 
             if (myOrder == null)
             {
@@ -2832,7 +2834,7 @@ namespace OsEngine.Market.Servers.Woo
 
                 request.AddHeader("x-api-key", _apiKey);
                 request.AddHeader("x-api-signature", signature);
-                request.AddHeader("x-api-timestamp", timestamp.ToString());
+                request.AddHeader("x-api-timestamp", timestamp.ToString(CultureInfo.InvariantCulture));
                 request.AddParameter("application/json", requestBody, ParameterType.RequestBody);
 
                 IRestResponse responseMessage = client.Execute(request);
@@ -2892,7 +2894,11 @@ namespace OsEngine.Market.Servers.Woo
 
         private string GenerateSignature(long timestamp, string method, string requestPath, string requestBody = null)
         {
-            string signString = $"{timestamp}{method}{requestPath}{requestBody}";
+            string signString = string.Concat(
+                timestamp.ToString(CultureInfo.InvariantCulture),
+                method,
+                requestPath,
+                requestBody);
 
             try
             {

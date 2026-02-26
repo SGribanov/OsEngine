@@ -1264,7 +1264,7 @@ namespace OsEngine.Market.Servers.Binance.Futures
 
                     long from = TimeManager.GetTimeStampMilliSecondsToDateTime(startTime);
 
-                    string timeStamp = TimeManager.GetUnixTimeStampMilliseconds().ToString();
+                    string timeStamp = TimeManager.GetUnixTimeStampMilliseconds().ToString(CultureInfo.InvariantCulture);
                     Dictionary<string, string> param = new Dictionary<string, string>();
 
                     param.Add("symbol=" + security, "&limit=1000" + "&startTime=" + from);
@@ -1698,7 +1698,7 @@ namespace OsEngine.Market.Servers.Binance.Futures
                         data.SecurityNameCode = response[i].symbol;
                         data.MinFundingRate = response[i].adjustedFundingRateFloor.ToDecimal();
                         data.MaxFundingRate = response[i].adjustedFundingRateCap.ToDecimal();
-                        int.TryParse(response[i].fundingIntervalHours, out data.FundingIntervalHours);
+                        int.TryParse(response[i].fundingIntervalHours, NumberStyles.Integer, CultureInfo.InvariantCulture, out data.FundingIntervalHours);
 
                         FundingUpdateEvent?.Invoke(data);
 
@@ -2562,7 +2562,7 @@ namespace OsEngine.Market.Servers.Binance.Futures
                 }
                 param.Add("&type=", order.TypeOrder == OrderPriceType.Limit ? "LIMIT" : "MARKET");
                 //param.Add("&timeInForce=", "GTC");
-                param.Add("&newClientOrderId=", "x-gnrPHWyE" + order.NumberUser.ToString());
+                param.Add("&newClientOrderId=", "x-gnrPHWyE" + order.NumberUser.ToString(CultureInfo.InvariantCulture));
                 param.Add("&quantity=",
                     order.Volume.ToString(CultureInfo.InvariantCulture)
                         .Replace(CultureInfo.InvariantCulture.NumberFormat.NumberDecimalSeparator, "."));
@@ -2698,11 +2698,11 @@ namespace OsEngine.Market.Servers.Binance.Futures
 
              var param = new Dictionary<string, string>();
              param.Add("orderId=", order.NumberMarket);
-             param.Add("origClientOrderId=", order.NumberUser.ToString());
+             param.Add("origClientOrderId=", order.NumberUser.ToString(CultureInfo.InvariantCulture));
              param.Add("symbol=", order.SecurityNameCode.ToUpper());
              param.Add("side=", order.Side.ToString().ToUpper());
-             param.Add("quantity=", order.Volume.ToString());
-             param.Add("price=", newPrice.ToString());
+             param.Add("quantity=", order.Volume.ToString(CultureInfo.InvariantCulture));
+             param.Add("price=", newPrice.ToString(CultureInfo.InvariantCulture));
 
              var res = CreateQuery(
                         Method.PUT,
@@ -3013,7 +3013,7 @@ namespace OsEngine.Market.Servers.Binance.Futures
                     {
                         try
                         {
-                            if (allOrders[i].clientOrderId.Replace("x-gnrPHWyE", "") == oldOrder.NumberUser.ToString())
+                            if (allOrders[i].clientOrderId.Replace("x-gnrPHWyE", "") == oldOrder.NumberUser.ToString(CultureInfo.InvariantCulture))
                             {
                                 orderOnBoard = allOrders[i];
                                 break;
@@ -3232,7 +3232,7 @@ namespace OsEngine.Market.Servers.Binance.Futures
             if (!string.IsNullOrEmpty(resTime))
             {
                 var result = JsonConvert.DeserializeAnonymousType(resTime, new BinanceTime());
-                return (result.serverTime + 500).ToString();
+                return (result.serverTime + 500).ToString(CultureInfo.InvariantCulture);
             }
             else
             {

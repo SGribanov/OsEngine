@@ -529,7 +529,7 @@ namespace OsEngine.OsOptimizer.OptEntity
             {
                 List<string> lines = new List<string>
                 {
-                    _threadsCount.ToString(),
+                    _threadsCount.ToString(CultureInfo.InvariantCulture),
                     _strategyName,
                     _startDeposit.ToString(CultureInfo.InvariantCulture),
 
@@ -546,28 +546,28 @@ namespace OsEngine.OsOptimizer.OptEntity
                     _timeEnd.ToString("O", CultureInfo.InvariantCulture),
                     _percentOnFiltration.ToString(CultureInfo.InvariantCulture),
 
-                    _filterDealsCountValue.ToString(),
+                    _filterDealsCountValue.ToString(CultureInfo.InvariantCulture),
                     _filterDealsCountIsOn.ToString(),
                     _isScript.ToString(),
-                    _iterationCount.ToString(),
+                    _iterationCount.ToString(CultureInfo.InvariantCulture),
                     _commissionType.ToString(),
                     _commissionValue.ToString(CultureInfo.InvariantCulture),
                     _lastInSample.ToString(),
                     _orderExecutionType.ToString(),
-                    _slippageToSimpleOrder.ToString(),
-                    _slippageToStopOrder.ToString(),
+                    _slippageToSimpleOrder.ToString(CultureInfo.InvariantCulture),
+                    _slippageToStopOrder.ToString(CultureInfo.InvariantCulture),
 
                     // V2 fields
                     _optimizationMethod.ToString(),
                     _objectiveMetric.ToString(),
-                    _bayesianInitialSamples.ToString(),
-                    _bayesianMaxIterations.ToString(),
-                    _bayesianBatchSize.ToString(),
+                    _bayesianInitialSamples.ToString(CultureInfo.InvariantCulture),
+                    _bayesianMaxIterations.ToString(CultureInfo.InvariantCulture),
+                    _bayesianBatchSize.ToString(CultureInfo.InvariantCulture),
                     _objectiveDirection.ToString(),
                     _bayesianAcquisitionMode.ToString(),
                     _bayesianAcquisitionKappa.ToString(CultureInfo.InvariantCulture),
                     _bayesianUseTailPass.ToString(),
-                    _bayesianTailSharePercent.ToString(),
+                    _bayesianTailSharePercent.ToString(CultureInfo.InvariantCulture),
 
                     // V3 fields
                     _useIndicatorCache.ToString()
@@ -752,7 +752,7 @@ namespace OsEngine.OsOptimizer.OptEntity
 
         private static bool TryParseInt(string? value, out int result)
         {
-            return int.TryParse(value, out result);
+            return int.TryParse(value, NumberStyles.Integer, CultureInfo.InvariantCulture, out result);
         }
 
         private static bool TryParseBool(string? value, out bool result)

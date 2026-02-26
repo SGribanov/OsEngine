@@ -7,6 +7,7 @@
 */
 
 using System;
+using System.Globalization;
 using System.Windows;
 using System.Windows.Forms;
 using OsEngine.Entity;
@@ -69,7 +70,7 @@ namespace OsEngine.Charts.CandleChart.Indicators
         {
             try
             {
-                if (Convert.ToInt32(TextBoxLength.Text) <= 0)
+                if (Convert.ToInt32(TextBoxLength.Text, CultureInfo.InvariantCulture) <= 0)
                 {
                     throw new Exception("error");
                 }
@@ -82,7 +83,7 @@ namespace OsEngine.Charts.CandleChart.Indicators
             }
 
             _mA.ColorBase = HostColor.Child.BackColor;
-            _mA.Length = Convert.ToInt32(TextBoxLength.Text);
+            _mA.Length = Convert.ToInt32(TextBoxLength.Text, CultureInfo.InvariantCulture);
             _mA.PaintOn = CheckBoxPaintOnOff.IsChecked.Value;
             //Enum.TryParse(ComboBoxPriceField.SelectedItem.ToString(), true, out _mA.TypePointsToSearch);
 
@@ -106,4 +107,5 @@ namespace OsEngine.Charts.CandleChart.Indicators
 
     }
 }
+
 

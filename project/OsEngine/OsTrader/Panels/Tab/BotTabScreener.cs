@@ -7,6 +7,7 @@
 */
 
 using System;
+using System.Globalization;
 using System.Collections.Generic;
 using System.IO;
 using System.Windows.Forms.Integration;
@@ -2239,7 +2240,7 @@ namespace OsEngine.OsTrader.Panels.Tab
                                     {
                                         if (newIndicator.Parameters[i2].Type == IndicatorParameterType.Int)
                                         {
-                                            ((IndicatorParameterInt)newIndicator.Parameters[i2]).ValueInt = Convert.ToInt32(ind.Parameters[i2]);
+                                            ((IndicatorParameterInt)newIndicator.Parameters[i2]).ValueInt = Convert.ToInt32(ind.Parameters[i2], CultureInfo.InvariantCulture);
                                         }
                                         if (newIndicator.Parameters[i2].Type == IndicatorParameterType.Decimal)
                                         {
@@ -2277,9 +2278,9 @@ namespace OsEngine.OsTrader.Panels.Tab
                                     for (int i2 = 0; i2 < ind.Parameters.Count; i2++)
                                     {
                                         if (newIndicator.Parameters[i2].Type == IndicatorParameterType.Int
-                                            && ((IndicatorParameterInt)newIndicator.Parameters[i2]).ValueInt != Convert.ToInt32(ind.Parameters[i2]))
+                                            && ((IndicatorParameterInt)newIndicator.Parameters[i2]).ValueInt != Convert.ToInt32(ind.Parameters[i2], CultureInfo.InvariantCulture))
                                         {
-                                            ((IndicatorParameterInt)newIndicator.Parameters[i2]).ValueInt = Convert.ToInt32(ind.Parameters[i2]);
+                                            ((IndicatorParameterInt)newIndicator.Parameters[i2]).ValueInt = Convert.ToInt32(ind.Parameters[i2], CultureInfo.InvariantCulture);
                                             parametersChanged = true;
                                         }
                                         if (newIndicator.Parameters[i2].Type == IndicatorParameterType.Decimal
@@ -2346,7 +2347,7 @@ namespace OsEngine.OsTrader.Panels.Tab
                             {
                                 if (newIndicator.Parameters[i2].Type == IndicatorParameterType.Int)
                                 {
-                                    ((IndicatorParameterInt)newIndicator.Parameters[i2]).ValueInt = Convert.ToInt32(ind.Parameters[i2]);
+                                    ((IndicatorParameterInt)newIndicator.Parameters[i2]).ValueInt = Convert.ToInt32(ind.Parameters[i2], CultureInfo.InvariantCulture);
                                 }
                                 if (newIndicator.Parameters[i2].Type == IndicatorParameterType.Decimal)
                                 {
@@ -3202,7 +3203,7 @@ namespace OsEngine.OsTrader.Panels.Tab
 
             Type = str[0];
             NameArea = str[1];
-            Num = Convert.ToInt32(str[2]);
+            Num = Convert.ToInt32(str[2], CultureInfo.InvariantCulture);
 
             int startInd = 3;
 

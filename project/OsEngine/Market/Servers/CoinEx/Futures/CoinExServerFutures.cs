@@ -677,7 +677,7 @@ namespace OsEngine.Market.Servers.CoinEx.Futures
             if (tsStartTime > tsEndTime || tsStartTime < 0 || tsEndTime < 0) { return null; }
 
             //https://www.coinex.com/res/contract/market/kline?market=TONUSDT&start_time=1741330800&end_time=1741374900&interval=900
-            string url = string.Format("https://www.coinex.com/res/contract/market/kline?market={0}&start_time={1}&end_time={2}&interval={3}",
+            string url = string.Format(CultureInfo.InvariantCulture, "https://www.coinex.com/res/contract/market/kline?market={0}&start_time={1}&end_time={2}&interval={3}",
                 security.Name,
                 tsStartTime,
                 tsEndTime,

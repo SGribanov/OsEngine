@@ -11,6 +11,7 @@ using OsEngine.Logging;
 using OsEngine.Market;
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 
 namespace OsEngine.OsTrader.Grids
 {
@@ -37,13 +38,13 @@ namespace OsEngine.OsTrader.Grids
 
             result += ProfitRegime + "@";
             result += ProfitValueType + "@";
-            result += ProfitValue + "@";
+            result += ProfitValue.ToString(CultureInfo.InvariantCulture) + "@";
             result += StopRegime + "@";
             result += StopValueType + "@";
-            result += StopValue + "@";
+            result += StopValue.ToString(CultureInfo.InvariantCulture) + "@";
             result += TrailStopRegime + "@";
             result += TrailStopValueType + "@";
-            result += TrailStopValue + "@";
+            result += TrailStopValue.ToString(CultureInfo.InvariantCulture) + "@";
             result += StopTradingAfterProfit + "@";
             result += "@";
             result += "@";

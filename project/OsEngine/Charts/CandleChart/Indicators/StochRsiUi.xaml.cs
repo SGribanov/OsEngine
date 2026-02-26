@@ -7,6 +7,7 @@
 */
 
 using System;
+using System.Globalization;
 using System.Windows;
 using System.Windows.Forms;
 using OsEngine.Entity;
@@ -70,10 +71,10 @@ namespace OsEngine.Charts.CandleChart.Indicators
         {
             try
             {
-                if (Convert.ToInt32(TextBoxLength.Text) <= 0 ||
-                    Convert.ToInt32(TextBoxStochasticLength.Text) <= 0 ||
-                    Convert.ToInt32(TextBoxK.Text) <= 0 ||
-                    Convert.ToInt32(TextBoxD.Text) <= 0)
+                if (Convert.ToInt32(TextBoxLength.Text, CultureInfo.InvariantCulture) <= 0 ||
+                    Convert.ToInt32(TextBoxStochasticLength.Text, CultureInfo.InvariantCulture) <= 0 ||
+                    Convert.ToInt32(TextBoxK.Text, CultureInfo.InvariantCulture) <= 0 ||
+                    Convert.ToInt32(TextBoxD.Text, CultureInfo.InvariantCulture) <= 0)
                 {
                     throw new Exception("error");
                 }
@@ -86,10 +87,10 @@ namespace OsEngine.Charts.CandleChart.Indicators
 
             _rsi.ColorK = HostColor.Child.BackColor;
             _rsi.ColorD = HostColorD.Child.BackColor;
-            _rsi.RsiLength = Convert.ToInt32(TextBoxLength.Text);
-            _rsi.StochasticLength = Convert.ToInt32(TextBoxStochasticLength.Text);
-            _rsi.K = Convert.ToInt32(TextBoxK.Text);
-            _rsi.D = Convert.ToInt32(TextBoxD.Text);
+            _rsi.RsiLength = Convert.ToInt32(TextBoxLength.Text, CultureInfo.InvariantCulture);
+            _rsi.StochasticLength = Convert.ToInt32(TextBoxStochasticLength.Text, CultureInfo.InvariantCulture);
+            _rsi.K = Convert.ToInt32(TextBoxK.Text, CultureInfo.InvariantCulture);
+            _rsi.D = Convert.ToInt32(TextBoxD.Text, CultureInfo.InvariantCulture);
 
             _rsi.Save();
             IsChange = true;

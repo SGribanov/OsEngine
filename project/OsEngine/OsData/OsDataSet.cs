@@ -2340,7 +2340,7 @@ namespace OsEngine.OsData
         {
             if (_isDeleted) { return; }
 
-            string curSaveStrCandleCount = candles.Count.ToString();
+            string curSaveStrCandleCount = candles.Count.ToString(CultureInfo.InvariantCulture);
 
             if (curSaveStrCandleCount == _saveStrCandleCount)
             {
@@ -2600,7 +2600,7 @@ namespace OsEngine.OsData
 
                                 if (_lastFrameDateTime.Date != marketDepth.Time.Date)
                                 {
-                                    _filePath = _pathSecurityFolder + "\\" + SecName.RemoveExcessFromSecurityName() + "." + DateTime.UtcNow.ToString("yyyy-MM-dd") + ".Quotes" + ".qsh";
+                                    _filePath = _pathSecurityFolder + "\\" + SecName.RemoveExcessFromSecurityName() + "." + DateTime.UtcNow.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture) + ".Quotes" + ".qsh";
 
                                     bool fileExist = File.Exists(_filePath);
 
@@ -3551,7 +3551,7 @@ namespace OsEngine.OsData
                     return _tempFileName;
                 }
 
-                _tempFileName = Start.ToString("yyyyMMdd") + "_" + End.ToString("yyyyMMdd") + ".txt";
+                _tempFileName = Start.ToString("yyyyMMdd", CultureInfo.InvariantCulture) + "_" + End.ToString("yyyyMMdd", CultureInfo.InvariantCulture) + ".txt";
 
                 return _tempFileName;
             }
@@ -3587,7 +3587,7 @@ namespace OsEngine.OsData
 
             try
             {
-                SafeFileWriter.WriteAllLines(pathToTempFile, new[] { CountTriesToLoadSet.ToString() });
+                SafeFileWriter.WriteAllLines(pathToTempFile, new[] { CountTriesToLoadSet.ToString(CultureInfo.InvariantCulture) });
             }
             catch
             {
@@ -3908,10 +3908,10 @@ namespace OsEngine.OsData
 
             try
             {
-                string start = realStart.ToString("yyyy-MM-dd");
-                string end = realEnd.ToString("yyyy-MM-dd");
+                string start = realStart.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture);
+                string end = realEnd.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture);
 
-                string pieInfo = string.Join('#', [start, end, qshFilesCount]);
+                string pieInfo = string.Join('#', [start, end, qshFilesCount.ToString(CultureInfo.InvariantCulture)]);
 
                 SafeFileWriter.WriteAllText(pathToTempFile, pieInfo);
             }

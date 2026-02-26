@@ -14,6 +14,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Collections.Concurrent;
+using System.Globalization;
 using System.Threading;
 using Google.Protobuf.Collections;
 using Google.Protobuf.WellKnownTypes;
@@ -2452,7 +2453,7 @@ namespace OsEngine.Market.Servers.TInvest
                     newTrade.Price = GetValue(trade.Price);
                     newTrade.Volume = trade.Quantity;
                     newTrade.Time = TimeZoneInfo.ConvertTimeFromUtc(trade.Time.ToDateTime(), _mskTimeZone);
-                    newTrade.Id = newTrade.Time.Ticks.ToString();
+                    newTrade.Id = newTrade.Time.Ticks.ToString(CultureInfo.InvariantCulture);
                     newTrade.Side = trade.Direction == TradeDirection.Buy ? Side.Buy : Side.Sell;
 
                     if (_openInterestData.TryGetValue(security.Name, out var oi))
@@ -2712,7 +2713,7 @@ namespace OsEngine.Market.Servers.TInvest
             newTrade.Price = GetValue(price.Price);
             newTrade.Side = Side.Buy;
             newTrade.Volume = 1;
-            newTrade.Id = newTrade.Time.Ticks.ToString();
+            newTrade.Id = newTrade.Time.Ticks.ToString(CultureInfo.InvariantCulture);
 
             if (_openInterestData.ContainsKey(mySec.Name))
             {

@@ -1021,8 +1021,8 @@ namespace OsEngine.Market.Servers.HTX.Swap
             {
                 string queryParam = $"contract_code={security}&";
                 queryParam += $"period={interval}&";
-                queryParam += $"from={fromTimeStamp}&";
-                queryParam += $"to={toTimeStamp}";
+                queryParam += "from=" + fromTimeStamp.ToString(CultureInfo.InvariantCulture) + "&";
+                queryParam += "to=" + toTimeStamp.ToString(CultureInfo.InvariantCulture);
 
                 string url = $"https://{_baseUrl}{_pathCandles}/market/history/kline?{queryParam}";
                 RestClient client = new RestClient(url);
@@ -1503,7 +1503,7 @@ namespace OsEngine.Market.Servers.HTX.Swap
                         _webSocketPrivate.ReadyState == WebSocketState.Connecting)
                     {
                         // Supports one-way heartbeat.
-                        string timestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds().ToString();
+                        string timestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds().ToString(CultureInfo.InvariantCulture);
                         //_webSocketPrivate.Send($"{{\"op\": \"ping\",\"ts\": \"{timestamp}\"}}");
                     }
                     else
@@ -1519,7 +1519,7 @@ namespace OsEngine.Market.Servers.HTX.Swap
                             && webSocketPublic?.ReadyState == WebSocketState.Open)
                         {
                             // Supports two-way heartbeat
-                            string timestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds().ToString();
+                            string timestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds().ToString(CultureInfo.InvariantCulture);
                             webSocketPublic.SendAsync($"{{\"ping\": \"{timestamp}\"}}");
                         }
                         else
@@ -2769,7 +2769,7 @@ namespace OsEngine.Market.Servers.HTX.Swap
                 Dictionary<string, string> jsonContent = new Dictionary<string, string>();
 
                 jsonContent.Add("contract_code", order.SecurityNameCode);
-                jsonContent.Add("client_order_id", order.NumberUser.ToString());
+                jsonContent.Add("client_order_id", order.NumberUser.ToString(CultureInfo.InvariantCulture));
                 jsonContent.Add("direction", order.Side == Side.Buy ? "buy" : "sell");
 
                 decimal volume = order.Volume / GetVolume(order.SecurityNameCode);
@@ -3046,7 +3046,7 @@ namespace OsEngine.Market.Servers.HTX.Swap
             try
             {
                 Dictionary<string, string> jsonContent = new Dictionary<string, string>();
-                jsonContent.Add("page_index", pageIndex.ToString());
+                jsonContent.Add("page_index", pageIndex.ToString(CultureInfo.InvariantCulture));
                 jsonContent.Add("page_size", "20");
 
                 string jsonRequest = JsonConvert.SerializeObject(jsonContent);
@@ -3177,7 +3177,7 @@ namespace OsEngine.Market.Servers.HTX.Swap
 
         public OrderStateType GetOrderStatus(Order order)
         {
-            Order orderFromExchange = GetOrderFromExchange(order.SecurityNameCode, order.NumberMarket, order.NumberUser.ToString());
+            Order orderFromExchange = GetOrderFromExchange(order.SecurityNameCode, order.NumberMarket, order.NumberUser.ToString(CultureInfo.InvariantCulture));
 
             if (orderFromExchange == null)
             {
@@ -3470,7 +3470,7 @@ namespace OsEngine.Market.Servers.HTX.Swap
 
         private IRestResponse CreatePrivateQuery(string path, Method method, string body = null)
         {
-            string strDateTime = DateTime.UtcNow.ToString("s");
+            string strDateTime = DateTime.UtcNow.ToString("s", CultureInfo.InvariantCulture);
 
             Dictionary<string, string> parameters = new Dictionary<string, string>
             {
@@ -3513,7 +3513,7 @@ namespace OsEngine.Market.Servers.HTX.Swap
 
         public string BuildSign()
         {
-            string strDateTime = DateTime.UtcNow.ToString("s");
+            string strDateTime = DateTime.UtcNow.ToString("s", CultureInfo.InvariantCulture);
 
             Dictionary<string, string> parameters = new Dictionary<string, string>
             {

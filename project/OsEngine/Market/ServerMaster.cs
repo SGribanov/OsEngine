@@ -13,6 +13,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
@@ -254,7 +255,7 @@ namespace OsEngine.Market
                 {
                     while (reader.EndOfStream == false)
                     {
-                        int currentNumber = Convert.ToInt32(reader.ReadLine());
+                        int currentNumber = Convert.ToInt32(reader.ReadLine(), CultureInfo.InvariantCulture);
                         CreateServer(serverType, false, currentNumber);
                     }
 
@@ -1157,7 +1158,7 @@ namespace OsEngine.Market
                 entries.Add(new ServerPopularityEntry
                 {
                     ServerType = serverType,
-                    CountOfCreation = Convert.ToInt32(saveInStr[1])
+                    CountOfCreation = Convert.ToInt32(saveInStr[1], CultureInfo.InvariantCulture)
                 });
             }
 

@@ -7,6 +7,7 @@
 */
 
 using System;
+using System.Globalization;
 using System.Windows;
 using System.Windows.Forms;
 using OsEngine.Entity;
@@ -111,9 +112,9 @@ namespace OsEngine.Charts.CandleChart.Indicators
         {
             try
             {
-                if (Convert.ToInt32(TextBoxLength.Text) <= 0 ||
-                    Convert.ToInt32(TextBoxKaufmanSlow.Text) <= 0 ||
-                    Convert.ToInt32(TextBoxKaufmanFast.Text) <= 0)
+                if (Convert.ToInt32(TextBoxLength.Text, CultureInfo.InvariantCulture) <= 0 ||
+                    Convert.ToInt32(TextBoxKaufmanSlow.Text, CultureInfo.InvariantCulture) <= 0 ||
+                    Convert.ToInt32(TextBoxKaufmanFast.Text, CultureInfo.InvariantCulture) <= 0)
                 {
                     throw new Exception("error");
                 }
@@ -126,10 +127,10 @@ namespace OsEngine.Charts.CandleChart.Indicators
             }
 
             _mA.ColorBase = HostColor.Child.BackColor;
-            _mA.Length = Convert.ToInt32(TextBoxLength.Text);
+            _mA.Length = Convert.ToInt32(TextBoxLength.Text, CultureInfo.InvariantCulture);
             _mA.PaintOn = CheckBoxPaintOnOff.IsChecked.Value;
-            _mA.KaufmanFastEma = Convert.ToInt32(TextBoxKaufmanFast.Text);
-            _mA.KaufmanSlowEma = Convert.ToInt32(TextBoxKaufmanSlow.Text);
+            _mA.KaufmanFastEma = Convert.ToInt32(TextBoxKaufmanFast.Text, CultureInfo.InvariantCulture);
+            _mA.KaufmanSlowEma = Convert.ToInt32(TextBoxKaufmanSlow.Text, CultureInfo.InvariantCulture);
 
 
             ComboBoxMovingType.Items.Add(MovingAverageTypeCalculation.Exponential);

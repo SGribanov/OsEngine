@@ -11,6 +11,7 @@ using OsEngine.Logging;
 using OsEngine.Market;
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 
 namespace OsEngine.OsTrader.Grids
 {
@@ -51,12 +52,12 @@ namespace OsEngine.OsTrader.Grids
             string result = "";
 
             result += TrailingUpIsOn + "@";
-            result += TrailingUpStep + "@";
-            result += TrailingUpLimit + "@";
+            result += TrailingUpStep.ToString(CultureInfo.InvariantCulture) + "@";
+            result += TrailingUpLimit.ToString(CultureInfo.InvariantCulture) + "@";
 
             result += TrailingDownIsOn + "@";
-            result += TrailingDownStep + "@";
-            result += TrailingDownLimit + "@";
+            result += TrailingDownStep.ToString(CultureInfo.InvariantCulture) + "@";
+            result += TrailingDownLimit.ToString(CultureInfo.InvariantCulture) + "@";
             result += TrailingUpCanMoveExitOrder + "@";
             result += TrailingDownCanMoveExitOrder + "@";
             result += "@";

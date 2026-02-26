@@ -1527,7 +1527,7 @@ namespace OsEngine.OsOptimizer
 
             result += _timeEnd.ToString("O", CultureInfo.InvariantCulture) + "%";
 
-            result += Days.ToString() + "%";
+            result += Days.ToString(CultureInfo.InvariantCulture) + "%";
 
             return result;
         }
@@ -1590,7 +1590,7 @@ namespace OsEngine.OsOptimizer
         public string GetSaveString()
         {
             string result = "";
-            result += NumberOfTab + "%";
+            result += NumberOfTab.ToString(CultureInfo.InvariantCulture) + "%";
             result += NameSecurity + "%";
             result += TimeFrame;
 
@@ -1620,7 +1620,7 @@ namespace OsEngine.OsOptimizer
         public string GetSaveString()
         {
             string result = "";
-            result += NumberOfTab + "%";
+            result += NumberOfTab.ToString(CultureInfo.InvariantCulture) + "%";
             result += TimeFrame + "%";
             result += Formula + "%";
 

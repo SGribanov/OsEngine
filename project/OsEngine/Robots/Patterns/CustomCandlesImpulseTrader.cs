@@ -145,7 +145,7 @@ namespace OsEngine.Robots.Patterns
                 if (isLongSignal)
                 {
                     string signal =
-                    candles[candles.Count - 1].TimeStart.ToString("MMddyyyy HHmmss");
+                    candles[candles.Count - 1].TimeStart.ToString("MMddyyyy HHmmss", CultureInfo.InvariantCulture);
 
                     decimal lastPrice = candles[candles.Count - 1].Close;
                     _tab.BuyAtLimit(GetVolume(_tab), lastPrice + lastPrice * (_slippage.ValueDecimal / 100),
@@ -179,7 +179,7 @@ namespace OsEngine.Robots.Patterns
                 if (isShortSignal)
                 {
                     string signal = 
-                        candles[candles.Count - 1].TimeStart.ToString("MMddyyyy HHmmss");
+                        candles[candles.Count - 1].TimeStart.ToString("MMddyyyy HHmmss", CultureInfo.InvariantCulture);
 
                     decimal lastPrice = candles[candles.Count - 1].Close;
                     _tab.SellAtLimit(GetVolume(_tab), lastPrice - lastPrice * (_slippage.ValueDecimal / 100), 

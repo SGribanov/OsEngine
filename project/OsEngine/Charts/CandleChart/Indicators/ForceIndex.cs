@@ -7,6 +7,7 @@
 */
 
 using System;
+using System.Globalization;
 using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
@@ -264,10 +265,10 @@ namespace OsEngine.Charts.CandleChart.Indicators
 
             return new ForceIndexSettingsDto
             {
-                Period = Convert.ToInt32(lines[0]),
+                Period = Convert.ToInt32(lines[0], CultureInfo.InvariantCulture),
                 TypePoint = typePoint,
                 TypeCalculationAverage = typeCalculationAverage,
-                ColorArgb = Convert.ToInt32(lines[3]),
+                ColorArgb = Convert.ToInt32(lines[3], CultureInfo.InvariantCulture),
                 PaintOn = Convert.ToBoolean(lines[4])
             };
         }
@@ -511,4 +512,5 @@ namespace OsEngine.Charts.CandleChart.Indicators
 
     }
 }
+
 

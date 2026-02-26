@@ -4,6 +4,7 @@
 using OsEngine.Entity;
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 
 namespace OsEngine.Market.Servers.OKXData.Entity
 {
@@ -15,7 +16,8 @@ namespace OsEngine.Market.Servers.OKXData.Entity
             if (timeComparison != 0)
                 return timeComparison;
 
-            if (long.TryParse(x.Id, out long xId) && long.TryParse(y.Id, out long yId))
+            if (long.TryParse(x.Id, NumberStyles.Integer, CultureInfo.InvariantCulture, out long xId)
+                && long.TryParse(y.Id, NumberStyles.Integer, CultureInfo.InvariantCulture, out long yId))
             {
                 return xId.CompareTo(yId);
             }

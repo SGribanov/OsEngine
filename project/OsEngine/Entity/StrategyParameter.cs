@@ -1022,10 +1022,10 @@ namespace OsEngine.Entity
 
         public override string ToString()
         {
-            string result = Hour + ":";
-            result += Minute + ":";
-            result += Second + ":";
-            result += Millisecond;
+            string result = Hour.ToString(CultureInfo.InvariantCulture) + ":";
+            result += Minute.ToString(CultureInfo.InvariantCulture) + ":";
+            result += Second.ToString(CultureInfo.InvariantCulture) + ":";
+            result += Millisecond.ToString(CultureInfo.InvariantCulture);
 
             return result;
         }

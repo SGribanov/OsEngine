@@ -588,7 +588,7 @@ namespace OsEngine.Market.Servers.CoinEx.Spot
             }
 
             // https://www.coinex.com/res/market/kline?market=XRPUSDT&start_time=1719781200&end_time=1725138000&interval=300
-            string url = string.Format("https://www.coinex.com/res/market/kline?market={0}&start_time={1}&end_time={2}&interval={3}",
+            string url = string.Format(CultureInfo.InvariantCulture, "https://www.coinex.com/res/market/kline?market={0}&start_time={1}&end_time={2}&interval={3}",
                 security.Name,
                 tsStartTime,
                 tsEndTime,

@@ -241,7 +241,7 @@ namespace OsEngine.Market.Servers.AstsBridge
                     ServerName = reader.ReadLine();
                     ServiseName = reader.ReadLine();
                     Enum.TryParse(reader.ReadLine(), out Dislocation);
-                    _countDaysTickNeedToSave = Convert.ToInt32(reader.ReadLine());
+                    _countDaysTickNeedToSave = Convert.ToInt32(reader.ReadLine(), CultureInfo.InvariantCulture);
                     _needToSaveTicks = Convert.ToBoolean(reader.ReadLine());
                     _clientCode = reader.ReadLine();
                     reader.Close();

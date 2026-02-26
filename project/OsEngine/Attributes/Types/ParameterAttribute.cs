@@ -6,6 +6,7 @@ using OsEngine.Indicators;
 using OsEngine.OsTrader.Panels;
 using System;
 using System.Drawing;
+using System.Globalization;
 using System.Linq;
 using System.Runtime.CompilerServices;
 
@@ -113,7 +114,7 @@ namespace OsEngine.Attributes
 
             if (type == typeof(IndicatorParameterInt))
             {
-                int value = int.Parse(arguments[0]);
+                int value = int.Parse(arguments[0], NumberStyles.Integer, CultureInfo.InvariantCulture);
                 parameter = indicator.CreateParameterInt(Name, value);
             }
             else if (type == typeof(IndicatorParameterDecimal))
@@ -163,15 +164,15 @@ namespace OsEngine.Attributes
             {
                 if (arguments.Length == 1)
                 {
-                    int value = int.Parse(arguments[0]);
+                    int value = int.Parse(arguments[0], NumberStyles.Integer, CultureInfo.InvariantCulture);
                     parameter = bot.CreateParameter(Name, value, value, value, value, TabControlName);
                 }
                 else
                 {
-                    int value = int.Parse(arguments[0]);
-                    int start = int.Parse(arguments[1]);
-                    int stop = int.Parse(arguments[2]);
-                    int step = int.Parse(arguments[3]);
+                    int value = int.Parse(arguments[0], NumberStyles.Integer, CultureInfo.InvariantCulture);
+                    int start = int.Parse(arguments[1], NumberStyles.Integer, CultureInfo.InvariantCulture);
+                    int stop = int.Parse(arguments[2], NumberStyles.Integer, CultureInfo.InvariantCulture);
+                    int step = int.Parse(arguments[3], NumberStyles.Integer, CultureInfo.InvariantCulture);
                     parameter = bot.CreateParameter(Name, value, start, stop, step, TabControlName);
                 }
             }
@@ -221,8 +222,8 @@ namespace OsEngine.Attributes
             }
             else if (type == typeof(StrategyParameterLabel))
             {
-                int rowHeight = int.Parse(arguments[2]);
-                int textHeight = int.Parse(arguments[3]);
+                int rowHeight = int.Parse(arguments[2], NumberStyles.Integer, CultureInfo.InvariantCulture);
+                int textHeight = int.Parse(arguments[3], NumberStyles.Integer, CultureInfo.InvariantCulture);
                 Color color = Color.FromName(arguments[4]);
                 parameter = bot.CreateParameterLabel(Name, arguments[0], arguments[1], rowHeight, textHeight, color, TabControlName);
             }

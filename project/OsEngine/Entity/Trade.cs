@@ -109,11 +109,11 @@ namespace OsEngine.Entity
             //20150401,100000,86160.000000000,2
             // либо 20150401,100000,86160.000000000,2, Buy/Sell
             string result = "";
-            result += Time.ToString("yyyyMMdd,HHmmss") + ",";
+            result += Time.ToString("yyyyMMdd,HHmmss", CultureInfo.InvariantCulture) + ",";
             result += Price.ToString(CultureInfo.InvariantCulture) + ",";
             result += Volume.ToString(CultureInfo.InvariantCulture) + ",";
             result += Side + ",";
-            result += MicroSeconds;
+            result += MicroSeconds.ToString(CultureInfo.InvariantCulture);
 
             if (Id != null)
             {

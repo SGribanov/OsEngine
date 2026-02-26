@@ -1238,7 +1238,7 @@ namespace OsEngine.Market.Servers.HTX.Spot
                         _webSocketPrivate.ReadyState == WebSocketState.Connecting)
                     {
                         // Supports one-way heartbeat.
-                        string timestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds().ToString();
+                        string timestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds().ToString(CultureInfo.InvariantCulture);
                         // _webSocketPrivate.Send($"{{ \"action\": \"ping\", \"data\": {{ \"ts\": {timestamp} }} }}");
                     }
                     else
@@ -1254,7 +1254,7 @@ namespace OsEngine.Market.Servers.HTX.Spot
                             && webSocketPublic?.ReadyState == WebSocketState.Open)
                         {
                             // Supports two-way heartbeat
-                            string timestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds().ToString();
+                            string timestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds().ToString(CultureInfo.InvariantCulture);
                             webSocketPublic.SendAsync($"{{\"ping\": \"{timestamp}\"}}");
                         }
                         else
@@ -2166,7 +2166,7 @@ namespace OsEngine.Market.Servers.HTX.Spot
                 }
 
                 jsonContent.Add("source", source_portfolio);
-                jsonContent.Add("client-order-id", "AAe2ccbd47" + order.NumberUser.ToString());
+                jsonContent.Add("client-order-id", "AAe2ccbd47" + order.NumberUser.ToString(CultureInfo.InvariantCulture));
 
                 string jsonRequest = JsonConvert.SerializeObject(jsonContent);
 
@@ -2906,7 +2906,7 @@ namespace OsEngine.Market.Servers.HTX.Spot
 
         private IRestResponse CreatePrivateQuery(string path, Method method, string body = null)
         {
-            string strDateTime = DateTime.UtcNow.ToString("s");
+            string strDateTime = DateTime.UtcNow.ToString("s", CultureInfo.InvariantCulture);
 
             Dictionary<string, string> parameters = new Dictionary<string, string>
             {
@@ -2949,7 +2949,7 @@ namespace OsEngine.Market.Servers.HTX.Spot
 
         public string BuildSign()
         {
-            string strDateTime = DateTime.UtcNow.ToString("s");
+            string strDateTime = DateTime.UtcNow.ToString("s", CultureInfo.InvariantCulture);
 
             Dictionary<string, string> parameters = new Dictionary<string, string>
             {

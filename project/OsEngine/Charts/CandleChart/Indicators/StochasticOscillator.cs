@@ -7,6 +7,7 @@
 */
 
 using System;
+using System.Globalization;
 using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
@@ -282,7 +283,7 @@ namespace OsEngine.Charts.CandleChart.Indicators
                 return null;
             }
 
-            bool firstTokenIsNumeric = int.TryParse(lines[0], out _);
+            bool firstTokenIsNumeric = int.TryParse(lines[0], NumberStyles.Integer, CultureInfo.InvariantCulture, out _);
 
             if (!firstTokenIsNumeric
                 && Enum.TryParse(lines[0], true, out MovingAverageTypeCalculation typeFromFirst))
@@ -290,11 +291,11 @@ namespace OsEngine.Charts.CandleChart.Indicators
                 return new StochasticOscillatorSettingsDto
                 {
                     TypeCalculationAverage = typeFromFirst,
-                    P1 = Convert.ToInt32(lines[1]),
-                    P2 = Convert.ToInt32(lines[2]),
-                    P3 = Convert.ToInt32(lines[3]),
-                    ColorUpArgb = Convert.ToInt32(lines[4]),
-                    ColorDownArgb = Convert.ToInt32(lines[5]),
+                    P1 = Convert.ToInt32(lines[1], CultureInfo.InvariantCulture),
+                    P2 = Convert.ToInt32(lines[2], CultureInfo.InvariantCulture),
+                    P3 = Convert.ToInt32(lines[3], CultureInfo.InvariantCulture),
+                    ColorUpArgb = Convert.ToInt32(lines[4], CultureInfo.InvariantCulture),
+                    ColorDownArgb = Convert.ToInt32(lines[5], CultureInfo.InvariantCulture),
                     PaintOn = Convert.ToBoolean(lines[6])
                 };
             }
@@ -320,12 +321,12 @@ namespace OsEngine.Charts.CandleChart.Indicators
 
             return new StochasticOscillatorSettingsDto
             {
-                P1 = Convert.ToInt32(lines[0]),
-                P2 = Convert.ToInt32(lines[1]),
-                P3 = Convert.ToInt32(lines[2]),
+                P1 = Convert.ToInt32(lines[0], CultureInfo.InvariantCulture),
+                P2 = Convert.ToInt32(lines[1], CultureInfo.InvariantCulture),
+                P3 = Convert.ToInt32(lines[2], CultureInfo.InvariantCulture),
                 TypeCalculationAverage = typeFromFourth,
-                ColorUpArgb = Convert.ToInt32(lines[colorIndex]),
-                ColorDownArgb = Convert.ToInt32(lines[colorIndex + 1]),
+                ColorUpArgb = Convert.ToInt32(lines[colorIndex], CultureInfo.InvariantCulture),
+                ColorDownArgb = Convert.ToInt32(lines[colorIndex + 1], CultureInfo.InvariantCulture),
                 PaintOn = Convert.ToBoolean(lines[colorIndex + 2])
             };
         }

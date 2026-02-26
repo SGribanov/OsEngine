@@ -10707,3 +10707,117 @@
   - `dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo` -> success
   - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` -> success (0 warnings, 0 errors)
   - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed `352/352`
+
+## 2026-02-26 - Step 2.2 (CultureInfo.InvariantCulture) - GateIo REST timestamp serialization hardening block
+
+- Standardized unix-seconds timestamp serialization with explicit invariant culture in:
+  - `project/OsEngine/Market/Servers/GateIo/GateIoSpot/GateIoServerSpot.cs`
+  - `project/OsEngine/Market/Servers/GateIo/GateIoFutures/GateIoServerFutures.cs`
+- Changes:
+  - replaced `TimeManager.GetUnixTimeStampSeconds().ToString()` -> `ToString(CultureInfo.InvariantCulture)` in signed/public REST request timestamp headers and signature payload construction paths.
+- Scope:
+  - protocol timestamp serialization determinism hardening only
+  - runtime behavior unchanged for valid payloads.
+
+### Verification
+
+- Host-context verification (outside sandbox):
+  - `dotnet restore project/OsEngine/OsEngine.csproj --nologo` -> success
+  - `dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo` -> success
+  - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` -> success (0 warnings, 0 errors)
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed `352/352`
+
+## 2026-02-26 - Step 2.2 (CultureInfo.InvariantCulture) - GateIo WebSocket payload/signature formatting hardening block
+
+- Standardized culture-invariant numeric formatting for GateIo WebSocket payload/signature strings in:
+  - `project/OsEngine/Market/Servers/GateIo/GateIoSpot/GateIoServerSpot.cs`
+  - `project/OsEngine/Market/Servers/GateIo/GateIoFutures/GateIoServerFutures.cs`
+- Changes:
+  - wrapped interpolated JSON payloads containing unix timestamps and numeric IDs with `FormattableString.Invariant(...)`.
+  - wrapped interpolated signature base-string parameters (`channel=...&event=...&time=...`) with `FormattableString.Invariant(...)`.
+  - replaced `string.Format(... timeStamp ...)` usages in GateIo futures subscribe/unsubscribe auth params with invariant interpolated strings.
+- Scope:
+  - protocol payload/signature serialization determinism hardening only
+  - runtime behavior unchanged for valid payloads.
+
+### Verification
+
+- Host-context verification (outside sandbox):
+  - `dotnet restore project/OsEngine/OsEngine.csproj --nologo` -> success
+  - `dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo` -> success
+  - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` -> success (0 warnings, 0 errors)
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed `352/352`
+
+## 2026-02-26 - Step 2.2 (CultureInfo.InvariantCulture) - clientOrderId/query numeric formatting hardening block
+
+- Standardized explicit invariant formatting for user order IDs in request/signature/query payload construction in:
+  - `project/OsEngine/Market/Servers/BingX/BingXSpot/BingXServerSpot.cs`
+  - `project/OsEngine/Market/Servers/BingX/BingXFutures/BingXServerFutures.cs`
+  - `project/OsEngine/Market/Servers/ExMo/ExmoSpot/ExmoSpotServer.cs`
+  - `project/OsEngine/Market/Servers/BitGet/BitGetFutures/BitGetServerFutures.cs`
+  - `project/OsEngine/Market/Servers/GateIo/GateIoSpot/GateIoServerSpot.cs`
+  - `project/OsEngine/Market/Servers/GateIo/GateIoFutures/GateIoServerFutures.cs`
+- Changes:
+  - introduced `clientOrderId` strings via `order.NumberUser.ToString(CultureInfo.InvariantCulture)` and used them in signed parameter strings.
+  - replaced direct numeric interpolation/concatenation for `client_id`, `clientOrderID`, `newClientOrderId`, `clientOid`, and GateIo `text` (`t-...`) payload fields.
+- Scope:
+  - request/signature/query serialization determinism hardening only
+  - runtime behavior unchanged for valid payloads.
+
+### Verification
+
+- Host-context verification (outside sandbox):
+  - `dotnet restore project/OsEngine/OsEngine.csproj --nologo` -> success
+  - `dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo` -> success
+  - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` -> success (0 warnings, 0 errors)
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed `352/352`
+
+## 2026-02-26 - Step 2.2 (CultureInfo.InvariantCulture) - CoinEx/BingX URL and client-order parameter formatting hardening block
+
+- Standardized invariant formatting for protocol URL/query/payload construction in:
+  - `project/OsEngine/Market/Servers/CoinEx/Spot/CoinExServerSpot.cs`
+  - `project/OsEngine/Market/Servers/CoinEx/Futures/CoinExServerFutures.cs`
+  - `project/OsEngine/Market/Servers/BingX/BingXSpot/BingXServerSpot.cs`
+  - `project/OsEngine/Market/Servers/BingX/BingXFutures/BingXServerFutures.cs`
+- Changes:
+  - switched `string.Format(...)` -> `string.Format(CultureInfo.InvariantCulture, ...)` for CoinEx historical kline REST URLs (`start_time/end_time/interval`).
+  - for BingX, introduced invariant string `clientOrderId` (`order.NumberUser.ToString(CultureInfo.InvariantCulture)`) and used it both in signed parameter strings and `request.AddParameter(...)` calls.
+- Scope:
+  - protocol serialization determinism hardening only
+  - runtime behavior unchanged for valid payloads.
+
+### Verification
+
+- Host-context verification (outside sandbox):
+  - `dotnet restore project/OsEngine/OsEngine.csproj --nologo` -> success
+  - `dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo` -> success
+  - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` -> success (0 warnings, 0 errors)
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed `352/352`
+
+## 2026-02-26 - Step 2.2 (CultureInfo.InvariantCulture) - historical-query timestamp/range formatting hardening block
+
+- Standardized invariant formatting for numeric timestamp/range query parameters in:
+  - `project/OsEngine/Market/Servers/Deribit/DeribitServer.cs`
+  - `project/OsEngine/Market/Servers/GateIo/GateIoSpot/GateIoServerSpot.cs`
+  - `project/OsEngine/Market/Servers/GateIo/GateIoFutures/GateIoServerFutures.cs`
+  - `project/OsEngine/Market/Servers/HTX/Swap/HTXSwapServer.cs`
+  - `project/OsEngine/Market/Servers/HTX/Futures/HTXFuturesServer.cs`
+  - `project/OsEngine/Market/Servers/Woo/WooServer.cs`
+  - `project/OsEngine/Market/Servers/YahooFinance/YahooServer.cs`
+  - `project/OsEngine/Market/Servers/OKX/OkxServer.cs`
+  - `project/OsEngine/Market/Servers/OKXData/OKXDataServer.cs`
+- Changes:
+  - replaced interpolated/implicit formatting of `from/to/start/end/after/period1/period2/limit/timestamp` numeric fields with explicit `ToString(CultureInfo.InvariantCulture)` or invariant concatenation.
+  - hardened Deribit auth/signature message creation to use invariant timestamp string representation.
+  - added `using System.Globalization;` in `YahooServer.cs`.
+- Scope:
+  - protocol URL/query/signature serialization determinism hardening only
+  - runtime behavior unchanged for valid payloads.
+
+### Verification
+
+- Host-context verification (outside sandbox):
+  - `dotnet restore project/OsEngine/OsEngine.csproj --nologo` -> success
+  - `dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo` -> success
+  - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` -> success (0 warnings, 0 errors)
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed `352/352`

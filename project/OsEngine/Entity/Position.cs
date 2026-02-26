@@ -968,7 +968,7 @@ namespace OsEngine.Entity
                     if (curOrdOpen.NumberMarket == trade.NumberOrderParent
                         && curOrdOpen.SecurityNameCode == trade.SecurityNameCode)
                     {
-                        trade.NumberPosition = Number.ToString();
+                        trade.NumberPosition = Number.ToString(CultureInfo.InvariantCulture);
                         curOrdOpen.SetTrade(trade);
 
                         if (OpenVolume != 0 &&
@@ -1000,7 +1000,7 @@ namespace OsEngine.Entity
                     if (curOrdClose.NumberMarket == trade.NumberOrderParent
                         && curOrdClose.SecurityNameCode == trade.SecurityNameCode)
                     {
-                        trade.NumberPosition = Number.ToString();
+                        trade.NumberPosition = Number.ToString(CultureInfo.InvariantCulture);
                         curOrdClose.SetTrade(trade);
 
                         if (OpenVolume == 0
@@ -1137,7 +1137,7 @@ namespace OsEngine.Entity
                 result.Append("#");
             }
 
-            result.Append(Number + "#");
+            result.Append(Number.ToString(CultureInfo.InvariantCulture) + "#");
 
             // Comment and profit/stop signals
 

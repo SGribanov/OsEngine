@@ -11,6 +11,7 @@ using OsEngine.Logging;
 using OsEngine.Market.Servers;
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Windows;
 using System.Windows.Input;
 using OsEngine.Language;
@@ -987,9 +988,9 @@ namespace OsEngine.OsTrader.Panels.Tab
         {
             try
             {
-                int indexRow = Convert.ToInt32(LabelCurrentResultShow.Content) - 1;
+                int indexRow = Convert.ToInt32(LabelCurrentResultShow.Content, CultureInfo.InvariantCulture) - 1;
 
-                int maxRowIndex = Convert.ToInt32(LabelCountResultsShow.Content);
+                int maxRowIndex = Convert.ToInt32(LabelCountResultsShow.Content, CultureInfo.InvariantCulture);
 
                 if (indexRow <= 0)
                 {
@@ -1016,9 +1017,9 @@ namespace OsEngine.OsTrader.Panels.Tab
         {
             try
             {
-                int indexRow = Convert.ToInt32(LabelCurrentResultShow.Content) - 1 + 1;
+                int indexRow = Convert.ToInt32(LabelCurrentResultShow.Content, CultureInfo.InvariantCulture) - 1 + 1;
 
-                int maxRowIndex = Convert.ToInt32(LabelCountResultsShow.Content);
+                int maxRowIndex = Convert.ToInt32(LabelCountResultsShow.Content, CultureInfo.InvariantCulture);
 
                 if (indexRow >= maxRowIndex)
                 {

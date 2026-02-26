@@ -7,6 +7,7 @@
 */
 
 using System;
+using System.Globalization;
 using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
@@ -369,13 +370,13 @@ namespace OsEngine.Charts.CandleChart.Indicators
 
             return new MovingAverageSettingsDto
             {
-                ColorArgb = Convert.ToInt32(lines[0]),
-                Length = Convert.ToInt32(lines[1]),
+                ColorArgb = Convert.ToInt32(lines[0], CultureInfo.InvariantCulture),
+                Length = Convert.ToInt32(lines[1], CultureInfo.InvariantCulture),
                 PaintOn = Convert.ToBoolean(lines[2]),
                 TypeCalculationAverage = typeCalculationAverage,
                 TypePointsToSearch = typePointsToSearch,
-                KaufmanFastEma = Convert.ToInt32(lines[5]),
-                KaufmanSlowEma = Convert.ToInt32(lines[6])
+                KaufmanFastEma = Convert.ToInt32(lines[5], CultureInfo.InvariantCulture),
+                KaufmanSlowEma = Convert.ToInt32(lines[6], CultureInfo.InvariantCulture)
             };
         }
 

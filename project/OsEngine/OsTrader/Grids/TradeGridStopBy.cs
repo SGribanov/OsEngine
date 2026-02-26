@@ -48,25 +48,25 @@ namespace OsEngine.OsTrader.Grids
             string result = "";
 
             result += StopGridByMoveUpIsOn + "@";
-            result += StopGridByMoveUpValuePercent + "@";
+            result += StopGridByMoveUpValuePercent.ToString(CultureInfo.InvariantCulture) + "@";
             result += StopGridByMoveUpReaction + "@";
 
             result += StopGridByMoveDownIsOn + "@";
-            result += StopGridByMoveDownValuePercent + "@";
+            result += StopGridByMoveDownValuePercent.ToString(CultureInfo.InvariantCulture) + "@";
             result += StopGridByMoveDownReaction + "@";
 
             result += StopGridByPositionsCountIsOn + "@";
-            result += StopGridByPositionsCountValue + "@";
+            result += StopGridByPositionsCountValue.ToString(CultureInfo.InvariantCulture) + "@";
             result += StopGridByPositionsCountReaction + "@";
 
             result += StopGridByLifeTimeIsOn + "@";
-            result += StopGridByLifeTimeSecondsToLife + "@";
+            result += StopGridByLifeTimeSecondsToLife.ToString(CultureInfo.InvariantCulture) + "@";
             result += StopGridByLifeTimeReaction + "@";
 
             result += StopGridByTimeOfDayIsOn + "@";
-            result += StopGridByTimeOfDayHour + "@";
-            result += StopGridByTimeOfDayMinute + "@";
-            result += StopGridByTimeOfDaySecond + "@";
+            result += StopGridByTimeOfDayHour.ToString(CultureInfo.InvariantCulture) + "@";
+            result += StopGridByTimeOfDayMinute.ToString(CultureInfo.InvariantCulture) + "@";
+            result += StopGridByTimeOfDaySecond.ToString(CultureInfo.InvariantCulture) + "@";
             result += StopGridByTimeOfDayReaction + "@";
 
             result += "@";
