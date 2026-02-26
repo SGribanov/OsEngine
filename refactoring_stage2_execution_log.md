@@ -12911,3 +12911,21 @@
   - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` succeeded (`393/393`).
 - **Commit:** n/a (not committed in this session)
 - **Push:** n/a
+
+### Step 2.2 - InvariantCulture Coverage (Incremental Adoption #585)
+
+- **Status:** In Progress (increment completed)
+- **Plan item:** `refactoring_stage2_plan.md` -> Phase 2 / Step 2.2
+- **Changes:**
+  - Added test coverage for `MyTrade` persistence parsing:
+    - `project/OsEngine.Tests/MyTradePersistenceTests.cs`
+  - Added roundtrip test for `GetStringFofSave` / `SetTradeFromString` with security code escaping for `@`.
+  - Added date parsing fallback test for ISO (`O`) and legacy RU datetime formats.
+- **Verification:**
+  - Executed outside sandbox.
+  - `dotnet restore project/OsEngine/OsEngine.csproj --nologo` succeeded.
+  - `dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo` succeeded.
+  - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` succeeded (0 warnings, 0 errors).
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` succeeded (`395/395`).
+- **Commit:** n/a (not committed in this session)
+- **Push:** n/a

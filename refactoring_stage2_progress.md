@@ -11606,3 +11606,22 @@
   - `dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo` -> success
   - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` -> success, 0 warnings, 0 errors
   - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed `393/393`
+
+## 2026-02-26 - Step 2.2 (InvariantCulture) - MyTrade persistence coverage hardening block
+
+- Expanded tests for `MyTrade` persistence parsing paths:
+  - `project/OsEngine.Tests/MyTradePersistenceTests.cs`
+- Changes:
+  - added full roundtrip test for `GetStringFofSave()` / `SetTradeFromString()`, including `@` escaping in `SecurityNameCode`.
+  - added date parsing test for ISO roundtrip format and legacy RU date format fallback.
+- Scope:
+  - test-only hardening
+  - no production runtime behavior changes.
+
+### Verification
+
+- Host-context verification (outside sandbox):
+  - `dotnet restore project/OsEngine/OsEngine.csproj --nologo` -> success
+  - `dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo` -> success
+  - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` -> success, 0 warnings, 0 errors
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed `395/395`
