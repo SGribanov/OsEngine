@@ -12947,3 +12947,21 @@
   - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` succeeded (`397/397`).
 - **Commit:** n/a (not committed in this session)
 - **Push:** n/a
+
+### Stage2 Checkpoint (Post #586)
+
+- **Status:** In Progress (checkpoint recorded)
+- **Date:** 2026-02-26
+- **Summary:**
+  - Incremental steps completed and committed:
+    - `#584` `7526d6db8` (`Order` persistence parsing tests)
+    - `#585` `11e1086ee` (`MyTrade` persistence parsing tests)
+    - `#586` `8b4ad02bb` (`Trade` persistence parsing tests)
+  - Net result: test suite baseline increased to `397` passing tests.
+- **Verification:**
+  - Last host-context verification before checkpoint:
+    - `dotnet restore` (OsEngine + OsEngine.Tests) succeeded.
+    - `dotnet build` (Release) succeeded with `0` warnings, `0` errors.
+    - `dotnet test` succeeded (`397/397`).
+- **Commit:** pending
+- **Push:** pending

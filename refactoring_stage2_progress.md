@@ -11644,3 +11644,14 @@
   - `dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo` -> success
   - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` -> success, 0 warnings, 0 errors
   - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed `397/397`
+
+## 2026-02-26 - Stage2 Progress Checkpoint
+
+- Consolidated progress to commits:
+  - `7526d6db8` - `#584`
+  - `11e1086ee` - `#585`
+  - `8b4ad02bb` - `#586`
+- Current result:
+  - silent-catch visibility hardening incrementally completed through `#583`;
+  - persistence parse coverage extended for `Order`, `MyTrade`, `Trade`;
+  - test suite increased to `397` passing tests.
