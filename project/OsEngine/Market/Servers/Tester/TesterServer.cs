@@ -4168,9 +4168,9 @@ namespace OsEngine.Market.Servers.Tester
                     dealsStream.Read(binaryReader, security.Security.PriceStep, security.Security.VolumeStep);
                 }
             }
-            catch
+            catch (Exception ex)
             {
-                //ignore
+                SendLogMessage(ex.ToString(), LogMessageType.Error);
             }
 
             security.TimeEnd = frameTime;
@@ -4828,9 +4828,9 @@ namespace OsEngine.Market.Servers.Tester
                         Items = items
                     });
             }
-            catch
+            catch (Exception ex)
             {
-                // ignored
+                SendLogMessage(ex.ToString(), LogMessageType.Error);
             }
         }
 
@@ -4870,9 +4870,9 @@ namespace OsEngine.Market.Servers.Tester
                     SecuritiesTester[i].TimeFrame = security.TimeFrame;
                 }
             }
-            catch
+            catch (Exception ex)
             {
-                // ignored
+                SendLogMessage(ex.ToString(), LogMessageType.Error);
             }
 
         }
