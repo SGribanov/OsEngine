@@ -889,9 +889,9 @@ namespace OsEngine.Market.Servers.Woo
                         webSocketPublic = null;
                     }
                 }
-                catch
+                catch (Exception ex)
                 {
-                    // ignore
+                    SendLogMessage(ex.ToString(), LogMessageType.Error);
                 }
 
                 _webSocketPublic.Clear();
@@ -907,9 +907,9 @@ namespace OsEngine.Market.Servers.Woo
                     _webSocketPrivate.OnError -= _webSocketPrivate_OnError;
                     _webSocketPrivate.CloseAsync();
                 }
-                catch
+                catch (Exception ex)
                 {
-                    // ignore
+                    SendLogMessage(ex.ToString(), LogMessageType.Error);
                 }
 
                 _webSocketPrivate = null;
@@ -1448,9 +1448,9 @@ namespace OsEngine.Market.Servers.Woo
                     }
                 }
             }
-            catch
+            catch (Exception ex)
             {
-                // ignore
+                SendLogMessage(ex.ToString(), LogMessageType.Error);
             }
 
             if (_webSocketPrivate != null
@@ -1460,9 +1460,9 @@ namespace OsEngine.Market.Servers.Woo
                 {
                     _webSocketPrivate.SendAsync($"{{\"id\": 1, \"cmd\": \"UN_SUBSCRIBE\", \"params\": [\"account\",\"balance\", \"position\", \"executionreport\"]}}");
                 }
-                catch
+                catch (Exception ex)
                 {
-                    // ignore
+                    SendLogMessage(ex.ToString(), LogMessageType.Error);
                 }
             }
         }
@@ -2220,9 +2220,9 @@ namespace OsEngine.Market.Servers.Woo
                 {
                     newOrder.NumberUser = Convert.ToInt32(item.cid, CultureInfo.InvariantCulture);
                 }
-                catch
+                catch (Exception ex)
                 {
-                    // ignore
+                    SendLogMessage(ex.ToString(), LogMessageType.Error);
                 }
 
                 newOrder.NumberMarket = item.oid.ToString();
@@ -2593,9 +2593,9 @@ namespace OsEngine.Market.Servers.Woo
                             {
                                 newOrder.NumberUser = Convert.ToInt32(item.clientOrderId, CultureInfo.InvariantCulture);
                             }
-                            catch
+                            catch (Exception ex)
                             {
-                                // ignore
+                                SendLogMessage(ex.ToString(), LogMessageType.Error);
                             }
 
                             newOrder.NumberMarket = item.orderId;
@@ -2703,9 +2703,9 @@ namespace OsEngine.Market.Servers.Woo
                         {
                             newOrder.NumberUser = Convert.ToInt32(item.clientOrderId, CultureInfo.InvariantCulture);
                         }
-                        catch
+                        catch (Exception ex)
                         {
-                            // ignore
+                            SendLogMessage(ex.ToString(), LogMessageType.Error);
                         }
 
                         newOrder.NumberMarket = item.orderId;

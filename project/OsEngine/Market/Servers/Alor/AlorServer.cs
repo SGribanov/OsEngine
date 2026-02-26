@@ -1164,9 +1164,9 @@ namespace OsEngine.Market.Servers.Alor
                             _webSocketData.OnError -= WebSocketData_Error;
                             _webSocketData.CloseAsync();
                         }
-                        catch
+                        catch (Exception ex)
                         {
-                            // ignore
+                            SendLogMessage(ex.ToString(), LogMessageType.Error);
                         }
 
                         try
@@ -1177,9 +1177,9 @@ namespace OsEngine.Market.Servers.Alor
                             _webSocketPortfolio.OnError -= _webSocketPortfolio_Error;
                             _webSocketPortfolio.CloseAsync();
                         }
-                        catch
+                        catch (Exception ex)
                         {
-                            // ignore
+                            SendLogMessage(ex.ToString(), LogMessageType.Error);
                         }
                     }
                 }
@@ -2251,9 +2251,9 @@ namespace OsEngine.Market.Servers.Alor
             {
                 order.NumberUser = Convert.ToInt32(baseMessage.comment, CultureInfo.InvariantCulture);
             }
-            catch
+            catch (Exception ex)
             {
-                // ignore
+                SendLogMessage(ex.ToString(), LogMessageType.Error);
             }
 
             order.NumberMarket = baseMessage.id;
