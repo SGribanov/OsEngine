@@ -176,7 +176,10 @@ namespace OsEngine.Entity.WebSocketOsEngine
                         // Give receive loop some time to exit gracefully
                         await Task.WhenAny(_receiveTask, Task.Delay(TimeSpan.FromSeconds(5)));
                     }
-                    catch { /* ignored */ }
+                    catch (Exception ex)
+                    {
+                        OnError?.Invoke(this, new ErrorEventArgs { Exception = ex });
+                    }
                 }
 
                 if (_client.State == System.Net.WebSockets.WebSocketState.Open || _client.State == System.Net.WebSockets.WebSocketState.CloseSent)
@@ -187,7 +190,10 @@ namespace OsEngine.Entity.WebSocketOsEngine
                         using var closeCts = new CancellationTokenSource(TimeSpan.FromSeconds(5));
                         await _client.CloseAsync(WebSocketCloseStatus.NormalClosure, "Client initiated close", closeCts.Token);
                     }
-                    catch (Exception) { /* Ignore close errors, client might be disposed already or connection lost */ }
+                    catch (Exception ex)
+                    {
+                        OnError?.Invoke(this, new ErrorEventArgs { Exception = ex });
+                    }
                 }
 
                 lock (_ctsLocker)
@@ -280,13 +286,19 @@ namespace OsEngine.Entity.WebSocketOsEngine
             {
                 Close().GetAwaiter().GetResult();
             }
-            catch { /* ignored */ }
+            catch (Exception ex)
+            {
+                OnError?.Invoke(this, new ErrorEventArgs { Exception = ex });
+            }
 
             try
             {
                 _client.Dispose();
             }
-            catch { /* ignored */ }
+            catch (Exception ex)
+            {
+                OnError?.Invoke(this, new ErrorEventArgs { Exception = ex });
+            }
         }
 
         private async Task ReceiveLoopAsync(CancellationToken token)

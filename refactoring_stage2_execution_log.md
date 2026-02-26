@@ -12606,3 +12606,22 @@
   - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo -p:IsTestProject=true --settings .coverage.runsettings` succeeded (`360/360`).
 - **Commit:** n/a (not committed in this session)
 - **Push:** n/a
+
+### Step 0.3 - Silent Catch Visibility (Incremental Adoption #569)
+
+- **Status:** In Progress (increment completed)
+- **Plan item:** `refactoring_stage2_plan.md` -> Phase 0 / Step 0.3
+- **Changes:**
+  - Added logging for previously ignored catches in:
+    - `project/OsEngine/Entity/WebSocketOsEngine.cs`
+  - Replaced ignored catches with `catch (Exception ex)` and routed to existing error event pipeline:
+    - `OnError?.Invoke(this, new ErrorEventArgs { Exception = ex });`
+  - Preserved existing branch control flow and non-throwing behavior.
+- **Verification:**
+  - Executed outside sandbox.
+  - `dotnet restore project/OsEngine/OsEngine.csproj --nologo` succeeded.
+  - `dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo` succeeded.
+  - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` succeeded (0 warnings, 0 errors).
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` succeeded (`391/391`).
+- **Commit:** n/a (not committed in this session)
+- **Push:** n/a

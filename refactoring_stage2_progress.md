@@ -11269,3 +11269,23 @@
   - `dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo` -> success
   - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` -> success
   - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo -p:IsTestProject=true --settings .coverage.runsettings` -> passed `360/360`
+
+## 2026-02-26 - Step 0.3 (silent-catch visibility) - WebSocketOsEngine catch logging hardening block
+
+- Added explicit exception visibility for previously ignored catches in:
+  - `project/OsEngine/Entity/WebSocketOsEngine.cs`
+- Changes:
+  - replaced `catch { /* ignored */ }` and one `catch (Exception) { /* Ignore ... */ }` with `catch (Exception ex)`.
+  - routed exceptions to existing error pipeline via `OnError?.Invoke(this, new ErrorEventArgs { Exception = ex });`.
+  - preserved behavior and control flow (non-throwing close/dispose/polling paths remain intact).
+- Scope:
+  - observability-only hardening
+  - no behavior changes on successful execution paths.
+
+### Verification
+
+- Host-context verification (outside sandbox):
+  - `dotnet restore project/OsEngine/OsEngine.csproj --nologo` -> success
+  - `dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo` -> success
+  - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` -> success, 0 warnings, 0 errors
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed `391/391`
