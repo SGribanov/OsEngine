@@ -11566,3 +11566,24 @@
   - `dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo` -> success
   - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` -> success, 0 warnings, 0 errors
   - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed `391/391`
+
+## 2026-02-26 - Step 0.3 (silent-catch visibility) - FinamGrpc+MainWindow final catch logging hardening block
+
+- Added explicit exception visibility for remaining silent catches in:
+  - `project/OsEngine/Market/Servers/FinamGrpc/FinamGrpcServer.cs`
+  - `project/OsEngine/MainWindow.xaml.cs`
+- Changes:
+  - replaced empty `catch (OperationCanceledException)` handlers in Finam gRPC stream readers with `TraceInformation` diagnostics.
+  - replaced empty process-probe `catch` in main window startup check with explicit `Exception` handling and `TraceWarning` diagnostics.
+  - preserved existing control flow, cancellation semantics and return values.
+- Scope:
+  - observability-only hardening
+  - no behavior changes on successful paths.
+
+### Verification
+
+- Host-context verification (outside sandbox):
+  - `dotnet restore project/OsEngine/OsEngine.csproj --nologo` -> success
+  - `dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo` -> success
+  - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` -> success, 0 warnings, 0 errors
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed `391/391`

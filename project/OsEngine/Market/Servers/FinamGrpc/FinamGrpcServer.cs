@@ -1100,6 +1100,7 @@ namespace OsEngine.Market.Servers.FinamGrpc
             }
             catch (OperationCanceledException)
             {
+                System.Diagnostics.Trace.TraceInformation($"FinamGrpc trades stream canceled for {security?.NameId}.");
             }
             catch (System.Exception ex)
             {
@@ -1205,6 +1206,7 @@ namespace OsEngine.Market.Servers.FinamGrpc
             }
             catch (OperationCanceledException)
             {
+                System.Diagnostics.Trace.TraceInformation($"FinamGrpc market depth stream canceled for {security?.NameId}.");
             }
             catch (System.Exception ex)
             {

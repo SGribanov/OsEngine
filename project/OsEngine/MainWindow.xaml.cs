@@ -536,9 +536,9 @@ namespace OsEngine
                             process.Add(p);
                         }
                     }
-                    catch
+                    catch (Exception ex)
                     {
-
+                        System.Diagnostics.Trace.TraceWarning($"CheckAlreadyWorkEngine process probe failed: {ex.Message}");
                     }
                 }
 

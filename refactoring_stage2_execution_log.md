@@ -12873,3 +12873,23 @@
   - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` succeeded (`391/391`).
 - **Commit:** n/a (not committed in this session)
 - **Push:** n/a
+
+### Step 0.3 - Silent Catch Visibility (Incremental Adoption #583)
+
+- **Status:** In Progress (increment completed)
+- **Plan item:** `refactoring_stage2_plan.md` -> Phase 0 / Step 0.3
+- **Changes:**
+  - Added logging/visibility for remaining silent catches in:
+    - `project/OsEngine/Market/Servers/FinamGrpc/FinamGrpcServer.cs`
+    - `project/OsEngine/MainWindow.xaml.cs`
+  - Replaced empty `catch (OperationCanceledException)` handlers in Finam stream readers with `TraceInformation` diagnostics.
+  - Replaced empty process-probe catch in main window startup check with explicit exception logging (`TraceWarning`).
+  - Preserved existing control flow and non-throwing behavior.
+- **Verification:**
+  - Executed outside sandbox.
+  - `dotnet restore project/OsEngine/OsEngine.csproj --nologo` succeeded.
+  - `dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo` succeeded.
+  - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` succeeded (0 warnings, 0 errors).
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` succeeded (`391/391`).
+- **Commit:** n/a (not committed in this session)
+- **Push:** n/a
