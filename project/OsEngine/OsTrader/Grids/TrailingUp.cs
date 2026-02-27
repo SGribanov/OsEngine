@@ -24,7 +24,7 @@ namespace OsEngine.OsTrader.Grids
             _grid = grid;
         }
 
-        protected TradeGrid _grid;
+        protected TradeGrid? _grid;
 
         public void Delete()
         {
@@ -133,7 +133,13 @@ namespace OsEngine.OsTrader.Grids
                 return false;
             }
 
-            List<Candle> candles = _grid.Tab.CandlesAll;
+            TradeGrid? grid = _grid;
+            if (grid == null)
+            {
+                return false;
+            }
+
+            List<Candle> candles = grid.Tab.CandlesAll;
 
             if (candles == null
                 || candles.Count == 0)
@@ -258,7 +264,13 @@ namespace OsEngine.OsTrader.Grids
         {
             get
             {
-                List<TradeGridLine> lines = _grid.GridCreator.Lines;
+                TradeGrid? grid = _grid;
+                if (grid == null)
+                {
+                    return 0;
+                }
+
+                List<TradeGridLine> lines = grid.GridCreator.Lines;
 
                 if (lines == null || lines.Count == 0)
                 {
@@ -288,7 +300,13 @@ namespace OsEngine.OsTrader.Grids
         {
             get
             {
-                List<TradeGridLine> lines = _grid.GridCreator.Lines;
+                TradeGrid? grid = _grid;
+                if (grid == null)
+                {
+                    return 0;
+                }
+
+                List<TradeGridLine> lines = grid.GridCreator.Lines;
 
                 if (lines == null || lines.Count == 0)
                 {
@@ -316,7 +334,13 @@ namespace OsEngine.OsTrader.Grids
 
         public void ShiftGridDownOnValue(decimal value)
         {
-            List<TradeGridLine> lines = _grid.GridCreator.Lines;
+            TradeGrid? grid = _grid;
+            if (grid == null)
+            {
+                return;
+            }
+
+            List<TradeGridLine> lines = grid.GridCreator.Lines;
 
             if (lines == null || lines.Count == 0)
             {
@@ -334,7 +358,13 @@ namespace OsEngine.OsTrader.Grids
 
         public void ShiftGridUpOnValue(decimal value)
         {
-            List<TradeGridLine> lines = _grid.GridCreator.Lines;
+            TradeGrid? grid = _grid;
+            if (grid == null)
+            {
+                return;
+            }
+
+            List<TradeGridLine> lines = grid.GridCreator.Lines;
 
             if (lines == null || lines.Count == 0)
             {

@@ -12504,6 +12504,28 @@
 - Host-context verification (outside sandbox):
   - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed `484/484`
 
+## 2026-02-27 - Step 4.2 (nullable annotations) - TrailingUp grid lifecycle contract (`#641`)
+
+- Applied localized nullable lifecycle hardening in:
+  - `project/OsEngine/OsTrader/Grids/TrailingUp.cs`
+- Changes:
+  - grid reference contract aligned with lifecycle:
+    - `_grid` updated from `TradeGrid` to `TradeGrid?` (it is nulled in `Delete()`).
+  - added early-return null guards before `_grid` dereference in:
+    - `TryTrailingGrid()`
+    - `MaxGridPrice` getter
+    - `MinGridPrice` getter
+    - `ShiftGridDownOnValue(...)`
+    - `ShiftGridUpOnValue(...)`
+- Scope:
+  - nullable lifecycle cleanup only
+  - no behavior changes for valid non-deleted grid state.
+
+### Verification
+
+- Host-context verification (outside sandbox):
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed `484/484`
+
 ## 2026-02-27 - Step 4.2 (nullable annotations) - CandleSeriesSaveInfo signature cleanup (`#633`)
 
 - Applied localized nullable-signature alignment in candle save-info holder:
