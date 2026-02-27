@@ -13056,3 +13056,18 @@
   - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` succeeded (`408/408`).
 - **Commit:** n/a (not committed in this session)
 - **Push:** n/a
+
+### Step 2.2 - InvariantCulture Coverage (Incremental Adoption #593)
+
+- **Status:** In Progress (increment completed)
+- **Plan item:** `refactoring_stage2_plan.md` -> Phase 2 / Step 2.2
+- **Changes:**
+  - Expanded core persistence parsing coverage for `Trade`:
+    - `project/OsEngine.Tests/TradeCoreTests.cs`
+  - Added roundtrip test for `GetSaveString()` / `SetTradeFromString()` with optional depth payload fields.
+  - Added assertions for microseconds and trade id save/load consistency.
+- **Verification:**
+  - Executed outside sandbox.
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` succeeded (`409/409`).
+- **Commit:** n/a (not committed in this session)
+- **Push:** n/a
