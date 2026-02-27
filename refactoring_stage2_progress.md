@@ -11720,3 +11720,19 @@
 
 - Host-context verification (outside sandbox):
   - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed `404/404`
+
+## 2026-02-27 - Step 2.2 (InvariantCulture) - Security persistence parse coverage hardening block
+
+- Expanded tests for `Security` persistence parsing paths:
+  - `project/OsEngine.Tests/SecurityCoreTests.cs`
+- Changes:
+  - added full roundtrip test for `GetSaveStr()` / `LoadFromString()` covering optional fields (`VolumeStep`, `MinTradeAmountType`, `MarginSell`) and core metadata.
+  - added legacy RU datetime parse coverage for `Expiration` with invariant decimal payload assertions.
+- Scope:
+  - test-only hardening
+  - no production runtime behavior changes.
+
+### Verification
+
+- Host-context verification (outside sandbox):
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed `406/406`
