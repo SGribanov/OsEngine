@@ -13424,3 +13424,19 @@
 - **Commit:** `82912aff3`
 - **Push:** n/a
 
+
+### Step 2.2 - InvariantCulture Coverage (Incremental Adoption #617)
+
+- **Status:** In Progress (increment completed)
+- **Plan item:** `refactoring_stage2_plan.md` -> Phase 2 / Step 2.2
+- **Changes:**
+  - Expanded `Order` parser compatibility coverage:
+    - `project/OsEngine.Tests/OrderPersistenceTests.cs`
+  - Added test for legacy payload with numeric `OrderTypeTime` value (`"2"`).
+  - Added assertion for enum numeric mapping to `OrderTypeTime.Day`.
+- **Verification:**
+  - Executed outside sandbox.
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` succeeded (`439/439`).
+- **Commit:** `ca47077bc`
+- **Push:** n/a
+
