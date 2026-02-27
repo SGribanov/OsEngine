@@ -12300,6 +12300,29 @@
 - Host-context verification (outside sandbox):
   - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed `483/483`
 
+## 2026-02-27 - Step 2.3 (JSON settings subsystem) - OptimizerSettings core migration pass (`#626`)
+
+- Inventory (completion-pass scan):
+  - JSON settings subsystem already covers broad settings surface.
+  - Remaining legacy hotspots include several strategy-specific line-based settings readers.
+  - High-risk core candidate selected for this increment: `OptimizerSettings` main settings file.
+- Changes:
+  - migrated `OptimizerSettings` main settings persistence from line-based format to JSON via `SettingsManager`:
+    - `project/OsEngine/OsOptimizer/OptEntity/OptimizerSettings.cs`
+  - added backward-compatible legacy adapter:
+    - load path now attempts JSON first, then falls back to legacy line-based payload parsing.
+  - preserved existing clamping/default semantics for optional V2/V3 tail fields during legacy load.
+  - updated optimizer persistence tests to validate JSON save behavior and explicit legacy-load compatibility:
+    - `project/OsEngine.Tests/OptimizerRefactorTests.cs`
+- Scope:
+  - runtime settings persistence hardening for optimizer core settings
+  - backward compatibility for existing legacy settings files retained.
+
+### Verification
+
+- Host-context verification (outside sandbox):
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed `483/483`
+
 ## 2026-02-27 - Step 2.1 (Atomic File Writes) - storage hotspot completion pass (`#625`)
 
 - Completed atomic-write migration for remaining hotspot in server storage path:

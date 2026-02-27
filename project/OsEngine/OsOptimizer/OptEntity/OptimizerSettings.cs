@@ -527,53 +527,7 @@ namespace OsEngine.OsOptimizer.OptEntity
         {
             try
             {
-                List<string> lines = new List<string>
-                {
-                    _threadsCount.ToString(CultureInfo.InvariantCulture),
-                    _strategyName,
-                    _startDeposit.ToString(CultureInfo.InvariantCulture),
-
-                    _filterProfitValue.ToString(CultureInfo.InvariantCulture),
-                    _filterProfitIsOn.ToString(),
-                    _filterMaxDrawDownValue.ToString(CultureInfo.InvariantCulture),
-                    _filterMaxDrawDownIsOn.ToString(),
-                    _filterMiddleProfitValue.ToString(CultureInfo.InvariantCulture),
-                    _filterMiddleProfitIsOn.ToString(),
-                    _filterProfitFactorValue.ToString(CultureInfo.InvariantCulture),
-                    _filterProfitFactorIsOn.ToString(),
-
-                    _timeStart.ToString("O", CultureInfo.InvariantCulture),
-                    _timeEnd.ToString("O", CultureInfo.InvariantCulture),
-                    _percentOnFiltration.ToString(CultureInfo.InvariantCulture),
-
-                    _filterDealsCountValue.ToString(CultureInfo.InvariantCulture),
-                    _filterDealsCountIsOn.ToString(),
-                    _isScript.ToString(),
-                    _iterationCount.ToString(CultureInfo.InvariantCulture),
-                    _commissionType.ToString(),
-                    _commissionValue.ToString(CultureInfo.InvariantCulture),
-                    _lastInSample.ToString(),
-                    _orderExecutionType.ToString(),
-                    _slippageToSimpleOrder.ToString(CultureInfo.InvariantCulture),
-                    _slippageToStopOrder.ToString(CultureInfo.InvariantCulture),
-
-                    // V2 fields
-                    _optimizationMethod.ToString(),
-                    _objectiveMetric.ToString(),
-                    _bayesianInitialSamples.ToString(CultureInfo.InvariantCulture),
-                    _bayesianMaxIterations.ToString(CultureInfo.InvariantCulture),
-                    _bayesianBatchSize.ToString(CultureInfo.InvariantCulture),
-                    _objectiveDirection.ToString(),
-                    _bayesianAcquisitionMode.ToString(),
-                    _bayesianAcquisitionKappa.ToString(CultureInfo.InvariantCulture),
-                    _bayesianUseTailPass.ToString(),
-                    _bayesianTailSharePercent.ToString(CultureInfo.InvariantCulture),
-
-                    // V3 fields
-                    _useIndicatorCache.ToString()
-                };
-
-                SafeFileWriter.WriteAllLines(GetSettingsPath(), lines);
+                SettingsManager.Save(GetSettingsPath(), BuildSettingsDto());
             }
             catch (Exception error)
             {
@@ -583,112 +537,402 @@ namespace OsEngine.OsOptimizer.OptEntity
 
         private void Load()
         {
-            if (!File.Exists(GetSettingsPath()))
+            string path = GetSettingsPath();
+
+            if (!File.Exists(path))
             {
                 return;
             }
+
             try
             {
-                using (StreamReader reader = new StreamReader(GetSettingsPath()))
+                string content = File.ReadAllText(path);
+                if (string.IsNullOrWhiteSpace(content))
                 {
-                    _threadsCount = Convert.ToInt32(reader.ReadLine() ?? "0", CultureInfo.InvariantCulture);
-                    _strategyName = reader.ReadLine() ?? string.Empty;
-                    _startDeposit = (reader.ReadLine() ?? "0").ToDecimal();
-                    _filterProfitValue = (reader.ReadLine() ?? "0").ToDecimal();
-                    _filterProfitIsOn = Convert.ToBoolean(reader.ReadLine() ?? bool.FalseString);
-                    _filterMaxDrawDownValue = (reader.ReadLine() ?? "0").ToDecimal();
-                    _filterMaxDrawDownIsOn = Convert.ToBoolean(reader.ReadLine() ?? bool.FalseString);
-                    _filterMiddleProfitValue = (reader.ReadLine() ?? "0").ToDecimal();
-                    _filterMiddleProfitIsOn = Convert.ToBoolean(reader.ReadLine() ?? bool.FalseString);
-                    _filterProfitFactorValue = (reader.ReadLine() ?? "0").ToDecimal();
-                    _filterProfitFactorIsOn = Convert.ToBoolean(reader.ReadLine() ?? bool.FalseString);
+                    return;
+                }
 
-                    _timeStart = ParseDateInvariantOrCurrent(reader.ReadLine());
-                    _timeEnd = ParseDateInvariantOrCurrent(reader.ReadLine());
-                    _percentOnFiltration = (reader.ReadLine() ?? "0").ToDecimal();
+                if (LooksLikeJson(content))
+                {
+                    OptimizerSettingsDto? settings = SettingsManager.Load<OptimizerSettingsDto?>(
+                        path,
+                        null);
 
-                    _filterDealsCountValue = Convert.ToInt32(reader.ReadLine() ?? "0", CultureInfo.InvariantCulture);
-                    _filterDealsCountIsOn = Convert.ToBoolean(reader.ReadLine() ?? bool.FalseString);
-                    _isScript = Convert.ToBoolean(reader.ReadLine() ?? bool.FalseString);
-                    _iterationCount = ClampPositiveInt(Convert.ToInt32(reader.ReadLine() ?? "1", CultureInfo.InvariantCulture));
-                    _commissionType = (CommissionType)Enum.Parse(typeof(CommissionType),
-                        reader.ReadLine() ?? CommissionType.None.ToString());
-                    _commissionValue = (reader.ReadLine() ?? "0").ToDecimal();
-                    _lastInSample = Convert.ToBoolean(reader.ReadLine() ?? bool.FalseString);
-
-                    string? orderExecutionLine = reader.ReadLine();
-                    if (TryParseDefinedEnum(orderExecutionLine, out OrderExecutionType orderExecutionType))
+                    if (settings != null)
                     {
-                        _orderExecutionType = orderExecutionType;
-                    }
-                    _slippageToSimpleOrder = Convert.ToInt32(reader.ReadLine() ?? "0", CultureInfo.InvariantCulture);
-                    _slippageToStopOrder = Convert.ToInt32(reader.ReadLine() ?? "0", CultureInfo.InvariantCulture);
-
-                    // V2 fields - optional for backward compatibility
-                    string? line = reader.ReadLine();
-                    if (line != null)
-                    {
-                        if (TryParseDefinedEnum(line, out OptimizationMethodType optimizationMethod))
-                        {
-                            _optimizationMethod = optimizationMethod;
-                        }
-                        line = reader.ReadLine();
-                        if (line != null && TryParseDefinedEnum(line, out SortBotsType objectiveMetric))
-                        {
-                            _objectiveMetric = objectiveMetric;
-                        }
-                        line = reader.ReadLine();
-                        if (TryParseInt(line, out int bayesianInitialSamples))
-                        {
-                            _bayesianInitialSamples = ClampPositiveInt(bayesianInitialSamples);
-                        }
-                        line = reader.ReadLine();
-                        if (TryParseInt(line, out int bayesianMaxIterations))
-                        {
-                            _bayesianMaxIterations = ClampPositiveInt(bayesianMaxIterations);
-                        }
-                        line = reader.ReadLine();
-                        if (TryParseInt(line, out int bayesianBatchSize))
-                        {
-                            _bayesianBatchSize = ClampPositiveInt(bayesianBatchSize);
-                        }
-                        line = reader.ReadLine();
-                        if (line != null && TryParseDefinedEnum(line, out ObjectiveDirectionType objectiveDirection))
-                        {
-                            _objectiveDirection = objectiveDirection;
-                        }
-                        line = reader.ReadLine();
-                        if (line != null && TryParseDefinedEnum(line, out BayesianAcquisitionModeType bayesianAcquisitionMode))
-                        {
-                            _bayesianAcquisitionMode = bayesianAcquisitionMode;
-                        }
-                        line = reader.ReadLine();
-                        if (TryParseDecimal(line, out decimal bayesianAcquisitionKappa))
-                        {
-                            _bayesianAcquisitionKappa = ClampNonNegativeDecimal(bayesianAcquisitionKappa);
-                        }
-                        line = reader.ReadLine();
-                        if (TryParseBool(line, out bool bayesianUseTailPass))
-                        {
-                            _bayesianUseTailPass = bayesianUseTailPass;
-                        }
-                        line = reader.ReadLine();
-                        if (TryParseInt(line, out int bayesianTailSharePercent))
-                        {
-                            _bayesianTailSharePercent = ClampTailSharePercent(bayesianTailSharePercent);
-                        }
-                        line = reader.ReadLine();
-                        if (TryParseBool(line, out bool useIndicatorCache))
-                        {
-                            _useIndicatorCache = useIndicatorCache;
-                        }
+                        ApplySettingsDto(settings);
+                        return;
                     }
                 }
+
+                LoadLegacy(content);
             }
             catch (Exception ex)
             {
                 LogMessageEvent?.Invoke(ex.ToString(), LogMessageType.Error);
             }
+        }
+
+        private OptimizerSettingsDto BuildSettingsDto()
+        {
+            return new OptimizerSettingsDto
+            {
+                ThreadsCount = _threadsCount,
+                StrategyName = _strategyName,
+                IsScript = _isScript,
+                StartDeposit = _startDeposit,
+                OrderExecutionType = _orderExecutionType,
+                SlippageToSimpleOrder = _slippageToSimpleOrder,
+                SlippageToStopOrder = _slippageToStopOrder,
+                CommissionType = _commissionType,
+                CommissionValue = _commissionValue,
+                FilterProfitValue = _filterProfitValue,
+                FilterProfitIsOn = _filterProfitIsOn,
+                FilterMaxDrawDownValue = _filterMaxDrawDownValue,
+                FilterMaxDrawDownIsOn = _filterMaxDrawDownIsOn,
+                FilterMiddleProfitValue = _filterMiddleProfitValue,
+                FilterMiddleProfitIsOn = _filterMiddleProfitIsOn,
+                FilterProfitFactorValue = _filterProfitFactorValue,
+                FilterProfitFactorIsOn = _filterProfitFactorIsOn,
+                FilterDealsCountValue = _filterDealsCountValue,
+                FilterDealsCountIsOn = _filterDealsCountIsOn,
+                TimeStart = _timeStart,
+                TimeEnd = _timeEnd,
+                PercentOnFiltration = _percentOnFiltration,
+                IterationCount = _iterationCount,
+                LastInSample = _lastInSample,
+                OptimizationMethod = _optimizationMethod,
+                ObjectiveMetric = _objectiveMetric,
+                BayesianInitialSamples = _bayesianInitialSamples,
+                BayesianMaxIterations = _bayesianMaxIterations,
+                BayesianBatchSize = _bayesianBatchSize,
+                ObjectiveDirection = _objectiveDirection,
+                BayesianAcquisitionMode = _bayesianAcquisitionMode,
+                BayesianAcquisitionKappa = _bayesianAcquisitionKappa,
+                BayesianUseTailPass = _bayesianUseTailPass,
+                BayesianTailSharePercent = _bayesianTailSharePercent,
+                UseIndicatorCache = _useIndicatorCache
+            };
+        }
+
+        private void ApplySettingsDto(OptimizerSettingsDto dto)
+        {
+            if (dto.ThreadsCount.HasValue)
+            {
+                _threadsCount = dto.ThreadsCount.Value;
+            }
+
+            if (dto.StrategyName != null)
+            {
+                _strategyName = dto.StrategyName;
+            }
+
+            if (dto.IsScript.HasValue)
+            {
+                _isScript = dto.IsScript.Value;
+            }
+
+            if (dto.StartDeposit.HasValue)
+            {
+                _startDeposit = dto.StartDeposit.Value;
+            }
+
+            if (dto.OrderExecutionType.HasValue
+                && Enum.IsDefined(typeof(OrderExecutionType), dto.OrderExecutionType.Value))
+            {
+                _orderExecutionType = dto.OrderExecutionType.Value;
+            }
+
+            if (dto.SlippageToSimpleOrder.HasValue)
+            {
+                _slippageToSimpleOrder = dto.SlippageToSimpleOrder.Value;
+            }
+
+            if (dto.SlippageToStopOrder.HasValue)
+            {
+                _slippageToStopOrder = dto.SlippageToStopOrder.Value;
+            }
+
+            if (dto.CommissionType.HasValue
+                && Enum.IsDefined(typeof(CommissionType), dto.CommissionType.Value))
+            {
+                _commissionType = dto.CommissionType.Value;
+            }
+
+            if (dto.CommissionValue.HasValue)
+            {
+                _commissionValue = dto.CommissionValue.Value;
+            }
+
+            if (dto.FilterProfitValue.HasValue)
+            {
+                _filterProfitValue = dto.FilterProfitValue.Value;
+            }
+
+            if (dto.FilterProfitIsOn.HasValue)
+            {
+                _filterProfitIsOn = dto.FilterProfitIsOn.Value;
+            }
+
+            if (dto.FilterMaxDrawDownValue.HasValue)
+            {
+                _filterMaxDrawDownValue = dto.FilterMaxDrawDownValue.Value;
+            }
+
+            if (dto.FilterMaxDrawDownIsOn.HasValue)
+            {
+                _filterMaxDrawDownIsOn = dto.FilterMaxDrawDownIsOn.Value;
+            }
+
+            if (dto.FilterMiddleProfitValue.HasValue)
+            {
+                _filterMiddleProfitValue = dto.FilterMiddleProfitValue.Value;
+            }
+
+            if (dto.FilterMiddleProfitIsOn.HasValue)
+            {
+                _filterMiddleProfitIsOn = dto.FilterMiddleProfitIsOn.Value;
+            }
+
+            if (dto.FilterProfitFactorValue.HasValue)
+            {
+                _filterProfitFactorValue = dto.FilterProfitFactorValue.Value;
+            }
+
+            if (dto.FilterProfitFactorIsOn.HasValue)
+            {
+                _filterProfitFactorIsOn = dto.FilterProfitFactorIsOn.Value;
+            }
+
+            if (dto.FilterDealsCountValue.HasValue)
+            {
+                _filterDealsCountValue = dto.FilterDealsCountValue.Value;
+            }
+
+            if (dto.FilterDealsCountIsOn.HasValue)
+            {
+                _filterDealsCountIsOn = dto.FilterDealsCountIsOn.Value;
+            }
+
+            if (dto.TimeStart.HasValue)
+            {
+                _timeStart = dto.TimeStart.Value;
+            }
+
+            if (dto.TimeEnd.HasValue)
+            {
+                _timeEnd = dto.TimeEnd.Value;
+            }
+
+            if (dto.PercentOnFiltration.HasValue)
+            {
+                _percentOnFiltration = dto.PercentOnFiltration.Value;
+            }
+
+            if (dto.IterationCount.HasValue)
+            {
+                _iterationCount = ClampPositiveInt(dto.IterationCount.Value);
+            }
+
+            if (dto.LastInSample.HasValue)
+            {
+                _lastInSample = dto.LastInSample.Value;
+            }
+
+            if (dto.OptimizationMethod.HasValue
+                && Enum.IsDefined(typeof(OptimizationMethodType), dto.OptimizationMethod.Value))
+            {
+                _optimizationMethod = dto.OptimizationMethod.Value;
+            }
+
+            if (dto.ObjectiveMetric.HasValue
+                && Enum.IsDefined(typeof(SortBotsType), dto.ObjectiveMetric.Value))
+            {
+                _objectiveMetric = dto.ObjectiveMetric.Value;
+            }
+
+            if (dto.BayesianInitialSamples.HasValue)
+            {
+                _bayesianInitialSamples = ClampPositiveInt(dto.BayesianInitialSamples.Value);
+            }
+
+            if (dto.BayesianMaxIterations.HasValue)
+            {
+                _bayesianMaxIterations = ClampPositiveInt(dto.BayesianMaxIterations.Value);
+            }
+
+            if (dto.BayesianBatchSize.HasValue)
+            {
+                _bayesianBatchSize = ClampPositiveInt(dto.BayesianBatchSize.Value);
+            }
+
+            if (dto.ObjectiveDirection.HasValue
+                && Enum.IsDefined(typeof(ObjectiveDirectionType), dto.ObjectiveDirection.Value))
+            {
+                _objectiveDirection = dto.ObjectiveDirection.Value;
+            }
+
+            if (dto.BayesianAcquisitionMode.HasValue
+                && Enum.IsDefined(typeof(BayesianAcquisitionModeType), dto.BayesianAcquisitionMode.Value))
+            {
+                _bayesianAcquisitionMode = dto.BayesianAcquisitionMode.Value;
+            }
+
+            if (dto.BayesianAcquisitionKappa.HasValue)
+            {
+                _bayesianAcquisitionKappa = ClampNonNegativeDecimal(dto.BayesianAcquisitionKappa.Value);
+            }
+
+            if (dto.BayesianUseTailPass.HasValue)
+            {
+                _bayesianUseTailPass = dto.BayesianUseTailPass.Value;
+            }
+
+            if (dto.BayesianTailSharePercent.HasValue)
+            {
+                _bayesianTailSharePercent = ClampTailSharePercent(dto.BayesianTailSharePercent.Value);
+            }
+
+            if (dto.UseIndicatorCache.HasValue)
+            {
+                _useIndicatorCache = dto.UseIndicatorCache.Value;
+            }
+        }
+
+        private void LoadLegacy(string content)
+        {
+            string[] lines = content.Split(new[] { "\r\n", "\n" }, StringSplitOptions.None);
+            int i = 0;
+
+            _threadsCount = Convert.ToInt32(ReadLegacyLine(lines, ref i) ?? "0", CultureInfo.InvariantCulture);
+            _strategyName = ReadLegacyLine(lines, ref i) ?? string.Empty;
+            _startDeposit = (ReadLegacyLine(lines, ref i) ?? "0").ToDecimal();
+            _filterProfitValue = (ReadLegacyLine(lines, ref i) ?? "0").ToDecimal();
+            _filterProfitIsOn = Convert.ToBoolean(ReadLegacyLine(lines, ref i) ?? bool.FalseString);
+            _filterMaxDrawDownValue = (ReadLegacyLine(lines, ref i) ?? "0").ToDecimal();
+            _filterMaxDrawDownIsOn = Convert.ToBoolean(ReadLegacyLine(lines, ref i) ?? bool.FalseString);
+            _filterMiddleProfitValue = (ReadLegacyLine(lines, ref i) ?? "0").ToDecimal();
+            _filterMiddleProfitIsOn = Convert.ToBoolean(ReadLegacyLine(lines, ref i) ?? bool.FalseString);
+            _filterProfitFactorValue = (ReadLegacyLine(lines, ref i) ?? "0").ToDecimal();
+            _filterProfitFactorIsOn = Convert.ToBoolean(ReadLegacyLine(lines, ref i) ?? bool.FalseString);
+
+            _timeStart = ParseDateInvariantOrCurrent(ReadLegacyLine(lines, ref i));
+            _timeEnd = ParseDateInvariantOrCurrent(ReadLegacyLine(lines, ref i));
+            _percentOnFiltration = (ReadLegacyLine(lines, ref i) ?? "0").ToDecimal();
+
+            _filterDealsCountValue = Convert.ToInt32(ReadLegacyLine(lines, ref i) ?? "0", CultureInfo.InvariantCulture);
+            _filterDealsCountIsOn = Convert.ToBoolean(ReadLegacyLine(lines, ref i) ?? bool.FalseString);
+            _isScript = Convert.ToBoolean(ReadLegacyLine(lines, ref i) ?? bool.FalseString);
+            _iterationCount = ClampPositiveInt(Convert.ToInt32(ReadLegacyLine(lines, ref i) ?? "1", CultureInfo.InvariantCulture));
+            _commissionType = (CommissionType)Enum.Parse(typeof(CommissionType),
+                ReadLegacyLine(lines, ref i) ?? CommissionType.None.ToString());
+            _commissionValue = (ReadLegacyLine(lines, ref i) ?? "0").ToDecimal();
+            _lastInSample = Convert.ToBoolean(ReadLegacyLine(lines, ref i) ?? bool.FalseString);
+
+            string? orderExecutionLine = ReadLegacyLine(lines, ref i);
+            if (TryParseDefinedEnum(orderExecutionLine, out OrderExecutionType orderExecutionType))
+            {
+                _orderExecutionType = orderExecutionType;
+            }
+
+            _slippageToSimpleOrder = Convert.ToInt32(ReadLegacyLine(lines, ref i) ?? "0", CultureInfo.InvariantCulture);
+            _slippageToStopOrder = Convert.ToInt32(ReadLegacyLine(lines, ref i) ?? "0", CultureInfo.InvariantCulture);
+
+            // V2 fields - optional for backward compatibility
+            string? line = ReadLegacyLine(lines, ref i);
+            if (line != null)
+            {
+                if (TryParseDefinedEnum(line, out OptimizationMethodType optimizationMethod))
+                {
+                    _optimizationMethod = optimizationMethod;
+                }
+
+                line = ReadLegacyLine(lines, ref i);
+                if (line != null && TryParseDefinedEnum(line, out SortBotsType objectiveMetric))
+                {
+                    _objectiveMetric = objectiveMetric;
+                }
+
+                line = ReadLegacyLine(lines, ref i);
+                if (TryParseInt(line, out int bayesianInitialSamples))
+                {
+                    _bayesianInitialSamples = ClampPositiveInt(bayesianInitialSamples);
+                }
+
+                line = ReadLegacyLine(lines, ref i);
+                if (TryParseInt(line, out int bayesianMaxIterations))
+                {
+                    _bayesianMaxIterations = ClampPositiveInt(bayesianMaxIterations);
+                }
+
+                line = ReadLegacyLine(lines, ref i);
+                if (TryParseInt(line, out int bayesianBatchSize))
+                {
+                    _bayesianBatchSize = ClampPositiveInt(bayesianBatchSize);
+                }
+
+                line = ReadLegacyLine(lines, ref i);
+                if (line != null && TryParseDefinedEnum(line, out ObjectiveDirectionType objectiveDirection))
+                {
+                    _objectiveDirection = objectiveDirection;
+                }
+
+                line = ReadLegacyLine(lines, ref i);
+                if (line != null && TryParseDefinedEnum(line, out BayesianAcquisitionModeType bayesianAcquisitionMode))
+                {
+                    _bayesianAcquisitionMode = bayesianAcquisitionMode;
+                }
+
+                line = ReadLegacyLine(lines, ref i);
+                if (TryParseDecimal(line, out decimal bayesianAcquisitionKappa))
+                {
+                    _bayesianAcquisitionKappa = ClampNonNegativeDecimal(bayesianAcquisitionKappa);
+                }
+
+                line = ReadLegacyLine(lines, ref i);
+                if (TryParseBool(line, out bool bayesianUseTailPass))
+                {
+                    _bayesianUseTailPass = bayesianUseTailPass;
+                }
+
+                line = ReadLegacyLine(lines, ref i);
+                if (TryParseInt(line, out int bayesianTailSharePercent))
+                {
+                    _bayesianTailSharePercent = ClampTailSharePercent(bayesianTailSharePercent);
+                }
+
+                line = ReadLegacyLine(lines, ref i);
+                if (TryParseBool(line, out bool useIndicatorCache))
+                {
+                    _useIndicatorCache = useIndicatorCache;
+                }
+            }
+        }
+
+        private static string? ReadLegacyLine(string[] lines, ref int index)
+        {
+            if (index >= lines.Length)
+            {
+                index++;
+                return null;
+            }
+
+            string line = lines[index];
+            index++;
+            return line;
+        }
+
+        private static bool LooksLikeJson(string content)
+        {
+            for (int i = 0; i < content.Length; i++)
+            {
+                if (!char.IsWhiteSpace(content[i]))
+                {
+                    return content[i] == '{' || content[i] == '[';
+                }
+            }
+
+            return false;
         }
 
         private static string GetClearingsPath()
@@ -808,6 +1052,45 @@ namespace OsEngine.OsOptimizer.OptEntity
             }
 
             return DateTime.MinValue;
+        }
+
+        private sealed class OptimizerSettingsDto
+        {
+            public int? ThreadsCount { get; set; }
+            public string? StrategyName { get; set; }
+            public bool? IsScript { get; set; }
+            public decimal? StartDeposit { get; set; }
+            public OrderExecutionType? OrderExecutionType { get; set; }
+            public int? SlippageToSimpleOrder { get; set; }
+            public int? SlippageToStopOrder { get; set; }
+            public CommissionType? CommissionType { get; set; }
+            public decimal? CommissionValue { get; set; }
+            public decimal? FilterProfitValue { get; set; }
+            public bool? FilterProfitIsOn { get; set; }
+            public decimal? FilterMaxDrawDownValue { get; set; }
+            public bool? FilterMaxDrawDownIsOn { get; set; }
+            public decimal? FilterMiddleProfitValue { get; set; }
+            public bool? FilterMiddleProfitIsOn { get; set; }
+            public decimal? FilterProfitFactorValue { get; set; }
+            public bool? FilterProfitFactorIsOn { get; set; }
+            public int? FilterDealsCountValue { get; set; }
+            public bool? FilterDealsCountIsOn { get; set; }
+            public DateTime? TimeStart { get; set; }
+            public DateTime? TimeEnd { get; set; }
+            public decimal? PercentOnFiltration { get; set; }
+            public int? IterationCount { get; set; }
+            public bool? LastInSample { get; set; }
+            public OptimizationMethodType? OptimizationMethod { get; set; }
+            public SortBotsType? ObjectiveMetric { get; set; }
+            public int? BayesianInitialSamples { get; set; }
+            public int? BayesianMaxIterations { get; set; }
+            public int? BayesianBatchSize { get; set; }
+            public ObjectiveDirectionType? ObjectiveDirection { get; set; }
+            public BayesianAcquisitionModeType? BayesianAcquisitionMode { get; set; }
+            public decimal? BayesianAcquisitionKappa { get; set; }
+            public bool? BayesianUseTailPass { get; set; }
+            public int? BayesianTailSharePercent { get; set; }
+            public bool? UseIndicatorCache { get; set; }
         }
 
         #endregion

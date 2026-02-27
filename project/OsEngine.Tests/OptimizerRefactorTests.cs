@@ -3,6 +3,7 @@
 
 using System.Collections.Generic;
 using System.Collections.Concurrent;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Runtime.Serialization;
@@ -1579,6 +1580,9 @@ public class OptimizerRefactorTests
                 UseIndicatorCache = false
             };
 
+            string content = File.ReadAllText(Path.Combine(Path.GetFullPath("Engine"), "OptimizerSettings.txt"));
+            Assert.StartsWith("{", content.TrimStart());
+
             OptimizerSettings reader = new OptimizerSettings();
 
             Assert.Equal(OptimizationMethodType.Bayesian, reader.OptimizationMethod);
@@ -1602,27 +1606,7 @@ public class OptimizerRefactorTests
         {
             using SettingsFileScope scope = new SettingsFileScope();
 
-            // Create a full modern settings file first.
-            _ = new OptimizerSettings
-            {
-                OptimizationMethod = OptimizationMethodType.Bayesian,
-                ObjectiveMetric = SortBotsType.Recovery,
-                BayesianInitialSamples = 99,
-                BayesianMaxIterations = 199,
-                BayesianBatchSize = 7,
-                ObjectiveDirection = ObjectiveDirectionType.Minimize,
-                BayesianAcquisitionMode = BayesianAcquisitionModeType.Greedy,
-                BayesianAcquisitionKappa = 0.77m,
-                BayesianUseTailPass = false,
-                BayesianTailSharePercent = 7
-            };
-
-            string[] fullLines = File.ReadAllLines(scope.SettingsPath);
-            Assert.True(fullLines.Length >= 5);
-
-            // Simulate legacy file by removing appended method-setting lines from the tail.
-            string[] legacyLines = fullLines.Take(fullLines.Length - 11).ToArray();
-            File.WriteAllLines(scope.SettingsPath, legacyLines);
+            File.WriteAllLines(scope.SettingsPath, BuildLegacyOptimizerSettingsLines(includeV2Fields: false));
 
             OptimizerSettings reader = new OptimizerSettings();
 
@@ -1674,31 +1658,12 @@ public class OptimizerRefactorTests
         {
             using SettingsFileScope scope = new SettingsFileScope();
 
-            // Create baseline settings file with all modern fields.
-            _ = new OptimizerSettings
-            {
-                OptimizationMethod = OptimizationMethodType.Bayesian,
-                ObjectiveMetric = SortBotsType.TotalProfit,
-                BayesianInitialSamples = 10,
-                BayesianMaxIterations = 20,
-                BayesianBatchSize = 3,
-                ObjectiveDirection = ObjectiveDirectionType.Maximize,
-                BayesianAcquisitionMode = BayesianAcquisitionModeType.Ucb,
-                BayesianAcquisitionKappa = 0.5m,
-                BayesianUseTailPass = true,
-                BayesianTailSharePercent = 20
-            };
-
-            string[] lines = File.ReadAllLines(scope.SettingsPath);
-            Assert.True(lines.Length >= 11);
-
-            // Patch last settings block with invalid numeric values.
-            lines[^9] = "0";     // BayesianInitialSamples
-            lines[^8] = "-10";   // BayesianMaxIterations
-            lines[^7] = "0";     // BayesianBatchSize
-            lines[^4] = "-7.5";  // BayesianAcquisitionKappa
-            lines[^2] = "999";   // BayesianTailSharePercent
-            File.WriteAllLines(scope.SettingsPath, lines);
+            File.WriteAllLines(scope.SettingsPath, BuildLegacyOptimizerSettingsLines(
+                bayesianInitialSamples: "0",
+                bayesianMaxIterations: "-10",
+                bayesianBatchSize: "0",
+                bayesianAcquisitionKappa: "-7.5",
+                bayesianTailSharePercent: "999"));
 
             OptimizerSettings reader = new OptimizerSettings();
 
@@ -1717,28 +1682,11 @@ public class OptimizerRefactorTests
         {
             using SettingsFileScope scope = new SettingsFileScope();
 
-            _ = new OptimizerSettings
-            {
-                OptimizationMethod = OptimizationMethodType.Bayesian,
-                ObjectiveMetric = SortBotsType.SharpRatio,
-                BayesianInitialSamples = 10,
-                BayesianMaxIterations = 20,
-                BayesianBatchSize = 3,
-                ObjectiveDirection = ObjectiveDirectionType.Minimize,
-                BayesianAcquisitionMode = BayesianAcquisitionModeType.ExpectedImprovement,
-                BayesianAcquisitionKappa = 0.5m,
-                BayesianUseTailPass = true,
-                BayesianTailSharePercent = 20
-            };
-
-            string[] lines = File.ReadAllLines(scope.SettingsPath);
-            Assert.True(lines.Length >= 11);
-
-            lines[^11] = "999"; // OptimizationMethod
-            lines[^10] = "999"; // ObjectiveMetric
-            lines[^6] = "999";  // ObjectiveDirection
-            lines[^5] = "999";  // BayesianAcquisitionMode
-            File.WriteAllLines(scope.SettingsPath, lines);
+            File.WriteAllLines(scope.SettingsPath, BuildLegacyOptimizerSettingsLines(
+                optimizationMethod: "999",
+                objectiveMetric: "999",
+                objectiveDirection: "999",
+                bayesianAcquisitionMode: "999"));
 
             OptimizerSettings reader = new OptimizerSettings();
 
@@ -1756,32 +1704,15 @@ public class OptimizerRefactorTests
         {
             using SettingsFileScope scope = new SettingsFileScope();
 
-            _ = new OptimizerSettings
-            {
-                OptimizationMethod = OptimizationMethodType.Bayesian,
-                ObjectiveMetric = SortBotsType.TotalProfit,
-                BayesianInitialSamples = 10,
-                BayesianMaxIterations = 20,
-                BayesianBatchSize = 3,
-                ObjectiveDirection = ObjectiveDirectionType.Maximize,
-                BayesianAcquisitionMode = BayesianAcquisitionModeType.Ucb,
-                BayesianAcquisitionKappa = 0.5m,
-                BayesianUseTailPass = true,
-                BayesianTailSharePercent = 20
-            };
-
-            string[] lines = File.ReadAllLines(scope.SettingsPath);
-            Assert.True(lines.Length >= 11);
-
-            lines[^9] = "broken-int"; // BayesianInitialSamples
-            lines[^8] = "33";         // BayesianMaxIterations
-            lines[^7] = "4";          // BayesianBatchSize
-            lines[^6] = "Minimize";   // ObjectiveDirection
-            lines[^5] = "Greedy";     // BayesianAcquisitionMode
-            lines[^4] = "0.9";        // BayesianAcquisitionKappa
-            lines[^3] = "False";      // BayesianUseTailPass
-            lines[^2] = "17";         // BayesianTailSharePercent
-            File.WriteAllLines(scope.SettingsPath, lines);
+            File.WriteAllLines(scope.SettingsPath, BuildLegacyOptimizerSettingsLines(
+                bayesianInitialSamples: "broken-int",
+                bayesianMaxIterations: "33",
+                bayesianBatchSize: "4",
+                objectiveDirection: "Minimize",
+                bayesianAcquisitionMode: "Greedy",
+                bayesianAcquisitionKappa: "0.9",
+                bayesianUseTailPass: "False",
+                bayesianTailSharePercent: "17"));
 
             OptimizerSettings reader = new OptimizerSettings();
 
@@ -1803,25 +1734,8 @@ public class OptimizerRefactorTests
         {
             using SettingsFileScope scope = new SettingsFileScope();
 
-            _ = new OptimizerSettings
-            {
-                OptimizationMethod = OptimizationMethodType.Bayesian,
-                ObjectiveMetric = SortBotsType.TotalProfit,
-                BayesianInitialSamples = 10,
-                BayesianMaxIterations = 20,
-                BayesianBatchSize = 3,
-                ObjectiveDirection = ObjectiveDirectionType.Maximize,
-                BayesianAcquisitionMode = BayesianAcquisitionModeType.Ucb,
-                BayesianAcquisitionKappa = 0.5m,
-                BayesianUseTailPass = true,
-                BayesianTailSharePercent = 20
-            };
-
-            string[] lines = File.ReadAllLines(scope.SettingsPath);
-            Assert.True(lines.Length >= 11);
-
-            lines[^4] = "0,9"; // BayesianAcquisitionKappa
-            File.WriteAllLines(scope.SettingsPath, lines);
+            File.WriteAllLines(scope.SettingsPath, BuildLegacyOptimizerSettingsLines(
+                bayesianAcquisitionKappa: "0,9"));
 
             OptimizerSettings reader = new OptimizerSettings();
 
@@ -1836,26 +1750,9 @@ public class OptimizerRefactorTests
         {
             using SettingsFileScope scope = new SettingsFileScope();
 
-            _ = new OptimizerSettings
-            {
-                OptimizationMethod = OptimizationMethodType.Bayesian,
-                ObjectiveMetric = SortBotsType.TotalProfit,
-                BayesianInitialSamples = 10,
-                BayesianMaxIterations = 20,
-                BayesianBatchSize = 3,
-                ObjectiveDirection = ObjectiveDirectionType.Maximize,
-                BayesianAcquisitionMode = BayesianAcquisitionModeType.Ucb,
-                BayesianAcquisitionKappa = 0.5m,
-                BayesianUseTailPass = true,
-                BayesianTailSharePercent = 20
-            };
-
-            string[] lines = File.ReadAllLines(scope.SettingsPath);
-            Assert.True(lines.Length >= 11);
-
-            lines[^3] = "not-a-bool"; // BayesianUseTailPass
-            lines[^2] = "17";         // BayesianTailSharePercent
-            File.WriteAllLines(scope.SettingsPath, lines);
+            File.WriteAllLines(scope.SettingsPath, BuildLegacyOptimizerSettingsLines(
+                bayesianUseTailPass: "not-a-bool",
+                bayesianTailSharePercent: "17"));
 
             OptimizerSettings reader = new OptimizerSettings();
 
@@ -2157,6 +2054,66 @@ public class OptimizerRefactorTests
 
             Assert.Null(bot);
         }
+    }
+
+    private static string[] BuildLegacyOptimizerSettingsLines(
+        bool includeV2Fields = true,
+        string optimizationMethod = "Bayesian",
+        string objectiveMetric = "TotalProfit",
+        string bayesianInitialSamples = "10",
+        string bayesianMaxIterations = "20",
+        string bayesianBatchSize = "3",
+        string objectiveDirection = "Maximize",
+        string bayesianAcquisitionMode = "Ucb",
+        string bayesianAcquisitionKappa = "0.5",
+        string bayesianUseTailPass = "True",
+        string bayesianTailSharePercent = "20",
+        string useIndicatorCache = "True")
+    {
+        List<string> lines = new List<string>
+        {
+            "1",
+            "legacy-strategy",
+            "100000",
+            "10",
+            "False",
+            "-10",
+            "False",
+            "0.001",
+            "False",
+            "1",
+            "False",
+            new DateTime(2025, 1, 1, 0, 0, 0, DateTimeKind.Utc).ToString("O", CultureInfo.InvariantCulture),
+            new DateTime(2025, 2, 1, 0, 0, 0, DateTimeKind.Utc).ToString("O", CultureInfo.InvariantCulture),
+            "30",
+            "0",
+            "False",
+            "False",
+            "1",
+            CommissionType.None.ToString(),
+            "0",
+            "False",
+            Enum.GetNames(typeof(OrderExecutionType))[0],
+            "0",
+            "0"
+        };
+
+        if (includeV2Fields)
+        {
+            lines.Add(optimizationMethod);
+            lines.Add(objectiveMetric);
+            lines.Add(bayesianInitialSamples);
+            lines.Add(bayesianMaxIterations);
+            lines.Add(bayesianBatchSize);
+            lines.Add(objectiveDirection);
+            lines.Add(bayesianAcquisitionMode);
+            lines.Add(bayesianAcquisitionKappa);
+            lines.Add(bayesianUseTailPass);
+            lines.Add(bayesianTailSharePercent);
+            lines.Add(useIndicatorCache);
+        }
+
+        return lines.ToArray();
     }
 
     private sealed class SettingsFileScope : IDisposable
