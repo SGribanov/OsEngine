@@ -12483,6 +12483,27 @@
 - Host-context verification (outside sandbox):
   - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed `484/484`
 
+## 2026-02-27 - Step 4.2 (nullable annotations) - TrailingUp parser/log contract cleanup (`#640`)
+
+- Applied localized nullable contract alignment in:
+  - `project/OsEngine/OsTrader/Grids/TrailingUp.cs`
+- Changes:
+  - parser input contract:
+    - `LoadFromString(string value)` -> `LoadFromString(string? value)`
+    - existing `string.IsNullOrWhiteSpace(value)` guard retained.
+  - log-event contract and dispatch:
+    - `LogMessageEvent` -> nullable event (`Action<string, LogMessageType>?`)
+    - dispatch switched to nullable-safe invoke `LogMessageEvent?.Invoke(message, type)`
+    - fallback to `ServerMaster.SendNewLogMessage(...)` for `Error` when no subscribers retained.
+- Scope:
+  - nullable contract cleanup only
+  - no changes to trailing grid algorithm behavior.
+
+### Verification
+
+- Host-context verification (outside sandbox):
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed `484/484`
+
 ## 2026-02-27 - Step 4.2 (nullable annotations) - CandleSeriesSaveInfo signature cleanup (`#633`)
 
 - Applied localized nullable-signature alignment in candle save-info holder:
