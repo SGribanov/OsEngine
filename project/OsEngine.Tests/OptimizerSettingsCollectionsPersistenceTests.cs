@@ -112,6 +112,11 @@ public class OptimizerSettingsCollectionsPersistenceTests
             writer.SaveClearingInfo();
             writer.SaveNonTradePeriods();
 
+            string clearingsContent = File.ReadAllText(scope.ClearingsPath);
+            string nonTradeContent = File.ReadAllText(scope.NonTradePeriodsPath);
+            Assert.StartsWith("{", clearingsContent.TrimStart());
+            Assert.StartsWith("{", nonTradeContent.TrimStart());
+
             OptimizerSettings reader = new OptimizerSettings();
 
             Assert.Equal(2, reader.ClearingTimes.Count);

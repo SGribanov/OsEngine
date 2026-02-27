@@ -279,13 +279,21 @@ namespace OsEngine.OsOptimizer.OptEntity
         {
             try
             {
-                List<string> lines = new List<string>();
+                OptimizerClearingsSettingsDto settings = new OptimizerClearingsSettingsDto
+                {
+                    Items = new List<OrderClearingDto>()
+                };
+
                 for (int i = 0; i < ClearingTimes.Count; i++)
                 {
-                    lines.Add(ClearingTimes[i].GetSaveString());
+                    settings.Items.Add(new OrderClearingDto
+                    {
+                        Time = ClearingTimes[i].Time,
+                        IsOn = ClearingTimes[i].IsOn
+                    });
                 }
 
-                SafeFileWriter.WriteAllLines(GetClearingsPath(), lines);
+                SettingsManager.Save(GetClearingsPath(), settings);
             }
             catch (Exception ex)
             {
@@ -295,26 +303,38 @@ namespace OsEngine.OsOptimizer.OptEntity
 
         private void LoadClearingInfo()
         {
-            if (!File.Exists(GetClearingsPath()))
+            string path = GetClearingsPath();
+            if (!File.Exists(path))
             {
                 return;
             }
 
             try
             {
-                using (StreamReader reader = new StreamReader(GetClearingsPath()))
-                {
-                    while (reader.EndOfStream == false)
-                    {
-                        string? str = reader.ReadLine();
+                OptimizerClearingsSettingsDto? settings = SettingsManager.Load(
+                    path,
+                    defaultValue: null as OptimizerClearingsSettingsDto,
+                    legacyLoader: ParseLegacyClearingsContent);
 
-                        if (!string.IsNullOrEmpty(str))
-                        {
-                            OrderClearing clearings = new OrderClearing();
-                            clearings.SetFromString(str);
-                            ClearingTimes.Add(clearings);
-                        }
+                if (settings?.Items == null)
+                {
+                    return;
+                }
+
+                ClearingTimes.Clear();
+                for (int i = 0; i < settings.Items.Count; i++)
+                {
+                    OrderClearingDto item = settings.Items[i];
+                    if (item == null)
+                    {
+                        continue;
                     }
+
+                    ClearingTimes.Add(new OrderClearing
+                    {
+                        Time = item.Time,
+                        IsOn = item.IsOn
+                    });
                 }
             }
             catch (Exception ex)
@@ -352,13 +372,22 @@ namespace OsEngine.OsOptimizer.OptEntity
         {
             try
             {
-                List<string> lines = new List<string>();
+                OptimizerNonTradePeriodsSettingsDto settings = new OptimizerNonTradePeriodsSettingsDto
+                {
+                    Items = new List<NonTradePeriodDto>()
+                };
+
                 for (int i = 0; i < NonTradePeriods.Count; i++)
                 {
-                    lines.Add(NonTradePeriods[i].GetSaveString());
+                    settings.Items.Add(new NonTradePeriodDto
+                    {
+                        DateStart = NonTradePeriods[i].DateStart,
+                        DateEnd = NonTradePeriods[i].DateEnd,
+                        IsOn = NonTradePeriods[i].IsOn
+                    });
                 }
 
-                SafeFileWriter.WriteAllLines(GetNonTradePeriodsPath(), lines);
+                SettingsManager.Save(GetNonTradePeriodsPath(), settings);
             }
             catch (Exception ex)
             {
@@ -368,32 +397,104 @@ namespace OsEngine.OsOptimizer.OptEntity
 
         private void LoadNonTradePeriods()
         {
-            if (!File.Exists(GetNonTradePeriodsPath()))
+            string path = GetNonTradePeriodsPath();
+            if (!File.Exists(path))
             {
                 return;
             }
 
             try
             {
-                using (StreamReader reader = new StreamReader(GetNonTradePeriodsPath()))
-                {
-                    while (reader.EndOfStream == false)
-                    {
-                        string? str = reader.ReadLine();
+                OptimizerNonTradePeriodsSettingsDto? settings = SettingsManager.Load(
+                    path,
+                    defaultValue: null as OptimizerNonTradePeriodsSettingsDto,
+                    legacyLoader: ParseLegacyNonTradePeriodsContent);
 
-                        if (!string.IsNullOrEmpty(str))
-                        {
-                            NonTradePeriod period = new NonTradePeriod();
-                            period.SetFromString(str);
-                            NonTradePeriods.Add(period);
-                        }
+                if (settings?.Items == null)
+                {
+                    return;
+                }
+
+                NonTradePeriods.Clear();
+                for (int i = 0; i < settings.Items.Count; i++)
+                {
+                    NonTradePeriodDto item = settings.Items[i];
+                    if (item == null)
+                    {
+                        continue;
                     }
+
+                    NonTradePeriods.Add(new NonTradePeriod
+                    {
+                        DateStart = item.DateStart,
+                        DateEnd = item.DateEnd,
+                        IsOn = item.IsOn
+                    });
                 }
             }
             catch (Exception ex)
             {
                 LogMessageEvent?.Invoke(ex.ToString(), LogMessageType.Error);
             }
+        }
+
+        private static OptimizerClearingsSettingsDto ParseLegacyClearingsContent(string content)
+        {
+            OptimizerClearingsSettingsDto settings = new OptimizerClearingsSettingsDto
+            {
+                Items = new List<OrderClearingDto>()
+            };
+
+            string[] lines = content.Split(new[] { "\r\n", "\n" }, StringSplitOptions.None);
+            for (int i = 0; i < lines.Length; i++)
+            {
+                string line = lines[i];
+                if (string.IsNullOrWhiteSpace(line))
+                {
+                    continue;
+                }
+
+                OrderClearing clearing = new OrderClearing();
+                clearing.SetFromString(line);
+
+                settings.Items.Add(new OrderClearingDto
+                {
+                    Time = clearing.Time,
+                    IsOn = clearing.IsOn
+                });
+            }
+
+            return settings;
+        }
+
+        private static OptimizerNonTradePeriodsSettingsDto ParseLegacyNonTradePeriodsContent(string content)
+        {
+            OptimizerNonTradePeriodsSettingsDto settings = new OptimizerNonTradePeriodsSettingsDto
+            {
+                Items = new List<NonTradePeriodDto>()
+            };
+
+            string[] lines = content.Split(new[] { "\r\n", "\n" }, StringSplitOptions.None);
+            for (int i = 0; i < lines.Length; i++)
+            {
+                string line = lines[i];
+                if (string.IsNullOrWhiteSpace(line))
+                {
+                    continue;
+                }
+
+                NonTradePeriod period = new NonTradePeriod();
+                period.SetFromString(line);
+
+                settings.Items.Add(new NonTradePeriodDto
+                {
+                    DateStart = period.DateStart,
+                    DateEnd = period.DateEnd,
+                    IsOn = period.IsOn
+                });
+            }
+
+            return settings;
         }
 
         public void CreateNewNonTradePeriod()
@@ -1091,6 +1192,29 @@ namespace OsEngine.OsOptimizer.OptEntity
             public bool? BayesianUseTailPass { get; set; }
             public int? BayesianTailSharePercent { get; set; }
             public bool? UseIndicatorCache { get; set; }
+        }
+
+        private sealed class OptimizerClearingsSettingsDto
+        {
+            public List<OrderClearingDto>? Items { get; set; }
+        }
+
+        private sealed class OrderClearingDto
+        {
+            public DateTime Time { get; set; }
+            public bool IsOn { get; set; }
+        }
+
+        private sealed class OptimizerNonTradePeriodsSettingsDto
+        {
+            public List<NonTradePeriodDto>? Items { get; set; }
+        }
+
+        private sealed class NonTradePeriodDto
+        {
+            public DateTime DateStart { get; set; }
+            public DateTime DateEnd { get; set; }
+            public bool IsOn { get; set; }
         }
 
         #endregion

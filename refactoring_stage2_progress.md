@@ -12323,6 +12323,32 @@
   - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo --filter "FullyQualifiedName~OptimizerIndicatorCachePilotMetricsTests"` -> passed `1/1`
   - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed `484/484`
 
+## 2026-02-27 - Step 2.3 (JSON settings subsystem) - OptimizerSettings collections migration pass (`#626`)
+
+- Inventory snapshot (high-risk optimizer settings scope):
+  - migrated to JSON:
+    - `OptimizerSettings` main settings (`OptimizerSettings.txt`)
+    - `OptimizerSettings` clearing settings (`OptimizerMasterClearings.txt`)
+    - `OptimizerSettings` non-trade periods (`OptimizerMasterNonTradePeriods.txt`)
+  - legacy compatibility retained for line-based payloads in all three paths.
+- Changes:
+  - migrated `SaveClearingInfo/LoadClearingInfo` to JSON wrapper through `SettingsManager` with legacy loader fallback:
+    - `project/OsEngine/OsOptimizer/OptEntity/OptimizerSettings.cs`
+  - migrated `SaveNonTradePeriods/LoadNonTradePeriods` to JSON wrapper through `SettingsManager` with legacy loader fallback:
+    - `project/OsEngine/OsOptimizer/OptEntity/OptimizerSettings.cs`
+  - added DTO wrappers for collections persistence.
+  - expanded collections persistence tests to assert JSON save format while keeping legacy load coverage:
+    - `project/OsEngine.Tests/OptimizerSettingsCollectionsPersistenceTests.cs`
+- Scope:
+  - runtime persistence hardening in optimizer settings high-risk scope
+  - backward compatibility for existing line-based files preserved.
+
+### Verification
+
+- Host-context verification (outside sandbox):
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo --filter "FullyQualifiedName~OptimizerSettingsCollectionsPersistenceTests|FullyQualifiedName~OptimizerRefactorTests"` -> passed `79/79`
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed `484/484`
+
 ## 2026-02-27 - Step 2.3 (JSON settings subsystem) - OptimizerSettings core migration pass (`#626`)
 
 - Inventory (completion-pass scan):
