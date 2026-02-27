@@ -50,4 +50,20 @@ public class MyTradePersistenceTests
         ruTrade.SetTradeFromString("1&2&ord&26.02.2026 11:12:13&tr&Buy&SEC&1");
         Assert.Equal(new DateTime(2026, 2, 26, 11, 12, 13), ruTrade.Time);
     }
+
+    [Fact]
+    public void SetTradeFromString_ShouldSupportLegacyPayloadWithEmptyPosition()
+    {
+        MyTrade trade = new MyTrade();
+        trade.SetTradeFromString("1.5&2.5&ord&2026-02-26T11:12:13.0000000Z&tr&Sell&SEC&");
+
+        Assert.Equal(1.5m, trade.Volume);
+        Assert.Equal(2.5m, trade.Price);
+        Assert.Equal("ord", trade.NumberOrderParent);
+        Assert.Equal(new DateTime(2026, 2, 26, 11, 12, 13, DateTimeKind.Utc), trade.Time);
+        Assert.Equal("tr", trade.NumberTrade);
+        Assert.Equal(Side.Sell, trade.Side);
+        Assert.Equal("SEC", trade.SecurityNameCode);
+        Assert.Equal(string.Empty, trade.NumberPosition);
+    }
 }
