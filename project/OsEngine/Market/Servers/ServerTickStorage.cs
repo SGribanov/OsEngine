@@ -293,7 +293,13 @@ namespace OsEngine.Market.Servers
 
                         while (!reader.EndOfStream)
                         {
-                            tradesInStr.Add(reader.ReadLine());
+                            string? line = reader.ReadLine();
+                            if (string.IsNullOrWhiteSpace(line))
+                            {
+                                continue;
+                            }
+
+                            tradesInStr.Add(line);
                         }
 
                         for (int i2 = 0; i2 < tradesInStr.Count; i2++)
@@ -379,11 +385,9 @@ namespace OsEngine.Market.Servers
         /// </summary>
         private void SendNewLogMessage(string message, LogMessageType type)
         {
-            if (LogMessageEvent != null)
-            {
-                LogMessageEvent(message, type);
-            }
-            else if (type == LogMessageType.Error)
+            LogMessageEvent?.Invoke(message, type);
+
+            if (LogMessageEvent == null && type == LogMessageType.Error)
             { // if nobody is subscribed to us and there is a log error / если на нас никто не подписан и в логе ошибка
                 System.Windows.MessageBox.Show(message);
             }

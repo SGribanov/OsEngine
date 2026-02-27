@@ -12426,6 +12426,26 @@
 - Host-context verification (outside sandbox):
   - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed `484/484`
 
+## 2026-02-27 - Step 4.2 (nullable annotations) - ServerTickStorage line-read/log-event cleanup (`#637`)
+
+- Applied localized nullable hardening in:
+  - `project/OsEngine/Market/Servers/ServerTickStorage.cs`
+- Changes:
+  - loader file-read loop now handles nullable lines explicitly:
+    - `string? line = reader.ReadLine();`
+    - skips `null`/whitespace lines before parse list append.
+  - log event dispatch aligned to nullable-event contract:
+    - replaced manual null-check invoke with `LogMessageEvent?.Invoke(message, type)`.
+    - preserved message-box fallback for error messages when no subscribers exist.
+- Scope:
+  - nullable contract cleanup only
+  - no behavior changes in tick persistence logic for valid lines.
+
+### Verification
+
+- Host-context verification (outside sandbox):
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed `484/484`
+
 ## 2026-02-27 - Step 4.2 (nullable annotations) - CandleSeriesSaveInfo signature cleanup (`#633`)
 
 - Applied localized nullable-signature alignment in candle save-info holder:
