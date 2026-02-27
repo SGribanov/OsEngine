@@ -12981,3 +12981,18 @@
   - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` succeeded (`399/399`).
 - **Commit:** n/a (not committed in this session)
 - **Push:** n/a
+
+### Step 2.2 - InvariantCulture Coverage (Incremental Adoption #588)
+
+- **Status:** In Progress (increment completed)
+- **Plan item:** `refactoring_stage2_plan.md` -> Phase 2 / Step 2.2
+- **Changes:**
+  - Expanded core persistence parsing coverage for `Candle`:
+    - `project/OsEngine.Tests/CandleCoreTests.cs`
+  - Added roundtrip test for `StringToSave` / `SetCandleFromString` with time, OHLC, volume and open interest.
+  - Added invariant-format assertion under `ru-RU` process culture to lock decimal separator behavior in serialized candles.
+- **Verification:**
+  - Executed outside sandbox.
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` succeeded (`400/400`).
+- **Commit:** n/a (not committed in this session)
+- **Push:** n/a
