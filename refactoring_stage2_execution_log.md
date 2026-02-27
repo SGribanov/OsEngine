@@ -13041,3 +13041,18 @@
   - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` succeeded (`406/406`).
 - **Commit:** n/a (not committed in this session)
 - **Push:** n/a
+
+### Step 2.2 - InvariantCulture Coverage (Incremental Adoption #592)
+
+- **Status:** In Progress (increment completed)
+- **Plan item:** `refactoring_stage2_plan.md` -> Phase 2 / Step 2.2
+- **Changes:**
+  - Added core persistence parsing coverage for `NonTradePeriodInDay`:
+    - `project/OsEngine.Tests/NonTradePeriodInDayCoreTests.cs`
+  - Added roundtrip test for `GetSaveString()` / `LoadFromString()` for all configured period slots.
+  - Added legacy payload test ensuring reserved tail fields do not affect parsing of active fields.
+- **Verification:**
+  - Executed outside sandbox.
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` succeeded (`408/408`).
+- **Commit:** n/a (not committed in this session)
+- **Push:** n/a
