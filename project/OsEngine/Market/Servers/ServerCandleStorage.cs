@@ -414,11 +414,9 @@ namespace OsEngine.Market.Servers
         /// </summary>
         private void SendNewLogMessage(string message, LogMessageType type)
         {
-            if (LogMessageEvent != null)
-            {
-                LogMessageEvent(message, type);
-            }
-            else if (type == LogMessageType.Error)
+            LogMessageEvent?.Invoke(message, type);
+
+            if (LogMessageEvent == null && type == LogMessageType.Error)
             { // if nobody is subscribed to us and there is a log error / если на нас никто не подписан и в логе ошибка
                 System.Windows.MessageBox.Show(message);
             }

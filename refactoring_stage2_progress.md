@@ -12446,6 +12446,24 @@
 - Host-context verification (outside sandbox):
   - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed `484/484`
 
+## 2026-02-27 - Step 4.2 (nullable annotations) - ServerCandleStorage log-event dispatch cleanup (`#638`)
+
+- Applied localized nullable event-dispatch alignment in:
+  - `project/OsEngine/Market/Servers/ServerCandleStorage.cs`
+- Changes:
+  - updated log callback invoke to nullable-safe pattern:
+    - replaced manual `if (LogMessageEvent != null) { ... }` with `LogMessageEvent?.Invoke(message, type)`.
+  - preserved existing fallback behavior:
+    - still shows `MessageBox` for `Error` messages when no event subscribers exist.
+- Scope:
+  - nullable contract cleanup only
+  - no behavior changes in candle storage persistence flow.
+
+### Verification
+
+- Host-context verification (outside sandbox):
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed `484/484`
+
 ## 2026-02-27 - Step 4.2 (nullable annotations) - CandleSeriesSaveInfo signature cleanup (`#633`)
 
 - Applied localized nullable-signature alignment in candle save-info holder:
