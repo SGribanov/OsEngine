@@ -13690,3 +13690,23 @@
 - **Commit:** `925952572`
 - **Push:** n/a
 
+
+### Step 4.2 - Nullable Annotations (Incremental Adoption #629)
+
+- **Status:** In Progress (increment completed)
+- **Plan item:** `refactoring_stage2_plan.md` -> Phase 4 / Step 4.2
+- **Changes (server storage nullable cleanup):**
+  - Updated nullable contracts in:
+    - `project/OsEngine/Market/Servers/ServerTickStorage.cs`
+  - Runtime reference/event hardening:
+    - `_server` annotated as nullable (`AServer?`) with explicit guards before use.
+    - `TickLoadedEvent` and `LogMessageEvent` annotated nullable.
+  - Removed lazy-null collection patterns:
+    - `_securities` and `_tradeSaveInfo` converted to readonly initialized lists.
+  - Simplified conditional flow after guaranteed list initialization.
+- **Verification:**
+  - Executed outside sandbox.
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` succeeded (`484/484`).
+- **Commit:** `c0c8238d7`
+- **Push:** n/a
+
