@@ -212,4 +212,44 @@ public class OrderPersistenceTests
         Assert.Equal(0, loaded.CancellingTryCount);
         Assert.Equal(DateTime.MinValue, loaded.LastCancelTryLocalTime);
     }
+
+    [Fact]
+    public void SetOrderFromString_ShouldSupportPayloadWithOrderTypeAndNoServerName()
+    {
+        Order source = new Order
+        {
+            NumberUser = 9,
+            ServerType = ServerType.None,
+            NumberMarket = "legacy-len22",
+            Side = Side.Buy,
+            Price = 50m,
+            Volume = 1m,
+            VolumeExecute = 0m,
+            State = OrderStateType.Active,
+            TypeOrder = OrderPriceType.Limit,
+            SecurityNameCode = "SEC3",
+            PortfolioNumber = "PF3",
+            TimeCallBack = new DateTime(2026, 2, 27, 12, 10, 10),
+            TimeCreate = new DateTime(2026, 2, 27, 12, 10, 0),
+            LifeTime = TimeSpan.FromMinutes(2),
+            Comment = "legacy-len22",
+            OrderTypeTime = OrderTypeTime.Specified,
+            ServerName = "server-z",
+            IsSendToCancel = true,
+            CancellingTryCount = 1,
+            LastCancelTryLocalTime = new DateTime(2026, 2, 27, 12, 11, 0)
+        };
+
+        string[] fields = source.GetStringForSave().ToString().Split('@');
+        string payloadLen22 = string.Join("@", fields[..22]);
+
+        Order loaded = new Order();
+        loaded.SetOrderFromString(payloadLen22);
+
+        Assert.Equal(OrderTypeTime.Specified, loaded.OrderTypeTime);
+        Assert.Equal(string.Empty, loaded.ServerName);
+        Assert.False(loaded.IsSendToCancel);
+        Assert.Equal(0, loaded.CancellingTryCount);
+        Assert.Equal(DateTime.MinValue, loaded.LastCancelTryLocalTime);
+    }
 }

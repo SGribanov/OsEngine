@@ -11853,3 +11853,19 @@
 
 - Host-context verification (outside sandbox):
   - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed `417/417`
+
+## 2026-02-27 - Step 2.2 (InvariantCulture) - Order len22 tail compatibility coverage block
+
+- Expanded tests for `Order` persistence parsing paths:
+  - `project/OsEngine.Tests/OrderPersistenceTests.cs`
+- Changes:
+  - added compatibility test for payload length `22` where `OrderTypeTime` is present but `ServerName` and cancel-info tail are absent.
+  - asserted parser fallback defaults for omitted tail fields.
+- Scope:
+  - test-only hardening
+  - no production runtime behavior changes.
+
+### Verification
+
+- Host-context verification (outside sandbox):
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed `418/418`
