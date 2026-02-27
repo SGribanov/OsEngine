@@ -13011,3 +13011,18 @@
   - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` succeeded (`402/402`).
 - **Commit:** n/a (not committed in this session)
 - **Push:** n/a
+
+### Step 2.2 - InvariantCulture Coverage (Incremental Adoption #590)
+
+- **Status:** In Progress (increment completed)
+- **Plan item:** `refactoring_stage2_plan.md` -> Phase 2 / Step 2.2
+- **Changes:**
+  - Added core persistence parsing coverage for `PositionOpenerToStopLimit`:
+    - `project/OsEngine.Tests/PositionOpenerToStopCoreTests.cs`
+  - Added roundtrip test for `GetSaveString()` / `LoadFromString()` with enums, decimals and timestamps.
+  - Added legacy RU datetime parse test and invariant-decimal assertions on persisted payload fields.
+- **Verification:**
+  - Executed outside sandbox.
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` succeeded (`404/404`).
+- **Commit:** n/a (not committed in this session)
+- **Push:** n/a
