@@ -13941,3 +13941,21 @@
   - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` succeeded (`484/484`).
 - **Commit:** `a1e949877`
 - **Push:** n/a
+
+
+### Step 4.2 - Nullable Annotations (Incremental Adoption #643)
+
+- **Status:** In Progress (increment completed)
+- **Plan item:** `refactoring_stage2_plan.md` -> Phase 4 / Step 4.2
+- **Changes (TradeGridStopAndProfit parser/log contracts):**
+  - Updated `project/OsEngine/OsTrader/Grids/TradeGridStopAndProfit.cs`:
+    - `LoadFromString(string)` -> `LoadFromString(string?)`.
+    - added empty payload guard (`string.IsNullOrWhiteSpace(...)`).
+    - added field-by-field length/empty checks before parsing `Split('@')` values to prevent index overflow on malformed payloads.
+    - `LogMessageEvent` aligned to nullable event contract (`Action<string, LogMessageType>?`).
+    - logging dispatch changed to nullable-safe `LogMessageEvent?.Invoke(message, type)` with `Error` fallback preserved.
+- **Verification:**
+  - Executed outside sandbox.
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` succeeded (`484/484`).
+- **Commit:** `cbdc8cba2`
+- **Push:** n/a
