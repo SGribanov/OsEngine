@@ -78,35 +78,91 @@ namespace OsEngine.OsTrader.Grids
             return result;
         }
 
-        public void LoadFromString(string value)
+        public void LoadFromString(string? value)
         {
             try
             {
+                if (string.IsNullOrWhiteSpace(value))
+                {
+                    return;
+                }
+
                 string[] values = value.Split('@');
 
                 // stop grid by event
 
-                StopGridByMoveUpIsOn = Convert.ToBoolean(values[0]);
-                StopGridByMoveUpValuePercent = values[1].ToDecimal();
-                Enum.TryParse(values[2], out StopGridByMoveUpReaction);
+                if (values.Length > 0 && string.IsNullOrWhiteSpace(values[0]) == false)
+                {
+                    StopGridByMoveUpIsOn = Convert.ToBoolean(values[0]);
+                }
+                if (values.Length > 1 && string.IsNullOrWhiteSpace(values[1]) == false)
+                {
+                    StopGridByMoveUpValuePercent = values[1].ToDecimal();
+                }
+                if (values.Length > 2 && string.IsNullOrWhiteSpace(values[2]) == false)
+                {
+                    Enum.TryParse(values[2], out StopGridByMoveUpReaction);
+                }
 
-                StopGridByMoveDownIsOn = Convert.ToBoolean(values[3]);
-                StopGridByMoveDownValuePercent = values[4].ToDecimal();
-                Enum.TryParse(values[5], out StopGridByMoveDownReaction);
+                if (values.Length > 3 && string.IsNullOrWhiteSpace(values[3]) == false)
+                {
+                    StopGridByMoveDownIsOn = Convert.ToBoolean(values[3]);
+                }
+                if (values.Length > 4 && string.IsNullOrWhiteSpace(values[4]) == false)
+                {
+                    StopGridByMoveDownValuePercent = values[4].ToDecimal();
+                }
+                if (values.Length > 5 && string.IsNullOrWhiteSpace(values[5]) == false)
+                {
+                    Enum.TryParse(values[5], out StopGridByMoveDownReaction);
+                }
 
-                StopGridByPositionsCountIsOn = Convert.ToBoolean(values[6]);
-                StopGridByPositionsCountValue = Convert.ToInt32(values[7], CultureInfo.InvariantCulture);
-                Enum.TryParse(values[8], out StopGridByPositionsCountReaction);
+                if (values.Length > 6 && string.IsNullOrWhiteSpace(values[6]) == false)
+                {
+                    StopGridByPositionsCountIsOn = Convert.ToBoolean(values[6]);
+                }
+                if (values.Length > 7 && string.IsNullOrWhiteSpace(values[7]) == false)
+                {
+                    StopGridByPositionsCountValue = Convert.ToInt32(values[7], CultureInfo.InvariantCulture);
+                }
+                if (values.Length > 8 && string.IsNullOrWhiteSpace(values[8]) == false)
+                {
+                    Enum.TryParse(values[8], out StopGridByPositionsCountReaction);
+                }
 
-                StopGridByLifeTimeIsOn = Convert.ToBoolean(values[9]);
-                StopGridByLifeTimeSecondsToLife = Convert.ToInt32(values[10], CultureInfo.InvariantCulture);
-                Enum.TryParse(values[11], out StopGridByLifeTimeReaction);
+                if (values.Length > 9 && string.IsNullOrWhiteSpace(values[9]) == false)
+                {
+                    StopGridByLifeTimeIsOn = Convert.ToBoolean(values[9]);
+                }
+                if (values.Length > 10 && string.IsNullOrWhiteSpace(values[10]) == false)
+                {
+                    StopGridByLifeTimeSecondsToLife = Convert.ToInt32(values[10], CultureInfo.InvariantCulture);
+                }
+                if (values.Length > 11 && string.IsNullOrWhiteSpace(values[11]) == false)
+                {
+                    Enum.TryParse(values[11], out StopGridByLifeTimeReaction);
+                }
 
-                StopGridByTimeOfDayIsOn = Convert.ToBoolean(values[12]);
-                StopGridByTimeOfDayHour = Convert.ToInt32(values[13], CultureInfo.InvariantCulture);
-                StopGridByTimeOfDayMinute = Convert.ToInt32(values[14], CultureInfo.InvariantCulture);
-                StopGridByTimeOfDaySecond = Convert.ToInt32(values[15], CultureInfo.InvariantCulture);
-                Enum.TryParse(values[16], out StopGridByTimeOfDayReaction);
+                if (values.Length > 12 && string.IsNullOrWhiteSpace(values[12]) == false)
+                {
+                    StopGridByTimeOfDayIsOn = Convert.ToBoolean(values[12]);
+                }
+                if (values.Length > 13 && string.IsNullOrWhiteSpace(values[13]) == false)
+                {
+                    StopGridByTimeOfDayHour = Convert.ToInt32(values[13], CultureInfo.InvariantCulture);
+                }
+                if (values.Length > 14 && string.IsNullOrWhiteSpace(values[14]) == false)
+                {
+                    StopGridByTimeOfDayMinute = Convert.ToInt32(values[14], CultureInfo.InvariantCulture);
+                }
+                if (values.Length > 15 && string.IsNullOrWhiteSpace(values[15]) == false)
+                {
+                    StopGridByTimeOfDaySecond = Convert.ToInt32(values[15], CultureInfo.InvariantCulture);
+                }
+                if (values.Length > 16 && string.IsNullOrWhiteSpace(values[16]) == false)
+                {
+                    Enum.TryParse(values[16], out StopGridByTimeOfDayReaction);
+                }
             }
             catch (Exception e)
             {
@@ -263,17 +319,15 @@ namespace OsEngine.OsTrader.Grids
 
         public void SendNewLogMessage(string message, LogMessageType type)
         {
-            if (LogMessageEvent != null)
-            {
-                LogMessageEvent(message, type);
-            }
-            else if (type == LogMessageType.Error)
+            LogMessageEvent?.Invoke(message, type);
+
+            if (LogMessageEvent == null && type == LogMessageType.Error)
             {
                 ServerMaster.SendNewLogMessage(message, type);
             }
         }
 
-        public event Action<string, LogMessageType> LogMessageEvent;
+        public event Action<string, LogMessageType>? LogMessageEvent;
 
         #endregion
 
