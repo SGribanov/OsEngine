@@ -12464,6 +12464,25 @@
 - Host-context verification (outside sandbox):
   - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed `484/484`
 
+## 2026-02-27 - Step 4.2 (nullable annotations) - ServerCandleStorage series collection contract (`#639`)
+
+- Applied localized nullable collection-contract alignment in:
+  - `project/OsEngine/Market/Servers/ServerCandleStorage.cs`
+- Changes:
+  - updated series storage field contract:
+    - `List<CandleSeries>` -> `List<CandleSeries?>`
+  - marked field as readonly:
+    - `_series` now `private readonly ...` with existing initialization.
+  - this matches existing null-aware iteration guards in saver/remove flows.
+- Scope:
+  - nullable contract cleanup only
+  - no behavior changes in candle series tracking/saving flow.
+
+### Verification
+
+- Host-context verification (outside sandbox):
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed `484/484`
+
 ## 2026-02-27 - Step 4.2 (nullable annotations) - CandleSeriesSaveInfo signature cleanup (`#633`)
 
 - Applied localized nullable-signature alignment in candle save-info holder:

@@ -59,7 +59,7 @@ namespace OsEngine.Market.Servers
         /// <summary>
         /// securities for saving
         /// </summary>
-        private List<CandleSeries> _series = new List<CandleSeries>();
+        private readonly List<CandleSeries?> _series = new List<CandleSeries?>();
 
         /// <summary>
         /// save security data 
