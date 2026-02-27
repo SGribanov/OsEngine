@@ -13026,3 +13026,18 @@
   - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` succeeded (`404/404`).
 - **Commit:** n/a (not committed in this session)
 - **Push:** n/a
+
+### Step 2.2 - InvariantCulture Coverage (Incremental Adoption #591)
+
+- **Status:** In Progress (increment completed)
+- **Plan item:** `refactoring_stage2_plan.md` -> Phase 2 / Step 2.2
+- **Changes:**
+  - Added core persistence parsing coverage for `Security`:
+    - `project/OsEngine.Tests/SecurityCoreTests.cs`
+  - Added roundtrip test for `GetSaveStr()` / `LoadFromString()` including optional tail fields.
+  - Added legacy RU datetime parse test for `Expiration` and invariant-decimal assertions.
+- **Verification:**
+  - Executed outside sandbox.
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` succeeded (`406/406`).
+- **Commit:** n/a (not committed in this session)
+- **Push:** n/a
