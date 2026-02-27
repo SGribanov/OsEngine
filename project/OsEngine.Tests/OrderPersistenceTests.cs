@@ -293,4 +293,46 @@ public class OrderPersistenceTests
         Assert.Equal(0, loaded.CancellingTryCount);
         Assert.Equal(DateTime.MinValue, loaded.LastCancelTryLocalTime);
     }
+
+    [Fact]
+    public void SetOrderFromString_ShouldParseCancelInfo_WhenServerNameIsEmpty()
+    {
+        Order source = new Order
+        {
+            NumberUser = 11,
+            ServerType = ServerType.None,
+            NumberMarket = "legacy-empty-server",
+            Side = Side.Sell,
+            Price = 60m,
+            Volume = 1m,
+            VolumeExecute = 0m,
+            State = OrderStateType.Active,
+            TypeOrder = OrderPriceType.Limit,
+            SecurityNameCode = "SEC5",
+            PortfolioNumber = "PF5",
+            TimeCallBack = new DateTime(2026, 2, 27, 14, 10, 10),
+            TimeCreate = new DateTime(2026, 2, 27, 14, 10, 0),
+            LifeTime = TimeSpan.FromMinutes(2),
+            Comment = "legacy-empty-server",
+            OrderTypeTime = OrderTypeTime.Day,
+            ServerName = "server-will-be-empty",
+            IsSendToCancel = true,
+            CancellingTryCount = 4,
+            LastCancelTryLocalTime = new DateTime(2026, 2, 27, 14, 11, 0)
+        };
+
+        string[] fields = source.GetStringForSave().ToString().Split('@');
+        fields[21] = string.Empty;
+        fields[22] = "True&4&2026-02-27T14:11:00.0000000";
+        string payload = string.Join("@", fields);
+
+        Order loaded = new Order();
+        loaded.SetOrderFromString(payload);
+
+        Assert.Equal(OrderTypeTime.Day, loaded.OrderTypeTime);
+        Assert.Equal(string.Empty, loaded.ServerName);
+        Assert.True(loaded.IsSendToCancel);
+        Assert.Equal(4, loaded.CancellingTryCount);
+        Assert.Equal(new DateTime(2026, 2, 27, 14, 11, 0), loaded.LastCancelTryLocalTime);
+    }
 }

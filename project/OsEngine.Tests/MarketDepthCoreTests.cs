@@ -92,4 +92,22 @@ public class MarketDepthCoreTests
         Assert.Equal(101.1, loaded.Asks[0].Price);
         Assert.Equal(100.9, loaded.Bids[0].Price);
     }
+
+    [Fact]
+    public void GetSaveStringToAllDepfh_EmptyLevels_ShouldRoundTripWithoutErrors()
+    {
+        MarketDepth source = new MarketDepth
+        {
+            Time = new DateTime(2026, 2, 27, 19, 30, 1, 125)
+        };
+
+        string save = source.GetSaveStringToAllDepfh(10);
+
+        MarketDepth loaded = new MarketDepth();
+        loaded.SetMarketDepthFromString(save);
+
+        Assert.Empty(loaded.Asks);
+        Assert.Empty(loaded.Bids);
+        Assert.Equal(source.Time, loaded.Time);
+    }
 }

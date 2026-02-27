@@ -11917,3 +11917,24 @@
 
 - Host-context verification (outside sandbox):
   - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed `421/421`
+
+## 2026-02-27 - Step 2.2 (InvariantCulture) - Parser compatibility batch coverage hardening block #2
+
+- Expanded persistence parser compatibility tests in batch:
+  - `project/OsEngine.Tests/TradeCoreTests.cs`
+  - `project/OsEngine.Tests/MarketDepthCoreTests.cs`
+  - `project/OsEngine.Tests/PositionOpenerToStopCoreTests.cs`
+  - `project/OsEngine.Tests/OrderPersistenceTests.cs`
+- Changes:
+  - added `Trade` IQFeed buy-side inference test (`Ask == Price`, `Bid != Ask`).
+  - added `MarketDepth` empty-level save/load roundtrip compatibility test.
+  - added `PositionOpenerToStopLimit` mid-tail payload compatibility test (`OrderPriceType` present, `PositionNumber` absent).
+  - added `Order` compatibility test for empty `ServerName` with valid cancel-info payload.
+- Scope:
+  - test-only hardening
+  - no production runtime behavior changes.
+
+### Verification
+
+- Host-context verification (outside sandbox):
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed `425/425`

@@ -49,7 +49,7 @@ public class TradeCoreTests
     }
 
     [Fact]
-    public void SetTradeFromString_ShouldParseIqFeedFormatAndInferBuySide()
+    public void SetTradeFromString_ShouldParseIqFeedFormatAndInferSellSide()
     {
         Trade trade = new Trade();
 
@@ -76,6 +76,21 @@ public class TradeCoreTests
         Assert.Equal(100.4m, trade.Bid);
         Assert.Equal(100.6m, trade.Ask);
         Assert.Equal(Side.Sell, trade.Side);
+    }
+
+    [Fact]
+    public void SetTradeFromString_ShouldParseIqFeedFormatAndInferBuySide()
+    {
+        Trade trade = new Trade();
+
+        trade.SetTradeFromString("2024-01-02T15:30:45.0000000Z,100.6,7.25,100.5,100.6,S");
+
+        Assert.Equal(new DateTime(2024, 1, 2, 15, 30, 45, DateTimeKind.Utc), trade.Time);
+        Assert.Equal(100.6m, trade.Price);
+        Assert.Equal(7.25m, trade.Volume);
+        Assert.Equal(100.5m, trade.Bid);
+        Assert.Equal(100.6m, trade.Ask);
+        Assert.Equal(Side.Buy, trade.Side);
     }
 
     [Fact]

@@ -107,4 +107,19 @@ public class PositionOpenerToStopCoreTests
         Assert.Equal(OrderPriceType.Limit, loaded.OrderPriceType);
         Assert.Equal(0, loaded.PositionNumber);
     }
+
+    [Fact]
+    public void LoadFromString_ShouldSupportPayloadWithOrderPriceTypeAndNoPositionNumber()
+    {
+        string payload =
+            "SBER&tab-mid&18&NoLifeTime&101.5&100.5&HigherOrEqual&2.0&Buy&4&56&27.02.2026 16:30:45&signal-D&27.02.2026 16:25:40&Market";
+
+        PositionOpenerToStopLimit loaded = new PositionOpenerToStopLimit();
+        loaded.LoadFromString(payload);
+
+        Assert.Equal(OrderPriceType.Market, loaded.OrderPriceType);
+        Assert.Equal(0, loaded.PositionNumber);
+        Assert.Equal(101.5m, loaded.PriceOrder);
+        Assert.Equal(2.0m, loaded.Volume);
+    }
 }
