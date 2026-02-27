@@ -13328,3 +13328,19 @@
 - **Commit:** `1f8192398`
 - **Push:** n/a
 
+
+### Step 2.2 - InvariantCulture Coverage (Incremental Adoption #611)
+
+- **Status:** In Progress (increment completed)
+- **Plan item:** `refactoring_stage2_plan.md` -> Phase 2 / Step 2.2
+- **Changes:**
+  - Expanded `Order` parser compatibility coverage:
+    - `project/OsEngine.Tests/OrderPersistenceTests.cs`
+  - Added test for legacy payload with numeric cancel state value (`"7"`).
+  - Added assertion for enum numeric mapping to `OrderStateType.Cancel`.
+- **Verification:**
+  - Executed outside sandbox.
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` succeeded (`433/433`).
+- **Commit:** `af22a1775`
+- **Push:** n/a
+
