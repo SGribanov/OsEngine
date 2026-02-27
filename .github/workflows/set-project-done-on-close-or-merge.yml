@@ -1,0 +1,202 @@
+name: Set project status Done on close or merge
+
+on:
+  issues:
+    types:
+      - closed
+      - reopened
+  pull_request:
+    types:
+      - closed
+
+permissions:
+  contents: read
+  issues: read
+  pull-requests: read
+  repository-projects: write
+
+jobs:
+  update-project-status:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Update linked project items
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.ADD_TO_PROJECT_PAT || github.token }}
+          script: |
+            const owner = context.repo.owner;
+            const repo = context.repo.repo;
+            const projectNumber = 2;
+
+            async function getProjectAndStatusField() {
+              const projectData = await github.graphql(
+                `
+                query($owner:String!, $projectNumber:Int!) {
+                  user(login:$owner) {
+                    projectV2(number:$projectNumber) {
+                      id
+                      fields(first:50) {
+                        nodes {
+                          ... on ProjectV2SingleSelectField {
+                            id
+                            name
+                            options { id name }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+                `,
+                { owner, projectNumber }
+              );
+
+              const project = projectData.user?.projectV2;
+              if (!project) {
+                throw new Error(`Project #${projectNumber} not found for user ${owner}`);
+              }
+
+              const statusField = project.fields.nodes.find(
+                (f) => f && f.name === "Status"
+              );
+              if (!statusField) {
+                throw new Error("Status field not found in project");
+              }
+
+              const doneOption = statusField.options.find((o) => o.name === "Done");
+              const inProgressOption = statusField.options.find((o) => o.name === "In Progress");
+              if (!doneOption || !inProgressOption) {
+                throw new Error('Status options "Done" or "In Progress" not found');
+              }
+
+              return { project, statusField, doneOption, inProgressOption };
+            }
+
+            async function ensureProjectItem(projectId, contentId, existingNodes) {
+              let projectItemId =
+                existingNodes?.find((n) => n.project.id === projectId)?.id || null;
+
+              if (!projectItemId) {
+                const addItem = await github.graphql(
+                  `
+                  mutation($projectId:ID!, $contentId:ID!) {
+                    addProjectV2ItemById(input: { projectId:$projectId, contentId:$contentId }) {
+                      item { id }
+                    }
+                  }
+                  `,
+                  { projectId, contentId }
+                );
+                projectItemId = addItem.addProjectV2ItemById.item.id;
+              }
+
+              return projectItemId;
+            }
+
+            async function setStatus(projectId, itemId, fieldId, optionId) {
+              await github.graphql(
+                `
+                mutation($projectId:ID!, $itemId:ID!, $fieldId:ID!, $optionId:String!) {
+                  updateProjectV2ItemFieldValue(
+                    input: {
+                      projectId: $projectId
+                      itemId: $itemId
+                      fieldId: $fieldId
+                      value: { singleSelectOptionId: $optionId }
+                    }
+                  ) {
+                    projectV2Item { id }
+                  }
+                }
+                `,
+                { projectId, itemId, fieldId, optionId }
+              );
+            }
+
+            const { project, statusField, doneOption, inProgressOption } = await getProjectAndStatusField();
+
+            if (context.eventName === "issues") {
+              const issueNumber = context.payload.issue.number;
+              const issueState = context.payload.action; // closed | reopened
+
+              const issueData = await github.graphql(
+                `
+                query($owner:String!, $repo:String!, $issueNumber:Int!) {
+                  repository(owner:$owner, name:$repo) {
+                    issue(number:$issueNumber) {
+                      id
+                      number
+                      projectItems(first:20) {
+                        nodes {
+                          id
+                          project { id }
+                        }
+                      }
+                    }
+                  }
+                }
+                `,
+                { owner, repo, issueNumber }
+              );
+
+              const issue = issueData.repository?.issue;
+              if (!issue) {
+                core.info(`Issue #${issueNumber} not found`);
+                return;
+              }
+
+              const itemId = await ensureProjectItem(project.id, issue.id, issue.projectItems.nodes);
+              const optionId = issueState === "closed" ? doneOption.id : inProgressOption.id;
+              await setStatus(project.id, itemId, statusField.id, optionId);
+
+              core.info(
+                `Issue #${issue.number} moved to ${issueState === "closed" ? "Done" : "In Progress"}`
+              );
+              return;
+            }
+
+            if (context.eventName === "pull_request") {
+              const pr = context.payload.pull_request;
+              if (!pr.merged) {
+                core.info("PR was closed without merge. Skip status update.");
+                return;
+              }
+
+              const pull_number = pr.number;
+              const prData = await github.graphql(
+                `
+                query($owner:String!, $repo:String!, $pull_number:Int!) {
+                  repository(owner:$owner, name:$repo) {
+                    pullRequest(number:$pull_number) {
+                      number
+                      closingIssuesReferences(first:50) {
+                        nodes {
+                          id
+                          number
+                          projectItems(first:20) {
+                            nodes {
+                              id
+                              project { id }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+                `,
+                { owner, repo, pull_number }
+              );
+
+              const issues = prData.repository?.pullRequest?.closingIssuesReferences?.nodes || [];
+              core.info(`Linked closing issues: ${issues.length}`);
+              if (issues.length === 0) {
+                return;
+              }
+
+              for (const issue of issues) {
+                const itemId = await ensureProjectItem(project.id, issue.id, issue.projectItems.nodes);
+                await setStatus(project.id, itemId, statusField.id, doneOption.id);
+                core.info(`Issue #${issue.number} moved to Done`);
+              }
+            }
