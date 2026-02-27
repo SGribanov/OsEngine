@@ -149,4 +149,46 @@ public class SecurityCoreTests
         Assert.Equal(MinTradeAmountType.Contract, loaded.MinTradeAmountType);
         Assert.Equal(0m, loaded.MarginSell);
     }
+
+    [Fact]
+    public void LoadFromString_ShouldSupportLegacyPayloadWithOnlyVolumeStepFromOptionalTail()
+    {
+        string payloadWithVolumeStepOnly =
+            "MOEX\nTQBR\nMoscow Exchange\nid-901\nActiv\n0.01\n10\n0.01\n500\nStock\n2\n150\n250\nNone\n0\n2026-02-27T15:30:45.0000000Z\n0\n1\n0.05";
+
+        Security loaded = new Security();
+        loaded.LoadFromString(payloadWithVolumeStepOnly);
+
+        Assert.Equal(0.05m, loaded.VolumeStep);
+        Assert.Equal(MinTradeAmountType.Contract, loaded.MinTradeAmountType);
+        Assert.Equal(0m, loaded.MarginSell);
+    }
+
+    [Fact]
+    public void LoadFromString_ShouldSupportLegacyPayloadWithVolumeStepAndMinTradeAmountTypeOnly()
+    {
+        string payloadWithTwoOptionalFields =
+            "NVTK\nTQBR\nNovatek\nid-902\nActiv\n0.1\n1\n0.1\n450\nStock\n2\n800\n1200\nNone\n0\n2026-02-27T15:30:45.0000000Z\n0\n1\n0.1\nC_Currency";
+
+        Security loaded = new Security();
+        loaded.LoadFromString(payloadWithTwoOptionalFields);
+
+        Assert.Equal(0.1m, loaded.VolumeStep);
+        Assert.Equal(MinTradeAmountType.C_Currency, loaded.MinTradeAmountType);
+        Assert.Equal(0m, loaded.MarginSell);
+    }
+
+    [Fact]
+    public void LoadFromString_ShouldKeepDefaultMinTradeAmountTypeWhenLegacyTailEnumIsInvalid()
+    {
+        string payloadWithInvalidTailEnum =
+            "MAGN\nTQBR\nMagnitogorsk Iron and Steel Works\nid-903\nActiv\n0.01\n10\n0.01\n350\nStock\n2\n30\n80\nNone\n0\n2026-02-27T15:30:45.0000000Z\n0\n1\n0.01\nLegacyUnknown\n999";
+
+        Security loaded = new Security();
+        loaded.LoadFromString(payloadWithInvalidTailEnum);
+
+        Assert.Equal(0.01m, loaded.VolumeStep);
+        Assert.Equal(MinTradeAmountType.Contract, loaded.MinTradeAmountType);
+        Assert.Equal(999m, loaded.MarginSell);
+    }
 }

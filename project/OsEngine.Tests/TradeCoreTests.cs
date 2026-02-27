@@ -111,6 +111,52 @@ public class TradeCoreTests
     }
 
     [Fact]
+    public void SetTradeFromString_ShouldParseLegacyStandardFormatWithoutSideAndOptionalFields()
+    {
+        Trade trade = new Trade();
+
+        trade.SetTradeFromString("20240102,153045,77.7,3.5");
+
+        Assert.Equal(new DateTime(2024, 1, 2, 15, 30, 45), trade.Time);
+        Assert.Equal(77.7m, trade.Price);
+        Assert.Equal(3.5m, trade.Volume);
+        Assert.Equal(0, trade.MicroSeconds);
+        Assert.Equal(string.Empty, trade.Id);
+        Assert.Equal(0m, trade.Bid);
+        Assert.Equal(0m, trade.Ask);
+    }
+
+    [Fact]
+    public void SetTradeFromString_ShouldParseLegacyStandardFormatWithCaseInsensitiveSideAndEmptyId()
+    {
+        Trade trade = new Trade();
+
+        trade.SetTradeFromString("20240102,153045,100.5,7.25,bUy,42,");
+
+        Assert.Equal(new DateTime(2024, 1, 2, 15, 30, 45), trade.Time);
+        Assert.Equal(100.5m, trade.Price);
+        Assert.Equal(7.25m, trade.Volume);
+        Assert.Equal(Side.Buy, trade.Side);
+        Assert.Equal(42, trade.MicroSeconds);
+        Assert.Equal(string.Empty, trade.Id);
+    }
+
+    [Fact]
+    public void SetTradeFromString_ShouldParseIqFeedFormatWithInvariantDateWithoutTimezone()
+    {
+        Trade trade = new Trade();
+
+        trade.SetTradeFromString("2024-01-02 15:30:45,100.5,1,100.5,100.6,C");
+
+        Assert.Equal(new DateTime(2024, 1, 2, 15, 30, 45), trade.Time);
+        Assert.Equal(100.5m, trade.Price);
+        Assert.Equal(1m, trade.Volume);
+        Assert.Equal(100.5m, trade.Bid);
+        Assert.Equal(100.6m, trade.Ask);
+        Assert.Equal(Side.Sell, trade.Side);
+    }
+
+    [Fact]
     public void SetTradeFromString_ShouldIgnoreEmptyInput()
     {
         Trade trade = new Trade

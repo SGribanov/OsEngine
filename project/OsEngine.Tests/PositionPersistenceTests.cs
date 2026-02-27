@@ -219,6 +219,90 @@ public class PositionPersistenceTests
         Assert.Equal("LKOH", loaded.SecurityName);
     }
 
+    [Fact]
+    public void SetDealFromString_ShouldSupportLegacyLotsWithoutMarginValues()
+    {
+        Position source = new Position
+        {
+            Direction = Side.Buy,
+            State = PositionStateType.Open,
+            NameBot = "bot-legacy-lots",
+            Number = 58,
+            SecurityName = "SNGS"
+        };
+
+        string[] fields = source.GetStringForSave().ToString().Split('#');
+        fields[13] = "3.25";
+        string payload = string.Join("#", fields);
+
+        Position loaded = new Position();
+        loaded.SetDealFromString(payload);
+
+        Assert.Equal(3.25m, loaded.Lots);
+        Assert.Equal(0m, loaded.MarginBuy);
+        Assert.Equal(0m, loaded.MarginSell);
+        Assert.Equal("SNGS", loaded.SecurityName);
+    }
+
+    [Fact]
+    public void SetDealFromString_ShouldSkipMalformedLegacyCloseOrderEntries()
+    {
+        Position source = new Position
+        {
+            Direction = Side.Sell,
+            State = PositionStateType.Open,
+            NameBot = "bot-close-legacy",
+            Number = 59,
+            SecurityName = "NVTK"
+        };
+
+        source.AddNewCloseOrder(CreateOrder(
+            marketId: "close-valid",
+            side: Side.Buy,
+            timeCreate: new DateTime(2026, 2, 26, 12, 0, 0),
+            tradeId: "close-trade"));
+
+        string[] fields = source.GetStringForSave().ToString().Split('#');
+        string[] head = fields[..^3];
+        string[] tail = fields[^3..];
+        string payload = string.Join("#", head.Concat(new[] { "broken-close-entry" }).Concat(tail));
+
+        Position loaded = new Position();
+        loaded.SetDealFromString(payload);
+
+        Assert.NotNull(loaded.CloseOrders);
+        Assert.Single(loaded.CloseOrders);
+        Assert.Equal("close-valid", loaded.CloseOrders[0].NumberMarket);
+        Assert.Equal("NVTK", loaded.SecurityName);
+    }
+
+    [Fact]
+    public void SetDealFromString_ShouldIgnoreWhitespaceWrappedMarketFlags()
+    {
+        Position source = new Position
+        {
+            Direction = Side.Buy,
+            State = PositionStateType.Open,
+            NameBot = "bot-space-flags",
+            Number = 60,
+            StopIsMarket = true,
+            ProfitIsMarket = true,
+            SecurityName = "TATN"
+        };
+
+        string[] fields = source.GetStringForSave().ToString().Split('#');
+        fields[^3] = " True ";
+        fields[^2] = " false ";
+        string payload = string.Join("#", fields);
+
+        Position loaded = new Position();
+        loaded.SetDealFromString(payload);
+
+        Assert.False(loaded.StopIsMarket);
+        Assert.False(loaded.ProfitIsMarket);
+        Assert.Equal("TATN", loaded.SecurityName);
+    }
+
     private static Order CreateOrder(
         string marketId,
         Side side,

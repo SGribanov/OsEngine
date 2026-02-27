@@ -12198,3 +12198,22 @@
 
 - Host-context verification (outside sandbox):
   - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed `447/447`
+
+## 2026-02-28 - Step 2.2 (InvariantCulture) - Multi-file parser compatibility batch coverage block
+
+- Expanded persistence parser compatibility tests in batch:
+  - `project/OsEngine.Tests/PositionPersistenceTests.cs`
+  - `project/OsEngine.Tests/SecurityCoreTests.cs`
+  - `project/OsEngine.Tests/TradeCoreTests.cs`
+- Changes:
+  - `Position`: added legacy lots-without-margin payload coverage; malformed close-order entry tolerance; whitespace-wrapped market-flag compatibility behavior coverage.
+  - `Security`: added partial optional-tail compatibility coverage (`VolumeStep` only; `VolumeStep + MinTradeAmountType`) and invalid tail enum fallback behavior coverage.
+  - `Trade`: added legacy short standard-format parse coverage (without side/optional fields), case-insensitive side parse with empty id, and IQFeed invariant datetime-without-timezone coverage.
+- Scope:
+  - test-only hardening
+  - no production runtime behavior changes.
+
+### Verification
+
+- Host-context verification (outside sandbox):
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed `456/456`
