@@ -13597,3 +13597,29 @@
 - **Commit:** `d70fd6a81`
 - **Push:** n/a
 
+
+### Step 2.3 - JSON Settings Subsystem (Incremental Adoption #626)
+
+- **Status:** In Progress (increment completed)
+- **Plan item:** `refactoring_stage2_plan.md` -> Phase 2 / Step 2.3
+- **Changes (optimizer settings core migration pass):**
+  - Inventory check for completion pass:
+    - broad JSON subsystem coverage already present.
+    - remaining legacy readers mostly in strategy-specific settings paths.
+    - selected high-risk core hotspot for migration: `OptimizerSettings` main settings file.
+  - Migrated optimizer main settings persistence to JSON:
+    - `project/OsEngine/OsOptimizer/OptEntity/OptimizerSettings.cs`
+    - save path now uses `SettingsManager.Save(...)`.
+  - Added backward-compatible load adapter:
+    - JSON-first load path with fallback to legacy line-based payload parser.
+    - preserved legacy optional-tail defaults/clamping behavior for method settings fields.
+  - Updated tests for explicit compatibility semantics:
+    - `project/OsEngine.Tests/OptimizerRefactorTests.cs`
+    - added assertion that saved `OptimizerSettings` payload is JSON.
+    - converted line-index patch tests to explicit legacy payload fixtures.
+- **Verification:**
+  - Executed outside sandbox.
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` succeeded (`483/483`).
+- **Commit:** `95ae04954`
+- **Push:** n/a
+
