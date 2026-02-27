@@ -13576,3 +13576,24 @@
 - **Commit:** `c961c89d8`
 - **Push:** n/a
 
+
+### Step 2.1 - Atomic File Writes (Incremental Adoption #625)
+
+- **Status:** In Progress (increment completed)
+- **Plan item:** `refactoring_stage2_plan.md` -> Phase 2 / Step 2.1
+- **Changes (storage hotspot completion pass):**
+  - Completed atomic-write migration in:
+    - `project/OsEngine/Market/Servers/ServerTickStorage.cs`
+  - Replaced direct append `StreamWriter(..., append: true)` path with atomic append-through-rewrite:
+    - collect incremental lines for current save cycle.
+    - merge with existing file content.
+    - persist via `SafeFileWriter.WriteAllLines(...)`.
+  - Added helper `AppendLinesAtomically(...)` in `ServerTickStorage`.
+  - Scope audit result (`ServerTickStorage`, `ServerCandleStorage`, `TesterServer`, `OptimizerDataStorage`):
+    - no remaining direct `StreamWriter`/`File.WriteAll*` create-append write paths in audited files.
+- **Verification:**
+  - Executed outside sandbox.
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` succeeded (`483/483`).
+- **Commit:** `d70fd6a81`
+- **Push:** n/a
+
