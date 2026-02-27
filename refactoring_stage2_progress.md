@@ -12407,6 +12407,25 @@
 - Host-context verification (outside sandbox):
   - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed `484/484`
 
+## 2026-02-27 - Step 4.2 (nullable annotations) - ServerTickStorage local nullable contracts (`#636`)
+
+- Applied localized nullable local-contract alignment in:
+  - `project/OsEngine/Market/Servers/ServerTickStorage.cs`
+- Changes:
+  - aligned local trade-array variables with existing control flow:
+    - `List<Trade>[] allTrades` -> `List<Trade>[]? allTrades` in saver and loader paths.
+  - simplified nullable event invocation in loader completion path:
+    - retained `allTrades != null` guard
+    - switched callback invoke to `TickLoadedEvent?.Invoke(allTrades)`.
+- Scope:
+  - nullable contract alignment only
+  - no behavior changes in tick save/load flow.
+
+### Verification
+
+- Host-context verification (outside sandbox):
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed `484/484`
+
 ## 2026-02-27 - Step 4.2 (nullable annotations) - CandleSeriesSaveInfo signature cleanup (`#633`)
 
 - Applied localized nullable-signature alignment in candle save-info holder:

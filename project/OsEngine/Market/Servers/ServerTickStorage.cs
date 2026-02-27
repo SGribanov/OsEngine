@@ -144,7 +144,7 @@ namespace OsEngine.Market.Servers
                         return;
                     }
 
-                    List<Trade>[] allTrades = server.AllTrades;
+                    List<Trade>[]? allTrades = server.AllTrades;
 
                     for (int i1 = 0;
                         allTrades != null && Thread.CurrentThread.Name != "deleteThread" && i1 < allTrades.Length;
@@ -255,7 +255,7 @@ namespace OsEngine.Market.Servers
                     return;
                 }
 
-                List<Trade>[] allTrades = server.AllTrades;
+                List<Trade>[]? allTrades = server.AllTrades;
 
                 string[] saves = Directory.GetFiles(_pathName);
 
@@ -360,10 +360,9 @@ namespace OsEngine.Market.Servers
 
                 }
 
-                if (TickLoadedEvent != null
-                    && allTrades != null)
+                if (allTrades != null)
                 {
-                    TickLoadedEvent(allTrades);
+                    TickLoadedEvent?.Invoke(allTrades);
                 }
             }
             catch (Exception error)
