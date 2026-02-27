@@ -565,4 +565,37 @@ public class OrderPersistenceTests
 
         Assert.Equal(OrderStateType.Fail, loaded.State);
     }
+
+    [Fact]
+    public void SetOrderFromString_ShouldParseNumericPendingStateValue()
+    {
+        Order source = new Order
+        {
+            NumberUser = 19,
+            ServerType = ServerType.None,
+            NumberMarket = "ord-legacy-numeric-pending",
+            Side = Side.Buy,
+            Price = 76m,
+            Volume = 1m,
+            VolumeExecute = 0m,
+            State = OrderStateType.None,
+            TypeOrder = OrderPriceType.Limit,
+            SecurityNameCode = "SEC12",
+            PortfolioNumber = "PF12",
+            TimeCallBack = new DateTime(2026, 2, 27, 22, 10, 10),
+            TimeCreate = new DateTime(2026, 2, 27, 22, 10, 0),
+            LifeTime = TimeSpan.FromMinutes(1),
+            Comment = "legacy-numeric-pending",
+            OrderTypeTime = OrderTypeTime.Day
+        };
+
+        string[] fields = source.GetStringForSave().ToString().Split('@');
+        fields[8] = "3";
+        string payload = string.Join("@", fields);
+
+        Order loaded = new Order();
+        loaded.SetOrderFromString(payload);
+
+        Assert.Equal(OrderStateType.Pending, loaded.State);
+    }
 }
