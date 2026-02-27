@@ -11736,3 +11736,19 @@
 
 - Host-context verification (outside sandbox):
   - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed `406/406`
+
+## 2026-02-27 - Step 2.2 (InvariantCulture) - NonTradePeriodInDay persistence parse coverage hardening block
+
+- Expanded tests for `NonTradePeriodInDay` persistence parsing paths:
+  - `project/OsEngine.Tests/NonTradePeriodInDayCoreTests.cs`
+- Changes:
+  - added roundtrip test for `GetSaveString()` / `LoadFromString()` covering all five non-trade windows.
+  - added legacy payload test verifying reserved tail fields are ignored while core period fields are parsed correctly.
+- Scope:
+  - test-only hardening
+  - no production runtime behavior changes.
+
+### Verification
+
+- Host-context verification (outside sandbox):
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed `408/408`
