@@ -11752,3 +11752,19 @@
 
 - Host-context verification (outside sandbox):
   - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed `408/408`
+
+## 2026-02-27 - Step 2.2 (InvariantCulture) - Trade save/load roundtrip coverage hardening block
+
+- Expanded tests for `Trade` persistence parsing paths:
+  - `project/OsEngine.Tests/TradeCoreTests.cs`
+- Changes:
+  - added explicit roundtrip test for `GetSaveString()` -> `SetTradeFromString()` including optional depth fields (`Bid`, `Ask`, `BidsVolume`, `AsksVolume`).
+  - locked save/load compatibility for microseconds and trade id payload.
+- Scope:
+  - test-only hardening
+  - no production runtime behavior changes.
+
+### Verification
+
+- Host-context verification (outside sandbox):
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed `409/409`

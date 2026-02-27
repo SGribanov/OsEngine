@@ -107,4 +107,38 @@ public class TradeCoreTests
 
         Assert.Equal(new DateTime(2020, 1, 1), trade.Time);
     }
+
+    [Fact]
+    public void GetSaveString_SetTradeFromString_ShouldRoundTripWithDepthFields()
+    {
+        Trade source = new Trade
+        {
+            Time = new DateTime(2026, 2, 27, 18, 15, 30),
+            Price = 123.45m,
+            Volume = 7.89m,
+            Side = Side.Buy,
+            MicroSeconds = 321,
+            Id = "trade-100",
+            Bid = 123.4m,
+            Ask = 123.5m,
+            BidsVolume = 100m,
+            AsksVolume = 120m
+        };
+
+        string save = source.GetSaveString();
+
+        Trade loaded = new Trade();
+        loaded.SetTradeFromString(save);
+
+        Assert.Equal(source.Time, loaded.Time);
+        Assert.Equal(source.Price, loaded.Price);
+        Assert.Equal(source.Volume, loaded.Volume);
+        Assert.Equal(source.Side, loaded.Side);
+        Assert.Equal(source.MicroSeconds, loaded.MicroSeconds);
+        Assert.Equal(source.Id, loaded.Id);
+        Assert.Equal(source.Bid, loaded.Bid);
+        Assert.Equal(source.Ask, loaded.Ask);
+        Assert.Equal(source.BidsVolume, loaded.BidsVolume);
+        Assert.Equal(source.AsksVolume, loaded.AsksVolume);
+    }
 }
