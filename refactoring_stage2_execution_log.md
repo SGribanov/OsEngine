@@ -13266,3 +13266,18 @@
   - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` succeeded (`428/428`).
 - **Commit:** n/a (not committed in this session)
 - **Push:** n/a
+
+### Step 2.2 - InvariantCulture Coverage (Incremental Adoption #607)
+
+- **Status:** In Progress (increment completed)
+- **Plan item:** `refactoring_stage2_plan.md` -> Phase 2 / Step 2.2
+- **Changes:**
+  - Expanded `Order` parser compatibility coverage:
+    - `project/OsEngine.Tests/OrderPersistenceTests.cs`
+  - Added test for legacy misspelled order state value (`Patrial`).
+  - Added assertion for enum alias mapping to `OrderStateType.Partial`.
+- **Verification:**
+  - Executed outside sandbox.
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` succeeded (`429/429`).
+- **Commit:** n/a (not committed in this session)
+- **Push:** n/a
