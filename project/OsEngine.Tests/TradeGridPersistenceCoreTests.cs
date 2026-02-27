@@ -86,6 +86,28 @@ public class TradeGridPersistenceCoreTests
     }
 
     [Fact]
+    public void Stage2Step2_2_TrailingUp_LoadFromString_VeryShortLegacyPayload_ShouldNotThrowAndKeepDefaults()
+    {
+        TradeGrid grid = CreateBareGrid();
+        TrailingUp trailing = new TrailingUp(grid)
+        {
+            TrailingDownIsOn = true,
+            TrailingDownStep = 2m,
+            TrailingDownLimit = 20m
+        };
+
+        Exception? error = Record.Exception(() => trailing.LoadFromString("True@1.25"));
+
+        Assert.Null(error);
+        Assert.True(trailing.TrailingUpIsOn);
+        Assert.Equal(1.25m, trailing.TrailingUpStep);
+        Assert.Equal(0m, trailing.TrailingUpLimit);
+        Assert.True(trailing.TrailingDownIsOn);
+        Assert.Equal(2m, trailing.TrailingDownStep);
+        Assert.Equal(20m, trailing.TrailingDownLimit);
+    }
+
+    [Fact]
     public void Stage2Step2_2_TradeGrid_LoadFromString_LegacyPrimeShortTail_ShouldApplyFallbackDefaults()
     {
         TradeGrid source = CreateBareGrid();
@@ -136,4 +158,3 @@ public class TradeGridPersistenceCoreTests
         return grid;
     }
 }
-

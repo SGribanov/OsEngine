@@ -19,6 +19,7 @@ using Xunit;
 
 namespace OsEngine.Tests;
 
+[Collection("OptimizerSettingsFileSerial")]
 public class OptimizerRefactorTests
 {
     private static readonly object SettingsFileLock = new object();

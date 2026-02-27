@@ -73,21 +73,44 @@ namespace OsEngine.OsTrader.Grids
         {
             try
             {
+                if (string.IsNullOrWhiteSpace(value))
+                {
+                    return;
+                }
+
                 string[] values = value.Split('@');
 
-                TrailingUpIsOn = Convert.ToBoolean(values[0]);
-                TrailingUpStep = values[1].ToDecimal();
-                TrailingUpLimit = values[2].ToDecimal();
+                if (values.Length > 0 && string.IsNullOrEmpty(values[0]) == false)
+                {
+                    TrailingUpIsOn = Convert.ToBoolean(values[0]);
+                }
+                if (values.Length > 1 && string.IsNullOrEmpty(values[1]) == false)
+                {
+                    TrailingUpStep = values[1].ToDecimal();
+                }
+                if (values.Length > 2 && string.IsNullOrEmpty(values[2]) == false)
+                {
+                    TrailingUpLimit = values[2].ToDecimal();
+                }
 
-                TrailingDownIsOn = Convert.ToBoolean(values[3]);
-                TrailingDownStep = values[4].ToDecimal();
-                TrailingDownLimit = values[5].ToDecimal();
+                if (values.Length > 3 && string.IsNullOrEmpty(values[3]) == false)
+                {
+                    TrailingDownIsOn = Convert.ToBoolean(values[3]);
+                }
+                if (values.Length > 4 && string.IsNullOrEmpty(values[4]) == false)
+                {
+                    TrailingDownStep = values[4].ToDecimal();
+                }
+                if (values.Length > 5 && string.IsNullOrEmpty(values[5]) == false)
+                {
+                    TrailingDownLimit = values[5].ToDecimal();
+                }
 
-                if(string.IsNullOrEmpty(values[6]) == false)
+                if (values.Length > 6 && string.IsNullOrEmpty(values[6]) == false)
                 {
                     TrailingUpCanMoveExitOrder = Convert.ToBoolean(values[6]);
                 }
-                if (string.IsNullOrEmpty(values[7]) == false)
+                if (values.Length > 7 && string.IsNullOrEmpty(values[7]) == false)
                 {
                     TrailingDownCanMoveExitOrder = Convert.ToBoolean(values[7]);
                 }

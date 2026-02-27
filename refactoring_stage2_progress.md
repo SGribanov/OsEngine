@@ -12274,3 +12274,28 @@
 
 - Host-context verification (outside sandbox):
   - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed `479/479`
+
+## 2026-02-27 - Step 2.2 (InvariantCulture) - Optimizer settings parser compatibility coverage block (`#624`)
+
+- Expanded parser compatibility tests for optimizer settings collections:
+  - `project/OsEngine.Tests/OptimizerSettingsCollectionsPersistenceTests.cs`
+- Changes:
+  - added legacy line-based compatibility coverage for `OptimizerSettings.LoadClearingInfo()` (`OrderClearing.SetFromString` paths).
+  - added legacy line-based compatibility coverage for `OptimizerSettings.LoadNonTradePeriods()` (`NonTradePeriod.SetFromString` paths).
+  - added save/load roundtrip coverage for optimizer `ClearingTimes` and `NonTradePeriods` collections.
+  - introduced serial xUnit collection for file-backed optimizer settings tests to avoid `Engine\\OptimizerSettings.txt` file-lock races:
+    - `project/OsEngine.Tests/OptimizerRefactorTests.cs`
+    - `project/OsEngine.Tests/OptimizerSettingsCollectionsPersistenceTests.cs`
+- Runtime hardening discovered during verification:
+  - fixed `TrailingUp.LoadFromString()` short-payload crash (`IndexOutOfRangeException`) with safe length-gated parsing:
+    - `project/OsEngine/OsTrader/Grids/TrailingUp.cs`
+  - added regression test for very short legacy payload:
+    - `project/OsEngine.Tests/TradeGridPersistenceCoreTests.cs`
+- Scope:
+  - test coverage hardening + targeted runtime parser robustness fix
+  - no behavior changes for valid payloads.
+
+### Verification
+
+- Host-context verification (outside sandbox):
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed `483/483`
