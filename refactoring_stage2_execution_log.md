@@ -13751,3 +13751,19 @@
 - **Commit:** `dd1f8b922`
 - **Push:** n/a
 
+
+### Step 4.2 - Nullable Annotations (Incremental Adoption #632)
+
+- **Status:** In Progress (increment completed)
+- **Plan item:** `refactoring_stage2_plan.md` -> Phase 4 / Step 4.2
+- **Changes (TradeSaveInfo nullable contracts):**
+  - Updated `project/OsEngine/Market/Servers/ServerTickStorage.cs`:
+    - `TradeSaveInfo.NameSecurity` initialized to `string.Empty`.
+    - `TradeSaveInfo.LastTradeId` initialized to `string.Empty`.
+  - Purpose: remove nullable-unsafe uninitialized string fields in storage holder without behavior changes.
+- **Verification:**
+  - Executed outside sandbox.
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` succeeded (`484/484`).
+- **Commit:** `18b0d45c7`
+- **Push:** n/a
+
