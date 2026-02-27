@@ -425,7 +425,7 @@ namespace OsEngine.Market.Servers
 
         private DateTime _lastCandleTime;
 
-        public void InsertCandles(List<Candle> candles, int maxCount)
+        public void InsertCandles(List<Candle>? candles, int maxCount)
         {
             if (candles == null)
             {

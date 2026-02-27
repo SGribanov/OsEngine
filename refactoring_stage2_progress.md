@@ -12369,6 +12369,23 @@
 - Host-context verification (outside sandbox):
   - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed `484/484`
 
+## 2026-02-27 - Step 4.2 (nullable annotations) - CandleSeriesSaveInfo signature cleanup (`#633`)
+
+- Applied localized nullable-signature alignment in candle save-info holder:
+  - `project/OsEngine/Market/Servers/ServerCandleStorage.cs`
+- Changes:
+  - updated method contract to match existing nullable guard:
+    - `InsertCandles(List<Candle> candles, int maxCount)`
+    - -> `InsertCandles(List<Candle>? candles, int maxCount)`
+- Scope:
+  - nullable-safety contract alignment only
+  - no behavior changes in candle save/merge flow.
+
+### Verification
+
+- Host-context verification (outside sandbox):
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed `484/484`
+
 ## 2026-02-27 - Step 4.2 (nullable annotations) - TradeSaveInfo contracts cleanup (`#632`)
 
 - Applied localized nullable-contract cleanup in tick save-info holder:
