@@ -13492,3 +13492,22 @@
 - **Commit:** `d710dac06`
 - **Push:** n/a
 
+
+### Step 2.2 - InvariantCulture Coverage (Incremental Adoption #621)
+
+- **Status:** In Progress (increment completed)
+- **Plan item:** `refactoring_stage2_plan.md` -> Phase 2 / Step 2.2
+- **Changes (batch, multi-agent):**
+  - Expanded parser compatibility coverage in:
+    - `project/OsEngine.Tests/MyTradePersistenceTests.cs`
+    - `project/OsEngine.Tests/MarketDepthCoreTests.cs`
+    - `project/OsEngine.Tests/PositionOpenerToStopCoreTests.cs`
+  - Added 3 tests for `MyTrade` legacy parser/save compatibility.
+  - Added 3 tests for `MarketDepth` legacy parser compatibility.
+  - Added 3 tests for `PositionOpenerToStopLimit` legacy parser compatibility.
+- **Verification:**
+  - Executed outside sandbox.
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` succeeded (`465/465`).
+- **Commit:** `2b316635b`
+- **Push:** n/a
+
