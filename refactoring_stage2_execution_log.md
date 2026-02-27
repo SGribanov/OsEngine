@@ -13511,3 +13511,22 @@
 - **Commit:** `2b316635b`
 - **Push:** n/a
 
+
+### Step 2.2 - InvariantCulture Coverage (Incremental Adoption #622)
+
+- **Status:** In Progress (increment completed)
+- **Plan item:** `refactoring_stage2_plan.md` -> Phase 2 / Step 2.2
+- **Changes (batch, multi-agent):**
+  - Expanded parser compatibility coverage in:
+    - `project/OsEngine.Tests/CandleCoreTests.cs`
+    - `project/OsEngine.Tests/NonTradePeriodInDayCoreTests.cs`
+    - `project/OsEngine.Tests/StrategyParameterNumericTimeCoreTests.cs`
+  - Added 3 tests for `Candle` legacy parser/save compatibility.
+  - Added 3 tests for `NonTradePeriodInDay` legacy parser/save compatibility.
+  - Added 3 tests for `StrategyParameterNumericTime` legacy parsing compatibility.
+- **Verification:**
+  - Executed outside sandbox.
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` succeeded (`474/474`).
+- **Commit:** `5a988e5e1`
+- **Push:** n/a
+
