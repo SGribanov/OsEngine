@@ -11837,3 +11837,19 @@
 
 - Host-context verification (outside sandbox):
   - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed `416/416`
+
+## 2026-02-27 - Step 2.2 (InvariantCulture) - Position market-flag case-insensitive parsing coverage block
+
+- Expanded tests for `Position` persistence parsing paths:
+  - `project/OsEngine.Tests/PositionPersistenceTests.cs`
+- Changes:
+  - added compatibility test for lowercase `true/false` market flags in `SetDealFromString()` tail fields.
+  - locked case-insensitive parsing behavior for `StopIsMarket` / `ProfitIsMarket`.
+- Scope:
+  - test-only hardening
+  - no production runtime behavior changes.
+
+### Verification
+
+- Host-context verification (outside sandbox):
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed `417/417`

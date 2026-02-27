@@ -166,6 +166,32 @@ public class PositionPersistenceTests
         Assert.False(loaded.ProfitIsMarket);
     }
 
+    [Fact]
+    public void SetDealFromString_ShouldParseLowercaseMarketFlags()
+    {
+        Position source = new Position
+        {
+            Direction = Side.Buy,
+            State = PositionStateType.Open,
+            NameBot = "bot-lower-flags",
+            Number = 56,
+            StopIsMarket = false,
+            ProfitIsMarket = true,
+            SecurityName = "ROSN"
+        };
+
+        string[] fields = source.GetStringForSave().ToString().Split('#');
+        fields[^3] = "true";
+        fields[^2] = "false";
+        string payload = string.Join("#", fields);
+
+        Position loaded = new Position();
+        loaded.SetDealFromString(payload);
+
+        Assert.True(loaded.StopIsMarket);
+        Assert.False(loaded.ProfitIsMarket);
+    }
+
     private static Order CreateOrder(
         string marketId,
         Side side,
