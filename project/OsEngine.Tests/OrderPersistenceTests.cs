@@ -400,4 +400,37 @@ public class OrderPersistenceTests
 
         Assert.Equal(OrderStateType.Partial, loaded.State);
     }
+
+    [Fact]
+    public void SetOrderFromString_ShouldParseLegacyMisspelledActiveState()
+    {
+        Order source = new Order
+        {
+            NumberUser = 14,
+            ServerType = ServerType.None,
+            NumberMarket = "ord-legacy-activ",
+            Side = Side.Sell,
+            Price = 71m,
+            Volume = 2m,
+            VolumeExecute = 0m,
+            State = OrderStateType.None,
+            TypeOrder = OrderPriceType.Limit,
+            SecurityNameCode = "SEC7",
+            PortfolioNumber = "PF7",
+            TimeCallBack = new DateTime(2026, 2, 27, 17, 10, 10),
+            TimeCreate = new DateTime(2026, 2, 27, 17, 10, 0),
+            LifeTime = TimeSpan.FromMinutes(1),
+            Comment = "legacy-activ",
+            OrderTypeTime = OrderTypeTime.Day
+        };
+
+        string[] fields = source.GetStringForSave().ToString().Split('@');
+        fields[8] = "Activ";
+        string payload = string.Join("@", fields);
+
+        Order loaded = new Order();
+        loaded.SetOrderFromString(payload);
+
+        Assert.Equal(OrderStateType.Active, loaded.State);
+    }
 }
