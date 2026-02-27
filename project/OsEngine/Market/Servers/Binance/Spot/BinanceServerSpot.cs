@@ -3141,7 +3141,7 @@ namespace OsEngine.Market.Servers.Binance.Spot
 
         #region 12 Queries
 
-        private object _queryHttpLocker = new object();
+        private readonly Lock _queryHttpLocker = new();
 
         private RateGate _rateGate = new RateGate(1, TimeSpan.FromMilliseconds(100));
 

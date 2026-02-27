@@ -12349,6 +12349,26 @@
   - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo --filter "FullyQualifiedName~OptimizerSettingsCollectionsPersistenceTests|FullyQualifiedName~OptimizerRefactorTests"` -> passed `79/79`
   - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed `484/484`
 
+## 2026-02-27 - Step 4.1 (lock migration) - cleanup pass for remaining object locks (`#628`)
+
+- Inventory in production scope:
+  - active `new object()` lock field found in:
+    - `project/OsEngine/Market/Servers/Binance/Spot/BinanceServerSpot.cs` (`_queryHttpLocker`)
+  - one additional commented occurrence in `MfdServer` ignored (non-runtime code path).
+- Changes:
+  - migrated lock object field to modern `Lock` type:
+    - `private object _queryHttpLocker = new object();`
+    - -> `private readonly Lock _queryHttpLocker = new();`
+  - existing `lock (_queryHttpLocker)` critical section preserved without behavior changes.
+- Scope:
+  - synchronization primitive modernization in touched path only
+  - no functional logic changes.
+
+### Verification
+
+- Host-context verification (outside sandbox):
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed `484/484`
+
 ## 2026-02-27 - Step 2.3 (JSON settings subsystem) - OptimizerSettings core migration pass (`#626`)
 
 - Inventory (completion-pass scan):
