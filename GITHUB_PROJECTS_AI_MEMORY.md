@@ -120,3 +120,5 @@ gh project item-list 2 --owner SGribanov
 1. Создать новую issue в `SGribanov/OsEngine`
 2. Открыть проект `Tasks`
 3. Убедиться, что карточка появилась автоматически в `Todo`
+
+Примечание: в workflow включен fallback на `github.token`, если `ADD_TO_PROJECT_PAT` не задан.
