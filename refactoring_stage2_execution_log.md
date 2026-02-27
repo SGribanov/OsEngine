@@ -13710,3 +13710,27 @@
 - **Commit:** `c0c8238d7`
 - **Push:** n/a
 
+
+### Step 4.2 - Nullable Annotations (Incremental Adoption #630)
+
+- **Status:** In Progress (increment completed)
+- **Plan item:** `refactoring_stage2_plan.md` -> Phase 4 / Step 4.2
+- **Changes (candle storage nullable cleanup):**
+  - Updated nullable contracts in:
+    - `project/OsEngine/Market/Servers/ServerCandleStorage.cs`
+  - Runtime reference/event hardening:
+    - `_server` annotated as nullable (`AServer?`) with explicit guard before use in saver thread.
+    - `LogMessageEvent` annotated nullable.
+  - Optional-load APIs clarified:
+    - `TryLoadCandle(...)` -> `CandleSeriesSaveInfo?`
+    - `GetCandles(...)` -> `List<Candle>?` (existing null behavior retained).
+  - Collection immutability/initialization cleanup:
+    - `_candleSeriesSaveInfos` converted to readonly initialized list.
+  - File parser hardening:
+    - nullable `ReadLine()` handling with whitespace skip guards in candle loading loops.
+- **Verification:**
+  - Executed outside sandbox.
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` succeeded (`484/484`).
+- **Commit:** `19d4ef795`
+- **Push:** n/a
+
