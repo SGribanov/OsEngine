@@ -13852,3 +13852,19 @@
   - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` succeeded (`484/484`).
 - **Commit:** `ba37e932d`
 - **Push:** n/a
+
+
+### Step 4.2 - Nullable Annotations (Incremental Adoption #638)
+
+- **Status:** In Progress (increment completed)
+- **Plan item:** `refactoring_stage2_plan.md` -> Phase 4 / Step 4.2
+- **Changes (ServerCandleStorage log-event dispatch):**
+  - Updated `project/OsEngine/Market/Servers/ServerCandleStorage.cs`:
+    - changed log callback dispatch to nullable-safe invoke: `LogMessageEvent?.Invoke(message, type)`.
+    - kept existing `MessageBox` fallback for `Error` messages when no subscribers exist.
+  - Purpose: align event invocation style with nullable event contract, without changing behavior.
+- **Verification:**
+  - Executed outside sandbox.
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` succeeded (`484/484`).
+- **Commit:** `326589f12`
+- **Push:** n/a
