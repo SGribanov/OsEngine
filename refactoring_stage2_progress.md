@@ -12369,6 +12369,29 @@
 - Host-context verification (outside sandbox):
   - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed `484/484`
 
+## 2026-02-27 - Step 4.2 (nullable annotations) - candle storage nullable cleanup pass (`#630`)
+
+- Applied localized nullable hardening in candle storage runtime path:
+  - `project/OsEngine/Market/Servers/ServerCandleStorage.cs`
+- Changes:
+  - clarified nullable contracts for mutable runtime refs/events:
+    - `_server` -> `AServer?`
+    - `LogMessageEvent` -> nullable event
+  - clarified nullable-return APIs used as optional loaders:
+    - `TryLoadCandle(...)` -> `CandleSeriesSaveInfo?`
+    - `GetCandles(...)` -> `List<Candle>?` (existing null return preserved)
+  - made `_candleSeriesSaveInfos` readonly initialized list.
+  - added explicit null guard for `_server` in saver thread before dereference.
+  - hardened file-read loops for nullable `ReadLine()` values with whitespace skip.
+- Scope:
+  - nullable-safety cleanup only
+  - no behavior changes in candle storage persistence flow.
+
+### Verification
+
+- Host-context verification (outside sandbox):
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed `484/484`
+
 ## 2026-02-27 - Step 4.2 (nullable annotations) - server storage nullable cleanup pass (`#629`)
 
 - Applied localized nullable hardening in server tick storage runtime path:

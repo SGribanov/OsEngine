@@ -39,7 +39,7 @@ namespace OsEngine.Market.Servers
             saver.Start();
         }
 
-        private AServer _server;
+        private AServer? _server;
 
         /// <summary>
         /// directory for saving data
@@ -144,7 +144,13 @@ namespace OsEngine.Market.Servers
                         return;
                     }
 
-                    if(_server.IsDeleted == true)
+                    AServer? server = _server;
+                    if (server == null)
+                    {
+                        return;
+                    }
+
+                    if(server.IsDeleted == true)
                     {
                         _server = null;
                         return;
@@ -185,7 +191,7 @@ namespace OsEngine.Market.Servers
         /// <summary>
         /// objects storing information on collections of stored data
         /// </summary>
-        private List<CandleSeriesSaveInfo> _candleSeriesSaveInfos = new List<CandleSeriesSaveInfo>();
+        private readonly List<CandleSeriesSaveInfo> _candleSeriesSaveInfos = new List<CandleSeriesSaveInfo>();
 
         /// <summary>
         /// blocker of multithreaded access to specifications of data stored by the object
@@ -199,7 +205,7 @@ namespace OsEngine.Market.Servers
         {
             lock (_lockerSpec)
             {
-                CandleSeriesSaveInfo mySaveInfo = _candleSeriesSaveInfos.Find(s => s.Specification == specification);
+                CandleSeriesSaveInfo? mySaveInfo = _candleSeriesSaveInfos.Find(s => s.Specification == specification);
 
                 if (mySaveInfo == null)
                 {
@@ -260,11 +266,11 @@ namespace OsEngine.Market.Servers
         /// <summary>
         /// query previously saved security candles
         /// </summary>
-        public List<Candle> GetCandles(string specification, int count)
+        public List<Candle>? GetCandles(string specification, int count)
         {
             CandleSeriesSaveInfo mySaveInfo = GetSpecInfo(specification);
 
-            List<Candle> candles = mySaveInfo.AllCandlesInFile;
+            List<Candle>? candles = mySaveInfo.AllCandlesInFile;
 
             if (candles != null &&
                 candles.Count != 0 &&
@@ -291,7 +297,7 @@ namespace OsEngine.Market.Servers
         /// <summary>
         /// try to load paper candle data from the file system
         /// </summary>
-        public CandleSeriesSaveInfo TryLoadCandle(string specification)
+        public CandleSeriesSaveInfo? TryLoadCandle(string specification)
         {
             List<Candle> candlesFromServer = new List<Candle>();
 
@@ -303,7 +309,11 @@ namespace OsEngine.Market.Servers
                     {
                         while (reader.EndOfStream == false)
                         {
-                            string str = reader.ReadLine();
+                            string? str = reader.ReadLine();
+                            if (string.IsNullOrWhiteSpace(str))
+                            {
+                                continue;
+                            }
                             Candle newCandle = new Candle();
                             newCandle.SetCandleFromString(str);
                             candlesFromServer.Add(newCandle);
@@ -333,7 +343,11 @@ namespace OsEngine.Market.Servers
                     {
                         while (reader.EndOfStream == false)
                         {
-                            string str = reader.ReadLine();
+                            string? str = reader.ReadLine();
+                            if (string.IsNullOrWhiteSpace(str))
+                            {
+                                continue;
+                            }
                             Candle newCandle = new Candle();
                             newCandle.SetCandleFromString(str);
                             candlesFromOsData.Add(newCandle);
@@ -398,7 +412,7 @@ namespace OsEngine.Market.Servers
         /// <summary>
         /// outgoing log message
         /// </summary>
-        public event Action<string, LogMessageType> LogMessageEvent;
+        public event Action<string, LogMessageType>? LogMessageEvent;
 
     }
 
