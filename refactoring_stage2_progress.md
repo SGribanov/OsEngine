@@ -11768,3 +11768,19 @@
 
 - Host-context verification (outside sandbox):
   - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed `409/409`
+
+## 2026-02-27 - Step 2.2 (InvariantCulture) - Security legacy-short payload compatibility coverage block
+
+- Expanded tests for `Security` persistence parsing paths:
+  - `project/OsEngine.Tests/SecurityCoreTests.cs`
+- Changes:
+  - added compatibility test for legacy short payloads that do not contain optional tail fields (`VolumeStep`, `MinTradeAmountType`, `MarginSell`).
+  - asserted fallback defaults for omitted fields while preserving core parsed values.
+- Scope:
+  - test-only hardening
+  - no production runtime behavior changes.
+
+### Verification
+
+- Host-context verification (outside sandbox):
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed `410/410`

@@ -95,4 +95,23 @@ public class SecurityCoreTests
             CultureInfo.CurrentUICulture = originalUiCulture;
         }
     }
+
+    [Fact]
+    public void LoadFromString_ShouldSupportLegacyPayloadWithoutOptionalTailFields()
+    {
+        string legacyShort =
+            "LKOH\nTQBR\nLukoil\nid-555\nActiv\n0.05\n1\n0.05\n700\nStock\n2\n5000\n9000\nNone\n0\n2026-02-27T15:30:45.0000000Z\n0\n1";
+
+        Security loaded = new Security();
+        loaded.LoadFromString(legacyShort);
+
+        Assert.Equal("LKOH", loaded.Name);
+        Assert.Equal(0.05m, loaded.PriceStep);
+        Assert.Equal(1m, loaded.Lot);
+        Assert.Equal(700m, loaded.MarginBuy);
+        Assert.Equal(1m, loaded.MinTradeAmount);
+        Assert.Equal(0m, loaded.VolumeStep);
+        Assert.Equal(MinTradeAmountType.Contract, loaded.MinTradeAmountType);
+        Assert.Equal(0m, loaded.MarginSell);
+    }
 }
