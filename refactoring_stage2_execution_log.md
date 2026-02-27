@@ -13408,3 +13408,19 @@
 - **Commit:** `17232e0d7`
 - **Push:** n/a
 
+
+### Step 2.2 - InvariantCulture Coverage (Incremental Adoption #616)
+
+- **Status:** In Progress (increment completed)
+- **Plan item:** `refactoring_stage2_plan.md` -> Phase 2 / Step 2.2
+- **Changes:**
+  - Expanded `Order` parser compatibility coverage:
+    - `project/OsEngine.Tests/OrderPersistenceTests.cs`
+  - Added test for legacy payload with numeric none state value (`"1"`).
+  - Added assertion for enum numeric mapping to `OrderStateType.None`.
+- **Verification:**
+  - Executed outside sandbox.
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` succeeded (`438/438`).
+- **Commit:** `82912aff3`
+- **Push:** n/a
+
