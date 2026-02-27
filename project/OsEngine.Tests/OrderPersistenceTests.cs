@@ -433,4 +433,37 @@ public class OrderPersistenceTests
 
         Assert.Equal(OrderStateType.Active, loaded.State);
     }
+
+    [Fact]
+    public void SetOrderFromString_ShouldParseNumericStateValue()
+    {
+        Order source = new Order
+        {
+            NumberUser = 15,
+            ServerType = ServerType.None,
+            NumberMarket = "ord-legacy-numeric-state",
+            Side = Side.Buy,
+            Price = 72m,
+            Volume = 2m,
+            VolumeExecute = 1m,
+            State = OrderStateType.None,
+            TypeOrder = OrderPriceType.Limit,
+            SecurityNameCode = "SEC8",
+            PortfolioNumber = "PF8",
+            TimeCallBack = new DateTime(2026, 2, 27, 18, 10, 10),
+            TimeCreate = new DateTime(2026, 2, 27, 18, 10, 0),
+            LifeTime = TimeSpan.FromMinutes(1),
+            Comment = "legacy-numeric-state",
+            OrderTypeTime = OrderTypeTime.Day
+        };
+
+        string[] fields = source.GetStringForSave().ToString().Split('@');
+        fields[8] = "5";
+        string payload = string.Join("@", fields);
+
+        Order loaded = new Order();
+        loaded.SetOrderFromString(payload);
+
+        Assert.Equal(OrderStateType.Partial, loaded.State);
+    }
 }
