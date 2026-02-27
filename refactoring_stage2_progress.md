@@ -11704,3 +11704,19 @@
 
 - Host-context verification (outside sandbox):
   - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed `402/402`
+
+## 2026-02-27 - Step 2.2 (InvariantCulture) - PositionOpenerToStopLimit persistence parse coverage hardening block
+
+- Expanded tests for `PositionOpenerToStopLimit` persistence parsing paths:
+  - `project/OsEngine.Tests/PositionOpenerToStopCoreTests.cs`
+- Changes:
+  - added full roundtrip test for `GetSaveString()` / `LoadFromString()` including numeric fields, enums and timestamps.
+  - added legacy RU datetime parse coverage for `LastCandleTime` and `TimeCreate` with invariant decimal payload parsing.
+- Scope:
+  - test-only hardening
+  - no production runtime behavior changes.
+
+### Verification
+
+- Host-context verification (outside sandbox):
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed `404/404`
