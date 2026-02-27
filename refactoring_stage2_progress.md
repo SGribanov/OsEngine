@@ -11655,3 +11655,20 @@
   - silent-catch visibility hardening incrementally completed through `#583`;
   - persistence parse coverage extended for `Order`, `MyTrade`, `Trade`;
   - test suite increased to `397` passing tests.
+
+## 2026-02-27 - Step 2.2 (InvariantCulture) - Position persistence parse coverage hardening block
+
+- Expanded tests for `Position` persistence parsing paths:
+  - `project/OsEngine.Tests/PositionPersistenceTests.cs`
+- Changes:
+  - added full roundtrip test for `GetStringForSave()` / `SetDealFromString()` including open/close orders and stop/profit flags.
+  - added legacy RU datetime parse test for embedded order payload inside serialized position strings.
+  - documented/asserted current callback timestamp mapping behavior where order field index `15` is authoritative on load.
+- Scope:
+  - test-only hardening
+  - no production runtime behavior changes.
+
+### Verification
+
+- Host-context verification (outside sandbox):
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed `399/399`
