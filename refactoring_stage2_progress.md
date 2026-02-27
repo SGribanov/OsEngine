@@ -11688,3 +11688,19 @@
 
 - Host-context verification (outside sandbox):
   - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed `400/400`
+
+## 2026-02-27 - Step 2.2 (InvariantCulture) - MarketDepth persistence roundtrip coverage hardening block
+
+- Expanded tests for `MarketDepth` persistence parsing paths:
+  - `project/OsEngine.Tests/MarketDepthCoreTests.cs`
+- Changes:
+  - added roundtrip test for `GetSaveStringToAllDepfh()` -> `SetMarketDepthFromString()` covering timestamp milliseconds and ask/bid levels.
+  - added invariant-format assertion under `ru-RU` current culture to lock decimal separator behavior in saved depth payload.
+- Scope:
+  - test-only hardening
+  - no production runtime behavior changes.
+
+### Verification
+
+- Host-context verification (outside sandbox):
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed `402/402`
