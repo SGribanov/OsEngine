@@ -11885,3 +11885,19 @@
 
 - Host-context verification (outside sandbox):
   - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed `419/419`
+
+## 2026-02-27 - Step 2.2 (InvariantCulture) - Position invalid market-flag compatibility coverage block
+
+- Expanded tests for `Position` persistence parsing paths:
+  - `project/OsEngine.Tests/PositionPersistenceTests.cs`
+- Changes:
+  - added compatibility test for invalid market-flag tail values in `SetDealFromString()`.
+  - asserted fallback defaults when market-flag values are not recognized.
+- Scope:
+  - test-only hardening
+  - no production runtime behavior changes.
+
+### Verification
+
+- Host-context verification (outside sandbox):
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed `420/420`

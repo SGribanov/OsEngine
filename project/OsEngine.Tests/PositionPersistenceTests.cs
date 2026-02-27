@@ -192,6 +192,33 @@ public class PositionPersistenceTests
         Assert.False(loaded.ProfitIsMarket);
     }
 
+    [Fact]
+    public void SetDealFromString_ShouldIgnoreInvalidMarketFlags()
+    {
+        Position source = new Position
+        {
+            Direction = Side.Buy,
+            State = PositionStateType.Open,
+            NameBot = "bot-invalid-flags",
+            Number = 57,
+            StopIsMarket = true,
+            ProfitIsMarket = true,
+            SecurityName = "LKOH"
+        };
+
+        string[] fields = source.GetStringForSave().ToString().Split('#');
+        fields[^3] = "yes";
+        fields[^2] = "no";
+        string payload = string.Join("#", fields);
+
+        Position loaded = new Position();
+        loaded.SetDealFromString(payload);
+
+        Assert.False(loaded.StopIsMarket);
+        Assert.False(loaded.ProfitIsMarket);
+        Assert.Equal("LKOH", loaded.SecurityName);
+    }
+
     private static Order CreateOrder(
         string marketId,
         Side side,
