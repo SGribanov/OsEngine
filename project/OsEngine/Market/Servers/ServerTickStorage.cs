@@ -181,8 +181,9 @@ namespace OsEngine.Market.Servers
                         int lastSecond = allTrades[i1][tradeInfo.LastSaveIndex].Time.Second;
                         int lastMillisecond = allTrades[i1][tradeInfo.LastSaveIndex].MicroSeconds;
 
-                        using StreamWriter writer =
-                            new StreamWriter(_pathName + @"\" + allTrades[i1][0].SecurityNameCode + ".txt", true);
+                        string securityPath = _pathName + @"\" + allTrades[i1][0].SecurityNameCode + ".txt";
+                        List<string> linesToAppend = new List<string>();
+
                         for (int i = tradeInfo.LastSaveIndex; i < allTrades[i1].Count - 1; i++)
                         {
                             if (allTrades[i1][i].MicroSeconds == 0)
@@ -196,8 +197,10 @@ namespace OsEngine.Market.Servers
                                 allTrades[i1][i].MicroSeconds = lastMillisecond += 10;
                             }
 
-                            writer.WriteLine(allTrades[i1][i].GetSaveString());
+                            linesToAppend.Add(allTrades[i1][i].GetSaveString());
                         }
+
+                        AppendLinesAtomically(securityPath, linesToAppend);
                         tradeInfo.LastSaveIndex = allTrades[i1].Count - 1;
 
 
@@ -208,6 +211,24 @@ namespace OsEngine.Market.Servers
                     SendNewLogMessage(error.ToString(), LogMessageType.Error);
                 }
             }
+        }
+
+        private static void AppendLinesAtomically(string path, List<string> linesToAppend)
+        {
+            if (linesToAppend == null || linesToAppend.Count == 0)
+            {
+                return;
+            }
+
+            List<string> allLines = new List<string>();
+
+            if (File.Exists(path))
+            {
+                allLines.AddRange(File.ReadAllLines(path));
+            }
+
+            allLines.AddRange(linesToAppend);
+            SafeFileWriter.WriteAllLines(path, allLines);
         }
 
         private bool _weLoadTrades;

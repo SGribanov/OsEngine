@@ -12299,3 +12299,25 @@
 
 - Host-context verification (outside sandbox):
   - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed `483/483`
+
+## 2026-02-27 - Step 2.1 (Atomic File Writes) - storage hotspot completion pass (`#625`)
+
+- Completed atomic-write migration for remaining hotspot in server storage path:
+  - `project/OsEngine/Market/Servers/ServerTickStorage.cs`
+- Changes:
+  - replaced direct append `StreamWriter(..., append: true)` path with atomic append-through-rewrite:
+    - collect incremental lines for current save cycle
+    - merge with existing file content
+    - persist via `SafeFileWriter.WriteAllLines(...)`
+  - introduced helper `AppendLinesAtomically(...)` in `ServerTickStorage`.
+- Audit result for target scope (`ServerTickStorage`, `ServerCandleStorage`, `TesterServer`, `OptimizerDataStorage`):
+  - no remaining direct `StreamWriter`/`File.WriteAll*` create-append write paths in audited files
+  - `SafeFileWriter` is used for write persistence paths in scope.
+- Scope:
+  - runtime persistence hardening (atomic write safety)
+  - no format/schema change in saved trade files.
+
+### Verification
+
+- Host-context verification (outside sandbox):
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed `483/483`
