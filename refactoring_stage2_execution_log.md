@@ -13392,3 +13392,19 @@
 - **Commit:** `3a6787a85`
 - **Push:** n/a
 
+
+### Step 2.2 - InvariantCulture Coverage (Incremental Adoption #615)
+
+- **Status:** In Progress (increment completed)
+- **Plan item:** `refactoring_stage2_plan.md` -> Phase 2 / Step 2.2
+- **Changes:**
+  - Expanded `Order` parser compatibility coverage:
+    - `project/OsEngine.Tests/OrderPersistenceTests.cs`
+  - Added test for legacy payload with numeric lost-after-active state value (`"8"`).
+  - Added assertion for enum numeric mapping to `OrderStateType.LostAfterActive`.
+- **Verification:**
+  - Executed outside sandbox.
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` succeeded (`437/437`).
+- **Commit:** `17232e0d7`
+- **Push:** n/a
+
