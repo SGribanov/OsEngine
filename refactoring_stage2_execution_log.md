@@ -13902,3 +13902,24 @@
   - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` succeeded (`484/484`).
 - **Commit:** `d9c207da6`
 - **Push:** n/a
+
+
+### Step 4.2 - Nullable Annotations (Incremental Adoption #641)
+
+- **Status:** In Progress (increment completed)
+- **Plan item:** `refactoring_stage2_plan.md` -> Phase 4 / Step 4.2
+- **Changes (TrailingUp grid lifecycle contract):**
+  - Updated `project/OsEngine/OsTrader/Grids/TrailingUp.cs`:
+    - `_grid` type aligned to nullable lifecycle (`TradeGrid?`) since `Delete()` nulls the field.
+    - added null guards before grid dereference in:
+      - `TryTrailingGrid()`
+      - `MaxGridPrice` getter
+      - `MinGridPrice` getter
+      - `ShiftGridDownOnValue(...)`
+      - `ShiftGridUpOnValue(...)`
+  - Purpose: prevent null-reference failures after delete lifecycle while preserving normal runtime behavior.
+- **Verification:**
+  - Executed outside sandbox.
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` succeeded (`484/484`).
+- **Commit:** `ef536a6f7`
+- **Push:** n/a
