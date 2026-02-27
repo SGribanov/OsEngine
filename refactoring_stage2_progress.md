@@ -12369,6 +12369,25 @@
 - Host-context verification (outside sandbox):
   - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed `484/484`
 
+## 2026-02-27 - Step 4.2 (nullable annotations) - ServerCandleStorage method-signature cleanup (`#634`)
+
+- Applied localized nullable-signature cleanup in candle storage methods:
+  - `project/OsEngine/Market/Servers/ServerCandleStorage.cs`
+- Changes:
+  - updated method signatures:
+    - `SetSeriesToSave(CandleSeries)` -> `SetSeriesToSave(CandleSeries?)`
+    - `RemoveSeries(CandleSeries)` -> `RemoveSeries(CandleSeries?)`
+    - `SaveSeries(CandleSeries)` -> `SaveSeries(CandleSeries?)`
+  - added early-return null guards in all three methods.
+- Scope:
+  - nullable-safety contract alignment only
+  - no behavior changes for valid non-null callers.
+
+### Verification
+
+- Host-context verification (outside sandbox):
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed `484/484`
+
 ## 2026-02-27 - Step 4.2 (nullable annotations) - CandleSeriesSaveInfo signature cleanup (`#633`)
 
 - Applied localized nullable-signature alignment in candle save-info holder:

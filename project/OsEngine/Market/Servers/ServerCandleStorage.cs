@@ -64,8 +64,13 @@ namespace OsEngine.Market.Servers
         /// <summary>
         /// save security data 
         /// </summary>
-        public void SetSeriesToSave(CandleSeries series)
+        public void SetSeriesToSave(CandleSeries? series)
         {
+            if (series == null)
+            {
+                return;
+            }
+
             string spec = series.Specification;
 
             if(string.IsNullOrEmpty(spec))
@@ -105,8 +110,13 @@ namespace OsEngine.Market.Servers
         /// <summary>
         /// delete the data series from the save
         /// </summary>
-        public void RemoveSeries(CandleSeries series)
+        public void RemoveSeries(CandleSeries? series)
         {
+            if (series == null)
+            {
+                return;
+            }
+
             for (int i = 0; i < _series.Count; i++)
             {
                 if (_series[i] == null)
@@ -227,8 +237,13 @@ namespace OsEngine.Market.Servers
         /// <summary>
         /// save the data series
         /// </summary>
-        private void SaveSeries(CandleSeries series)
+        private void SaveSeries(CandleSeries? series)
         {
+            if (series == null)
+            {
+                return;
+            }
+
             CandleSeriesSaveInfo mySaveInfo = GetSpecInfo(series.Specification);
 
             if (series.CandlesAll == null ||
