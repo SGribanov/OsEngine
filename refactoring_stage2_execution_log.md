@@ -13101,3 +13101,18 @@
   - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` succeeded (`411/411`).
 - **Commit:** n/a (not committed in this session)
 - **Push:** n/a
+
+### Step 2.2 - InvariantCulture Coverage (Incremental Adoption #596)
+
+- **Status:** In Progress (increment completed)
+- **Plan item:** `refactoring_stage2_plan.md` -> Phase 2 / Step 2.2
+- **Changes:**
+  - Expanded `PositionOpenerToStopLimit` parser compatibility coverage:
+    - `project/OsEngine.Tests/PositionOpenerToStopCoreTests.cs`
+  - Added test for legacy short payload without optional tail fields.
+  - Added assertions for fallback defaults on omitted fields.
+- **Verification:**
+  - Executed outside sandbox.
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` succeeded (`412/412`).
+- **Commit:** n/a (not committed in this session)
+- **Push:** n/a
