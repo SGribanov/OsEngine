@@ -11954,3 +11954,19 @@
 
 - Host-context verification (outside sandbox):
   - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed `426/426`
+
+## 2026-02-27 - Step 2.2 (InvariantCulture) - Security CRLF short-legacy payload compatibility coverage block
+
+- Expanded tests for `Security` persistence parsing paths:
+  - `project/OsEngine.Tests/SecurityCoreTests.cs`
+- Changes:
+  - added compatibility test for CRLF-formatted legacy-short payload without optional tail fields.
+  - asserted fallback defaults for omitted tail fields under CRLF input format.
+- Scope:
+  - test-only hardening
+  - no production runtime behavior changes.
+
+### Verification
+
+- Host-context verification (outside sandbox):
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed `427/427`
