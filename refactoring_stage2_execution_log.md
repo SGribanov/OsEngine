@@ -13734,3 +13734,20 @@
 - **Commit:** `19d4ef795`
 - **Push:** n/a
 
+
+### Step 4.2 - Nullable Annotations (Incremental Adoption #631)
+
+- **Status:** In Progress (increment completed)
+- **Plan item:** `refactoring_stage2_plan.md` -> Phase 4 / Step 4.2
+- **Changes (CandleSeriesSaveInfo nullable contracts):**
+  - Updated `project/OsEngine/Market/Servers/ServerCandleStorage.cs`:
+    - `CandleSeriesSaveInfo.AllCandlesInFile` annotated nullable (`List<Candle>?`).
+    - `CandleSeriesSaveInfo.Specification` initialized with non-null default (`string.Empty`).
+    - `SaveSeries(...)` safe-fallback conversion for nullable candle list before persistence.
+    - `TryTrim(...)` null guard added before list count/index operations.
+- **Verification:**
+  - Executed outside sandbox.
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` succeeded (`484/484`).
+- **Commit:** `dd1f8b922`
+- **Push:** n/a
+
