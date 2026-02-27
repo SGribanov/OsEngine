@@ -12996,3 +12996,18 @@
   - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` succeeded (`400/400`).
 - **Commit:** n/a (not committed in this session)
 - **Push:** n/a
+
+### Step 2.2 - InvariantCulture Coverage (Incremental Adoption #589)
+
+- **Status:** In Progress (increment completed)
+- **Plan item:** `refactoring_stage2_plan.md` -> Phase 2 / Step 2.2
+- **Changes:**
+  - Added core persistence parsing coverage for `MarketDepth`:
+    - `project/OsEngine.Tests/MarketDepthCoreTests.cs`
+  - Added roundtrip test for `GetSaveStringToAllDepfh()` / `SetMarketDepthFromString()` with timestamp and level payload.
+  - Added invariant-format assertion under `ru-RU` process culture for serialized market depth decimals.
+- **Verification:**
+  - Executed outside sandbox.
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` succeeded (`402/402`).
+- **Commit:** n/a (not committed in this session)
+- **Push:** n/a
