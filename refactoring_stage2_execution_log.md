@@ -13457,3 +13457,19 @@
 - **Commit:** `9f703bdd7`
 - **Push:** n/a
 
+
+### Step 2.2 - InvariantCulture Coverage (Incremental Adoption #619)
+
+- **Status:** In Progress (increment completed)
+- **Plan item:** `refactoring_stage2_plan.md` -> Phase 2 / Step 2.2
+- **Changes (batch):**
+  - Expanded `Order` parser compatibility coverage:
+    - `project/OsEngine.Tests/OrderPersistenceTests.cs`
+  - Added lowercase `State` parse tests for values `active`, `partial`, `cancel`.
+  - Added invalid-value fallback test for `State` (`not-a-valid-order-state`) and fixed expected assertion to current parser behavior (underlying enum value `0`).
+- **Verification:**
+  - Executed outside sandbox.
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` succeeded (`447/447`).
+- **Commit:** `656f3a2dd`
+- **Push:** n/a
+
