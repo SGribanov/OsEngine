@@ -13833,3 +13833,22 @@
   - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` succeeded (`484/484`).
 - **Commit:** `83961228b`
 - **Push:** n/a
+
+
+### Step 4.2 - Nullable Annotations (Incremental Adoption #637)
+
+- **Status:** In Progress (increment completed)
+- **Plan item:** `refactoring_stage2_plan.md` -> Phase 4 / Step 4.2
+- **Changes (ServerTickStorage line-read/log-event cleanup):**
+  - Updated `project/OsEngine/Market/Servers/ServerTickStorage.cs`:
+    - nullable-aware line read in loader loop:
+      - `string? line = reader.ReadLine();`
+      - skip `null`/whitespace lines before append to parse list.
+    - logging callback invoke aligned to nullable-event pattern:
+      - `LogMessageEvent?.Invoke(message, type)`.
+      - preserved error message-box fallback when no subscribers exist.
+- **Verification:**
+  - Executed outside sandbox.
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` succeeded (`484/484`).
+- **Commit:** `ba37e932d`
+- **Push:** n/a
