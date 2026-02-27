@@ -367,4 +367,37 @@ public class OrderPersistenceTests
         Assert.Equal("SEC@MAIN", loaded.SecurityNameCode);
         Assert.Equal("PORT@A", loaded.PortfolioNumber);
     }
+
+    [Fact]
+    public void SetOrderFromString_ShouldParseLegacyMisspelledPartialState()
+    {
+        Order source = new Order
+        {
+            NumberUser = 13,
+            ServerType = ServerType.None,
+            NumberMarket = "ord-legacy-patrial",
+            Side = Side.Buy,
+            Price = 70m,
+            Volume = 2m,
+            VolumeExecute = 1m,
+            State = OrderStateType.Active,
+            TypeOrder = OrderPriceType.Limit,
+            SecurityNameCode = "SEC6",
+            PortfolioNumber = "PF6",
+            TimeCallBack = new DateTime(2026, 2, 27, 16, 10, 10),
+            TimeCreate = new DateTime(2026, 2, 27, 16, 10, 0),
+            LifeTime = TimeSpan.FromMinutes(1),
+            Comment = "legacy-patrial",
+            OrderTypeTime = OrderTypeTime.Day
+        };
+
+        string[] fields = source.GetStringForSave().ToString().Split('@');
+        fields[8] = "Patrial";
+        string payload = string.Join("@", fields);
+
+        Order loaded = new Order();
+        loaded.SetOrderFromString(payload);
+
+        Assert.Equal(OrderStateType.Partial, loaded.State);
+    }
 }
