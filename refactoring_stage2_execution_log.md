@@ -13670,3 +13670,23 @@
 - **Commit:** `370dca426`
 - **Push:** n/a
 
+
+### Step 4.1 - Lock Migration (Incremental Adoption #628)
+
+- **Status:** In Progress (increment completed)
+- **Plan item:** `refactoring_stage2_plan.md` -> Phase 4 / Step 4.1
+- **Changes (cleanup pass for remaining object locks):**
+  - Inventory result in production code:
+    - active `new object()` lock field found in:
+      - `project/OsEngine/Market/Servers/Binance/Spot/BinanceServerSpot.cs` (`_queryHttpLocker`)
+    - one commented occurrence in `MfdServer` ignored as non-runtime path.
+  - Migrated active field to `Lock`:
+    - `private object _queryHttpLocker = new object();`
+    - -> `private readonly Lock _queryHttpLocker = new();`
+  - Existing `lock (_queryHttpLocker)` usage unchanged.
+- **Verification:**
+  - Executed outside sandbox.
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` succeeded (`484/484`).
+- **Commit:** `925952572`
+- **Push:** n/a
+
