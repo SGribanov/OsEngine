@@ -46,7 +46,7 @@ namespace OsEngine.Market.Servers
         /// <summary>
         /// Serviced connection
         /// </summary>
-        private AServer _server;
+        private AServer? _server;
 
         /// <summary>
         /// shows whether need to save trades
@@ -66,18 +66,13 @@ namespace OsEngine.Market.Servers
         /// <summary>
         /// securities for saving
         /// </summary>
-        private List<Security> _securities;
+        private readonly List<Security> _securities = new List<Security>();
 
         /// <summary>
         /// save security data 
         /// </summary>
         public void SetSecurityToSave(Security security)
         {
-            if (_securities == null)
-            {
-                _securities = new List<Security>();
-            }
-
             if (_securities.Find(security1 => security1.Name == security.Name) == null)
             {
                 _securities.Add(security);
@@ -87,12 +82,12 @@ namespace OsEngine.Market.Servers
         /// <summary>
         /// upload ticks for some instrument
         /// </summary>
-        public event Action<List<Trade>[]> TickLoadedEvent;
+        public event Action<List<Trade>[]>? TickLoadedEvent;
 
         /// <summary>
         /// service information for saving trades
         /// </summary>
-        private List<TradeSaveInfo> _tradeSaveInfo;
+        private readonly List<TradeSaveInfo> _tradeSaveInfo = new List<TradeSaveInfo>();
 
         // for saving in one file
 
@@ -101,8 +96,6 @@ namespace OsEngine.Market.Servers
         /// </summary>
         private void TickSaverSpaceInOneFile()
         {
-            _tradeSaveInfo = new List<TradeSaveInfo>();
-
             if (!Directory.Exists(_pathName))
             {
                 Directory.CreateDirectory(_pathName);
@@ -114,13 +107,19 @@ namespace OsEngine.Market.Servers
                 {
                     Thread.Sleep(15000);
 
-                    if(_server.IsDeleted == true)
+                    AServer? server = _server;
+                    if (server == null)
+                    {
+                        return;
+                    }
+
+                    if(server.IsDeleted == true)
                     {
                         _server = null;
                         return;
                     }
 
-                    if (_server.ServerStatus != ServerConnectStatus.Connect)
+                    if (server.ServerStatus != ServerConnectStatus.Connect)
                     {
                         continue;
                     }
@@ -140,7 +139,7 @@ namespace OsEngine.Market.Servers
                         return;
                     }
 
-                    List<Trade>[] allTrades = _server.AllTrades;
+                    List<Trade>[] allTrades = server.AllTrades;
 
                     for (int i1 = 0;
                         allTrades != null && Thread.CurrentThread.Name != "deleteThread" && i1 < allTrades.Length;
@@ -156,9 +155,7 @@ namespace OsEngine.Market.Servers
                             return;
                         }
 
-                        if (_securities == null ||
-                            (_securities != null &&
-                             _securities.Find(security => security.Name == allTrades[i1][0].SecurityNameCode) == null))
+                        if (_securities.Find(security => security.Name == allTrades[i1][0].SecurityNameCode) == null)
                         {
                             continue;
                         }
@@ -247,7 +244,13 @@ namespace OsEngine.Market.Servers
                     return;
                 }
 
-                List<Trade>[] allTrades = _server.AllTrades;
+                AServer? server = _server;
+                if (server == null)
+                {
+                    return;
+                }
+
+                List<Trade>[] allTrades = server.AllTrades;
 
                 string[] saves = Directory.GetFiles(_pathName);
 
@@ -385,7 +388,7 @@ namespace OsEngine.Market.Servers
         /// <summary>
         /// outgoing log message
         /// </summary>
-        public event Action<string, LogMessageType> LogMessageEvent;
+        public event Action<string, LogMessageType>? LogMessageEvent;
 
     }
 

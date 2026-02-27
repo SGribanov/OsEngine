@@ -12369,6 +12369,27 @@
 - Host-context verification (outside sandbox):
   - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed `484/484`
 
+## 2026-02-27 - Step 4.2 (nullable annotations) - server storage nullable cleanup pass (`#629`)
+
+- Applied localized nullable hardening in server tick storage runtime path:
+  - `project/OsEngine/Market/Servers/ServerTickStorage.cs`
+- Changes:
+  - clarified nullable contracts for mutable runtime references/events:
+    - `_server` -> `AServer?`
+    - `TickLoadedEvent` and `LogMessageEvent` -> nullable events
+  - removed null-prone lazy state by initializing collections eagerly:
+    - `_securities` and `_tradeSaveInfo` now readonly initialized lists
+  - added explicit null guards before using `_server` in save/load loops.
+  - simplified security filter logic after `_securities` initialization.
+- Scope:
+  - nullable-safety cleanup only
+  - no behavior changes in tick storage persistence flow.
+
+### Verification
+
+- Host-context verification (outside sandbox):
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed `484/484`
+
 ## 2026-02-27 - Step 2.3 (JSON settings subsystem) - OptimizerSettings core migration pass (`#626`)
 
 - Inventory (completion-pass scan):
