@@ -13623,3 +13623,27 @@
 - **Commit:** `95ae04954`
 - **Push:** n/a
 
+
+### Step 3.1 - Optimizer Performance (Indicator Cache Pilot Metrics) (Incremental Adoption #627)
+
+- **Status:** In Progress (increment completed)
+- **Plan item:** `refactoring_stage2_plan.md` -> Phase 3 / Step 3.1
+- **Changes (pilot baseline instrumentation):**
+  - Added deterministic cache pilot test:
+    - `project/OsEngine.Tests/OptimizerIndicatorCachePilotMetricsTests.cs`
+  - Scenario parameters:
+    - unique indicator keys: `40`
+    - repeated requests per key: `30`
+    - total requests: `1200`
+  - Measured counters:
+    - baseline (without cache): `1200` computations
+    - with cache: `40` computations
+    - reduction: `96.67%`
+    - cache stats: `hits=1160`, `misses=40`, `writes=40`, `entries=40`, `hit-rate=96.67%`
+- **Verification:**
+  - Executed outside sandbox.
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo --filter "FullyQualifiedName~OptimizerIndicatorCachePilotMetricsTests"` succeeded (`1/1`).
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` succeeded (`484/484`).
+- **Commit:** `1b71ad4b6`
+- **Push:** n/a
+
