@@ -13885,3 +13885,20 @@
   - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` succeeded (`484/484`).
 - **Commit:** `be410eacc`
 - **Push:** n/a
+
+
+### Step 4.2 - Nullable Annotations (Incremental Adoption #640)
+
+- **Status:** In Progress (increment completed)
+- **Plan item:** `refactoring_stage2_plan.md` -> Phase 4 / Step 4.2
+- **Changes (TrailingUp parser/log contracts):**
+  - Updated `project/OsEngine/OsTrader/Grids/TrailingUp.cs`:
+    - `LoadFromString(string)` -> `LoadFromString(string?)` with existing whitespace guard preserved.
+    - `LogMessageEvent` aligned to nullable event contract (`Action<string, LogMessageType>?`).
+    - log dispatch updated to nullable-safe `LogMessageEvent?.Invoke(message, type)`.
+    - existing `ServerMaster.SendNewLogMessage(...)` fallback for `Error` when no subscribers preserved.
+- **Verification:**
+  - Executed outside sandbox.
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` succeeded (`484/484`).
+- **Commit:** `d9c207da6`
+- **Push:** n/a
