@@ -1,4 +1,5 @@
 using System;
+using System.Globalization;
 using OsEngine.Entity;
 using Xunit;
 
@@ -102,5 +103,50 @@ public class CandleCoreTests
 
         Assert.NotEqual(first, afterChange);
         Assert.Contains(",13,", afterChange, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void StringToSave_AndSetCandleFromString_ShouldRoundTripWithInvariantFormat()
+    {
+        CultureInfo originalCulture = CultureInfo.CurrentCulture;
+        CultureInfo originalUiCulture = CultureInfo.CurrentUICulture;
+
+        try
+        {
+            CultureInfo.CurrentCulture = new CultureInfo("ru-RU");
+            CultureInfo.CurrentUICulture = new CultureInfo("ru-RU");
+
+            Candle source = new Candle
+            {
+                TimeStart = new DateTime(2026, 2, 27, 12, 34, 56),
+                Open = 1234.56m,
+                High = 1240.01m,
+                Low = 1222.22m,
+                Close = 1230.78m,
+                Volume = 15.25m,
+                OpenInterest = 7.5m
+            };
+
+            string save = source.StringToSave;
+
+            Assert.Contains("1234.56", save, StringComparison.Ordinal);
+            Assert.DoesNotContain("1234,56", save, StringComparison.Ordinal);
+
+            Candle loaded = new Candle();
+            loaded.SetCandleFromString(save);
+
+            Assert.Equal(source.TimeStart, loaded.TimeStart);
+            Assert.Equal(source.Open, loaded.Open);
+            Assert.Equal(source.High, loaded.High);
+            Assert.Equal(source.Low, loaded.Low);
+            Assert.Equal(source.Close, loaded.Close);
+            Assert.Equal(source.Volume, loaded.Volume);
+            Assert.Equal(source.OpenInterest, loaded.OpenInterest);
+        }
+        finally
+        {
+            CultureInfo.CurrentCulture = originalCulture;
+            CultureInfo.CurrentUICulture = originalUiCulture;
+        }
     }
 }

@@ -11672,3 +11672,19 @@
 
 - Host-context verification (outside sandbox):
   - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed `399/399`
+
+## 2026-02-27 - Step 2.2 (InvariantCulture) - Candle persistence roundtrip coverage hardening block
+
+- Expanded tests for `Candle` persistence parsing paths:
+  - `project/OsEngine.Tests/CandleCoreTests.cs`
+- Changes:
+  - added roundtrip persistence test for `StringToSave` -> `SetCandleFromString` covering OHLC, volume, open interest and timestamp.
+  - validated invariant decimal serialization under `ru-RU` current culture (dot separator in persisted payload).
+- Scope:
+  - test-only hardening
+  - no production runtime behavior changes.
+
+### Verification
+
+- Host-context verification (outside sandbox):
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed `400/400`
