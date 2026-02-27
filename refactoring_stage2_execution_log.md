@@ -13131,3 +13131,18 @@
   - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` succeeded (`416/416`).
 - **Commit:** n/a (not committed in this session)
 - **Push:** n/a
+
+### Step 2.2 - InvariantCulture Coverage (Incremental Adoption #598)
+
+- **Status:** In Progress (increment completed)
+- **Plan item:** `refactoring_stage2_plan.md` -> Phase 2 / Step 2.2
+- **Changes:**
+  - Expanded `Position` parser compatibility coverage:
+    - `project/OsEngine.Tests/PositionPersistenceTests.cs`
+  - Added test for lowercase `true/false` market flag payload values.
+  - Added assertions for case-insensitive parsing of market-flag tail fields.
+- **Verification:**
+  - Executed outside sandbox.
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` succeeded (`417/417`).
+- **Commit:** n/a (not committed in this session)
+- **Push:** n/a
