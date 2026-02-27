@@ -400,7 +400,7 @@ namespace OsEngine.Market.Servers
         /// <summary>
         /// Security name
         /// </summary>
-        public string NameSecurity;
+        public string NameSecurity = string.Empty;
 
         /// <summary>
         /// last save time
@@ -410,7 +410,7 @@ namespace OsEngine.Market.Servers
         /// <summary>
         /// the last trade Id we saved
         /// </summary>
-        public string LastTradeId;
+        public string LastTradeId = string.Empty;
 
         /// <summary>
         /// last stored index

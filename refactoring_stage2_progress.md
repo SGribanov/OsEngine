@@ -12369,6 +12369,23 @@
 - Host-context verification (outside sandbox):
   - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed `484/484`
 
+## 2026-02-27 - Step 4.2 (nullable annotations) - TradeSaveInfo contracts cleanup (`#632`)
+
+- Applied localized nullable-contract cleanup in tick save-info holder:
+  - `project/OsEngine/Market/Servers/ServerTickStorage.cs`
+- Changes:
+  - initialized non-null defaults for string fields in `TradeSaveInfo`:
+    - `NameSecurity = string.Empty`
+    - `LastTradeId = string.Empty`
+- Scope:
+  - nullable-safety contract cleanup only
+  - no behavior changes in tick save/load flow.
+
+### Verification
+
+- Host-context verification (outside sandbox):
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed `484/484`
+
 ## 2026-02-27 - Step 4.2 (nullable annotations) - CandleSeriesSaveInfo contracts cleanup (`#631`)
 
 - Applied localized nullable-contract cleanup in candle save-info holder:
