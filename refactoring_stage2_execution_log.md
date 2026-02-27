@@ -12965,3 +12965,19 @@
     - `dotnet test` succeeded (`397/397`).
 - **Commit:** pending
 - **Push:** pending
+
+### Step 2.2 - InvariantCulture Coverage (Incremental Adoption #587)
+
+- **Status:** In Progress (increment completed)
+- **Plan item:** `refactoring_stage2_plan.md` -> Phase 2 / Step 2.2
+- **Changes:**
+  - Added core persistence parsing coverage for `Position`:
+    - `project/OsEngine.Tests/PositionPersistenceTests.cs`
+  - Added roundtrip test for `GetStringForSave()` / `SetDealFromString()` with open/close orders and stop/profit flags.
+  - Added legacy RU datetime parse test for embedded order payload in serialized position data.
+  - Locked current callback timestamp mapping behavior for embedded orders (loader uses order field index `15`).
+- **Verification:**
+  - Executed outside sandbox.
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` succeeded (`399/399`).
+- **Commit:** n/a (not committed in this session)
+- **Push:** n/a
