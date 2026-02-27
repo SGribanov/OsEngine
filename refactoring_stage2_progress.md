@@ -12300,6 +12300,29 @@
 - Host-context verification (outside sandbox):
   - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed `483/483`
 
+## 2026-02-27 - Step 3.1 (optimizer performance) - indicator cache pilot metrics baseline (`#627`)
+
+- Added deterministic pilot-metrics test for indicator cache reuse in representative replay pattern:
+  - `project/OsEngine.Tests/OptimizerIndicatorCachePilotMetricsTests.cs`
+- Metrics scenario:
+  - unique indicator keys: `40`
+  - repeated requests per key: `30`
+  - total requests: `1200`
+- Baseline vs cache-enabled results (deterministic counters):
+  - without cache: `1200` computations
+  - with cache: `40` computations
+  - reduction: `96.67%`
+  - cache stats: `hits=1160`, `misses=40`, `writes=40`, `entries=40`, `hit-rate=96.67%`
+- Scope:
+  - pilot contour only (test-level instrumentation)
+  - no runtime production behavior changes.
+
+### Verification
+
+- Host-context verification (outside sandbox):
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo --filter "FullyQualifiedName~OptimizerIndicatorCachePilotMetricsTests"` -> passed `1/1`
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed `484/484`
+
 ## 2026-02-27 - Step 2.3 (JSON settings subsystem) - OptimizerSettings core migration pass (`#626`)
 
 - Inventory (completion-pass scan):
