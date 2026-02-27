@@ -1,0 +1,46 @@
+name: Feature task
+description: Поставить задачу на доработку/новую функциональность
+title: "[Task] "
+labels:
+  - enhancement
+body:
+  - type: textarea
+    id: context
+    attributes:
+      label: Контекст
+      description: Зачем нужна задача, какая проблема решается
+      placeholder: Текущая боль, ограничения, предпосылки
+    validations:
+      required: true
+  - type: textarea
+    id: scope
+    attributes:
+      label: Что нужно сделать
+      description: Конкретный объем работы
+      placeholder: |
+        - ...
+        - ...
+    validations:
+      required: true
+  - type: textarea
+    id: acceptance
+    attributes:
+      label: Критерии готовности
+      description: Измеримые условия приемки
+      placeholder: |
+        - [ ] ...
+        - [ ] ...
+    validations:
+      required: true
+  - type: textarea
+    id: verification
+    attributes:
+      label: Шаги проверки
+      description: Как проверить результат
+      placeholder: |
+        1. ...
+        2. ...
+        3. ...
+    validations:
+      required: true
+

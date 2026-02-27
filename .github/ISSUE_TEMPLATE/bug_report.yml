@@ -1,0 +1,52 @@
+name: Bug report
+description: Сообщить о дефекте в функциональности
+title: "[Bug] "
+labels:
+  - bug
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Опишите проблему так, чтобы ее можно было воспроизвести и проверить исправление.
+  - type: textarea
+    id: context
+    attributes:
+      label: Контекст
+      description: Где проявляется проблема и что ожидалось
+      placeholder: Окружение, модуль, сценарий использования
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Шаги воспроизведения
+      description: Пошаговый сценарий
+      placeholder: |
+        1. ...
+        2. ...
+        3. ...
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Ожидаемое поведение
+    validations:
+      required: true
+  - type: textarea
+    id: actual
+    attributes:
+      label: Фактическое поведение
+    validations:
+      required: true
+  - type: textarea
+    id: acceptance
+    attributes:
+      label: Критерии проверки
+      description: Как понять, что проблема исправлена
+      placeholder: |
+        - [ ] ...
+        - [ ] ...
+    validations:
+      required: true
+
