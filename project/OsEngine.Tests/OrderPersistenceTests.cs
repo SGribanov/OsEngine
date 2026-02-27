@@ -127,4 +127,48 @@ public class OrderPersistenceTests
             CultureInfo.CurrentUICulture = originalUiCulture;
         }
     }
+
+    [Fact]
+    public void SetOrderFromString_ShouldSupportLegacyPayloadWithoutOptionalTailFields()
+    {
+        Order source = new Order
+        {
+            NumberUser = 7,
+            ServerType = ServerType.None,
+            NumberMarket = "legacy-short",
+            Side = Side.Buy,
+            Price = 100m,
+            Volume = 2m,
+            VolumeExecute = 0m,
+            State = OrderStateType.Active,
+            TypeOrder = OrderPriceType.Limit,
+            SecurityNameCode = "SEC",
+            PortfolioNumber = "PF",
+            TimeCallBack = new DateTime(2026, 2, 27, 10, 10, 10),
+            TimeCreate = new DateTime(2026, 2, 27, 10, 10, 0),
+            TimeCancel = DateTime.MinValue,
+            LifeTime = TimeSpan.FromMinutes(3),
+            Comment = "legacy-short",
+            TimeDone = DateTime.MinValue,
+            OrderTypeTime = OrderTypeTime.Specified,
+            ServerName = "server-x",
+            IsSendToCancel = true,
+            CancellingTryCount = 5,
+            LastCancelTryLocalTime = new DateTime(2026, 2, 27, 10, 11, 0)
+        };
+
+        string full = source.GetStringForSave().ToString();
+        string shortLegacy = string.Join("@", full.Split('@')[..20]);
+
+        Order loaded = new Order();
+        loaded.SetOrderFromString(shortLegacy);
+
+        Assert.Equal(source.NumberUser, loaded.NumberUser);
+        Assert.Equal(source.NumberMarket, loaded.NumberMarket);
+        Assert.Equal(OrderTypeTime.Specified, loaded.OrderTypeTime);
+        Assert.Equal(string.Empty, loaded.ServerName);
+        Assert.False(loaded.IsSendToCancel);
+        Assert.Equal(0, loaded.CancellingTryCount);
+        Assert.Equal(DateTime.MinValue, loaded.LastCancelTryLocalTime);
+    }
 }

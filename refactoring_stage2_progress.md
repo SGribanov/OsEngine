@@ -11784,3 +11784,19 @@
 
 - Host-context verification (outside sandbox):
   - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed `410/410`
+
+## 2026-02-27 - Step 2.2 (InvariantCulture) - Order legacy-short payload compatibility coverage block
+
+- Expanded tests for `Order` persistence parsing paths:
+  - `project/OsEngine.Tests/OrderPersistenceTests.cs`
+- Changes:
+  - added compatibility test for legacy short payloads without optional tail fields (`OrderTypeTime`, `ServerName`, cancel-info block).
+  - asserted default fallback behavior for omitted fields while preserving core parsed order values.
+- Scope:
+  - test-only hardening
+  - no production runtime behavior changes.
+
+### Verification
+
+- Host-context verification (outside sandbox):
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed `411/411`
