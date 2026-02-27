@@ -12236,3 +12236,22 @@
 
 - Host-context verification (outside sandbox):
   - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed `465/465`
+
+## 2026-02-28 - Step 2.2 (InvariantCulture) - Multi-file parser compatibility batch coverage block #3
+
+- Expanded persistence parser compatibility tests in batch:
+  - `project/OsEngine.Tests/CandleCoreTests.cs`
+  - `project/OsEngine.Tests/NonTradePeriodInDayCoreTests.cs`
+  - `project/OsEngine.Tests/StrategyParameterNumericTimeCoreTests.cs`
+- Changes:
+  - `Candle`: added legacy payload coverage for missing volume field fallback, missing open-interest field behavior, and save-string cache compatibility under non-close field mutations.
+  - `NonTradePeriodInDay`: added legacy core-without-reserved-tail compatibility coverage, post-load save-schema tail reconstruction coverage, and malformed core-token partial-parse behavior coverage.
+  - `StrategyParameterNumericTime`: added legacy time token parsing coverage for plus/zero-padded input and whitespace/CRLF input, plus formatting-equivalent no-change behavior coverage in `LoadParamFromString`.
+- Scope:
+  - test-only hardening
+  - no production runtime behavior changes.
+
+### Verification
+
+- Host-context verification (outside sandbox):
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed `474/474`

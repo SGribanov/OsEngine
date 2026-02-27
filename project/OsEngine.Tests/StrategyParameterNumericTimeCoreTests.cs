@@ -118,6 +118,44 @@ public class StrategyParameterNumericTimeCoreTests
     }
 
     [Fact]
+    public void TimeOfDay_LoadFromString_ShouldParseLegacyPlusAndZeroPaddedValues()
+    {
+        TimeOfDay value = new TimeOfDay();
+
+        bool changed = value.LoadFromString("+09:05:07:0008");
+
+        Assert.True(changed);
+        Assert.Equal(9, value.Hour);
+        Assert.Equal(5, value.Minute);
+        Assert.Equal(7, value.Second);
+        Assert.Equal(8, value.Millisecond);
+    }
+
+    [Fact]
+    public void TimeOfDay_LoadFromString_ShouldParseWhitespaceAndCrLfLegacyTokens()
+    {
+        TimeOfDay value = new TimeOfDay();
+
+        bool changed = value.LoadFromString(" 9 : 30 : 1 : 250\r\n");
+
+        Assert.True(changed);
+        Assert.Equal("9:30:1:250", value.ToString());
+    }
+
+    [Fact]
+    public void StrategyParameterTimeOfDay_LoadParamFromString_ShouldTreatFormattingEquivalentTimeAsUnchanged()
+    {
+        StrategyParameterTimeOfDay parameter = new StrategyParameterTimeOfDay("Start", 9, 5, 7, 8);
+        int changes = 0;
+        parameter.ValueChange += () => changes++;
+
+        parameter.LoadParamFromString(new[] { "Start", "09:05:07:0008", "legacy_tail" });
+
+        Assert.Equal(0, changes);
+        Assert.Equal("9:5:7:8", parameter.Value.ToString());
+    }
+
+    [Fact]
     public void StrategyParameterDecimalCheckBox_ShouldRoundTripAndRaiseValueChange()
     {
         StrategyParameterDecimalCheckBox parameter = new StrategyParameterDecimalCheckBox(

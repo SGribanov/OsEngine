@@ -149,4 +149,60 @@ public class CandleCoreTests
             CultureInfo.CurrentUICulture = originalUiCulture;
         }
     }
+
+    [Fact]
+    public void SetCandleFromString_ShouldUseLegacyVolumeFallback_WhenVolumeFieldIsMissing()
+    {
+        Candle candle = new Candle();
+
+        candle.SetCandleFromString("20240102,153045,10,12,9,11");
+
+        Assert.Equal(new DateTime(2024, 1, 2, 15, 30, 45), candle.TimeStart);
+        Assert.Equal(10m, candle.Open);
+        Assert.Equal(12m, candle.High);
+        Assert.Equal(9m, candle.Low);
+        Assert.Equal(11m, candle.Close);
+        Assert.Equal(1m, candle.Volume);
+        Assert.Equal(0m, candle.OpenInterest);
+    }
+
+    [Fact]
+    public void SetCandleFromString_ShouldKeepExistingOpenInterest_WhenFieldIsMissing()
+    {
+        Candle candle = new Candle
+        {
+            OpenInterest = 42m
+        };
+
+        candle.SetCandleFromString("20240102,153045,10,12,9,11,5");
+
+        Assert.Equal(5m, candle.Volume);
+        Assert.Equal(42m, candle.OpenInterest);
+    }
+
+    [Fact]
+    public void StringToSave_ShouldRemainCached_WhenOnlyNonCloseFieldsChange()
+    {
+        Candle candle = new Candle
+        {
+            TimeStart = new DateTime(2024, 1, 2, 15, 30, 45),
+            Open = 10m,
+            High = 12m,
+            Low = 9m,
+            Close = 11m,
+            Volume = 5m,
+            OpenInterest = 7m
+        };
+
+        string first = candle.StringToSave;
+
+        candle.Volume = 99m;
+        candle.OpenInterest = 123m;
+        candle.High = 15m;
+
+        string afterNonCloseChanges = candle.StringToSave;
+
+        Assert.Equal(first, afterNonCloseChanges);
+        Assert.Contains(",12,9,11,5,7", afterNonCloseChanges, StringComparison.Ordinal);
+    }
 }

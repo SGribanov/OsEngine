@@ -85,4 +85,57 @@ public class NonTradePeriodInDayCoreTests
         Assert.Equal("0:0:0:0", loaded.NonTradePeriod1Start.ToString());
         Assert.Equal("7:0:0:0", loaded.NonTradePeriod1End.ToString());
     }
+
+    [Fact]
+    public void Stage2Step2_2_LoadFromString_LegacyCoreWithoutReservedTail_ShouldParse()
+    {
+        NonTradePeriodInDay loaded = new NonTradePeriodInDay();
+
+        string legacyCore =
+            "True@1:1:1:1@2:2:2:2@False@3:3:3:3@4:4:4:4@True@5:5:5:5@6:6:6:6@False@7:7:7:7@8:8:8:8@True@9:9:9:9@10:10:10:10";
+
+        loaded.LoadFromString(legacyCore);
+
+        Assert.True(loaded.NonTradePeriod1OnOff);
+        Assert.False(loaded.NonTradePeriod2OnOff);
+        Assert.True(loaded.NonTradePeriod3OnOff);
+        Assert.False(loaded.NonTradePeriod4OnOff);
+        Assert.True(loaded.NonTradePeriod5OnOff);
+        Assert.Equal("10:10:10:10", loaded.NonTradePeriod5End.ToString());
+    }
+
+    [Fact]
+    public void Stage2Step2_2_GetSaveString_AfterLegacyCoreLoad_ShouldAddReservedTail()
+    {
+        NonTradePeriodInDay loaded = new NonTradePeriodInDay();
+
+        string legacyCore =
+            "True@1:1:1:1@2:2:2:2@False@3:3:3:3@4:4:4:4@True@5:5:5:5@6:6:6:6@False@7:7:7:7@8:8:8:8@True@9:9:9:9@10:10:10:10";
+
+        loaded.LoadFromString(legacyCore);
+
+        string save = loaded.GetSaveString();
+
+        Assert.StartsWith(legacyCore + "@", save);
+        Assert.EndsWith("@@@@@@", save);
+        Assert.Equal(21, save.Split('@').Length);
+    }
+
+    [Fact]
+    public void Stage2Step2_2_LoadFromString_CorruptedCoreToken_ShouldKeepPartiallyParsedState()
+    {
+        NonTradePeriodInDay loaded = new NonTradePeriodInDay();
+
+        string legacyWithBrokenCoreToken =
+            "True@1:0:0:0@2:0:0:0@True@3:0:0:0@bad-time@False@5:0:0:0@6:0:0:0@False@7:0:0:0@8:0:0:0@False@9:0:0:0@10:0:0:0";
+
+        loaded.LoadFromString(legacyWithBrokenCoreToken);
+
+        Assert.True(loaded.NonTradePeriod1OnOff);
+        Assert.Equal("1:0:0:0", loaded.NonTradePeriod1Start.ToString());
+        Assert.True(loaded.NonTradePeriod2OnOff);
+        Assert.Equal("3:0:0:0", loaded.NonTradePeriod2Start.ToString());
+        Assert.Equal("10:5:0:0", loaded.NonTradePeriod2End.ToString());
+        Assert.False(loaded.NonTradePeriod3OnOff);
+    }
 }
