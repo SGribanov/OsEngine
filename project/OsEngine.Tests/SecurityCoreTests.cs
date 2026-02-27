@@ -114,4 +114,22 @@ public class SecurityCoreTests
         Assert.Equal(MinTradeAmountType.Contract, loaded.MinTradeAmountType);
         Assert.Equal(0m, loaded.MarginSell);
     }
+
+    [Fact]
+    public void LoadFromString_ShouldSupportWindowsCrLfPayload()
+    {
+        string payloadCrLf =
+            "VTBR\r\nTQBR\r\nVTB\r\nid-777\r\nActiv\r\n0.01\r\n10\r\n0.01\r\n300\r\nStock\r\n2\r\n0.5\r\n1.5\r\nNone\r\n0\r\n2026-02-27T15:30:45.0000000Z\r\n0\r\n1\r\n0.01\r\nContract\r\n400";
+
+        Security loaded = new Security();
+        loaded.LoadFromString(payloadCrLf);
+
+        Assert.Equal("VTBR", loaded.Name);
+        Assert.Equal("TQBR", loaded.NameClass);
+        Assert.Equal(0.01m, loaded.PriceStep);
+        Assert.Equal(1m, loaded.MinTradeAmount);
+        Assert.Equal(0.01m, loaded.VolumeStep);
+        Assert.Equal(MinTradeAmountType.Contract, loaded.MinTradeAmountType);
+        Assert.Equal(400m, loaded.MarginSell);
+    }
 }

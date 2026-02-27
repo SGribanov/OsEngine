@@ -11901,3 +11901,19 @@
 
 - Host-context verification (outside sandbox):
   - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed `420/420`
+
+## 2026-02-27 - Step 2.2 (InvariantCulture) - Security CRLF payload compatibility coverage block
+
+- Expanded tests for `Security` persistence parsing paths:
+  - `project/OsEngine.Tests/SecurityCoreTests.cs`
+- Changes:
+  - added compatibility test for Windows CRLF payload in `LoadFromString()`.
+  - asserted correct parsing of core and optional tail fields from CRLF-formatted input.
+- Scope:
+  - test-only hardening
+  - no production runtime behavior changes.
+
+### Verification
+
+- Host-context verification (outside sandbox):
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed `421/421`
