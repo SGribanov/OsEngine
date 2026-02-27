@@ -664,4 +664,37 @@ public class OrderPersistenceTests
 
         Assert.Equal(OrderStateType.LostAfterActive, loaded.State);
     }
+
+    [Fact]
+    public void SetOrderFromString_ShouldParseNumericNoneStateValue()
+    {
+        Order source = new Order
+        {
+            NumberUser = 22,
+            ServerType = ServerType.None,
+            NumberMarket = "ord-legacy-numeric-none",
+            Side = Side.Sell,
+            Price = 79m,
+            Volume = 1m,
+            VolumeExecute = 0m,
+            State = OrderStateType.Active,
+            TypeOrder = OrderPriceType.Limit,
+            SecurityNameCode = "SEC15",
+            PortfolioNumber = "PF15",
+            TimeCallBack = new DateTime(2026, 2, 28, 1, 10, 10),
+            TimeCreate = new DateTime(2026, 2, 28, 1, 10, 0),
+            LifeTime = TimeSpan.FromMinutes(1),
+            Comment = "legacy-numeric-none",
+            OrderTypeTime = OrderTypeTime.Day
+        };
+
+        string[] fields = source.GetStringForSave().ToString().Split('@');
+        fields[8] = "1";
+        string payload = string.Join("@", fields);
+
+        Order loaded = new Order();
+        loaded.SetOrderFromString(payload);
+
+        Assert.Equal(OrderStateType.None, loaded.State);
+    }
 }
