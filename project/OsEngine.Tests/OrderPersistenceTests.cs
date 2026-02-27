@@ -631,4 +631,37 @@ public class OrderPersistenceTests
 
         Assert.Equal(OrderStateType.Done, loaded.State);
     }
+
+    [Fact]
+    public void SetOrderFromString_ShouldParseNumericLostAfterActiveStateValue()
+    {
+        Order source = new Order
+        {
+            NumberUser = 21,
+            ServerType = ServerType.None,
+            NumberMarket = "ord-legacy-numeric-lost-after-active",
+            Side = Side.Buy,
+            Price = 78m,
+            Volume = 1m,
+            VolumeExecute = 0m,
+            State = OrderStateType.None,
+            TypeOrder = OrderPriceType.Limit,
+            SecurityNameCode = "SEC14",
+            PortfolioNumber = "PF14",
+            TimeCallBack = new DateTime(2026, 2, 28, 0, 10, 10),
+            TimeCreate = new DateTime(2026, 2, 28, 0, 10, 0),
+            LifeTime = TimeSpan.FromMinutes(1),
+            Comment = "legacy-numeric-lost-after-active",
+            OrderTypeTime = OrderTypeTime.Day
+        };
+
+        string[] fields = source.GetStringForSave().ToString().Split('@');
+        fields[8] = "8";
+        string payload = string.Join("@", fields);
+
+        Order loaded = new Order();
+        loaded.SetOrderFromString(payload);
+
+        Assert.Equal(OrderStateType.LostAfterActive, loaded.State);
+    }
 }
