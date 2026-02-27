@@ -13868,3 +13868,20 @@
   - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` succeeded (`484/484`).
 - **Commit:** `326589f12`
 - **Push:** n/a
+
+
+### Step 4.2 - Nullable Annotations (Incremental Adoption #639)
+
+- **Status:** In Progress (increment completed)
+- **Plan item:** `refactoring_stage2_plan.md` -> Phase 4 / Step 4.2
+- **Changes (ServerCandleStorage series collection contract):**
+  - Updated `project/OsEngine/Market/Servers/ServerCandleStorage.cs`:
+    - `_series` field type aligned to nullable-aware element contract:
+      - `List<CandleSeries>` -> `List<CandleSeries?>`.
+    - `_series` marked `readonly` with existing eager initialization.
+  - Purpose: align collection type with existing null checks in series iteration paths.
+- **Verification:**
+  - Executed outside sandbox.
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` succeeded (`484/484`).
+- **Commit:** `be410eacc`
+- **Push:** n/a
