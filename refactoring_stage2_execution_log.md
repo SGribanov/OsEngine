@@ -13647,3 +13647,26 @@
 - **Commit:** `1b71ad4b6`
 - **Push:** n/a
 
+
+### Step 2.3 - JSON Settings Subsystem (Incremental Adoption #626, optimizer collections pass)
+
+- **Status:** In Progress (increment completed)
+- **Plan item:** `refactoring_stage2_plan.md` -> Phase 2 / Step 2.3
+- **Changes (high-risk optimizer settings scope):**
+  - Migrated `OptimizerSettings` collections persistence to JSON with legacy fallback:
+    - `project/OsEngine/OsOptimizer/OptEntity/OptimizerSettings.cs`
+    - `SaveClearingInfo/LoadClearingInfo`
+    - `SaveNonTradePeriods/LoadNonTradePeriods`
+  - Added typed JSON wrappers for collections:
+    - clearings collection DTO wrapper
+    - non-trade periods collection DTO wrapper
+  - Added explicit legacy parsers for line-based content to preserve backward compatibility.
+  - Updated tests to assert JSON save format while retaining legacy load compatibility coverage:
+    - `project/OsEngine.Tests/OptimizerSettingsCollectionsPersistenceTests.cs`
+- **Verification:**
+  - Executed outside sandbox.
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo --filter "FullyQualifiedName~OptimizerSettingsCollectionsPersistenceTests|FullyQualifiedName~OptimizerRefactorTests"` succeeded (`79/79`).
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` succeeded (`484/484`).
+- **Commit:** `370dca426`
+- **Push:** n/a
+
