@@ -12162,3 +12162,21 @@
 
 - Host-context verification (outside sandbox):
   - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed `439/439`
+
+## 2026-02-28 - Step 2.2 (InvariantCulture) - OrderTypeTime parser compatibility batch coverage block
+
+- Expanded tests for `Order` persistence parsing paths:
+  - `project/OsEngine.Tests/OrderPersistenceTests.cs`
+- Changes:
+  - added numeric compatibility test for `OrderTypeTime` value `1` -> `OrderTypeTime.GTC`.
+  - added numeric compatibility test for `OrderTypeTime` value `0` -> `OrderTypeTime.Specified`.
+  - added lowercase compatibility test for `OrderTypeTime` value `gtc` -> `OrderTypeTime.GTC`.
+  - added invalid-value compatibility test to lock fallback behavior (`not-a-valid-order-type-time` -> `OrderTypeTime.Specified`).
+- Scope:
+  - test-only hardening
+  - no production runtime behavior changes.
+
+### Verification
+
+- Host-context verification (outside sandbox):
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed `443/443`

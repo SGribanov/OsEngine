@@ -730,4 +730,136 @@ public class OrderPersistenceTests
 
         Assert.Equal(OrderTypeTime.Day, loaded.OrderTypeTime);
     }
+
+    [Fact]
+    public void SetOrderFromString_ShouldParseNumericOrderTypeTimeGtcValue()
+    {
+        Order source = new Order
+        {
+            NumberUser = 24,
+            ServerType = ServerType.None,
+            NumberMarket = "ord-legacy-numeric-order-type-time-gtc",
+            Side = Side.Sell,
+            Price = 81m,
+            Volume = 1m,
+            VolumeExecute = 0m,
+            State = OrderStateType.Active,
+            TypeOrder = OrderPriceType.Limit,
+            SecurityNameCode = "SEC17",
+            PortfolioNumber = "PF17",
+            TimeCallBack = new DateTime(2026, 2, 28, 3, 10, 10),
+            TimeCreate = new DateTime(2026, 2, 28, 3, 10, 0),
+            LifeTime = TimeSpan.FromMinutes(1),
+            Comment = "legacy-numeric-order-type-time-gtc",
+            OrderTypeTime = OrderTypeTime.Day
+        };
+
+        string[] fields = source.GetStringForSave().ToString().Split('@');
+        fields[20] = "1";
+        string payload = string.Join("@", fields);
+
+        Order loaded = new Order();
+        loaded.SetOrderFromString(payload);
+
+        Assert.Equal(OrderTypeTime.GTC, loaded.OrderTypeTime);
+    }
+
+    [Fact]
+    public void SetOrderFromString_ShouldParseNumericOrderTypeTimeSpecifiedValue()
+    {
+        Order source = new Order
+        {
+            NumberUser = 25,
+            ServerType = ServerType.None,
+            NumberMarket = "ord-legacy-numeric-order-type-time-specified",
+            Side = Side.Buy,
+            Price = 82m,
+            Volume = 1m,
+            VolumeExecute = 0m,
+            State = OrderStateType.Active,
+            TypeOrder = OrderPriceType.Limit,
+            SecurityNameCode = "SEC18",
+            PortfolioNumber = "PF18",
+            TimeCallBack = new DateTime(2026, 2, 28, 4, 10, 10),
+            TimeCreate = new DateTime(2026, 2, 28, 4, 10, 0),
+            LifeTime = TimeSpan.FromMinutes(1),
+            Comment = "legacy-numeric-order-type-time-specified",
+            OrderTypeTime = OrderTypeTime.Day
+        };
+
+        string[] fields = source.GetStringForSave().ToString().Split('@');
+        fields[20] = "0";
+        string payload = string.Join("@", fields);
+
+        Order loaded = new Order();
+        loaded.SetOrderFromString(payload);
+
+        Assert.Equal(OrderTypeTime.Specified, loaded.OrderTypeTime);
+    }
+
+    [Fact]
+    public void SetOrderFromString_ShouldParseLowercaseOrderTypeTimeValue()
+    {
+        Order source = new Order
+        {
+            NumberUser = 26,
+            ServerType = ServerType.None,
+            NumberMarket = "ord-legacy-lowercase-order-type-time",
+            Side = Side.Sell,
+            Price = 83m,
+            Volume = 1m,
+            VolumeExecute = 0m,
+            State = OrderStateType.Active,
+            TypeOrder = OrderPriceType.Limit,
+            SecurityNameCode = "SEC19",
+            PortfolioNumber = "PF19",
+            TimeCallBack = new DateTime(2026, 2, 28, 5, 10, 10),
+            TimeCreate = new DateTime(2026, 2, 28, 5, 10, 0),
+            LifeTime = TimeSpan.FromMinutes(1),
+            Comment = "legacy-lowercase-order-type-time",
+            OrderTypeTime = OrderTypeTime.Day
+        };
+
+        string[] fields = source.GetStringForSave().ToString().Split('@');
+        fields[20] = "gtc";
+        string payload = string.Join("@", fields);
+
+        Order loaded = new Order();
+        loaded.SetOrderFromString(payload);
+
+        Assert.Equal(OrderTypeTime.GTC, loaded.OrderTypeTime);
+    }
+
+    [Fact]
+    public void SetOrderFromString_ShouldFallbackToDefaultOnInvalidOrderTypeTimeValue()
+    {
+        Order source = new Order
+        {
+            NumberUser = 27,
+            ServerType = ServerType.None,
+            NumberMarket = "ord-legacy-invalid-order-type-time",
+            Side = Side.Buy,
+            Price = 84m,
+            Volume = 1m,
+            VolumeExecute = 0m,
+            State = OrderStateType.Active,
+            TypeOrder = OrderPriceType.Limit,
+            SecurityNameCode = "SEC20",
+            PortfolioNumber = "PF20",
+            TimeCallBack = new DateTime(2026, 2, 28, 6, 10, 10),
+            TimeCreate = new DateTime(2026, 2, 28, 6, 10, 0),
+            LifeTime = TimeSpan.FromMinutes(1),
+            Comment = "legacy-invalid-order-type-time",
+            OrderTypeTime = OrderTypeTime.Day
+        };
+
+        string[] fields = source.GetStringForSave().ToString().Split('@');
+        fields[20] = "not-a-valid-order-type-time";
+        string payload = string.Join("@", fields);
+
+        Order loaded = new Order();
+        loaded.SetOrderFromString(payload);
+
+        Assert.Equal(OrderTypeTime.Specified, loaded.OrderTypeTime);
+    }
 }
