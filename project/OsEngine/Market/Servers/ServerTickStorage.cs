@@ -71,8 +71,13 @@ namespace OsEngine.Market.Servers
         /// <summary>
         /// save security data 
         /// </summary>
-        public void SetSecurityToSave(Security security)
+        public void SetSecurityToSave(Security? security)
         {
+            if (security == null)
+            {
+                return;
+            }
+
             if (_securities.Find(security1 => security1.Name == security.Name) == null)
             {
                 _securities.Add(security);
@@ -210,7 +215,7 @@ namespace OsEngine.Market.Servers
             }
         }
 
-        private static void AppendLinesAtomically(string path, List<string> linesToAppend)
+        private static void AppendLinesAtomically(string path, List<string>? linesToAppend)
         {
             if (linesToAppend == null || linesToAppend.Count == 0)
             {

@@ -12388,6 +12388,25 @@
 - Host-context verification (outside sandbox):
   - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed `484/484`
 
+## 2026-02-27 - Step 4.2 (nullable annotations) - ServerTickStorage method-signature cleanup (`#635`)
+
+- Applied localized nullable signature alignment in:
+  - `project/OsEngine/Market/Servers/ServerTickStorage.cs`
+- Changes:
+  - `SetSecurityToSave(Security)` -> `SetSecurityToSave(Security?)`
+    - added early-return null guard.
+  - `AppendLinesAtomically(string path, List<string> linesToAppend)` ->
+    `AppendLinesAtomically(string path, List<string>? linesToAppend)`
+    - signature now matches existing null guard behavior.
+- Scope:
+  - nullable contract cleanup only
+  - no behavior changes in tick storage persistence flow.
+
+### Verification
+
+- Host-context verification (outside sandbox):
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed `484/484`
+
 ## 2026-02-27 - Step 4.2 (nullable annotations) - CandleSeriesSaveInfo signature cleanup (`#633`)
 
 - Applied localized nullable-signature alignment in candle save-info holder:
