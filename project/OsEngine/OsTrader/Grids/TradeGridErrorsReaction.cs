@@ -26,7 +26,7 @@ namespace OsEngine.OsTrader.Grids
             _myGrid = grid;
         }
 
-        private TradeGrid _myGrid;
+        private TradeGrid? _myGrid;
 
         public void Delete()
         {
@@ -77,24 +77,50 @@ namespace OsEngine.OsTrader.Grids
             return result;
         }
 
-        public void LoadFromString(string value)
+        public void LoadFromString(string? value)
         {
             try
             {
+                if (string.IsNullOrWhiteSpace(value))
+                {
+                    return;
+                }
+
                 string[] values = value.Split('@');
 
-                FailOpenOrdersReactionIsOn = Convert.ToBoolean(values[0]);
+                if (values.Length > 0 && string.IsNullOrWhiteSpace(values[0]) == false)
+                {
+                    FailOpenOrdersReactionIsOn = Convert.ToBoolean(values[0]);
+                }
                 //Enum.TryParse(values[1], out FailOpenOrdersReaction);
-                FailOpenOrdersCountToReaction = Convert.ToInt32(values[2], CultureInfo.InvariantCulture);
+                if (values.Length > 2 && string.IsNullOrWhiteSpace(values[2]) == false)
+                {
+                    FailOpenOrdersCountToReaction = Convert.ToInt32(values[2], CultureInfo.InvariantCulture);
+                }
                 //Enum.TryParse(values[3], out FailCancelOrdersReaction);
-                FailCancelOrdersCountToReaction = Convert.ToInt32(values[4], CultureInfo.InvariantCulture);
-                FailCancelOrdersReactionIsOn = Convert.ToBoolean(values[5]);
+                if (values.Length > 4 && string.IsNullOrWhiteSpace(values[4]) == false)
+                {
+                    FailCancelOrdersCountToReaction = Convert.ToInt32(values[4], CultureInfo.InvariantCulture);
+                }
+                if (values.Length > 5 && string.IsNullOrWhiteSpace(values[5]) == false)
+                {
+                    FailCancelOrdersReactionIsOn = Convert.ToBoolean(values[5]);
+                }
 
                 try
                 {
-                    WaitOnStartConnectorIsOn = Convert.ToBoolean(values[6]);
-                    WaitSecondsOnStartConnector = Convert.ToInt32(values[7], CultureInfo.InvariantCulture);
-                    ReduceOrdersCountInMarketOnNoFundsError = Convert.ToBoolean(values[8]);
+                    if (values.Length > 6 && string.IsNullOrWhiteSpace(values[6]) == false)
+                    {
+                        WaitOnStartConnectorIsOn = Convert.ToBoolean(values[6]);
+                    }
+                    if (values.Length > 7 && string.IsNullOrWhiteSpace(values[7]) == false)
+                    {
+                        WaitSecondsOnStartConnector = Convert.ToInt32(values[7], CultureInfo.InvariantCulture);
+                    }
+                    if (values.Length > 8 && string.IsNullOrWhiteSpace(values[8]) == false)
+                    {
+                        ReduceOrdersCountInMarketOnNoFundsError = Convert.ToBoolean(values[8]);
+                    }
                 }
                 catch
                 {
@@ -198,12 +224,13 @@ namespace OsEngine.OsTrader.Grids
         {
             try
             {
-                if (_myGrid == null)
+                TradeGrid? myGrid = _myGrid;
+                if (myGrid == null)
                 {
                     return;
                 }
 
-                if(_myGrid.Tab.StartProgram != StartProgram.IsOsTrader)
+                if(myGrid.Tab.StartProgram != StartProgram.IsOsTrader)
                 {
                     return;
                 }
@@ -213,7 +240,7 @@ namespace OsEngine.OsTrader.Grids
                     return;
                 }
 
-                IServer server = _myGrid.Tab.Connector.MyServer;
+                IServer server = myGrid.Tab.Connector.MyServer;
 
                 if (server.ServerType != ServerType.TInvest)
                 {
@@ -240,26 +267,26 @@ namespace OsEngine.OsTrader.Grids
                 if(haveNoFundsError == true)
                 {
                     if(isOpenOrder == true 
-                        && _myGrid.MaxOpenOrdersInMarket > 1)
+                        && myGrid.MaxOpenOrdersInMarket > 1)
                     {
-                        _myGrid.MaxOpenOrdersInMarket--;
-                        _myGrid.Save();
-                        _myGrid.RePaintGrid();
+                        myGrid.MaxOpenOrdersInMarket--;
+                        myGrid.Save();
+                        myGrid.RePaintGrid();
 
                         string message = "ERROR on open order. No money on deposit \n";
                         message += "Reduce open orders in market. " + "\n";
-                        message += "New value open orders in market: " + _myGrid.MaxOpenOrdersInMarket;
+                        message += "New value open orders in market: " + myGrid.MaxOpenOrdersInMarket;
                         SendNewLogMessage(message, LogMessageType.Error);
                     }
                     else if( isOpenOrder == false
-                        && _myGrid.MaxCloseOrdersInMarket > 1)
+                        && myGrid.MaxCloseOrdersInMarket > 1)
                     {
-                        _myGrid.MaxCloseOrdersInMarket--;
-                        _myGrid.Save();
-                        _myGrid.RePaintGrid();
+                        myGrid.MaxCloseOrdersInMarket--;
+                        myGrid.Save();
+                        myGrid.RePaintGrid();
                         string message = "ERROR on close order. No money on deposit \n";
                         message += "Reduce close orders in market. " + "\n";
-                        message += "New value close orders in market: " + _myGrid.MaxCloseOrdersInMarket;
+                        message += "New value close orders in market: " + myGrid.MaxCloseOrdersInMarket;
                         SendNewLogMessage(message, LogMessageType.Error);
                     }
                 }
@@ -341,17 +368,15 @@ namespace OsEngine.OsTrader.Grids
 
         public void SendNewLogMessage(string message, LogMessageType type)
         {
-            if (LogMessageEvent != null)
-            {
-                LogMessageEvent(message, type);
-            }
-            else if (type == LogMessageType.Error)
+            LogMessageEvent?.Invoke(message, type);
+
+            if (LogMessageEvent == null && type == LogMessageType.Error)
             {
                 ServerMaster.SendNewLogMessage(message, type);
             }
         }
 
-        public event Action<string, LogMessageType> LogMessageEvent;
+        public event Action<string, LogMessageType>? LogMessageEvent;
 
         #endregion
 

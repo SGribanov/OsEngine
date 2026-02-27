@@ -12598,6 +12598,33 @@
 - Host-context verification (outside sandbox):
   - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed `484/484`
 
+## 2026-02-27 - Step 4.2 (nullable annotations) - TradeGridErrorsReaction parser/lifecycle/log cleanup (`#645`)
+
+- Applied localized nullable-safe hardening in:
+  - `project/OsEngine/OsTrader/Grids/TradeGridErrorsReaction.cs`
+- Changes:
+  - parser input contract:
+    - `LoadFromString(string value)` -> `LoadFromString(string? value)`
+    - early-return guard for empty/whitespace payload.
+  - parser robustness:
+    - added length/empty checks before each `Split('@')` index access/parse.
+    - preserved existing fallback defaults for optional wait/no-funds settings block.
+  - lifecycle contract:
+    - `_myGrid` aligned to nullable lifecycle (`TradeGrid?`) because `Delete()` nulls the field.
+    - `TryFindNoFundsError(...)` now uses local `myGrid` snapshot + guard before dereference.
+  - log-event contract and dispatch:
+    - `LogMessageEvent` -> nullable event (`Action<string, LogMessageType>?`)
+    - dispatch changed to `LogMessageEvent?.Invoke(message, type)`
+    - fallback `ServerMaster.SendNewLogMessage(...)` for `Error` without subscribers preserved.
+- Scope:
+  - nullable contract + parser/lifecycle hardening only
+  - no behavior changes for valid settings payloads/runtime state.
+
+### Verification
+
+- Host-context verification (outside sandbox):
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed `484/484`
+
 ## 2026-02-27 - Step 4.2 (nullable annotations) - CandleSeriesSaveInfo signature cleanup (`#633`)
 
 - Applied localized nullable-signature alignment in candle save-info holder:
