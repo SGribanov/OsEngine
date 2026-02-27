@@ -11816,3 +11816,24 @@
 
 - Host-context verification (outside sandbox):
   - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed `412/412`
+
+## 2026-02-27 - Step 2.2 (InvariantCulture) - Parser compatibility batch coverage hardening block
+
+- Expanded persistence parser compatibility tests in batch:
+  - `project/OsEngine.Tests/PositionPersistenceTests.cs`
+  - `project/OsEngine.Tests/MarketDepthCoreTests.cs`
+  - `project/OsEngine.Tests/NonTradePeriodInDayCoreTests.cs`
+  - `project/OsEngine.Tests/OrderPersistenceTests.cs`
+- Changes:
+  - added `Position` legacy-short payload test without `StopIsMarket/ProfitIsMarket` fields.
+  - added `MarketDepth` depth=`0` save/roundtrip test to lock single-level fallback behavior.
+  - added `NonTradePeriodInDay` malformed payload tolerance test (non-throwing, default state preserved).
+  - added `Order` compatibility test for payload that includes `OrderTypeTime` but omits later tail fields.
+- Scope:
+  - test-only hardening
+  - no production runtime behavior changes.
+
+### Verification
+
+- Host-context verification (outside sandbox):
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed `416/416`

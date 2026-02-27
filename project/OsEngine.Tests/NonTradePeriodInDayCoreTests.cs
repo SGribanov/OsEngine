@@ -72,4 +72,17 @@ public class NonTradePeriodInDayCoreTests
         Assert.Equal("9:0:0:0", loaded.NonTradePeriod5Start.ToString());
         Assert.Equal("10:0:0:0", loaded.NonTradePeriod5End.ToString());
     }
+
+    [Fact]
+    public void LoadFromString_MalformedPayload_ShouldNotThrowAndKeepDefaults()
+    {
+        NonTradePeriodInDay loaded = new NonTradePeriodInDay();
+
+        Exception? error = Record.Exception(() => loaded.LoadFromString("bad"));
+
+        Assert.Null(error);
+        Assert.False(loaded.NonTradePeriod1OnOff);
+        Assert.Equal("0:0:0:0", loaded.NonTradePeriod1Start.ToString());
+        Assert.Equal("7:0:0:0", loaded.NonTradePeriod1End.ToString());
+    }
 }

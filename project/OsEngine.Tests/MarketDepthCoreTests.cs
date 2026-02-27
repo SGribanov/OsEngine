@@ -68,4 +68,28 @@ public class MarketDepthCoreTests
             CultureInfo.CurrentUICulture = originalUiCulture;
         }
     }
+
+    [Fact]
+    public void GetSaveStringToAllDepfh_DepthZero_ShouldPersistSingleLevelAndRoundTrip()
+    {
+        MarketDepth source = new MarketDepth
+        {
+            Time = new DateTime(2026, 2, 27, 19, 0, 1, 250)
+        };
+
+        source.Asks.Add(new MarketDepthLevel { Ask = 5.0, Price = 101.1 });
+        source.Asks.Add(new MarketDepthLevel { Ask = 6.0, Price = 101.2 });
+        source.Bids.Add(new MarketDepthLevel { Bid = 4.0, Price = 100.9 });
+        source.Bids.Add(new MarketDepthLevel { Bid = 3.0, Price = 100.8 });
+
+        string save = source.GetSaveStringToAllDepfh(0);
+
+        MarketDepth loaded = new MarketDepth();
+        loaded.SetMarketDepthFromString(save);
+
+        Assert.Single(loaded.Asks);
+        Assert.Single(loaded.Bids);
+        Assert.Equal(101.1, loaded.Asks[0].Price);
+        Assert.Equal(100.9, loaded.Bids[0].Price);
+    }
 }

@@ -3,6 +3,7 @@
 
 using System;
 using System.Globalization;
+using System.Linq;
 using OsEngine.Entity;
 using OsEngine.Market;
 using Xunit;
@@ -136,6 +137,33 @@ public class PositionPersistenceTests
             CultureInfo.CurrentCulture = originalCulture;
             CultureInfo.CurrentUICulture = originalUiCulture;
         }
+    }
+
+    [Fact]
+    public void SetDealFromString_ShouldSupportLegacyPayloadWithoutMarketFlagFields()
+    {
+        Position source = new Position
+        {
+            Direction = Side.Sell,
+            State = PositionStateType.Open,
+            NameBot = "bot-no-flags",
+            Number = 55,
+            StopIsMarket = true,
+            ProfitIsMarket = true,
+            SecurityName = "GAZP"
+        };
+
+        string[] fields = source.GetStringForSave().ToString().Split('#');
+        string legacyShort = string.Join("#", fields[..^3].Concat(new[] { fields[^1] }));
+
+        Position loaded = new Position();
+        loaded.SetDealFromString(legacyShort);
+
+        Assert.Equal(source.Direction, loaded.Direction);
+        Assert.Equal(source.Number, loaded.Number);
+        Assert.Equal("GAZP", loaded.SecurityName);
+        Assert.False(loaded.StopIsMarket);
+        Assert.False(loaded.ProfitIsMarket);
     }
 
     private static Order CreateOrder(
