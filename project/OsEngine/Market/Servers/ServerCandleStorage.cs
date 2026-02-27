@@ -260,7 +260,7 @@ namespace OsEngine.Market.Servers
 
             SafeFileWriter.WriteAllLines(
                 _pathName + "\\" + series.Specification + ".txt",
-                mySaveInfo.AllCandlesInFile.ConvertAll(candle => candle.StringToSave));
+                (mySaveInfo.AllCandlesInFile ?? new List<Candle>()).ConvertAll(candle => candle.StringToSave));
         }
 
         /// <summary>
@@ -419,8 +419,8 @@ namespace OsEngine.Market.Servers
     /// <summary>
     /// information to save candles
     /// </summary>
-    public class CandleSeriesSaveInfo
-    {
+        public class CandleSeriesSaveInfo
+        {
         private int _lastCandleCount;
 
         private DateTime _lastCandleTime;
@@ -479,7 +479,7 @@ namespace OsEngine.Market.Servers
 
         private void TryTrim(int count)
         {
-            if (AllCandlesInFile.Count < count)
+            if (AllCandlesInFile == null || AllCandlesInFile.Count < count)
             {
                 return;
             }
@@ -489,9 +489,9 @@ namespace OsEngine.Market.Servers
             StartCandleTime = AllCandlesInFile[0].TimeStart;
         }
 
-        public List<Candle> AllCandlesInFile;
+        public List<Candle>? AllCandlesInFile;
 
-        public string Specification;
+        public string Specification = string.Empty;
 
         public DateTime LastCandleTime;
 

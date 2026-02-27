@@ -12369,6 +12369,27 @@
 - Host-context verification (outside sandbox):
   - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed `484/484`
 
+## 2026-02-27 - Step 4.2 (nullable annotations) - CandleSeriesSaveInfo contracts cleanup (`#631`)
+
+- Applied localized nullable-contract cleanup in candle save-info holder:
+  - `project/OsEngine/Market/Servers/ServerCandleStorage.cs`
+- Changes:
+  - clarified optional list contract:
+    - `AllCandlesInFile` -> `List<Candle>?`
+  - initialized non-null textual identity:
+    - `Specification` -> `string.Empty` by default
+  - hardened save/trim flows for nullable list state:
+    - `SaveSeries(...)` now uses safe fallback when converting to save strings
+    - `TryTrim(...)` now guards null list before count checks
+- Scope:
+  - nullable-safety cleanup only
+  - no behavior changes in candle merge/save flow.
+
+### Verification
+
+- Host-context verification (outside sandbox):
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed `484/484`
+
 ## 2026-02-27 - Step 4.2 (nullable annotations) - candle storage nullable cleanup pass (`#630`)
 
 - Applied localized nullable hardening in candle storage runtime path:
