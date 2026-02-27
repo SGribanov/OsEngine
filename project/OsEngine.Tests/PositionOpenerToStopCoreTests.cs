@@ -122,4 +122,46 @@ public class PositionOpenerToStopCoreTests
         Assert.Equal(101.5m, loaded.PriceOrder);
         Assert.Equal(2.0m, loaded.Volume);
     }
+
+    [Fact]
+    public void LoadFromString_ShouldParseLegacyTypoActivateTypeLowerOrEqyal()
+    {
+        string payloadWithTypo =
+            "SBER&tab-typo&19&NoLifeTime&101.5&100.5&LowerOrEqyal&2.0&Sell&4&56&27.02.2026 16:30:45&signal-E&27.02.2026 16:25:40&Limit&303";
+
+        PositionOpenerToStopLimit loaded = new PositionOpenerToStopLimit();
+        loaded.LoadFromString(payloadWithTypo);
+
+        Assert.Equal(StopActivateType.LowerOrEqual, loaded.ActivateType);
+        Assert.Contains("&LowerOrEqual&", loaded.GetSaveString());
+    }
+
+    [Fact]
+    public void LoadFromString_ShouldSupportWindowsCrLfPayload()
+    {
+        string payloadCrLf =
+            "SBER&tab-crlf&20&NoLifeTime&101.75&100.25&HigherOrEqual&2.5&Buy&4&56&2026-02-27T16:30:45.0000000Z&signal-F&2026-02-27T16:25:40.0000000Z&Market&304\r\n";
+
+        PositionOpenerToStopLimit loaded = new PositionOpenerToStopLimit();
+        loaded.LoadFromString(payloadCrLf);
+
+        Assert.Equal(101.75m, loaded.PriceOrder);
+        Assert.Equal(100.25m, loaded.PriceRedLine);
+        Assert.Equal(2.5m, loaded.Volume);
+        Assert.Equal(OrderPriceType.Market, loaded.OrderPriceType);
+        Assert.Equal(304, loaded.PositionNumber);
+    }
+
+    [Fact]
+    public void LoadFromString_ShouldKeepDefaultOrderPriceTypeWhenOptionalTailEnumIsInvalid()
+    {
+        string payloadWithInvalidTailEnum =
+            "SBER&tab-invalid-tail&21&NoLifeTime&102.5&101.5&HigherOrEqual&3.0&Buy&6&78&27.02.2026 17:30:45&signal-G&27.02.2026 17:25:40&LegacyUnknownType&305";
+
+        PositionOpenerToStopLimit loaded = new PositionOpenerToStopLimit();
+        loaded.LoadFromString(payloadWithInvalidTailEnum);
+
+        Assert.Equal(OrderPriceType.Limit, loaded.OrderPriceType);
+        Assert.Equal(305, loaded.PositionNumber);
+    }
 }

@@ -12217,3 +12217,22 @@
 
 - Host-context verification (outside sandbox):
   - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed `456/456`
+
+## 2026-02-28 - Step 2.2 (InvariantCulture) - Multi-file parser compatibility batch coverage block #2
+
+- Expanded persistence parser compatibility tests in batch:
+  - `project/OsEngine.Tests/MyTradePersistenceTests.cs`
+  - `project/OsEngine.Tests/MarketDepthCoreTests.cs`
+  - `project/OsEngine.Tests/PositionOpenerToStopCoreTests.cs`
+- Changes:
+  - `MyTrade`: added legacy placeholder decode coverage (`%` -> `@`), invalid date/side fallback coverage, and trailing-delimiter schema-compatibility coverage for save payload.
+  - `MarketDepth`: added legacy comma-decimal compatibility coverage (locks current invariant-first parse behavior), and one-sided depth payload compatibility coverage (asks-only / bids-only).
+  - `PositionOpenerToStopLimit`: added legacy typo enum alias coverage (`LowerOrEqyal`), CRLF payload compatibility coverage, and invalid optional tail enum fallback coverage for `OrderPriceType`.
+- Scope:
+  - test-only hardening
+  - no production runtime behavior changes.
+
+### Verification
+
+- Host-context verification (outside sandbox):
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed `465/465`

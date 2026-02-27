@@ -66,4 +66,45 @@ public class MyTradePersistenceTests
         Assert.Equal("SEC", trade.SecurityNameCode);
         Assert.Equal(string.Empty, trade.NumberPosition);
     }
+
+    [Fact]
+    public void SetTradeFromString_ShouldDecodeLegacySecurityNamePlaceholder()
+    {
+        MyTrade trade = new MyTrade();
+        trade.SetTradeFromString("1&2&ord&2026-02-26T11:12:13.0000000Z&tr&Buy&SPB%SBER&42");
+
+        Assert.Equal("SPB@SBER", trade.SecurityNameCode);
+        Assert.Equal("42", trade.NumberPosition);
+    }
+
+    [Fact]
+    public void SetTradeFromString_ShouldFallbackToDefaultsForInvalidLegacyValues()
+    {
+        MyTrade trade = new MyTrade();
+        trade.SetTradeFromString("1&2&ord&not-a-date&tr&LegacySide&SEC&7");
+
+        Assert.Equal(DateTime.MinValue, trade.Time);
+        Assert.Equal(Side.None, trade.Side);
+    }
+
+    [Fact]
+    public void GetStringFofSave_ShouldKeepTrailingDelimiterForLegacySchemaCompatibility()
+    {
+        MyTrade trade = new MyTrade
+        {
+            Volume = 1m,
+            Price = 2m,
+            NumberOrderParent = "ord",
+            Time = new DateTime(2026, 2, 26, 11, 12, 13, DateTimeKind.Utc),
+            NumberTrade = "tr",
+            Side = Side.Buy,
+            SecurityNameCode = "SEC",
+            NumberPosition = string.Empty
+        };
+
+        string saved = trade.GetStringFofSave();
+
+        Assert.EndsWith("&", saved, StringComparison.Ordinal);
+        Assert.Equal(9, saved.Split('&').Length);
+    }
 }

@@ -110,4 +110,65 @@ public class MarketDepthCoreTests
         Assert.Empty(loaded.Bids);
         Assert.Equal(source.Time, loaded.Time);
     }
+
+    [Fact]
+    public void SetMarketDepthFromString_LegacyCommaDecimals_ShouldFollowCurrentInvariantFirstParsing()
+    {
+        CultureInfo originalCulture = CultureInfo.CurrentCulture;
+        CultureInfo originalUiCulture = CultureInfo.CurrentUICulture;
+
+        try
+        {
+            CultureInfo.CurrentCulture = new CultureInfo("en-US");
+            CultureInfo.CurrentUICulture = new CultureInfo("en-US");
+
+            string legacy = "20260227_141516_250_2,5&101,25*1,0&101,5*_3,75&101,0*";
+
+            MarketDepth loaded = new MarketDepth();
+            loaded.SetMarketDepthFromString(legacy);
+
+            Assert.Equal(new DateTime(2026, 2, 27, 14, 15, 16, 250), loaded.Time);
+            Assert.Equal(2, loaded.Asks.Count);
+            Assert.Single(loaded.Bids);
+            Assert.Equal(25.0, loaded.Asks[0].Ask);
+            Assert.Equal(10125.0, loaded.Asks[0].Price);
+            Assert.Equal(375.0, loaded.Bids[0].Bid);
+            Assert.Equal(1010.0, loaded.Bids[0].Price);
+        }
+        finally
+        {
+            CultureInfo.CurrentCulture = originalCulture;
+            CultureInfo.CurrentUICulture = originalUiCulture;
+        }
+    }
+
+    [Fact]
+    public void SetMarketDepthFromString_LegacyOnlyAsksSection_ShouldLoadAndKeepBidsEmpty()
+    {
+        string legacy = "20260227_095001_7_5&101.1*_";
+
+        MarketDepth loaded = new MarketDepth();
+        loaded.SetMarketDepthFromString(legacy);
+
+        Assert.Equal(new DateTime(2026, 2, 27, 9, 50, 1, 7), loaded.Time);
+        Assert.Single(loaded.Asks);
+        Assert.Empty(loaded.Bids);
+        Assert.Equal(5.0, loaded.Asks[0].Ask);
+        Assert.Equal(101.1, loaded.Asks[0].Price);
+    }
+
+    [Fact]
+    public void SetMarketDepthFromString_LegacyOnlyBidsSection_ShouldLoadAndKeepAsksEmpty()
+    {
+        string legacy = "20260227_095001_8__4&100.9*";
+
+        MarketDepth loaded = new MarketDepth();
+        loaded.SetMarketDepthFromString(legacy);
+
+        Assert.Equal(new DateTime(2026, 2, 27, 9, 50, 1, 8), loaded.Time);
+        Assert.Empty(loaded.Asks);
+        Assert.Single(loaded.Bids);
+        Assert.Equal(4.0, loaded.Bids[0].Bid);
+        Assert.Equal(100.9, loaded.Bids[0].Price);
+    }
 }
