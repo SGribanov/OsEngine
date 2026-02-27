@@ -252,4 +252,45 @@ public class OrderPersistenceTests
         Assert.Equal(0, loaded.CancellingTryCount);
         Assert.Equal(DateTime.MinValue, loaded.LastCancelTryLocalTime);
     }
+
+    [Fact]
+    public void SetOrderFromString_ShouldIgnoreMalformedCancelInfoTail()
+    {
+        Order source = new Order
+        {
+            NumberUser = 10,
+            ServerType = ServerType.None,
+            NumberMarket = "legacy-bad-cancel",
+            Side = Side.Buy,
+            Price = 40m,
+            Volume = 1m,
+            VolumeExecute = 0m,
+            State = OrderStateType.Active,
+            TypeOrder = OrderPriceType.Limit,
+            SecurityNameCode = "SEC4",
+            PortfolioNumber = "PF4",
+            TimeCallBack = new DateTime(2026, 2, 27, 13, 10, 10),
+            TimeCreate = new DateTime(2026, 2, 27, 13, 10, 0),
+            LifeTime = TimeSpan.FromMinutes(2),
+            Comment = "legacy-bad-cancel",
+            OrderTypeTime = OrderTypeTime.Day,
+            ServerName = "server-cancel",
+            IsSendToCancel = true,
+            CancellingTryCount = 7,
+            LastCancelTryLocalTime = new DateTime(2026, 2, 27, 13, 11, 0)
+        };
+
+        string[] fields = source.GetStringForSave().ToString().Split('@');
+        fields[22] = "True&broken";
+        string payload = string.Join("@", fields);
+
+        Order loaded = new Order();
+        loaded.SetOrderFromString(payload);
+
+        Assert.Equal(OrderTypeTime.Day, loaded.OrderTypeTime);
+        Assert.Equal("server-cancel", loaded.ServerName);
+        Assert.False(loaded.IsSendToCancel);
+        Assert.Equal(0, loaded.CancellingTryCount);
+        Assert.Equal(DateTime.MinValue, loaded.LastCancelTryLocalTime);
+    }
 }

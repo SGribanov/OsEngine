@@ -11869,3 +11869,19 @@
 
 - Host-context verification (outside sandbox):
   - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed `418/418`
+
+## 2026-02-27 - Step 2.2 (InvariantCulture) - Order malformed cancel-tail compatibility coverage block
+
+- Expanded tests for `Order` persistence parsing paths:
+  - `project/OsEngine.Tests/OrderPersistenceTests.cs`
+- Changes:
+  - added compatibility test for malformed cancel-info tail (`IsSendToCancel&CancellingTryCount&LastCancelTryLocalTime` block with invalid part count).
+  - asserted parser fallback defaults when cancel-info tail is malformed.
+- Scope:
+  - test-only hardening
+  - no production runtime behavior changes.
+
+### Verification
+
+- Host-context verification (outside sandbox):
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed `419/419`
