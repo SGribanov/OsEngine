@@ -13473,3 +13473,22 @@
 - **Commit:** `656f3a2dd`
 - **Push:** n/a
 
+
+### Step 2.2 - InvariantCulture Coverage (Incremental Adoption #620)
+
+- **Status:** In Progress (increment completed)
+- **Plan item:** `refactoring_stage2_plan.md` -> Phase 2 / Step 2.2
+- **Changes (batch, multi-agent):**
+  - Expanded parser compatibility coverage in:
+    - `project/OsEngine.Tests/PositionPersistenceTests.cs`
+    - `project/OsEngine.Tests/SecurityCoreTests.cs`
+    - `project/OsEngine.Tests/TradeCoreTests.cs`
+  - Added 3 tests for `Position.SetDealFromString` legacy edge-cases.
+  - Added 3 tests for `Security.LoadFromString` legacy optional-tail edge-cases.
+  - Added 3 tests for `Trade.SetTradeFromString` legacy format edge-cases.
+- **Verification:**
+  - Executed outside sandbox.
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` succeeded (`456/456`).
+- **Commit:** `d710dac06`
+- **Push:** n/a
+
