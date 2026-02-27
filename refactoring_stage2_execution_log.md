@@ -13360,3 +13360,19 @@
 - **Commit:** `b7cae7478`
 - **Push:** n/a
 
+
+### Step 2.2 - InvariantCulture Coverage (Incremental Adoption #613)
+
+- **Status:** In Progress (increment completed)
+- **Plan item:** `refactoring_stage2_plan.md` -> Phase 2 / Step 2.2
+- **Changes:**
+  - Expanded `Order` parser compatibility coverage:
+    - `project/OsEngine.Tests/OrderPersistenceTests.cs`
+  - Added test for legacy payload with numeric pending state value (`"3"`).
+  - Added assertion for enum numeric mapping to `OrderStateType.Pending`.
+- **Verification:**
+  - Executed outside sandbox.
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` succeeded (`435/435`).
+- **Commit:** `6cba54489`
+- **Push:** n/a
+
