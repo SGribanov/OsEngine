@@ -13799,3 +13799,20 @@
 - **Commit:** `ef0cc54a3`
 - **Push:** n/a
 
+
+### Step 4.2 - Nullable Annotations (Incremental Adoption #635)
+
+- **Status:** In Progress (increment completed)
+- **Plan item:** `refactoring_stage2_plan.md` -> Phase 4 / Step 4.2
+- **Changes (ServerTickStorage method signatures):**
+  - Updated `project/OsEngine/Market/Servers/ServerTickStorage.cs`:
+    - `SetSecurityToSave(Security)` -> `SetSecurityToSave(Security?)`
+    - `AppendLinesAtomically(string path, List<string> linesToAppend)` ->
+      `AppendLinesAtomically(string path, List<string>? linesToAppend)`
+  - Added early-return null guard in `SetSecurityToSave(...)`.
+  - Preserved existing null-guard behavior in `AppendLinesAtomically(...)`.
+- **Verification:**
+  - Executed outside sandbox.
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` succeeded (`484/484`).
+- **Commit:** `8b9a63570`
+- **Push:** n/a
