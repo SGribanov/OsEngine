@@ -13221,3 +13221,18 @@
   - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` succeeded (`425/425`).
 - **Commit:** n/a (not committed in this session)
 - **Push:** n/a
+
+### Step 2.2 - InvariantCulture Coverage (Incremental Adoption #604)
+
+- **Status:** In Progress (increment completed)
+- **Plan item:** `refactoring_stage2_plan.md` -> Phase 2 / Step 2.2
+- **Changes:**
+  - Expanded `MyTrade` parser compatibility coverage:
+    - `project/OsEngine.Tests/MyTradePersistenceTests.cs`
+  - Added test for payload with empty trailing `NumberPosition` value.
+  - Added assertions for stable parse of core trade fields with empty position tail.
+- **Verification:**
+  - Executed outside sandbox.
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` succeeded (`426/426`).
+- **Commit:** n/a (not committed in this session)
+- **Push:** n/a
