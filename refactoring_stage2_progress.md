@@ -12255,3 +12255,22 @@
 
 - Host-context verification (outside sandbox):
   - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed `474/474`
+
+## 2026-02-27 - Step 2.2 (InvariantCulture) - TradeGrid parser compatibility coverage block (`#623`)
+
+- Expanded parser compatibility tests for `TradeGrid` persistence/loading cluster:
+  - `project/OsEngine.Tests/TradeGridPersistenceCoreTests.cs`
+- Changes:
+  - added legacy/reserved-tail compatibility coverage for `TradeGridNonTradePeriods.LoadFromString`.
+  - added short-tail fallback coverage for `TradeGridAutoStarter.LoadFromString` optional time section.
+  - added optional-tail fallback coverage for `TradeGridErrorsReaction.LoadFromString`.
+  - added legacy-no-move-flags compatibility coverage for `TrailingUp.LoadFromString`.
+  - added legacy prime-short-tail coverage for `TradeGrid.LoadFromString` with asserted fallback defaults (`DelayInReal`, `CheckMicroVolumes`, `MaxDistanceToOrdersPercent`, `OpenOrdersMakerOnly`).
+- Scope:
+  - test-only hardening
+  - no production runtime behavior changes.
+
+### Verification
+
+- Host-context verification (outside sandbox):
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed `479/479`
