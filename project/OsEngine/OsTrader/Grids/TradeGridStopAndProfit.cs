@@ -55,25 +55,57 @@ namespace OsEngine.OsTrader.Grids
             return result;
         }
 
-        public void LoadFromString(string value)
+        public void LoadFromString(string? value)
         {
             try
             {
+                if (string.IsNullOrWhiteSpace(value))
+                {
+                    return;
+                }
+
                 string[] values = value.Split('@');
 
-                Enum.TryParse(values[0], out ProfitRegime);
-                Enum.TryParse(values[1], out ProfitValueType);
-                ProfitValue = values[2].ToDecimal();
+                if (values.Length > 0 && string.IsNullOrWhiteSpace(values[0]) == false)
+                {
+                    Enum.TryParse(values[0], out ProfitRegime);
+                }
+                if (values.Length > 1 && string.IsNullOrWhiteSpace(values[1]) == false)
+                {
+                    Enum.TryParse(values[1], out ProfitValueType);
+                }
+                if (values.Length > 2 && string.IsNullOrWhiteSpace(values[2]) == false)
+                {
+                    ProfitValue = values[2].ToDecimal();
+                }
 
-                Enum.TryParse(values[3], out StopRegime);
-                Enum.TryParse(values[4], out StopValueType);
-                StopValue = values[5].ToDecimal();
+                if (values.Length > 3 && string.IsNullOrWhiteSpace(values[3]) == false)
+                {
+                    Enum.TryParse(values[3], out StopRegime);
+                }
+                if (values.Length > 4 && string.IsNullOrWhiteSpace(values[4]) == false)
+                {
+                    Enum.TryParse(values[4], out StopValueType);
+                }
+                if (values.Length > 5 && string.IsNullOrWhiteSpace(values[5]) == false)
+                {
+                    StopValue = values[5].ToDecimal();
+                }
 
-                Enum.TryParse(values[6], out TrailStopRegime);
-                Enum.TryParse(values[7], out TrailStopValueType);
-                TrailStopValue = values[8].ToDecimal();
+                if (values.Length > 6 && string.IsNullOrWhiteSpace(values[6]) == false)
+                {
+                    Enum.TryParse(values[6], out TrailStopRegime);
+                }
+                if (values.Length > 7 && string.IsNullOrWhiteSpace(values[7]) == false)
+                {
+                    Enum.TryParse(values[7], out TrailStopValueType);
+                }
+                if (values.Length > 8 && string.IsNullOrWhiteSpace(values[8]) == false)
+                {
+                    TrailStopValue = values[8].ToDecimal();
+                }
 
-                if(string.IsNullOrEmpty(values[9]) == false)
+                if (values.Length > 9 && string.IsNullOrWhiteSpace(values[9]) == false)
                 {
                     StopTradingAfterProfit = Convert.ToBoolean(values[9]);
                 }
@@ -383,17 +415,15 @@ namespace OsEngine.OsTrader.Grids
 
         public void SendNewLogMessage(string message, LogMessageType type)
         {
-            if (LogMessageEvent != null)
-            {
-                LogMessageEvent(message, type);
-            }
-            else if (type == LogMessageType.Error)
+            LogMessageEvent?.Invoke(message, type);
+
+            if (LogMessageEvent == null && type == LogMessageType.Error)
             {
                 ServerMaster.SendNewLogMessage(message, type);
             }
         }
 
-        public event Action<string, LogMessageType> LogMessageEvent;
+        public event Action<string, LogMessageType>? LogMessageEvent;
 
         #endregion
     }

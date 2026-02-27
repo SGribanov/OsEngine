@@ -12550,6 +12550,30 @@
 - Host-context verification (outside sandbox):
   - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed `484/484`
 
+## 2026-02-27 - Step 4.2 (nullable annotations) - TradeGridStopAndProfit parser/log contract cleanup (`#643`)
+
+- Applied localized nullable-safe parser hardening in:
+  - `project/OsEngine/OsTrader/Grids/TradeGridStopAndProfit.cs`
+- Changes:
+  - parser input contract:
+    - `LoadFromString(string value)` -> `LoadFromString(string? value)`
+    - early-return guard for empty/whitespace payload.
+  - parser robustness:
+    - added length/empty checks before each `Split('@')` index access and parse operation.
+    - avoids index overflow on truncated/malformed settings strings.
+  - log-event contract and dispatch:
+    - `LogMessageEvent` -> nullable event (`Action<string, LogMessageType>?`)
+    - dispatch changed to `LogMessageEvent?.Invoke(message, type)`
+    - fallback `ServerMaster.SendNewLogMessage(...)` for `Error` without subscribers preserved.
+- Scope:
+  - nullable contract + parser hardening only
+  - no behavior changes for valid settings payloads.
+
+### Verification
+
+- Host-context verification (outside sandbox):
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed `484/484`
+
 ## 2026-02-27 - Step 4.2 (nullable annotations) - CandleSeriesSaveInfo signature cleanup (`#633`)
 
 - Applied localized nullable-signature alignment in candle save-info holder:
