@@ -12002,3 +12002,19 @@
 
 - Host-context verification (outside sandbox):
   - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed `429/429`
+
+## 2026-02-27 - Step 2.2 (InvariantCulture) - Order legacy Activ-state compatibility coverage block
+
+- Expanded tests for `Order` persistence parsing paths:
+  - `project/OsEngine.Tests/OrderPersistenceTests.cs`
+- Changes:
+  - added compatibility test for legacy misspelled state value (`Activ`) in `SetOrderFromString()`.
+  - asserted mapping to `OrderStateType.Active` through enum alias support.
+- Scope:
+  - test-only hardening
+  - no production runtime behavior changes.
+
+### Verification
+
+- Host-context verification (outside sandbox):
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed `430/430`
