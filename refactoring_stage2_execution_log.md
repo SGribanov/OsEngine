@@ -13767,3 +13767,18 @@
 - **Commit:** `18b0d45c7`
 - **Push:** n/a
 
+
+### Step 4.2 - Nullable Annotations (Incremental Adoption #633)
+
+- **Status:** In Progress (increment completed)
+- **Plan item:** `refactoring_stage2_plan.md` -> Phase 4 / Step 4.2
+- **Changes (CandleSeriesSaveInfo signature alignment):**
+  - Updated `project/OsEngine/Market/Servers/ServerCandleStorage.cs`:
+    - `InsertCandles(List<Candle> candles, int maxCount)` -> `InsertCandles(List<Candle>? candles, int maxCount)`.
+  - Existing null guard behavior preserved (`if (candles == null) return;`).
+- **Verification:**
+  - Executed outside sandbox.
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` succeeded (`484/484`).
+- **Commit:** `55a28ade3`
+- **Push:** n/a
+
