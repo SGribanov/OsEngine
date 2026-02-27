@@ -11970,3 +11970,19 @@
 
 - Host-context verification (outside sandbox):
   - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed `427/427`
+
+## 2026-02-27 - Step 2.2 (InvariantCulture) - Order escaped-name payload compatibility coverage block
+
+- Expanded tests for `Order` persistence parsing paths:
+  - `project/OsEngine.Tests/OrderPersistenceTests.cs`
+- Changes:
+  - added compatibility test for escaped names in payload (`%` -> `@`) for `SecurityNameCode` and `PortfolioNumber`.
+  - asserted parser unescape behavior on load.
+- Scope:
+  - test-only hardening
+  - no production runtime behavior changes.
+
+### Verification
+
+- Host-context verification (outside sandbox):
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed `428/428`

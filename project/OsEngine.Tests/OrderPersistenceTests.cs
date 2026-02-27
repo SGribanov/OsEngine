@@ -335,4 +335,36 @@ public class OrderPersistenceTests
         Assert.Equal(4, loaded.CancellingTryCount);
         Assert.Equal(new DateTime(2026, 2, 27, 14, 11, 0), loaded.LastCancelTryLocalTime);
     }
+
+    [Fact]
+    public void SetOrderFromString_ShouldUnescapeSecurityAndPortfolioNames()
+    {
+        Order source = new Order
+        {
+            NumberUser = 12,
+            ServerType = ServerType.None,
+            NumberMarket = "ord-unescape",
+            Side = Side.Buy,
+            Price = 70m,
+            Volume = 1m,
+            VolumeExecute = 0m,
+            State = OrderStateType.Active,
+            TypeOrder = OrderPriceType.Limit,
+            SecurityNameCode = "SEC@MAIN",
+            PortfolioNumber = "PORT@A",
+            TimeCallBack = new DateTime(2026, 2, 27, 15, 10, 10),
+            TimeCreate = new DateTime(2026, 2, 27, 15, 10, 0),
+            LifeTime = TimeSpan.FromMinutes(1),
+            Comment = "unescape-check",
+            OrderTypeTime = OrderTypeTime.Day
+        };
+
+        string save = source.GetStringForSave().ToString();
+
+        Order loaded = new Order();
+        loaded.SetOrderFromString(save);
+
+        Assert.Equal("SEC@MAIN", loaded.SecurityNameCode);
+        Assert.Equal("PORT@A", loaded.PortfolioNumber);
+    }
 }
