@@ -11800,3 +11800,19 @@
 
 - Host-context verification (outside sandbox):
   - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed `411/411`
+
+## 2026-02-27 - Step 2.2 (InvariantCulture) - PositionOpenerToStopLimit legacy-short payload compatibility coverage block
+
+- Expanded tests for `PositionOpenerToStopLimit` persistence parsing paths:
+  - `project/OsEngine.Tests/PositionOpenerToStopCoreTests.cs`
+- Changes:
+  - added compatibility test for legacy short payloads without optional tail fields (`OrderPriceType`, `PositionNumber`).
+  - asserted fallback defaults for omitted fields while preserving core parsed values.
+- Scope:
+  - test-only hardening
+  - no production runtime behavior changes.
+
+### Verification
+
+- Host-context verification (outside sandbox):
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed `412/412`

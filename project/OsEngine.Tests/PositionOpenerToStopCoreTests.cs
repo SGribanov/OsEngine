@@ -85,4 +85,26 @@ public class PositionOpenerToStopCoreTests
             CultureInfo.CurrentUICulture = originalUiCulture;
         }
     }
+
+    [Fact]
+    public void LoadFromString_ShouldSupportLegacyPayloadWithoutOptionalTailFields()
+    {
+        string legacyShort =
+            "SBER&tab-legacy&17&NoLifeTime&99.5&98.5&LowerOrEqual&1.0&Sell&3&55&27.02.2026 15:30:45&signal-C&27.02.2026 15:25:40";
+
+        PositionOpenerToStopLimit loaded = new PositionOpenerToStopLimit();
+        loaded.LoadFromString(legacyShort);
+
+        Assert.Equal("SBER", loaded.Security);
+        Assert.Equal("tab-legacy", loaded.TabName);
+        Assert.Equal(17, loaded.Number);
+        Assert.Equal(99.5m, loaded.PriceOrder);
+        Assert.Equal(98.5m, loaded.PriceRedLine);
+        Assert.Equal(1.0m, loaded.Volume);
+        Assert.Equal(StopActivateType.LowerOrEqual, loaded.ActivateType);
+        Assert.Equal(new DateTime(2026, 2, 27, 15, 30, 45), loaded.LastCandleTime);
+        Assert.Equal(new DateTime(2026, 2, 27, 15, 25, 40), loaded.TimeCreate);
+        Assert.Equal(OrderPriceType.Limit, loaded.OrderPriceType);
+        Assert.Equal(0, loaded.PositionNumber);
+    }
 }
