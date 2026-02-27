@@ -13782,3 +13782,20 @@
 - **Commit:** `55a28ade3`
 - **Push:** n/a
 
+
+### Step 4.2 - Nullable Annotations (Incremental Adoption #634)
+
+- **Status:** In Progress (increment completed)
+- **Plan item:** `refactoring_stage2_plan.md` -> Phase 4 / Step 4.2
+- **Changes (ServerCandleStorage method signatures):**
+  - Updated `project/OsEngine/Market/Servers/ServerCandleStorage.cs`:
+    - `SetSeriesToSave(CandleSeries)` -> `SetSeriesToSave(CandleSeries?)`
+    - `RemoveSeries(CandleSeries)` -> `RemoveSeries(CandleSeries?)`
+    - `SaveSeries(CandleSeries)` -> `SaveSeries(CandleSeries?)`
+  - Added early-return null guards in these methods.
+- **Verification:**
+  - Executed outside sandbox.
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` succeeded (`484/484`).
+- **Commit:** `ef0cc54a3`
+- **Push:** n/a
+
