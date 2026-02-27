@@ -12963,7 +12963,7 @@
     - `dotnet restore` (OsEngine + OsEngine.Tests) succeeded.
     - `dotnet build` (Release) succeeded with `0` warnings, `0` errors.
     - `dotnet test` succeeded (`397/397`).
-- **Commit:** pending
+- **Commit:** `a3a4d504c`
 - **Push:** pending
 
 ### Step 2.2 - InvariantCulture Coverage (Incremental Adoption #587)
@@ -13528,5 +13528,25 @@
   - Executed outside sandbox.
   - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` succeeded (`474/474`).
 - **Commit:** `5a988e5e1`
+- **Push:** n/a
+
+
+### Step 2.2 - InvariantCulture Coverage (Incremental Adoption #623)
+
+- **Status:** In Progress (increment completed)
+- **Plan item:** `refactoring_stage2_plan.md` -> Phase 2 / Step 2.2
+- **Changes (TradeGrid parser compatibility batch):**
+  - Added parser compatibility tests in:
+    - `project/OsEngine.Tests/TradeGridPersistenceCoreTests.cs`
+  - Added coverage for:
+    - `TradeGridNonTradePeriods.LoadFromString` reserved-tail compatibility.
+    - `TradeGridAutoStarter.LoadFromString` short-tail optional time-section fallback.
+    - `TradeGridErrorsReaction.LoadFromString` optional-tail fallback defaults.
+    - `TrailingUp.LoadFromString` legacy payload without move-flag fields.
+    - `TradeGrid.LoadFromString` legacy prime-short-tail payload fallback behavior.
+- **Verification:**
+  - Executed outside sandbox.
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` succeeded (`479/479`).
+- **Commit:** pending
 - **Push:** n/a
 
