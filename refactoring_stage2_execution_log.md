@@ -13440,3 +13440,20 @@
 - **Commit:** `ca47077bc`
 - **Push:** n/a
 
+
+### Step 2.2 - InvariantCulture Coverage (Incremental Adoption #618)
+
+- **Status:** In Progress (increment completed)
+- **Plan item:** `refactoring_stage2_plan.md` -> Phase 2 / Step 2.2
+- **Changes (batch):**
+  - Expanded `Order` parser compatibility coverage:
+    - `project/OsEngine.Tests/OrderPersistenceTests.cs`
+  - Added numeric `OrderTypeTime` parse tests for values `1` (`GTC`) and `0` (`Specified`).
+  - Added lowercase enum parse test for `OrderTypeTime` value `gtc`.
+  - Added invalid-value fallback test for `OrderTypeTime` (`not-a-valid-order-type-time` -> `Specified`).
+- **Verification:**
+  - Executed outside sandbox.
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` succeeded (`443/443`).
+- **Commit:** `9f703bdd7`
+- **Push:** n/a
+
