@@ -13547,6 +13547,32 @@
 - **Verification:**
   - Executed outside sandbox.
   - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` succeeded (`479/479`).
-- **Commit:** pending
+- **Commit:** `a3a4d504c`
+- **Push:** n/a
+
+
+### Step 2.2 - InvariantCulture Coverage (Incremental Adoption #624)
+
+- **Status:** In Progress (increment completed)
+- **Plan item:** `refactoring_stage2_plan.md` -> Phase 2 / Step 2.2
+- **Changes (optimizer settings parser compatibility batch):**
+  - Added compatibility and roundtrip tests in:
+    - `project/OsEngine.Tests/OptimizerSettingsCollectionsPersistenceTests.cs`
+  - Added coverage for:
+    - line-based legacy `OrderClearing` payloads loaded by `OptimizerSettings.LoadClearingInfo()`.
+    - line-based legacy `NonTradePeriod` payloads loaded by `OptimizerSettings.LoadNonTradePeriods()`.
+    - save/load roundtrip for optimizer `ClearingTimes` and `NonTradePeriods` collections.
+  - Added test isolation for file-backed optimizer settings tests (disable parallelization in shared collection):
+    - `project/OsEngine.Tests/OptimizerRefactorTests.cs`
+    - `project/OsEngine.Tests/OptimizerSettingsCollectionsPersistenceTests.cs`
+  - Runtime parser hardening (verification-driven fix):
+    - fixed `TrailingUp.LoadFromString()` to safely handle short legacy payloads without `IndexOutOfRangeException`:
+      - `project/OsEngine/OsTrader/Grids/TrailingUp.cs`
+    - added regression test for short payload handling:
+      - `project/OsEngine.Tests/TradeGridPersistenceCoreTests.cs`
+- **Verification:**
+  - Executed outside sandbox.
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` succeeded (`483/483`).
+- **Commit:** `c961c89d8`
 - **Push:** n/a
 
