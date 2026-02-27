@@ -13206,3 +13206,18 @@
   - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` succeeded (`421/421`).
 - **Commit:** n/a (not committed in this session)
 - **Push:** n/a
+
+### Step 2.2 - InvariantCulture Coverage (Incremental Adoption #603)
+
+- **Status:** In Progress (increment completed)
+- **Plan item:** `refactoring_stage2_plan.md` -> Phase 2 / Step 2.2
+- **Changes (batch):**
+  - `Trade` parser: added IQFeed buy-side inference compatibility test.
+  - `MarketDepth` parser: added empty-level save/load roundtrip test.
+  - `PositionOpenerToStopLimit` parser: added payload compatibility test with `OrderPriceType` and missing `PositionNumber`.
+  - `Order` parser: added empty-servername + valid-cancel-tail compatibility test.
+- **Verification:**
+  - Executed outside sandbox.
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` succeeded (`425/425`).
+- **Commit:** n/a (not committed in this session)
+- **Push:** n/a
