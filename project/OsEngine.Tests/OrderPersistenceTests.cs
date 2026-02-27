@@ -862,4 +862,136 @@ public class OrderPersistenceTests
 
         Assert.Equal(OrderTypeTime.Specified, loaded.OrderTypeTime);
     }
+
+    [Fact]
+    public void SetOrderFromString_ShouldParseLowercaseActiveStateValue()
+    {
+        Order source = new Order
+        {
+            NumberUser = 28,
+            ServerType = ServerType.None,
+            NumberMarket = "ord-legacy-lowercase-active",
+            Side = Side.Buy,
+            Price = 85m,
+            Volume = 1m,
+            VolumeExecute = 0m,
+            State = OrderStateType.None,
+            TypeOrder = OrderPriceType.Limit,
+            SecurityNameCode = "SEC21",
+            PortfolioNumber = "PF21",
+            TimeCallBack = new DateTime(2026, 2, 28, 7, 10, 10),
+            TimeCreate = new DateTime(2026, 2, 28, 7, 10, 0),
+            LifeTime = TimeSpan.FromMinutes(1),
+            Comment = "legacy-lowercase-active",
+            OrderTypeTime = OrderTypeTime.Day
+        };
+
+        string[] fields = source.GetStringForSave().ToString().Split('@');
+        fields[8] = "active";
+        string payload = string.Join("@", fields);
+
+        Order loaded = new Order();
+        loaded.SetOrderFromString(payload);
+
+        Assert.Equal(OrderStateType.Active, loaded.State);
+    }
+
+    [Fact]
+    public void SetOrderFromString_ShouldParseLowercasePartialStateValue()
+    {
+        Order source = new Order
+        {
+            NumberUser = 29,
+            ServerType = ServerType.None,
+            NumberMarket = "ord-legacy-lowercase-partial",
+            Side = Side.Sell,
+            Price = 86m,
+            Volume = 1m,
+            VolumeExecute = 0m,
+            State = OrderStateType.None,
+            TypeOrder = OrderPriceType.Limit,
+            SecurityNameCode = "SEC22",
+            PortfolioNumber = "PF22",
+            TimeCallBack = new DateTime(2026, 2, 28, 8, 10, 10),
+            TimeCreate = new DateTime(2026, 2, 28, 8, 10, 0),
+            LifeTime = TimeSpan.FromMinutes(1),
+            Comment = "legacy-lowercase-partial",
+            OrderTypeTime = OrderTypeTime.Day
+        };
+
+        string[] fields = source.GetStringForSave().ToString().Split('@');
+        fields[8] = "partial";
+        string payload = string.Join("@", fields);
+
+        Order loaded = new Order();
+        loaded.SetOrderFromString(payload);
+
+        Assert.Equal(OrderStateType.Partial, loaded.State);
+    }
+
+    [Fact]
+    public void SetOrderFromString_ShouldParseLowercaseCancelStateValue()
+    {
+        Order source = new Order
+        {
+            NumberUser = 30,
+            ServerType = ServerType.None,
+            NumberMarket = "ord-legacy-lowercase-cancel",
+            Side = Side.Buy,
+            Price = 87m,
+            Volume = 1m,
+            VolumeExecute = 0m,
+            State = OrderStateType.None,
+            TypeOrder = OrderPriceType.Limit,
+            SecurityNameCode = "SEC23",
+            PortfolioNumber = "PF23",
+            TimeCallBack = new DateTime(2026, 2, 28, 9, 10, 10),
+            TimeCreate = new DateTime(2026, 2, 28, 9, 10, 0),
+            LifeTime = TimeSpan.FromMinutes(1),
+            Comment = "legacy-lowercase-cancel",
+            OrderTypeTime = OrderTypeTime.Day
+        };
+
+        string[] fields = source.GetStringForSave().ToString().Split('@');
+        fields[8] = "cancel";
+        string payload = string.Join("@", fields);
+
+        Order loaded = new Order();
+        loaded.SetOrderFromString(payload);
+
+        Assert.Equal(OrderStateType.Cancel, loaded.State);
+    }
+
+    [Fact]
+    public void SetOrderFromString_ShouldFallbackToDefaultOnInvalidStateValue()
+    {
+        Order source = new Order
+        {
+            NumberUser = 31,
+            ServerType = ServerType.None,
+            NumberMarket = "ord-legacy-invalid-state",
+            Side = Side.Sell,
+            Price = 88m,
+            Volume = 1m,
+            VolumeExecute = 0m,
+            State = OrderStateType.Active,
+            TypeOrder = OrderPriceType.Limit,
+            SecurityNameCode = "SEC24",
+            PortfolioNumber = "PF24",
+            TimeCallBack = new DateTime(2026, 2, 28, 10, 10, 10),
+            TimeCreate = new DateTime(2026, 2, 28, 10, 10, 0),
+            LifeTime = TimeSpan.FromMinutes(1),
+            Comment = "legacy-invalid-state",
+            OrderTypeTime = OrderTypeTime.Day
+        };
+
+        string[] fields = source.GetStringForSave().ToString().Split('@');
+        fields[8] = "not-a-valid-order-state";
+        string payload = string.Join("@", fields);
+
+        Order loaded = new Order();
+        loaded.SetOrderFromString(payload);
+
+        Assert.Equal((OrderStateType)0, loaded.State);
+    }
 }

@@ -12180,3 +12180,21 @@
 
 - Host-context verification (outside sandbox):
   - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed `443/443`
+
+## 2026-02-28 - Step 2.2 (InvariantCulture) - Order state parser compatibility batch coverage block
+
+- Expanded tests for `Order` persistence parsing paths:
+  - `project/OsEngine.Tests/OrderPersistenceTests.cs`
+- Changes:
+  - added lowercase compatibility test for `State` value `active` -> `OrderStateType.Active`.
+  - added lowercase compatibility test for `State` value `partial` -> `OrderStateType.Partial`.
+  - added lowercase compatibility test for `State` value `cancel` -> `OrderStateType.Cancel`.
+  - added invalid-value compatibility test and documented current fallback behavior (`not-a-valid-order-state` -> underlying enum value `0`).
+- Scope:
+  - test-only hardening
+  - no production runtime behavior changes.
+
+### Verification
+
+- Host-context verification (outside sandbox):
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed `447/447`
