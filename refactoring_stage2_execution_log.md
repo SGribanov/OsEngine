@@ -13816,3 +13816,20 @@
   - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` succeeded (`484/484`).
 - **Commit:** `8b9a63570`
 - **Push:** n/a
+
+
+### Step 4.2 - Nullable Annotations (Incremental Adoption #636)
+
+- **Status:** In Progress (increment completed)
+- **Plan item:** `refactoring_stage2_plan.md` -> Phase 4 / Step 4.2
+- **Changes (ServerTickStorage local nullable contracts):**
+  - Updated `project/OsEngine/Market/Servers/ServerTickStorage.cs`:
+    - `List<Trade>[] allTrades` -> `List<Trade>[]? allTrades` in tick saver path.
+    - `List<Trade>[] allTrades` -> `List<Trade>[]? allTrades` in tick loader path.
+    - completion callback invoke changed to nullable-safe `TickLoadedEvent?.Invoke(allTrades)` under existing `allTrades != null` guard.
+  - Purpose: align local type contracts with existing null-aware control flow.
+- **Verification:**
+  - Executed outside sandbox.
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` succeeded (`484/484`).
+- **Commit:** `83961228b`
+- **Push:** n/a
