@@ -542,6 +542,27 @@ public class TradeGridPersistenceCoreTests
     }
 
     [Fact]
+    public void Stage2Step2_2_TradeGrid_EntryPointsAndLog_WithNullPayload_ShouldNotThrow()
+    {
+        TradeGrid grid = (TradeGrid)RuntimeHelpers.GetUninitializedObject(typeof(TradeGrid));
+        grid.RegimeLogicEntry = TradeGridLogicEntryRegime.OnTrade;
+
+        string? capturedMessage = null;
+        grid.LogMessageEvent += (message, _) => capturedMessage = message;
+
+        Exception? error = Record.Exception(() =>
+        {
+            InvokePrivateWithArgs(grid, "Tab_NewTickEvent", (object?)null);
+            InvokePrivateWithArgs(grid, "Tab_PositionStopActivateEvent", (object?)null);
+            grid.SendNewLogMessage(null!, LogMessageType.Error);
+        });
+
+        Assert.Null(error);
+        Assert.NotNull(capturedMessage);
+        Assert.Contains("Grid error. Bot: unknown", capturedMessage);
+    }
+
+    [Fact]
     public void Stage2Step2_2_TradeGrid_RemoveSelected_WithNullGridCreatorLines_ShouldNotThrow()
     {
         TradeGrid grid = (TradeGrid)RuntimeHelpers.GetUninitializedObject(typeof(TradeGrid));

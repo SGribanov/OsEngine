@@ -915,6 +915,11 @@ namespace OsEngine.OsTrader.Grids
 
         private void Tab_NewTickEvent(Trade trade)
         {
+            if (trade == null)
+            {
+                return;
+            }
+
             if (_isDeleted == true)
             {
                 return;
@@ -1571,6 +1576,11 @@ namespace OsEngine.OsTrader.Grids
 
         private void Tab_PositionStopActivateEvent(Position obj)
         {
+            if (obj == null)
+            {
+                return;
+            }
+
             if (_firstStopIsActivate == false)
             {
                 _firstStopIsActivate = true;
@@ -3354,10 +3364,16 @@ namespace OsEngine.OsTrader.Grids
 
         public void SendNewLogMessage(string message, LogMessageType type)
         {
+            if (message == null)
+            {
+                message = string.Empty;
+            }
+
             if (type == LogMessageType.Error)
             {
-                string botName = Tab?.NameStrategy ?? "unknown";
-                string securityName = Tab?.Connector?.SecurityName ?? "unknown";
+                BotTabSimple tab = Tab;
+                string botName = tab?.NameStrategy ?? "unknown";
+                string securityName = tab?.Connector?.SecurityName ?? "unknown";
 
                 message = "Grid error. Bot: " + botName + "\n"
                 + "Security name: " + securityName + "\n"
