@@ -14185,3 +14185,29 @@
     - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed `488/488`
 - **Commit:** n/a
 - **Push:** n/a
+
+### Step 4.2 - Nullable Annotations (Incremental Adoption #654)
+
+- **Status:** In Progress (increment completed)
+- **Plan item:** `refactoring_stage2_plan.md` -> Phase 4 / Step 4.2
+- **Changes (TradeGrid management/event lifecycle guards):**
+  - Updated `project/OsEngine/OsTrader/Grids/TradeGrid.cs`:
+    - added `GridCreator` / `Tab` guards in:
+      - `CreateNewGridSafe()`
+      - `CreateNewLine()`
+      - `DeleteGrid()`
+      - `RemoveSelected(List<int>)`
+    - added `GridCreator` guard in:
+      - `Tab_PositionOpeningSuccesEvent(Position position)`
+    - methods now exit safely when lifecycle dependencies are unavailable (e.g., after `Delete()`), preserving initialized-state behavior.
+  - Updated tests in `project/OsEngine.Tests/TradeGridPersistenceCoreTests.cs`:
+    - `...PublicGridManagement_WithNullGridCreator_ShouldNotThrow`
+    - `...PositionOpeningSuccessHandler_WithNullGridCreator_ShouldNotThrow`
+    - added private reflection helper with args support (`InvokePrivateWithArgs(...)`).
+- **Verification (outside sandbox, per dotnet-build-policy):**
+  - `dotnet restore project/OsEngine/OsEngine.csproj --nologo` -> success
+  - `dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo` -> success
+  - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` -> success, 0 warnings, 0 errors
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed `501/501`
+- **Commit:** n/a
+- **Push:** n/a
