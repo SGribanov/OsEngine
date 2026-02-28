@@ -14428,3 +14428,23 @@
   - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed `511/511`
 - **Commit:** n/a
 - **Push:** n/a
+
+### Step 4.2 - Nullable Annotations (Incremental Adoption #665)
+
+- **Status:** In Progress (increment completed)
+- **Plan item:** `refactoring_stage2_plan.md` -> Phase 4 / Step 4.2
+- **Changes (TradeGrid connector/journal lifecycle hardening block):**
+  - Updated `project/OsEngine/OsTrader/Grids/TradeGrid.cs`:
+    - `Process()` now guards `tab.Connector` and `connector.MyServer` in the start-connector wait branch.
+    - replaced reflection-style base-type check with direct pattern match `server is AServer`.
+    - added `position == null` guard in `Tab_PositionClosingSuccesEvent(Position position)`.
+    - added `tab._journal == null` guard in `TryDeletePositionsFromJournal(Position position)`.
+  - Updated tests in `project/OsEngine.Tests/TradeGridPersistenceCoreTests.cs`:
+    - `...TryDeletePositionsFromJournal_WithNullJournal_ShouldNotThrow`
+- **Verification (outside sandbox, per dotnet-build-policy):**
+  - `dotnet restore project/OsEngine/OsEngine.csproj --nologo` -> success
+  - `dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo` -> success
+  - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` -> success, 0 warnings, 0 errors
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed `512/512`
+- **Commit:** n/a
+- **Push:** n/a
