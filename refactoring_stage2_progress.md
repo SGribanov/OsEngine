@@ -13167,3 +13167,29 @@
   - dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo -> success
   - dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900 -> success, 0 warnings, 0 errors
   - dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo -> passed 505/505
+
+## 2026-02-28 - Step 4.2 (nullable annotations) - TradeGrid fail-event/open-position lifecycle guard cleanup (#659)
+
+- Applied localized nullable-safe lifecycle hardening in:
+  - project/OsEngine/OsTrader/Grids/TradeGrid.cs
+- Changes:
+  - fail-event handlers now guard `ErrorsReaction` before dispatch:
+    - `Tab_PositionClosingFailEvent(Position position)`
+    - `Tab_PositionOpeningFailEvent(Position position)`
+  - `GridTypeOpenPositionLogic(TradeGridRegime baseRegime)` now uses local `StopAndProfit` snapshot and guards before profit-regime checks.
+  - `MaxGridPrice` / `MinGridPrice` now return safe default (`0`) when `TrailingUp` is unavailable, avoiding exception-driven flow.
+  - behavior for initialized runtime state preserved.
+- Added/updated tests:
+  - project/OsEngine.Tests/TradeGridPersistenceCoreTests.cs
+    - `...FailEventsAndOpenPositionLogic_WithNullHandlers_ShouldNotThrow`
+- Scope:
+  - nullable lifecycle guard cleanup only
+  - no trade decision logic changes.
+
+### Verification
+
+- Host-context verification (outside sandbox, per dotnet-build-policy):
+  - dotnet restore project/OsEngine/OsEngine.csproj --nologo -> success
+  - dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo -> success
+  - dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900 -> success, 0 warnings, 0 errors
+  - dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo -> passed 506/506

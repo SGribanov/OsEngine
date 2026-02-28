@@ -441,6 +441,31 @@ public class TradeGridPersistenceCoreTests
         Assert.Null(error);
     }
 
+    [Fact]
+    public void Stage2Step2_2_TradeGrid_FailEventsAndOpenPositionLogic_WithNullHandlers_ShouldNotThrow()
+    {
+        TradeGrid grid = (TradeGrid)RuntimeHelpers.GetUninitializedObject(typeof(TradeGrid));
+        Position position = (Position)RuntimeHelpers.GetUninitializedObject(typeof(Position));
+
+        grid.Regime = TradeGridRegime.On;
+        grid.GridCreator = new TradeGridCreator();
+        grid.GridCreator.Lines = new List<TradeGridLine>
+        {
+            new TradeGridLine { Position = position, PositionNum = position.Number }
+        };
+
+        Exception? error = Record.Exception(() =>
+        {
+            InvokePrivateWithArgs(grid, "Tab_PositionClosingFailEvent", position);
+            InvokePrivateWithArgs(grid, "Tab_PositionOpeningFailEvent", position);
+            InvokePrivateWithArgs(grid, "GridTypeOpenPositionLogic", TradeGridRegime.On);
+        });
+
+        Assert.Null(error);
+        Assert.Equal(0m, grid.MaxGridPrice);
+        Assert.Equal(0m, grid.MinGridPrice);
+    }
+
     private static TradeGrid CreateBareGrid()
     {
         TradeGrid grid = (TradeGrid)RuntimeHelpers.GetUninitializedObject(typeof(TradeGrid));

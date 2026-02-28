@@ -499,7 +499,13 @@ namespace OsEngine.OsTrader.Grids
 
                     if (isInArray)
                     {
-                        ErrorsReaction.PositionClosingFailEvent(position);
+                        TradeGridErrorsReaction errorsReaction = ErrorsReaction;
+                        if (errorsReaction == null)
+                        {
+                            return;
+                        }
+
+                        errorsReaction.PositionClosingFailEvent(position);
                     }
                 }
             }
@@ -537,7 +543,13 @@ namespace OsEngine.OsTrader.Grids
 
                     if (isInArray)
                     {
-                        ErrorsReaction.PositionOpeningFailEvent(position);
+                        TradeGridErrorsReaction errorsReaction = ErrorsReaction;
+                        if (errorsReaction == null)
+                        {
+                            return;
+                        }
+
+                        errorsReaction.PositionOpeningFailEvent(position);
                     }
                 }
             }
@@ -1306,6 +1318,8 @@ namespace OsEngine.OsTrader.Grids
             {
                 if (_firstStopIsActivate == false)
                 {
+                    TradeGridStopAndProfit stopAndProfit = StopAndProfit;
+
                     // 1 пытаемся почистить журнал от лишних сделок
                     TryFreeJournal();
 
@@ -1316,11 +1330,12 @@ namespace OsEngine.OsTrader.Grids
                     TrySetStopAndProfit();
 
                     // 4 проверяем лимитки за закрытие по профиту
-                    if (StopAndProfit.ProfitRegime == OnOffRegime.On)
+                    if (stopAndProfit != null
+                        && stopAndProfit.ProfitRegime == OnOffRegime.On)
                     {
                         TrySetLimitProfit();
 
-                        if (StopAndProfit.StopTradingAfterProfit == true)
+                        if (stopAndProfit.StopTradingAfterProfit == true)
                         {
                             CheckStopTradingAfterProfit();
                         }
@@ -2864,7 +2879,13 @@ namespace OsEngine.OsTrader.Grids
             {
                 try
                 {
-                    return TrailingUp.MaxGridPrice;
+                    TrailingUp trailingUp = TrailingUp;
+                    if (trailingUp == null)
+                    {
+                        return 0;
+                    }
+
+                    return trailingUp.MaxGridPrice;
                 }
                 catch (Exception e)
                 {
@@ -2880,7 +2901,13 @@ namespace OsEngine.OsTrader.Grids
             {
                 try
                 {
-                    return TrailingUp.MinGridPrice;
+                    TrailingUp trailingUp = TrailingUp;
+                    if (trailingUp == null)
+                    {
+                        return 0;
+                    }
+
+                    return trailingUp.MinGridPrice;
                 }
                 catch (Exception e)
                 {
