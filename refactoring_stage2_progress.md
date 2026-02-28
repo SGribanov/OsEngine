@@ -13108,3 +13108,34 @@
   - dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo -> success
   - dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900 -> success, 0 warnings, 0 errors
   - dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo -> passed 503/503
+
+## 2026-02-28 - Step 4.2 (nullable annotations) - TradeGrid process-loop lifecycle guard cleanup (#657)
+
+- Applied localized nullable-safe lifecycle hardening in:
+  - project/OsEngine/OsTrader/Grids/TradeGrid.cs
+- Changes:
+  - `Process()` now uses guarded local snapshots for lifecycle-dependent subcomponents:
+    - `Tab`
+    - `GridCreator`
+    - `ErrorsReaction`
+    - `AutoStarter`
+    - `NonTradePeriods`
+    - `StopBy`
+    - `TrailingUp`
+  - added early-return guard when any required runtime dependency is unavailable.
+  - replaced direct field dereferences in `Process()` with guarded local snapshots in decision flow.
+  - behavior for initialized runtime state preserved.
+- Added/updated tests:
+  - project/OsEngine.Tests/TradeGridPersistenceCoreTests.cs
+    - `...Process_WithNullDependencies_ShouldNotThrow`
+- Scope:
+  - nullable lifecycle guard cleanup only
+  - no trade decision logic changes.
+
+### Verification
+
+- Host-context verification (outside sandbox, per dotnet-build-policy):
+  - dotnet restore project/OsEngine/OsEngine.csproj --nologo -> success
+  - dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo -> success
+  - dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900 -> success, 0 warnings, 0 errors
+  - dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo -> passed 504/504

@@ -924,25 +924,44 @@ namespace OsEngine.OsTrader.Grids
 
         private void Process()
         {
-            if (Tab.IsConnected == false
-                || Tab.IsReadyToTrade == false)
+            BotTabSimple tab = Tab;
+            TradeGridCreator gridCreator = GridCreator;
+            TradeGridErrorsReaction errorsReaction = ErrorsReaction;
+            TradeGridAutoStarter autoStarter = AutoStarter;
+            TradeGridNonTradePeriods nonTradePeriods = NonTradePeriods;
+            TradeGridStopBy stopBy = StopBy;
+            TrailingUp trailingUp = TrailingUp;
+
+            if (tab == null
+                || gridCreator == null
+                || errorsReaction == null
+                || autoStarter == null
+                || nonTradePeriods == null
+                || stopBy == null
+                || trailingUp == null)
             {
                 return;
             }
 
-            if (Tab.CandlesAll == null
-                || Tab.CandlesAll.Count == 0)
+            if (tab.IsConnected == false
+                || tab.IsReadyToTrade == false)
             {
                 return;
             }
 
-            if (GridCreator.Lines == null
-                || GridCreator.Lines.Count == 0)
+            if (tab.CandlesAll == null
+                || tab.CandlesAll.Count == 0)
             {
                 return;
             }
 
-            if (Tab.EventsIsOn == false)
+            if (gridCreator.Lines == null
+                || gridCreator.Lines.Count == 0)
+            {
+                return;
+            }
+
+            if (tab.EventsIsOn == false)
             {
                 return;
             }
@@ -954,21 +973,21 @@ namespace OsEngine.OsTrader.Grids
 
             if (StartProgram == StartProgram.IsOsTrader)
             {
-                if (Tab.IsNonTradePeriodInConnector == true)
+                if (tab.IsNonTradePeriodInConnector == true)
                 {
                     return;
                 }
             }
 
             if (StartProgram == StartProgram.IsOsTrader
-               && ErrorsReaction.WaitOnStartConnectorIsOn == true)
+               && errorsReaction.WaitOnStartConnectorIsOn == true)
             {
-                IServer server = Tab.Connector.MyServer;
+                IServer server = tab.Connector.MyServer;
 
                 if (server.GetType().BaseType.Name == "AServer")
                 {
                     AServer aServer = (AServer)server;
-                    if (ErrorsReaction.AwaitOnStartConnector(aServer) == true)
+                    if (errorsReaction.AwaitOnStartConnector(aServer) == true)
                     {
                         return;
                     }
@@ -978,7 +997,7 @@ namespace OsEngine.OsTrader.Grids
             if (StartProgram == StartProgram.IsOsTrader)
             {// сбрасываем кол-во ошибок по утрам и на старте сессии
 
-                if (ErrorsReaction.TryResetErrorsAtStartOfDay(Tab.TimeServerCurrent) == true)
+                if (errorsReaction.TryResetErrorsAtStartOfDay(tab.TimeServerCurrent) == true)
                 {
                     Save();
                 }
@@ -1019,11 +1038,11 @@ namespace OsEngine.OsTrader.Grids
 
                 _firstStopIsActivate = false;
 
-                if (ErrorsReaction.FailCancelOrdersCountFact != 0
-                    || ErrorsReaction.FailOpenOrdersCountFact != 0)
+                if (errorsReaction.FailCancelOrdersCountFact != 0
+                    || errorsReaction.FailOpenOrdersCountFact != 0)
                 {
-                    ErrorsReaction.FailCancelOrdersCountFact = 0;
-                    ErrorsReaction.FailOpenOrdersCountFact = 0;
+                    errorsReaction.FailCancelOrdersCountFact = 0;
+                    errorsReaction.FailOpenOrdersCountFact = 0;
                     _needToSave = true;
                 }
 
@@ -1060,43 +1079,43 @@ namespace OsEngine.OsTrader.Grids
 
                 // проверяем работу авто-стартера, если он включен
 
-                if (AutoStarter.AutoStartRegime == TradeGridAutoStartRegime.Off
-                    && AutoStarter.StartGridByTimeOfDayIsOn == false)
+                if (autoStarter.AutoStartRegime == TradeGridAutoStartRegime.Off
+                    && autoStarter.StartGridByTimeOfDayIsOn == false)
                 {
                     return;
                 }
 
-                DateTime serverTime = Tab.TimeServerCurrent;
+                DateTime serverTime = tab.TimeServerCurrent;
 
-                TradeGridRegime nonTradePeriodsRegime = NonTradePeriods.GetNonTradePeriodsRegime(serverTime);
+                TradeGridRegime nonTradePeriodsRegime = nonTradePeriods.GetNonTradePeriodsRegime(serverTime);
 
                 if (nonTradePeriodsRegime != TradeGridRegime.On)
                 { // авто-старт не может быть включен, если сейчас не торговый период
                     return;
                 }
 
-                if (AutoStarter.HaveEventToStart(this))
+                if (autoStarter.HaveEventToStart(this))
                 {
-                    if (AutoStarter.RebuildGridRegime == GridAutoStartShiftFirstPriceRegime.On_FullRebuild)
+                    if (autoStarter.RebuildGridRegime == GridAutoStartShiftFirstPriceRegime.On_FullRebuild)
                     {// пересобираем сетку полностью
-                        decimal newPriceStart = AutoStarter.GetNewGridPriceStart(this);
+                        decimal newPriceStart = autoStarter.GetNewGridPriceStart(this);
 
                         if (newPriceStart != 0)
                         {
-                            GridCreator.FirstPrice = newPriceStart;
-                            GridCreator.CreateNewGrid(Tab, GridType);
+                            gridCreator.FirstPrice = newPriceStart;
+                            gridCreator.CreateNewGrid(tab, GridType);
                             Save();
                             FullRePaintGrid();
                         }
                     }
-                    else if (AutoStarter.RebuildGridRegime == GridAutoStartShiftFirstPriceRegime.On_ShiftOnNewPrice)
+                    else if (autoStarter.RebuildGridRegime == GridAutoStartShiftFirstPriceRegime.On_ShiftOnNewPrice)
                     {// просто сдвигаем сетку на новую цену
 
-                        decimal newPriceStart = AutoStarter.GetNewGridPriceStart(this);
+                        decimal newPriceStart = autoStarter.GetNewGridPriceStart(this);
 
                         if (newPriceStart != 0)
                         {
-                            AutoStarter.ShiftGridOnNewPrice(newPriceStart, this);
+                            autoStarter.ShiftGridOnNewPrice(newPriceStart, this);
                             Save();
                             FullRePaintGrid();
                         }
@@ -1117,12 +1136,12 @@ namespace OsEngine.OsTrader.Grids
 
             if (StartProgram == StartProgram.IsOsTrader)
             {
-                TradeGridRegime reaction = ErrorsReaction.GetReactionOnErrors(this);
+                TradeGridRegime reaction = errorsReaction.GetReactionOnErrors(this);
 
                 if (reaction != TradeGridRegime.On)
                 {
-                    ErrorsReaction.FailCancelOrdersCountFact = 0;
-                    ErrorsReaction.FailOpenOrdersCountFact = 0;
+                    errorsReaction.FailCancelOrdersCountFact = 0;
+                    errorsReaction.FailOpenOrdersCountFact = 0;
                     baseRegime = reaction;
                     Regime = reaction;
                     Save();
@@ -1159,9 +1178,9 @@ namespace OsEngine.OsTrader.Grids
 
             if (baseRegime != TradeGridRegime.Off)
             {
-                DateTime serverTime = Tab.TimeServerCurrent;
+                DateTime serverTime = tab.TimeServerCurrent;
 
-                TradeGridRegime nonTradePeriodsRegime = NonTradePeriods.GetNonTradePeriodsRegime(serverTime);
+                TradeGridRegime nonTradePeriodsRegime = nonTradePeriods.GetNonTradePeriodsRegime(serverTime);
 
                 if (nonTradePeriodsRegime != TradeGridRegime.On)
                 {
@@ -1180,7 +1199,7 @@ namespace OsEngine.OsTrader.Grids
 
             if (baseRegime == TradeGridRegime.On)
             {
-                TradeGridRegime stopByRegime = StopBy.GetRegime(this, Tab);
+                TradeGridRegime stopByRegime = stopBy.GetRegime(this, tab);
 
                 if (stopByRegime != TradeGridRegime.On)
                 {
@@ -1195,7 +1214,7 @@ namespace OsEngine.OsTrader.Grids
 
             if (baseRegime == TradeGridRegime.On)
             {
-                if (TrailingUp.TryTrailingGrid())
+                if (trailingUp.TryTrailingGrid())
                 {
                     _needToSave = true;
                     RePaintGrid();
