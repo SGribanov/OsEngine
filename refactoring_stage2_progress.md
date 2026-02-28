@@ -13537,3 +13537,27 @@
   - dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900 -> success, 0 warnings, 0 errors
   - dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo -> passed 520/520
 
+
+## 2026-02-28 - Step 4.2 (nullable annotations) - TradeGridNonTradePeriods service/regime null-settings guard block (#673)
+
+- Applied localized nullable-safe lifecycle hardening in:
+  - project/OsEngine/OsTrader/Grids/TradeGridNonTradePeriods.cs
+- Changes:
+  - `ShowDialogPeriod1()` / `ShowDialogPeriod2()` now use null-safe calls on settings instances.
+  - `GetNonTradePeriodsRegime(DateTime)` now snapshots settings and guards null before `CanTradeThisTime` checks.
+  - prevents post-delete/partial-init null-reference in service and regime evaluation paths.
+- Added/updated tests:
+  - project/OsEngine.Tests/TradeGridPersistenceCoreTests.cs
+    - `...TradeGridNonTradePeriods_ServiceAndRegime_WithNullSettings_ShouldStaySafe`
+- Scope:
+  - nullable lifecycle guard cleanup only
+  - no trade decision logic changes.
+
+### Verification
+
+- Host-context verification (outside sandbox, per dotnet-build-policy):
+  - dotnet restore project/OsEngine/OsEngine.csproj --nologo -> success
+  - dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo -> success
+  - dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900 -> success, 0 warnings, 0 errors
+  - dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo -> passed 521/521
+

@@ -30,12 +30,12 @@ namespace OsEngine.OsTrader.Grids
 
         public void ShowDialogPeriod1()
         {
-            SettingsPeriod1.ShowDialog();
+            SettingsPeriod1?.ShowDialog();
         }
 
         public void ShowDialogPeriod2()
         {
-            SettingsPeriod2.ShowDialog();
+            SettingsPeriod2?.ShowDialog();
         }
 
         public void Delete()
@@ -102,12 +102,17 @@ namespace OsEngine.OsTrader.Grids
 
         public TradeGridRegime GetNonTradePeriodsRegime(DateTime curTime)
         {
-            if(SettingsPeriod1.CanTradeThisTime(curTime) == false)
+            NonTradePeriods settingsPeriod1 = SettingsPeriod1;
+            NonTradePeriods settingsPeriod2 = SettingsPeriod2;
+
+            if (settingsPeriod1 != null
+                && settingsPeriod1.CanTradeThisTime(curTime) == false)
             {
                 return NonTradePeriod1Regime;
             }
 
-            if (SettingsPeriod2.CanTradeThisTime(curTime) == false)
+            if (settingsPeriod2 != null
+                && settingsPeriod2.CanTradeThisTime(curTime) == false)
             {
                 return NonTradePeriod2Regime;
             }

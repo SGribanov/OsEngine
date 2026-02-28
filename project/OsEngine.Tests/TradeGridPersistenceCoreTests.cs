@@ -67,6 +67,26 @@ public class TradeGridPersistenceCoreTests
     }
 
     [Fact]
+    public void Stage2Step2_2_TradeGridNonTradePeriods_ServiceAndRegime_WithNullSettings_ShouldStaySafe()
+    {
+        TradeGridNonTradePeriods periods =
+            (TradeGridNonTradePeriods)RuntimeHelpers.GetUninitializedObject(typeof(TradeGridNonTradePeriods));
+        periods.NonTradePeriod1Regime = TradeGridRegime.CloseOnly;
+        periods.NonTradePeriod2Regime = TradeGridRegime.OffAndCancelOrders;
+
+        Exception? error = Record.Exception(() =>
+        {
+            periods.ShowDialogPeriod1();
+            periods.ShowDialogPeriod2();
+        });
+
+        TradeGridRegime regime = periods.GetNonTradePeriodsRegime(DateTime.UtcNow);
+
+        Assert.Null(error);
+        Assert.Equal(TradeGridRegime.On, regime);
+    }
+
+    [Fact]
     public void Stage2Step2_2_TradeGridCreator_LoadFromString_NullPayload_ShouldKeepDefaults()
     {
         TradeGridCreator creator = new TradeGridCreator
