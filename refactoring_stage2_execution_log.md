@@ -14116,6 +14116,30 @@
 - **Commit:** n/a
 - **Push:** n/a
 
+### Step 4.2 - Nullable Annotations (Incremental Adoption #652)
+
+- **Status:** In Progress (increment completed)
+- **Plan item:** `refactoring_stage2_plan.md` -> Phase 4 / Step 4.2
+- **Changes (TradeGrid internal lifecycle helpers):**
+  - Updated `project/OsEngine/OsTrader/Grids/TradeGrid.cs`:
+    - added `GridCreator` null guards with local snapshots in:
+      - `Connector_TestStartEvent()`
+      - `Tab_PositionClosingFailEvent(Position position)`
+      - `Tab_PositionOpeningFailEvent(Position position)`
+      - `TryDeleteOpeningFailPositions()`
+      - `TryDeleteDonePositions()`
+    - preserves normal behavior for valid initialized state; prevents null-reference hazards in delete/race lifecycle paths.
+  - Updated tests in `project/OsEngine.Tests/TradeGridPersistenceCoreTests.cs`:
+    - `...PrivateLifecycleMethods_WithNullGridCreator_ShouldNotThrow`
+    - added reflection helper for invoking private no-arg methods in lifecycle guard tests.
+- **Verification (outside sandbox, per dotnet-build-policy):**
+  - `dotnet restore project/OsEngine/OsEngine.csproj --nologo` -> success
+  - `dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo` -> success
+  - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` -> success, 0 warnings, 0 errors
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed `498/498`
+- **Commit:** n/a
+- **Push:** n/a
+
 ### Step 4.2 - Nullable Annotations (Incremental Adoption #647)
 
 - **Status:** In Progress (increment completed)
