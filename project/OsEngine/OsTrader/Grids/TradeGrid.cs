@@ -104,6 +104,14 @@ namespace OsEngine.OsTrader.Grids
 
         public string GetSaveString()
         {
+            TradeGridNonTradePeriods nonTradePeriods = NonTradePeriods;
+            TradeGridStopBy stopBy = StopBy;
+            TradeGridCreator gridCreator = GridCreator;
+            TradeGridStopAndProfit stopAndProfit = StopAndProfit;
+            TradeGridAutoStarter autoStarter = AutoStarter;
+            TradeGridErrorsReaction errorsReaction = ErrorsReaction;
+            TrailingUp trailingUp = TrailingUp;
+
             string result = "";
 
             // settings prime
@@ -129,7 +137,7 @@ namespace OsEngine.OsTrader.Grids
             result += "%";
 
             // non trade periods
-            result += NonTradePeriods.GetSaveString();
+            result += nonTradePeriods?.GetSaveString() ?? string.Empty;
             result += "%";
 
             // trade days
@@ -137,27 +145,27 @@ namespace OsEngine.OsTrader.Grids
             result += "%";
 
             // stop grid by event
-            result += StopBy.GetSaveString();
+            result += stopBy?.GetSaveString() ?? string.Empty;
             result += "%";
 
             // grid lines creation and storage
-            result += GridCreator.GetSaveString();
+            result += gridCreator?.GetSaveString() ?? string.Empty;
             result += "%";
 
             // stop and profit 
-            result += StopAndProfit.GetSaveString();
+            result += stopAndProfit?.GetSaveString() ?? string.Empty;
             result += "%";
 
             // auto start
-            result += AutoStarter.GetSaveString();
+            result += autoStarter?.GetSaveString() ?? string.Empty;
             result += "%";
 
             // errors reaction
-            result += ErrorsReaction.GetSaveString();
+            result += errorsReaction?.GetSaveString() ?? string.Empty;
             result += "%";
 
             // trailing up / down
-            result += TrailingUp.GetSaveString();
+            result += trailingUp?.GetSaveString() ?? string.Empty;
             result += "%";
 
             return result;
@@ -281,7 +289,7 @@ namespace OsEngine.OsTrader.Grids
                 }
 
                 // non trade periods
-                if (array.Length > 1)
+                if (array.Length > 1 && NonTradePeriods != null)
                 {
                     NonTradePeriods.LoadFromString(array[1]);
                 }
@@ -290,37 +298,37 @@ namespace OsEngine.OsTrader.Grids
                 // removed
 
                 // stop grid by event
-                if (array.Length > 3)
+                if (array.Length > 3 && StopBy != null)
                 {
                     StopBy.LoadFromString(array[3]);
                 }
 
                 // grid lines creation and storage
-                if (array.Length > 4)
+                if (array.Length > 4 && GridCreator != null)
                 {
                     GridCreator.LoadFromString(array[4]);
                 }
 
                 // stop and profit 
-                if (array.Length > 5)
+                if (array.Length > 5 && StopAndProfit != null)
                 {
                     StopAndProfit.LoadFromString(array[5]);
                 }
 
                 // auto start
-                if (array.Length > 6)
+                if (array.Length > 6 && AutoStarter != null)
                 {
                     AutoStarter.LoadFromString(array[6]);
                 }
 
                 // errors reaction
-                if (array.Length > 7)
+                if (array.Length > 7 && ErrorsReaction != null)
                 {
                     ErrorsReaction.LoadFromString(array[7]);
                 }
 
                 // trailing up / down
-                if (array.Length > 8)
+                if (array.Length > 8 && TrailingUp != null)
                 {
                     TrailingUp.LoadFromString(array[8]);
                 }

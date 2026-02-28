@@ -376,6 +376,21 @@ public class TradeGridPersistenceCoreTests
         Assert.Null(error);
     }
 
+    [Fact]
+    public void Stage2Step2_2_TradeGrid_SaveLoad_WithNullSubcomponents_ShouldNotThrow()
+    {
+        TradeGrid grid = (TradeGrid)RuntimeHelpers.GetUninitializedObject(typeof(TradeGrid));
+
+        Exception? error = Record.Exception(() =>
+        {
+            string save = grid.GetSaveString();
+            Assert.NotNull(save);
+            grid.LoadFromString("1@On@Off%ntp@legacy%td@stopby@creator@stopprofit@autostart@errors@trailing");
+        });
+
+        Assert.Null(error);
+    }
+
     private static TradeGrid CreateBareGrid()
     {
         TradeGrid grid = (TradeGrid)RuntimeHelpers.GetUninitializedObject(typeof(TradeGrid));
