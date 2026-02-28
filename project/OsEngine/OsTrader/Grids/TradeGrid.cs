@@ -869,16 +869,22 @@ namespace OsEngine.OsTrader.Grids
                     return;
                 }
 
+                List<TradeGridLine> lines = gridCreator.Lines;
+                if (lines == null || lines.Count == 0)
+                {
+                    return;
+                }
+
                 for (int i = numbers.Count - 1; i > -1; i--)
                 {
                     int curNumber = numbers[i];
 
-                    if (curNumber >= gridCreator.Lines.Count)
+                    if (curNumber >= lines.Count)
                     {
                         continue;
                     }
 
-                    TradeGridLine line = gridCreator.Lines[curNumber];
+                    TradeGridLine line = lines[curNumber];
 
                     if (line.Position != null
                         && line.Position.OpenActive
