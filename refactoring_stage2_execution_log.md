@@ -14140,6 +14140,28 @@
 - **Commit:** n/a
 - **Push:** n/a
 
+### Step 4.2 - Nullable Annotations (Incremental Adoption #653)
+
+- **Status:** In Progress (increment completed)
+- **Plan item:** `refactoring_stage2_plan.md` -> Phase 4 / Step 4.2
+- **Changes (TradeGrid query/property guards for null GridCreator):**
+  - Updated `project/OsEngine/OsTrader/Grids/TradeGrid.cs`:
+    - added `GridCreator` null guards in:
+      - `AllVolumeInLines`
+      - `HaveOrdersWithNoMarketOrders()`
+      - `HaveOrdersTryToCancelLastSecond()`
+      - `GetLinesWithOpenPosition()`
+    - when lifecycle dependencies are unavailable, methods return safe defaults (0/false/empty) instead of risking null-reference.
+  - Updated tests in `project/OsEngine.Tests/TradeGridPersistenceCoreTests.cs`:
+    - `...QueryProperties_WithNullGridCreator_ShouldReturnSafeDefaults`
+- **Verification (outside sandbox, per dotnet-build-policy):**
+  - `dotnet restore project/OsEngine/OsEngine.csproj --nologo` -> success
+  - `dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo` -> success
+  - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` -> success, 0 warnings, 0 errors
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed `499/499`
+- **Commit:** n/a
+- **Push:** n/a
+
 ### Step 4.2 - Nullable Annotations (Incremental Adoption #647)
 
 - **Status:** In Progress (increment completed)
