@@ -14368,3 +14368,22 @@
   - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed `508/508`
 - **Commit:** n/a
 - **Push:** n/a
+
+### Step 4.2 - Nullable Annotations (Incremental Adoption #662)
+
+- **Status:** In Progress (increment completed)
+- **Plan item:** `refactoring_stage2_plan.md` -> Phase 4 / Step 4.2
+- **Changes (TradeGrid delete fail-safe cleanup path):**
+  - Updated `project/OsEngine/OsTrader/Grids/TradeGrid.cs`:
+    - in `Delete()`, defensive cleanup `catch` blocks no longer route exceptions to UI logging fallback.
+    - cleanup now silently tolerates partial-state failures in unsubscription/component-delete phases, avoiding modal popups during teardown of uninitialized state.
+    - preserves normal cleanup behavior for fully initialized runtime.
+  - Updated tests in `project/OsEngine.Tests/TradeGridPersistenceCoreTests.cs`:
+    - `...Delete_WithFaultyUninitializedSubcomponents_ShouldNotThrow`
+- **Verification (outside sandbox, per dotnet-build-policy):**
+  - `dotnet restore project/OsEngine/OsEngine.csproj --nologo` -> success
+  - `dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo` -> success
+  - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` -> success, 0 warnings, 0 errors
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed `509/509`
+- **Commit:** n/a
+- **Push:** n/a
