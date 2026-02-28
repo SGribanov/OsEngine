@@ -14601,3 +14601,22 @@
 - **Commit:** n/a
 - **Push:** n/a
 
+
+### Step 4.2 - Nullable Annotations (Incremental Adoption #673)
+
+- **Status:** In Progress (increment completed)
+- **Plan item:** `refactoring_stage2_plan.md` -> Phase 4 / Step 4.2
+- **Changes (TradeGridNonTradePeriods service/regime null-settings guard block):**
+  - Updated `project/OsEngine/OsTrader/Grids/TradeGridNonTradePeriods.cs`:
+    - `ShowDialogPeriod1/ShowDialogPeriod2` switched to null-safe settings invocation.
+    - `GetNonTradePeriodsRegime(DateTime)` now guards null settings snapshots before calling `CanTradeThisTime`.
+  - Updated tests in `project/OsEngine.Tests/TradeGridPersistenceCoreTests.cs`:
+    - `...TradeGridNonTradePeriods_ServiceAndRegime_WithNullSettings_ShouldStaySafe`
+- **Verification (outside sandbox, per dotnet-build-policy):**
+  - `dotnet restore project/OsEngine/OsEngine.csproj --nologo` -> success
+  - `dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo` -> success
+  - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` -> success, 0 warnings, 0 errors
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed `521/521`
+- **Commit:** n/a
+- **Push:** n/a
+
