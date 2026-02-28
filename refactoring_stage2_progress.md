@@ -12797,3 +12797,32 @@
 - Sandbox verification status:
   - dotnet build ... --no-restore for tests project failed in this environment due NU1301 (nuget SSL/auth access in sandbox).
   - host-context full test verification: pending.
+
+## 2026-02-28 - Step 4.2 (nullable annotations) - TradeGridCreator parser/log contract cleanup (#647)
+
+- Applied localized nullable-safe hardening in:
+  - project/OsEngine/OsTrader/Grids/TradeGridCreator.cs
+- Changes:
+  - parser input contract:
+    - LoadFromString(string value) -> LoadFromString(string? value)
+    - added early-return guard for empty/whitespace payload.
+  - parser robustness:
+    - added length/empty checks before parsing each Split('@') index.
+    - avoids index overflow on truncated/malformed legacy payloads.
+  - log-event contract and dispatch:
+    - LogMessageEvent -> nullable event (Action<string, LogMessageType>?)
+    - dispatch changed to LogMessageEvent?.Invoke(message, type)
+    - fallback ServerMaster.SendNewLogMessage(...) for Error without subscribers preserved.
+- Added/updated tests:
+  - project/OsEngine.Tests/TradeGridPersistenceCoreTests.cs
+    - ..._TradeGridCreator_LoadFromString_NullPayload_ShouldKeepDefaults
+    - ..._TradeGridCreator_LoadFromString_ShortPayload_ShouldNotThrowAndKeepTailDefaults
+- Scope:
+  - nullable contract + parser hardening only
+  - no behavior changes for valid settings payloads.
+
+### Verification
+
+- Sandbox verification status:
+  - dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --no-build --configuration Release --filter FullyQualifiedName~TradeGridPersistenceCoreTests -> command exit code 0 in sandbox.
+  - full restore/build validation in sandbox remains blocked by NU1301 (nuget SSL/auth access).

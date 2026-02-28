@@ -72,26 +72,73 @@ namespace OsEngine.OsTrader.Grids
             return result;
         }
 
-        public void LoadFromString(string value)
+        public void LoadFromString(string? value)
         {
             try
             {
+                if (string.IsNullOrWhiteSpace(value))
+                {
+                    return;
+                }
+
                 string[] values = value.Split('@');
 
-                Enum.TryParse(values[0], out GridSide);
-                FirstPrice = values[1].ToDecimal();
-                LineCountStart = Convert.ToInt32(values[2], CultureInfo.InvariantCulture);
-                Enum.TryParse(values[3], out TypeStep);
-                LineStep = values[4].ToDecimal();
-                StepMultiplicator = values[5].ToDecimal();
-                Enum.TryParse(values[6], out TypeProfit);
-                ProfitStep = values[7].ToDecimal();
-                ProfitMultiplicator = values[8].ToDecimal();
-                Enum.TryParse(values[9], out TypeVolume);
-                StartVolume = values[10].ToDecimal();
-                MartingaleMultiplicator = values[11].ToDecimal();
-                TradeAssetInPortfolio = values[12];
-                LoadLines(values[13]);
+                if (values.Length > 0 && string.IsNullOrWhiteSpace(values[0]) == false)
+                {
+                    Enum.TryParse(values[0], out GridSide);
+                }
+                if (values.Length > 1 && string.IsNullOrWhiteSpace(values[1]) == false)
+                {
+                    FirstPrice = values[1].ToDecimal();
+                }
+                if (values.Length > 2 && string.IsNullOrWhiteSpace(values[2]) == false)
+                {
+                    LineCountStart = Convert.ToInt32(values[2], CultureInfo.InvariantCulture);
+                }
+                if (values.Length > 3 && string.IsNullOrWhiteSpace(values[3]) == false)
+                {
+                    Enum.TryParse(values[3], out TypeStep);
+                }
+                if (values.Length > 4 && string.IsNullOrWhiteSpace(values[4]) == false)
+                {
+                    LineStep = values[4].ToDecimal();
+                }
+                if (values.Length > 5 && string.IsNullOrWhiteSpace(values[5]) == false)
+                {
+                    StepMultiplicator = values[5].ToDecimal();
+                }
+                if (values.Length > 6 && string.IsNullOrWhiteSpace(values[6]) == false)
+                {
+                    Enum.TryParse(values[6], out TypeProfit);
+                }
+                if (values.Length > 7 && string.IsNullOrWhiteSpace(values[7]) == false)
+                {
+                    ProfitStep = values[7].ToDecimal();
+                }
+                if (values.Length > 8 && string.IsNullOrWhiteSpace(values[8]) == false)
+                {
+                    ProfitMultiplicator = values[8].ToDecimal();
+                }
+                if (values.Length > 9 && string.IsNullOrWhiteSpace(values[9]) == false)
+                {
+                    Enum.TryParse(values[9], out TypeVolume);
+                }
+                if (values.Length > 10 && string.IsNullOrWhiteSpace(values[10]) == false)
+                {
+                    StartVolume = values[10].ToDecimal();
+                }
+                if (values.Length > 11 && string.IsNullOrWhiteSpace(values[11]) == false)
+                {
+                    MartingaleMultiplicator = values[11].ToDecimal();
+                }
+                if (values.Length > 12 && string.IsNullOrWhiteSpace(values[12]) == false)
+                {
+                    TradeAssetInPortfolio = values[12];
+                }
+                if (values.Length > 13 && string.IsNullOrWhiteSpace(values[13]) == false)
+                {
+                    LoadLines(values[13]);
+                }
 
             }
             catch (Exception e)
@@ -448,17 +495,15 @@ namespace OsEngine.OsTrader.Grids
 
         public void SendNewLogMessage(string message, LogMessageType type)
         {
-            if (LogMessageEvent != null)
-            {
-                LogMessageEvent(message, type);
-            }
-            else if (type == LogMessageType.Error)
+            LogMessageEvent?.Invoke(message, type);
+
+            if (LogMessageEvent == null && type == LogMessageType.Error)
             {
                 ServerMaster.SendNewLogMessage(message, type);
             }
         }
 
-        public event Action<string, LogMessageType> LogMessageEvent;
+        public event Action<string, LogMessageType>? LogMessageEvent;
 
         #endregion
     }

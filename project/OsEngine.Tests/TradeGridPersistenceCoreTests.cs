@@ -52,6 +52,46 @@ public class TradeGridPersistenceCoreTests
     }
 
     [Fact]
+    public void Stage2Step2_2_TradeGridCreator_LoadFromString_NullPayload_ShouldKeepDefaults()
+    {
+        TradeGridCreator creator = new TradeGridCreator
+        {
+            GridSide = Side.Sell,
+            FirstPrice = 123.45m,
+            LineCountStart = 9,
+            TradeAssetInPortfolio = "USDT",
+            StartVolume = 3.21m
+        };
+
+        creator.LoadFromString(null);
+
+        Assert.Equal(Side.Sell, creator.GridSide);
+        Assert.Equal(123.45m, creator.FirstPrice);
+        Assert.Equal(9, creator.LineCountStart);
+        Assert.Equal("USDT", creator.TradeAssetInPortfolio);
+        Assert.Equal(3.21m, creator.StartVolume);
+    }
+
+    [Fact]
+    public void Stage2Step2_2_TradeGridCreator_LoadFromString_ShortPayload_ShouldNotThrowAndKeepTailDefaults()
+    {
+        TradeGridCreator creator = new TradeGridCreator
+        {
+            TradeAssetInPortfolio = "Prime",
+            TypeVolume = TradeGridVolumeType.DepositPercent
+        };
+
+        Exception? error = Record.Exception(() => creator.LoadFromString("Buy@101.5@3"));
+
+        Assert.Null(error);
+        Assert.Equal(Side.Buy, creator.GridSide);
+        Assert.Equal(101.5m, creator.FirstPrice);
+        Assert.Equal(3, creator.LineCountStart);
+        Assert.Equal(TradeGridVolumeType.DepositPercent, creator.TypeVolume);
+        Assert.Equal("Prime", creator.TradeAssetInPortfolio);
+    }
+
+    [Fact]
     public void Stage2Step2_2_TradeGridAutoStarter_LoadFromString_LegacyShortTail_ShouldKeepDefaultTimeSection()
     {
         TradeGridAutoStarter autoStarter = new TradeGridAutoStarter();
