@@ -211,6 +211,36 @@ public class TradeGridPersistenceCoreTests
         Assert.True(loaded.OpenOrdersMakerOnly);
     }
 
+    [Fact]
+    public void Stage2Step2_2_TradeGrid_LoadFromString_NullPayload_ShouldKeepConfiguredDefaults()
+    {
+        TradeGrid grid = CreateBareGrid();
+        grid.Number = 99;
+        grid.Regime = TradeGridRegime.CloseOnly;
+        grid.MaxOpenOrdersInMarket = 7;
+
+        grid.LoadFromString(null);
+
+        Assert.Equal(99, grid.Number);
+        Assert.Equal(TradeGridRegime.CloseOnly, grid.Regime);
+        Assert.Equal(7, grid.MaxOpenOrdersInMarket);
+    }
+
+    [Fact]
+    public void Stage2Step2_2_TradeGrid_LoadFromString_ShortPayload_ShouldParsePrefixWithoutThrow()
+    {
+        TradeGrid grid = CreateBareGrid();
+        grid.MaxOpenOrdersInMarket = 11;
+
+        Exception? error = Record.Exception(() => grid.LoadFromString("5@OpenPosition@On"));
+
+        Assert.Null(error);
+        Assert.Equal(5, grid.Number);
+        Assert.Equal(TradeGridPrimeType.OpenPosition, grid.GridType);
+        Assert.Equal(TradeGridRegime.On, grid.Regime);
+        Assert.Equal(11, grid.MaxOpenOrdersInMarket);
+    }
+
     private static TradeGrid CreateBareGrid()
     {
         TradeGrid grid = (TradeGrid)RuntimeHelpers.GetUninitializedObject(typeof(TradeGrid));

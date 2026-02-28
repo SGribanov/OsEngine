@@ -12860,3 +12860,39 @@
   - dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo -> success
   - dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900 -> success, 0 warnings, 0 errors
   - dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo -> passed 490/490
+
+## 2026-02-28 - Step 4.2 (nullable annotations) - TradeGrid core parser/log contract cleanup (#649)
+
+- Applied localized nullable-safe hardening in:
+  - project/OsEngine/OsTrader/Grids/TradeGrid.cs
+- Changes:
+  - parser input contract:
+    - `LoadFromString(string value)` -> `LoadFromString(string? value)`
+    - added early-return guard for empty/whitespace payload.
+  - parser robustness:
+    - added section and field length/empty checks before parsing `%` and `@` sections.
+    - optional subsection loads (`NonTradePeriods`, `StopBy`, `GridCreator`, `StopAndProfit`, `AutoStarter`, `ErrorsReaction`, `TrailingUp`) now guarded by section existence.
+    - preserved legacy fallback semantics for missing prime-tail fields:
+      - missing/invalid delay/micro-volume -> `DelayInReal = 500`, `CheckMicroVolumes = true`
+      - missing/invalid max-distance -> `MaxDistanceToOrdersPercent = 1.5m`
+      - missing/invalid maker-only -> `OpenOrdersMakerOnly = true`
+  - log-event contract and dispatch:
+    - `LogMessageEvent` -> nullable event (`Action<string, LogMessageType>?`)
+    - dispatch changed to `LogMessageEvent?.Invoke(message, type)`
+    - fallback `ServerMaster.SendNewLogMessage(...)` for `Error` without subscribers preserved
+    - error message formatting hardened for deleted/null tab state (`Tab?.NameStrategy`, `Tab?.Connector?.SecurityName`).
+- Added/updated tests:
+  - project/OsEngine.Tests/TradeGridPersistenceCoreTests.cs
+    - `...TradeGrid_LoadFromString_NullPayload_ShouldKeepConfiguredDefaults`
+    - `...TradeGrid_LoadFromString_ShortPayload_ShouldParsePrefixWithoutThrow`
+- Scope:
+  - nullable contract + parser/log hardening only
+  - no behavior changes for valid persisted grid payloads.
+
+### Verification
+
+- Host-context verification (outside sandbox, per dotnet-build-policy):
+  - dotnet restore project/OsEngine/OsEngine.csproj --nologo -> success
+  - dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo -> success
+  - dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900 -> success, 0 warnings, 0 errors
+  - dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo -> passed 492/492

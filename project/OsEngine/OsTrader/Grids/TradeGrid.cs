@@ -163,32 +163,88 @@ namespace OsEngine.OsTrader.Grids
             return result;
         }
 
-        public void LoadFromString(string value)
+        public void LoadFromString(string? value)
         {
             try
             {
+                if (string.IsNullOrWhiteSpace(value))
+                {
+                    return;
+                }
+
                 string[] array = value.Split('%');
+
+                if (array.Length == 0 || string.IsNullOrWhiteSpace(array[0]))
+                {
+                    return;
+                }
 
                 string[] values = array[0].Split('@');
 
                 // settings prime
 
-                Number = Convert.ToInt32(values[0], CultureInfo.InvariantCulture);
-                Enum.TryParse(values[1], out GridType);
-                Enum.TryParse(values[2], out _regime);
-                Enum.TryParse(values[3], out RegimeLogicEntry);
-                AutoClearJournalIsOn = Convert.ToBoolean(values[4]);
-                MaxClosePositionsInJournal = Convert.ToInt32(values[5], CultureInfo.InvariantCulture);
-                MaxOpenOrdersInMarket = Convert.ToInt32(values[6], CultureInfo.InvariantCulture);
-                MaxCloseOrdersInMarket = Convert.ToInt32(values[7], CultureInfo.InvariantCulture);
-                _firstTradePrice = values[8].ToDecimal();
-                _openPositionsBySession = Convert.ToInt32(values[9], CultureInfo.InvariantCulture);
-                _firstTradeTime = ParseDateInvariantOrCurrent(values[10]);
+                if (values.Length > 0 && string.IsNullOrWhiteSpace(values[0]) == false)
+                {
+                    Number = Convert.ToInt32(values[0], CultureInfo.InvariantCulture);
+                }
+                if (values.Length > 1 && string.IsNullOrWhiteSpace(values[1]) == false)
+                {
+                    Enum.TryParse(values[1], out GridType);
+                }
+                if (values.Length > 2 && string.IsNullOrWhiteSpace(values[2]) == false)
+                {
+                    Enum.TryParse(values[2], out _regime);
+                }
+                if (values.Length > 3 && string.IsNullOrWhiteSpace(values[3]) == false)
+                {
+                    Enum.TryParse(values[3], out RegimeLogicEntry);
+                }
+                if (values.Length > 4 && string.IsNullOrWhiteSpace(values[4]) == false)
+                {
+                    AutoClearJournalIsOn = Convert.ToBoolean(values[4]);
+                }
+                if (values.Length > 5 && string.IsNullOrWhiteSpace(values[5]) == false)
+                {
+                    MaxClosePositionsInJournal = Convert.ToInt32(values[5], CultureInfo.InvariantCulture);
+                }
+                if (values.Length > 6 && string.IsNullOrWhiteSpace(values[6]) == false)
+                {
+                    MaxOpenOrdersInMarket = Convert.ToInt32(values[6], CultureInfo.InvariantCulture);
+                }
+                if (values.Length > 7 && string.IsNullOrWhiteSpace(values[7]) == false)
+                {
+                    MaxCloseOrdersInMarket = Convert.ToInt32(values[7], CultureInfo.InvariantCulture);
+                }
+                if (values.Length > 8 && string.IsNullOrWhiteSpace(values[8]) == false)
+                {
+                    _firstTradePrice = values[8].ToDecimal();
+                }
+                if (values.Length > 9 && string.IsNullOrWhiteSpace(values[9]) == false)
+                {
+                    _openPositionsBySession = Convert.ToInt32(values[9], CultureInfo.InvariantCulture);
+                }
+                if (values.Length > 10 && string.IsNullOrWhiteSpace(values[10]) == false)
+                {
+                    _firstTradeTime = ParseDateInvariantOrCurrent(values[10]);
+                }
 
                 try
                 {
-                    DelayInReal = Convert.ToInt32(values[11], CultureInfo.InvariantCulture);
-                    CheckMicroVolumes = Convert.ToBoolean(values[12]);
+                    if (values.Length <= 12
+                        || string.IsNullOrWhiteSpace(values[11])
+                        || string.IsNullOrWhiteSpace(values[12]))
+                    {
+                        throw new FormatException("Legacy payload has no delay/micro-volume tail.");
+                    }
+
+                    if (values.Length > 11)
+                    {
+                        DelayInReal = Convert.ToInt32(values[11], CultureInfo.InvariantCulture);
+                    }
+                    if (values.Length > 12)
+                    {
+                        CheckMicroVolumes = Convert.ToBoolean(values[12]);
+                    }
                 }
                 catch
                 {
@@ -198,6 +254,11 @@ namespace OsEngine.OsTrader.Grids
 
                 try
                 {
+                    if (values.Length <= 13 || string.IsNullOrWhiteSpace(values[13]))
+                    {
+                        throw new FormatException("Legacy payload has no max-distance tail.");
+                    }
+
                     MaxDistanceToOrdersPercent = values[13].ToDecimal();
                 }
                 catch
@@ -207,6 +268,11 @@ namespace OsEngine.OsTrader.Grids
 
                 try
                 {
+                    if (values.Length <= 14 || string.IsNullOrWhiteSpace(values[14]))
+                    {
+                        throw new FormatException("Legacy payload has no maker-only tail.");
+                    }
+
                     OpenOrdersMakerOnly = Convert.ToBoolean(values[14]);
                 }
                 catch
@@ -215,28 +281,49 @@ namespace OsEngine.OsTrader.Grids
                 }
 
                 // non trade periods
-                NonTradePeriods.LoadFromString(array[1]);
+                if (array.Length > 1)
+                {
+                    NonTradePeriods.LoadFromString(array[1]);
+                }
 
                 // trade days
                 // removed
 
                 // stop grid by event
-                StopBy.LoadFromString(array[3]);
+                if (array.Length > 3)
+                {
+                    StopBy.LoadFromString(array[3]);
+                }
 
                 // grid lines creation and storage
-                GridCreator.LoadFromString(array[4]);
+                if (array.Length > 4)
+                {
+                    GridCreator.LoadFromString(array[4]);
+                }
 
                 // stop and profit 
-                StopAndProfit.LoadFromString(array[5]);
+                if (array.Length > 5)
+                {
+                    StopAndProfit.LoadFromString(array[5]);
+                }
 
                 // auto start
-                AutoStarter.LoadFromString(array[6]);
+                if (array.Length > 6)
+                {
+                    AutoStarter.LoadFromString(array[6]);
+                }
 
                 // errors reaction
-                ErrorsReaction.LoadFromString(array[7]);
+                if (array.Length > 7)
+                {
+                    ErrorsReaction.LoadFromString(array[7]);
+                }
 
                 // trailing up / down
-                TrailingUp.LoadFromString(array[8]);
+                if (array.Length > 8)
+                {
+                    TrailingUp.LoadFromString(array[8]);
+                }
             }
             catch (Exception e)
             {
@@ -2833,22 +2920,23 @@ namespace OsEngine.OsTrader.Grids
         {
             if (type == LogMessageType.Error)
             {
-                message = "Grid error. Bot: " + this.Tab.NameStrategy + "\n"
-                + "Security name: " + this.Tab.Connector.SecurityName + "\n"
+                string botName = Tab?.NameStrategy ?? "unknown";
+                string securityName = Tab?.Connector?.SecurityName ?? "unknown";
+
+                message = "Grid error. Bot: " + botName + "\n"
+                + "Security name: " + securityName + "\n"
                 + message;
             }
 
-            if (LogMessageEvent != null)
-            {
-                LogMessageEvent(message, type);
-            }
-            else if (type == LogMessageType.Error)
+            LogMessageEvent?.Invoke(message, type);
+
+            if (LogMessageEvent == null && type == LogMessageType.Error)
             {
                 ServerMaster.SendNewLogMessage(message, type);
             }
         }
 
-        public event Action<string, LogMessageType> LogMessageEvent;
+        public event Action<string, LogMessageType>? LogMessageEvent;
 
         #endregion
     }
