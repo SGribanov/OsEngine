@@ -303,6 +303,19 @@ public class TradeGridPersistenceCoreTests
     }
 
     [Fact]
+    public void Stage2Step2_2_TradeGrid_GetLinesWithOpenOrdersNeed_WithNullSecurity_ShouldReturnEmpty()
+    {
+        TradeGrid grid = (TradeGrid)RuntimeHelpers.GetUninitializedObject(typeof(TradeGrid));
+        grid.Tab = (BotTabSimple)RuntimeHelpers.GetUninitializedObject(typeof(BotTabSimple));
+        grid.GridCreator = new TradeGridCreator();
+        grid.GridCreator.Lines = new List<TradeGridLine> { new TradeGridLine() };
+
+        List<TradeGridLine> lines = grid.GetLinesWithOpenOrdersNeed(100m);
+
+        Assert.Empty(lines);
+    }
+
+    [Fact]
     public void Stage2Step2_2_TradeGrid_GetOpenAndClosingFact_WithNullGridCreator_ShouldReturnEmpty()
     {
         TradeGrid grid = (TradeGrid)RuntimeHelpers.GetUninitializedObject(typeof(TradeGrid));

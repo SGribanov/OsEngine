@@ -1662,6 +1662,11 @@ namespace OsEngine.OsTrader.Grids
             {
                 return;
             }
+            Security security = tab.Security;
+            if (security == null)
+            {
+                return;
+            }
 
             List<TradeGridLine> linesOpenPoses = GetLinesWithOpenPosition();
 
@@ -1688,11 +1693,11 @@ namespace OsEngine.OsTrader.Grids
                     continue;
                 }
 
-                if (tab.Security.PriceLimitHigh != 0
-                 && tab.Security.PriceLimitLow != 0)
+                if (security.PriceLimitHigh != 0
+                 && security.PriceLimitLow != 0)
                 {
-                    if (line.PriceExit > tab.Security.PriceLimitHigh
-                        || line.PriceExit < tab.Security.PriceLimitLow)
+                    if (line.PriceExit > security.PriceLimitHigh
+                        || line.PriceExit < security.PriceLimitLow)
                     {
                         continue;
                     }
@@ -2173,6 +2178,11 @@ namespace OsEngine.OsTrader.Grids
             {
                 return;
             }
+            Security security = tab.Security;
+            if (security == null)
+            {
+                return;
+            }
 
             CheckWrongCloseOrders();
 
@@ -2203,11 +2213,11 @@ namespace OsEngine.OsTrader.Grids
                     continue;
                 }
 
-                if (tab.Security.PriceLimitHigh != 0
-                 && tab.Security.PriceLimitLow != 0)
+                if (security.PriceLimitHigh != 0
+                 && security.PriceLimitLow != 0)
                 {
-                    if (line.PriceExit > tab.Security.PriceLimitHigh
-                        || line.PriceExit < tab.Security.PriceLimitLow)
+                    if (line.PriceExit > security.PriceLimitHigh
+                        || line.PriceExit < security.PriceLimitLow)
                     {
                         continue;
                     }
@@ -2321,6 +2331,11 @@ namespace OsEngine.OsTrader.Grids
             {
                 return;
             }
+            Security security = tab.Security;
+            if (security == null)
+            {
+                return;
+            }
 
             List<Candle> candles = tab.CandlesAll;
 
@@ -2377,10 +2392,10 @@ namespace OsEngine.OsTrader.Grids
                     decimal price = curLineNeed.PriceEnter;
 
                     if (OpenOrdersMakerOnly == false
-                        && tab.Security.PriceLimitHigh != 0
-                        && price >= tab.Security.PriceLimitHigh)
+                        && security.PriceLimitHigh != 0
+                        && price >= security.PriceLimitHigh)
                     {
-                        price = tab.Security.PriceLimitHigh - (tab.Security.PriceStep * 10);
+                        price = security.PriceLimitHigh - (security.PriceStep * 10);
                     }
 
                     newPosition = tab.BuyAtLimit(volume, price);
@@ -2390,10 +2405,10 @@ namespace OsEngine.OsTrader.Grids
                     decimal price = curLineNeed.PriceEnter;
 
                     if (OpenOrdersMakerOnly == false
-                        && tab.Security.PriceLimitLow != 0
-                        && price <= tab.Security.PriceLimitLow)
+                        && security.PriceLimitLow != 0
+                        && price <= security.PriceLimitLow)
                     {
-                        price = tab.Security.PriceLimitLow + (tab.Security.PriceStep * 10);
+                        price = security.PriceLimitLow + (security.PriceStep * 10);
                     }
 
                     newPosition = tab.SellAtLimit(volume, price);
@@ -3178,6 +3193,11 @@ namespace OsEngine.OsTrader.Grids
             {
                 return linesWithOrdersToOpenNeed;
             }
+            Security security = tab.Security;
+            if (security == null)
+            {
+                return linesWithOrdersToOpenNeed;
+            }
 
             List<TradeGridLine> linesAll = gridCreator.Lines;
             if (linesAll == null || linesAll.Count == 0)
@@ -3210,26 +3230,26 @@ namespace OsEngine.OsTrader.Grids
                         continue;
                     }
 
-                    if (tab.Security.PriceLimitHigh != 0
-                        && tab.Security.PriceLimitLow != 0)
+                    if (security.PriceLimitHigh != 0
+                        && security.PriceLimitLow != 0)
                     {
                         if (OpenOrdersMakerOnly == true
                             &&
-                            (curLine.PriceEnter > tab.Security.PriceLimitHigh
-                            || curLine.PriceEnter < tab.Security.PriceLimitLow))
+                            (curLine.PriceEnter > security.PriceLimitHigh
+                            || curLine.PriceEnter < security.PriceLimitLow))
                         {
                             continue;
                         }
 
                         if (OpenOrdersMakerOnly == false
                             && curLine.Side == Side.Buy
-                            && curLine.PriceEnter < tab.Security.PriceLimitLow)
+                            && curLine.PriceEnter < security.PriceLimitLow)
                         {
                             continue;
                         }
                         if (OpenOrdersMakerOnly == false
                             && curLine.Side == Side.Sell
-                            && curLine.PriceEnter > tab.Security.PriceLimitHigh)
+                            && curLine.PriceEnter > security.PriceLimitHigh)
                         {
                             continue;
                         }
@@ -3274,11 +3294,11 @@ namespace OsEngine.OsTrader.Grids
                         continue;
                     }
 
-                    if (tab.Security.PriceLimitHigh != 0
-                        && tab.Security.PriceLimitLow != 0)
+                    if (security.PriceLimitHigh != 0
+                        && security.PriceLimitLow != 0)
                     {
-                        if (curLine.PriceEnter > tab.Security.PriceLimitHigh
-                            || curLine.PriceEnter < tab.Security.PriceLimitLow)
+                        if (curLine.PriceEnter > security.PriceLimitHigh
+                            || curLine.PriceEnter < security.PriceLimitLow)
                         {
                             continue;
                         }
