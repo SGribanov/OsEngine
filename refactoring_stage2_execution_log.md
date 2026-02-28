@@ -14676,3 +14676,22 @@
 - **Commit:** n/a
 - **Push:** n/a
 
+
+### Step 4.2 - Nullable Annotations (Incremental Adoption #677)
+
+- **Status:** In Progress (increment completed)
+- **Plan item:** `refactoring_stage2_plan.md` -> Phase 4 / Step 4.2
+- **Changes (TradeGridErrorsReaction no-funds/await null-safety block):**
+  - Updated `project/OsEngine/OsTrader/Grids/TradeGridErrorsReaction.cs`:
+    - null-guards added in no-funds error path for missing runtime dependencies and sparse log objects.
+    - `AwaitOnStartConnector(...)` now returns false for null server.
+  - Updated tests in `project/OsEngine.Tests/TradeGridPersistenceCoreTests.cs`:
+    - `...TradeGridErrorsReaction_AwaitOnStartConnector_WithNullServer_ShouldReturnFalse`
+- **Verification (outside sandbox, per dotnet-build-policy):**
+  - `dotnet restore project/OsEngine/OsEngine.csproj --nologo` -> success
+  - `dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo` -> success
+  - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` -> success, 0 warnings, 0 errors
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed `525/525`
+- **Commit:** n/a
+- **Push:** n/a
+
