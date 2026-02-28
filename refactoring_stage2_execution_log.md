@@ -14657,3 +14657,22 @@
 - **Commit:** n/a
 - **Push:** n/a
 
+
+### Step 4.2 - Nullable Annotations (Incremental Adoption #676)
+
+- **Status:** In Progress (increment completed)
+- **Plan item:** `refactoring_stage2_plan.md` -> Phase 4 / Step 4.2
+- **Changes (TrailingUp runtime-context null guards block):**
+  - Updated `project/OsEngine/OsTrader/Grids/TrailingUp.cs`:
+    - guards added for missing `Tab` and `GridCreator` across trailing and price-range/shift helpers.
+    - sparse/null lines are now skipped safely in loops.
+  - Updated tests in `project/OsEngine.Tests/TradeGridPersistenceCoreTests.cs`:
+    - `...TrailingUp_RuntimeContextMissing_ShouldStaySafe`
+- **Verification (outside sandbox, per dotnet-build-policy):**
+  - `dotnet restore project/OsEngine/OsEngine.csproj --nologo` -> success
+  - `dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo` -> success
+  - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` -> success, 0 warnings, 0 errors
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed `524/524`
+- **Commit:** n/a
+- **Push:** n/a
+
