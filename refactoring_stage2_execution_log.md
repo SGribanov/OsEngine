@@ -14328,3 +14328,24 @@
   - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed `506/506`
 - **Commit:** n/a
 - **Push:** n/a
+
+### Step 4.2 - Nullable Annotations (Incremental Adoption #660)
+
+- **Status:** In Progress (increment completed)
+- **Plan item:** `refactoring_stage2_plan.md` -> Phase 4 / Step 4.2
+- **Changes (TradeGrid delete path and grid-mutator snapshot guards):**
+  - Updated `project/OsEngine/OsTrader/Grids/TradeGrid.cs`:
+    - `Delete()` now uses local `tab` snapshot and `tab.Connector` guard before unsubscription from `TestStartEvent`.
+    - `DeleteGrid()` switched to local guarded `gridCreator` snapshot before delete call.
+    - `CreateNewLine()` switched to local guarded `gridCreator` snapshot before line creation.
+    - preserves behavior for initialized runtime while preventing null-reference in partially initialized/cleaned lifecycle states.
+  - Updated tests in `project/OsEngine.Tests/TradeGridPersistenceCoreTests.cs`:
+    - `...Delete_WithUninitializedTabConnector_ShouldNotThrow`
+    - added `using OsEngine.OsTrader.Panels.Tab;` for test type resolution.
+- **Verification (outside sandbox, per dotnet-build-policy):**
+  - `dotnet restore project/OsEngine/OsEngine.csproj --nologo` -> success
+  - `dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo` -> success
+  - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` -> success, 0 warnings, 0 errors
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed `507/507`
+- **Commit:** n/a
+- **Push:** n/a
