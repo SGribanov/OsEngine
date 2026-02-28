@@ -9,6 +9,7 @@
 using OsEngine.Entity;
 using OsEngine.Logging;
 using OsEngine.Market;
+using OsEngine.OsTrader.Panels.Tab;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
@@ -122,6 +123,20 @@ namespace OsEngine.OsTrader.Grids
 
         public void Process(TradeGrid grid)
         {
+            if (grid == null)
+            {
+                return;
+            }
+
+            TradeGridCreator gridCreator = grid.GridCreator;
+            BotTabSimple tab = grid.Tab;
+            Security security = tab?.Security;
+
+            if (gridCreator == null || tab == null || security == null)
+            {
+                return;
+            }
+
             List<TradeGridLine> lines = grid.GetLinesWithOpenPosition();
 
             if (lines == null

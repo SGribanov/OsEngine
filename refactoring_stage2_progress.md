@@ -13585,3 +13585,26 @@
   - dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900 -> success, 0 warnings, 0 errors
   - dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo -> passed 522/522
 
+
+## 2026-02-28 - Step 4.2 (nullable annotations) - TradeGridStopAndProfit process null-context guard block (#675)
+
+- Applied localized nullable-safe lifecycle hardening in:
+  - project/OsEngine/OsTrader/Grids/TradeGridStopAndProfit.cs
+- Changes:
+  - `Process(TradeGrid grid)` now uses local dependency snapshots and early return guards for `grid`, `grid.GridCreator`, `grid.Tab`, and `grid.Tab.Security`.
+  - prevents null-reference in partial lifecycle/runtime states before profit/stop/trailing operations.
+- Added/updated tests:
+  - project/OsEngine.Tests/TradeGridPersistenceCoreTests.cs
+    - `...TradeGridStopAndProfit_Process_WithNullRuntimeContext_ShouldNotThrow`
+- Scope:
+  - nullable lifecycle guard cleanup only
+  - no trade decision logic changes.
+
+### Verification
+
+- Host-context verification (outside sandbox, per dotnet-build-policy):
+  - dotnet restore project/OsEngine/OsEngine.csproj --nologo -> success
+  - dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo -> success
+  - dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900 -> success, 0 warnings, 0 errors
+  - dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo -> passed 523/523
+

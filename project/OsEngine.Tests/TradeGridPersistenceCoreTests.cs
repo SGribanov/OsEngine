@@ -102,6 +102,22 @@ public class TradeGridPersistenceCoreTests
     }
 
     [Fact]
+    public void Stage2Step2_2_TradeGridStopAndProfit_Process_WithNullRuntimeContext_ShouldNotThrow()
+    {
+        TradeGridStopAndProfit stopAndProfit = new TradeGridStopAndProfit();
+        TradeGrid uninitializedGrid =
+            (TradeGrid)RuntimeHelpers.GetUninitializedObject(typeof(TradeGrid));
+
+        Exception? error = Record.Exception(() =>
+        {
+            stopAndProfit.Process(null!);
+            stopAndProfit.Process(uninitializedGrid);
+        });
+
+        Assert.Null(error);
+    }
+
+    [Fact]
     public void Stage2Step2_2_TradeGridCreator_LoadFromString_NullPayload_ShouldKeepDefaults()
     {
         TradeGridCreator creator = new TradeGridCreator
