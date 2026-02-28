@@ -14749,3 +14749,21 @@
 - **Commit:** n/a
 - **Push:** n/a
 
+
+### Step 4.2 - Nullable Annotations (Incremental Adoption #681)
+
+- **Status:** In Progress (increment completed)
+- **Plan item:** `refactoring_stage2_plan.md` -> Phase 4 / Step 4.2
+- **Changes (TradeGridStopAndProfit private setter null-context guards block):**
+  - Updated `project/OsEngine/OsTrader/Grids/TradeGridStopAndProfit.cs`:
+    - private `SetProfit/SetStop/SetTrailStop` now guard null runtime dependencies and use local snapshots.
+  - Updated tests in `project/OsEngine.Tests/TradeGridPersistenceCoreTests.cs`:
+    - `...TradeGridStopAndProfit_PrivateSetters_WithNullRuntimeContext_ShouldNotThrow`
+- **Verification (outside sandbox, per dotnet-build-policy):**
+  - `dotnet restore project/OsEngine/OsEngine.csproj --nologo` -> success
+  - `dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo` -> success
+  - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` -> success, 0 warnings, 0 errors
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed `529/529`
+- **Commit:** n/a
+- **Push:** n/a
+
