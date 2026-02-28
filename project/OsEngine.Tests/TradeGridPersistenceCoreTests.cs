@@ -161,6 +161,27 @@ public class TradeGridPersistenceCoreTests
     }
 
     [Fact]
+    public void Stage2Step2_2_TradeGridErrorsReaction_FailEvents_WithNullPositionOrOrder_ShouldNotThrow()
+    {
+        TradeGridErrorsReaction reaction = new TradeGridErrorsReaction(CreateBareGrid());
+        Position sparsePosition = (Position)RuntimeHelpers.GetUninitializedObject(typeof(Position));
+        SetPrivateField(sparsePosition, "_openOrders", new List<Order> { null! });
+        SetPrivateField(sparsePosition, "_closeOrders", new List<Order> { null! });
+
+        Exception? error = Record.Exception(() =>
+        {
+            reaction.PositionOpeningFailEvent(null!);
+            reaction.PositionClosingFailEvent(null!);
+            reaction.PositionOpeningFailEvent(sparsePosition);
+            reaction.PositionClosingFailEvent(sparsePosition);
+        });
+
+        Assert.Null(error);
+        Assert.Equal(0, reaction.FailOpenOrdersCountFact);
+        Assert.Equal(0, reaction.FailCancelOrdersCountFact);
+    }
+
+    [Fact]
     public void Stage2Step2_2_TradeGridCreator_LoadFromString_NullPayload_ShouldKeepDefaults()
     {
         TradeGridCreator creator = new TradeGridCreator

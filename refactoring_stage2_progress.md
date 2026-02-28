@@ -13658,3 +13658,27 @@
   - dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900 -> success, 0 warnings, 0 errors
   - dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo -> passed 525/525
 
+
+## 2026-02-28 - Step 4.2 (nullable annotations) - TradeGridErrorsReaction fail-event null payload/order guards block (#678)
+
+- Applied localized nullable-safe lifecycle hardening in:
+  - project/OsEngine/OsTrader/Grids/TradeGridErrorsReaction.cs
+- Changes:
+  - `PositionOpeningFailEvent(Position)` now returns early on null `position`.
+  - `PositionClosingFailEvent(Position)` now returns early on null `position` and null last close-order.
+  - protects fail-event telemetry from sparse/null event payloads in degraded runtime state.
+- Added/updated tests:
+  - project/OsEngine.Tests/TradeGridPersistenceCoreTests.cs
+    - `...TradeGridErrorsReaction_FailEvents_WithNullPositionOrOrder_ShouldNotThrow`
+- Scope:
+  - nullable lifecycle guard cleanup only
+  - no trade decision logic changes.
+
+### Verification
+
+- Host-context verification (outside sandbox, per dotnet-build-policy):
+  - dotnet restore project/OsEngine/OsEngine.csproj --nologo -> success
+  - dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo -> success
+  - dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900 -> success, 0 warnings, 0 errors
+  - dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo -> passed 526/526
+

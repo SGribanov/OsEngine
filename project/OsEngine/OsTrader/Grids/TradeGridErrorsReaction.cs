@@ -145,6 +145,11 @@ namespace OsEngine.OsTrader.Grids
         {
             try
             {
+                if (position == null)
+                {
+                    return;
+                }
+
                 if (position.CloseOrders == null
                  || position.CloseOrders.Count == 0)
                 {
@@ -152,6 +157,10 @@ namespace OsEngine.OsTrader.Grids
                 }
 
                 Order lastOrder = position.CloseOrders[^1];
+                if (lastOrder == null)
+                {
+                    return;
+                }
 
                 if (lastOrder.State == OrderStateType.Fail)
                 {
@@ -170,6 +179,11 @@ namespace OsEngine.OsTrader.Grids
         {
             try
             {
+                if (position == null)
+                {
+                    return;
+                }
+
                 if (position.OpenOrders == null
                 || position.OpenOrders.Count == 0)
                 {
