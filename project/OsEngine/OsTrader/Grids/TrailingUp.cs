@@ -9,6 +9,7 @@
 using OsEngine.Entity;
 using OsEngine.Logging;
 using OsEngine.Market;
+using OsEngine.OsTrader.Panels.Tab;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
@@ -139,7 +140,13 @@ namespace OsEngine.OsTrader.Grids
                 return false;
             }
 
-            List<Candle> candles = grid.Tab.CandlesAll;
+            BotTabSimple tab = grid.Tab;
+            if (tab == null)
+            {
+                return false;
+            }
+
+            List<Candle> candles = tab.CandlesAll;
 
             if (candles == null
                 || candles.Count == 0)
@@ -270,7 +277,8 @@ namespace OsEngine.OsTrader.Grids
                     return 0;
                 }
 
-                List<TradeGridLine> lines = grid.GridCreator.Lines;
+                TradeGridCreator gridCreator = grid.GridCreator;
+                List<TradeGridLine> lines = gridCreator?.Lines;
 
                 if (lines == null || lines.Count == 0)
                 {
@@ -281,9 +289,15 @@ namespace OsEngine.OsTrader.Grids
 
                 for(int i = 0;i < lines.Count;i++)
                 {
-                    if (lines[i].PriceEnter >  maxPriceGrid)
+                    TradeGridLine line = lines[i];
+                    if (line == null)
                     {
-                        maxPriceGrid = lines[i].PriceEnter;
+                        continue;
+                    }
+
+                    if (line.PriceEnter >  maxPriceGrid)
+                    {
+                        maxPriceGrid = line.PriceEnter;
                     }
                 }
 
@@ -306,7 +320,8 @@ namespace OsEngine.OsTrader.Grids
                     return 0;
                 }
 
-                List<TradeGridLine> lines = grid.GridCreator.Lines;
+                TradeGridCreator gridCreator = grid.GridCreator;
+                List<TradeGridLine> lines = gridCreator?.Lines;
 
                 if (lines == null || lines.Count == 0)
                 {
@@ -317,9 +332,15 @@ namespace OsEngine.OsTrader.Grids
 
                 for (int i = 0; i < lines.Count; i++)
                 {
-                    if (lines[i].PriceEnter < minPriceGrid)
+                    TradeGridLine line = lines[i];
+                    if (line == null)
                     {
-                        minPriceGrid = lines[i].PriceEnter;
+                        continue;
+                    }
+
+                    if (line.PriceEnter < minPriceGrid)
+                    {
+                        minPriceGrid = line.PriceEnter;
                     }
                 }
 
@@ -340,7 +361,8 @@ namespace OsEngine.OsTrader.Grids
                 return;
             }
 
-            List<TradeGridLine> lines = grid.GridCreator.Lines;
+            TradeGridCreator gridCreator = grid.GridCreator;
+            List<TradeGridLine> lines = gridCreator?.Lines;
 
             if (lines == null || lines.Count == 0)
             {
@@ -350,6 +372,11 @@ namespace OsEngine.OsTrader.Grids
             for(int i = 0;i < lines.Count;i++)
             {
                 TradeGridLine line = lines[i];
+                if (line == null)
+                {
+                    continue;
+                }
+
                 line.CanReplaceExitOrder = TrailingDownCanMoveExitOrder;
                 line.PriceEnter -= value;
                 line.PriceExit -= value;
@@ -364,7 +391,8 @@ namespace OsEngine.OsTrader.Grids
                 return;
             }
 
-            List<TradeGridLine> lines = grid.GridCreator.Lines;
+            TradeGridCreator gridCreator = grid.GridCreator;
+            List<TradeGridLine> lines = gridCreator?.Lines;
 
             if (lines == null || lines.Count == 0)
             {
@@ -374,6 +402,11 @@ namespace OsEngine.OsTrader.Grids
             for (int i = 0; i < lines.Count; i++)
             {
                 TradeGridLine line = lines[i];
+                if (line == null)
+                {
+                    continue;
+                }
+
                 line.CanReplaceExitOrder = TrailingUpCanMoveExitOrder;
                 line.PriceEnter += value;
                 line.PriceExit += value;

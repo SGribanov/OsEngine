@@ -13608,3 +13608,28 @@
   - dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900 -> success, 0 warnings, 0 errors
   - dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo -> passed 523/523
 
+
+## 2026-02-28 - Step 4.2 (nullable annotations) - TrailingUp runtime-context null guards block (#676)
+
+- Applied localized nullable-safe lifecycle hardening in:
+  - project/OsEngine/OsTrader/Grids/TrailingUp.cs
+- Changes:
+  - `TryTrailingGrid()` now guards missing `grid.Tab` before candle access.
+  - `MaxGridPrice` / `MinGridPrice` now guard missing `grid.GridCreator` and skip null lines safely.
+  - `ShiftGridUpOnValue` / `ShiftGridDownOnValue` now guard missing `grid.GridCreator` and skip null lines.
+  - prevents null-reference in post-delete/partial-init runtime contexts.
+- Added/updated tests:
+  - project/OsEngine.Tests/TradeGridPersistenceCoreTests.cs
+    - `...TrailingUp_RuntimeContextMissing_ShouldStaySafe`
+- Scope:
+  - nullable lifecycle guard cleanup only
+  - no trade decision logic changes.
+
+### Verification
+
+- Host-context verification (outside sandbox, per dotnet-build-policy):
+  - dotnet restore project/OsEngine/OsEngine.csproj --nologo -> success
+  - dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo -> success
+  - dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900 -> success, 0 warnings, 0 errors
+  - dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo -> passed 524/524
+

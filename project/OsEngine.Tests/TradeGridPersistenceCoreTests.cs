@@ -118,6 +118,39 @@ public class TradeGridPersistenceCoreTests
     }
 
     [Fact]
+    public void Stage2Step2_2_TrailingUp_RuntimeContextMissing_ShouldStaySafe()
+    {
+        TradeGrid grid = (TradeGrid)RuntimeHelpers.GetUninitializedObject(typeof(TradeGrid));
+        TrailingUp trailing = new TrailingUp(grid)
+        {
+            TrailingUpIsOn = true,
+            TrailingDownIsOn = true,
+            TrailingUpStep = 1,
+            TrailingDownStep = 1,
+            TrailingUpLimit = 100,
+            TrailingDownLimit = 1
+        };
+
+        bool moved = true;
+        decimal max = -1;
+        decimal min = -1;
+
+        Exception? error = Record.Exception(() =>
+        {
+            moved = trailing.TryTrailingGrid();
+            max = trailing.MaxGridPrice;
+            min = trailing.MinGridPrice;
+            trailing.ShiftGridUpOnValue(1);
+            trailing.ShiftGridDownOnValue(1);
+        });
+
+        Assert.Null(error);
+        Assert.False(moved);
+        Assert.Equal(0, max);
+        Assert.Equal(0, min);
+    }
+
+    [Fact]
     public void Stage2Step2_2_TradeGridCreator_LoadFromString_NullPayload_ShouldKeepDefaults()
     {
         TradeGridCreator creator = new TradeGridCreator
