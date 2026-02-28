@@ -13320,3 +13320,31 @@
   - dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo -> success
   - dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900 -> success, 0 warnings, 0 errors
   - dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo -> passed 511/511
+
+## 2026-02-28 - Step 4.2 (nullable annotations) - TradeGrid connector/journal lifecycle hardening block (#665)
+
+- Applied localized nullable-safe lifecycle hardening in:
+  - project/OsEngine/OsTrader/Grids/TradeGrid.cs
+- Changes:
+  - `Process()` start-connector branch hardened:
+    - guarded `tab.Connector` and `connector.MyServer` before use;
+    - early return when server is unavailable;
+    - replaced base-type name reflection check with pattern-match `server is AServer`.
+  - event consistency hardening:
+    - added `position == null` guard in `Tab_PositionClosingSuccesEvent(Position position)`.
+  - journal cleanup hardening:
+    - `TryDeletePositionsFromJournal(Position position)` now guards `tab._journal == null` before delete call.
+- Added/updated tests:
+  - project/OsEngine.Tests/TradeGridPersistenceCoreTests.cs
+    - `...TryDeletePositionsFromJournal_WithNullJournal_ShouldNotThrow`
+- Scope:
+  - nullable lifecycle guard cleanup only
+  - no trade decision logic changes.
+
+### Verification
+
+- Host-context verification (outside sandbox, per dotnet-build-policy):
+  - dotnet restore project/OsEngine/OsEngine.csproj --nologo -> success
+  - dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo -> success
+  - dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900 -> success, 0 warnings, 0 errors
+  - dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo -> passed 512/512

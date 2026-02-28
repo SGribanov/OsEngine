@@ -1007,6 +1007,11 @@ namespace OsEngine.OsTrader.Grids
 
         private void Tab_PositionClosingSuccesEvent(Position position)
         {
+            if (position == null)
+            {
+                return;
+            }
+
             if (Regime == TradeGridRegime.On)
             {
                 _firstPositionIsOpen = true;
@@ -1085,11 +1090,15 @@ namespace OsEngine.OsTrader.Grids
             if (StartProgram == StartProgram.IsOsTrader
                && errorsReaction.WaitOnStartConnectorIsOn == true)
             {
-                IServer server = tab.Connector.MyServer;
-
-                if (server.GetType().BaseType.Name == "AServer")
+                var connector = tab.Connector;
+                IServer server = connector?.MyServer;
+                if (server == null)
                 {
-                    AServer aServer = (AServer)server;
+                    return;
+                }
+
+                if (server is AServer aServer)
+                {
                     if (errorsReaction.AwaitOnStartConnector(aServer) == true)
                     {
                         return;
@@ -2432,7 +2441,7 @@ namespace OsEngine.OsTrader.Grids
         {
             TradeGridCreator gridCreator = GridCreator;
             BotTabSimple tab = Tab;
-            if (gridCreator == null || tab == null || position == null)
+            if (gridCreator == null || tab == null || position == null || tab._journal == null)
             {
                 return;
             }
