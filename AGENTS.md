@@ -15,3 +15,9 @@
   - `dotnet build`
   - `dotnet test`
 - Prefer a single chained command for restore/build/test when possible.
+
+## GitHub CLI auth in agent context
+- In this environment, `gh` keyring auth may be unavailable for the agent user.
+- For GitHub issue/project sync commands, load token from local file into session env:
+  - `$env:GH_TOKEN = (Get-Content C:\Users\gsv777\gh_pat.txt -Raw).Trim()`
+- Then run `gh` commands in the same command invocation.
