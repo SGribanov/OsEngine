@@ -12826,3 +12826,8 @@
 - Sandbox verification status:
   - dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --no-build --configuration Release --filter FullyQualifiedName~TradeGridPersistenceCoreTests -> command exit code 0 in sandbox.
   - full restore/build validation in sandbox remains blocked by NU1301 (nuget SSL/auth access).
+- Host-context verification (outside sandbox, per dotnet-build-policy):
+  - dotnet restore project/OsEngine/OsEngine.csproj --nologo -> success
+  - dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo -> success
+  - dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900 -> success, 0 warnings, 0 errors
+  - dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo -> passed 488/488

@@ -14034,6 +14034,10 @@
     - short payload (`Buy@101.5@3`) parses available prefix and keeps tail defaults without throw.
 - **Verification:**
   - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --no-build --configuration Release --nologo --filter "FullyQualifiedName~TradeGridPersistenceCoreTests"` -> exit code `0` in sandbox.
-  - Full restore/build verification remains blocked in sandbox by nuget network issue (`NU1301`).
+  - Host-context verification (outside sandbox, per dotnet-build-policy):
+    - `dotnet restore project/OsEngine/OsEngine.csproj --nologo` -> success
+    - `dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo` -> success
+    - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` -> success, 0 warnings, 0 errors
+    - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed `488/488`
 - **Commit:** n/a
 - **Push:** n/a
