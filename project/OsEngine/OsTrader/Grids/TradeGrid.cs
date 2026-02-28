@@ -890,7 +890,10 @@ namespace OsEngine.OsTrader.Grids
                         && line.Position.OpenActive
                         && tab != null)
                     {
-                        tab.CloseOrder(line.Position.OpenOrders[^1]);
+                        if (TryGetLastOrder(line.Position.OpenOrders, out Order order))
+                        {
+                            tab.CloseOrder(order);
+                        }
                     }
                 }
 
@@ -1023,6 +1026,19 @@ namespace OsEngine.OsTrader.Grids
         }
 
         private bool _needToSave;
+
+        private static bool TryGetLastOrder(List<Order> orders, out Order order)
+        {
+            order = null;
+
+            if (orders == null || orders.Count == 0)
+            {
+                return false;
+            }
+
+            order = orders[^1];
+            return order != null;
+        }
 
         #endregion
 
@@ -1604,7 +1620,10 @@ namespace OsEngine.OsTrader.Grids
                     continue;
                 }
 
-                Order order = lines[i].Position.CloseOrders[^1];
+                if (TryGetLastOrder(lines[i].Position.CloseOrders, out Order order) == false)
+                {
+                    continue;
+                }
 
                 if (order.NumberMarket != null
                     && order.LastCancelTryLocalTime.AddSeconds(5) < DateTime.Now)
@@ -1896,7 +1915,10 @@ namespace OsEngine.OsTrader.Grids
 
                 if (position.OpenActive)
                 {
-                    Order openOrder = position.OpenOrders[^1];
+                    if (TryGetLastOrder(position.OpenOrders, out Order openOrder) == false)
+                    {
+                        continue;
+                    }
 
                     if (openOrder.Price != currentLine.PriceEnter)
                     {
@@ -1915,7 +1937,10 @@ namespace OsEngine.OsTrader.Grids
                 if (position.CloseActive
                     && currentLine.CanReplaceExitOrder == true)
                 {
-                    Order closeOrder = position.CloseOrders[^1];
+                    if (TryGetLastOrder(position.CloseOrders, out Order closeOrder) == false)
+                    {
+                        continue;
+                    }
 
                     if (GridType == TradeGridPrimeType.MarketMaking)
                     {
@@ -1950,7 +1975,10 @@ namespace OsEngine.OsTrader.Grids
             for (int i = MaxOpenOrdersInMarket; i < linesWithOrdersToOpenFact.Count; i++)
             {
                 Position curPosition = linesWithOrdersToOpenFact[i].Position;
-                ordersToCancel.Add(curPosition.OpenOrders[^1]);
+                if (TryGetLastOrder(curPosition.OpenOrders, out Order order))
+                {
+                    ordersToCancel.Add(order);
+                }
             }
 
             return ordersToCancel;
@@ -2010,7 +2038,16 @@ namespace OsEngine.OsTrader.Grids
 
             if (linesWithOrdersToOpenFact.Count >= linesWithOrdersToOpenNeed.Count)
             {
-                ordersToCancel.Add(linesWithOrdersToOpenFact[^1].Position.OpenOrders[^1]);
+                TradeGridLine lastLine = linesWithOrdersToOpenFact[^1];
+                if (lastLine?.Position == null)
+                {
+                    return null;
+                }
+
+                if (TryGetLastOrder(lastLine.Position.OpenOrders, out Order order))
+                {
+                    ordersToCancel.Add(order);
+                }
             }
 
             return ordersToCancel;
@@ -2031,7 +2068,10 @@ namespace OsEngine.OsTrader.Grids
 
                 if (pos.CloseActive == true)
                 {
-                    ordersToCancel.Add(pos.CloseOrders[^1]);
+                    if (TryGetLastOrder(pos.CloseOrders, out Order order))
+                    {
+                        ordersToCancel.Add(order);
+                    }
                 }
             }
 
@@ -2047,7 +2087,10 @@ namespace OsEngine.OsTrader.Grids
                     continue;
                 }
 
-                Order orderToClose = pos.CloseOrders[^1];
+                if (TryGetLastOrder(pos.CloseOrders, out Order orderToClose) == false)
+                {
+                    continue;
+                }
 
                 if (orderToClose.Volume != pos.OpenVolume)
                 {
@@ -2093,7 +2136,10 @@ namespace OsEngine.OsTrader.Grids
                     continue;
                 }
 
-                Order order = lines[i].Position.OpenOrders[^1];
+                if (TryGetLastOrder(lines[i].Position.OpenOrders, out Order order) == false)
+                {
+                    continue;
+                }
 
                 if (order.NumberMarket != null)
                 {
@@ -2195,7 +2241,10 @@ namespace OsEngine.OsTrader.Grids
 
                 if (pos.CloseActive == true)
                 {
-                    Order orderToClose = pos.CloseOrders[^1];
+                    if (TryGetLastOrder(pos.CloseOrders, out Order orderToClose) == false)
+                    {
+                        continue;
+                    }
                     decimal volumeCloseOrder = orderToClose.Volume;
                     decimal volumeExecuteCloseOrder = orderToClose.VolumeExecute;
 
@@ -2229,7 +2278,10 @@ namespace OsEngine.OsTrader.Grids
                     continue;
                 }
 
-                Order order = lines[i].Position.CloseOrders[^1];
+                if (TryGetLastOrder(lines[i].Position.CloseOrders, out Order order) == false)
+                {
+                    continue;
+                }
 
                 if (order.NumberMarket != null
                    && order.TypeOrder != OrderPriceType.Market)
@@ -2724,14 +2776,19 @@ namespace OsEngine.OsTrader.Grids
 
                     if (position.OpenActive)
                     {
-                        if (string.IsNullOrEmpty(position.OpenOrders[^1].NumberMarket))
+                        if (TryGetLastOrder(position.OpenOrders, out Order openOrder) == false)
                         {
-                            if (position.OpenOrders[^1].State == OrderStateType.None
+                            continue;
+                        }
+
+                        if (string.IsNullOrEmpty(openOrder.NumberMarket))
+                        {
+                            if (openOrder.State == OrderStateType.None
                                 && _lastNoneOrderTime == DateTime.MinValue)
                             {
                                 _lastNoneOrderTime = DateTime.Now;
                             }
-                            else if (position.OpenOrders[^1].State == OrderStateType.None
+                            else if (openOrder.State == OrderStateType.None
                                 && _lastNoneOrderTime.AddMinutes(5) < DateTime.Now)
                             {// 5ть минут висит ордер со статусом NONE. Утерян
                                 position.OpenOrders.RemoveAt(position.OpenOrders.Count - 1);
@@ -2745,14 +2802,19 @@ namespace OsEngine.OsTrader.Grids
 
                     if (position.CloseActive)
                     {
-                        if (string.IsNullOrEmpty(position.CloseOrders[^1].NumberMarket))
+                        if (TryGetLastOrder(position.CloseOrders, out Order closeOrder) == false)
                         {
-                            if (position.CloseOrders[^1].State == OrderStateType.None
+                            continue;
+                        }
+
+                        if (string.IsNullOrEmpty(closeOrder.NumberMarket))
+                        {
+                            if (closeOrder.State == OrderStateType.None
                                 && _lastNoneOrderTime == DateTime.MinValue)
                             {
                                 _lastNoneOrderTime = DateTime.Now;
                             }
-                            else if (position.CloseOrders[^1].State == OrderStateType.None
+                            else if (closeOrder.State == OrderStateType.None
                                 && _lastNoneOrderTime.AddMinutes(5) < DateTime.Now)
                             {// 5ть минут висит ордер со статусом NONE. Утерян
                                 position.CloseOrders.RemoveAt(position.CloseOrders.Count - 1);
@@ -2797,10 +2859,15 @@ namespace OsEngine.OsTrader.Grids
 
                     if (position.OpenActive)
                     {
-                        if (position.OpenOrders[^1].State == OrderStateType.Active
-                            && position.OpenOrders[^1].IsSendToCancel == true)
+                        if (TryGetLastOrder(position.OpenOrders, out Order openOrder) == false)
                         {
-                            if (position.OpenOrders[^1].LastCancelTryLocalTime.AddSeconds(3) > DateTime.Now)
+                            continue;
+                        }
+
+                        if (openOrder.State == OrderStateType.Active
+                            && openOrder.IsSendToCancel == true)
+                        {
+                            if (openOrder.LastCancelTryLocalTime.AddSeconds(3) > DateTime.Now)
                             {
                                 return true;
                             }
@@ -2809,10 +2876,15 @@ namespace OsEngine.OsTrader.Grids
 
                     if (position.CloseActive)
                     {
-                        if (position.CloseOrders[^1].State == OrderStateType.Active
-                            && position.CloseOrders[^1].IsSendToCancel == true)
+                        if (TryGetLastOrder(position.CloseOrders, out Order closeOrder) == false)
                         {
-                            if (position.CloseOrders[^1].LastCancelTryLocalTime.AddSeconds(3) > DateTime.Now)
+                            continue;
+                        }
+
+                        if (closeOrder.State == OrderStateType.Active
+                            && closeOrder.IsSendToCancel == true)
+                        {
+                            if (closeOrder.LastCancelTryLocalTime.AddSeconds(3) > DateTime.Now)
                             {
                                 return true;
                             }

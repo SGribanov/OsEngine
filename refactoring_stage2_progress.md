@@ -13348,3 +13348,38 @@
   - dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo -> success
   - dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900 -> success, 0 warnings, 0 errors
   - dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo -> passed 512/512
+
+## 2026-02-28 - Step 4.2 (nullable annotations) - TradeGrid order-tail safety hardening block (#666)
+
+- Applied localized nullable-safe lifecycle hardening in:
+  - project/OsEngine/OsTrader/Grids/TradeGrid.cs
+- Changes:
+  - introduced helper `TryGetLastOrder(List<Order>, out Order)` for safe last-order access.
+  - replaced direct `[^1]` order access in order-processing paths with guarded helper checks:
+    - `RemoveSelected(...)`
+    - `TryCancelWrongCloseProfitOrders()`
+    - `GetOrdersBadPriceToGrid()`
+    - `GetOrdersBadLinesMaxCount()`
+    - `GetOpenOrdersGridHole()`
+    - `GetCloseOrdersGridHole()`
+    - `TryCancelOpeningOrders()`
+    - `CheckWrongCloseOrders()`
+    - `TryCancelClosingOrders()`
+    - `HaveOrdersWithNoMarketOrders()`
+    - `HaveOrdersTryToCancelLastSecond()`
+  - preserves behavior for valid runtime state while preventing index/null failures on malformed/partial order collections.
+- Added/updated tests:
+  - project/OsEngine.Tests/TradeGridPersistenceCoreTests.cs
+    - `...OrderStateChecks_WithEmptyOrderCollections_ShouldNotThrow`
+    - added reflection helper `SetPrivateField(...)` for controlled malformed-state setup.
+- Scope:
+  - nullable lifecycle guard cleanup only
+  - no trade decision logic changes.
+
+### Verification
+
+- Host-context verification (outside sandbox, per dotnet-build-policy):
+  - dotnet restore project/OsEngine/OsEngine.csproj --nologo -> success
+  - dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo -> success
+  - dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900 -> success, 0 warnings, 0 errors
+  - dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo -> passed 513/513

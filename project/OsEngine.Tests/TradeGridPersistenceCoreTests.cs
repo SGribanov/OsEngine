@@ -548,6 +548,33 @@ public class TradeGridPersistenceCoreTests
         Assert.Null(error);
     }
 
+    [Fact]
+    public void Stage2Step2_2_TradeGrid_OrderStateChecks_WithEmptyOrderCollections_ShouldNotThrow()
+    {
+        TradeGrid grid = (TradeGrid)RuntimeHelpers.GetUninitializedObject(typeof(TradeGrid));
+        grid.GridCreator = new TradeGridCreator();
+
+        Position position = (Position)RuntimeHelpers.GetUninitializedObject(typeof(Position));
+        SetPrivateField(position, "_openOrders", new List<Order>());
+        SetPrivateField(position, "_closeOrders", new List<Order>());
+
+        grid.GridCreator.Lines = new List<TradeGridLine>
+        {
+            new TradeGridLine { Position = position, PositionNum = 1 }
+        };
+
+        Exception? error = Record.Exception(() =>
+        {
+            bool hasNoMarketOrders = grid.HaveOrdersWithNoMarketOrders();
+            bool hasRecentCancel = grid.HaveOrdersTryToCancelLastSecond();
+
+            Assert.False(hasNoMarketOrders);
+            Assert.False(hasRecentCancel);
+        });
+
+        Assert.Null(error);
+    }
+
     private static TradeGrid CreateBareGrid()
     {
         TradeGrid grid = (TradeGrid)RuntimeHelpers.GetUninitializedObject(typeof(TradeGrid));
@@ -573,5 +600,12 @@ public class TradeGridPersistenceCoreTests
         MethodInfo method = target.GetType().GetMethod(methodName, BindingFlags.NonPublic | BindingFlags.Instance)
             ?? throw new InvalidOperationException($"Method {methodName} not found.");
         method.Invoke(target, args);
+    }
+
+    private static void SetPrivateField(object target, string fieldName, object value)
+    {
+        FieldInfo field = target.GetType().GetField(fieldName, BindingFlags.NonPublic | BindingFlags.Instance)
+            ?? throw new InvalidOperationException($"Field {fieldName} not found.");
+        field.SetValue(target, value);
     }
 }
