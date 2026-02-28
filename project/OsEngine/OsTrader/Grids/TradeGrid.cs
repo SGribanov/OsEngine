@@ -543,6 +543,11 @@ namespace OsEngine.OsTrader.Grids
         {
             try
             {
+                if (position == null)
+                {
+                    return;
+                }
+
                 if (Regime != TradeGridRegime.Off)
                 {
                     TradeGridCreator gridCreator = GridCreator;
@@ -587,6 +592,11 @@ namespace OsEngine.OsTrader.Grids
         {
             try
             {
+                if (position == null)
+                {
+                    return;
+                }
+
                 if (Regime != TradeGridRegime.Off)
                 {
                     TradeGridCreator gridCreator = GridCreator;
@@ -945,6 +955,11 @@ namespace OsEngine.OsTrader.Grids
 
         private void Tab_PositionOpeningSuccesEvent(Position position)
         {
+            if (position == null)
+            {
+                return;
+            }
+
             if (Regime != TradeGridRegime.Off)
             {
                 TradeGridCreator gridCreator = GridCreator;
