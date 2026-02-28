@@ -369,6 +369,23 @@ namespace OsEngine.OsTrader.Grids
             _isDeleted = true;
 
             BotTabSimple tab = Tab;
+            TradeGridNonTradePeriods nonTradePeriods = NonTradePeriods;
+            TradeGridStopBy stopBy = StopBy;
+            TradeGridStopAndProfit stopAndProfit = StopAndProfit;
+            TradeGridAutoStarter autoStarter = AutoStarter;
+            TradeGridCreator gridCreator = GridCreator;
+            TradeGridErrorsReaction errorsReaction = ErrorsReaction;
+            TrailingUp trailingUp = TrailingUp;
+
+            Tab = null;
+            NonTradePeriods = null;
+            StopBy = null;
+            StopAndProfit = null;
+            AutoStarter = null;
+            GridCreator = null;
+            ErrorsReaction = null;
+            TrailingUp = null;
+
             if (tab != null)
             {
                 tab.NewTickEvent -= Tab_NewTickEvent;
@@ -381,53 +398,44 @@ namespace OsEngine.OsTrader.Grids
                 }
                 tab.PositionOpeningFailEvent -= Tab_PositionOpeningFailEvent;
                 tab.PositionClosingFailEvent -= Tab_PositionClosingFailEvent;
-
-                Tab = null;
             }
 
-            if (NonTradePeriods != null)
+            if (nonTradePeriods != null)
             {
-                NonTradePeriods.LogMessageEvent -= SendNewLogMessage;
-                NonTradePeriods.Delete();
-                NonTradePeriods = null;
+                nonTradePeriods.LogMessageEvent -= SendNewLogMessage;
+                nonTradePeriods.Delete();
             }
 
-            if (StopBy != null)
+            if (stopBy != null)
             {
-                StopBy.LogMessageEvent -= SendNewLogMessage;
-                StopBy = null;
+                stopBy.LogMessageEvent -= SendNewLogMessage;
             }
 
-            if (StopAndProfit != null)
+            if (stopAndProfit != null)
             {
-                StopAndProfit.LogMessageEvent -= SendNewLogMessage;
-                StopAndProfit = null;
+                stopAndProfit.LogMessageEvent -= SendNewLogMessage;
             }
 
-            if (AutoStarter != null)
+            if (autoStarter != null)
             {
-                AutoStarter.LogMessageEvent -= SendNewLogMessage;
-                AutoStarter = null;
+                autoStarter.LogMessageEvent -= SendNewLogMessage;
             }
 
-            if (GridCreator != null)
+            if (gridCreator != null)
             {
-                GridCreator.LogMessageEvent -= SendNewLogMessage;
-                GridCreator = null;
+                gridCreator.LogMessageEvent -= SendNewLogMessage;
             }
 
-            if (ErrorsReaction != null)
+            if (errorsReaction != null)
             {
-                ErrorsReaction.LogMessageEvent -= SendNewLogMessage;
-                ErrorsReaction.Delete();
-                ErrorsReaction = null;
+                errorsReaction.LogMessageEvent -= SendNewLogMessage;
+                errorsReaction.Delete();
             }
 
-            if (TrailingUp != null)
+            if (trailingUp != null)
             {
-                TrailingUp.LogMessageEvent -= SendNewLogMessage;
-                TrailingUp.Delete();
-                TrailingUp = null;
+                trailingUp.LogMessageEvent -= SendNewLogMessage;
+                trailingUp.Delete();
             }
         }
 

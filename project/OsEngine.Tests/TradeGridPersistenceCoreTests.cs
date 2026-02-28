@@ -478,6 +478,20 @@ public class TradeGridPersistenceCoreTests
         Assert.Null(error);
     }
 
+    [Fact]
+    public void Stage2Step2_2_TradeGrid_Delete_CalledTwice_ShouldNotThrow()
+    {
+        TradeGrid grid = CreateBareGrid();
+
+        Exception? error = Record.Exception(() =>
+        {
+            grid.Delete();
+            grid.Delete();
+        });
+
+        Assert.Null(error);
+    }
+
     private static TradeGrid CreateBareGrid()
     {
         TradeGrid grid = (TradeGrid)RuntimeHelpers.GetUninitializedObject(typeof(TradeGrid));
