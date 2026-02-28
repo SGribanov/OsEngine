@@ -147,6 +147,29 @@ public class TradeGridPersistenceCoreTests
     }
 
     [Fact]
+    public void Stage2Step2_2_TradeGridStopAndProfit_SetTrailStop_WithNullLastCandle_ShouldNotThrow()
+    {
+        TradeGridStopAndProfit stopAndProfit = new TradeGridStopAndProfit();
+        TradeGrid grid = CreateBareGrid();
+
+        BotTabSimple tab = (BotTabSimple)RuntimeHelpers.GetUninitializedObject(typeof(BotTabSimple));
+        ConnectorCandles connector = new ConnectorCandles("CodexGridTrailStop", StartProgram.IsTester, false);
+        TimeFrameBuilder builder = new TimeFrameBuilder("CodexGridTrailStop", StartProgram.IsTester);
+        CandleSeries series = new CandleSeries(builder, new Security(), StartProgram.IsTester)
+        {
+            CandlesAll = new List<Candle> { null! }
+        };
+        SetPrivateField(connector, "_mySeries", series);
+        SetPrivateField(tab, "_connector", connector);
+        grid.Tab = tab;
+
+        Exception? error = Record.Exception(() =>
+            InvokePrivateWithArgs(stopAndProfit, "SetTrailStop", grid, new List<Position>()));
+
+        Assert.Null(error);
+    }
+
+    [Fact]
     public void Stage2Step2_2_TrailingUp_RuntimeContextMissing_ShouldStaySafe()
     {
         TradeGrid grid = (TradeGrid)RuntimeHelpers.GetUninitializedObject(typeof(TradeGrid));
