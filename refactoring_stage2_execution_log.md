@@ -14231,3 +14231,33 @@
   - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed `502/502`
 - **Commit:** n/a
 - **Push:** n/a
+
+### Step 4.2 - Nullable Annotations (Incremental Adoption #656)
+
+- **Status:** In Progress (increment completed)
+- **Plan item:** `refactoring_stage2_plan.md` -> Phase 4 / Step 4.2
+- **Changes (TradeGrid private trading-helper lifecycle guards):**
+  - Updated `project/OsEngine/OsTrader/Grids/TradeGrid.cs`:
+    - added lifecycle guards (`Tab`/`GridCreator`) in private helper methods:
+      - `TryRemoveWrongOrders()`
+      - `GetOpenOrdersGridHole()`
+      - `TryCancelOpeningOrders()`
+      - `TrySetClosingOrders(decimal lastPrice)`
+      - `CheckWrongCloseOrders()`
+      - `TryCancelClosingOrders()`
+      - `TrySetOpenOrders()`
+      - `TryFreeJournal()`
+      - `TryDeletePositionsFromJournal(Position position)`
+      - `TryFindPositionsInJournalAfterReconnect()`
+      - `TryForcedCloseGrid()`
+    - method internals switched to guarded local snapshots where required.
+    - prevents null-reference entry after lifecycle cleanup (`Delete()`), while preserving behavior in valid initialized state.
+  - Updated tests in `project/OsEngine.Tests/TradeGridPersistenceCoreTests.cs`:
+    - `...PrivateTradingHelpers_WithNullDependencies_ShouldNotThrow`
+- **Verification (outside sandbox, per dotnet-build-policy):**
+  - `dotnet restore project/OsEngine/OsEngine.csproj --nologo` -> success
+  - `dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo` -> success
+  - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` -> success, 0 warnings, 0 errors
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed `503/503`
+- **Commit:** n/a
+- **Push:** n/a
