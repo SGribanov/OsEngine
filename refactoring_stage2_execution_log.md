@@ -14017,3 +14017,23 @@
   - Host-context verification: pending.
 - **Commit:** n/a
 - **Push:** n/a
+
+### Step 4.2 - Nullable Annotations (Incremental Adoption #647)
+
+- **Status:** In Progress (increment completed)
+- **Plan item:** `refactoring_stage2_plan.md` -> Phase 4 / Step 4.2
+- **Changes (TradeGridCreator parser/log contracts):**
+  - Updated `project/OsEngine/OsTrader/Grids/TradeGridCreator.cs`:
+    - `LoadFromString(string)` -> `LoadFromString(string?)`.
+    - added empty payload guard (`string.IsNullOrWhiteSpace(...)`).
+    - added field-by-field length/empty checks before parsing `Split('@')` values to prevent index overflow on malformed payloads.
+    - `LogMessageEvent` aligned to nullable event contract (`Action<string, LogMessageType>?`).
+    - logging dispatch changed to nullable-safe `LogMessageEvent?.Invoke(message, type)` with `Error` fallback preserved.
+  - Updated tests in `project/OsEngine.Tests/TradeGridPersistenceCoreTests.cs`:
+    - null payload keeps preconfigured defaults.
+    - short payload (`Buy@101.5@3`) parses available prefix and keeps tail defaults without throw.
+- **Verification:**
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --no-build --configuration Release --nologo --filter "FullyQualifiedName~TradeGridPersistenceCoreTests"` -> exit code `0` in sandbox.
+  - Full restore/build verification remains blocked in sandbox by nuget network issue (`NU1301`).
+- **Commit:** n/a
+- **Push:** n/a
