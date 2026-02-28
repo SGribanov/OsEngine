@@ -63,13 +63,26 @@ namespace OsEngine.OsTrader.Grids
             return result;
         }
 
-        public void LoadFromString(string value)
+        public void LoadFromString(string? value)
         {
             try
             {
+                if (string.IsNullOrWhiteSpace(value))
+                {
+                    return;
+                }
+
                 string[] values = value.Split('@');
-                Enum.TryParse(values[0], out NonTradePeriod1Regime);
-                Enum.TryParse(values[1], out NonTradePeriod2Regime);
+
+                if (values.Length > 0 && string.IsNullOrWhiteSpace(values[0]) == false)
+                {
+                    Enum.TryParse(values[0], out NonTradePeriod1Regime);
+                }
+
+                if (values.Length > 1 && string.IsNullOrWhiteSpace(values[1]) == false)
+                {
+                    Enum.TryParse(values[1], out NonTradePeriod2Regime);
+                }
             }
             catch (Exception e)
             {
@@ -102,17 +115,15 @@ namespace OsEngine.OsTrader.Grids
 
         public void SendNewLogMessage(string message, LogMessageType type)
         {
-            if (LogMessageEvent != null)
-            {
-                LogMessageEvent(message, type);
-            }
-            else if (type == LogMessageType.Error)
+            LogMessageEvent?.Invoke(message, type);
+
+            if (LogMessageEvent == null && type == LogMessageType.Error)
             {
                 ServerMaster.SendNewLogMessage(message, type);
             }
         }
 
-        public event Action<string, LogMessageType> LogMessageEvent;
+        public event Action<string, LogMessageType>? LogMessageEvent;
 
         #endregion
     }

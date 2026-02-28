@@ -26,6 +26,32 @@ public class TradeGridPersistenceCoreTests
     }
 
     [Fact]
+    public void Stage2Step2_2_TradeGridNonTradePeriods_LoadFromString_NullPayload_ShouldKeepDefaults()
+    {
+        TradeGridNonTradePeriods periods = new TradeGridNonTradePeriods("CodexGridPeriods");
+        periods.NonTradePeriod1Regime = TradeGridRegime.CloseOnly;
+        periods.NonTradePeriod2Regime = TradeGridRegime.OffAndCancelOrders;
+
+        periods.LoadFromString(null);
+
+        Assert.Equal(TradeGridRegime.CloseOnly, periods.NonTradePeriod1Regime);
+        Assert.Equal(TradeGridRegime.OffAndCancelOrders, periods.NonTradePeriod2Regime);
+    }
+
+    [Fact]
+    public void Stage2Step2_2_TradeGridNonTradePeriods_LoadFromString_ShortPayload_ShouldNotThrowAndKeepSecondDefault()
+    {
+        TradeGridNonTradePeriods periods = new TradeGridNonTradePeriods("CodexGridPeriods");
+        periods.NonTradePeriod2Regime = TradeGridRegime.OffAndCancelOrders;
+
+        Exception? error = Record.Exception(() => periods.LoadFromString("CloseOnly"));
+
+        Assert.Null(error);
+        Assert.Equal(TradeGridRegime.CloseOnly, periods.NonTradePeriod1Regime);
+        Assert.Equal(TradeGridRegime.OffAndCancelOrders, periods.NonTradePeriod2Regime);
+    }
+
+    [Fact]
     public void Stage2Step2_2_TradeGridAutoStarter_LoadFromString_LegacyShortTail_ShouldKeepDefaultTimeSection()
     {
         TradeGridAutoStarter autoStarter = new TradeGridAutoStarter();
