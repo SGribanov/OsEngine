@@ -13014,3 +13014,33 @@
   - dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo -> success
   - dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900 -> success, 0 warnings, 0 errors
   - dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo -> passed 499/499
+
+## 2026-02-28 - Step 4.2 (nullable annotations) - TradeGrid management lifecycle guard cleanup (#654)
+
+- Applied localized nullable-safe lifecycle hardening in:
+  - project/OsEngine/OsTrader/Grids/TradeGrid.cs
+- Changes:
+  - added `GridCreator` / `Tab` lifecycle guards in grid-management methods:
+    - `CreateNewGridSafe()`
+    - `CreateNewLine()`
+    - `DeleteGrid()`
+    - `RemoveSelected(List<int>)`
+  - added `GridCreator` guard in event path:
+    - `Tab_PositionOpeningSuccesEvent(Position position)`
+  - methods now return safely when lifecycle dependencies are already cleared; behavior for initialized state preserved.
+- Added/updated tests:
+  - project/OsEngine.Tests/TradeGridPersistenceCoreTests.cs
+    - `...PublicGridManagement_WithNullGridCreator_ShouldNotThrow`
+    - `...PositionOpeningSuccessHandler_WithNullGridCreator_ShouldNotThrow`
+    - reflection helper `InvokePrivateWithArgs(...)`
+- Scope:
+  - nullable lifecycle guard cleanup only
+  - no trade decision logic changes.
+
+### Verification
+
+- Host-context verification (outside sandbox, per dotnet-build-policy):
+  - dotnet restore project/OsEngine/OsEngine.csproj --nologo -> success
+  - dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo -> success
+  - dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900 -> success, 0 warnings, 0 errors
+  - dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo -> passed 501/501

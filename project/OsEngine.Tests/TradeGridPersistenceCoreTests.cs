@@ -349,6 +349,33 @@ public class TradeGridPersistenceCoreTests
         Assert.Null(error);
     }
 
+    [Fact]
+    public void Stage2Step2_2_TradeGrid_PublicGridManagement_WithNullGridCreator_ShouldNotThrow()
+    {
+        TradeGrid grid = (TradeGrid)RuntimeHelpers.GetUninitializedObject(typeof(TradeGrid));
+
+        Exception? error = Record.Exception(() =>
+        {
+            grid.CreateNewGridSafe();
+            grid.CreateNewLine();
+            grid.DeleteGrid();
+            grid.RemoveSelected(new List<int> { 0, 1 });
+        });
+
+        Assert.Null(error);
+    }
+
+    [Fact]
+    public void Stage2Step2_2_TradeGrid_PositionOpeningSuccessHandler_WithNullGridCreator_ShouldNotThrow()
+    {
+        TradeGrid grid = (TradeGrid)RuntimeHelpers.GetUninitializedObject(typeof(TradeGrid));
+        Position position = (Position)RuntimeHelpers.GetUninitializedObject(typeof(Position));
+
+        Exception? error = Record.Exception(() => InvokePrivateWithArgs(grid, "Tab_PositionOpeningSuccesEvent", position));
+
+        Assert.Null(error);
+    }
+
     private static TradeGrid CreateBareGrid()
     {
         TradeGrid grid = (TradeGrid)RuntimeHelpers.GetUninitializedObject(typeof(TradeGrid));
@@ -367,5 +394,12 @@ public class TradeGridPersistenceCoreTests
         MethodInfo method = target.GetType().GetMethod(methodName, BindingFlags.NonPublic | BindingFlags.Instance)
             ?? throw new InvalidOperationException($"Method {methodName} not found.");
         method.Invoke(target, null);
+    }
+
+    private static void InvokePrivateWithArgs(object target, string methodName, params object[] args)
+    {
+        MethodInfo method = target.GetType().GetMethod(methodName, BindingFlags.NonPublic | BindingFlags.Instance)
+            ?? throw new InvalidOperationException($"Method {methodName} not found.");
+        method.Invoke(target, args);
     }
 }

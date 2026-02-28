@@ -598,9 +598,17 @@ namespace OsEngine.OsTrader.Grids
         {
             try
             {
+                TradeGridCreator gridCreator = GridCreator;
+                BotTabSimple tab = Tab;
+
+                if (gridCreator == null || tab == null)
+                {
+                    return;
+                }
+
                 if (Regime != TradeGridRegime.Off &&
-                    GridCreator.Lines != null
-                    && GridCreator.Lines.Count > 0)
+                    gridCreator.Lines != null
+                    && gridCreator.Lines.Count > 0)
                 {
                     // Сетка включена. Есть линии. Запрет
                     CustomMessageBoxUi ui = new CustomMessageBoxUi(OsLocalization.Trader.Label510);
@@ -615,8 +623,8 @@ namespace OsEngine.OsTrader.Grids
                     return;
                 }
 
-                if (Tab.IsConnected == false
-                    || Tab.IsReadyToTrade == false)
+                if (tab.IsConnected == false
+                    || tab.IsReadyToTrade == false)
                 {
                     // По сетке не подключены данные. Запрет
                     CustomMessageBoxUi ui = new CustomMessageBoxUi(OsLocalization.Trader.Label512);
@@ -624,7 +632,7 @@ namespace OsEngine.OsTrader.Grids
                     return;
                 }
 
-                if (GridCreator.LineCountStart <= 0)
+                if (gridCreator.LineCountStart <= 0)
                 {
                     // Количество линий в сетке не установлено. Запрет
                     CustomMessageBoxUi ui = new CustomMessageBoxUi(OsLocalization.Trader.Label514);
@@ -632,7 +640,7 @@ namespace OsEngine.OsTrader.Grids
                     return;
                 }
 
-                if (GridCreator.LineStep <= 0)
+                if (gridCreator.LineStep <= 0)
                 {
                     // Шаг сетки не указан. Запрет
                     CustomMessageBoxUi ui = new CustomMessageBoxUi(OsLocalization.Trader.Label515);
@@ -641,7 +649,7 @@ namespace OsEngine.OsTrader.Grids
                 }
 
                 if (GridType == TradeGridPrimeType.MarketMaking
-                    && GridCreator.ProfitStep <= 0)
+                    && gridCreator.ProfitStep <= 0)
                 {
                     // Шаг сетки для профита не указан. Запрет
                     CustomMessageBoxUi ui = new CustomMessageBoxUi(OsLocalization.Trader.Label516);
@@ -649,7 +657,7 @@ namespace OsEngine.OsTrader.Grids
                     return;
                 }
 
-                if (GridCreator.StartVolume <= 0)
+                if (gridCreator.StartVolume <= 0)
                 {
                     // Стартовый объём не указан. Запрет
                     CustomMessageBoxUi ui = new CustomMessageBoxUi(OsLocalization.Trader.Label517);
@@ -657,7 +665,7 @@ namespace OsEngine.OsTrader.Grids
                     return;
                 }
 
-                if (GridCreator.StepMultiplicator <= 0)
+                if (gridCreator.StepMultiplicator <= 0)
                 {
                     // Мультипликатор шага ноль. Запрет
                     CustomMessageBoxUi ui = new CustomMessageBoxUi(OsLocalization.Trader.Label518);
@@ -666,7 +674,7 @@ namespace OsEngine.OsTrader.Grids
                 }
 
                 if (GridType == TradeGridPrimeType.MarketMaking
-                    && GridCreator.ProfitMultiplicator <= 0)
+                    && gridCreator.ProfitMultiplicator <= 0)
                 {
                     // Мультипликатор профита ноль. Запрет
                     CustomMessageBoxUi ui = new CustomMessageBoxUi(OsLocalization.Trader.Label519);
@@ -674,7 +682,7 @@ namespace OsEngine.OsTrader.Grids
                     return;
                 }
 
-                if (GridCreator.MartingaleMultiplicator <= 0)
+                if (gridCreator.MartingaleMultiplicator <= 0)
                 {
                     // Мультипликатор объёма ноль. Запрет
                     CustomMessageBoxUi ui = new CustomMessageBoxUi(OsLocalization.Trader.Label520);
@@ -682,7 +690,7 @@ namespace OsEngine.OsTrader.Grids
                     return;
                 }
 
-                if (GridCreator.Lines.Count > 0)
+                if (gridCreator.Lines.Count > 0)
                 {
                     AcceptDialogUi ui = new AcceptDialogUi(OsLocalization.Trader.Label522);
 
@@ -694,7 +702,7 @@ namespace OsEngine.OsTrader.Grids
                     }
                 }
 
-                GridCreator.CreateNewGrid(Tab, GridType);
+                gridCreator.CreateNewGrid(tab, GridType);
                 Save();
             }
             catch (Exception e)
@@ -707,6 +715,11 @@ namespace OsEngine.OsTrader.Grids
         {
             try
             {
+                if (GridCreator == null)
+                {
+                    return;
+                }
+
                 if (HaveOpenPositionsByGrid == true
                     && StartProgram == StartProgram.IsOsTrader)
                 {
@@ -730,6 +743,11 @@ namespace OsEngine.OsTrader.Grids
         {
             try
             {
+                if (GridCreator == null)
+                {
+                    return;
+                }
+
                 GridCreator.CreateNewLine();
 
                 Save();
@@ -744,25 +762,33 @@ namespace OsEngine.OsTrader.Grids
         {
             try
             {
+                TradeGridCreator gridCreator = GridCreator;
+                BotTabSimple tab = Tab;
+                if (gridCreator == null || numbers == null || numbers.Count == 0)
+                {
+                    return;
+                }
+
                 for (int i = numbers.Count - 1; i > -1; i--)
                 {
                     int curNumber = numbers[i];
 
-                    if (curNumber >= GridCreator.Lines.Count)
+                    if (curNumber >= gridCreator.Lines.Count)
                     {
                         continue;
                     }
 
-                    TradeGridLine line = GridCreator.Lines[curNumber];
+                    TradeGridLine line = gridCreator.Lines[curNumber];
 
                     if (line.Position != null
-                        && line.Position.OpenActive)
+                        && line.Position.OpenActive
+                        && tab != null)
                     {
-                        Tab.CloseOrder(line.Position.OpenOrders[^1]);
+                        tab.CloseOrder(line.Position.OpenOrders[^1]);
                     }
                 }
 
-                GridCreator.RemoveSelected(numbers);
+                gridCreator.RemoveSelected(numbers);
                 Save();
             }
             catch (Exception e)
@@ -831,12 +857,17 @@ namespace OsEngine.OsTrader.Grids
         {
             if (Regime != TradeGridRegime.Off)
             {
+                TradeGridCreator gridCreator = GridCreator;
+                if (gridCreator == null || gridCreator.Lines == null)
+                {
+                    return;
+                }
 
                 bool isInArray = false;
 
-                for (int i = 0; i < GridCreator.Lines.Count; i++)
+                for (int i = 0; i < gridCreator.Lines.Count; i++)
                 {
-                    TradeGridLine line = GridCreator.Lines[i];
+                    TradeGridLine line = gridCreator.Lines[i];
 
                     if (line.Position != null
                         && line.Position.Number == position.Number)
