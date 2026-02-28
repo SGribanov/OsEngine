@@ -13997,3 +13997,23 @@
   - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` succeeded (`484/484`).
 - **Commit:** `83ab240be`
 - **Push:** n/a
+
+### Step 4.2 - Nullable Annotations (Incremental Adoption #646)
+
+- **Status:** In Progress (increment completed)
+- **Plan item:** efactoring_stage2_plan.md -> Phase 4 / Step 4.2
+- **Changes (TradeGridNonTradePeriods parser/log contracts):**
+  - Updated project/OsEngine/OsTrader/Grids/TradeGridNonTradePeriods.cs:
+    - LoadFromString(string) -> LoadFromString(string?).
+    - added empty payload guard (string.IsNullOrWhiteSpace(...)).
+    - added field-by-field length/empty checks before parsing Split('@') values to prevent index overflow on malformed payloads.
+    - LogMessageEvent aligned to nullable event contract (Action<string, LogMessageType>?).
+    - logging dispatch changed to nullable-safe LogMessageEvent?.Invoke(message, type) with Error fallback preserved.
+  - Updated tests in project/OsEngine.Tests/TradeGridPersistenceCoreTests.cs:
+    - null payload keeps preconfigured defaults.
+    - short payload ("CloseOnly") parses first regime and keeps second regime default without throw.
+- **Verification:**
+  - Sandbox build/test verification blocked by nuget network issue (NU1301 to https://api.nuget.org/v3/index.json).
+  - Host-context verification: pending.
+- **Commit:** n/a
+- **Push:** n/a
