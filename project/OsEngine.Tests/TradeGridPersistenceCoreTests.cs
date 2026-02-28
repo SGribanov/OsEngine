@@ -55,6 +55,17 @@ public class TradeGridPersistenceCoreTests
     }
 
     [Fact]
+    public void Stage2Step2_2_TradeGridNonTradePeriods_Delete_WithNullSettings_ShouldNotThrow()
+    {
+        TradeGridNonTradePeriods periods =
+            (TradeGridNonTradePeriods)RuntimeHelpers.GetUninitializedObject(typeof(TradeGridNonTradePeriods));
+
+        Exception? error = Record.Exception(periods.Delete);
+
+        Assert.Null(error);
+    }
+
+    [Fact]
     public void Stage2Step2_2_TradeGridCreator_LoadFromString_NullPayload_ShouldKeepDefaults()
     {
         TradeGridCreator creator = new TradeGridCreator

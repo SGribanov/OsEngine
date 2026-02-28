@@ -13488,3 +13488,27 @@
   - dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo -> success
   - dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900 -> success, 0 warnings, 0 errors
   - dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo -> passed 518/518
+
+## 2026-02-28 - Step 4.2 (nullable annotations) - TradeGridNonTradePeriods delete null-settings hardening block (#671)
+
+- Applied localized nullable-safe lifecycle hardening in:
+  - project/OsEngine/OsTrader/Grids/TradeGridNonTradePeriods.cs
+- Changes:
+  - `Delete()` now uses local snapshots for period settings and null-safe cleanup calls.
+  - fields are nulled before cleanup to keep delete path idempotent and safe for partially initialized lifecycle state.
+  - fixes real `NullReferenceException` from `TradeGridNonTradePeriods.Delete()` observed in runtime teardown.
+- Added/updated tests:
+  - project/OsEngine.Tests/TradeGridPersistenceCoreTests.cs
+    - `...TradeGridNonTradePeriods_Delete_WithNullSettings_ShouldNotThrow`
+- Scope:
+  - nullable lifecycle guard cleanup only
+  - no trade decision logic changes.
+
+### Verification
+
+- Host-context verification (outside sandbox, per dotnet-build-policy):
+  - dotnet restore project/OsEngine/OsEngine.csproj --nologo -> success
+  - dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo -> success
+  - dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900 -> success, 0 warnings, 0 errors
+  - dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo -> passed 519/519
+

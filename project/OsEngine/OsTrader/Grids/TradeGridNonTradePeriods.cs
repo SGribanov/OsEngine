@@ -40,8 +40,14 @@ namespace OsEngine.OsTrader.Grids
 
         public void Delete()
         {
-            SettingsPeriod1.Delete();
-            SettingsPeriod2.Delete();
+            NonTradePeriods period1 = SettingsPeriod1;
+            NonTradePeriods period2 = SettingsPeriod2;
+
+            SettingsPeriod1 = null;
+            SettingsPeriod2 = null;
+
+            period1?.Delete();
+            period2?.Delete();
         }
 
         public TradeGridRegime NonTradePeriod1Regime = TradeGridRegime.Off;
