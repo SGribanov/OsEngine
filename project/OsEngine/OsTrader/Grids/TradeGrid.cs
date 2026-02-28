@@ -2626,10 +2626,16 @@ namespace OsEngine.OsTrader.Grids
 
                     for (int j = 0; j < positions.Count; j++)
                     {
-                        if (positions[j].Number == line.PositionNum)
+                        Position journalPosition = positions[j];
+                        if (journalPosition == null)
+                        {
+                            continue;
+                        }
+
+                        if (journalPosition.Number == line.PositionNum)
                         {
                             isInArray = true;
-                            line.Position = positions[j];
+                            line.Position = journalPosition;
                             break;
                         }
                     }

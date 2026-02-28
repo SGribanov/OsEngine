@@ -7,6 +7,7 @@ using System.Linq;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using OsEngine.Entity;
+using OsEngine.Journal.Internal;
 using OsEngine.Logging;
 using OsEngine.OsTrader.Grids;
 using OsEngine.OsTrader.Panels.Tab;
@@ -639,6 +640,32 @@ public class TradeGridPersistenceCoreTests
         Exception? error = Record.Exception(() => InvokePrivateWithArgs(grid, "TryDeletePositionsFromJournal", position));
 
         Assert.Null(error);
+    }
+
+    [Fact]
+    public void Stage2Step2_2_TradeGrid_TryFindPositionsInJournalAfterReconnect_WithNullJournalEntries_ShouldNotThrow()
+    {
+        TradeGrid grid = (TradeGrid)RuntimeHelpers.GetUninitializedObject(typeof(TradeGrid));
+        grid.GridCreator = new TradeGridCreator();
+        grid.GridCreator.Lines = new List<TradeGridLine>
+        {
+            new TradeGridLine { PositionNum = 42, Position = null }
+        };
+
+        BotTabSimple tab = (BotTabSimple)RuntimeHelpers.GetUninitializedObject(typeof(BotTabSimple));
+        OsEngine.Journal.Journal journal =
+            (OsEngine.Journal.Journal)RuntimeHelpers.GetUninitializedObject(typeof(OsEngine.Journal.Journal));
+        PositionController controller = (PositionController)RuntimeHelpers.GetUninitializedObject(typeof(PositionController));
+        SetPrivateField(controller, "_deals", new List<Position> { null! });
+        SetPrivateField(journal, "_positionController", controller);
+        tab._journal = journal;
+        grid.Tab = tab;
+
+        Exception? error = Record.Exception(() => InvokePrivateNoArg(grid, "TryFindPositionsInJournalAfterReconnect"));
+
+        Assert.Null(error);
+        Assert.Equal(-1, grid.GridCreator.Lines[0].PositionNum);
+        Assert.Null(grid.GridCreator.Lines[0].Position);
     }
 
     [Fact]
