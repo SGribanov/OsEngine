@@ -10,7 +10,9 @@ using OsEngine.Entity;
 using OsEngine.Language;
 using OsEngine.Logging;
 using OsEngine.Market;
+using OsEngine.Market.Connectors;
 using OsEngine.Market.Servers;
+using OsEngine.OsTrader.Panels.Tab;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
@@ -230,7 +232,8 @@ namespace OsEngine.OsTrader.Grids
                     return;
                 }
 
-                if(myGrid.Tab.StartProgram != StartProgram.IsOsTrader)
+                BotTabSimple tab = myGrid.Tab;
+                if (tab == null || tab.StartProgram != StartProgram.IsOsTrader)
                 {
                     return;
                 }
@@ -240,22 +243,41 @@ namespace OsEngine.OsTrader.Grids
                     return;
                 }
 
-                IServer server = myGrid.Tab.Connector.MyServer;
+                ConnectorCandles connector = tab.Connector;
+                IServer server = connector?.MyServer;
+                if (server == null)
+                {
+                    return;
+                }
 
                 if (server.ServerType != ServerType.TInvest)
                 {
                     return;
                 }
 
-                AServer tInvest = (AServer)server;
+                AServer tInvest = server as AServer;
+                if (tInvest == null || tInvest.Log == null)
+                {
+                    return;
+                }
 
                 List<LogMessage> messages = tInvest.Log.LastErrorMessages;
+                if (messages == null || messages.Count == 0)
+                {
+                    return;
+                }
 
                 bool haveNoFundsError = false;
 
                 for (int i = 0; i < messages.Count; i++)
                 {
-                    string message = messages[i].Message;
+                    LogMessage messageObj = messages[i];
+                    if (messageObj == null || string.IsNullOrEmpty(messageObj.Message))
+                    {
+                        continue;
+                    }
+
+                    string message = messageObj.Message;
 
                     if(message.Contains(OsLocalization.Market.Label301))
                     {
@@ -344,6 +366,11 @@ namespace OsEngine.OsTrader.Grids
 
         public bool AwaitOnStartConnector(AServer server)
         {
+            if (server == null)
+            {
+                return false;
+            }
+
             if (WaitOnStartConnectorIsOn == false)
             {
                 return false;

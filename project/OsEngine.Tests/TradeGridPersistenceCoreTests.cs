@@ -151,6 +151,16 @@ public class TradeGridPersistenceCoreTests
     }
 
     [Fact]
+    public void Stage2Step2_2_TradeGridErrorsReaction_AwaitOnStartConnector_WithNullServer_ShouldReturnFalse()
+    {
+        TradeGridErrorsReaction reaction = new TradeGridErrorsReaction(CreateBareGrid());
+
+        bool shouldAwait = reaction.AwaitOnStartConnector(null!);
+
+        Assert.False(shouldAwait);
+    }
+
+    [Fact]
     public void Stage2Step2_2_TradeGridCreator_LoadFromString_NullPayload_ShouldKeepDefaults()
     {
         TradeGridCreator creator = new TradeGridCreator

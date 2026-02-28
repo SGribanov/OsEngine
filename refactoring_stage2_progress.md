@@ -13633,3 +13633,28 @@
   - dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900 -> success, 0 warnings, 0 errors
   - dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo -> passed 524/524
 
+
+## 2026-02-28 - Step 4.2 (nullable annotations) - TradeGridErrorsReaction no-funds/await null-safety block (#677)
+
+- Applied localized nullable-safe lifecycle hardening in:
+  - project/OsEngine/OsTrader/Grids/TradeGridErrorsReaction.cs
+- Changes:
+  - `TryFindNoFundsError(...)` now guards missing runtime context (`Tab`, `Connector`, `MyServer`, server cast/log/messages).
+  - added sparse log-message guards before message text checks.
+  - `AwaitOnStartConnector(AServer server)` now handles `server == null` safely.
+  - prevents null-reference in partial lifecycle and degraded connector/server states.
+- Added/updated tests:
+  - project/OsEngine.Tests/TradeGridPersistenceCoreTests.cs
+    - `...TradeGridErrorsReaction_AwaitOnStartConnector_WithNullServer_ShouldReturnFalse`
+- Scope:
+  - nullable lifecycle guard cleanup only
+  - no trade decision logic changes.
+
+### Verification
+
+- Host-context verification (outside sandbox, per dotnet-build-policy):
+  - dotnet restore project/OsEngine/OsEngine.csproj --nologo -> success
+  - dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo -> success
+  - dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900 -> success, 0 warnings, 0 errors
+  - dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo -> passed 525/525
+
