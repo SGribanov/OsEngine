@@ -170,6 +170,21 @@ public class TradeGridPersistenceCoreTests
     }
 
     [Fact]
+    public void Stage2Step2_2_TradeGridStopAndProfit_PrivateSetters_WithNullRuntimeContext_ShouldNotThrow()
+    {
+        TradeGridStopAndProfit stopAndProfit = new TradeGridStopAndProfit();
+
+        Exception? error = Record.Exception(() =>
+        {
+            InvokePrivateWithArgs(stopAndProfit, "SetProfit", null!, 100m, null!);
+            InvokePrivateWithArgs(stopAndProfit, "SetStop", null!, 100m, null!);
+            InvokePrivateWithArgs(stopAndProfit, "SetTrailStop", null!, null!);
+        });
+
+        Assert.Null(error);
+    }
+
+    [Fact]
     public void Stage2Step2_2_TrailingUp_RuntimeContextMissing_ShouldStaySafe()
     {
         TradeGrid grid = (TradeGrid)RuntimeHelpers.GetUninitializedObject(typeof(TradeGrid));

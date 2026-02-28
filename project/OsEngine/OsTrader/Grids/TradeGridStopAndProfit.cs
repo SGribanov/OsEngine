@@ -191,9 +191,22 @@ namespace OsEngine.OsTrader.Grids
 
         private void SetProfit(TradeGrid grid, decimal middleEntryPrice, List<Position> positions)
         {
+            if (grid == null || positions == null || positions.Count == 0)
+            {
+                return;
+            }
+
+            TradeGridCreator gridCreator = grid.GridCreator;
+            BotTabSimple tab = grid.Tab;
+            Security security = tab?.Security;
+            if (gridCreator == null || tab == null || security == null)
+            {
+                return;
+            }
+
             decimal profitPrice = 0;
 
-            if (grid.GridCreator.GridSide == Side.Buy)
+            if (gridCreator.GridSide == Side.Buy)
             {
                 if (ProfitValueType == TradeGridValueType.Absolute)
                 {
@@ -204,9 +217,9 @@ namespace OsEngine.OsTrader.Grids
                     profitPrice = middleEntryPrice + middleEntryPrice * (ProfitValue/100);
                 }
 
-                profitPrice = grid.Tab.RoundPrice(profitPrice, grid.Tab.Security, Side.Buy);
+                profitPrice = tab.RoundPrice(profitPrice, security, Side.Buy);
             }
-            else if (grid.GridCreator.GridSide == Side.Sell)
+            else if (gridCreator.GridSide == Side.Sell)
             {
                 if (ProfitValueType == TradeGridValueType.Absolute)
                 {
@@ -217,7 +230,7 @@ namespace OsEngine.OsTrader.Grids
                     profitPrice = middleEntryPrice - middleEntryPrice * (ProfitValue / 100);
                 }
 
-                profitPrice = grid.Tab.RoundPrice(profitPrice, grid.Tab.Security, Side.Sell);
+                profitPrice = tab.RoundPrice(profitPrice, security, Side.Sell);
             }
 
             if(profitPrice == 0)
@@ -246,9 +259,22 @@ namespace OsEngine.OsTrader.Grids
 
         private void SetStop(TradeGrid grid, decimal middleEntryPrice, List<Position> positions)
         {
+            if (grid == null || positions == null || positions.Count == 0)
+            {
+                return;
+            }
+
+            TradeGridCreator gridCreator = grid.GridCreator;
+            BotTabSimple tab = grid.Tab;
+            Security security = tab?.Security;
+            if (gridCreator == null || tab == null || security == null)
+            {
+                return;
+            }
+
             decimal stopPrice = 0;
 
-            if (grid.GridCreator.GridSide == Side.Buy)
+            if (gridCreator.GridSide == Side.Buy)
             {
                 if (StopValueType == TradeGridValueType.Absolute)
                 {
@@ -259,9 +285,9 @@ namespace OsEngine.OsTrader.Grids
                     stopPrice = middleEntryPrice - middleEntryPrice * (StopValue / 100);
                 }
 
-                stopPrice = grid.Tab.RoundPrice(stopPrice, grid.Tab.Security, Side.Buy);
+                stopPrice = tab.RoundPrice(stopPrice, security, Side.Buy);
             }
-            else if (grid.GridCreator.GridSide == Side.Sell)
+            else if (gridCreator.GridSide == Side.Sell)
             {
                 if (StopValueType == TradeGridValueType.Absolute)
                 {
@@ -272,7 +298,7 @@ namespace OsEngine.OsTrader.Grids
                     stopPrice = middleEntryPrice + middleEntryPrice * (StopValue / 100);
                 }
 
-                stopPrice = grid.Tab.RoundPrice(stopPrice, grid.Tab.Security, Side.Sell);
+                stopPrice = tab.RoundPrice(stopPrice, security, Side.Sell);
             }
 
             if (stopPrice == 0)
@@ -295,13 +321,26 @@ namespace OsEngine.OsTrader.Grids
                     continue;
                 }
 
-                grid.Tab.CloseAtStopMarket(pos, stopPrice);
+                tab.CloseAtStopMarket(pos, stopPrice);
             }
         }
 
         private void SetTrailStop(TradeGrid grid, List<Position> positions)
         {
-            List<Candle> candles = grid.Tab.CandlesAll;
+            if (grid == null || positions == null || positions.Count == 0)
+            {
+                return;
+            }
+
+            TradeGridCreator gridCreator = grid.GridCreator;
+            BotTabSimple tab = grid.Tab;
+            Security security = tab?.Security;
+            if (gridCreator == null || tab == null || security == null)
+            {
+                return;
+            }
+
+            List<Candle> candles = tab.CandlesAll;
 
             if (candles == null || candles.Count == 0)
             {
@@ -318,7 +357,7 @@ namespace OsEngine.OsTrader.Grids
 
             decimal stopPrice = 0;
 
-            if (grid.GridCreator.GridSide == Side.Buy)
+            if (gridCreator.GridSide == Side.Buy)
             {
                 if (TrailStopValueType == TradeGridValueType.Absolute)
                 {
@@ -329,9 +368,9 @@ namespace OsEngine.OsTrader.Grids
                     stopPrice = lastPrice - lastPrice * (TrailStopValue / 100);
                 }
 
-                stopPrice = grid.Tab.RoundPrice(stopPrice, grid.Tab.Security, Side.Buy);
+                stopPrice = tab.RoundPrice(stopPrice, security, Side.Buy);
             }
-            else if (grid.GridCreator.GridSide == Side.Sell)
+            else if (gridCreator.GridSide == Side.Sell)
             {
                 if (TrailStopValueType == TradeGridValueType.Absolute)
                 {
@@ -342,7 +381,7 @@ namespace OsEngine.OsTrader.Grids
                     stopPrice = lastPrice + lastPrice * (TrailStopValue / 100);
                 }
 
-                stopPrice = grid.Tab.RoundPrice(stopPrice, grid.Tab.Security, Side.Sell);
+                stopPrice = tab.RoundPrice(stopPrice, security, Side.Sell);
             }
 
             if (stopPrice == 0)
@@ -366,7 +405,7 @@ namespace OsEngine.OsTrader.Grids
                     continue;
                 }
 
-                grid.Tab.CloseAtTrailingStopMarket(pos, stopPrice);
+                tab.CloseAtTrailingStopMarket(pos, stopPrice);
             }
 
             decimal maxPrice = decimal.MinValue;
@@ -420,11 +459,11 @@ namespace OsEngine.OsTrader.Grids
 
                     if (pos.Direction == Side.Buy)
                     {
-                        grid.Tab.CloseAtTrailingStopMarket(pos, maxPrice);
+                        tab.CloseAtTrailingStopMarket(pos, maxPrice);
                     }
                     else if (pos.Direction == Side.Sell)
                     {
-                        grid.Tab.CloseAtTrailingStopMarket(pos, minPrice);
+                        tab.CloseAtTrailingStopMarket(pos, minPrice);
                     }
                 }
             }

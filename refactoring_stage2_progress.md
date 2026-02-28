@@ -13728,3 +13728,27 @@
   - dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900 -> success, 0 warnings, 0 errors
   - dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo -> passed 528/528
 
+
+## 2026-02-28 - Step 4.2 (nullable annotations) - TradeGridStopAndProfit private setter null-context guards block (#681)
+
+- Applied localized nullable-safe lifecycle hardening in:
+  - project/OsEngine/OsTrader/Grids/TradeGridStopAndProfit.cs
+- Changes:
+  - `SetProfit(...)`, `SetStop(...)`, `SetTrailStop(...)` now guard null/missing runtime context (`grid`, `positions`, `GridCreator`, `Tab`, `Security`).
+  - switched touched internals to local snapshots (`gridCreator`, `tab`, `security`) in those methods.
+  - protects private profit/stop/trailing helpers from null-reference on direct/instrumented invocation.
+- Added/updated tests:
+  - project/OsEngine.Tests/TradeGridPersistenceCoreTests.cs
+    - `...TradeGridStopAndProfit_PrivateSetters_WithNullRuntimeContext_ShouldNotThrow`
+- Scope:
+  - nullable lifecycle guard cleanup only
+  - no trade decision logic changes.
+
+### Verification
+
+- Host-context verification (outside sandbox, per dotnet-build-policy):
+  - dotnet restore project/OsEngine/OsEngine.csproj --nologo -> success
+  - dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo -> success
+  - dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900 -> success, 0 warnings, 0 errors
+  - dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo -> passed 529/529
+
