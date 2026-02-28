@@ -14068,6 +14068,29 @@
 - **Commit:** n/a
 - **Push:** n/a
 
+### Step 4.2 - Nullable Annotations (Incremental Adoption #650)
+
+- **Status:** In Progress (increment completed)
+- **Plan item:** `refactoring_stage2_plan.md` -> Phase 4 / Step 4.2
+- **Changes (TradeGrid event contracts):**
+  - Updated `project/OsEngine/OsTrader/Grids/TradeGrid.cs`:
+    - `NeedToSaveEvent`, `RePaintSettingsEvent`, `FullRePaintGridEvent` aligned to nullable event contracts (`Action?`).
+    - event dispatch switched to nullable-safe invoke pattern `?.Invoke()` in:
+      - `Save()`
+      - `RePaintGrid()`
+      - `FullRePaintGrid()`
+      - `Regime` setter repaint-notification path
+  - Updated tests in `project/OsEngine.Tests/TradeGridPersistenceCoreTests.cs`:
+    - `...TradeGrid_EventDispatchWithoutSubscribers_ShouldNotThrow`
+    - `...TradeGrid_SendNewLogMessage_WithNullTab_ShouldNotThrow`
+- **Verification (outside sandbox, per dotnet-build-policy):**
+  - `dotnet restore project/OsEngine/OsEngine.csproj --nologo` -> success
+  - `dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo` -> success
+  - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` -> success, 0 warnings, 0 errors
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed `494/494`
+- **Commit:** n/a
+- **Push:** n/a
+
 ### Step 4.2 - Nullable Annotations (Incremental Adoption #647)
 
 - **Status:** In Progress (increment completed)
