@@ -14306,3 +14306,25 @@
   - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed `505/505`
 - **Commit:** n/a
 - **Push:** n/a
+
+### Step 4.2 - Nullable Annotations (Incremental Adoption #659)
+
+- **Status:** In Progress (increment completed)
+- **Plan item:** `refactoring_stage2_plan.md` -> Phase 4 / Step 4.2
+- **Changes (TradeGrid fail-event/open-position lifecycle guards):**
+  - Updated `project/OsEngine/OsTrader/Grids/TradeGrid.cs`:
+    - added `ErrorsReaction` guards in:
+      - `Tab_PositionClosingFailEvent(Position position)`
+      - `Tab_PositionOpeningFailEvent(Position position)`
+    - updated `GridTypeOpenPositionLogic(TradeGridRegime baseRegime)` to use guarded local `StopAndProfit` snapshot in profit checks.
+    - updated `MaxGridPrice`/`MinGridPrice` to return `0` when `TrailingUp` is null (safe default after lifecycle cleanup).
+    - preserves behavior for initialized runtime while preventing null-reference paths post-`Delete()`.
+  - Updated tests in `project/OsEngine.Tests/TradeGridPersistenceCoreTests.cs`:
+    - `...FailEventsAndOpenPositionLogic_WithNullHandlers_ShouldNotThrow`
+- **Verification (outside sandbox, per dotnet-build-policy):**
+  - `dotnet restore project/OsEngine/OsEngine.csproj --nologo` -> success
+  - `dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo` -> success
+  - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` -> success, 0 warnings, 0 errors
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed `506/506`
+- **Commit:** n/a
+- **Push:** n/a
