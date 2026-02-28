@@ -14562,3 +14562,23 @@
   - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed `518/518`
 - **Commit:** n/a
 - **Push:** n/a
+
+### Step 4.2 - Nullable Annotations (Incremental Adoption #671)
+
+- **Status:** In Progress (increment completed)
+- **Plan item:** `refactoring_stage2_plan.md` -> Phase 4 / Step 4.2
+- **Changes (TradeGridNonTradePeriods delete null-settings hardening block):**
+  - Updated `project/OsEngine/OsTrader/Grids/TradeGridNonTradePeriods.cs`:
+    - `Delete()` switched to local snapshots for `SettingsPeriod1/SettingsPeriod2`.
+    - fields are nulled before cleanup and `Delete()` calls are null-safe (`?.Delete()`).
+    - fixes null-reference on teardown after partial/uninitialized lifecycle.
+  - Updated tests in `project/OsEngine.Tests/TradeGridPersistenceCoreTests.cs`:
+    - `...TradeGridNonTradePeriods_Delete_WithNullSettings_ShouldNotThrow`
+- **Verification (outside sandbox, per dotnet-build-policy):**
+  - `dotnet restore project/OsEngine/OsEngine.csproj --nologo` -> success
+  - `dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo` -> success
+  - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` -> success, 0 warnings, 0 errors
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed `519/519`
+- **Commit:** n/a
+- **Push:** n/a
+
