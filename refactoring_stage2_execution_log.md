@@ -14448,3 +14448,34 @@
   - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed `512/512`
 - **Commit:** n/a
 - **Push:** n/a
+
+### Step 4.2 - Nullable Annotations (Incremental Adoption #666)
+
+- **Status:** In Progress (increment completed)
+- **Plan item:** `refactoring_stage2_plan.md` -> Phase 4 / Step 4.2
+- **Changes (TradeGrid order-tail safety hardening block):**
+  - Updated `project/OsEngine/OsTrader/Grids/TradeGrid.cs`:
+    - added helper: `TryGetLastOrder(List<Order>, out Order)` for nullable/empty-safe access to tail order.
+    - replaced direct `[^1]` order dereferences with guarded helper checks in:
+      - `RemoveSelected(...)`
+      - `TryCancelWrongCloseProfitOrders()`
+      - `GetOrdersBadPriceToGrid()`
+      - `GetOrdersBadLinesMaxCount()`
+      - `GetOpenOrdersGridHole()`
+      - `GetCloseOrdersGridHole()`
+      - `TryCancelOpeningOrders()`
+      - `CheckWrongCloseOrders()`
+      - `TryCancelClosingOrders()`
+      - `HaveOrdersWithNoMarketOrders()`
+      - `HaveOrdersTryToCancelLastSecond()`
+    - mitigates malformed/partial order-list crashes while preserving valid-state logic.
+  - Updated tests in `project/OsEngine.Tests/TradeGridPersistenceCoreTests.cs`:
+    - `...OrderStateChecks_WithEmptyOrderCollections_ShouldNotThrow`
+    - added private reflection helper `SetPrivateField(...)` for malformed-state setup.
+- **Verification (outside sandbox, per dotnet-build-policy):**
+  - `dotnet restore project/OsEngine/OsEngine.csproj --nologo` -> success
+  - `dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo` -> success
+  - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` -> success, 0 warnings, 0 errors
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed `513/513`
+- **Commit:** n/a
+- **Push:** n/a
