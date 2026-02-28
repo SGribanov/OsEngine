@@ -14018,6 +14018,28 @@
 - **Commit:** n/a
 - **Push:** n/a
 
+### Step 4.2 - Nullable Annotations (Incremental Adoption #648)
+
+- **Status:** In Progress (increment completed)
+- **Plan item:** `refactoring_stage2_plan.md` -> Phase 4 / Step 4.2
+- **Changes (TradeGridsMaster load-parser/log contracts):**
+  - Updated `project/OsEngine/OsTrader/Grids/TradeGridsMaster.cs`:
+    - replaced direct `Convert.ToInt32(gridSettings.Split('@')[0], ...)` with guarded helper parsing.
+    - added `TryExtractGridNumber(string? gridSettings, out int number)` for null-safe invariant parsing of legacy payload prefix.
+    - malformed/empty payload entries are skipped during load instead of throwing and terminating batch.
+    - `LogMessageEvent` aligned to nullable event contract (`Action<string, LogMessageType>?`).
+    - logging dispatch changed to nullable-safe `LogMessageEvent?.Invoke(message, type)` with `Error` fallback preserved.
+  - Updated tests in `project/OsEngine.Tests/TradeGridsMasterPersistenceTests.cs`:
+    - `TryExtractGridNumber_ShouldParseValidPrefix`
+    - `TryExtractGridNumber_ShouldReturnFalse_OnMalformedPrefix`
+- **Verification (outside sandbox, per dotnet-build-policy):**
+  - `dotnet restore project/OsEngine/OsEngine.csproj --nologo` -> success
+  - `dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo` -> success
+  - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` -> success, 0 warnings, 0 errors
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed `490/490`
+- **Commit:** n/a
+- **Push:** n/a
+
 ### Step 4.2 - Nullable Annotations (Incremental Adoption #647)
 
 - **Status:** In Progress (increment completed)
