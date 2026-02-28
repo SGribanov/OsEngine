@@ -1064,6 +1064,7 @@ namespace OsEngine.OsTrader.Grids
             TradeGridNonTradePeriods nonTradePeriods = NonTradePeriods;
             TradeGridStopBy stopBy = StopBy;
             TrailingUp trailingUp = TrailingUp;
+            List<TradeGridLine> lines = gridCreator?.Lines;
 
             if (tab == null
                 || gridCreator == null
@@ -1088,8 +1089,8 @@ namespace OsEngine.OsTrader.Grids
                 return;
             }
 
-            if (gridCreator.Lines == null
-                || gridCreator.Lines.Count == 0)
+            if (lines == null
+                || lines.Count == 0)
             {
                 return;
             }
@@ -2517,6 +2518,10 @@ namespace OsEngine.OsTrader.Grids
             }
 
             List<TradeGridLine> lines = gridCreator.Lines;
+            if (lines == null || lines.Count == 0)
+            {
+                return;
+            }
 
             bool isInGridNow = false;
 

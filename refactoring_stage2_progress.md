@@ -13437,3 +13437,27 @@
   - dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo -> success
   - dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900 -> success, 0 warnings, 0 errors
   - dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo -> passed 515/515
+
+## 2026-02-28 - Step 4.2 (nullable annotations) - TradeGrid process/journal lines-snapshot guard block (#669)
+
+- Applied localized nullable-safe lifecycle hardening in:
+  - project/OsEngine/OsTrader/Grids/TradeGrid.cs
+- Changes:
+  - `Process()` now snapshots `gridCreator.Lines` once and validates `lines == null/empty` before continuing.
+  - `TryDeletePositionsFromJournal(Position position)` now returns early when `gridCreator.Lines` is null/empty.
+  - reduces race window and avoids implicit null-loop semantics in partial lifecycle state.
+- Added/updated tests:
+  - project/OsEngine.Tests/TradeGridPersistenceCoreTests.cs
+    - `...Process_WithNullGridLines_ShouldNotThrow`
+    - `...TryDeletePositionsFromJournal_WithNullLines_ShouldNotThrow`
+- Scope:
+  - nullable lifecycle guard cleanup only
+  - no trade decision logic changes.
+
+### Verification
+
+- Host-context verification (outside sandbox, per dotnet-build-policy):
+  - dotnet restore project/OsEngine/OsEngine.csproj --nologo -> success
+  - dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo -> success
+  - dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900 -> success, 0 warnings, 0 errors
+  - dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo -> passed 517/517

@@ -426,6 +426,23 @@ public class TradeGridPersistenceCoreTests
     }
 
     [Fact]
+    public void Stage2Step2_2_TradeGrid_Process_WithNullGridLines_ShouldNotThrow()
+    {
+        TradeGrid grid = (TradeGrid)RuntimeHelpers.GetUninitializedObject(typeof(TradeGrid));
+        grid.Tab = (BotTabSimple)RuntimeHelpers.GetUninitializedObject(typeof(BotTabSimple));
+        grid.GridCreator = (TradeGridCreator)RuntimeHelpers.GetUninitializedObject(typeof(TradeGridCreator));
+        grid.ErrorsReaction = (TradeGridErrorsReaction)RuntimeHelpers.GetUninitializedObject(typeof(TradeGridErrorsReaction));
+        grid.AutoStarter = (TradeGridAutoStarter)RuntimeHelpers.GetUninitializedObject(typeof(TradeGridAutoStarter));
+        grid.NonTradePeriods = (TradeGridNonTradePeriods)RuntimeHelpers.GetUninitializedObject(typeof(TradeGridNonTradePeriods));
+        grid.StopBy = (TradeGridStopBy)RuntimeHelpers.GetUninitializedObject(typeof(TradeGridStopBy));
+        grid.TrailingUp = (TrailingUp)RuntimeHelpers.GetUninitializedObject(typeof(TrailingUp));
+
+        Exception? error = Record.Exception(() => InvokePrivateNoArg(grid, "Process"));
+
+        Assert.Null(error);
+    }
+
+    [Fact]
     public void Stage2Step2_2_TradeGrid_ProfitAndMarketMakingHelpers_WithNullDependencies_ShouldNotThrow()
     {
         TradeGrid grid = (TradeGrid)RuntimeHelpers.GetUninitializedObject(typeof(TradeGrid));
@@ -579,6 +596,19 @@ public class TradeGridPersistenceCoreTests
         TradeGrid grid = (TradeGrid)RuntimeHelpers.GetUninitializedObject(typeof(TradeGrid));
         grid.GridCreator = new TradeGridCreator();
         grid.GridCreator.Lines = new List<TradeGridLine>();
+        grid.Tab = (BotTabSimple)RuntimeHelpers.GetUninitializedObject(typeof(BotTabSimple));
+        Position position = (Position)RuntimeHelpers.GetUninitializedObject(typeof(Position));
+
+        Exception? error = Record.Exception(() => InvokePrivateWithArgs(grid, "TryDeletePositionsFromJournal", position));
+
+        Assert.Null(error);
+    }
+
+    [Fact]
+    public void Stage2Step2_2_TradeGrid_TryDeletePositionsFromJournal_WithNullLines_ShouldNotThrow()
+    {
+        TradeGrid grid = (TradeGrid)RuntimeHelpers.GetUninitializedObject(typeof(TradeGrid));
+        grid.GridCreator = (TradeGridCreator)RuntimeHelpers.GetUninitializedObject(typeof(TradeGridCreator));
         grid.Tab = (BotTabSimple)RuntimeHelpers.GetUninitializedObject(typeof(BotTabSimple));
         Position position = (Position)RuntimeHelpers.GetUninitializedObject(typeof(Position));
 
