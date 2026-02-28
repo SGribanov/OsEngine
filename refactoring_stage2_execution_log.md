@@ -14349,3 +14349,22 @@
   - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed `507/507`
 - **Commit:** n/a
 - **Push:** n/a
+
+### Step 4.2 - Nullable Annotations (Incremental Adoption #661)
+
+- **Status:** In Progress (increment completed)
+- **Plan item:** `refactoring_stage2_plan.md` -> Phase 4 / Step 4.2
+- **Changes (TradeGrid delete idempotency lifecycle guards):**
+  - Updated `project/OsEngine/OsTrader/Grids/TradeGrid.cs`:
+    - `Delete()` reworked to snapshot all owned lifecycle dependencies (`Tab`, `NonTradePeriods`, `StopBy`, `StopAndProfit`, `AutoStarter`, `GridCreator`, `ErrorsReaction`, `TrailingUp`) into local variables.
+    - fields are nulled before event unsubscription and nested cleanup calls, reducing reentrancy/race risk and making repeated `Delete()` calls safe.
+    - cleanup semantics for initialized runtime state preserved.
+  - Updated tests in `project/OsEngine.Tests/TradeGridPersistenceCoreTests.cs`:
+    - `...Delete_CalledTwice_ShouldNotThrow`
+- **Verification (outside sandbox, per dotnet-build-policy):**
+  - `dotnet restore project/OsEngine/OsEngine.csproj --nologo` -> success
+  - `dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo` -> success
+  - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` -> success, 0 warnings, 0 errors
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed `508/508`
+- **Commit:** n/a
+- **Push:** n/a
