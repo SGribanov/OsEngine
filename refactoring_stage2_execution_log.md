@@ -14499,3 +14499,24 @@
   - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed `514/514`
 - **Commit:** n/a
 - **Push:** n/a
+
+### Step 4.2 - Nullable Annotations (Incremental Adoption #668)
+
+- **Status:** In Progress (increment completed)
+- **Plan item:** `refactoring_stage2_plan.md` -> Phase 4 / Step 4.2
+- **Changes (TradeGrid entry-point/log payload hardening block):**
+  - Updated `project/OsEngine/OsTrader/Grids/TradeGrid.cs`:
+    - added null-payload guards in:
+      - `Tab_NewTickEvent(Trade trade)`
+      - `Tab_PositionStopActivateEvent(Position obj)`
+    - `SendNewLogMessage(string message, LogMessageType type)` now normalizes null `message` and uses local `tab` snapshot for bot/security context.
+    - preserves behavior for valid payloads while preventing edge-case null crashes.
+  - Updated tests in `project/OsEngine.Tests/TradeGridPersistenceCoreTests.cs`:
+    - `...EntryPointsAndLog_WithNullPayload_ShouldNotThrow`
+- **Verification (outside sandbox, per dotnet-build-policy):**
+  - `dotnet restore project/OsEngine/OsEngine.csproj --nologo` -> success
+  - `dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo` -> success
+  - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` -> success, 0 warnings, 0 errors
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed `515/515`
+- **Commit:** n/a
+- **Push:** n/a
