@@ -218,7 +218,13 @@ namespace OsEngine.OsTrader.Grids
                     return TradeGridRegime.On;
                 }
 
-                decimal lastSecurityPrice = candles[candles.Count - 1].Close;
+                Candle lastCandle = candles[candles.Count - 1];
+                if (lastCandle == null)
+                {
+                    return TradeGridRegime.On;
+                }
+
+                decimal lastSecurityPrice = lastCandle.Close;
 
                 decimal firstGridPrice = grid.FirstPriceReal;
 

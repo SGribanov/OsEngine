@@ -6,7 +6,9 @@ using System.Globalization;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.CompilerServices;
+using OsEngine.Candles;
 using OsEngine.Entity;
+using OsEngine.Market.Connectors;
 using OsEngine.Journal.Internal;
 using OsEngine.Logging;
 using OsEngine.OsTrader.Grids;
@@ -99,6 +101,33 @@ public class TradeGridPersistenceCoreTests
 
         Assert.Equal(TradeGridRegime.On, nullTabRegime);
         Assert.Equal(TradeGridRegime.On, nullGridRegime);
+    }
+
+    [Fact]
+    public void Stage2Step2_2_TradeGridStopBy_GetRegime_WithNullLastCandle_ShouldReturnOn()
+    {
+        TradeGridStopBy stopBy = new TradeGridStopBy
+        {
+            StopGridByMoveUpIsOn = true,
+            StopGridByMoveUpValuePercent = 1m
+        };
+
+        TradeGrid grid = CreateBareGrid();
+        grid.GridCreator.FirstPrice = 100m;
+
+        BotTabSimple tab = (BotTabSimple)RuntimeHelpers.GetUninitializedObject(typeof(BotTabSimple));
+        ConnectorCandles connector = new ConnectorCandles("CodexGrid", StartProgram.IsTester, false);
+        TimeFrameBuilder builder = new TimeFrameBuilder("CodexGrid", StartProgram.IsTester);
+        CandleSeries series = new CandleSeries(builder, new Security(), StartProgram.IsTester)
+        {
+            CandlesAll = new List<Candle> { null! }
+        };
+        SetPrivateField(connector, "_mySeries", series);
+        SetPrivateField(tab, "_connector", connector);
+
+        TradeGridRegime regime = stopBy.GetRegime(grid, tab);
+
+        Assert.Equal(TradeGridRegime.On, regime);
     }
 
     [Fact]

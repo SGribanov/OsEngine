@@ -13682,3 +13682,26 @@
   - dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900 -> success, 0 warnings, 0 errors
   - dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo -> passed 526/526
 
+
+## 2026-02-28 - Step 4.2 (nullable annotations) - TradeGridStopBy null-last-candle guard block (#679)
+
+- Applied localized nullable-safe lifecycle hardening in:
+  - project/OsEngine/OsTrader/Grids/TradeGridStopBy.cs
+- Changes:
+  - `GetRegime(...)` now guards null last candle entry before close-price access.
+  - prevents null-reference when candle stream contains sparse/null tail element.
+- Added/updated tests:
+  - project/OsEngine.Tests/TradeGridPersistenceCoreTests.cs
+    - `...TradeGridStopBy_GetRegime_WithNullLastCandle_ShouldReturnOn`
+- Scope:
+  - nullable lifecycle guard cleanup only
+  - no trade decision logic changes.
+
+### Verification
+
+- Host-context verification (outside sandbox, per dotnet-build-policy):
+  - dotnet restore project/OsEngine/OsEngine.csproj --nologo -> success
+  - dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo -> success
+  - dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900 -> success, 0 warnings, 0 errors
+  - dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo -> passed 527/527
+
