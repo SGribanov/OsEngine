@@ -492,6 +492,19 @@ public class TradeGridPersistenceCoreTests
         Assert.Null(error);
     }
 
+    [Fact]
+    public void Stage2Step2_2_TradeGrid_Delete_WithFaultyUninitializedSubcomponents_ShouldNotThrow()
+    {
+        TradeGrid grid = (TradeGrid)RuntimeHelpers.GetUninitializedObject(typeof(TradeGrid));
+        grid.NonTradePeriods = (TradeGridNonTradePeriods)RuntimeHelpers.GetUninitializedObject(typeof(TradeGridNonTradePeriods));
+        grid.ErrorsReaction = (TradeGridErrorsReaction)RuntimeHelpers.GetUninitializedObject(typeof(TradeGridErrorsReaction));
+        grid.TrailingUp = (TrailingUp)RuntimeHelpers.GetUninitializedObject(typeof(TrailingUp));
+
+        Exception? error = Record.Exception(() => grid.Delete());
+
+        Assert.Null(error);
+    }
+
     private static TradeGrid CreateBareGrid()
     {
         TradeGrid grid = (TradeGrid)RuntimeHelpers.GetUninitializedObject(typeof(TradeGrid));

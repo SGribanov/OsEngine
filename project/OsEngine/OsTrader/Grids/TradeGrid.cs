@@ -388,54 +388,110 @@ namespace OsEngine.OsTrader.Grids
 
             if (tab != null)
             {
-                tab.NewTickEvent -= Tab_NewTickEvent;
-                tab.PositionOpeningSuccesEvent -= Tab_PositionOpeningSuccesEvent;
-                tab.PositionClosingSuccesEvent -= Tab_PositionClosingSuccesEvent;
-                tab.PositionStopActivateEvent -= Tab_PositionStopActivateEvent;
-                if (tab.Connector != null)
+                try
                 {
-                    tab.Connector.TestStartEvent -= Connector_TestStartEvent;
+                    tab.NewTickEvent -= Tab_NewTickEvent;
+                    tab.PositionOpeningSuccesEvent -= Tab_PositionOpeningSuccesEvent;
+                    tab.PositionClosingSuccesEvent -= Tab_PositionClosingSuccesEvent;
+                    tab.PositionStopActivateEvent -= Tab_PositionStopActivateEvent;
+                    if (tab.Connector != null)
+                    {
+                        tab.Connector.TestStartEvent -= Connector_TestStartEvent;
+                    }
+                    tab.PositionOpeningFailEvent -= Tab_PositionOpeningFailEvent;
+                    tab.PositionClosingFailEvent -= Tab_PositionClosingFailEvent;
                 }
-                tab.PositionOpeningFailEvent -= Tab_PositionOpeningFailEvent;
-                tab.PositionClosingFailEvent -= Tab_PositionClosingFailEvent;
+                catch (Exception)
+                {
+                    // Defensive cleanup path: ignore partial-state unsubscription failures.
+                }
             }
 
             if (nonTradePeriods != null)
             {
-                nonTradePeriods.LogMessageEvent -= SendNewLogMessage;
-                nonTradePeriods.Delete();
+                try
+                {
+                    nonTradePeriods.LogMessageEvent -= SendNewLogMessage;
+                    nonTradePeriods.Delete();
+                }
+                catch (Exception)
+                {
+                    // Defensive cleanup path: ignore partial-state component failures.
+                }
             }
 
             if (stopBy != null)
             {
-                stopBy.LogMessageEvent -= SendNewLogMessage;
+                try
+                {
+                    stopBy.LogMessageEvent -= SendNewLogMessage;
+                }
+                catch (Exception)
+                {
+                    // Defensive cleanup path: ignore partial-state component failures.
+                }
             }
 
             if (stopAndProfit != null)
             {
-                stopAndProfit.LogMessageEvent -= SendNewLogMessage;
+                try
+                {
+                    stopAndProfit.LogMessageEvent -= SendNewLogMessage;
+                }
+                catch (Exception)
+                {
+                    // Defensive cleanup path: ignore partial-state component failures.
+                }
             }
 
             if (autoStarter != null)
             {
-                autoStarter.LogMessageEvent -= SendNewLogMessage;
+                try
+                {
+                    autoStarter.LogMessageEvent -= SendNewLogMessage;
+                }
+                catch (Exception)
+                {
+                    // Defensive cleanup path: ignore partial-state component failures.
+                }
             }
 
             if (gridCreator != null)
             {
-                gridCreator.LogMessageEvent -= SendNewLogMessage;
+                try
+                {
+                    gridCreator.LogMessageEvent -= SendNewLogMessage;
+                }
+                catch (Exception)
+                {
+                    // Defensive cleanup path: ignore partial-state component failures.
+                }
             }
 
             if (errorsReaction != null)
             {
-                errorsReaction.LogMessageEvent -= SendNewLogMessage;
-                errorsReaction.Delete();
+                try
+                {
+                    errorsReaction.LogMessageEvent -= SendNewLogMessage;
+                    errorsReaction.Delete();
+                }
+                catch (Exception)
+                {
+                    // Defensive cleanup path: ignore partial-state component failures.
+                }
             }
 
             if (trailingUp != null)
             {
-                trailingUp.LogMessageEvent -= SendNewLogMessage;
-                trailingUp.Delete();
+                try
+                {
+                    trailingUp.LogMessageEvent -= SendNewLogMessage;
+                    trailingUp.Delete();
+                }
+                catch (Exception)
+                {
+                    // Defensive cleanup path: ignore partial-state component failures.
+                }
             }
         }
 
