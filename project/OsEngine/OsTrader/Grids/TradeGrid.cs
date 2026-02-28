@@ -421,26 +421,17 @@ namespace OsEngine.OsTrader.Grids
 
         public void Save()
         {
-            if (NeedToSaveEvent != null)
-            {
-                NeedToSaveEvent();
-            }
+            NeedToSaveEvent?.Invoke();
         }
 
         public void RePaintGrid()
         {
-            if (RePaintSettingsEvent != null)
-            {
-                RePaintSettingsEvent();
-            }
+            RePaintSettingsEvent?.Invoke();
         }
 
         public void FullRePaintGrid()
         {
-            if (FullRePaintGridEvent != null)
-            {
-                FullRePaintGridEvent();
-            }
+            FullRePaintGridEvent?.Invoke();
         }
 
         private void Connector_TestStartEvent()
@@ -530,11 +521,11 @@ namespace OsEngine.OsTrader.Grids
             }
         }
 
-        public event Action NeedToSaveEvent;
+        public event Action? NeedToSaveEvent;
 
-        public event Action RePaintSettingsEvent;
+        public event Action? RePaintSettingsEvent;
 
-        public event Action FullRePaintGridEvent;
+        public event Action? FullRePaintGridEvent;
 
         #endregion
 
@@ -557,15 +548,8 @@ namespace OsEngine.OsTrader.Grids
 
                 _regime = value;
 
-                if (FullRePaintGridEvent != null)
-                {
-                    FullRePaintGridEvent();
-                }
-
-                if (RePaintSettingsEvent != null)
-                {
-                    RePaintSettingsEvent();
-                }
+                FullRePaintGridEvent?.Invoke();
+                RePaintSettingsEvent?.Invoke();
             }
         }
         private TradeGridRegime _regime;

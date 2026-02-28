@@ -12896,3 +12896,34 @@
   - dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo -> success
   - dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900 -> success, 0 warnings, 0 errors
   - dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo -> passed 492/492
+
+## 2026-02-28 - Step 4.2 (nullable annotations) - TradeGrid event contract cleanup (#650)
+
+- Applied localized nullable-safe hardening in:
+  - project/OsEngine/OsTrader/Grids/TradeGrid.cs
+- Changes:
+  - event contract cleanup:
+    - `NeedToSaveEvent`, `RePaintSettingsEvent`, `FullRePaintGridEvent` -> nullable events (`Action?`).
+    - dispatch switched from manual null-check blocks to `?.Invoke()` in:
+      - `Save()`
+      - `RePaintGrid()`
+      - `FullRePaintGrid()`
+      - `Regime` setter repaint path
+  - scope:
+    - nullable event-contract alignment only;
+    - no behavior change for subscribed handlers.
+- Added/updated tests:
+  - project/OsEngine.Tests/TradeGridPersistenceCoreTests.cs
+    - `...TradeGrid_EventDispatchWithoutSubscribers_ShouldNotThrow`
+    - `...TradeGrid_SendNewLogMessage_WithNullTab_ShouldNotThrow`
+- Scope:
+  - nullable contract cleanup only
+  - no changes to trade grid execution logic.
+
+### Verification
+
+- Host-context verification (outside sandbox, per dotnet-build-policy):
+  - dotnet restore project/OsEngine/OsEngine.csproj --nologo -> success
+  - dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo -> success
+  - dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900 -> success, 0 warnings, 0 errors
+  - dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo -> passed 494/494

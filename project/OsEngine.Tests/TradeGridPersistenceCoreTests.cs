@@ -6,6 +6,7 @@ using System.Globalization;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using OsEngine.Entity;
+using OsEngine.Logging;
 using OsEngine.OsTrader.Grids;
 using Xunit;
 
@@ -239,6 +240,31 @@ public class TradeGridPersistenceCoreTests
         Assert.Equal(TradeGridPrimeType.OpenPosition, grid.GridType);
         Assert.Equal(TradeGridRegime.On, grid.Regime);
         Assert.Equal(11, grid.MaxOpenOrdersInMarket);
+    }
+
+    [Fact]
+    public void Stage2Step2_2_TradeGrid_EventDispatchWithoutSubscribers_ShouldNotThrow()
+    {
+        TradeGrid grid = CreateBareGrid();
+
+        Exception? error = Record.Exception(() =>
+        {
+            grid.Save();
+            grid.RePaintGrid();
+            grid.FullRePaintGrid();
+        });
+
+        Assert.Null(error);
+    }
+
+    [Fact]
+    public void Stage2Step2_2_TradeGrid_SendNewLogMessage_WithNullTab_ShouldNotThrow()
+    {
+        TradeGrid grid = (TradeGrid)RuntimeHelpers.GetUninitializedObject(typeof(TradeGrid));
+
+        Exception? error = Record.Exception(() => grid.SendNewLogMessage("test", LogMessageType.Error));
+
+        Assert.Null(error);
     }
 
     private static TradeGrid CreateBareGrid()
