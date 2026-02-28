@@ -2403,7 +2403,13 @@ namespace OsEngine.OsTrader.Grids
         {
             get
             {
-                List<TradeGridLine> lines = GridCreator.Lines;
+                TradeGridCreator gridCreator = GridCreator;
+                if (gridCreator == null)
+                {
+                    return 0;
+                }
+
+                List<TradeGridLine> lines = gridCreator.Lines;
 
                 if (lines == null
                     || lines.Count == 0)
@@ -2434,7 +2440,13 @@ namespace OsEngine.OsTrader.Grids
         public bool HaveOrdersWithNoMarketOrders()
         {
             // 1 берём все уровни с позициями
-            List<TradeGridLine> linesAll = GridCreator.Lines;
+            TradeGridCreator gridCreator = GridCreator;
+            if (gridCreator == null)
+            {
+                return false;
+            }
+
+            List<TradeGridLine> linesAll = gridCreator.Lines;
 
             for (int i = 0; linesAll != null && i < linesAll.Count; i++)
             {
@@ -2501,7 +2513,13 @@ namespace OsEngine.OsTrader.Grids
             // возвращает true - если есть ордер который уже отослан на отзыв но всё ещё в статусе Active. За последние 3 секунды.
             // если true - значит последние операции ещё не завершены по снятию ордеров
 
-            List<TradeGridLine> linesAll = GridCreator.Lines;
+            TradeGridCreator gridCreator = GridCreator;
+            if (gridCreator == null)
+            {
+                return false;
+            }
+
+            List<TradeGridLine> linesAll = gridCreator.Lines;
 
             for (int i = 0; linesAll != null && i < linesAll.Count; i++)
             {
@@ -2721,9 +2739,18 @@ namespace OsEngine.OsTrader.Grids
 
         public List<TradeGridLine> GetLinesWithOpenPosition()
         {
-            List<TradeGridLine> linesAll = GridCreator.Lines;
-
             List<TradeGridLine> linesWithPositionFact = new List<TradeGridLine>();
+            TradeGridCreator gridCreator = GridCreator;
+            if (gridCreator == null)
+            {
+                return linesWithPositionFact;
+            }
+
+            List<TradeGridLine> linesAll = gridCreator.Lines;
+            if (linesAll == null || linesAll.Count == 0)
+            {
+                return linesWithPositionFact;
+            }
 
             for (int i = 0; linesAll != null && i < linesAll.Count; i++)
             {

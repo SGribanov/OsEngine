@@ -328,6 +328,27 @@ public class TradeGridPersistenceCoreTests
         Assert.Null(error);
     }
 
+    [Fact]
+    public void Stage2Step2_2_TradeGrid_QueryProperties_WithNullGridCreator_ShouldReturnSafeDefaults()
+    {
+        TradeGrid grid = (TradeGrid)RuntimeHelpers.GetUninitializedObject(typeof(TradeGrid));
+
+        Exception? error = Record.Exception(() =>
+        {
+            decimal allVolume = grid.AllVolumeInLines;
+            bool hasNoMarketOrders = grid.HaveOrdersWithNoMarketOrders();
+            bool hasRecentCancel = grid.HaveOrdersTryToCancelLastSecond();
+            List<TradeGridLine> openPositions = grid.GetLinesWithOpenPosition();
+
+            Assert.Equal(0m, allVolume);
+            Assert.False(hasNoMarketOrders);
+            Assert.False(hasRecentCancel);
+            Assert.Empty(openPositions);
+        });
+
+        Assert.Null(error);
+    }
+
     private static TradeGrid CreateBareGrid()
     {
         TradeGrid grid = (TradeGrid)RuntimeHelpers.GetUninitializedObject(typeof(TradeGrid));

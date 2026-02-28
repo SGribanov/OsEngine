@@ -12987,3 +12987,30 @@
   - dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo -> success
   - dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900 -> success, 0 warnings, 0 errors
   - dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo -> passed 498/498
+
+## 2026-02-28 - Step 4.2 (nullable annotations) - TradeGrid query/property guard cleanup for null GridCreator (#653)
+
+- Applied localized nullable-safe lifecycle hardening in:
+  - project/OsEngine/OsTrader/Grids/TradeGrid.cs
+- Changes:
+  - added `GridCreator` null guards in remaining query/property paths:
+    - `AllVolumeInLines`
+    - `HaveOrdersWithNoMarketOrders()`
+    - `HaveOrdersTryToCancelLastSecond()`
+    - `GetLinesWithOpenPosition()`
+  - methods/properties now return safe defaults (`0`/`false`/empty list) when grid lifecycle dependencies are unavailable.
+  - normal behavior for initialized runtime state preserved.
+- Added/updated tests:
+  - project/OsEngine.Tests/TradeGridPersistenceCoreTests.cs
+    - `...QueryProperties_WithNullGridCreator_ShouldReturnSafeDefaults`
+- Scope:
+  - nullable lifecycle guard cleanup only
+  - no trading behavior changes.
+
+### Verification
+
+- Host-context verification (outside sandbox, per dotnet-build-policy):
+  - dotnet restore project/OsEngine/OsEngine.csproj --nologo -> success
+  - dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo -> success
+  - dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900 -> success, 0 warnings, 0 errors
+  - dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo -> passed 499/499
