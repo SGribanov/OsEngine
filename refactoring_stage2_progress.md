@@ -13074,3 +13074,37 @@
   - dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo -> success
   - dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900 -> success, 0 warnings, 0 errors
   - dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo -> passed 502/502
+
+## 2026-02-28 - Step 4.2 (nullable annotations) - TradeGrid private trading-helper lifecycle guard cleanup (#656)
+
+- Applied localized nullable-safe lifecycle hardening in:
+  - project/OsEngine/OsTrader/Grids/TradeGrid.cs
+- Changes:
+  - added early lifecycle guards (`Tab`/`GridCreator`) in private trading helper entry points:
+    - `TryRemoveWrongOrders()`
+    - `GetOpenOrdersGridHole()`
+    - `TryCancelOpeningOrders()`
+    - `TrySetClosingOrders(decimal lastPrice)`
+    - `CheckWrongCloseOrders()`
+    - `TryCancelClosingOrders()`
+    - `TrySetOpenOrders()`
+    - `TryFreeJournal()`
+    - `TryDeletePositionsFromJournal(Position position)`
+    - `TryFindPositionsInJournalAfterReconnect()`
+    - `TryForcedCloseGrid()`
+  - switched internal method calls to guarded local `tab`/`gridCreator` snapshots where used.
+  - behavior for initialized runtime state preserved; post-delete/race entry points now return safely.
+- Added/updated tests:
+  - project/OsEngine.Tests/TradeGridPersistenceCoreTests.cs
+    - `...PrivateTradingHelpers_WithNullDependencies_ShouldNotThrow`
+- Scope:
+  - nullable lifecycle guard cleanup only
+  - no trade decision logic changes.
+
+### Verification
+
+- Host-context verification (outside sandbox, per dotnet-build-policy):
+  - dotnet restore project/OsEngine/OsEngine.csproj --nologo -> success
+  - dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo -> success
+  - dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900 -> success, 0 warnings, 0 errors
+  - dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo -> passed 503/503

@@ -391,6 +391,29 @@ public class TradeGridPersistenceCoreTests
         Assert.Null(error);
     }
 
+    [Fact]
+    public void Stage2Step2_2_TradeGrid_PrivateTradingHelpers_WithNullDependencies_ShouldNotThrow()
+    {
+        TradeGrid grid = (TradeGrid)RuntimeHelpers.GetUninitializedObject(typeof(TradeGrid));
+        Position position = (Position)RuntimeHelpers.GetUninitializedObject(typeof(Position));
+
+        Exception? error = Record.Exception(() =>
+        {
+            InvokePrivateNoArg(grid, "TryRemoveWrongOrders");
+            InvokePrivateWithArgs(grid, "TrySetClosingOrders", 0m);
+            InvokePrivateNoArg(grid, "CheckWrongCloseOrders");
+            InvokePrivateNoArg(grid, "TryCancelOpeningOrders");
+            InvokePrivateNoArg(grid, "TryCancelClosingOrders");
+            InvokePrivateNoArg(grid, "TrySetOpenOrders");
+            InvokePrivateNoArg(grid, "TryFreeJournal");
+            InvokePrivateWithArgs(grid, "TryDeletePositionsFromJournal", position);
+            InvokePrivateNoArg(grid, "TryFindPositionsInJournalAfterReconnect");
+            InvokePrivateNoArg(grid, "TryForcedCloseGrid");
+        });
+
+        Assert.Null(error);
+    }
+
     private static TradeGrid CreateBareGrid()
     {
         TradeGrid grid = (TradeGrid)RuntimeHelpers.GetUninitializedObject(typeof(TradeGrid));

@@ -1629,7 +1629,14 @@ namespace OsEngine.OsTrader.Grids
 
         private int TryRemoveWrongOrders()
         {
-            List<Candle> candles = Tab.CandlesAll;
+            BotTabSimple tab = Tab;
+            TradeGridCreator gridCreator = GridCreator;
+            if (tab == null || gridCreator == null)
+            {
+                return 0;
+            }
+
+            List<Candle> candles = tab.CandlesAll;
 
             if (candles == null || candles.Count == 0)
             {
@@ -1637,8 +1644,6 @@ namespace OsEngine.OsTrader.Grids
             }
 
             decimal lastPrice = candles[candles.Count - 1].Close;
-
-            List<TradeGridLine> linesAll = GridCreator.Lines;
 
             // 1 убираем ордера на открытие и закрытие с неправильной ценой.
 
@@ -1650,7 +1655,7 @@ namespace OsEngine.OsTrader.Grids
                 for (int i = 0; i < ordersToCancelBadPrice.Count; i++)
                 {
                     //Tab.SetNewLogMessage("Отзыв ордера по не правильной цене", LogMessageType.System);
-                    Tab.CloseOrder(ordersToCancelBadPrice[i]);
+                    tab.CloseOrder(ordersToCancelBadPrice[i]);
                 }
 
                 return ordersToCancelBadPrice.Count;
@@ -1666,7 +1671,7 @@ namespace OsEngine.OsTrader.Grids
                 for (int i = 0; i < ordersToCancelBadLines.Count; i++)
                 {
                     //Tab.SetNewLogMessage("Отзыв ордера по количеству", LogMessageType.System);
-                    Tab.CloseOrder(ordersToCancelBadLines[i]);
+                    tab.CloseOrder(ordersToCancelBadLines[i]);
                 }
 
                 return ordersToCancelBadLines.Count;
@@ -1682,7 +1687,7 @@ namespace OsEngine.OsTrader.Grids
                 for (int i = 0; i < ordersToCancelOpenOrders.Count; i++)
                 {
                     //Tab.SetNewLogMessage("Отзыв ордера по дыре в сетке", LogMessageType.System);
-                    Tab.CloseOrder(ordersToCancelOpenOrders[i]);
+                    tab.CloseOrder(ordersToCancelOpenOrders[i]);
                 }
 
                 return ordersToCancelOpenOrders.Count;
@@ -1701,7 +1706,7 @@ namespace OsEngine.OsTrader.Grids
                 {
                     for (int i = 0; i < ordersToCancelCloseOrders.Count; i++)
                     {
-                        Tab.CloseOrder(ordersToCancelCloseOrders[i]);
+                        tab.CloseOrder(ordersToCancelCloseOrders[i]);
                     }
 
                     return ordersToCancelCloseOrders.Count;
@@ -1789,7 +1794,14 @@ namespace OsEngine.OsTrader.Grids
 
         private List<Order> GetOpenOrdersGridHole()
         {
-            List<Candle> candles = Tab.CandlesAll;
+            BotTabSimple tab = Tab;
+            TradeGridCreator gridCreator = GridCreator;
+            if (tab == null || gridCreator == null)
+            {
+                return null;
+            }
+
+            List<Candle> candles = tab.CandlesAll;
 
             if (candles == null || candles.Count == 0)
             {
@@ -1797,8 +1809,6 @@ namespace OsEngine.OsTrader.Grids
             }
 
             decimal lastPrice = candles[candles.Count - 1].Close;
-
-            List<TradeGridLine> linesAll = GridCreator.Lines;
 
             // 1 берём текущие линии с позициями
 
@@ -1899,6 +1909,12 @@ namespace OsEngine.OsTrader.Grids
 
         private int TryCancelOpeningOrders()
         {
+            BotTabSimple tab = Tab;
+            if (tab == null)
+            {
+                return 0;
+            }
+
             List<TradeGridLine> lines = GetLinesWithOpenOrdersFact();
 
             int cancelledOrders = 0;
@@ -1917,7 +1933,7 @@ namespace OsEngine.OsTrader.Grids
 
                 if (order.NumberMarket != null)
                 {
-                    Tab.CloseOrder(order);
+                    tab.CloseOrder(order);
                     cancelledOrders++;
                 }
             }
@@ -1927,6 +1943,12 @@ namespace OsEngine.OsTrader.Grids
 
         private void TrySetClosingOrders(decimal lastPrice)
         {
+            BotTabSimple tab = Tab;
+            if (tab == null)
+            {
+                return;
+            }
+
             CheckWrongCloseOrders();
 
             List<TradeGridLine> linesOpenPoses = GetLinesWithOpenPosition();
@@ -1951,22 +1973,22 @@ namespace OsEngine.OsTrader.Grids
                 decimal volume = pos.OpenVolume;
 
                 if (CheckMicroVolumes == true
-                    && Tab.CanTradeThisVolume(volume) == false)
+                    && tab.CanTradeThisVolume(volume) == false)
                 {
                     continue;
                 }
 
-                if (Tab.Security.PriceLimitHigh != 0
-                 && Tab.Security.PriceLimitLow != 0)
+                if (tab.Security.PriceLimitHigh != 0
+                 && tab.Security.PriceLimitLow != 0)
                 {
-                    if (line.PriceExit > Tab.Security.PriceLimitHigh
-                        || line.PriceExit < Tab.Security.PriceLimitLow)
+                    if (line.PriceExit > tab.Security.PriceLimitHigh
+                        || line.PriceExit < tab.Security.PriceLimitLow)
                     {
                         continue;
                     }
                 }
 
-                if (Tab.StartProgram == StartProgram.IsOsTrader
+                if (tab.StartProgram == StartProgram.IsOsTrader
                     && MaxDistanceToOrdersPercent != 0
                     && lastPrice != 0)
                 {
@@ -1980,18 +2002,20 @@ namespace OsEngine.OsTrader.Grids
                     }
                 }
 
-                Tab.CloseAtLimitUnsafe(pos, line.PriceExit, volume);
+                tab.CloseAtLimitUnsafe(pos, line.PriceExit, volume);
             }
         }
 
         private void CheckWrongCloseOrders()
         {
-            if (Tab.StartProgram != StartProgram.IsOsTrader)
+            BotTabSimple tab = Tab;
+            TradeGridCreator gridCreator = GridCreator;
+            if (tab == null || gridCreator == null || tab.StartProgram != StartProgram.IsOsTrader)
             {
                 return;
             }
 
-            List<TradeGridLine> linesAll = GridCreator.Lines;
+            List<TradeGridLine> linesAll = gridCreator.Lines;
 
             for (int i = 0; i < linesAll.Count; i++)
             {
@@ -2013,7 +2037,7 @@ namespace OsEngine.OsTrader.Grids
 
                     if (volumePosOpen != (volumeCloseOrder - volumeExecuteCloseOrder))
                     {
-                        Tab.CloseOrder(orderToClose);
+                        tab.CloseOrder(orderToClose);
                     }
                 }
             }
@@ -2021,6 +2045,12 @@ namespace OsEngine.OsTrader.Grids
 
         private int TryCancelClosingOrders()
         {
+            BotTabSimple tab = Tab;
+            if (tab == null)
+            {
+                return 0;
+            }
+
             List<TradeGridLine> lines = GetLinesWithOpenPosition();
 
             int cancelledOrders = 0;
@@ -2040,7 +2070,7 @@ namespace OsEngine.OsTrader.Grids
                 if (order.NumberMarket != null
                    && order.TypeOrder != OrderPriceType.Market)
                 {
-                    Tab.CloseOrder(order);
+                    tab.CloseOrder(order);
                     cancelledOrders++;
                 }
             }
@@ -2050,7 +2080,14 @@ namespace OsEngine.OsTrader.Grids
 
         private void TrySetOpenOrders()
         {
-            List<Candle> candles = Tab.CandlesAll;
+            BotTabSimple tab = Tab;
+            TradeGridCreator gridCreator = GridCreator;
+            if (tab == null || gridCreator == null)
+            {
+                return;
+            }
+
+            List<Candle> candles = tab.CandlesAll;
 
             if (candles == null || candles.Count == 0)
             {
@@ -2064,13 +2101,11 @@ namespace OsEngine.OsTrader.Grids
                 return;
             }
 
-            if (Tab.PriceBestAsk == 0
-                || Tab.PriceBestBid == 0)
+            if (tab.PriceBestAsk == 0
+                || tab.PriceBestBid == 0)
             {
                 return;
             }
-
-            List<TradeGridLine> linesAll = GridCreator.Lines;
 
             // 1 берём текущие линии с позициями
 
@@ -2098,7 +2133,7 @@ namespace OsEngine.OsTrader.Grids
 
                 // открываемся. Позиции по линии нет
 
-                decimal volume = GridCreator.GetVolume(curLineNeed, Tab);
+                decimal volume = gridCreator.GetVolume(curLineNeed, tab);
 
                 Position newPosition = null;
 
@@ -2107,26 +2142,26 @@ namespace OsEngine.OsTrader.Grids
                     decimal price = curLineNeed.PriceEnter;
 
                     if (OpenOrdersMakerOnly == false
-                        && Tab.Security.PriceLimitHigh != 0
-                        && price >= Tab.Security.PriceLimitHigh)
+                        && tab.Security.PriceLimitHigh != 0
+                        && price >= tab.Security.PriceLimitHigh)
                     {
-                        price = Tab.Security.PriceLimitHigh - (Tab.Security.PriceStep * 10);
+                        price = tab.Security.PriceLimitHigh - (tab.Security.PriceStep * 10);
                     }
 
-                    newPosition = Tab.BuyAtLimit(volume, price);
+                    newPosition = tab.BuyAtLimit(volume, price);
                 }
                 else if (curLineNeed.Side == Side.Sell)
                 {
                     decimal price = curLineNeed.PriceEnter;
 
                     if (OpenOrdersMakerOnly == false
-                        && Tab.Security.PriceLimitLow != 0
-                        && price <= Tab.Security.PriceLimitLow)
+                        && tab.Security.PriceLimitLow != 0
+                        && price <= tab.Security.PriceLimitLow)
                     {
-                        price = Tab.Security.PriceLimitLow + (Tab.Security.PriceStep * 10);
+                        price = tab.Security.PriceLimitLow + (tab.Security.PriceStep * 10);
                     }
 
-                    newPosition = Tab.SellAtLimit(volume, price);
+                    newPosition = tab.SellAtLimit(volume, price);
                 }
 
                 if (newPosition != null)
@@ -2141,7 +2176,7 @@ namespace OsEngine.OsTrader.Grids
 
                     if (_firstTradeTime == DateTime.MinValue)
                     {
-                        _firstTradeTime = Tab.TimeServerCurrent;
+                        _firstTradeTime = tab.TimeServerCurrent;
                     }
 
                     _needToSave = true;
@@ -2160,6 +2195,12 @@ namespace OsEngine.OsTrader.Grids
 
         private void TryFreeJournal()
         {
+            BotTabSimple tab = Tab;
+            if (tab == null)
+            {
+                return;
+            }
+
             if (AutoClearJournalIsOn == false)
             {
                 return;
@@ -2172,7 +2213,7 @@ namespace OsEngine.OsTrader.Grids
 
             _lastCheckJournalTime = DateTime.Now;
 
-            Position[] positions = Tab.PositionsAll.ToArray();
+            Position[] positions = tab.PositionsAll.ToArray();
 
             // 1 удаляем позиции с OpeningFail без всяких условий
 
@@ -2234,7 +2275,14 @@ namespace OsEngine.OsTrader.Grids
 
         private void TryDeletePositionsFromJournal(Position position)
         {
-            List<TradeGridLine> lines = GridCreator.Lines;
+            TradeGridCreator gridCreator = GridCreator;
+            BotTabSimple tab = Tab;
+            if (gridCreator == null || tab == null || position == null)
+            {
+                return;
+            }
+
+            List<TradeGridLine> lines = gridCreator.Lines;
 
             bool isInGridNow = false;
 
@@ -2249,7 +2297,7 @@ namespace OsEngine.OsTrader.Grids
 
             if (isInGridNow == false)
             {
-                Tab._journal.DeletePosition(position);
+                tab._journal.DeletePosition(position);
             }
         }
 
@@ -2296,9 +2344,20 @@ namespace OsEngine.OsTrader.Grids
 
         private void TryFindPositionsInJournalAfterReconnect()
         {
-            List<TradeGridLine> lines = GridCreator.Lines;
+            TradeGridCreator gridCreator = GridCreator;
+            BotTabSimple tab = Tab;
+            if (gridCreator == null || tab == null)
+            {
+                return;
+            }
 
-            List<Position> positions = Tab.PositionsAll;
+            List<TradeGridLine> lines = gridCreator.Lines;
+            List<Position> positions = tab.PositionsAll;
+
+            if (lines == null || positions == null)
+            {
+                return;
+            }
 
             for (int i = 0; i < lines.Count; i++)
             {
@@ -2336,6 +2395,12 @@ namespace OsEngine.OsTrader.Grids
 
         private void TryForcedCloseGrid()
         {
+            BotTabSimple tab = Tab;
+            if (tab == null)
+            {
+                return;
+            }
+
             List<TradeGridLine> lines = GetLinesWithOpenPosition();
 
             bool havePositions = false;
@@ -2356,7 +2421,7 @@ namespace OsEngine.OsTrader.Grids
                     || pos.OpenVolume >= 0)
                 {
                     if (CheckMicroVolumes == true
-                    && Tab.CanTradeThisVolume(pos.OpenVolume) == false)
+                    && tab.CanTradeThisVolume(pos.OpenVolume) == false)
                     {
                         string message = "Micro volume detected. Position deleted \n";
                         message += "Position volume: " + pos.OpenVolume + "\n";
@@ -2368,7 +2433,7 @@ namespace OsEngine.OsTrader.Grids
                         continue;
                     }
 
-                    Tab.CloseAtMarket(pos, pos.OpenVolume);
+                    tab.CloseAtMarket(pos, pos.OpenVolume);
                     havePositions = true;
                 }
             }
