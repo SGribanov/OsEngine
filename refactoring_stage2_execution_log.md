@@ -14091,6 +14091,31 @@
 - **Commit:** n/a
 - **Push:** n/a
 
+### Step 4.2 - Nullable Annotations (Incremental Adoption #651)
+
+- **Status:** In Progress (increment completed)
+- **Plan item:** `refactoring_stage2_plan.md` -> Phase 4 / Step 4.2
+- **Changes (TradeGrid lifecycle guards in query methods):**
+  - Updated `project/OsEngine/OsTrader/Grids/TradeGrid.cs`:
+    - added lifecycle guards to return empty collections when `GridCreator`/`Tab` are unavailable:
+      - `GetPositionByGrid()`
+      - `GetLinesWithOpenOrdersNeed(decimal lastPrice)`
+      - `GetLinesWithOpenOrdersFact()`
+      - `GetLinesWithClosingOrdersFact()`
+    - guarded local snapshots used for nullable-safe access in these methods.
+  - Updated tests in `project/OsEngine.Tests/TradeGridPersistenceCoreTests.cs`:
+    - `...GetPositionByGrid_WithNullGridCreator_ShouldReturnEmpty`
+    - `...GetLinesWithOpenOrdersNeed_WithNullDependencies_ShouldReturnEmpty`
+    - `...GetOpenAndClosingFact_WithNullGridCreator_ShouldReturnEmpty`
+    - adjusted `...SendNewLogMessage_WithNullTab...` test to event-capture path (avoids modal UI side effect).
+- **Verification (outside sandbox, per dotnet-build-policy):**
+  - `dotnet restore project/OsEngine/OsEngine.csproj --nologo` -> success
+  - `dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo` -> success
+  - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` -> success, 0 warnings, 0 errors
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed `497/497`
+- **Commit:** n/a
+- **Push:** n/a
+
 ### Step 4.2 - Nullable Annotations (Incremental Adoption #647)
 
 - **Status:** In Progress (increment completed)
