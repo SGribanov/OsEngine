@@ -12831,3 +12831,32 @@
   - dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo -> success
   - dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900 -> success, 0 warnings, 0 errors
   - dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo -> passed 488/488
+
+## 2026-02-28 - Step 4.2 (nullable annotations) - TradeGridsMaster load-parser/log contract cleanup (#648)
+
+- Applied localized nullable-safe hardening in:
+  - project/OsEngine/OsTrader/Grids/TradeGridsMaster.cs
+- Changes:
+  - load parser robustness:
+    - replaced direct `Convert.ToInt32(gridSettings.Split('@')[0], ...)` with guarded parser helper.
+    - added `TryExtractGridNumber(string? gridSettings, out int number)` for invariant, null-safe prefix parsing.
+    - malformed/empty payloads are skipped instead of throwing and aborting load loop.
+  - log-event contract and dispatch:
+    - `LogMessageEvent` -> nullable event (`Action<string, LogMessageType>?`)
+    - dispatch changed to `LogMessageEvent?.Invoke(message, type)`
+    - fallback `ServerMaster.SendNewLogMessage(...)` for `Error` without subscribers preserved.
+- Added/updated tests:
+  - project/OsEngine.Tests/TradeGridsMasterPersistenceTests.cs
+    - `TryExtractGridNumber_ShouldParseValidPrefix`
+    - `TryExtractGridNumber_ShouldReturnFalse_OnMalformedPrefix`
+- Scope:
+  - nullable contract + load parser hardening only
+  - no behavior changes for valid persisted grid payloads.
+
+### Verification
+
+- Host-context verification (outside sandbox, per dotnet-build-policy):
+  - dotnet restore project/OsEngine/OsEngine.csproj --nologo -> success
+  - dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo -> success
+  - dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900 -> success, 0 warnings, 0 errors
+  - dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo -> passed 490/490

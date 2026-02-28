@@ -328,7 +328,10 @@ namespace OsEngine.OsTrader.Grids
                         continue;
                     }
 
-                    int num = Convert.ToInt32(gridSettings.Split('@')[0], CultureInfo.InvariantCulture);
+                    if (TryExtractGridNumber(gridSettings, out int num) == false)
+                    {
+                        continue;
+                    }
 
                     TradeGrid newGrid = new TradeGrid(_startProgram, _tab, num);
 
@@ -364,6 +367,28 @@ namespace OsEngine.OsTrader.Grids
             {
                 GridSaveStrings = new List<string>(lines)
             };
+        }
+
+        private static bool TryExtractGridNumber(string? gridSettings, out int number)
+        {
+            number = 0;
+
+            if (string.IsNullOrWhiteSpace(gridSettings))
+            {
+                return false;
+            }
+
+            int separatorIndex = gridSettings.IndexOf('@');
+            string numberPart = separatorIndex == -1
+                ? gridSettings
+                : gridSettings.Substring(0, separatorIndex);
+
+            if (string.IsNullOrWhiteSpace(numberPart))
+            {
+                return false;
+            }
+
+            return int.TryParse(numberPart, NumberStyles.Integer, CultureInfo.InvariantCulture, out number);
         }
 
         private sealed class TradeGridsMasterSettingsDto
@@ -584,17 +609,15 @@ namespace OsEngine.OsTrader.Grids
 
         public void SendNewLogMessage(string message, LogMessageType type)
         {
-            if (LogMessageEvent != null)
-            {
-                LogMessageEvent(message, type);
-            }
-            else if (type == LogMessageType.Error)
+            LogMessageEvent?.Invoke(message, type);
+
+            if (LogMessageEvent == null && type == LogMessageType.Error)
             {
                 ServerMaster.SendNewLogMessage(message, type);
             }
         }
 
-        public event Action<string, LogMessageType> LogMessageEvent;
+        public event Action<string, LogMessageType>? LogMessageEvent;
 
         #endregion
     }

@@ -48,6 +48,30 @@ public class TradeGridsMasterPersistenceTests
         Assert.Equal("3@C%", gridStrings[2]);
     }
 
+    [Fact]
+    public void TryExtractGridNumber_ShouldParseValidPrefix()
+    {
+        const string botName = "CodexTradeGridsNumberParseValid";
+        using TradeGridsMasterFileScope scope = new TradeGridsMasterFileScope(botName);
+
+        bool parsed = scope.TryExtractGridNumber("12@GridPayload", out int number);
+
+        Assert.True(parsed);
+        Assert.Equal(12, number);
+    }
+
+    [Fact]
+    public void TryExtractGridNumber_ShouldReturnFalse_OnMalformedPrefix()
+    {
+        const string botName = "CodexTradeGridsNumberParseMalformed";
+        using TradeGridsMasterFileScope scope = new TradeGridsMasterFileScope(botName);
+
+        bool parsed = scope.TryExtractGridNumber("@GridPayload", out int number);
+
+        Assert.False(parsed);
+        Assert.Equal(0, number);
+    }
+
     private sealed class TradeGridsMasterFileScope : IDisposable
     {
         private readonly string _botName;
@@ -57,6 +81,7 @@ public class TradeGridsMasterPersistenceTests
         private readonly string _settingsBackupPath;
         private readonly MethodInfo _saveGridsMethod;
         private readonly MethodInfo _parseLegacyMethod;
+        private readonly MethodInfo _tryExtractGridNumberMethod;
         private readonly FieldInfo _masterStartProgramField;
         private readonly FieldInfo _masterNameBotField;
         private readonly FieldInfo _gridFirstTradePriceField;
@@ -76,6 +101,10 @@ public class TradeGridsMasterPersistenceTests
                 "ParseLegacyGridsSettings",
                 BindingFlags.NonPublic | BindingFlags.Static)
                 ?? throw new InvalidOperationException("Method ParseLegacyGridsSettings not found.");
+            _tryExtractGridNumberMethod = typeof(TradeGridsMaster).GetMethod(
+                "TryExtractGridNumber",
+                BindingFlags.NonPublic | BindingFlags.Static)
+                ?? throw new InvalidOperationException("Method TryExtractGridNumber not found.");
             _masterStartProgramField = typeof(TradeGridsMaster).GetField("_startProgram", BindingFlags.NonPublic | BindingFlags.Instance)
                 ?? throw new InvalidOperationException("Field _startProgram not found.");
             _masterNameBotField = typeof(TradeGridsMaster).GetField("_nameBot", BindingFlags.NonPublic | BindingFlags.Instance)
@@ -163,6 +192,14 @@ public class TradeGridsMasterPersistenceTests
                 ?? throw new InvalidOperationException("Property GridSaveStrings not found.");
             IEnumerable<string> values = (IEnumerable<string>)gridSaveStringsProperty.GetValue(settings)!;
             return values.ToList();
+        }
+
+        public bool TryExtractGridNumber(string payload, out int number)
+        {
+            object[] args = new object[] { payload, 0 };
+            bool parsed = (bool)_tryExtractGridNumberMethod.Invoke(null, args)!;
+            number = (int)args[1];
+            return parsed;
         }
 
         public void Dispose()
