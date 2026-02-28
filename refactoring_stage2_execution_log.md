@@ -14479,3 +14479,23 @@
   - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed `513/513`
 - **Commit:** n/a
 - **Push:** n/a
+
+### Step 4.2 - Nullable Annotations (Incremental Adoption #667)
+
+- **Status:** In Progress (increment completed)
+- **Plan item:** `refactoring_stage2_plan.md` -> Phase 4 / Step 4.2
+- **Changes (TradeGrid lines-snapshot consistency hardening block):**
+  - Updated `project/OsEngine/OsTrader/Grids/TradeGrid.cs`:
+    - `CreateNewGridSafe()` now uses local `lines` snapshot instead of repeated direct `gridCreator.Lines` dereference.
+    - `Tab_PositionOpeningSuccesEvent`, `Tab_PositionOpeningFailEvent`, `Tab_PositionClosingFailEvent` switched to local `lines` snapshot guards before loops.
+    - `CheckWrongCloseOrders()` now returns early when `linesAll` is null/empty.
+    - removes remaining null-race windows around `Lines` access after lifecycle cleanup.
+  - Updated tests in `project/OsEngine.Tests/TradeGridPersistenceCoreTests.cs`:
+    - `...EventHandlers_WithNullGridLines_ShouldNotThrow`
+- **Verification (outside sandbox, per dotnet-build-policy):**
+  - `dotnet restore project/OsEngine/OsEngine.csproj --nologo` -> success
+  - `dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo` -> success
+  - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` -> success, 0 warnings, 0 errors
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed `514/514`
+- **Commit:** n/a
+- **Push:** n/a
