@@ -14211,3 +14211,23 @@
   - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed `501/501`
 - **Commit:** n/a
 - **Push:** n/a
+
+### Step 4.2 - Nullable Annotations (Incremental Adoption #655)
+
+- **Status:** In Progress (increment completed)
+- **Plan item:** `refactoring_stage2_plan.md` -> Phase 4 / Step 4.2
+- **Changes (TradeGrid save/load lifecycle guards):**
+  - Updated `project/OsEngine/OsTrader/Grids/TradeGrid.cs`:
+    - hardened `GetSaveString()` with nullable-safe subcomponent serialization via guarded snapshots for:
+      - `NonTradePeriods`, `StopBy`, `GridCreator`, `StopAndProfit`, `AutoStarter`, `ErrorsReaction`, `TrailingUp`
+    - hardened `LoadFromString(string? value)` by guarding per-section `LoadFromString(...)` calls when subcomponents are null (after lifecycle cleanup via `Delete()`).
+    - preserves behavior in normal initialized state and existing payload format.
+  - Updated tests in `project/OsEngine.Tests/TradeGridPersistenceCoreTests.cs`:
+    - `...SaveLoad_WithNullSubcomponents_ShouldNotThrow`
+- **Verification (outside sandbox, per dotnet-build-policy):**
+  - `dotnet restore project/OsEngine/OsEngine.csproj --nologo` -> success
+  - `dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo` -> success
+  - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` -> success, 0 warnings, 0 errors
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed `502/502`
+- **Commit:** n/a
+- **Push:** n/a
