@@ -13383,3 +13383,30 @@
   - dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo -> success
   - dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900 -> success, 0 warnings, 0 errors
   - dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo -> passed 513/513
+
+## 2026-02-28 - Step 4.2 (nullable annotations) - TradeGrid lines-snapshot consistency hardening block (#667)
+
+- Applied localized nullable-safe lifecycle hardening in:
+  - project/OsEngine/OsTrader/Grids/TradeGrid.cs
+- Changes:
+  - `CreateNewGridSafe()` now snapshots `gridCreator.Lines` once and avoids repeated direct `Lines.Count` dereference.
+  - event handlers switched to local `lines` snapshots to avoid race between null-check and loop access:
+    - `Tab_PositionOpeningSuccesEvent(Position position)`
+    - `Tab_PositionOpeningFailEvent(Position position)`
+    - `Tab_PositionClosingFailEvent(Position position)`
+  - `CheckWrongCloseOrders()` now guards `linesAll == null/empty` before loop.
+  - behavior for valid initialized state preserved.
+- Added/updated tests:
+  - project/OsEngine.Tests/TradeGridPersistenceCoreTests.cs
+    - `...EventHandlers_WithNullGridLines_ShouldNotThrow`
+- Scope:
+  - nullable lifecycle guard cleanup only
+  - no trade decision logic changes.
+
+### Verification
+
+- Host-context verification (outside sandbox, per dotnet-build-policy):
+  - dotnet restore project/OsEngine/OsEngine.csproj --nologo -> success
+  - dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo -> success
+  - dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900 -> success, 0 warnings, 0 errors
+  - dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo -> passed 514/514

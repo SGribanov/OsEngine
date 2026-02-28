@@ -524,6 +524,24 @@ public class TradeGridPersistenceCoreTests
     }
 
     [Fact]
+    public void Stage2Step2_2_TradeGrid_EventHandlers_WithNullGridLines_ShouldNotThrow()
+    {
+        TradeGrid grid = (TradeGrid)RuntimeHelpers.GetUninitializedObject(typeof(TradeGrid));
+        grid.Regime = TradeGridRegime.On;
+        grid.GridCreator = (TradeGridCreator)RuntimeHelpers.GetUninitializedObject(typeof(TradeGridCreator));
+        Position position = (Position)RuntimeHelpers.GetUninitializedObject(typeof(Position));
+
+        Exception? error = Record.Exception(() =>
+        {
+            InvokePrivateWithArgs(grid, "Tab_PositionOpeningSuccesEvent", position);
+            InvokePrivateWithArgs(grid, "Tab_PositionOpeningFailEvent", position);
+            InvokePrivateWithArgs(grid, "Tab_PositionClosingFailEvent", position);
+        });
+
+        Assert.Null(error);
+    }
+
+    [Fact]
     public void Stage2Step2_2_TradeGrid_RemoveSelected_WithNullGridCreatorLines_ShouldNotThrow()
     {
         TradeGrid grid = (TradeGrid)RuntimeHelpers.GetUninitializedObject(typeof(TradeGrid));

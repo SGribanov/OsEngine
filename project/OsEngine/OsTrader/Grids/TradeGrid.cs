@@ -551,16 +551,17 @@ namespace OsEngine.OsTrader.Grids
                 if (Regime != TradeGridRegime.Off)
                 {
                     TradeGridCreator gridCreator = GridCreator;
-                    if (gridCreator == null || gridCreator.Lines == null)
+                    List<TradeGridLine> lines = gridCreator?.Lines;
+                    if (lines == null)
                     {
                         return;
                     }
 
                     bool isInArray = false;
 
-                    for (int i = 0; i < gridCreator.Lines.Count; i++)
+                    for (int i = 0; i < lines.Count; i++)
                     {
-                        TradeGridLine line = gridCreator.Lines[i];
+                        TradeGridLine line = lines[i];
 
                         if (line.Position != null
                             && line.Position.Number == position.Number)
@@ -600,16 +601,17 @@ namespace OsEngine.OsTrader.Grids
                 if (Regime != TradeGridRegime.Off)
                 {
                     TradeGridCreator gridCreator = GridCreator;
-                    if (gridCreator == null || gridCreator.Lines == null)
+                    List<TradeGridLine> lines = gridCreator?.Lines;
+                    if (lines == null)
                     {
                         return;
                     }
 
                     bool isInArray = false;
 
-                    for (int i = 0; i < gridCreator.Lines.Count; i++)
+                    for (int i = 0; i < lines.Count; i++)
                     {
-                        TradeGridLine line = gridCreator.Lines[i];
+                        TradeGridLine line = lines[i];
 
                         if (line.Position != null
                             && line.Position.Number == position.Number)
@@ -698,6 +700,7 @@ namespace OsEngine.OsTrader.Grids
             {
                 TradeGridCreator gridCreator = GridCreator;
                 BotTabSimple tab = Tab;
+                List<TradeGridLine> lines = gridCreator?.Lines;
 
                 if (gridCreator == null || tab == null)
                 {
@@ -705,8 +708,8 @@ namespace OsEngine.OsTrader.Grids
                 }
 
                 if (Regime != TradeGridRegime.Off &&
-                    gridCreator.Lines != null
-                    && gridCreator.Lines.Count > 0)
+                    lines != null
+                    && lines.Count > 0)
                 {
                     // Сетка включена. Есть линии. Запрет
                     CustomMessageBoxUi ui = new CustomMessageBoxUi(OsLocalization.Trader.Label510);
@@ -788,7 +791,7 @@ namespace OsEngine.OsTrader.Grids
                     return;
                 }
 
-                if (gridCreator.Lines.Count > 0)
+                if (lines != null && lines.Count > 0)
                 {
                     AcceptDialogUi ui = new AcceptDialogUi(OsLocalization.Trader.Label522);
 
@@ -972,16 +975,17 @@ namespace OsEngine.OsTrader.Grids
             if (Regime != TradeGridRegime.Off)
             {
                 TradeGridCreator gridCreator = GridCreator;
-                if (gridCreator == null || gridCreator.Lines == null)
+                List<TradeGridLine> lines = gridCreator?.Lines;
+                if (lines == null)
                 {
                     return;
                 }
 
                 bool isInArray = false;
 
-                for (int i = 0; i < gridCreator.Lines.Count; i++)
+                for (int i = 0; i < lines.Count; i++)
                 {
-                    TradeGridLine line = gridCreator.Lines[i];
+                    TradeGridLine line = lines[i];
 
                     if (line.Position != null
                         && line.Position.Number == position.Number)
@@ -2226,6 +2230,10 @@ namespace OsEngine.OsTrader.Grids
             }
 
             List<TradeGridLine> linesAll = gridCreator.Lines;
+            if (linesAll == null || linesAll.Count == 0)
+            {
+                return;
+            }
 
             for (int i = 0; i < linesAll.Count; i++)
             {
