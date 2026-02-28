@@ -14620,3 +14620,22 @@
 - **Commit:** n/a
 - **Push:** n/a
 
+
+### Step 4.2 - Nullable Annotations (Incremental Adoption #674)
+
+- **Status:** In Progress (increment completed)
+- **Plan item:** `refactoring_stage2_plan.md` -> Phase 4 / Step 4.2
+- **Changes (TradeGridStopBy regime guards for null runtime context block):**
+  - Updated `project/OsEngine/OsTrader/Grids/TradeGridStopBy.cs`:
+    - `GetRegime(...)` now returns `TradeGridRegime.On` when `grid` or `tab` is null.
+    - added guard for null `tab.CandlesAll` before count/index access.
+  - Updated tests in `project/OsEngine.Tests/TradeGridPersistenceCoreTests.cs`:
+    - `...TradeGridStopBy_GetRegime_WithNullGridOrTab_ShouldReturnOn`
+- **Verification (outside sandbox, per dotnet-build-policy):**
+  - `dotnet restore project/OsEngine/OsEngine.csproj --nologo` -> success
+  - `dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo` -> success
+  - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` -> success, 0 warnings, 0 errors
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed `522/522`
+- **Commit:** n/a
+- **Push:** n/a
+
