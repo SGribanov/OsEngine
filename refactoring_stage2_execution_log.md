@@ -14520,3 +14520,23 @@
   - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed `515/515`
 - **Commit:** n/a
 - **Push:** n/a
+
+### Step 4.2 - Nullable Annotations (Incremental Adoption #669)
+
+- **Status:** In Progress (increment completed)
+- **Plan item:** `refactoring_stage2_plan.md` -> Phase 4 / Step 4.2
+- **Changes (TradeGrid process/journal lines-snapshot guard block):**
+  - Updated `project/OsEngine/OsTrader/Grids/TradeGrid.cs`:
+    - `Process()` now takes local `lines` snapshot from `gridCreator.Lines` and guards `lines == null/empty`.
+    - `TryDeletePositionsFromJournal(Position position)` now returns early on null/empty `lines`.
+    - cleanup targets remaining low-risk null/consistency edges in lifecycle-sensitive paths.
+  - Updated tests in `project/OsEngine.Tests/TradeGridPersistenceCoreTests.cs`:
+    - `...Process_WithNullGridLines_ShouldNotThrow`
+    - `...TryDeletePositionsFromJournal_WithNullLines_ShouldNotThrow`
+- **Verification (outside sandbox, per dotnet-build-policy):**
+  - `dotnet restore project/OsEngine/OsEngine.csproj --nologo` -> success
+  - `dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo` -> success
+  - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` -> success, 0 warnings, 0 errors
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed `517/517`
+- **Commit:** n/a
+- **Push:** n/a
