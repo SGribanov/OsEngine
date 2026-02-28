@@ -14040,6 +14040,34 @@
 - **Commit:** n/a
 - **Push:** n/a
 
+### Step 4.2 - Nullable Annotations (Incremental Adoption #649)
+
+- **Status:** In Progress (increment completed)
+- **Plan item:** `refactoring_stage2_plan.md` -> Phase 4 / Step 4.2
+- **Changes (TradeGrid core parser/log contracts):**
+  - Updated `project/OsEngine/OsTrader/Grids/TradeGrid.cs`:
+    - `LoadFromString(string)` -> `LoadFromString(string?)`.
+    - added empty payload guard (`string.IsNullOrWhiteSpace(...)`).
+    - added length/empty checks before parsing `%`/`@` sections to avoid index overflow on malformed payloads.
+    - guarded optional subsection loads by section existence (`NonTradePeriods`, `StopBy`, `GridCreator`, `StopAndProfit`, `AutoStarter`, `ErrorsReaction`, `TrailingUp`).
+    - preserved legacy fallback defaults for missing/invalid prime-tail fields:
+      - delay/micro-volume -> `DelayInReal = 500`, `CheckMicroVolumes = true`
+      - max-distance -> `MaxDistanceToOrdersPercent = 1.5m`
+      - maker-only -> `OpenOrdersMakerOnly = true`
+    - `LogMessageEvent` aligned to nullable event contract (`Action<string, LogMessageType>?`).
+    - logging dispatch changed to nullable-safe `LogMessageEvent?.Invoke(message, type)` with `Error` fallback preserved.
+    - error log message formatting hardened for null/deleted tab state.
+  - Updated tests in `project/OsEngine.Tests/TradeGridPersistenceCoreTests.cs`:
+    - `...TradeGrid_LoadFromString_NullPayload_ShouldKeepConfiguredDefaults`
+    - `...TradeGrid_LoadFromString_ShortPayload_ShouldParsePrefixWithoutThrow`
+- **Verification (outside sandbox, per dotnet-build-policy):**
+  - `dotnet restore project/OsEngine/OsEngine.csproj --nologo` -> success
+  - `dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo` -> success
+  - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` -> success, 0 warnings, 0 errors
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed `492/492`
+- **Commit:** n/a
+- **Push:** n/a
+
 ### Step 4.2 - Nullable Annotations (Incremental Adoption #647)
 
 - **Status:** In Progress (increment completed)
