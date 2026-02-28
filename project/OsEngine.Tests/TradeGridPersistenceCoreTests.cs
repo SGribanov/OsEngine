@@ -258,13 +258,58 @@ public class TradeGridPersistenceCoreTests
     }
 
     [Fact]
-    public void Stage2Step2_2_TradeGrid_SendNewLogMessage_WithNullTab_ShouldNotThrow()
+    public void Stage2Step2_2_TradeGrid_SendNewLogMessage_WithNullTab_ShouldPublishErrorWithUnknownContext()
     {
         TradeGrid grid = (TradeGrid)RuntimeHelpers.GetUninitializedObject(typeof(TradeGrid));
+        string? capturedMessage = null;
+        LogMessageType capturedType = LogMessageType.System;
+
+        grid.LogMessageEvent += (message, type) =>
+        {
+            capturedMessage = message;
+            capturedType = type;
+        };
 
         Exception? error = Record.Exception(() => grid.SendNewLogMessage("test", LogMessageType.Error));
 
         Assert.Null(error);
+        Assert.Equal(LogMessageType.Error, capturedType);
+        Assert.NotNull(capturedMessage);
+        Assert.Contains("Bot: unknown", capturedMessage);
+        Assert.Contains("Security name: unknown", capturedMessage);
+        Assert.Contains("test", capturedMessage);
+    }
+
+    [Fact]
+    public void Stage2Step2_2_TradeGrid_GetPositionByGrid_WithNullGridCreator_ShouldReturnEmpty()
+    {
+        TradeGrid grid = (TradeGrid)RuntimeHelpers.GetUninitializedObject(typeof(TradeGrid));
+
+        List<Position> positions = grid.GetPositionByGrid();
+
+        Assert.Empty(positions);
+    }
+
+    [Fact]
+    public void Stage2Step2_2_TradeGrid_GetLinesWithOpenOrdersNeed_WithNullDependencies_ShouldReturnEmpty()
+    {
+        TradeGrid grid = (TradeGrid)RuntimeHelpers.GetUninitializedObject(typeof(TradeGrid));
+
+        List<TradeGridLine> lines = grid.GetLinesWithOpenOrdersNeed(100m);
+
+        Assert.Empty(lines);
+    }
+
+    [Fact]
+    public void Stage2Step2_2_TradeGrid_GetOpenAndClosingFact_WithNullGridCreator_ShouldReturnEmpty()
+    {
+        TradeGrid grid = (TradeGrid)RuntimeHelpers.GetUninitializedObject(typeof(TradeGrid));
+
+        List<TradeGridLine> openFact = grid.GetLinesWithOpenOrdersFact();
+        List<TradeGridLine> closingFact = grid.GetLinesWithClosingOrdersFact();
+
+        Assert.Empty(openFact);
+        Assert.Empty(closingFact);
     }
 
     private static TradeGrid CreateBareGrid()

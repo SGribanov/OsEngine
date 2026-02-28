@@ -12927,3 +12927,34 @@
   - dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo -> success
   - dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900 -> success, 0 warnings, 0 errors
   - dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo -> passed 494/494
+
+## 2026-02-28 - Step 4.2 (nullable annotations) - TradeGrid lifecycle guard cleanup in public query methods (#651)
+
+- Applied localized nullable-safe lifecycle hardening in:
+  - project/OsEngine/OsTrader/Grids/TradeGrid.cs
+- Changes:
+  - public query methods now safely return empty collections when lifecycle dependencies are unavailable (e.g., after `Delete()`):
+    - `GetPositionByGrid()`
+    - `GetLinesWithOpenOrdersNeed(decimal lastPrice)`
+    - `GetLinesWithOpenOrdersFact()`
+    - `GetLinesWithClosingOrdersFact()`
+  - added guarded local snapshots for `GridCreator` / `Tab` in query path.
+  - preserved existing behavior for valid initialized runtime state.
+- Added/updated tests:
+  - project/OsEngine.Tests/TradeGridPersistenceCoreTests.cs
+    - `...GetPositionByGrid_WithNullGridCreator_ShouldReturnEmpty`
+    - `...GetLinesWithOpenOrdersNeed_WithNullDependencies_ShouldReturnEmpty`
+    - `...GetOpenAndClosingFact_WithNullGridCreator_ShouldReturnEmpty`
+  - adjusted error-log null-tab test to avoid UI modal side effects:
+    - `...SendNewLogMessage_WithNullTab_ShouldPublishErrorWithUnknownContext`
+- Scope:
+  - nullable lifecycle contract cleanup only
+  - no trade execution logic change.
+
+### Verification
+
+- Host-context verification (outside sandbox, per dotnet-build-policy):
+  - dotnet restore project/OsEngine/OsEngine.csproj --nologo -> success
+  - dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo -> success
+  - dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900 -> success, 0 warnings, 0 errors
+  - dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo -> passed 497/497

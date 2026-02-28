@@ -2708,9 +2708,15 @@ namespace OsEngine.OsTrader.Grids
 
         public List<Position> GetPositionByGrid()
         {
-            List<TradeGridLine> linesAll = GridCreator.Lines;
-
             List<Position> positions = new List<Position>();
+
+            TradeGridCreator gridCreator = GridCreator;
+            if (gridCreator == null)
+            {
+                return positions;
+            }
+
+            List<TradeGridLine> linesAll = gridCreator.Lines;
 
             if (linesAll == null ||
                 linesAll.Count == 0)
@@ -2732,21 +2738,32 @@ namespace OsEngine.OsTrader.Grids
 
         public List<TradeGridLine> GetLinesWithOpenOrdersNeed(decimal lastPrice)
         {
-            List<TradeGridLine> linesAll = GridCreator.Lines;
-
             List<TradeGridLine> linesWithOrdersToOpenNeed = new List<TradeGridLine>();
+            TradeGridCreator gridCreator = GridCreator;
+            BotTabSimple tab = Tab;
+
+            if (gridCreator == null || tab == null)
+            {
+                return linesWithOrdersToOpenNeed;
+            }
+
+            List<TradeGridLine> linesAll = gridCreator.Lines;
+            if (linesAll == null || linesAll.Count == 0)
+            {
+                return linesWithOrdersToOpenNeed;
+            }
 
             decimal maxPriceUp = 0;
             decimal minPriceDown = 0;
 
-            if (Tab.StartProgram == StartProgram.IsOsTrader
+            if (tab.StartProgram == StartProgram.IsOsTrader
                 && MaxDistanceToOrdersPercent != 0)
             {
                 maxPriceUp = lastPrice + lastPrice * (MaxDistanceToOrdersPercent / 100);
                 minPriceDown = lastPrice - lastPrice * (MaxDistanceToOrdersPercent / 100);
             }
 
-            if (GridCreator.GridSide == Side.Buy)
+            if (gridCreator.GridSide == Side.Buy)
             {
                 for (int i = 0; i < linesAll.Count; i++)
                 {
@@ -2761,26 +2778,26 @@ namespace OsEngine.OsTrader.Grids
                         continue;
                     }
 
-                    if (Tab.Security.PriceLimitHigh != 0
-                        && Tab.Security.PriceLimitLow != 0)
+                    if (tab.Security.PriceLimitHigh != 0
+                        && tab.Security.PriceLimitLow != 0)
                     {
                         if (OpenOrdersMakerOnly == true
                             &&
-                            (curLine.PriceEnter > Tab.Security.PriceLimitHigh
-                            || curLine.PriceEnter < Tab.Security.PriceLimitLow))
+                            (curLine.PriceEnter > tab.Security.PriceLimitHigh
+                            || curLine.PriceEnter < tab.Security.PriceLimitLow))
                         {
                             continue;
                         }
 
                         if (OpenOrdersMakerOnly == false
                             && curLine.Side == Side.Buy
-                            && curLine.PriceEnter < Tab.Security.PriceLimitLow)
+                            && curLine.PriceEnter < tab.Security.PriceLimitLow)
                         {
                             continue;
                         }
                         if (OpenOrdersMakerOnly == false
                             && curLine.Side == Side.Sell
-                            && curLine.PriceEnter > Tab.Security.PriceLimitHigh)
+                            && curLine.PriceEnter > tab.Security.PriceLimitHigh)
                         {
                             continue;
                         }
@@ -2810,7 +2827,7 @@ namespace OsEngine.OsTrader.Grids
                     }
                 }
             }
-            else if (GridCreator.GridSide == Side.Sell)
+            else if (gridCreator.GridSide == Side.Sell)
             {
                 for (int i = 0; i < linesAll.Count; i++)
                 {
@@ -2825,11 +2842,11 @@ namespace OsEngine.OsTrader.Grids
                         continue;
                     }
 
-                    if (Tab.Security.PriceLimitHigh != 0
-                        && Tab.Security.PriceLimitLow != 0)
+                    if (tab.Security.PriceLimitHigh != 0
+                        && tab.Security.PriceLimitLow != 0)
                     {
-                        if (curLine.PriceEnter > Tab.Security.PriceLimitHigh
-                            || curLine.PriceEnter < Tab.Security.PriceLimitLow)
+                        if (curLine.PriceEnter > tab.Security.PriceLimitHigh
+                            || curLine.PriceEnter < tab.Security.PriceLimitLow)
                         {
                             continue;
                         }
@@ -2864,9 +2881,18 @@ namespace OsEngine.OsTrader.Grids
 
         public List<TradeGridLine> GetLinesWithOpenOrdersFact()
         {
-            List<TradeGridLine> linesAll = GridCreator.Lines;
-
             List<TradeGridLine> linesWithOpenOrder = new List<TradeGridLine>();
+            TradeGridCreator gridCreator = GridCreator;
+            if (gridCreator == null)
+            {
+                return linesWithOpenOrder;
+            }
+
+            List<TradeGridLine> linesAll = gridCreator.Lines;
+            if (linesAll == null || linesAll.Count == 0)
+            {
+                return linesWithOpenOrder;
+            }
 
             for (int i = 0; linesAll != null && i < linesAll.Count; i++)
             {
@@ -2881,9 +2907,18 @@ namespace OsEngine.OsTrader.Grids
 
         public List<TradeGridLine> GetLinesWithClosingOrdersFact()
         {
-            List<TradeGridLine> linesAll = GridCreator.Lines;
-
             List<TradeGridLine> linesWithCloseOrder = new List<TradeGridLine>();
+            TradeGridCreator gridCreator = GridCreator;
+            if (gridCreator == null)
+            {
+                return linesWithCloseOrder;
+            }
+
+            List<TradeGridLine> linesAll = gridCreator.Lines;
+            if (linesAll == null || linesAll.Count == 0)
+            {
+                return linesWithCloseOrder;
+            }
 
             for (int i = 0; linesAll != null && i < linesAll.Count; i++)
             {
