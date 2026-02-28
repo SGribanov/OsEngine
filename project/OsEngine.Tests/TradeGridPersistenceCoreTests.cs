@@ -4,6 +4,7 @@
 using System;
 using System.Globalization;
 using System.Linq;
+using System.Reflection;
 using System.Runtime.CompilerServices;
 using OsEngine.Entity;
 using OsEngine.Logging;
@@ -312,6 +313,21 @@ public class TradeGridPersistenceCoreTests
         Assert.Empty(closingFact);
     }
 
+    [Fact]
+    public void Stage2Step2_2_TradeGrid_PrivateLifecycleMethods_WithNullGridCreator_ShouldNotThrow()
+    {
+        TradeGrid grid = (TradeGrid)RuntimeHelpers.GetUninitializedObject(typeof(TradeGrid));
+
+        Exception? error = Record.Exception(() =>
+        {
+            InvokePrivateNoArg(grid, "Connector_TestStartEvent");
+            InvokePrivateNoArg(grid, "TryDeleteOpeningFailPositions");
+            InvokePrivateNoArg(grid, "TryDeleteDonePositions");
+        });
+
+        Assert.Null(error);
+    }
+
     private static TradeGrid CreateBareGrid()
     {
         TradeGrid grid = (TradeGrid)RuntimeHelpers.GetUninitializedObject(typeof(TradeGrid));
@@ -323,5 +339,12 @@ public class TradeGridPersistenceCoreTests
         grid.ErrorsReaction = new TradeGridErrorsReaction(grid);
         grid.TrailingUp = new TrailingUp(grid);
         return grid;
+    }
+
+    private static void InvokePrivateNoArg(object target, string methodName)
+    {
+        MethodInfo method = target.GetType().GetMethod(methodName, BindingFlags.NonPublic | BindingFlags.Instance)
+            ?? throw new InvalidOperationException($"Method {methodName} not found.");
+        method.Invoke(target, null);
     }
 }

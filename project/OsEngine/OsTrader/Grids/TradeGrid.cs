@@ -438,7 +438,13 @@ namespace OsEngine.OsTrader.Grids
         {
             try
             {
-                List<TradeGridLine> lines = GridCreator.Lines;
+                TradeGridCreator gridCreator = GridCreator;
+                if (gridCreator == null)
+                {
+                    return;
+                }
+
+                List<TradeGridLine> lines = gridCreator.Lines;
 
                 if (lines == null)
                 {
@@ -463,11 +469,17 @@ namespace OsEngine.OsTrader.Grids
             {
                 if (Regime != TradeGridRegime.Off)
                 {
+                    TradeGridCreator gridCreator = GridCreator;
+                    if (gridCreator == null || gridCreator.Lines == null)
+                    {
+                        return;
+                    }
+
                     bool isInArray = false;
 
-                    for (int i = 0; i < GridCreator.Lines.Count; i++)
+                    for (int i = 0; i < gridCreator.Lines.Count; i++)
                     {
-                        TradeGridLine line = GridCreator.Lines[i];
+                        TradeGridLine line = gridCreator.Lines[i];
 
                         if (line.Position != null
                             && line.Position.Number == position.Number)
@@ -495,11 +507,17 @@ namespace OsEngine.OsTrader.Grids
             {
                 if (Regime != TradeGridRegime.Off)
                 {
+                    TradeGridCreator gridCreator = GridCreator;
+                    if (gridCreator == null || gridCreator.Lines == null)
+                    {
+                        return;
+                    }
+
                     bool isInArray = false;
 
-                    for (int i = 0; i < GridCreator.Lines.Count; i++)
+                    for (int i = 0; i < gridCreator.Lines.Count; i++)
                     {
-                        TradeGridLine line = GridCreator.Lines[i];
+                        TradeGridLine line = gridCreator.Lines[i];
 
                         if (line.Position != null
                             && line.Position.Number == position.Number)
@@ -1316,7 +1334,13 @@ namespace OsEngine.OsTrader.Grids
 
         private void TryDeleteOpeningFailPositions()
         {
-            List<TradeGridLine> lines = GridCreator.Lines;
+            TradeGridCreator gridCreator = GridCreator;
+            if (gridCreator == null)
+            {
+                return;
+            }
+
+            List<TradeGridLine> lines = gridCreator.Lines;
 
             if (lines == null)
             {
@@ -2192,7 +2216,13 @@ namespace OsEngine.OsTrader.Grids
 
         private void TryDeleteDonePositions()
         {
-            List<TradeGridLine> lines = GridCreator.Lines;
+            TradeGridCreator gridCreator = GridCreator;
+            if (gridCreator == null)
+            {
+                return;
+            }
+
+            List<TradeGridLine> lines = gridCreator.Lines;
 
             if (lines == null)
             {
