@@ -176,6 +176,11 @@ namespace OsEngine.OsTrader.Grids
 
         public TradeGridRegime GetRegime(TradeGrid grid, BotTabSimple tab)
         {
+            if (grid == null || tab == null)
+            {
+                return TradeGridRegime.On;
+            }
+
             if(StopGridByMoveUpIsOn == false
                 &&  StopGridByMoveDownIsOn == false
                 && StopGridByPositionsCountIsOn == false
@@ -208,7 +213,7 @@ namespace OsEngine.OsTrader.Grids
             {
                 List<Candle> candles = tab.CandlesAll;
 
-                if(candles.Count == 0)
+                if(candles == null || candles.Count == 0)
                 {
                     return TradeGridRegime.On;
                 }

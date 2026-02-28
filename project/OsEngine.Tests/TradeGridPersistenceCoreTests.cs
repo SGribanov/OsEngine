@@ -87,6 +87,21 @@ public class TradeGridPersistenceCoreTests
     }
 
     [Fact]
+    public void Stage2Step2_2_TradeGridStopBy_GetRegime_WithNullGridOrTab_ShouldReturnOn()
+    {
+        TradeGridStopBy stopBy = new TradeGridStopBy
+        {
+            StopGridByMoveUpIsOn = true
+        };
+
+        TradeGridRegime nullTabRegime = stopBy.GetRegime(CreateBareGrid(), null!);
+        TradeGridRegime nullGridRegime = stopBy.GetRegime(null!, (BotTabSimple)RuntimeHelpers.GetUninitializedObject(typeof(BotTabSimple)));
+
+        Assert.Equal(TradeGridRegime.On, nullTabRegime);
+        Assert.Equal(TradeGridRegime.On, nullGridRegime);
+    }
+
+    [Fact]
     public void Stage2Step2_2_TradeGridCreator_LoadFromString_NullPayload_ShouldKeepDefaults()
     {
         TradeGridCreator creator = new TradeGridCreator
