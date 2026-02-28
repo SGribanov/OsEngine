@@ -9,6 +9,7 @@ using System.Runtime.CompilerServices;
 using OsEngine.Entity;
 using OsEngine.Logging;
 using OsEngine.OsTrader.Grids;
+using OsEngine.OsTrader.Panels.Tab;
 using Xunit;
 
 namespace OsEngine.Tests;
@@ -464,6 +465,17 @@ public class TradeGridPersistenceCoreTests
         Assert.Null(error);
         Assert.Equal(0m, grid.MaxGridPrice);
         Assert.Equal(0m, grid.MinGridPrice);
+    }
+
+    [Fact]
+    public void Stage2Step2_2_TradeGrid_Delete_WithUninitializedTabConnector_ShouldNotThrow()
+    {
+        TradeGrid grid = (TradeGrid)RuntimeHelpers.GetUninitializedObject(typeof(TradeGrid));
+        grid.Tab = (BotTabSimple)RuntimeHelpers.GetUninitializedObject(typeof(BotTabSimple));
+
+        Exception? error = Record.Exception(() => grid.Delete());
+
+        Assert.Null(error);
     }
 
     private static TradeGrid CreateBareGrid()

@@ -13193,3 +13193,27 @@
   - dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo -> success
   - dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900 -> success, 0 warnings, 0 errors
   - dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo -> passed 506/506
+
+## 2026-02-28 - Step 4.2 (nullable annotations) - TradeGrid delete path and grid-mutator snapshot cleanup (#660)
+
+- Applied localized nullable-safe lifecycle hardening in:
+  - project/OsEngine/OsTrader/Grids/TradeGrid.cs
+- Changes:
+  - `Delete()` now uses local `tab` snapshot and guards `tab.Connector` before unsubscribing `TestStartEvent`, preventing null dereference for partially initialized lifecycle state.
+  - `DeleteGrid()` and `CreateNewLine()` switched to guarded local `gridCreator` snapshots for safer execution under concurrent lifecycle cleanup.
+  - behavior for initialized runtime state preserved.
+- Added/updated tests:
+  - project/OsEngine.Tests/TradeGridPersistenceCoreTests.cs
+    - `...Delete_WithUninitializedTabConnector_ShouldNotThrow`
+  - added missing `using OsEngine.OsTrader.Panels.Tab;` for test compilation.
+- Scope:
+  - nullable lifecycle guard cleanup only
+  - no trade decision logic changes.
+
+### Verification
+
+- Host-context verification (outside sandbox, per dotnet-build-policy):
+  - dotnet restore project/OsEngine/OsEngine.csproj --nologo -> success
+  - dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo -> success
+  - dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900 -> success, 0 warnings, 0 errors
+  - dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo -> passed 507/507

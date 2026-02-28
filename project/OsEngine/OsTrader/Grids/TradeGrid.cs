@@ -368,15 +368,19 @@ namespace OsEngine.OsTrader.Grids
         {
             _isDeleted = true;
 
-            if (Tab != null)
+            BotTabSimple tab = Tab;
+            if (tab != null)
             {
-                Tab.NewTickEvent -= Tab_NewTickEvent;
-                Tab.PositionOpeningSuccesEvent -= Tab_PositionOpeningSuccesEvent;
-                Tab.PositionClosingSuccesEvent -= Tab_PositionClosingSuccesEvent;
-                Tab.PositionStopActivateEvent -= Tab_PositionStopActivateEvent;
-                Tab.Connector.TestStartEvent -= Connector_TestStartEvent;
-                Tab.PositionOpeningFailEvent -= Tab_PositionOpeningFailEvent;
-                Tab.PositionClosingFailEvent -= Tab_PositionClosingFailEvent;
+                tab.NewTickEvent -= Tab_NewTickEvent;
+                tab.PositionOpeningSuccesEvent -= Tab_PositionOpeningSuccesEvent;
+                tab.PositionClosingSuccesEvent -= Tab_PositionClosingSuccesEvent;
+                tab.PositionStopActivateEvent -= Tab_PositionStopActivateEvent;
+                if (tab.Connector != null)
+                {
+                    tab.Connector.TestStartEvent -= Connector_TestStartEvent;
+                }
+                tab.PositionOpeningFailEvent -= Tab_PositionOpeningFailEvent;
+                tab.PositionClosingFailEvent -= Tab_PositionClosingFailEvent;
 
                 Tab = null;
             }
@@ -735,7 +739,8 @@ namespace OsEngine.OsTrader.Grids
         {
             try
             {
-                if (GridCreator == null)
+                TradeGridCreator gridCreator = GridCreator;
+                if (gridCreator == null)
                 {
                     return;
                 }
@@ -748,7 +753,7 @@ namespace OsEngine.OsTrader.Grids
                     return;
                 }
 
-                GridCreator.DeleteGrid();
+                gridCreator.DeleteGrid();
                 Save();
             }
             catch (Exception e)
@@ -763,12 +768,13 @@ namespace OsEngine.OsTrader.Grids
         {
             try
             {
-                if (GridCreator == null)
+                TradeGridCreator gridCreator = GridCreator;
+                if (gridCreator == null)
                 {
                     return;
                 }
 
-                GridCreator.CreateNewLine();
+                gridCreator.CreateNewLine();
 
                 Save();
             }
