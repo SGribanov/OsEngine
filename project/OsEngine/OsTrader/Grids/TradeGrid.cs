@@ -1380,14 +1380,20 @@ namespace OsEngine.OsTrader.Grids
 
         private void TrySetStopAndProfit()
         {
-            if (StopAndProfit.ProfitRegime == OnOffRegime.Off
-                && StopAndProfit.StopRegime == OnOffRegime.Off
-                && StopAndProfit.TrailStopRegime == OnOffRegime.Off)
+            TradeGridStopAndProfit stopAndProfit = StopAndProfit;
+            if (stopAndProfit == null)
             {
                 return;
             }
 
-            StopAndProfit.Process(this);
+            if (stopAndProfit.ProfitRegime == OnOffRegime.Off
+                && stopAndProfit.StopRegime == OnOffRegime.Off
+                && stopAndProfit.TrailStopRegime == OnOffRegime.Off)
+            {
+                return;
+            }
+
+            stopAndProfit.Process(this);
         }
 
         private void TryDeleteOpeningFailPositions()
@@ -1439,6 +1445,12 @@ namespace OsEngine.OsTrader.Grids
 
         private void TrySetLimitProfit()
         {
+            BotTabSimple tab = Tab;
+            if (tab == null)
+            {
+                return;
+            }
+
             // 1 проверяем отзыв не правильных лимиток
 
             int countRejectOrders = TryCancelWrongCloseProfitOrders();
@@ -1451,12 +1463,18 @@ namespace OsEngine.OsTrader.Grids
 
             // 2 выставляем лимитки 
 
-            TrySetClosingProfitOrders(Tab.PriceBestAsk);
+            TrySetClosingProfitOrders(tab.PriceBestAsk);
 
         }
 
         private int TryCancelWrongCloseProfitOrders()
         {
+            BotTabSimple tab = Tab;
+            if (tab == null)
+            {
+                return 0;
+            }
+
             List<TradeGridLine> lines = GetLinesWithClosingOrdersFact();
 
             int cancelledOrders = 0;
@@ -1479,7 +1497,7 @@ namespace OsEngine.OsTrader.Grids
                     if (order.Price != line.Position.ProfitOrderPrice
                         || order.Volume - order.VolumeExecute != line.Position.OpenVolume)
                     {
-                        Tab.CloseOrder(order);
+                        tab.CloseOrder(order);
                         cancelledOrders++;
                     }
                 }
@@ -1490,6 +1508,12 @@ namespace OsEngine.OsTrader.Grids
 
         private void TrySetClosingProfitOrders(decimal lastPrice)
         {
+            BotTabSimple tab = Tab;
+            if (tab == null)
+            {
+                return;
+            }
+
             List<TradeGridLine> linesOpenPoses = GetLinesWithOpenPosition();
 
             for (int i = 0; i < linesOpenPoses.Count; i++)
@@ -1510,22 +1534,22 @@ namespace OsEngine.OsTrader.Grids
                 decimal volume = pos.OpenVolume;
 
                 if (CheckMicroVolumes == true
-                    && Tab.CanTradeThisVolume(volume) == false)
+                    && tab.CanTradeThisVolume(volume) == false)
                 {
                     continue;
                 }
 
-                if (Tab.Security.PriceLimitHigh != 0
-                 && Tab.Security.PriceLimitLow != 0)
+                if (tab.Security.PriceLimitHigh != 0
+                 && tab.Security.PriceLimitLow != 0)
                 {
-                    if (line.PriceExit > Tab.Security.PriceLimitHigh
-                        || line.PriceExit < Tab.Security.PriceLimitLow)
+                    if (line.PriceExit > tab.Security.PriceLimitHigh
+                        || line.PriceExit < tab.Security.PriceLimitLow)
                     {
                         continue;
                     }
                 }
 
-                if (Tab.StartProgram == StartProgram.IsOsTrader
+                if (tab.StartProgram == StartProgram.IsOsTrader
                     && MaxDistanceToOrdersPercent != 0
                     && lastPrice != 0)
                 {
@@ -1539,7 +1563,7 @@ namespace OsEngine.OsTrader.Grids
                     }
                 }
 
-                Tab.CloseAtLimitUnsafe(pos, pos.ProfitOrderPrice, volume);
+                tab.CloseAtLimitUnsafe(pos, pos.ProfitOrderPrice, volume);
             }
         }
 
@@ -1571,6 +1595,12 @@ namespace OsEngine.OsTrader.Grids
 
         private void GridTypeMarketMakingLogic(TradeGridRegime baseRegime)
         {
+            BotTabSimple tab = Tab;
+            if (tab == null)
+            {
+                return;
+            }
+
             // 1 сверям позиции в журнале и в сетке
 
             TryFindPositionsInJournalAfterReconnect();
@@ -1597,7 +1627,7 @@ namespace OsEngine.OsTrader.Grids
                 TrySetOpenOrders();
 
                 // 3 проверяем выставлены ли закрытия
-                TrySetClosingOrders(Tab.PriceBestAsk);
+                TrySetClosingOrders(tab.PriceBestAsk);
             }
             else
             {
@@ -1628,7 +1658,7 @@ namespace OsEngine.OsTrader.Grids
                 if (baseRegime == TradeGridRegime.CloseOnly)
                 {
                     // закрываем позиции штатно
-                    TrySetClosingOrders(Tab.PriceBestAsk);
+                    TrySetClosingOrders(tab.PriceBestAsk);
                 }
                 else if (baseRegime == TradeGridRegime.CloseForced)
                 {

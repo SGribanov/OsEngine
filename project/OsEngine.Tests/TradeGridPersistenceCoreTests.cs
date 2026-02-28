@@ -424,6 +424,23 @@ public class TradeGridPersistenceCoreTests
         Assert.Null(error);
     }
 
+    [Fact]
+    public void Stage2Step2_2_TradeGrid_ProfitAndMarketMakingHelpers_WithNullDependencies_ShouldNotThrow()
+    {
+        TradeGrid grid = (TradeGrid)RuntimeHelpers.GetUninitializedObject(typeof(TradeGrid));
+
+        Exception? error = Record.Exception(() =>
+        {
+            InvokePrivateNoArg(grid, "TrySetStopAndProfit");
+            InvokePrivateNoArg(grid, "TrySetLimitProfit");
+            InvokePrivateNoArg(grid, "TryCancelWrongCloseProfitOrders");
+            InvokePrivateWithArgs(grid, "TrySetClosingProfitOrders", 0m);
+            InvokePrivateWithArgs(grid, "GridTypeMarketMakingLogic", TradeGridRegime.On);
+        });
+
+        Assert.Null(error);
+    }
+
     private static TradeGrid CreateBareGrid()
     {
         TradeGrid grid = (TradeGrid)RuntimeHelpers.GetUninitializedObject(typeof(TradeGrid));
