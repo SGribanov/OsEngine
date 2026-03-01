@@ -16300,3 +16300,22 @@
   - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed `625/625`
 - **Commit:** n/a
 - **Push:** n/a
+
+### Step 4.2 - Nullable Annotations (Incremental Adoption #780-#783)
+
+- **Status:** In Progress (increment block completed)
+- **Plan item:** `refactoring_stage2_plan.md` -> Phase 4 / Step 4.2
+- **Changes (TrailingUp primary-bool partial-payload regression coverage):**
+  - Updated tests in `project/OsEngine.Tests/TradeGridPersistenceCoreTests.cs`:
+    - added `Stage2Step2_2_TrailingUp_LoadFromString_WithMissingUpBool_ShouldKeepValueAndContinueParsing`.
+    - added `Stage2Step2_2_TrailingUp_LoadFromString_WithMissingDownBool_ShouldKeepValueAndContinueParsing`.
+    - added `Stage2Step2_2_TrailingUp_LoadFromString_WithInvalidUpBoolAndFlexibleDownBool_ShouldKeepValueAndContinueParsing`.
+    - added `Stage2Step2_2_TrailingUp_LoadFromString_WithFlexibleUpBoolAndInvalidDownBool_ShouldKeepValueAndContinueParsing`.
+  - Locked missing/malformed primary-bool behavior while valid numeric fields and the opposite bool token still continue to parse.
+- **Verification (outside sandbox, per dotnet-build-policy):**
+  - `dotnet restore project/OsEngine/OsEngine.csproj --nologo` -> success
+  - `dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo` -> success
+  - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` -> success, 0 warnings, 0 errors
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed `629/629`
+- **Commit:** n/a
+- **Push:** n/a
