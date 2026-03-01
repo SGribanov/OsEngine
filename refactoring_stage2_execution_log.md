@@ -16379,3 +16379,43 @@
   - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed `641/641`
 - **Commit:** n/a
 - **Push:** n/a
+
+### Step 4.2 - Nullable Annotations (Incremental Adoption #798-#805)
+
+- **Status:** In Progress (increment block completed)
+- **Plan item:** `refactoring_stage2_plan.md` -> Phase 4 / Step 4.2
+- **Changes (TradeGridAutoStarter parser hardening):**
+  - Updated `project/OsEngine/OsTrader/Grids/TradeGridAutoStarter.cs`:
+    - `LoadFromString(...)` now uses guarded enum, decimal, bool, and range-checked int parsing instead of exception-driven conversions.
+    - time-section fields now parse independently, avoiding coarse fallback behavior when one tail token is malformed.
+  - Updated tests in `project/OsEngine.Tests/TradeGridPersistenceCoreTests.cs`:
+    - added `Stage2Step2_2_TradeGridAutoStarter_LoadFromString_WithMalformedFields_ShouldKeepValuesAndContinueParsing`.
+    - added `Stage2Step2_2_TradeGridAutoStarter_LoadFromString_WithFlexibleTimeBools_ShouldParse`.
+    - added `Stage2Step2_2_TradeGridAutoStarter_LoadFromString_WithOutOfRangeTimeFields_ShouldKeepExistingValues`.
+    - added `Stage2Step2_2_TradeGridAutoStarter_LoadFromString_WithMissingTimeFlag_ShouldKeepValueAndContinueTailParsing`.
+- **Verification (outside sandbox, per dotnet-build-policy):**
+  - `dotnet restore project/OsEngine/OsEngine.csproj --nologo` -> success
+  - `dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo` -> success
+  - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` -> success, 0 warnings, 0 errors
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed `645/645`
+- **Commit:** n/a
+- **Push:** n/a
+
+### Step 4.2 - Nullable Annotations (Incremental Adoption #806-#809)
+
+- **Status:** In Progress (increment block completed)
+- **Plan item:** `refactoring_stage2_plan.md` -> Phase 4 / Step 4.2
+- **Changes (TradeGridAutoStarter time-tail partial-payload regression coverage):**
+  - Updated tests in `project/OsEngine.Tests/TradeGridPersistenceCoreTests.cs`:
+    - added `Stage2Step2_2_TradeGridAutoStarter_LoadFromString_WithMissingHour_ShouldKeepValueAndContinueTailParsing`.
+    - added `Stage2Step2_2_TradeGridAutoStarter_LoadFromString_WithMissingMinute_ShouldKeepValueAndContinueTailParsing`.
+    - added `Stage2Step2_2_TradeGridAutoStarter_LoadFromString_WithMissingSecond_ShouldKeepValueAndParseSingleActivation`.
+    - added `Stage2Step2_2_TradeGridAutoStarter_LoadFromString_WithInvalidHourAndValidMinuteSecond_ShouldKeepHourAndContinueTailParsing`.
+  - Locked missing and mixed invalid time-tail behavior after the new independent parser logic.
+- **Verification (outside sandbox, per dotnet-build-policy):**
+  - `dotnet restore project/OsEngine/OsEngine.csproj --nologo` -> success
+  - `dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo` -> success
+  - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` -> success, 0 warnings, 0 errors
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed `649/649`
+- **Commit:** n/a
+- **Push:** n/a
