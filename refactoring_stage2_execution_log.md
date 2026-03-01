@@ -15976,3 +15976,105 @@
   - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed `593/593`
 - **Commit:** n/a
 - **Push:** n/a
+
+### Step 4.2 - Nullable Annotations (Incremental Adoption #748)
+
+- **Status:** In Progress (increment completed)
+- **Plan item:** `refactoring_stage2_plan.md` -> Phase 4 / Step 4.2
+- **Changes (TradeGrid partial optional-tail missing-delay parsed-micro regression coverage):**
+  - Updated `project/OsEngine.Tests/TradeGridPersistenceCoreTests.cs`:
+    - added `Stage2Step2_2_TradeGrid_LoadFromString_WithMissingDelayAndValidMicroTail_ShouldApplyDefaultDelayAndParseMicroFlag`.
+  - Locked in existing `TradeGrid.LoadFromString(...)` behavior:
+    - when `DelayInReal` is missing but `CheckMicroVolumes` is present and valid, delay falls back to `500` and the parsed micro-flag is still applied.
+- **Verification (outside sandbox, per dotnet-build-policy):**
+  - `dotnet restore project/OsEngine/OsEngine.csproj --nologo` -> success
+  - `dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo` -> success
+  - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` -> success, 0 warnings, 0 errors
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed `594/594`
+- **Commit:** n/a
+- **Push:** n/a
+
+### Step 4.2 - Nullable Annotations (Incremental Adoption #749)
+
+- **Status:** In Progress (increment completed)
+- **Plan item:** `refactoring_stage2_plan.md` -> Phase 4 / Step 4.2
+- **Changes (TradeGrid partial optional-tail malformed-delay invalid-micro regression coverage):**
+  - Updated `project/OsEngine.Tests/TradeGridPersistenceCoreTests.cs`:
+    - added `Stage2Step2_2_TradeGrid_LoadFromString_WithMalformedDelayAndInvalidMicroTail_ShouldApplyDefaultDelayAndKeepMicroFlag`.
+  - Locked in existing `TradeGrid.LoadFromString(...)` behavior:
+    - when `DelayInReal` is malformed and `CheckMicroVolumes` is present but malformed, delay falls back to `500` and the current micro-flag is preserved.
+- **Verification (outside sandbox, per dotnet-build-policy):**
+  - `dotnet restore project/OsEngine/OsEngine.csproj --nologo` -> success
+  - `dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo` -> success
+  - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` -> success, 0 warnings, 0 errors
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed `595/595`
+- **Commit:** n/a
+- **Push:** n/a
+
+### Step 4.2 - Nullable Annotations (Incremental Adoption #750)
+
+- **Status:** In Progress (increment completed)
+- **Plan item:** `refactoring_stage2_plan.md` -> Phase 4 / Step 4.2
+- **Changes (TradeGrid partial optional-tail missing-distance invalid-maker regression coverage):**
+  - Updated `project/OsEngine.Tests/TradeGridPersistenceCoreTests.cs`:
+    - added `Stage2Step2_2_TradeGrid_LoadFromString_WithMissingDistanceAndInvalidMakerTail_ShouldApplyDefaultDistanceAndKeepMakerFlag`.
+  - Locked in existing `TradeGrid.LoadFromString(...)` behavior:
+    - when `MaxDistanceToOrdersPercent` is missing and `OpenOrdersMakerOnly` is present but malformed, default distance is applied and the current maker-only flag is preserved.
+- **Verification (outside sandbox, per dotnet-build-policy):**
+  - `dotnet restore project/OsEngine/OsEngine.csproj --nologo` -> success
+  - `dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo` -> success
+  - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` -> success, 0 warnings, 0 errors
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed `596/596`
+- **Commit:** n/a
+- **Push:** n/a
+
+### Step 4.2 - Nullable Annotations (Incremental Adoption #751)
+
+- **Status:** In Progress (increment completed)
+- **Plan item:** `refactoring_stage2_plan.md` -> Phase 4 / Step 4.2
+- **Changes (TradeGrid partial optional-tail malformed-distance invalid-maker regression coverage):**
+  - Updated `project/OsEngine.Tests/TradeGridPersistenceCoreTests.cs`:
+    - added `Stage2Step2_2_TradeGrid_LoadFromString_WithMalformedDistanceAndInvalidMakerTail_ShouldKeepDistanceAndKeepMakerFlag`.
+  - Locked in existing `TradeGrid.LoadFromString(...)` behavior:
+    - when `MaxDistanceToOrdersPercent` and `OpenOrdersMakerOnly` are both malformed, the current distance and current maker-only flag are both preserved.
+- **Verification (outside sandbox, per dotnet-build-policy):**
+  - `dotnet restore project/OsEngine/OsEngine.csproj --nologo` -> success
+  - `dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo` -> success
+  - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` -> success, 0 warnings, 0 errors
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed `597/597`
+- **Commit:** n/a
+- **Push:** n/a
+
+### Step 4.2 - Nullable Annotations (Incremental Adoption #752)
+
+- **Status:** In Progress (increment completed)
+- **Plan item:** `refactoring_stage2_plan.md` -> Phase 4 / Step 4.2
+- **Changes (TradeGrid partial optional-tail missing-delay invalid-micro regression coverage):**
+  - Updated `project/OsEngine.Tests/TradeGridPersistenceCoreTests.cs`:
+    - added `Stage2Step2_2_TradeGrid_LoadFromString_WithMissingDelayAndInvalidMicroTail_ShouldApplyDefaultDelayAndKeepMicroFlag`.
+  - Locked in existing `TradeGrid.LoadFromString(...)` behavior:
+    - when `DelayInReal` is missing and `CheckMicroVolumes` is present but malformed, delay falls back to `500` and the current micro-flag is preserved.
+- **Verification (outside sandbox, per dotnet-build-policy):**
+  - `dotnet restore project/OsEngine/OsEngine.csproj --nologo` -> success
+  - `dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo` -> success
+  - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` -> success, 0 warnings, 0 errors
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed `598/598`
+- **Commit:** n/a
+- **Push:** n/a
+
+### Step 4.2 - Nullable Annotations (Incremental Adoption #753)
+
+- **Status:** In Progress (increment completed)
+- **Plan item:** `refactoring_stage2_plan.md` -> Phase 4 / Step 4.2
+- **Changes (TradeGrid malformed prime-bool regression coverage):**
+  - Updated `project/OsEngine.Tests/TradeGridPersistenceCoreTests.cs`:
+    - added `Stage2Step2_2_TradeGrid_LoadFromString_WithInvalidAutoClearBool_ShouldKeepExistingValue`.
+  - Locked in existing `TradeGrid.LoadFromString(...)` behavior:
+    - when `AutoClearJournalIsOn` token is malformed, the current bool value is preserved.
+- **Verification (outside sandbox, per dotnet-build-policy):**
+  - `dotnet restore project/OsEngine/OsEngine.csproj --nologo` -> success
+  - `dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo` -> success
+  - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` -> success, 0 warnings, 0 errors
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed `599/599`
+- **Commit:** n/a
+- **Push:** n/a
