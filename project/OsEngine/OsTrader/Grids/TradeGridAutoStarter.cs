@@ -75,54 +75,153 @@ namespace OsEngine.OsTrader.Grids
                 // auto start
                 if (values.Length > 0 && string.IsNullOrWhiteSpace(values[0]) == false)
                 {
-                    Enum.TryParse(values[0], out AutoStartRegime);
+                    if (TryParseEnumValue(values[0], out TradeGridAutoStartRegime parsed))
+                    {
+                        AutoStartRegime = parsed;
+                    }
                 }
                 if (values.Length > 1 && string.IsNullOrWhiteSpace(values[1]) == false)
                 {
-                    AutoStartPrice = values[1].ToDecimal();
+                    if (TryParseDecimalFlexible(values[1], out decimal parsed))
+                    {
+                        AutoStartPrice = parsed;
+                    }
                 }
 
                 if (values.Length > 2 && string.IsNullOrWhiteSpace(values[2]) == false)
                 {
-                    Enum.TryParse(values[2], out RebuildGridRegime);
+                    if (TryParseEnumValue(values[2], out GridAutoStartShiftFirstPriceRegime parsed))
+                    {
+                        RebuildGridRegime = parsed;
+                    }
                 }
                 if (values.Length > 3 && string.IsNullOrWhiteSpace(values[3]) == false)
                 {
-                    ShiftFirstPrice = values[3].ToDecimal();
+                    if (TryParseDecimalFlexible(values[3], out decimal parsed))
+                    {
+                        ShiftFirstPrice = parsed;
+                    }
                 }
 
-                try
+                if (values.Length > 4 && string.IsNullOrWhiteSpace(values[4]) == false)
                 {
-                    if (values.Length > 4 && string.IsNullOrWhiteSpace(values[4]) == false)
+                    if (TryParseBoolFlexible(values[4], out bool parsed))
                     {
-                        StartGridByTimeOfDayIsOn = Convert.ToBoolean(values[4]);
-                    }
-                    if (values.Length > 5 && string.IsNullOrWhiteSpace(values[5]) == false)
-                    {
-                        StartGridByTimeOfDayHour = Convert.ToInt32(values[5], CultureInfo.InvariantCulture);
-                    }
-                    if (values.Length > 6 && string.IsNullOrWhiteSpace(values[6]) == false)
-                    {
-                        StartGridByTimeOfDayMinute = Convert.ToInt32(values[6], CultureInfo.InvariantCulture);
-                    }
-                    if (values.Length > 7 && string.IsNullOrWhiteSpace(values[7]) == false)
-                    {
-                        StartGridByTimeOfDaySecond = Convert.ToInt32(values[7], CultureInfo.InvariantCulture);
-                    }
-                    if (values.Length > 8 && string.IsNullOrWhiteSpace(values[8]) == false)
-                    {
-                        SingleActivationMode = Convert.ToBoolean(values[8]);
+                        StartGridByTimeOfDayIsOn = parsed;
                     }
                 }
-                catch (Exception ex)
+                if (values.Length > 5 && string.IsNullOrWhiteSpace(values[5]) == false)
                 {
-                    Trace.TraceWarning(ex.ToString());
+                    if (TryParseRangeInt(values[5], 0, 23, out int parsed))
+                    {
+                        StartGridByTimeOfDayHour = parsed;
+                    }
+                }
+                if (values.Length > 6 && string.IsNullOrWhiteSpace(values[6]) == false)
+                {
+                    if (TryParseRangeInt(values[6], 0, 59, out int parsed))
+                    {
+                        StartGridByTimeOfDayMinute = parsed;
+                    }
+                }
+                if (values.Length > 7 && string.IsNullOrWhiteSpace(values[7]) == false)
+                {
+                    if (TryParseRangeInt(values[7], 0, 59, out int parsed))
+                    {
+                        StartGridByTimeOfDaySecond = parsed;
+                    }
+                }
+                if (values.Length > 8 && string.IsNullOrWhiteSpace(values[8]) == false)
+                {
+                    if (TryParseBoolFlexible(values[8], out bool parsed))
+                    {
+                        SingleActivationMode = parsed;
+                    }
                 }
             }
             catch (Exception e)
             {
                 SendNewLogMessage(e.ToString(),LogMessageType.Error);
             }
+        }
+
+        private static bool TryParseBoolFlexible(string value, out bool parsed)
+        {
+            if (bool.TryParse(value, out parsed))
+            {
+                return true;
+            }
+
+            string normalized = value.Trim();
+
+            if (string.Equals(normalized, "1", StringComparison.OrdinalIgnoreCase)
+                || string.Equals(normalized, "yes", StringComparison.OrdinalIgnoreCase)
+                || string.Equals(normalized, "on", StringComparison.OrdinalIgnoreCase))
+            {
+                parsed = true;
+                return true;
+            }
+
+            if (string.Equals(normalized, "0", StringComparison.OrdinalIgnoreCase)
+                || string.Equals(normalized, "no", StringComparison.OrdinalIgnoreCase)
+                || string.Equals(normalized, "off", StringComparison.OrdinalIgnoreCase))
+            {
+                parsed = false;
+                return true;
+            }
+
+            parsed = false;
+            return false;
+        }
+
+        private static bool TryParseDecimalFlexible(string value, out decimal parsed)
+        {
+            if (decimal.TryParse(value, NumberStyles.Any, CultureInfo.InvariantCulture, out parsed))
+            {
+                return true;
+            }
+
+            if (decimal.TryParse(value, NumberStyles.Any, CultureInfo.CurrentCulture, out parsed))
+            {
+                return true;
+            }
+
+            parsed = 0;
+            return false;
+        }
+
+        private static bool TryParseRangeInt(string value, int min, int max, out int parsed)
+        {
+            if (int.TryParse(value, NumberStyles.Any, CultureInfo.InvariantCulture, out parsed) == false
+                && int.TryParse(value, NumberStyles.Any, CultureInfo.CurrentCulture, out parsed) == false)
+            {
+                parsed = 0;
+                return false;
+            }
+
+            if (parsed < min || parsed > max)
+            {
+                parsed = 0;
+                return false;
+            }
+
+            return true;
+        }
+
+        private static bool TryParseEnumValue<TEnum>(string value, out TEnum parsed)
+            where TEnum : struct
+        {
+            if (Enum.TryParse(value, true, out parsed) == false)
+            {
+                return false;
+            }
+
+            if (Enum.IsDefined(typeof(TEnum), parsed) == false)
+            {
+                return false;
+            }
+
+            return true;
         }
 
         #endregion

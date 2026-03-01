@@ -15813,3 +15813,57 @@
   - dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo -> success
   - dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900 -> success, 0 warnings, 0 errors
   - dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo -> passed 641/641
+
+## 2026-03-01 - Step 4.2 (nullable annotations) - TradeGridAutoStarter parser hardening (#798-#805)
+
+- Applied localized parser hardening in:
+  - project/OsEngine/OsTrader/Grids/TradeGridAutoStarter.cs
+- Changes:
+  - `LoadFromString(...)` no longer relies on exception-driven decimal/bool/int parsing.
+  - added guarded enum parsing (case-insensitive, only defined enum values accepted).
+  - added guarded decimal parsing for price fields.
+  - added flexible bool parsing (`true/false`, `1/0`, `yes/no`, `on/off`) for time-section toggles.
+  - added range-checked int parsing for hour (`0..23`) and minute/second (`0..59`).
+  - optional time tail now parses independently instead of relying on a coarse catch/warning path.
+- Added/updated tests:
+  - project/OsEngine.Tests/TradeGridPersistenceCoreTests.cs
+    - added `Stage2Step2_2_TradeGridAutoStarter_LoadFromString_WithMalformedFields_ShouldKeepValuesAndContinueParsing`.
+    - added `Stage2Step2_2_TradeGridAutoStarter_LoadFromString_WithFlexibleTimeBools_ShouldParse`.
+    - added `Stage2Step2_2_TradeGridAutoStarter_LoadFromString_WithOutOfRangeTimeFields_ShouldKeepExistingValues`.
+    - added `Stage2Step2_2_TradeGridAutoStarter_LoadFromString_WithMissingTimeFlag_ShouldKeepValueAndContinueTailParsing`.
+- Scope:
+  - parser/runtime hardening only
+  - valid payload behavior remains unchanged
+
+### Verification
+
+- Host-context verification (outside sandbox, per dotnet-build-policy):
+  - dotnet restore project/OsEngine/OsEngine.csproj --nologo -> success
+  - dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo -> success
+  - dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900 -> success, 0 warnings, 0 errors
+  - dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo -> passed 645/645
+
+## 2026-03-01 - Step 4.2 (nullable annotations) - TradeGridAutoStarter time-tail partial-payload regression coverage (#806-#809)
+
+- Added targeted regression coverage in:
+  - project/OsEngine.Tests/TradeGridPersistenceCoreTests.cs
+- Changes:
+  - locked missing and mixed invalid time-tail behavior after the new independent parser logic.
+  - covered missing hour, missing minute, missing second, and invalid hour with still-valid minute/second tail values.
+- Added/updated tests:
+  - project/OsEngine.Tests/TradeGridPersistenceCoreTests.cs
+    - added `Stage2Step2_2_TradeGridAutoStarter_LoadFromString_WithMissingHour_ShouldKeepValueAndContinueTailParsing`.
+    - added `Stage2Step2_2_TradeGridAutoStarter_LoadFromString_WithMissingMinute_ShouldKeepValueAndContinueTailParsing`.
+    - added `Stage2Step2_2_TradeGridAutoStarter_LoadFromString_WithMissingSecond_ShouldKeepValueAndParseSingleActivation`.
+    - added `Stage2Step2_2_TradeGridAutoStarter_LoadFromString_WithInvalidHourAndValidMinuteSecond_ShouldKeepHourAndContinueTailParsing`.
+- Scope:
+  - test-only regression coverage
+  - no production behavior change
+
+### Verification
+
+- Host-context verification (outside sandbox, per dotnet-build-policy):
+  - dotnet restore project/OsEngine/OsEngine.csproj --nologo -> success
+  - dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo -> success
+  - dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900 -> success, 0 warnings, 0 errors
+  - dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo -> passed 649/649

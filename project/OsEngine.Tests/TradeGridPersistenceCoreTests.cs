@@ -1247,6 +1247,189 @@ public class TradeGridPersistenceCoreTests
     }
 
     [Fact]
+    public void Stage2Step2_2_TradeGridAutoStarter_LoadFromString_WithMalformedFields_ShouldKeepValuesAndContinueParsing()
+    {
+        TradeGridAutoStarter autoStarter = new TradeGridAutoStarter
+        {
+            AutoStartRegime = TradeGridAutoStartRegime.Off,
+            AutoStartPrice = 77m,
+            RebuildGridRegime = GridAutoStartShiftFirstPriceRegime.Off,
+            ShiftFirstPrice = 3m,
+            StartGridByTimeOfDayIsOn = false,
+            StartGridByTimeOfDayHour = 14,
+            StartGridByTimeOfDayMinute = 15,
+            StartGridByTimeOfDaySecond = 16,
+            SingleActivationMode = true
+        };
+
+        Exception? error = Record.Exception(() => autoStarter.LoadFromString("badEnum@badDecimal@On_ShiftOnNewPrice@2.5@badBool@20@30@40@0"));
+
+        Assert.Null(error);
+        Assert.Equal(TradeGridAutoStartRegime.Off, autoStarter.AutoStartRegime);
+        Assert.Equal(77m, autoStarter.AutoStartPrice);
+        Assert.Equal(GridAutoStartShiftFirstPriceRegime.On_ShiftOnNewPrice, autoStarter.RebuildGridRegime);
+        Assert.Equal(2.5m, autoStarter.ShiftFirstPrice);
+        Assert.False(autoStarter.StartGridByTimeOfDayIsOn);
+        Assert.Equal(20, autoStarter.StartGridByTimeOfDayHour);
+        Assert.Equal(30, autoStarter.StartGridByTimeOfDayMinute);
+        Assert.Equal(40, autoStarter.StartGridByTimeOfDaySecond);
+        Assert.False(autoStarter.SingleActivationMode);
+    }
+
+    [Fact]
+    public void Stage2Step2_2_TradeGridAutoStarter_LoadFromString_WithFlexibleTimeBools_ShouldParse()
+    {
+        TradeGridAutoStarter autoStarter = new TradeGridAutoStarter
+        {
+            StartGridByTimeOfDayIsOn = false,
+            SingleActivationMode = true
+        };
+
+        Exception? error = Record.Exception(() => autoStarter.LoadFromString("HigherOrEqual@123.45@On_ShiftOnNewPrice@1.5@on@20@30@40@no"));
+
+        Assert.Null(error);
+        Assert.Equal(TradeGridAutoStartRegime.HigherOrEqual, autoStarter.AutoStartRegime);
+        Assert.Equal(123.45m, autoStarter.AutoStartPrice);
+        Assert.Equal(GridAutoStartShiftFirstPriceRegime.On_ShiftOnNewPrice, autoStarter.RebuildGridRegime);
+        Assert.Equal(1.5m, autoStarter.ShiftFirstPrice);
+        Assert.True(autoStarter.StartGridByTimeOfDayIsOn);
+        Assert.Equal(20, autoStarter.StartGridByTimeOfDayHour);
+        Assert.Equal(30, autoStarter.StartGridByTimeOfDayMinute);
+        Assert.Equal(40, autoStarter.StartGridByTimeOfDaySecond);
+        Assert.False(autoStarter.SingleActivationMode);
+    }
+
+    [Fact]
+    public void Stage2Step2_2_TradeGridAutoStarter_LoadFromString_WithOutOfRangeTimeFields_ShouldKeepExistingValues()
+    {
+        TradeGridAutoStarter autoStarter = new TradeGridAutoStarter
+        {
+            StartGridByTimeOfDayHour = 14,
+            StartGridByTimeOfDayMinute = 15,
+            StartGridByTimeOfDaySecond = 16
+        };
+
+        Exception? error = Record.Exception(() => autoStarter.LoadFromString("HigherOrEqual@123.45@On_ShiftOnNewPrice@1.5@True@24@60@61@1"));
+
+        Assert.Null(error);
+        Assert.Equal(14, autoStarter.StartGridByTimeOfDayHour);
+        Assert.Equal(15, autoStarter.StartGridByTimeOfDayMinute);
+        Assert.Equal(16, autoStarter.StartGridByTimeOfDaySecond);
+        Assert.True(autoStarter.StartGridByTimeOfDayIsOn);
+        Assert.True(autoStarter.SingleActivationMode);
+    }
+
+    [Fact]
+    public void Stage2Step2_2_TradeGridAutoStarter_LoadFromString_WithMissingTimeFlag_ShouldKeepValueAndContinueTailParsing()
+    {
+        TradeGridAutoStarter autoStarter = new TradeGridAutoStarter
+        {
+            StartGridByTimeOfDayIsOn = false,
+            StartGridByTimeOfDayHour = 14,
+            StartGridByTimeOfDayMinute = 15,
+            StartGridByTimeOfDaySecond = 16,
+            SingleActivationMode = true
+        };
+
+        Exception? error = Record.Exception(() => autoStarter.LoadFromString("HigherOrEqual@123.45@On_ShiftOnNewPrice@1.5@@20@30@40@0"));
+
+        Assert.Null(error);
+        Assert.False(autoStarter.StartGridByTimeOfDayIsOn);
+        Assert.Equal(20, autoStarter.StartGridByTimeOfDayHour);
+        Assert.Equal(30, autoStarter.StartGridByTimeOfDayMinute);
+        Assert.Equal(40, autoStarter.StartGridByTimeOfDaySecond);
+        Assert.False(autoStarter.SingleActivationMode);
+    }
+
+    [Fact]
+    public void Stage2Step2_2_TradeGridAutoStarter_LoadFromString_WithMissingHour_ShouldKeepValueAndContinueTailParsing()
+    {
+        TradeGridAutoStarter autoStarter = new TradeGridAutoStarter
+        {
+            StartGridByTimeOfDayIsOn = false,
+            StartGridByTimeOfDayHour = 14,
+            StartGridByTimeOfDayMinute = 15,
+            StartGridByTimeOfDaySecond = 16,
+            SingleActivationMode = true
+        };
+
+        Exception? error = Record.Exception(() => autoStarter.LoadFromString("HigherOrEqual@123.45@On_ShiftOnNewPrice@1.5@on@@30@40@0"));
+
+        Assert.Null(error);
+        Assert.True(autoStarter.StartGridByTimeOfDayIsOn);
+        Assert.Equal(14, autoStarter.StartGridByTimeOfDayHour);
+        Assert.Equal(30, autoStarter.StartGridByTimeOfDayMinute);
+        Assert.Equal(40, autoStarter.StartGridByTimeOfDaySecond);
+        Assert.False(autoStarter.SingleActivationMode);
+    }
+
+    [Fact]
+    public void Stage2Step2_2_TradeGridAutoStarter_LoadFromString_WithMissingMinute_ShouldKeepValueAndContinueTailParsing()
+    {
+        TradeGridAutoStarter autoStarter = new TradeGridAutoStarter
+        {
+            StartGridByTimeOfDayIsOn = false,
+            StartGridByTimeOfDayHour = 14,
+            StartGridByTimeOfDayMinute = 15,
+            StartGridByTimeOfDaySecond = 16,
+            SingleActivationMode = true
+        };
+
+        Exception? error = Record.Exception(() => autoStarter.LoadFromString("HigherOrEqual@123.45@On_ShiftOnNewPrice@1.5@on@20@@40@0"));
+
+        Assert.Null(error);
+        Assert.True(autoStarter.StartGridByTimeOfDayIsOn);
+        Assert.Equal(20, autoStarter.StartGridByTimeOfDayHour);
+        Assert.Equal(15, autoStarter.StartGridByTimeOfDayMinute);
+        Assert.Equal(40, autoStarter.StartGridByTimeOfDaySecond);
+        Assert.False(autoStarter.SingleActivationMode);
+    }
+
+    [Fact]
+    public void Stage2Step2_2_TradeGridAutoStarter_LoadFromString_WithMissingSecond_ShouldKeepValueAndParseSingleActivation()
+    {
+        TradeGridAutoStarter autoStarter = new TradeGridAutoStarter
+        {
+            StartGridByTimeOfDayIsOn = false,
+            StartGridByTimeOfDayHour = 14,
+            StartGridByTimeOfDayMinute = 15,
+            StartGridByTimeOfDaySecond = 16,
+            SingleActivationMode = true
+        };
+
+        Exception? error = Record.Exception(() => autoStarter.LoadFromString("HigherOrEqual@123.45@On_ShiftOnNewPrice@1.5@on@20@30@@0"));
+
+        Assert.Null(error);
+        Assert.True(autoStarter.StartGridByTimeOfDayIsOn);
+        Assert.Equal(20, autoStarter.StartGridByTimeOfDayHour);
+        Assert.Equal(30, autoStarter.StartGridByTimeOfDayMinute);
+        Assert.Equal(16, autoStarter.StartGridByTimeOfDaySecond);
+        Assert.False(autoStarter.SingleActivationMode);
+    }
+
+    [Fact]
+    public void Stage2Step2_2_TradeGridAutoStarter_LoadFromString_WithInvalidHourAndValidMinuteSecond_ShouldKeepHourAndContinueTailParsing()
+    {
+        TradeGridAutoStarter autoStarter = new TradeGridAutoStarter
+        {
+            StartGridByTimeOfDayIsOn = false,
+            StartGridByTimeOfDayHour = 14,
+            StartGridByTimeOfDayMinute = 15,
+            StartGridByTimeOfDaySecond = 16,
+            SingleActivationMode = true
+        };
+
+        Exception? error = Record.Exception(() => autoStarter.LoadFromString("HigherOrEqual@123.45@On_ShiftOnNewPrice@1.5@on@99@30@40@0"));
+
+        Assert.Null(error);
+        Assert.True(autoStarter.StartGridByTimeOfDayIsOn);
+        Assert.Equal(14, autoStarter.StartGridByTimeOfDayHour);
+        Assert.Equal(30, autoStarter.StartGridByTimeOfDayMinute);
+        Assert.Equal(40, autoStarter.StartGridByTimeOfDaySecond);
+        Assert.False(autoStarter.SingleActivationMode);
+    }
+
+    [Fact]
     public void Stage2Step2_2_TradeGridAutoStarter_RuntimeContextMissing_ShouldStaySafe()
     {
         TradeGridAutoStarter autoStarter = new TradeGridAutoStarter
