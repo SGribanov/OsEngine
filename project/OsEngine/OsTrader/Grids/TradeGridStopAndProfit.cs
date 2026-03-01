@@ -69,52 +69,145 @@ namespace OsEngine.OsTrader.Grids
 
                 if (values.Length > 0 && string.IsNullOrWhiteSpace(values[0]) == false)
                 {
-                    Enum.TryParse(values[0], out ProfitRegime);
+                    if (TryParseEnumValue(values[0], out OnOffRegime parsed))
+                    {
+                        ProfitRegime = parsed;
+                    }
                 }
                 if (values.Length > 1 && string.IsNullOrWhiteSpace(values[1]) == false)
                 {
-                    Enum.TryParse(values[1], out ProfitValueType);
+                    if (TryParseEnumValue(values[1], out TradeGridValueType parsed))
+                    {
+                        ProfitValueType = parsed;
+                    }
                 }
                 if (values.Length > 2 && string.IsNullOrWhiteSpace(values[2]) == false)
                 {
-                    ProfitValue = values[2].ToDecimal();
+                    if (TryParsePositiveDecimal(values[2], out decimal parsed))
+                    {
+                        ProfitValue = parsed;
+                    }
                 }
 
                 if (values.Length > 3 && string.IsNullOrWhiteSpace(values[3]) == false)
                 {
-                    Enum.TryParse(values[3], out StopRegime);
+                    if (TryParseEnumValue(values[3], out OnOffRegime parsed))
+                    {
+                        StopRegime = parsed;
+                    }
                 }
                 if (values.Length > 4 && string.IsNullOrWhiteSpace(values[4]) == false)
                 {
-                    Enum.TryParse(values[4], out StopValueType);
+                    if (TryParseEnumValue(values[4], out TradeGridValueType parsed))
+                    {
+                        StopValueType = parsed;
+                    }
                 }
                 if (values.Length > 5 && string.IsNullOrWhiteSpace(values[5]) == false)
                 {
-                    StopValue = values[5].ToDecimal();
+                    if (TryParsePositiveDecimal(values[5], out decimal parsed))
+                    {
+                        StopValue = parsed;
+                    }
                 }
 
                 if (values.Length > 6 && string.IsNullOrWhiteSpace(values[6]) == false)
                 {
-                    Enum.TryParse(values[6], out TrailStopRegime);
+                    if (TryParseEnumValue(values[6], out OnOffRegime parsed))
+                    {
+                        TrailStopRegime = parsed;
+                    }
                 }
                 if (values.Length > 7 && string.IsNullOrWhiteSpace(values[7]) == false)
                 {
-                    Enum.TryParse(values[7], out TrailStopValueType);
+                    if (TryParseEnumValue(values[7], out TradeGridValueType parsed))
+                    {
+                        TrailStopValueType = parsed;
+                    }
                 }
                 if (values.Length > 8 && string.IsNullOrWhiteSpace(values[8]) == false)
                 {
-                    TrailStopValue = values[8].ToDecimal();
+                    if (TryParsePositiveDecimal(values[8], out decimal parsed))
+                    {
+                        TrailStopValue = parsed;
+                    }
                 }
 
                 if (values.Length > 9 && string.IsNullOrWhiteSpace(values[9]) == false)
                 {
-                    StopTradingAfterProfit = Convert.ToBoolean(values[9]);
+                    if (TryParseBoolFlexible(values[9], out bool parsed))
+                    {
+                        StopTradingAfterProfit = parsed;
+                    }
                 }
             }
             catch (Exception e)
             {
                 SendNewLogMessage(e.ToString(),LogMessageType.Error);
             }
+        }
+
+        private static bool TryParseBoolFlexible(string value, out bool parsed)
+        {
+            if (bool.TryParse(value, out parsed))
+            {
+                return true;
+            }
+
+            string normalized = value.Trim();
+
+            if (string.Equals(normalized, "1", StringComparison.OrdinalIgnoreCase)
+                || string.Equals(normalized, "yes", StringComparison.OrdinalIgnoreCase)
+                || string.Equals(normalized, "on", StringComparison.OrdinalIgnoreCase))
+            {
+                parsed = true;
+                return true;
+            }
+
+            if (string.Equals(normalized, "0", StringComparison.OrdinalIgnoreCase)
+                || string.Equals(normalized, "no", StringComparison.OrdinalIgnoreCase)
+                || string.Equals(normalized, "off", StringComparison.OrdinalIgnoreCase))
+            {
+                parsed = false;
+                return true;
+            }
+
+            parsed = false;
+            return false;
+        }
+
+        private static bool TryParsePositiveDecimal(string value, out decimal parsed)
+        {
+            if (decimal.TryParse(value, NumberStyles.Any, CultureInfo.InvariantCulture, out parsed) == false
+                && decimal.TryParse(value, NumberStyles.Any, CultureInfo.CurrentCulture, out parsed) == false)
+            {
+                parsed = 0;
+                return false;
+            }
+
+            if (parsed <= 0)
+            {
+                parsed = 0;
+                return false;
+            }
+
+            return true;
+        }
+
+        private static bool TryParseEnumValue<TEnum>(string value, out TEnum parsed)
+            where TEnum : struct
+        {
+            if (Enum.TryParse(value, true, out parsed) == false)
+            {
+                return false;
+            }
+
+            if (Enum.IsDefined(typeof(TEnum), parsed) == false)
+            {
+                return false;
+            }
+
+            return true;
         }
 
         #endregion

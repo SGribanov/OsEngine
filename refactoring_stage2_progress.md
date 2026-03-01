@@ -15867,3 +15867,80 @@
   - dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo -> success
   - dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900 -> success, 0 warnings, 0 errors
   - dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo -> passed 649/649
+
+## 2026-03-01 - Step 4.2 (nullable annotations) - TradeGridStopAndProfit parser hardening (#810-#815)
+
+- Applied localized parser hardening in:
+  - project/OsEngine/OsTrader/Grids/TradeGridStopAndProfit.cs
+- Changes:
+  - `LoadFromString(...)` no longer relies on exception-driven decimal/bool parsing.
+  - added guarded enum parsing (case-insensitive, only defined enum values accepted).
+  - added guarded positive-decimal parsing for `ProfitValue`, `StopValue`, and `TrailStopValue`.
+  - added flexible bool parsing (`true/false`, `1/0`, `yes/no`, `on/off`) for `StopTradingAfterProfit`.
+  - invalid or non-positive numeric payload values now preserve current configured values.
+- Added/updated tests:
+  - project/OsEngine.Tests/TradeGridPersistenceCoreTests.cs
+    - added `Stage2Step2_2_TradeGridStopAndProfit_LoadFromString_WithMalformedFields_ShouldKeepValuesAndContinueParsing`.
+    - added `Stage2Step2_2_TradeGridStopAndProfit_LoadFromString_WithNonPositiveValues_ShouldKeepExistingValues`.
+    - added `Stage2Step2_2_TradeGridStopAndProfit_LoadFromString_WithFlexibleStopTradingBool_ShouldParse`.
+- Scope:
+  - parser/runtime hardening only
+  - valid payload behavior remains unchanged
+
+### Verification
+
+- Host-context verification (outside sandbox, per dotnet-build-policy):
+  - dotnet restore project/OsEngine/OsEngine.csproj --nologo -> success
+  - dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo -> success
+  - dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900 -> success, 0 warnings, 0 errors
+  - dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo -> passed 652/652
+
+## 2026-03-01 - Step 4.2 (nullable annotations) - TradeGridStopAndProfit late-tail regression coverage (#816-#819)
+
+- Added targeted regression coverage in:
+  - project/OsEngine.Tests/TradeGridPersistenceCoreTests.cs
+- Changes:
+  - locked partial and malformed behavior in the late part of `TradeGridStopAndProfit.LoadFromString(...)`.
+  - covered missing `TrailStopRegime`, malformed `TrailStopValueType`, missing `TrailStopValue`, and malformed `StopTradingAfterProfit`.
+- Added/updated tests:
+  - project/OsEngine.Tests/TradeGridPersistenceCoreTests.cs
+    - added `Stage2Step2_2_TradeGridStopAndProfit_LoadFromString_WithMissingTrailStopRegime_ShouldKeepValueAndContinueTailParsing`.
+    - added `Stage2Step2_2_TradeGridStopAndProfit_LoadFromString_WithInvalidTrailStopType_ShouldKeepValueAndContinueTailParsing`.
+    - added `Stage2Step2_2_TradeGridStopAndProfit_LoadFromString_WithMissingTrailStopValue_ShouldKeepValueAndParseStopTradingBool`.
+    - added `Stage2Step2_2_TradeGridStopAndProfit_LoadFromString_WithInvalidStopTradingBool_ShouldKeepValue`.
+- Scope:
+  - test-only regression coverage
+  - no production behavior change
+
+### Verification
+
+- Host-context verification (outside sandbox, per dotnet-build-policy):
+  - dotnet restore project/OsEngine/OsEngine.csproj --nologo -> success
+  - dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo -> success
+  - dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900 -> success, 0 warnings, 0 errors
+  - dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo -> passed 656/656
+
+## 2026-03-01 - Step 4.2 (nullable annotations) - TradeGridStopAndProfit prefix regression coverage (#820-#823)
+
+- Added targeted regression coverage in:
+  - project/OsEngine.Tests/TradeGridPersistenceCoreTests.cs
+- Changes:
+  - locked partial and malformed behavior in the prefix part of `TradeGridStopAndProfit.LoadFromString(...)`.
+  - covered missing `ProfitRegime`, malformed `ProfitValueType`, missing `ProfitValue`, and malformed `StopRegime` while later fields remain valid.
+- Added/updated tests:
+  - project/OsEngine.Tests/TradeGridPersistenceCoreTests.cs
+    - added `Stage2Step2_2_TradeGridStopAndProfit_LoadFromString_WithMissingProfitRegime_ShouldKeepValueAndContinueParsing`.
+    - added `Stage2Step2_2_TradeGridStopAndProfit_LoadFromString_WithInvalidProfitType_ShouldKeepValueAndContinueParsing`.
+    - added `Stage2Step2_2_TradeGridStopAndProfit_LoadFromString_WithMissingProfitValue_ShouldKeepValueAndContinueParsing`.
+    - added `Stage2Step2_2_TradeGridStopAndProfit_LoadFromString_WithInvalidStopRegime_ShouldKeepValueAndContinueParsing`.
+- Scope:
+  - test-only regression coverage
+  - no production behavior change
+
+### Verification
+
+- Host-context verification (outside sandbox, per dotnet-build-policy):
+  - dotnet restore project/OsEngine/OsEngine.csproj --nologo -> success
+  - dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo -> success
+  - dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900 -> success, 0 warnings, 0 errors
+  - dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo -> passed 660/660

@@ -219,6 +219,244 @@ public class TradeGridPersistenceCoreTests
     }
 
     [Fact]
+    public void Stage2Step2_2_TradeGridStopAndProfit_LoadFromString_WithMalformedFields_ShouldKeepValuesAndContinueParsing()
+    {
+        TradeGridStopAndProfit stopAndProfit = new TradeGridStopAndProfit
+        {
+            ProfitRegime = OnOffRegime.Off,
+            ProfitValueType = TradeGridValueType.Percent,
+            ProfitValue = 1.5m,
+            StopRegime = OnOffRegime.Off,
+            StopValueType = TradeGridValueType.Percent,
+            StopValue = 0.8m,
+            TrailStopRegime = OnOffRegime.Off,
+            TrailStopValueType = TradeGridValueType.Percent,
+            TrailStopValue = 0.8m,
+            StopTradingAfterProfit = true
+        };
+
+        Exception? error = Record.Exception(() => stopAndProfit.LoadFromString(
+            "badEnum@badEnum@badDecimal@On@Absolute@2.2@On@Percent@1.1@0"));
+
+        Assert.Null(error);
+        Assert.Equal(OnOffRegime.Off, stopAndProfit.ProfitRegime);
+        Assert.Equal(TradeGridValueType.Percent, stopAndProfit.ProfitValueType);
+        Assert.Equal(1.5m, stopAndProfit.ProfitValue);
+        Assert.Equal(OnOffRegime.On, stopAndProfit.StopRegime);
+        Assert.Equal(TradeGridValueType.Absolute, stopAndProfit.StopValueType);
+        Assert.Equal(2.2m, stopAndProfit.StopValue);
+        Assert.Equal(OnOffRegime.On, stopAndProfit.TrailStopRegime);
+        Assert.Equal(TradeGridValueType.Percent, stopAndProfit.TrailStopValueType);
+        Assert.Equal(1.1m, stopAndProfit.TrailStopValue);
+        Assert.False(stopAndProfit.StopTradingAfterProfit);
+    }
+
+    [Fact]
+    public void Stage2Step2_2_TradeGridStopAndProfit_LoadFromString_WithNonPositiveValues_ShouldKeepExistingValues()
+    {
+        TradeGridStopAndProfit stopAndProfit = new TradeGridStopAndProfit
+        {
+            ProfitValue = 1.5m,
+            StopValue = 0.8m,
+            TrailStopValue = 0.8m
+        };
+
+        Exception? error = Record.Exception(() => stopAndProfit.LoadFromString(
+            "On@Percent@0@On@Percent@-1@On@Percent@0@True"));
+
+        Assert.Null(error);
+        Assert.Equal(OnOffRegime.On, stopAndProfit.ProfitRegime);
+        Assert.Equal(1.5m, stopAndProfit.ProfitValue);
+        Assert.Equal(OnOffRegime.On, stopAndProfit.StopRegime);
+        Assert.Equal(0.8m, stopAndProfit.StopValue);
+        Assert.Equal(OnOffRegime.On, stopAndProfit.TrailStopRegime);
+        Assert.Equal(0.8m, stopAndProfit.TrailStopValue);
+        Assert.True(stopAndProfit.StopTradingAfterProfit);
+    }
+
+    [Fact]
+    public void Stage2Step2_2_TradeGridStopAndProfit_LoadFromString_WithFlexibleStopTradingBool_ShouldParse()
+    {
+        TradeGridStopAndProfit stopAndProfit = new TradeGridStopAndProfit
+        {
+            StopTradingAfterProfit = true
+        };
+
+        Exception? error = Record.Exception(() => stopAndProfit.LoadFromString(
+            "On@Percent@1.5@On@Percent@0.8@On@Percent@0.8@off"));
+
+        Assert.Null(error);
+        Assert.Equal(OnOffRegime.On, stopAndProfit.ProfitRegime);
+        Assert.Equal(OnOffRegime.On, stopAndProfit.StopRegime);
+        Assert.Equal(OnOffRegime.On, stopAndProfit.TrailStopRegime);
+        Assert.False(stopAndProfit.StopTradingAfterProfit);
+    }
+
+    [Fact]
+    public void Stage2Step2_2_TradeGridStopAndProfit_LoadFromString_WithMissingTrailStopRegime_ShouldKeepValueAndContinueTailParsing()
+    {
+        TradeGridStopAndProfit stopAndProfit = new TradeGridStopAndProfit
+        {
+            TrailStopRegime = OnOffRegime.Off,
+            TrailStopValueType = TradeGridValueType.Percent,
+            TrailStopValue = 0.8m,
+            StopTradingAfterProfit = true
+        };
+
+        Exception? error = Record.Exception(() => stopAndProfit.LoadFromString(
+            "On@Percent@1.5@On@Percent@0.8@@Absolute@1.1@0"));
+
+        Assert.Null(error);
+        Assert.Equal(OnOffRegime.On, stopAndProfit.ProfitRegime);
+        Assert.Equal(OnOffRegime.On, stopAndProfit.StopRegime);
+        Assert.Equal(OnOffRegime.Off, stopAndProfit.TrailStopRegime);
+        Assert.Equal(TradeGridValueType.Absolute, stopAndProfit.TrailStopValueType);
+        Assert.Equal(1.1m, stopAndProfit.TrailStopValue);
+        Assert.False(stopAndProfit.StopTradingAfterProfit);
+    }
+
+    [Fact]
+    public void Stage2Step2_2_TradeGridStopAndProfit_LoadFromString_WithInvalidTrailStopType_ShouldKeepValueAndContinueTailParsing()
+    {
+        TradeGridStopAndProfit stopAndProfit = new TradeGridStopAndProfit
+        {
+            TrailStopRegime = OnOffRegime.Off,
+            TrailStopValueType = TradeGridValueType.Percent,
+            TrailStopValue = 0.8m,
+            StopTradingAfterProfit = true
+        };
+
+        Exception? error = Record.Exception(() => stopAndProfit.LoadFromString(
+            "On@Percent@1.5@On@Percent@0.8@On@badEnum@1.1@0"));
+
+        Assert.Null(error);
+        Assert.Equal(OnOffRegime.On, stopAndProfit.TrailStopRegime);
+        Assert.Equal(TradeGridValueType.Percent, stopAndProfit.TrailStopValueType);
+        Assert.Equal(1.1m, stopAndProfit.TrailStopValue);
+        Assert.False(stopAndProfit.StopTradingAfterProfit);
+    }
+
+    [Fact]
+    public void Stage2Step2_2_TradeGridStopAndProfit_LoadFromString_WithMissingTrailStopValue_ShouldKeepValueAndParseStopTradingBool()
+    {
+        TradeGridStopAndProfit stopAndProfit = new TradeGridStopAndProfit
+        {
+            TrailStopValue = 0.8m,
+            StopTradingAfterProfit = true
+        };
+
+        Exception? error = Record.Exception(() => stopAndProfit.LoadFromString(
+            "On@Percent@1.5@On@Percent@0.8@On@Absolute@@off"));
+
+        Assert.Null(error);
+        Assert.Equal(OnOffRegime.On, stopAndProfit.TrailStopRegime);
+        Assert.Equal(TradeGridValueType.Absolute, stopAndProfit.TrailStopValueType);
+        Assert.Equal(0.8m, stopAndProfit.TrailStopValue);
+        Assert.False(stopAndProfit.StopTradingAfterProfit);
+    }
+
+    [Fact]
+    public void Stage2Step2_2_TradeGridStopAndProfit_LoadFromString_WithInvalidStopTradingBool_ShouldKeepValue()
+    {
+        TradeGridStopAndProfit stopAndProfit = new TradeGridStopAndProfit
+        {
+            StopTradingAfterProfit = true
+        };
+
+        Exception? error = Record.Exception(() => stopAndProfit.LoadFromString(
+            "On@Percent@1.5@On@Percent@0.8@On@Absolute@1.1@badBool"));
+
+        Assert.Null(error);
+        Assert.Equal(OnOffRegime.On, stopAndProfit.TrailStopRegime);
+        Assert.Equal(TradeGridValueType.Absolute, stopAndProfit.TrailStopValueType);
+        Assert.Equal(1.1m, stopAndProfit.TrailStopValue);
+        Assert.True(stopAndProfit.StopTradingAfterProfit);
+    }
+
+    [Fact]
+    public void Stage2Step2_2_TradeGridStopAndProfit_LoadFromString_WithMissingProfitRegime_ShouldKeepValueAndContinueParsing()
+    {
+        TradeGridStopAndProfit stopAndProfit = new TradeGridStopAndProfit
+        {
+            ProfitRegime = OnOffRegime.Off,
+            ProfitValueType = TradeGridValueType.Percent,
+            ProfitValue = 1.5m
+        };
+
+        Exception? error = Record.Exception(() => stopAndProfit.LoadFromString(
+            "@Absolute@2.2@On@Percent@0.8@On@Percent@0.8@0"));
+
+        Assert.Null(error);
+        Assert.Equal(OnOffRegime.Off, stopAndProfit.ProfitRegime);
+        Assert.Equal(TradeGridValueType.Absolute, stopAndProfit.ProfitValueType);
+        Assert.Equal(2.2m, stopAndProfit.ProfitValue);
+        Assert.Equal(OnOffRegime.On, stopAndProfit.StopRegime);
+        Assert.False(stopAndProfit.StopTradingAfterProfit);
+    }
+
+    [Fact]
+    public void Stage2Step2_2_TradeGridStopAndProfit_LoadFromString_WithInvalidProfitType_ShouldKeepValueAndContinueParsing()
+    {
+        TradeGridStopAndProfit stopAndProfit = new TradeGridStopAndProfit
+        {
+            ProfitValueType = TradeGridValueType.Percent,
+            ProfitValue = 1.5m
+        };
+
+        Exception? error = Record.Exception(() => stopAndProfit.LoadFromString(
+            "On@badEnum@2.2@On@Absolute@0.8@On@Percent@0.8@0"));
+
+        Assert.Null(error);
+        Assert.Equal(OnOffRegime.On, stopAndProfit.ProfitRegime);
+        Assert.Equal(TradeGridValueType.Percent, stopAndProfit.ProfitValueType);
+        Assert.Equal(2.2m, stopAndProfit.ProfitValue);
+        Assert.Equal(TradeGridValueType.Absolute, stopAndProfit.StopValueType);
+        Assert.False(stopAndProfit.StopTradingAfterProfit);
+    }
+
+    [Fact]
+    public void Stage2Step2_2_TradeGridStopAndProfit_LoadFromString_WithMissingProfitValue_ShouldKeepValueAndContinueParsing()
+    {
+        TradeGridStopAndProfit stopAndProfit = new TradeGridStopAndProfit
+        {
+            ProfitValue = 1.5m
+        };
+
+        Exception? error = Record.Exception(() => stopAndProfit.LoadFromString(
+            "On@Absolute@@On@Percent@0.8@On@Percent@0.8@0"));
+
+        Assert.Null(error);
+        Assert.Equal(OnOffRegime.On, stopAndProfit.ProfitRegime);
+        Assert.Equal(TradeGridValueType.Absolute, stopAndProfit.ProfitValueType);
+        Assert.Equal(1.5m, stopAndProfit.ProfitValue);
+        Assert.Equal(OnOffRegime.On, stopAndProfit.StopRegime);
+        Assert.False(stopAndProfit.StopTradingAfterProfit);
+    }
+
+    [Fact]
+    public void Stage2Step2_2_TradeGridStopAndProfit_LoadFromString_WithInvalidStopRegime_ShouldKeepValueAndContinueParsing()
+    {
+        TradeGridStopAndProfit stopAndProfit = new TradeGridStopAndProfit
+        {
+            StopRegime = OnOffRegime.Off,
+            StopValueType = TradeGridValueType.Percent,
+            StopValue = 0.8m
+        };
+
+        Exception? error = Record.Exception(() => stopAndProfit.LoadFromString(
+            "On@Absolute@2.2@badEnum@Absolute@1.1@On@Percent@0.8@0"));
+
+        Assert.Null(error);
+        Assert.Equal(OnOffRegime.On, stopAndProfit.ProfitRegime);
+        Assert.Equal(TradeGridValueType.Absolute, stopAndProfit.ProfitValueType);
+        Assert.Equal(2.2m, stopAndProfit.ProfitValue);
+        Assert.Equal(OnOffRegime.Off, stopAndProfit.StopRegime);
+        Assert.Equal(TradeGridValueType.Absolute, stopAndProfit.StopValueType);
+        Assert.Equal(1.1m, stopAndProfit.StopValue);
+        Assert.False(stopAndProfit.StopTradingAfterProfit);
+    }
+
+    [Fact]
     public void Stage2Step2_2_TrailingUp_RuntimeContextMissing_ShouldStaySafe()
     {
         TradeGrid grid = (TradeGrid)RuntimeHelpers.GetUninitializedObject(typeof(TradeGrid));
