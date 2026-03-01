@@ -1721,6 +1721,90 @@ public class TradeGridPersistenceCoreTests
     }
 
     [Fact]
+    public void Stage2Step2_2_TrailingUp_LoadFromString_WithMissingUpBool_ShouldKeepValueAndContinueParsing()
+    {
+        TradeGrid grid = CreateBareGrid();
+        TrailingUp trailing = new TrailingUp(grid)
+        {
+            TrailingUpIsOn = false,
+            TrailingDownIsOn = true
+        };
+
+        Exception? error = Record.Exception(() => trailing.LoadFromString("@1.25@10@False@0.5@5"));
+
+        Assert.Null(error);
+        Assert.False(trailing.TrailingUpIsOn);
+        Assert.Equal(1.25m, trailing.TrailingUpStep);
+        Assert.Equal(10m, trailing.TrailingUpLimit);
+        Assert.False(trailing.TrailingDownIsOn);
+        Assert.Equal(0.5m, trailing.TrailingDownStep);
+        Assert.Equal(5m, trailing.TrailingDownLimit);
+    }
+
+    [Fact]
+    public void Stage2Step2_2_TrailingUp_LoadFromString_WithMissingDownBool_ShouldKeepValueAndContinueParsing()
+    {
+        TradeGrid grid = CreateBareGrid();
+        TrailingUp trailing = new TrailingUp(grid)
+        {
+            TrailingUpIsOn = false,
+            TrailingDownIsOn = true
+        };
+
+        Exception? error = Record.Exception(() => trailing.LoadFromString("True@1.25@10@@0.5@5"));
+
+        Assert.Null(error);
+        Assert.True(trailing.TrailingUpIsOn);
+        Assert.Equal(1.25m, trailing.TrailingUpStep);
+        Assert.Equal(10m, trailing.TrailingUpLimit);
+        Assert.True(trailing.TrailingDownIsOn);
+        Assert.Equal(0.5m, trailing.TrailingDownStep);
+        Assert.Equal(5m, trailing.TrailingDownLimit);
+    }
+
+    [Fact]
+    public void Stage2Step2_2_TrailingUp_LoadFromString_WithInvalidUpBoolAndFlexibleDownBool_ShouldKeepValueAndContinueParsing()
+    {
+        TradeGrid grid = CreateBareGrid();
+        TrailingUp trailing = new TrailingUp(grid)
+        {
+            TrailingUpIsOn = false,
+            TrailingDownIsOn = true
+        };
+
+        Exception? error = Record.Exception(() => trailing.LoadFromString("badBool@1.25@10@off@0.5@5"));
+
+        Assert.Null(error);
+        Assert.False(trailing.TrailingUpIsOn);
+        Assert.Equal(1.25m, trailing.TrailingUpStep);
+        Assert.Equal(10m, trailing.TrailingUpLimit);
+        Assert.False(trailing.TrailingDownIsOn);
+        Assert.Equal(0.5m, trailing.TrailingDownStep);
+        Assert.Equal(5m, trailing.TrailingDownLimit);
+    }
+
+    [Fact]
+    public void Stage2Step2_2_TrailingUp_LoadFromString_WithFlexibleUpBoolAndInvalidDownBool_ShouldKeepValueAndContinueParsing()
+    {
+        TradeGrid grid = CreateBareGrid();
+        TrailingUp trailing = new TrailingUp(grid)
+        {
+            TrailingUpIsOn = false,
+            TrailingDownIsOn = true
+        };
+
+        Exception? error = Record.Exception(() => trailing.LoadFromString("on@1.25@10@badBool@0.5@5"));
+
+        Assert.Null(error);
+        Assert.True(trailing.TrailingUpIsOn);
+        Assert.Equal(1.25m, trailing.TrailingUpStep);
+        Assert.Equal(10m, trailing.TrailingUpLimit);
+        Assert.True(trailing.TrailingDownIsOn);
+        Assert.Equal(0.5m, trailing.TrailingDownStep);
+        Assert.Equal(5m, trailing.TrailingDownLimit);
+    }
+
+    [Fact]
     public void Stage2Step2_2_TradeGrid_LoadFromString_LegacyPrimeShortTail_ShouldApplyFallbackDefaults()
     {
         TradeGrid source = CreateBareGrid();

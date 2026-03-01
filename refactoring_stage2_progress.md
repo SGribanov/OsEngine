@@ -15711,3 +15711,28 @@
   - dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo -> success
   - dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900 -> success, 0 warnings, 0 errors
   - dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo -> passed 625/625
+
+## 2026-03-01 - Step 4.2 (nullable annotations) - TrailingUp primary-bool partial-payload regression coverage (#780-#783)
+
+- Added targeted regression coverage in:
+  - project/OsEngine.Tests/TradeGridPersistenceCoreTests.cs
+- Changes:
+  - locked `TrailingUp.LoadFromString(...)` behavior for missing and malformed primary bool tokens while adjacent numeric fields remain valid.
+  - covered both directions: missing `TrailingUpIsOn`, missing `TrailingDownIsOn`, malformed up-bool with valid down-bool, and valid up-bool with malformed down-bool.
+- Added/updated tests:
+  - project/OsEngine.Tests/TradeGridPersistenceCoreTests.cs
+    - added `Stage2Step2_2_TrailingUp_LoadFromString_WithMissingUpBool_ShouldKeepValueAndContinueParsing`.
+    - added `Stage2Step2_2_TrailingUp_LoadFromString_WithMissingDownBool_ShouldKeepValueAndContinueParsing`.
+    - added `Stage2Step2_2_TrailingUp_LoadFromString_WithInvalidUpBoolAndFlexibleDownBool_ShouldKeepValueAndContinueParsing`.
+    - added `Stage2Step2_2_TrailingUp_LoadFromString_WithFlexibleUpBoolAndInvalidDownBool_ShouldKeepValueAndContinueParsing`.
+- Scope:
+  - test-only regression coverage
+  - no production behavior change
+
+### Verification
+
+- Host-context verification (outside sandbox, per dotnet-build-policy):
+  - dotnet restore project/OsEngine/OsEngine.csproj --nologo -> success
+  - dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo -> success
+  - dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900 -> success, 0 warnings, 0 errors
+  - dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo -> passed 629/629
