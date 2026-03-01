@@ -16078,3 +16078,166 @@
   - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed `599/599`
 - **Commit:** n/a
 - **Push:** n/a
+
+### Step 4.2 - Nullable Annotations (Incremental Adoption #754)
+
+- **Status:** In Progress (increment completed)
+- **Plan item:** `refactoring_stage2_plan.md` -> Phase 4 / Step 4.2
+- **Changes (TrailingUp malformed-bool parser hardening):**
+  - Updated `project/OsEngine/OsTrader/Grids/TrailingUp.cs`:
+    - `LoadFromString(...)` now uses guarded flexible bool parsing instead of `Convert.ToBoolean(...)`.
+    - malformed bool tokens no longer abort the whole parse; current flag values are preserved and later fields still parse.
+  - Updated tests in `project/OsEngine.Tests/TradeGridPersistenceCoreTests.cs`:
+    - added `Stage2Step2_2_TrailingUp_LoadFromString_WithInvalidBoolToken_ShouldKeepBoolAndContinueParsing`.
+- **Verification (outside sandbox, per dotnet-build-policy):**
+  - `dotnet restore project/OsEngine/OsEngine.csproj --nologo` -> success
+  - `dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo` -> success
+  - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` -> success, 0 warnings, 0 errors
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed `600/600`
+- **Commit:** n/a
+- **Push:** n/a
+
+### Step 4.2 - Nullable Annotations (Incremental Adoption #755)
+
+- **Status:** In Progress (increment completed)
+- **Plan item:** `refactoring_stage2_plan.md` -> Phase 4 / Step 4.2
+- **Changes (TrailingUp malformed-decimal parser hardening):**
+  - Updated `project/OsEngine/OsTrader/Grids/TrailingUp.cs`:
+    - `LoadFromString(...)` now uses guarded decimal parsing for numeric fields.
+    - malformed decimal tokens no longer abort the whole parse; current numeric values are preserved and later fields still parse.
+  - Updated tests in `project/OsEngine.Tests/TradeGridPersistenceCoreTests.cs`:
+    - added `Stage2Step2_2_TrailingUp_LoadFromString_WithInvalidDecimalToken_ShouldKeepDecimalAndContinueParsing`.
+- **Verification (outside sandbox, per dotnet-build-policy):**
+  - `dotnet restore project/OsEngine/OsEngine.csproj --nologo` -> success
+  - `dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo` -> success
+  - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` -> success, 0 warnings, 0 errors
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed `601/601`
+- **Commit:** n/a
+- **Push:** n/a
+
+### Step 4.2 - Nullable Annotations (Incremental Adoption #756)
+
+- **Status:** In Progress (increment completed)
+- **Plan item:** `refactoring_stage2_plan.md` -> Phase 4 / Step 4.2
+- **Changes (TrailingUp negative step parser guard):**
+  - Updated `project/OsEngine/OsTrader/Grids/TrailingUp.cs`:
+    - `LoadFromString(...)` now ignores negative `TrailingUpStep` payload values.
+    - current step value is preserved and later fields still parse.
+  - Updated tests in `project/OsEngine.Tests/TradeGridPersistenceCoreTests.cs`:
+    - added `Stage2Step2_2_TrailingUp_LoadFromString_WithNegativeTrailingUpStep_ShouldKeepExistingValue`.
+- **Verification (outside sandbox, per dotnet-build-policy):**
+  - `dotnet restore project/OsEngine/OsEngine.csproj --nologo` -> success
+  - `dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo` -> success
+  - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` -> success, 0 warnings, 0 errors
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed `602/602`
+- **Commit:** n/a
+- **Push:** n/a
+
+### Step 4.2 - Nullable Annotations (Incremental Adoption #757)
+
+- **Status:** In Progress (increment completed)
+- **Plan item:** `refactoring_stage2_plan.md` -> Phase 4 / Step 4.2
+- **Changes (TrailingUp negative down-step parser guard):**
+  - Updated `project/OsEngine/OsTrader/Grids/TrailingUp.cs`:
+    - `LoadFromString(...)` now ignores negative `TrailingDownStep` payload values.
+    - current down-step value is preserved and later fields still parse.
+  - Updated tests in `project/OsEngine.Tests/TradeGridPersistenceCoreTests.cs`:
+    - added `Stage2Step2_2_TrailingUp_LoadFromString_WithNegativeTrailingDownStep_ShouldKeepExistingValue`.
+- **Verification (outside sandbox, per dotnet-build-policy):**
+  - `dotnet restore project/OsEngine/OsEngine.csproj --nologo` -> success
+  - `dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo` -> success
+  - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` -> success, 0 warnings, 0 errors
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed `604/604`
+- **Commit:** n/a
+- **Push:** n/a
+
+### Step 4.2 - Nullable Annotations (Incremental Adoption #758)
+
+- **Status:** In Progress (increment completed)
+- **Plan item:** `refactoring_stage2_plan.md` -> Phase 4 / Step 4.2
+- **Changes (TrailingUp negative up-limit parser guard):**
+  - Updated `project/OsEngine/OsTrader/Grids/TrailingUp.cs`:
+    - `LoadFromString(...)` now ignores negative `TrailingUpLimit` payload values.
+    - current up-limit value is preserved and later fields still parse.
+  - Updated tests in `project/OsEngine.Tests/TradeGridPersistenceCoreTests.cs`:
+    - added `Stage2Step2_2_TrailingUp_LoadFromString_WithNegativeTrailingUpLimit_ShouldKeepExistingValue`.
+- **Verification (outside sandbox, per dotnet-build-policy):**
+  - `dotnet restore project/OsEngine/OsEngine.csproj --nologo` -> success
+  - `dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo` -> success
+  - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` -> success, 0 warnings, 0 errors
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed `604/604`
+- **Commit:** n/a
+- **Push:** n/a
+
+### Step 4.2 - Nullable Annotations (Incremental Adoption #759)
+
+- **Status:** In Progress (increment completed)
+- **Plan item:** `refactoring_stage2_plan.md` -> Phase 4 / Step 4.2
+- **Changes (TrailingUp negative down-limit parser guard):**
+  - Updated `project/OsEngine/OsTrader/Grids/TrailingUp.cs`:
+    - `LoadFromString(...)` now ignores negative `TrailingDownLimit` payload values.
+    - current down-limit value is preserved and later fields still parse.
+  - Updated tests in `project/OsEngine.Tests/TradeGridPersistenceCoreTests.cs`:
+    - added `Stage2Step2_2_TrailingUp_LoadFromString_WithNegativeTrailingDownLimit_ShouldKeepExistingValue`.
+- **Verification (outside sandbox, per dotnet-build-policy):**
+  - `dotnet restore project/OsEngine/OsEngine.csproj --nologo` -> success
+  - `dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo` -> success
+  - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` -> success, 0 warnings, 0 errors
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed `605/605`
+- **Commit:** n/a
+- **Push:** n/a
+
+### Step 4.2 - Nullable Annotations (Incremental Adoption #760)
+
+- **Status:** In Progress (increment completed)
+- **Plan item:** `refactoring_stage2_plan.md` -> Phase 4 / Step 4.2
+- **Changes (TrailingUp move-flag partial-tail regression coverage):**
+  - Updated tests in `project/OsEngine.Tests/TradeGridPersistenceCoreTests.cs`:
+    - added `Stage2Step2_2_TrailingUp_LoadFromString_WithInvalidUpMoveFlag_ShouldKeepValueAndParseDownMoveFlag`.
+  - Locked behavior where malformed `TrailingUpCanMoveExitOrder` keeps the current value, while valid `TrailingDownCanMoveExitOrder` still parses and applies.
+- **Verification (outside sandbox, per dotnet-build-policy):**
+  - `dotnet restore project/OsEngine/OsEngine.csproj --nologo` -> success
+  - `dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo` -> success
+  - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` -> success, 0 warnings, 0 errors
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed `606/606`
+- **Commit:** n/a
+- **Push:** n/a
+
+### Step 4.2 - Nullable Annotations (Incremental Adoption #761-#763)
+
+- **Status:** In Progress (increment block completed)
+- **Plan item:** `refactoring_stage2_plan.md` -> Phase 4 / Step 4.2
+- **Changes (TrailingUp move-flag tail matrix regression coverage):**
+  - Updated tests in `project/OsEngine.Tests/TradeGridPersistenceCoreTests.cs`:
+    - added `Stage2Step2_2_TrailingUp_LoadFromString_WithInvalidDownMoveFlag_ShouldParseUpMoveFlagAndKeepValue`.
+    - added `Stage2Step2_2_TrailingUp_LoadFromString_WithMissingUpMoveFlag_ShouldKeepValueAndParseDownMoveFlag`.
+    - added `Stage2Step2_2_TrailingUp_LoadFromString_WithInvalidBothMoveFlags_ShouldKeepExistingValues`.
+  - Locked the remaining malformed/missing move-flag tail combinations around `TrailingUpCanMoveExitOrder` and `TrailingDownCanMoveExitOrder`.
+- **Verification (outside sandbox, per dotnet-build-policy):**
+  - `dotnet restore project/OsEngine/OsEngine.csproj --nologo` -> success
+  - `dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo` -> success
+  - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` -> success, 0 warnings, 0 errors
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed `609/609`
+- **Commit:** n/a
+- **Push:** n/a
+
+### Step 4.2 - Nullable Annotations (Incremental Adoption #764-#767)
+
+- **Status:** In Progress (increment block completed)
+- **Plan item:** `refactoring_stage2_plan.md` -> Phase 4 / Step 4.2
+- **Changes (TrailingUp runtime positivity guards):**
+  - Updated `project/OsEngine/OsTrader/Grids/TrailingUp.cs`:
+    - `TryTrailingGrid()` now requires strictly positive step and limit values before running trailing-up or trailing-down logic.
+    - this prevents negative runtime state from bypassing parser guards and shifting the grid in the wrong direction or without a valid lower bound.
+  - Updated tests in `project/OsEngine.Tests/TradeGridPersistenceCoreTests.cs`:
+    - added `Stage2Step2_2_TrailingUp_TryTrailingGrid_WithNegativeUpStepRuntimeValue_ShouldNotShiftGrid`.
+    - added `Stage2Step2_2_TrailingUp_TryTrailingGrid_WithNegativeUpLimitRuntimeValue_ShouldNotShiftGrid`.
+    - added `Stage2Step2_2_TrailingUp_TryTrailingGrid_WithNegativeDownStepRuntimeValue_ShouldNotShiftGrid`.
+    - added `Stage2Step2_2_TrailingUp_TryTrailingGrid_WithNegativeDownLimitRuntimeValue_ShouldNotShiftGrid`.
+- **Verification (outside sandbox, per dotnet-build-policy):**
+  - `dotnet restore project/OsEngine/OsEngine.csproj --nologo` -> success
+  - `dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo` -> success
+  - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` -> success, 0 warnings, 0 errors
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed `613/613`
+- **Commit:** n/a
+- **Push:** n/a
