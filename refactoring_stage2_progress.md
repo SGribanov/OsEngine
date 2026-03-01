@@ -15167,3 +15167,157 @@
   - dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo -> success
   - dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900 -> success, 0 warnings, 0 errors
   - dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo -> passed 586/586
+
+## 2026-03-01 - Step 4.2 (nullable annotations) - TradeGrid partial optional-tail delay parsing alignment (#741)
+
+- Applied localized parser hardening in:
+  - project/OsEngine/OsTrader/Grids/TradeGrid.cs
+- Changes:
+  - `LoadFromString(...)` now parses `DelayInReal` independently from the `CheckMicroVolumes` token.
+  - when the delay token is present and valid but the micro-volumes token is missing, delay is preserved while `CheckMicroVolumes` falls back to default `true`.
+- Added/updated tests:
+  - project/OsEngine.Tests/TradeGridPersistenceCoreTests.cs
+    - added `Stage2Step2_2_TradeGrid_LoadFromString_WithMissingMicroVolumesTail_ShouldKeepParsedDelayAndApplyDefaultMicroFlag`.
+- Scope:
+  - parser/runtime hardening only
+  - legacy fully-missing tail behavior remains unchanged
+
+### Verification
+
+- Host-context verification (outside sandbox, per dotnet-build-policy):
+  - dotnet restore project/OsEngine/OsEngine.csproj --nologo -> success
+  - dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo -> success
+  - dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900 -> success, 0 warnings, 0 errors
+  - dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo -> passed 587/587
+
+## 2026-03-01 - Step 4.2 (nullable annotations) - TradeGrid partial optional-tail distance parsing regression coverage (#742)
+
+- Applied localized parser-contract coverage in:
+  - project/OsEngine.Tests/TradeGridPersistenceCoreTests.cs
+- Changes:
+  - added regression coverage for partial optional-tail parsing where `MaxDistanceToOrdersPercent` is present but `OpenOrdersMakerOnly` is missing.
+  - the parsed distance must be preserved while `OpenOrdersMakerOnly` falls back to default `true`.
+- Added/updated tests:
+  - project/OsEngine.Tests/TradeGridPersistenceCoreTests.cs
+    - added `Stage2Step2_2_TradeGrid_LoadFromString_WithMissingMakerOnlyTail_ShouldKeepParsedDistanceAndApplyDefaultMakerFlag`.
+- Scope:
+  - parser/runtime hardening coverage only
+  - no production logic changes in this increment
+
+### Verification
+
+- Host-context verification (outside sandbox, per dotnet-build-policy):
+  - dotnet restore project/OsEngine/OsEngine.csproj --nologo -> success
+  - dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo -> success
+  - dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900 -> success, 0 warnings, 0 errors
+  - dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo -> passed 588/588
+
+## 2026-03-01 - Step 4.2 (nullable annotations) - TradeGrid partial optional-tail distance-missing regression coverage (#743)
+
+- Applied localized parser-contract coverage in:
+  - project/OsEngine.Tests/TradeGridPersistenceCoreTests.cs
+- Changes:
+  - added regression coverage for partial optional-tail parsing where `MaxDistanceToOrdersPercent` is missing but `OpenOrdersMakerOnly` is present.
+  - default distance must be applied while the parsed maker-only flag is preserved.
+- Added/updated tests:
+  - project/OsEngine.Tests/TradeGridPersistenceCoreTests.cs
+    - added `Stage2Step2_2_TradeGrid_LoadFromString_WithMissingDistanceTail_ShouldApplyDefaultDistanceAndKeepParsedMakerFlag`.
+- Scope:
+  - parser/runtime hardening coverage only
+  - no production logic changes in this increment
+
+### Verification
+
+- Host-context verification (outside sandbox, per dotnet-build-policy):
+  - dotnet restore project/OsEngine/OsEngine.csproj --nologo -> success
+  - dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo -> success
+  - dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900 -> success, 0 warnings, 0 errors
+  - dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo -> passed 589/589
+
+## 2026-03-01 - Step 4.2 (nullable annotations) - TradeGrid partial optional-tail malformed-distance regression coverage (#744)
+
+- Applied localized parser-contract coverage in:
+  - project/OsEngine.Tests/TradeGridPersistenceCoreTests.cs
+- Changes:
+  - added regression coverage for partial optional-tail parsing where `MaxDistanceToOrdersPercent` is malformed but `OpenOrdersMakerOnly` is missing.
+  - current distance must be preserved while `OpenOrdersMakerOnly` falls back to default `true`.
+- Added/updated tests:
+  - project/OsEngine.Tests/TradeGridPersistenceCoreTests.cs
+    - added `Stage2Step2_2_TradeGrid_LoadFromString_WithMalformedDistanceAndMissingMakerTail_ShouldKeepDistanceAndApplyDefaultMakerFlag`.
+- Scope:
+  - parser/runtime hardening coverage only
+  - no production logic changes in this increment
+
+### Verification
+
+- Host-context verification (outside sandbox, per dotnet-build-policy):
+  - dotnet restore project/OsEngine/OsEngine.csproj --nologo -> success
+  - dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo -> success
+  - dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900 -> success, 0 warnings, 0 errors
+  - dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo -> passed 590/590
+
+## 2026-03-01 - Step 4.2 (nullable annotations) - TradeGrid partial optional-tail malformed-delay regression coverage (#745)
+
+- Applied localized parser-contract coverage in:
+  - project/OsEngine.Tests/TradeGridPersistenceCoreTests.cs
+- Changes:
+  - added regression coverage for partial optional-tail parsing where `DelayInReal` is malformed but `CheckMicroVolumes` is missing.
+  - default delay and default micro-flag must both be applied in that case.
+- Added/updated tests:
+  - project/OsEngine.Tests/TradeGridPersistenceCoreTests.cs
+    - added `Stage2Step2_2_TradeGrid_LoadFromString_WithMalformedDelayAndMissingMicroTail_ShouldApplyDefaultDelayAndDefaultMicroFlag`.
+- Scope:
+  - parser/runtime hardening coverage only
+  - no production logic changes in this increment
+
+### Verification
+
+- Host-context verification (outside sandbox, per dotnet-build-policy):
+  - dotnet restore project/OsEngine/OsEngine.csproj --nologo -> success
+  - dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo -> success
+  - dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900 -> success, 0 warnings, 0 errors
+  - dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo -> passed 591/591
+
+## 2026-03-01 - Step 4.2 (nullable annotations) - TradeGrid partial optional-tail malformed-delay parsed-micro regression coverage (#746)
+
+- Applied localized parser-contract coverage in:
+  - project/OsEngine.Tests/TradeGridPersistenceCoreTests.cs
+- Changes:
+  - added regression coverage for partial optional-tail parsing where `DelayInReal` is malformed but `CheckMicroVolumes` is present and valid.
+  - default delay must be applied while the parsed micro-flag is preserved.
+- Added/updated tests:
+  - project/OsEngine.Tests/TradeGridPersistenceCoreTests.cs
+    - added `Stage2Step2_2_TradeGrid_LoadFromString_WithMalformedDelayAndValidMicroTail_ShouldApplyDefaultDelayAndParseMicroFlag`.
+- Scope:
+  - parser/runtime hardening coverage only
+  - no production logic changes in this increment
+
+### Verification
+
+- Host-context verification (outside sandbox, per dotnet-build-policy):
+  - dotnet restore project/OsEngine/OsEngine.csproj --nologo -> success
+  - dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo -> success
+  - dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900 -> success, 0 warnings, 0 errors
+  - dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo -> passed 592/592
+
+## 2026-03-01 - Step 4.2 (nullable annotations) - TradeGrid partial optional-tail malformed-distance parsed-maker regression coverage (#747)
+
+- Applied localized parser-contract coverage in:
+  - project/OsEngine.Tests/TradeGridPersistenceCoreTests.cs
+- Changes:
+  - added regression coverage for partial optional-tail parsing where `MaxDistanceToOrdersPercent` is malformed but `OpenOrdersMakerOnly` is present and valid.
+  - current distance must be preserved while the parsed maker-only flag is applied.
+- Added/updated tests:
+  - project/OsEngine.Tests/TradeGridPersistenceCoreTests.cs
+    - added `Stage2Step2_2_TradeGrid_LoadFromString_WithMalformedDistanceAndValidMakerTail_ShouldKeepDistanceAndParseMakerFlag`.
+- Scope:
+  - parser/runtime hardening coverage only
+  - no production logic changes in this increment
+
+### Verification
+
+- Host-context verification (outside sandbox, per dotnet-build-policy):
+  - dotnet restore project/OsEngine/OsEngine.csproj --nologo -> success
+  - dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo -> success
+  - dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900 -> success, 0 warnings, 0 errors
+  - dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo -> passed 593/593

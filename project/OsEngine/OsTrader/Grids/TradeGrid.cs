@@ -316,31 +316,34 @@ namespace OsEngine.OsTrader.Grids
                     }
                 }
 
-                if (values.Length <= 12
-                    || string.IsNullOrWhiteSpace(values[11])
-                    || string.IsNullOrWhiteSpace(values[12]))
+                if (values.Length <= 11
+                    || string.IsNullOrWhiteSpace(values[11]))
                 {
                     DelayInReal = 500;
-                    CheckMicroVolumes = true;
                 }
-                else
+                else if (TryParseIntInvariant(values[11], out int delayParsed))
                 {
-                    if (TryParseIntInvariant(values[11], out int delayParsed))
+                    if (delayParsed > 0)
                     {
-                        if (delayParsed > 0)
-                        {
-                            DelayInReal = delayParsed;
-                        }
-                        else
-                        {
-                            DelayInReal = 500;
-                        }
+                        DelayInReal = delayParsed;
                     }
                     else
                     {
                         DelayInReal = 500;
                     }
+                }
+                else
+                {
+                    DelayInReal = 500;
+                }
 
+                if (values.Length <= 12
+                    || string.IsNullOrWhiteSpace(values[12]))
+                {
+                    CheckMicroVolumes = true;
+                }
+                else
+                {
                     if (TryParseBoolFlexible(values[12], out bool microParsed))
                     {
                         CheckMicroVolumes = microParsed;

@@ -1581,6 +1581,29 @@ public class TradeGridPersistenceCoreTests
     }
 
     [Fact]
+    public void Stage2Step2_2_TradeGrid_LoadFromString_WithMissingMicroVolumesTail_ShouldKeepParsedDelayAndApplyDefaultMicroFlag()
+    {
+        TradeGrid source = CreateBareGrid();
+        string save = source.GetSaveString();
+        string[] sections = save.Split('%');
+        string[] primeFields = sections[0].Split('@');
+        primeFields[11] = "250";
+        primeFields[12] = string.Empty;
+        sections[0] = string.Join("@", primeFields);
+        string payload = string.Join("%", sections);
+
+        TradeGrid loaded = CreateBareGrid();
+        loaded.DelayInReal = 777;
+        loaded.CheckMicroVolumes = false;
+
+        Exception? error = Record.Exception(() => loaded.LoadFromString(payload));
+
+        Assert.Null(error);
+        Assert.Equal(250, loaded.DelayInReal);
+        Assert.True(loaded.CheckMicroVolumes);
+    }
+
+    [Fact]
     public void Stage2Step2_2_TradeGrid_LoadFromString_WithMissingDistanceAndMakerOnlyTail_ShouldApplyDefaults()
     {
         TradeGrid source = CreateBareGrid();
@@ -1605,6 +1628,144 @@ public class TradeGridPersistenceCoreTests
         Assert.Null(error);
         Assert.Equal(1.5m, loaded.MaxDistanceToOrdersPercent);
         Assert.True(loaded.OpenOrdersMakerOnly);
+    }
+
+    [Fact]
+    public void Stage2Step2_2_TradeGrid_LoadFromString_WithMissingMakerOnlyTail_ShouldKeepParsedDistanceAndApplyDefaultMakerFlag()
+    {
+        TradeGrid source = CreateBareGrid();
+        string save = source.GetSaveString();
+        string[] sections = save.Split('%');
+        string[] primeFields = sections[0].Split('@');
+        primeFields[13] = "2.75";
+        primeFields[14] = string.Empty;
+        sections[0] = string.Join("@", primeFields);
+        string payload = string.Join("%", sections);
+
+        TradeGrid loaded = CreateBareGrid();
+        loaded.MaxDistanceToOrdersPercent = 9m;
+        loaded.OpenOrdersMakerOnly = false;
+
+        Exception? error = Record.Exception(() => loaded.LoadFromString(payload));
+
+        Assert.Null(error);
+        Assert.Equal(2.75m, loaded.MaxDistanceToOrdersPercent);
+        Assert.True(loaded.OpenOrdersMakerOnly);
+    }
+
+    [Fact]
+    public void Stage2Step2_2_TradeGrid_LoadFromString_WithMissingDistanceTail_ShouldApplyDefaultDistanceAndKeepParsedMakerFlag()
+    {
+        TradeGrid source = CreateBareGrid();
+        string save = source.GetSaveString();
+        string[] sections = save.Split('%');
+        string[] primeFields = sections[0].Split('@');
+        primeFields[13] = string.Empty;
+        primeFields[14] = "false";
+        sections[0] = string.Join("@", primeFields);
+        string payload = string.Join("%", sections);
+
+        TradeGrid loaded = CreateBareGrid();
+        loaded.MaxDistanceToOrdersPercent = 9m;
+        loaded.OpenOrdersMakerOnly = true;
+
+        Exception? error = Record.Exception(() => loaded.LoadFromString(payload));
+
+        Assert.Null(error);
+        Assert.Equal(1.5m, loaded.MaxDistanceToOrdersPercent);
+        Assert.False(loaded.OpenOrdersMakerOnly);
+    }
+
+    [Fact]
+    public void Stage2Step2_2_TradeGrid_LoadFromString_WithMalformedDistanceAndMissingMakerTail_ShouldKeepDistanceAndApplyDefaultMakerFlag()
+    {
+        TradeGrid source = CreateBareGrid();
+        string save = source.GetSaveString();
+        string[] sections = save.Split('%');
+        string[] primeFields = sections[0].Split('@');
+        primeFields[13] = "badDecimal";
+        primeFields[14] = string.Empty;
+        sections[0] = string.Join("@", primeFields);
+        string payload = string.Join("%", sections);
+
+        TradeGrid loaded = CreateBareGrid();
+        loaded.MaxDistanceToOrdersPercent = 9m;
+        loaded.OpenOrdersMakerOnly = false;
+
+        Exception? error = Record.Exception(() => loaded.LoadFromString(payload));
+
+        Assert.Null(error);
+        Assert.Equal(9m, loaded.MaxDistanceToOrdersPercent);
+        Assert.True(loaded.OpenOrdersMakerOnly);
+    }
+
+    [Fact]
+    public void Stage2Step2_2_TradeGrid_LoadFromString_WithMalformedDelayAndMissingMicroTail_ShouldApplyDefaultDelayAndDefaultMicroFlag()
+    {
+        TradeGrid source = CreateBareGrid();
+        string save = source.GetSaveString();
+        string[] sections = save.Split('%');
+        string[] primeFields = sections[0].Split('@');
+        primeFields[11] = "badDelay";
+        primeFields[12] = string.Empty;
+        sections[0] = string.Join("@", primeFields);
+        string payload = string.Join("%", sections);
+
+        TradeGrid loaded = CreateBareGrid();
+        loaded.DelayInReal = 777;
+        loaded.CheckMicroVolumes = false;
+
+        Exception? error = Record.Exception(() => loaded.LoadFromString(payload));
+
+        Assert.Null(error);
+        Assert.Equal(500, loaded.DelayInReal);
+        Assert.True(loaded.CheckMicroVolumes);
+    }
+
+    [Fact]
+    public void Stage2Step2_2_TradeGrid_LoadFromString_WithMalformedDelayAndValidMicroTail_ShouldApplyDefaultDelayAndParseMicroFlag()
+    {
+        TradeGrid source = CreateBareGrid();
+        string save = source.GetSaveString();
+        string[] sections = save.Split('%');
+        string[] primeFields = sections[0].Split('@');
+        primeFields[11] = "badDelay";
+        primeFields[12] = "false";
+        sections[0] = string.Join("@", primeFields);
+        string payload = string.Join("%", sections);
+
+        TradeGrid loaded = CreateBareGrid();
+        loaded.DelayInReal = 777;
+        loaded.CheckMicroVolumes = true;
+
+        Exception? error = Record.Exception(() => loaded.LoadFromString(payload));
+
+        Assert.Null(error);
+        Assert.Equal(500, loaded.DelayInReal);
+        Assert.False(loaded.CheckMicroVolumes);
+    }
+
+    [Fact]
+    public void Stage2Step2_2_TradeGrid_LoadFromString_WithMalformedDistanceAndValidMakerTail_ShouldKeepDistanceAndParseMakerFlag()
+    {
+        TradeGrid source = CreateBareGrid();
+        string save = source.GetSaveString();
+        string[] sections = save.Split('%');
+        string[] primeFields = sections[0].Split('@');
+        primeFields[13] = "badDecimal";
+        primeFields[14] = "false";
+        sections[0] = string.Join("@", primeFields);
+        string payload = string.Join("%", sections);
+
+        TradeGrid loaded = CreateBareGrid();
+        loaded.MaxDistanceToOrdersPercent = 9m;
+        loaded.OpenOrdersMakerOnly = true;
+
+        Exception? error = Record.Exception(() => loaded.LoadFromString(payload));
+
+        Assert.Null(error);
+        Assert.Equal(9m, loaded.MaxDistanceToOrdersPercent);
+        Assert.False(loaded.OpenOrdersMakerOnly);
     }
 
     [Fact]
