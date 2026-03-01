@@ -15453,3 +15453,186 @@
   - dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo -> success
   - dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900 -> success, 0 warnings, 0 errors
   - dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo -> passed 599/599
+
+## 2026-03-01 - Step 4.2 (nullable annotations) - TrailingUp malformed-bool parser hardening (#754)
+
+- Applied localized parser hardening in:
+  - project/OsEngine/OsTrader/Grids/TrailingUp.cs
+- Changes:
+  - `LoadFromString(...)` no longer throws on malformed bool tokens in trailing flags.
+  - malformed bool values now preserve the current flag and parsing continues for the rest of the payload.
+  - accepted bool forms now include `true/false`, `1/0`, `yes/no`, `on/off`.
+- Added/updated tests:
+  - project/OsEngine.Tests/TradeGridPersistenceCoreTests.cs
+    - added `Stage2Step2_2_TrailingUp_LoadFromString_WithInvalidBoolToken_ShouldKeepBoolAndContinueParsing`.
+- Scope:
+  - parser/runtime hardening only
+  - valid payload behavior remains unchanged
+
+### Verification
+
+- Host-context verification (outside sandbox, per dotnet-build-policy):
+  - dotnet restore project/OsEngine/OsEngine.csproj --nologo -> success
+  - dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo -> success
+  - dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900 -> success, 0 warnings, 0 errors
+  - dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo -> passed 600/600
+
+## 2026-03-01 - Step 4.2 (nullable annotations) - TrailingUp malformed-decimal parser hardening (#755)
+
+- Applied localized parser hardening in:
+  - project/OsEngine/OsTrader/Grids/TrailingUp.cs
+- Changes:
+  - `LoadFromString(...)` now uses guarded decimal parsing for trailing numeric fields instead of exception-driven `ToDecimal()`.
+  - malformed decimal tokens no longer abort the whole parse; current numeric values are preserved and later fields still parse.
+- Added/updated tests:
+  - project/OsEngine.Tests/TradeGridPersistenceCoreTests.cs
+    - added `Stage2Step2_2_TrailingUp_LoadFromString_WithInvalidDecimalToken_ShouldKeepDecimalAndContinueParsing`.
+- Scope:
+  - parser/runtime hardening only
+  - valid payload behavior remains unchanged
+
+### Verification
+
+- Host-context verification (outside sandbox, per dotnet-build-policy):
+  - dotnet restore project/OsEngine/OsEngine.csproj --nologo -> success
+  - dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo -> success
+  - dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900 -> success, 0 warnings, 0 errors
+  - dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo -> passed 601/601
+
+## 2026-03-01 - Step 4.2 (nullable annotations) - TrailingUp negative step parser guard (#756)
+
+- Applied localized parser hardening in:
+  - project/OsEngine/OsTrader/Grids/TrailingUp.cs
+- Changes:
+  - `LoadFromString(...)` now ignores negative `TrailingUpStep` payload values.
+  - current `TrailingUpStep` is preserved while the rest of the payload continues to parse.
+- Added/updated tests:
+  - project/OsEngine.Tests/TradeGridPersistenceCoreTests.cs
+    - added `Stage2Step2_2_TrailingUp_LoadFromString_WithNegativeTrailingUpStep_ShouldKeepExistingValue`.
+- Scope:
+  - parser/runtime hardening only
+  - valid non-negative payload behavior remains unchanged
+
+### Verification
+
+- Host-context verification (outside sandbox, per dotnet-build-policy):
+  - dotnet restore project/OsEngine/OsEngine.csproj --nologo -> success
+  - dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo -> success
+  - dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900 -> success, 0 warnings, 0 errors
+  - dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo -> passed 602/602
+
+## 2026-03-01 - Step 4.2 (nullable annotations) - TrailingUp negative down-step parser guard (#757)
+
+- Applied localized parser hardening in:
+  - project/OsEngine/OsTrader/Grids/TrailingUp.cs
+- Changes:
+  - `LoadFromString(...)` now ignores negative `TrailingDownStep` payload values.
+  - current `TrailingDownStep` is preserved while the rest of the payload continues to parse.
+- Added/updated tests:
+  - project/OsEngine.Tests/TradeGridPersistenceCoreTests.cs
+    - added `Stage2Step2_2_TrailingUp_LoadFromString_WithNegativeTrailingDownStep_ShouldKeepExistingValue`.
+- Scope:
+  - parser/runtime hardening only
+  - valid non-negative payload behavior remains unchanged
+
+### Verification
+
+- Host-context verification (outside sandbox, per dotnet-build-policy):
+  - dotnet restore project/OsEngine/OsEngine.csproj --nologo -> success
+  - dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo -> success
+  - dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900 -> success, 0 warnings, 0 errors
+  - dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo -> passed 604/604
+
+## 2026-03-01 - Step 4.2 (nullable annotations) - TrailingUp negative down-limit parser guard (#759)
+
+- Applied localized parser hardening in:
+  - project/OsEngine/OsTrader/Grids/TrailingUp.cs
+- Changes:
+  - `LoadFromString(...)` now ignores negative `TrailingDownLimit` payload values.
+  - current `TrailingDownLimit` is preserved while the rest of the payload continues to parse.
+- Added/updated tests:
+  - project/OsEngine.Tests/TradeGridPersistenceCoreTests.cs
+    - added `Stage2Step2_2_TrailingUp_LoadFromString_WithNegativeTrailingDownLimit_ShouldKeepExistingValue`.
+- Scope:
+  - parser/runtime hardening only
+  - valid non-negative payload behavior remains unchanged
+
+### Verification
+
+- Host-context verification (outside sandbox, per dotnet-build-policy):
+  - dotnet restore project/OsEngine/OsEngine.csproj --nologo -> success
+  - dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo -> success
+  - dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900 -> success, 0 warnings, 0 errors
+  - dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo -> passed 605/605
+
+## 2026-03-01 - Step 4.2 (nullable annotations) - TrailingUp move-flag partial-tail regression coverage (#760)
+
+- Added targeted regression coverage in:
+  - project/OsEngine.Tests/TradeGridPersistenceCoreTests.cs
+- Changes:
+  - locked `TrailingUp.LoadFromString(...)` behavior when `TrailingUpCanMoveExitOrder` is malformed but `TrailingDownCanMoveExitOrder` remains valid.
+  - current up-move flag is preserved while the down-move flag still parses and applies.
+- Added/updated tests:
+  - project/OsEngine.Tests/TradeGridPersistenceCoreTests.cs
+    - added `Stage2Step2_2_TrailingUp_LoadFromString_WithInvalidUpMoveFlag_ShouldKeepValueAndParseDownMoveFlag`.
+- Scope:
+  - test-only regression coverage
+  - no production behavior change
+
+### Verification
+
+- Host-context verification (outside sandbox, per dotnet-build-policy):
+  - dotnet restore project/OsEngine/OsEngine.csproj --nologo -> success
+  - dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo -> success
+  - dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900 -> success, 0 warnings, 0 errors
+  - dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo -> passed 606/606
+
+## 2026-03-01 - Step 4.2 (nullable annotations) - TrailingUp move-flag tail matrix regression coverage (#761-#763)
+
+- Added targeted regression coverage in:
+  - project/OsEngine.Tests/TradeGridPersistenceCoreTests.cs
+- Changes:
+  - locked remaining `TrailingUp.LoadFromString(...)` move-flag tail combinations around malformed and missing tokens.
+  - covered cases where the down-move flag is malformed, where the up-move flag is missing but the down-move flag is still present, and where both move-flag tokens are malformed.
+- Added/updated tests:
+  - project/OsEngine.Tests/TradeGridPersistenceCoreTests.cs
+    - added `Stage2Step2_2_TrailingUp_LoadFromString_WithInvalidDownMoveFlag_ShouldParseUpMoveFlagAndKeepValue`.
+    - added `Stage2Step2_2_TrailingUp_LoadFromString_WithMissingUpMoveFlag_ShouldKeepValueAndParseDownMoveFlag`.
+    - added `Stage2Step2_2_TrailingUp_LoadFromString_WithInvalidBothMoveFlags_ShouldKeepExistingValues`.
+- Scope:
+  - test-only regression coverage
+  - no production behavior change
+
+### Verification
+
+- Host-context verification (outside sandbox, per dotnet-build-policy):
+  - dotnet restore project/OsEngine/OsEngine.csproj --nologo -> success
+  - dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo -> success
+  - dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900 -> success, 0 warnings, 0 errors
+  - dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo -> passed 609/609
+
+## 2026-03-01 - Step 4.2 (nullable annotations) - TrailingUp runtime positivity guards (#764-#767)
+
+- Applied localized runtime hardening in:
+  - project/OsEngine/OsTrader/Grids/TrailingUp.cs
+- Changes:
+  - `TryTrailingGrid()` now runs trailing-up only when `TrailingUpStep > 0` and `TrailingUpLimit > 0`.
+  - `TryTrailingGrid()` now runs trailing-down only when `TrailingDownStep > 0` and `TrailingDownLimit > 0`.
+  - this blocks invalid negative runtime state from bypassing parser guards and producing inverted or unbounded grid shifts.
+- Added/updated tests:
+  - project/OsEngine.Tests/TradeGridPersistenceCoreTests.cs
+    - added `Stage2Step2_2_TrailingUp_TryTrailingGrid_WithNegativeUpStepRuntimeValue_ShouldNotShiftGrid`.
+    - added `Stage2Step2_2_TrailingUp_TryTrailingGrid_WithNegativeUpLimitRuntimeValue_ShouldNotShiftGrid`.
+    - added `Stage2Step2_2_TrailingUp_TryTrailingGrid_WithNegativeDownStepRuntimeValue_ShouldNotShiftGrid`.
+    - added `Stage2Step2_2_TrailingUp_TryTrailingGrid_WithNegativeDownLimitRuntimeValue_ShouldNotShiftGrid`.
+- Scope:
+  - runtime hardening only
+  - valid positive trailing behavior remains unchanged
+
+### Verification
+
+- Host-context verification (outside sandbox, per dotnet-build-policy):
+  - dotnet restore project/OsEngine/OsEngine.csproj --nologo -> success
+  - dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo -> success
+  - dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900 -> success, 0 warnings, 0 errors
+  - dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo -> passed 613/613

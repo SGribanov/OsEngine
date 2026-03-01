@@ -83,43 +83,129 @@ namespace OsEngine.OsTrader.Grids
 
                 if (values.Length > 0 && string.IsNullOrEmpty(values[0]) == false)
                 {
-                    TrailingUpIsOn = Convert.ToBoolean(values[0]);
+                    if (TryParseBoolFlexible(values[0], out bool parsed))
+                    {
+                        TrailingUpIsOn = parsed;
+                    }
                 }
                 if (values.Length > 1 && string.IsNullOrEmpty(values[1]) == false)
                 {
-                    TrailingUpStep = values[1].ToDecimal();
+                    if (TryParseDecimalFlexible(values[1], out decimal parsed))
+                    {
+                        if (parsed >= 0)
+                        {
+                            TrailingUpStep = parsed;
+                        }
+                    }
                 }
                 if (values.Length > 2 && string.IsNullOrEmpty(values[2]) == false)
                 {
-                    TrailingUpLimit = values[2].ToDecimal();
+                    if (TryParseDecimalFlexible(values[2], out decimal parsed))
+                    {
+                        if (parsed >= 0)
+                        {
+                            TrailingUpLimit = parsed;
+                        }
+                    }
                 }
 
                 if (values.Length > 3 && string.IsNullOrEmpty(values[3]) == false)
                 {
-                    TrailingDownIsOn = Convert.ToBoolean(values[3]);
+                    if (TryParseBoolFlexible(values[3], out bool parsed))
+                    {
+                        TrailingDownIsOn = parsed;
+                    }
                 }
                 if (values.Length > 4 && string.IsNullOrEmpty(values[4]) == false)
                 {
-                    TrailingDownStep = values[4].ToDecimal();
+                    if (TryParseDecimalFlexible(values[4], out decimal parsed))
+                    {
+                        if (parsed >= 0)
+                        {
+                            TrailingDownStep = parsed;
+                        }
+                    }
                 }
                 if (values.Length > 5 && string.IsNullOrEmpty(values[5]) == false)
                 {
-                    TrailingDownLimit = values[5].ToDecimal();
+                    if (TryParseDecimalFlexible(values[5], out decimal parsed))
+                    {
+                        if (parsed >= 0)
+                        {
+                            TrailingDownLimit = parsed;
+                        }
+                    }
                 }
 
                 if (values.Length > 6 && string.IsNullOrEmpty(values[6]) == false)
                 {
-                    TrailingUpCanMoveExitOrder = Convert.ToBoolean(values[6]);
+                    if (TryParseBoolFlexible(values[6], out bool parsed))
+                    {
+                        TrailingUpCanMoveExitOrder = parsed;
+                    }
                 }
                 if (values.Length > 7 && string.IsNullOrEmpty(values[7]) == false)
                 {
-                    TrailingDownCanMoveExitOrder = Convert.ToBoolean(values[7]);
+                    if (TryParseBoolFlexible(values[7], out bool parsed))
+                    {
+                        TrailingDownCanMoveExitOrder = parsed;
+                    }
                 }
             }
             catch (Exception e)
             {
                 SendNewLogMessage(e.ToString(), LogMessageType.Error);
             }
+        }
+
+        private static bool TryParseBoolFlexible(string value, out bool parsed)
+        {
+            if (bool.TryParse(value, out parsed))
+            {
+                return true;
+            }
+
+            string normalized = value.Trim();
+
+            if (string.Equals(normalized, "1", StringComparison.OrdinalIgnoreCase)
+                || string.Equals(normalized, "yes", StringComparison.OrdinalIgnoreCase)
+                || string.Equals(normalized, "on", StringComparison.OrdinalIgnoreCase))
+            {
+                parsed = true;
+                return true;
+            }
+
+            if (string.Equals(normalized, "0", StringComparison.OrdinalIgnoreCase)
+                || string.Equals(normalized, "no", StringComparison.OrdinalIgnoreCase)
+                || string.Equals(normalized, "off", StringComparison.OrdinalIgnoreCase))
+            {
+                parsed = false;
+                return true;
+            }
+
+            parsed = false;
+            return false;
+        }
+
+        private static bool TryParseDecimalFlexible(string value, out decimal parsed)
+        {
+            if (decimal.TryParse(value, NumberStyles.Any, CultureInfo.InvariantCulture, out parsed))
+            {
+                return true;
+            }
+
+            if (decimal.TryParse(value, NumberStyles.Any, CultureInfo.CurrentCulture, out parsed))
+            {
+                return true;
+            }
+
+            if (decimal.TryParse(value, NumberStyles.Any, new CultureInfo("ru-RU"), out parsed))
+            {
+                return true;
+            }
+
+            parsed = 0;
+            return false;
         }
 
         #endregion
@@ -171,15 +257,15 @@ namespace OsEngine.OsTrader.Grids
             bool trailDownIsDone = false;
 
             if (TrailingUpIsOn == true
-                && TrailingUpStep != 0 
-                && TrailingUpLimit != 0)
+                && TrailingUpStep > 0 
+                && TrailingUpLimit > 0)
             {
                 trailUpIsDone = TrailingUpMethod(lastPrice);
             }
 
             if (TrailingDownIsOn == true
-                 && TrailingDownStep != 0
-                && TrailingDownLimit != 0)
+                 && TrailingDownStep > 0
+                && TrailingDownLimit > 0)
             {
                 trailDownIsDone = TrailingDownMethod(lastPrice);
             }
