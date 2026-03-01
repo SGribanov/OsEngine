@@ -365,10 +365,10 @@ namespace OsEngine.OsTrader.Grids
                     break;
                 }*/
 
-                /*if (priceCurrent <= 0)
+                if (priceCurrent <= 0)
                 {
                     break;
-                }*/
+                }
 
                 /*if (priceCurrent / FirstPrice > 3)
                 {
@@ -447,18 +447,33 @@ namespace OsEngine.OsTrader.Grids
                     && StepMultiplicator != 0)
                 {
                     curStep = curStep * StepMultiplicator;
+
+                    if (curStep <= 0)
+                    {
+                        break;
+                    }
                 }
 
                 if (ProfitMultiplicator != 1
                     && ProfitMultiplicator != 0)
                 {
                     profitStep = profitStep * ProfitMultiplicator;
+
+                    if (profitStep <= 0)
+                    {
+                        break;
+                    }
                 }
 
                 if (MartingaleMultiplicator != 0
                     && MartingaleMultiplicator != 1)
                 {
                     volumeCurrent = volumeCurrent * MartingaleMultiplicator;
+
+                    if (volumeCurrent <= 0)
+                    {
+                        break;
+                    }
                 }
             }
         }

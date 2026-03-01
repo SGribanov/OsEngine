@@ -841,6 +841,132 @@ public class TradeGridPersistenceCoreTests
     }
 
     [Fact]
+    public void Stage2Step2_2_TradeGridCreator_CreateNewGrid_WithNegativeStepMultiplicatorRuntimeValue_ShouldStopAfterFirstLine()
+    {
+        TradeGridCreator creator = new TradeGridCreator
+        {
+            GridSide = Side.Buy,
+            FirstPrice = 100m,
+            LineCountStart = 3,
+            TypeStep = TradeGridValueType.Absolute,
+            LineStep = 1m,
+            StepMultiplicator = -1m,
+            TypeProfit = TradeGridValueType.Absolute,
+            ProfitStep = 1m,
+            ProfitMultiplicator = 1m,
+            TypeVolume = TradeGridVolumeType.Contracts,
+            StartVolume = 1m,
+            MartingaleMultiplicator = 1m
+        };
+
+        BotTabSimple tab = (BotTabSimple)RuntimeHelpers.GetUninitializedObject(typeof(BotTabSimple));
+        ConnectorCandles connector = new ConnectorCandles("CodexGridCreatorNegativeStepMultiplicator", StartProgram.IsTester, false);
+        SetPrivateField(tab, "_connector", connector);
+
+        Exception? error = Record.Exception(() => creator.CreateNewGrid(tab, TradeGridPrimeType.MarketMaking));
+
+        Assert.Null(error);
+        Assert.NotNull(creator.Lines);
+        Assert.Single(creator.Lines);
+        Assert.Equal(100m, creator.Lines[0].PriceEnter);
+        Assert.Equal(101m, creator.Lines[0].PriceExit);
+    }
+
+    [Fact]
+    public void Stage2Step2_2_TradeGridCreator_CreateNewGrid_WithNegativeProfitMultiplicatorRuntimeValue_ShouldStopAfterFirstLine()
+    {
+        TradeGridCreator creator = new TradeGridCreator
+        {
+            GridSide = Side.Buy,
+            FirstPrice = 100m,
+            LineCountStart = 3,
+            TypeStep = TradeGridValueType.Absolute,
+            LineStep = 1m,
+            StepMultiplicator = 1m,
+            TypeProfit = TradeGridValueType.Absolute,
+            ProfitStep = 1m,
+            ProfitMultiplicator = -1m,
+            TypeVolume = TradeGridVolumeType.Contracts,
+            StartVolume = 1m,
+            MartingaleMultiplicator = 1m
+        };
+
+        BotTabSimple tab = (BotTabSimple)RuntimeHelpers.GetUninitializedObject(typeof(BotTabSimple));
+        ConnectorCandles connector = new ConnectorCandles("CodexGridCreatorNegativeProfitMultiplicator", StartProgram.IsTester, false);
+        SetPrivateField(tab, "_connector", connector);
+
+        Exception? error = Record.Exception(() => creator.CreateNewGrid(tab, TradeGridPrimeType.MarketMaking));
+
+        Assert.Null(error);
+        Assert.NotNull(creator.Lines);
+        Assert.Single(creator.Lines);
+        Assert.Equal(100m, creator.Lines[0].PriceEnter);
+        Assert.Equal(101m, creator.Lines[0].PriceExit);
+    }
+
+    [Fact]
+    public void Stage2Step2_2_TradeGridCreator_CreateNewGrid_WithNegativeMartingaleRuntimeValue_ShouldStopAfterFirstLine()
+    {
+        TradeGridCreator creator = new TradeGridCreator
+        {
+            GridSide = Side.Buy,
+            FirstPrice = 100m,
+            LineCountStart = 3,
+            TypeStep = TradeGridValueType.Absolute,
+            LineStep = 1m,
+            StepMultiplicator = 1m,
+            TypeProfit = TradeGridValueType.Absolute,
+            ProfitStep = 1m,
+            ProfitMultiplicator = 1m,
+            TypeVolume = TradeGridVolumeType.Contracts,
+            StartVolume = 1m,
+            MartingaleMultiplicator = -1m
+        };
+
+        BotTabSimple tab = (BotTabSimple)RuntimeHelpers.GetUninitializedObject(typeof(BotTabSimple));
+        ConnectorCandles connector = new ConnectorCandles("CodexGridCreatorNegativeMartingaleMultiplicator", StartProgram.IsTester, false);
+        SetPrivateField(tab, "_connector", connector);
+
+        Exception? error = Record.Exception(() => creator.CreateNewGrid(tab, TradeGridPrimeType.MarketMaking));
+
+        Assert.Null(error);
+        Assert.NotNull(creator.Lines);
+        Assert.Single(creator.Lines);
+        Assert.Equal(100m, creator.Lines[0].PriceEnter);
+        Assert.Equal(1m, creator.Lines[0].Volume);
+    }
+
+    [Fact]
+    public void Stage2Step2_2_TradeGridCreator_CreateNewGrid_WithNegativeFirstPriceRuntimeValue_ShouldNotCreateLines()
+    {
+        TradeGridCreator creator = new TradeGridCreator
+        {
+            GridSide = Side.Buy,
+            FirstPrice = -100m,
+            LineCountStart = 3,
+            TypeStep = TradeGridValueType.Absolute,
+            LineStep = 1m,
+            StepMultiplicator = 1m,
+            TypeProfit = TradeGridValueType.Absolute,
+            ProfitStep = 1m,
+            ProfitMultiplicator = 1m,
+            TypeVolume = TradeGridVolumeType.Contracts,
+            StartVolume = 1m,
+            MartingaleMultiplicator = 1m
+        };
+
+        BotTabSimple tab = (BotTabSimple)RuntimeHelpers.GetUninitializedObject(typeof(BotTabSimple));
+        ConnectorCandles connector = new ConnectorCandles("CodexGridCreatorNegativeFirstPrice", StartProgram.IsTester, false);
+        SetPrivateField(tab, "_connector", connector);
+
+        Exception? error = Record.Exception(() => creator.CreateNewGrid(tab, TradeGridPrimeType.MarketMaking));
+
+        Assert.Null(error);
+        Assert.NotNull(creator.Lines);
+        Assert.Empty(creator.Lines);
+    }
+
+    [Fact]
     public void Stage2Step2_2_TradeGridCreator_GetSaveLinesString_WithSparseLines_ShouldNotThrow()
     {
         TradeGridCreator creator = new TradeGridCreator();

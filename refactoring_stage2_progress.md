@@ -15079,3 +15079,91 @@
   - dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo -> success
   - dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900 -> success, 0 warnings, 0 errors
   - dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo -> passed 582/582
+
+## 2026-03-01 - Step 4.2 (nullable annotations) - TradeGridCreator negative runtime step-multiplicator guard (#737)
+
+- Applied localized runtime hardening in:
+  - project/OsEngine/OsTrader/Grids/TradeGridCreator.cs
+- Changes:
+  - `CreateMarketMakingGrid(...)` now stops grid expansion if `StepMultiplicator` turns effective `curStep` non-positive at runtime.
+  - prevents invalid follow-up lines when direct runtime state bypasses UI/parser guards and provides a negative `StepMultiplicator`.
+- Added/updated tests:
+  - project/OsEngine.Tests/TradeGridPersistenceCoreTests.cs
+    - added `Stage2Step2_2_TradeGridCreator_CreateNewGrid_WithNegativeStepMultiplicatorRuntimeValue_ShouldStopAfterFirstLine`.
+- Scope:
+  - runtime hardening only
+  - valid positive-step multiplier behavior unchanged
+
+### Verification
+
+- Host-context verification (outside sandbox, per dotnet-build-policy):
+  - dotnet restore project/OsEngine/OsEngine.csproj --nologo -> success
+  - dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo -> success
+  - dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900 -> success, 0 warnings, 0 errors
+  - dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo -> passed 583/583
+
+## 2026-03-01 - Step 4.2 (nullable annotations) - TradeGridCreator negative runtime profit-multiplicator guard (#738)
+
+- Applied localized runtime hardening in:
+  - project/OsEngine/OsTrader/Grids/TradeGridCreator.cs
+- Changes:
+  - `CreateMarketMakingGrid(...)` now stops grid expansion if `ProfitMultiplicator` turns effective `profitStep` non-positive at runtime.
+  - prevents invalid follow-up exit pricing when direct runtime state bypasses UI/parser guards and provides a negative `ProfitMultiplicator`.
+- Added/updated tests:
+  - project/OsEngine.Tests/TradeGridPersistenceCoreTests.cs
+    - added `Stage2Step2_2_TradeGridCreator_CreateNewGrid_WithNegativeProfitMultiplicatorRuntimeValue_ShouldStopAfterFirstLine`.
+- Scope:
+  - runtime hardening only
+  - valid positive profit-multiplier behavior unchanged
+
+### Verification
+
+- Host-context verification (outside sandbox, per dotnet-build-policy):
+  - dotnet restore project/OsEngine/OsEngine.csproj --nologo -> success
+  - dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo -> success
+  - dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900 -> success, 0 warnings, 0 errors
+  - dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo -> passed 584/584
+
+## 2026-03-01 - Step 4.2 (nullable annotations) - TradeGridCreator negative runtime martingale guard (#739)
+
+- Applied localized runtime hardening in:
+  - project/OsEngine/OsTrader/Grids/TradeGridCreator.cs
+- Changes:
+  - `CreateMarketMakingGrid(...)` now stops grid expansion if `MartingaleMultiplicator` turns effective `volumeCurrent` non-positive at runtime.
+  - prevents invalid follow-up line generation when direct runtime state bypasses UI/parser guards and provides a negative `MartingaleMultiplicator`.
+- Added/updated tests:
+  - project/OsEngine.Tests/TradeGridPersistenceCoreTests.cs
+    - added `Stage2Step2_2_TradeGridCreator_CreateNewGrid_WithNegativeMartingaleRuntimeValue_ShouldStopAfterFirstLine`.
+- Scope:
+  - runtime hardening only
+  - valid positive martingale behavior unchanged
+
+### Verification
+
+- Host-context verification (outside sandbox, per dotnet-build-policy):
+  - dotnet restore project/OsEngine/OsEngine.csproj --nologo -> success
+  - dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo -> success
+  - dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900 -> success, 0 warnings, 0 errors
+  - dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo -> passed 585/585
+
+## 2026-03-01 - Step 4.2 (nullable annotations) - TradeGridCreator non-positive runtime price guard (#740)
+
+- Applied localized runtime hardening in:
+  - project/OsEngine/OsTrader/Grids/TradeGridCreator.cs
+- Changes:
+  - `CreateMarketMakingGrid(...)` now stops before line creation when effective `priceCurrent` is non-positive.
+  - prevents generating lines with invalid non-positive entry prices when direct runtime state bypasses UI/parser guards and provides a non-positive `FirstPrice`.
+- Added/updated tests:
+  - project/OsEngine.Tests/TradeGridPersistenceCoreTests.cs
+    - added `Stage2Step2_2_TradeGridCreator_CreateNewGrid_WithNegativeFirstPriceRuntimeValue_ShouldNotCreateLines`.
+- Scope:
+  - runtime hardening only
+  - valid positive price grid creation behavior unchanged
+
+### Verification
+
+- Host-context verification (outside sandbox, per dotnet-build-policy):
+  - dotnet restore project/OsEngine/OsEngine.csproj --nologo -> success
+  - dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo -> success
+  - dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900 -> success, 0 warnings, 0 errors
+  - dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo -> passed 586/586
