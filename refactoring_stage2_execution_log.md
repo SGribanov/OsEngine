@@ -16419,3 +16419,61 @@
   - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed `649/649`
 - **Commit:** n/a
 - **Push:** n/a
+
+### Step 4.2 - Nullable Annotations (Incremental Adoption #810-#815)
+
+- **Status:** In Progress (increment block completed)
+- **Plan item:** `refactoring_stage2_plan.md` -> Phase 4 / Step 4.2
+- **Changes (TradeGridStopAndProfit parser hardening):**
+  - Updated `project/OsEngine/OsTrader/Grids/TradeGridStopAndProfit.cs`:
+    - `LoadFromString(...)` now uses guarded enum parsing, guarded positive-decimal parsing, and flexible bool parsing instead of exception-driven conversions.
+    - invalid or non-positive numeric values now preserve the current configured values.
+  - Updated tests in `project/OsEngine.Tests/TradeGridPersistenceCoreTests.cs`:
+    - added `Stage2Step2_2_TradeGridStopAndProfit_LoadFromString_WithMalformedFields_ShouldKeepValuesAndContinueParsing`.
+    - added `Stage2Step2_2_TradeGridStopAndProfit_LoadFromString_WithNonPositiveValues_ShouldKeepExistingValues`.
+    - added `Stage2Step2_2_TradeGridStopAndProfit_LoadFromString_WithFlexibleStopTradingBool_ShouldParse`.
+- **Verification (outside sandbox, per dotnet-build-policy):**
+  - `dotnet restore project/OsEngine/OsEngine.csproj --nologo` -> success
+  - `dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo` -> success
+  - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` -> success, 0 warnings, 0 errors
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed `652/652`
+- **Commit:** n/a
+- **Push:** n/a
+
+### Step 4.2 - Nullable Annotations (Incremental Adoption #816-#819)
+
+- **Status:** In Progress (increment block completed)
+- **Plan item:** `refactoring_stage2_plan.md` -> Phase 4 / Step 4.2
+- **Changes (TradeGridStopAndProfit late-tail regression coverage):**
+  - Updated tests in `project/OsEngine.Tests/TradeGridPersistenceCoreTests.cs`:
+    - added `Stage2Step2_2_TradeGridStopAndProfit_LoadFromString_WithMissingTrailStopRegime_ShouldKeepValueAndContinueTailParsing`.
+    - added `Stage2Step2_2_TradeGridStopAndProfit_LoadFromString_WithInvalidTrailStopType_ShouldKeepValueAndContinueTailParsing`.
+    - added `Stage2Step2_2_TradeGridStopAndProfit_LoadFromString_WithMissingTrailStopValue_ShouldKeepValueAndParseStopTradingBool`.
+    - added `Stage2Step2_2_TradeGridStopAndProfit_LoadFromString_WithInvalidStopTradingBool_ShouldKeepValue`.
+  - Locked partial and malformed behavior in the late tail of the stop/profit parser.
+- **Verification (outside sandbox, per dotnet-build-policy):**
+  - `dotnet restore project/OsEngine/OsEngine.csproj --nologo` -> success
+  - `dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo` -> success
+  - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` -> success, 0 warnings, 0 errors
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed `656/656`
+- **Commit:** n/a
+- **Push:** n/a
+
+### Step 4.2 - Nullable Annotations (Incremental Adoption #820-#823)
+
+- **Status:** In Progress (increment block completed)
+- **Plan item:** `refactoring_stage2_plan.md` -> Phase 4 / Step 4.2
+- **Changes (TradeGridStopAndProfit prefix regression coverage):**
+  - Updated tests in `project/OsEngine.Tests/TradeGridPersistenceCoreTests.cs`:
+    - added `Stage2Step2_2_TradeGridStopAndProfit_LoadFromString_WithMissingProfitRegime_ShouldKeepValueAndContinueParsing`.
+    - added `Stage2Step2_2_TradeGridStopAndProfit_LoadFromString_WithInvalidProfitType_ShouldKeepValueAndContinueParsing`.
+    - added `Stage2Step2_2_TradeGridStopAndProfit_LoadFromString_WithMissingProfitValue_ShouldKeepValueAndContinueParsing`.
+    - added `Stage2Step2_2_TradeGridStopAndProfit_LoadFromString_WithInvalidStopRegime_ShouldKeepValueAndContinueParsing`.
+  - Locked partial and malformed behavior in the prefix part of the stop/profit parser.
+- **Verification (outside sandbox, per dotnet-build-policy):**
+  - `dotnet restore project/OsEngine/OsEngine.csproj --nologo` -> success
+  - `dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo` -> success
+  - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` -> success, 0 warnings, 0 errors
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed `660/660`
+- **Commit:** n/a
+- **Push:** n/a
