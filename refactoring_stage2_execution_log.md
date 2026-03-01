@@ -15124,3 +15124,417 @@
 - **Commit:** n/a
 - **Push:** n/a
 
+
+### Step 4.2 - Nullable Annotations (Incremental Adoption #700)
+
+- **Status:** In Progress (increment completed)
+- **Plan item:** `refactoring_stage2_plan.md` -> Phase 4 / Step 4.2
+- **Changes (TradeGridCreator LoadLines mixed-invalid payload tolerance):**
+  - Updated `project/OsEngine/OsTrader/Grids/TradeGridCreator.cs`:
+    - `LoadLines(...)` now catches per-line parsing failures and continues loading remaining lines.
+    - malformed line entries no longer abort full deserialization flow.
+  - Updated tests in `project/OsEngine.Tests/TradeGridPersistenceCoreTests.cs`:
+    - added `Stage2Step2_2_TradeGridCreator_LoadLines_WithMixedInvalidPayload_ShouldKeepValidLines`.
+    - attached local `LogMessageEvent` subscriber in test to avoid modal UI fallback during expected error logging branch.
+- **Verification (outside sandbox, per dotnet-build-policy):**
+  - `dotnet restore project/OsEngine/OsEngine.csproj --nologo` -> success
+  - `dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo` -> success
+  - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` -> success, 0 warnings, 0 errors
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed `545/545`
+- **Commit:** n/a
+- **Push:** n/a
+
+### Step 4.2 - Nullable Annotations (Incremental Adoption #701)
+
+- **Status:** In Progress (increment completed)
+- **Plan item:** `refactoring_stage2_plan.md` -> Phase 4 / Step 4.2
+- **Changes (TradeGridCreator LoadFromString parser tolerance batch):**
+  - Updated `project/OsEngine/OsTrader/Grids/TradeGridCreator.cs`:
+    - replaced exception-prone numeric conversions with guarded parse checks in `LoadFromString(...)`.
+    - malformed numeric fields now preserve already loaded/default state and do not break subsequent tail parsing.
+    - added helper `TryParseDecimal(...)` with `InvariantCulture`/`CurrentCulture`/`ru-RU` fallback.
+  - Updated tests in `project/OsEngine.Tests/TradeGridPersistenceCoreTests.cs`:
+    - added `Stage2Step2_2_TradeGridCreator_LoadFromString_WithMalformedMiddleFields_ShouldContinueTailParsing`.
+- **Verification (outside sandbox, per dotnet-build-policy):**
+  - `dotnet restore project/OsEngine/OsEngine.csproj --nologo` -> success
+  - `dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo` -> success
+  - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` -> success, 0 warnings, 0 errors
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed `546/546`
+- **Commit:** n/a
+- **Push:** n/a
+
+### Step 4.2 - Nullable Annotations (Incremental Adoption #702)
+
+- **Status:** In Progress (increment completed)
+- **Plan item:** `refactoring_stage2_plan.md` -> Phase 4 / Step 4.2
+- **Changes (TradeGrid stale-NONE order recovery hardening batch):**
+  - Updated `project/OsEngine/OsTrader/Grids/TradeGrid.cs`:
+    - `HaveOrdersWithNoMarketOrders()` now uses local `position` snapshot and safe stale-order cleanup helper.
+    - introduced `TryRemoveLastOrder(List<Order>)` and replaced direct `RemoveAt(Count - 1)` calls in stale-NONE cleanup branches.
+    - `HaveOrdersTryToCancelLastSecond()` aligned to local-snapshot pattern.
+  - Updated tests in `project/OsEngine.Tests/TradeGridPersistenceCoreTests.cs`:
+    - added `Stage2Step2_2_TradeGrid_HaveOrdersWithNoMarketOrders_ShouldRemoveStaleNoneOpenOrder`.
+    - added `Stage2Step2_2_TradeGrid_HaveOrdersWithNoMarketOrders_ShouldRemoveStaleNoneCloseOrder`.
+- **Verification (outside sandbox, per dotnet-build-policy):**
+  - `dotnet restore project/OsEngine/OsEngine.csproj --nologo` -> success
+  - `dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo` -> success
+  - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` -> success, 0 warnings, 0 errors
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed `548/548`
+- **Commit:** n/a
+- **Push:** n/a
+
+### Step 4.2 - Nullable Annotations (Incremental Adoption #703)
+
+- **Status:** In Progress (increment completed)
+- **Plan item:** `refactoring_stage2_plan.md` -> Phase 4 / Step 4.2
+- **Changes (TradeGrid MiddleEntryPrice zero-volume guard):**
+  - Updated `project/OsEngine/OsTrader/Grids/TradeGrid.cs`:
+    - `MiddleEntryPrice` now returns `0` when computed aggregate trade volume equals `0` before `summ / volume`.
+  - Updated tests in `project/OsEngine.Tests/TradeGridPersistenceCoreTests.cs`:
+    - added `Stage2Step2_2_TradeGrid_MiddleEntryPrice_WithZeroTradeVolume_ShouldReturnZero`.
+- **Verification (outside sandbox, per dotnet-build-policy):**
+  - `dotnet restore project/OsEngine/OsEngine.csproj --nologo` -> success
+  - `dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo` -> success
+  - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` -> success, 0 warnings, 0 errors
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed `549/549`
+- **Commit:** n/a
+- **Push:** n/a
+
+### Step 4.2 - Nullable Annotations (Incremental Adoption #704)
+
+- **Status:** In Progress (increment completed)
+- **Plan item:** `refactoring_stage2_plan.md` -> Phase 4 / Step 4.2
+- **Changes (TradeGrid LoadFromString prime parser tolerance batch):**
+  - Updated `project/OsEngine/OsTrader/Grids/TradeGrid.cs`:
+    - replaced exception-prone prime-field conversions with guarded parse checks.
+    - malformed prime fields now keep existing/default state and no longer block tail-section parsing.
+    - added helpers `TryParseIntInvariant(...)` and `TryParseDecimal(...)`.
+  - Updated tests in `project/OsEngine.Tests/TradeGridPersistenceCoreTests.cs`:
+    - added `Stage2Step2_2_TradeGrid_LoadFromString_WithMalformedPrimeFields_ShouldContinueTailParsing`.
+- **Verification (outside sandbox, per dotnet-build-policy):**
+  - `dotnet restore project/OsEngine/OsEngine.csproj --nologo` -> success
+  - `dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo` -> success
+  - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` -> success, 0 warnings, 0 errors
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed `550/550`
+- **Commit:** n/a
+- **Push:** n/a
+
+### Step 4.2 - Nullable Annotations (Incremental Adoption #705)
+
+- **Status:** In Progress (increment completed)
+- **Plan item:** `refactoring_stage2_plan.md` -> Phase 4 / Step 4.2
+- **Changes (TradeGrid last-candle access helper consolidation):**
+  - Updated `project/OsEngine/OsTrader/Grids/TradeGrid.cs`:
+    - added shared helper `TryGetLastCandle(...)`.
+    - switched `TryRemoveWrongOrders()`, `GetOpenOrdersGridHole()`, and `TrySetOpenOrders()` to unified safe last-candle retrieval.
+  - Updated tests in `project/OsEngine.Tests/TradeGridPersistenceCoreTests.cs`:
+    - added `Stage2Step2_2_TradeGrid_OrderHelpers_WithEmptyCandles_ShouldStaySafe`.
+- **Verification (outside sandbox, per dotnet-build-policy):**
+  - `dotnet restore project/OsEngine/OsEngine.csproj --nologo` -> success
+  - `dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo` -> success
+  - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` -> success, 0 warnings, 0 errors
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed `551/551`
+- **Commit:** n/a
+- **Push:** n/a
+
+### Step 4.2 - Nullable Annotations (Incremental Adoption #706)
+
+- **Status:** In Progress (increment completed)
+- **Plan item:** `refactoring_stage2_plan.md` -> Phase 4 / Step 4.2
+- **Changes (TradeGrid optional-tail deterministic fallback parsing):**
+  - Updated `project/OsEngine/OsTrader/Grids/TradeGrid.cs`:
+    - `LoadFromString(...)` tail fields now use explicit guarded parsing with deterministic defaults on malformed inputs.
+    - defaults: `DelayInReal=500`, `CheckMicroVolumes=true`, `MaxDistanceToOrdersPercent=1.5m`, `OpenOrdersMakerOnly=true`.
+  - Updated tests in `project/OsEngine.Tests/TradeGridPersistenceCoreTests.cs`:
+    - added `Stage2Step2_2_TradeGrid_LoadFromString_WithMalformedOptionalTail_ShouldApplyDefaults`.
+- **Verification (outside sandbox, per dotnet-build-policy):**
+  - `dotnet restore project/OsEngine/OsEngine.csproj --nologo` -> success
+  - `dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo` -> success
+  - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` -> success, 0 warnings, 0 errors
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed `552/552`
+- **Commit:** n/a
+- **Push:** n/a
+
+### Step 4.2 - Nullable Annotations (Incremental Adoption #707)
+
+- **Status:** In Progress (increment completed)
+- **Plan item:** `refactoring_stage2_plan.md` -> Phase 4 / Step 4.2
+- **Changes (TradeGridCreator line-parser legacy compatibility hardening):**
+  - Updated `project/OsEngine/OsTrader/Grids/TradeGridCreator.cs`:
+    - `TradeGridLine.SetFromStr(...)` converted to guarded parse with bool success return.
+    - `LoadLines(...)` now appends only successfully parsed lines.
+    - supported legacy 4-field line payload with default `PositionNum = -1`.
+  - Updated tests in `project/OsEngine.Tests/TradeGridPersistenceCoreTests.cs`:
+    - added `Stage2Step2_2_TradeGridCreator_LoadLines_WithLegacyLineWithoutPositionNum_ShouldLoadWithDefaultPosition`.
+- **Verification (outside sandbox, per dotnet-build-policy):**
+  - `dotnet restore project/OsEngine/OsEngine.csproj --nologo` -> success
+  - `dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo` -> success
+  - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` -> success, 0 warnings, 0 errors
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed `553/553`
+- **Commit:** n/a
+- **Push:** n/a
+
+### Step 4.2 - Nullable Annotations (Incremental Adoption #708)
+
+- **Status:** In Progress (increment completed)
+- **Plan item:** `refactoring_stage2_plan.md` -> Phase 4 / Step 4.2
+- **Changes (TradeGrid flexible boolean parser compatibility batch):**
+  - Updated `project/OsEngine/OsTrader/Grids/TradeGrid.cs`:
+    - added `TryParseBoolFlexible(...)`.
+    - `LoadFromString(...)` now accepts `true/false`, `1/0`, `yes/no`, `on/off` for selected bool fields.
+  - Updated tests in `project/OsEngine.Tests/TradeGridPersistenceCoreTests.cs`:
+    - added `Stage2Step2_2_TradeGrid_LoadFromString_WithFlexibleBooleanTail_ShouldParse`.
+- **Verification (outside sandbox, per dotnet-build-policy):**
+  - `dotnet restore project/OsEngine/OsEngine.csproj --nologo` -> success
+  - `dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo` -> success
+  - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` -> success, 0 warnings, 0 errors
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed `554/554`
+- **Commit:** n/a
+- **Push:** n/a
+
+### Step 4.2 - Nullable Annotations (Incremental Adoption #709)
+
+- **Status:** In Progress (increment completed)
+- **Plan item:** `refactoring_stage2_plan.md` -> Phase 4 / Step 4.2
+- **Changes (TradeGrid enum parser case-insensitive compatibility batch):**
+  - Updated `project/OsEngine/OsTrader/Grids/TradeGrid.cs`:
+    - added `TryParseEnumFlexible<TEnum>(...)`.
+    - `LoadFromString(...)` enum fields now parse case-insensitively with guarded assignment.
+  - Updated tests in `project/OsEngine.Tests/TradeGridPersistenceCoreTests.cs`:
+    - added `Stage2Step2_2_TradeGrid_LoadFromString_WithLowercaseEnumFields_ShouldParse`.
+- **Verification (outside sandbox, per dotnet-build-policy):**
+  - `dotnet restore project/OsEngine/OsEngine.csproj --nologo` -> success
+  - `dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo` -> success
+  - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` -> success, 0 warnings, 0 errors
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed `555/555`
+- **Commit:** n/a
+- **Push:** n/a
+
+### Step 4.2 - Nullable Annotations (Incremental Adoption #710)
+
+- **Status:** In Progress (increment completed)
+- **Plan item:** `refactoring_stage2_plan.md` -> Phase 4 / Step 4.2
+- **Changes (TradeGridCreator enum parser case-insensitive compatibility batch):**
+  - Updated `project/OsEngine/OsTrader/Grids/TradeGridCreator.cs`:
+    - added `TryParseEnumFlexible<TEnum>(...)`.
+    - `LoadFromString(...)` enum fields now parse case-insensitively with guarded assignment.
+  - Updated tests in `project/OsEngine.Tests/TradeGridPersistenceCoreTests.cs`:
+    - added `Stage2Step2_2_TradeGridCreator_LoadFromString_WithLowercaseEnumFields_ShouldParse`.
+- **Verification (outside sandbox, per dotnet-build-policy):**
+  - `dotnet restore project/OsEngine/OsEngine.csproj --nologo` -> success
+  - `dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo` -> success
+  - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` -> success, 0 warnings, 0 errors
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed `556/556`
+- **Commit:** n/a
+- **Push:** n/a
+
+### Step 4.2 - Nullable Annotations (Incremental Adoption #711)
+
+- **Status:** In Progress (increment completed)
+- **Plan item:** `refactoring_stage2_plan.md` -> Phase 4 / Step 4.2
+- **Changes (TradeGridCreator line payload whitespace/CRLF parser compatibility batch):**
+  - Updated `project/OsEngine/OsTrader/Grids/TradeGridCreator.cs`:
+    - `LoadLines(...)` trims line fragments and skips whitespace-only entries.
+    - `TradeGridLine.SetFromStr(...)` trims per-field values prior to parsing.
+  - Updated tests in `project/OsEngine.Tests/TradeGridPersistenceCoreTests.cs`:
+    - added `Stage2Step2_2_TradeGridCreator_LoadLines_WithWhitespaceAndCrLf_ShouldParseValidLines`.
+- **Verification (outside sandbox, per dotnet-build-policy):**
+  - `dotnet restore project/OsEngine/OsEngine.csproj --nologo` -> success
+  - `dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo` -> success
+  - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` -> success, 0 warnings, 0 errors
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed `557/557`
+- **Commit:** n/a
+- **Push:** n/a
+
+### Step 4.2 - Nullable Annotations (Incremental Adoption #712)
+
+- **Status:** In Progress (increment completed)
+- **Plan item:** `refactoring_stage2_plan.md` -> Phase 4 / Step 4.2
+- **Changes (TradeGridCreator numeric invariant guards in LoadFromString):**
+  - Updated `project/OsEngine/OsTrader/Grids/TradeGridCreator.cs`:
+    - guarded parsed numeric assignments with invariant checks (`>=0`/`>0` by field semantics).
+    - invalid numeric payload values no longer overwrite safe existing state.
+  - Updated tests in `project/OsEngine.Tests/TradeGridPersistenceCoreTests.cs`:
+    - added `Stage2Step2_2_TradeGridCreator_LoadFromString_WithInvalidNumericInvariants_ShouldKeepSafeValues`.
+- **Verification (outside sandbox, per dotnet-build-policy):**
+  - `dotnet restore project/OsEngine/OsEngine.csproj --nologo` -> success
+  - `dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo` -> success
+  - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` -> success, 0 warnings, 0 errors
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed `558/558`
+- **Commit:** n/a
+- **Push:** n/a
+
+### Step 4.2 - Nullable Annotations (Incremental Adoption #713)
+
+- **Status:** In Progress (increment completed)
+- **Plan item:** `refactoring_stage2_plan.md` -> Phase 4 / Step 4.2
+- **Changes (TradeGrid firstTradeTime parse fallback hardening):**
+  - Updated `project/OsEngine/OsTrader/Grids/TradeGrid.cs`:
+    - introduced `TryParseDateInvariantOrCurrent(...)`.
+    - `LoadFromString(...)` now assigns `_firstTradeTime` only on successful parse.
+  - Updated tests in `project/OsEngine.Tests/TradeGridPersistenceCoreTests.cs`:
+    - added `Stage2Step2_2_TradeGrid_LoadFromString_WithMalformedFirstTradeTime_ShouldKeepExistingValue`.
+- **Verification (outside sandbox, per dotnet-build-policy):**
+  - `dotnet restore project/OsEngine/OsEngine.csproj --nologo` -> success
+  - `dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo` -> success
+  - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` -> success, 0 warnings, 0 errors
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed `559/559`
+- **Commit:** n/a
+- **Push:** n/a
+
+### Step 4.2 - Nullable Annotations (Incremental Adoption #714)
+
+- **Status:** In Progress (increment completed)
+- **Plan item:** `refactoring_stage2_plan.md` -> Phase 4 / Step 4.2
+- **Changes (TradeGrid prime numeric invariant guards in LoadFromString):**
+  - Updated `project/OsEngine/OsTrader/Grids/TradeGrid.cs`:
+    - added `>=0` guards for prime counters/limits.
+    - negative `DelayInReal` now falls back to `500`.
+    - negative `MaxDistanceToOrdersPercent` now falls back to `1.5m`.
+  - Updated tests in `project/OsEngine.Tests/TradeGridPersistenceCoreTests.cs`:
+    - added `Stage2Step2_2_TradeGrid_LoadFromString_WithNegativeNumericLimits_ShouldKeepSafeValues`.
+- **Verification (outside sandbox, per dotnet-build-policy):**
+  - `dotnet restore project/OsEngine/OsEngine.csproj --nologo` -> success
+  - `dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo` -> success
+  - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` -> success, 0 warnings, 0 errors
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed `560/560`
+- **Commit:** n/a
+- **Push:** n/a
+
+### Step 4.2 - Nullable Annotations (Incremental Adoption #715)
+
+- **Status:** In Progress (increment completed)
+- **Plan item:** `refactoring_stage2_plan.md` -> Phase 4 / Step 4.2
+- **Changes (TradeGridLine PositionNum parser compatibility hardening):**
+  - Updated `project/OsEngine/OsTrader/Grids/TradeGridCreator.cs`:
+    - `PositionNum` parsing switched to flexible int parser with trim and culture fallback.
+  - Updated tests in `project/OsEngine.Tests/TradeGridPersistenceCoreTests.cs`:
+    - added `Stage2Step2_2_TradeGridCreator_LoadLines_WithSpacedPositionNum_ShouldParse`.
+- **Verification (outside sandbox, per dotnet-build-policy):**
+  - `dotnet restore project/OsEngine/OsEngine.csproj --nologo` -> success
+  - `dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo` -> success
+  - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` -> success, 0 warnings, 0 errors
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed `561/561`
+- **Commit:** n/a
+- **Push:** n/a
+
+### Step 4.2 - Nullable Annotations (Incremental Adoption #716)
+
+- **Status:** In Progress (increment completed)
+- **Plan item:** `refactoring_stage2_plan.md` -> Phase 4 / Step 4.2
+- **Changes (TradeGridCreator TradeAsset parser normalization batch):**
+  - Updated `project/OsEngine/OsTrader/Grids/TradeGridCreator.cs`:
+    - `TradeAssetInPortfolio` payload value is trimmed before assignment.
+    - empty/whitespace trimmed asset no longer overwrites current value.
+  - Updated tests in `project/OsEngine.Tests/TradeGridPersistenceCoreTests.cs`:
+    - added `Stage2Step2_2_TradeGridCreator_LoadFromString_TradeAssetWithWhitespace_ShouldBeTrimmed`.
+- **Verification (outside sandbox, per dotnet-build-policy):**
+  - `dotnet restore project/OsEngine/OsEngine.csproj --nologo` -> success
+  - `dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo` -> success
+  - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` -> success, 0 warnings, 0 errors
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed `562/562`
+- **Commit:** n/a
+- **Push:** n/a
+
+### Step 4.2 - Nullable Annotations (Incremental Adoption #717)
+
+- **Status:** In Progress (increment completed)
+- **Plan item:** `refactoring_stage2_plan.md` -> Phase 4 / Step 4.2
+- **Changes (TradeGridCreator full-token whitespace normalization in LoadFromString):**
+  - Updated `project/OsEngine/OsTrader/Grids/TradeGridCreator.cs`:
+    - added pre-trim normalization pass for all payload tokens after split.
+  - Updated tests in `project/OsEngine.Tests/TradeGridPersistenceCoreTests.cs`:
+    - added `Stage2Step2_2_TradeGridCreator_LoadFromString_WithMixedWhitespaceTokens_ShouldParse`.
+- **Verification (outside sandbox, per dotnet-build-policy):**
+  - `dotnet restore project/OsEngine/OsEngine.csproj --nologo` -> success
+  - `dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo` -> success
+  - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` -> success, 0 warnings, 0 errors
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed `563/563`
+- **Commit:** n/a
+- **Push:** n/a
+
+### Step 4.2 - Nullable Annotations (Incremental Adoption #718)
+
+- **Status:** In Progress (increment completed)
+- **Plan item:** `refactoring_stage2_plan.md` -> Phase 4 / Step 4.2
+- **Changes (TradeGrid full-token whitespace normalization in LoadFromString):**
+  - Updated `project/OsEngine/OsTrader/Grids/TradeGrid.cs`:
+    - added pre-trim normalization for section and prime tokens before parsing.
+  - Updated tests in `project/OsEngine.Tests/TradeGridPersistenceCoreTests.cs`:
+    - added `Stage2Step2_2_TradeGrid_LoadFromString_WithMixedWhitespaceTokens_ShouldParse`.
+- **Verification (outside sandbox, per dotnet-build-policy):**
+  - `dotnet restore project/OsEngine/OsEngine.csproj --nologo` -> success
+  - `dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo` -> success
+  - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` -> success, 0 warnings, 0 errors
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed `564/564`
+- **Commit:** n/a
+- **Push:** n/a
+
+### Step 4.2 - Nullable Annotations (Incremental Adoption #719)
+
+- **Status:** In Progress (increment completed)
+- **Plan item:** `refactoring_stage2_plan.md` -> Phase 4 / Step 4.2
+- **Changes (TradeGrid whitespace-only section skip guards in LoadFromString):**
+  - Updated `project/OsEngine/OsTrader/Grids/TradeGrid.cs`:
+    - added `IsPayloadSegmentPresent(...)`.
+    - subcomponent `LoadFromString(...)` calls now run only for non-empty section tokens.
+  - Updated tests in `project/OsEngine.Tests/TradeGridPersistenceCoreTests.cs`:
+    - added `Stage2Step2_2_TradeGrid_LoadFromString_WithWhitespaceOnlySections_ShouldSkipSubcomponentParsing`.
+- **Verification (outside sandbox, per dotnet-build-policy):**
+  - `dotnet restore project/OsEngine/OsEngine.csproj --nologo` -> success
+  - `dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo` -> success
+  - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` -> success, 0 warnings, 0 errors
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed `565/565`
+- **Commit:** n/a
+- **Push:** n/a
+
+### Step 4.2 - Nullable Annotations (Incremental Adoption #720)
+
+- **Status:** In Progress (increment completed)
+- **Plan item:** `refactoring_stage2_plan.md` -> Phase 4 / Step 4.2
+- **Changes (TradeGrid Number/FirstPrice invariant guards in LoadFromString):**
+  - Updated `project/OsEngine/OsTrader/Grids/TradeGrid.cs`:
+    - added `>= 0` guards for `Number` and `_firstTradePrice` assignments from payload.
+  - Updated tests in `project/OsEngine.Tests/TradeGridPersistenceCoreTests.cs`:
+    - added `Stage2Step2_2_TradeGrid_LoadFromString_WithNegativeNumberAndFirstPrice_ShouldKeepSafeValues`.
+- **Verification (outside sandbox, per dotnet-build-policy):**
+  - `dotnet restore project/OsEngine/OsEngine.csproj --nologo` -> success
+  - `dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo` -> success
+  - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` -> success, 0 warnings, 0 errors
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed `566/566`
+- **Commit:** n/a
+- **Push:** n/a
+
+### Step 4.2 - Nullable Annotations (Incremental Adoption #721)
+
+- **Status:** In Progress (increment completed)
+- **Plan item:** `refactoring_stage2_plan.md` -> Phase 4 / Step 4.2
+- **Changes (TradeGridLine non-negative invariant guard in parser):**
+  - Updated `project/OsEngine/OsTrader/Grids/TradeGridCreator.cs`:
+    - `TradeGridLine.SetFromStr(...)` now rejects negative `PriceEnter`, `Volume`, or `PriceExit`.
+  - Updated tests in `project/OsEngine.Tests/TradeGridPersistenceCoreTests.cs`:
+    - added `Stage2Step2_2_TradeGridCreator_LoadLines_WithNegativeLineValues_ShouldSkipInvalidLine`.
+- **Verification (outside sandbox, per dotnet-build-policy):**
+  - `dotnet restore project/OsEngine/OsEngine.csproj --nologo` -> success
+  - `dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo` -> success
+  - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` -> success, 0 warnings, 0 errors
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed `567/567`
+- **Commit:** n/a
+- **Push:** n/a
+
+### Step 4.2 - Nullable Annotations (Incremental Adoption #722)
+
+- **Status:** In Progress (increment completed)
+- **Plan item:** `refactoring_stage2_plan.md` -> Phase 4 / Step 4.2
+- **Changes (TradeGridLine PositionNum lower-bound invariant guard):**
+  - Updated `project/OsEngine/OsTrader/Grids/TradeGridCreator.cs`:
+    - `PositionNum` in `SetFromStr(...)` now requires `>= -1`.
+  - Updated tests in `project/OsEngine.Tests/TradeGridPersistenceCoreTests.cs`:
+    - added `Stage2Step2_2_TradeGridCreator_LoadLines_WithInvalidNegativePositionNum_ShouldSkipInvalidLine`.
+- **Verification (outside sandbox, per dotnet-build-policy):**
+  - `dotnet restore project/OsEngine/OsEngine.csproj --nologo` -> success
+  - `dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo` -> success
+  - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` -> success, 0 warnings, 0 errors
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed `568/568`
+- **Commit:** n/a
+- **Push:** n/a
