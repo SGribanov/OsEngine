@@ -16241,3 +16241,62 @@
   - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed `613/613`
 - **Commit:** n/a
 - **Push:** n/a
+
+### Step 4.2 - Nullable Annotations (Incremental Adoption #768-#771)
+
+- **Status:** In Progress (increment block completed)
+- **Plan item:** `refactoring_stage2_plan.md` -> Phase 4 / Step 4.2
+- **Changes (TrailingUp zero-value runtime regression coverage):**
+  - Updated tests in `project/OsEngine.Tests/TradeGridPersistenceCoreTests.cs`:
+    - added `Stage2Step2_2_TrailingUp_TryTrailingGrid_WithZeroUpStepRuntimeValue_ShouldNotShiftGrid`.
+    - added `Stage2Step2_2_TrailingUp_TryTrailingGrid_WithZeroUpLimitRuntimeValue_ShouldNotShiftGrid`.
+    - added `Stage2Step2_2_TrailingUp_TryTrailingGrid_WithZeroDownStepRuntimeValue_ShouldNotShiftGrid`.
+    - added `Stage2Step2_2_TrailingUp_TryTrailingGrid_WithZeroDownLimitRuntimeValue_ShouldNotShiftGrid`.
+  - Locked zero-valued runtime `step/limit` behavior across both trailing directions.
+- **Verification (outside sandbox, per dotnet-build-policy):**
+  - `dotnet restore project/OsEngine/OsEngine.csproj --nologo` -> success
+  - `dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo` -> success
+  - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` -> success, 0 warnings, 0 errors
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed `617/617`
+- **Commit:** n/a
+- **Push:** n/a
+
+### Step 4.2 - Nullable Annotations (Incremental Adoption #772-#775)
+
+- **Status:** In Progress (increment block completed)
+- **Plan item:** `refactoring_stage2_plan.md` -> Phase 4 / Step 4.2
+- **Changes (TrailingUp zero-value parser guards):**
+  - Updated `project/OsEngine/OsTrader/Grids/TrailingUp.cs`:
+    - `LoadFromString(...)` now ignores zero-valued `TrailingUpStep`, `TrailingUpLimit`, `TrailingDownStep`, and `TrailingDownLimit`.
+    - this aligns parser behavior with the existing runtime `> 0` invariant in `TryTrailingGrid()`.
+  - Updated tests in `project/OsEngine.Tests/TradeGridPersistenceCoreTests.cs`:
+    - added `Stage2Step2_2_TrailingUp_LoadFromString_WithZeroTrailingUpStep_ShouldKeepExistingValue`.
+    - added `Stage2Step2_2_TrailingUp_LoadFromString_WithZeroTrailingUpLimit_ShouldKeepExistingValue`.
+    - added `Stage2Step2_2_TrailingUp_LoadFromString_WithZeroTrailingDownStep_ShouldKeepExistingValue`.
+    - added `Stage2Step2_2_TrailingUp_LoadFromString_WithZeroTrailingDownLimit_ShouldKeepExistingValue`.
+- **Verification (outside sandbox, per dotnet-build-policy):**
+  - `dotnet restore project/OsEngine/OsEngine.csproj --nologo` -> success
+  - `dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo` -> success
+  - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` -> success, 0 warnings, 0 errors
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed `621/621`
+- **Commit:** n/a
+- **Push:** n/a
+
+### Step 4.2 - Nullable Annotations (Incremental Adoption #776-#779)
+
+- **Status:** In Progress (increment block completed)
+- **Plan item:** `refactoring_stage2_plan.md` -> Phase 4 / Step 4.2
+- **Changes (TrailingUp flexible bool regression coverage):**
+  - Updated tests in `project/OsEngine.Tests/TradeGridPersistenceCoreTests.cs`:
+    - added `Stage2Step2_2_TrailingUp_LoadFromString_WithFlexiblePrimaryBools_ShouldParse`.
+    - added `Stage2Step2_2_TrailingUp_LoadFromString_WithFlexibleMoveFlagBools_ShouldParse`.
+    - added `Stage2Step2_2_TrailingUp_LoadFromString_WithNumericPrimaryBools_ShouldParse`.
+    - added `Stage2Step2_2_TrailingUp_LoadFromString_WithNumericMoveFlagBools_ShouldParse`.
+  - Locked mixed legacy and numeric bool forms across primary trailing toggles and move-flag tail fields.
+- **Verification (outside sandbox, per dotnet-build-policy):**
+  - `dotnet restore project/OsEngine/OsEngine.csproj --nologo` -> success
+  - `dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo` -> success
+  - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` -> success, 0 warnings, 0 errors
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed `625/625`
+- **Commit:** n/a
+- **Push:** n/a
