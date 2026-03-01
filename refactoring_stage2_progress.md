@@ -14755,3 +14755,261 @@
   - dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo -> success
   - dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900 -> success, 0 warnings, 0 errors
   - dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo -> passed 568/568
+
+## 2026-03-01 - Step 4.2 (nullable annotations) - TradeGridLine side invariant guard in parser (#723)
+
+- Applied localized nullable-safe hardening in:
+  - project/OsEngine/OsTrader/Grids/TradeGridCreator.cs
+- Changes:
+  - `TradeGridLine.SetFromStr(...)` now accepts only trading sides (`Buy`/`Sell`).
+  - payload lines with non-trading side values (e.g., `None`) are rejected and skipped by `LoadLines(...)`.
+- Added/updated tests:
+  - project/OsEngine.Tests/TradeGridPersistenceCoreTests.cs
+    - added `Stage2Step2_2_TradeGridCreator_LoadLines_WithInvalidSide_ShouldSkipInvalidLine`.
+- Scope:
+  - parser/runtime safety hardening only
+  - no behavior changes for valid line side values.
+
+### Verification
+
+- Host-context verification (outside sandbox, per dotnet-build-policy):
+  - dotnet restore project/OsEngine/OsEngine.csproj --nologo -> success
+  - dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo -> success
+  - dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900 -> success, 0 warnings, 0 errors
+  - dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo -> passed 569/569
+
+## 2026-03-01 - Step 4.2 (nullable annotations) - TradeGrid RegimeLogicEntry range guard in LoadFromString (#724)
+
+- Applied localized nullable-safe hardening in:
+  - project/OsEngine/OsTrader/Grids/TradeGrid.cs
+- Changes:
+  - `LoadFromString(...)` now assigns `RegimeLogicEntry` only for known valid enum members:
+    - `OnTrade`
+    - `OncePerSecond`
+  - out-of-range numeric enum payloads no longer overwrite current runtime entry regime.
+- Added/updated tests:
+  - project/OsEngine.Tests/TradeGridPersistenceCoreTests.cs
+    - added `Stage2Step2_2_TradeGrid_LoadFromString_WithOutOfRangeRegimeLogicEntry_ShouldKeepExistingValue`.
+- Scope:
+  - parser/runtime safety hardening only
+  - no behavior changes for valid regime logic values.
+
+### Verification
+
+- Host-context verification (outside sandbox, per dotnet-build-policy):
+  - dotnet restore project/OsEngine/OsEngine.csproj --nologo -> success
+  - dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo -> success
+  - dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900 -> success, 0 warnings, 0 errors
+  - dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo -> passed 570/570
+
+## 2026-03-01 - Step 4.2 (nullable annotations) - TradeGrid GridType range guard in LoadFromString (#725)
+
+- Applied localized nullable-safe hardening in:
+  - project/OsEngine/OsTrader/Grids/TradeGrid.cs
+- Changes:
+  - `LoadFromString(...)` now assigns `GridType` only for known valid enum members:
+    - `MarketMaking`
+    - `OpenPosition`
+  - out-of-range numeric enum payloads no longer overwrite current `GridType`.
+- Added/updated tests:
+  - project/OsEngine.Tests/TradeGridPersistenceCoreTests.cs
+    - added `Stage2Step2_2_TradeGrid_LoadFromString_WithOutOfRangeGridType_ShouldKeepExistingValue`.
+- Scope:
+  - parser/runtime safety hardening only
+  - no behavior changes for valid grid type values.
+
+### Verification
+
+- Host-context verification (outside sandbox, per dotnet-build-policy):
+  - dotnet restore project/OsEngine/OsEngine.csproj --nologo -> success
+  - dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo -> success
+  - dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900 -> success, 0 warnings, 0 errors
+  - dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo -> passed 571/571
+
+## 2026-03-01 - Step 4.2 (nullable annotations) - TradeGrid Regime range guard in LoadFromString (#726)
+
+- Applied localized nullable-safe hardening in:
+  - project/OsEngine/OsTrader/Grids/TradeGrid.cs
+- Changes:
+  - `LoadFromString(...)` now assigns `Regime` only for known valid enum members:
+    - `Off`
+    - `OffAndCancelOrders`
+    - `On`
+    - `CloseOnly`
+    - `CloseForced`
+  - out-of-range numeric enum payloads no longer overwrite current regime.
+- Added/updated tests:
+  - project/OsEngine.Tests/TradeGridPersistenceCoreTests.cs
+    - added `Stage2Step2_2_TradeGrid_LoadFromString_WithOutOfRangeRegime_ShouldKeepExistingValue`.
+- Scope:
+  - parser/runtime safety hardening only
+  - no behavior changes for valid regime payload values.
+
+### Verification
+
+- Host-context verification (outside sandbox, per dotnet-build-policy):
+  - dotnet restore project/OsEngine/OsEngine.csproj --nologo -> success
+  - dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo -> success
+  - dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900 -> success, 0 warnings, 0 errors
+  - dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo -> passed 572/572
+
+## 2026-03-01 - Step 4.2 (nullable annotations) - TradeGrid DelayInReal positive-bound guard in LoadFromString (#727)
+
+- Applied localized nullable-safe hardening in:
+  - project/OsEngine/OsTrader/Grids/TradeGrid.cs
+- Changes:
+  - `LoadFromString(...)` delay tail now accepts only strictly positive `DelayInReal` values.
+  - zero or negative delay payload values now fall back to safe default `500`.
+- Added/updated tests:
+  - project/OsEngine.Tests/TradeGridPersistenceCoreTests.cs
+    - added `Stage2Step2_2_TradeGrid_LoadFromString_WithZeroDelay_ShouldApplyDefault`.
+- Scope:
+  - parser/runtime safety hardening only
+  - no behavior changes for valid positive delay payload values.
+
+### Verification
+
+- Host-context verification (outside sandbox, per dotnet-build-policy):
+  - dotnet restore project/OsEngine/OsEngine.csproj --nologo -> success
+  - dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo -> success
+  - dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900 -> success, 0 warnings, 0 errors
+  - dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo -> passed 573/573
+
+## 2026-03-01 - Step 4.2 (nullable annotations) - TradeGrid CheckMicroVolumes invalid-bool preservation guard (#728)
+
+- Applied localized nullable-safe hardening in:
+  - project/OsEngine/OsTrader/Grids/TradeGrid.cs
+- Changes:
+  - in `LoadFromString(...)`, when delay tail is present but `CheckMicroVolumes` token is malformed, current `CheckMicroVolumes` value is now preserved.
+  - keeps fallback-to-default behavior for missing delay/micro tail unchanged.
+- Added/updated tests:
+  - project/OsEngine.Tests/TradeGridPersistenceCoreTests.cs
+    - added `Stage2Step2_2_TradeGrid_LoadFromString_WithInvalidMicroVolumesBool_ShouldKeepExistingValue`.
+    - updated expectations in existing malformed/legacy tail tests to match intended parser semantics.
+- Scope:
+  - parser/runtime safety hardening only
+  - no behavior changes for valid boolean payload values.
+
+### Verification
+
+- Host-context verification (outside sandbox, per dotnet-build-policy):
+  - dotnet restore project/OsEngine/OsEngine.csproj --nologo -> success
+  - dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo -> success
+  - dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900 -> success, 0 warnings, 0 errors
+  - dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo -> passed 574/574
+
+## 2026-03-01 - Step 4.2 (nullable annotations) - TradeGrid optional-tail malformed-vs-missing fallback alignment (#729)
+
+- Applied localized nullable-safe hardening in:
+  - project/OsEngine/OsTrader/Grids/TradeGrid.cs
+- Changes:
+  - aligned optional-tail behavior for `MaxDistanceToOrdersPercent` and `OpenOrdersMakerOnly` in `LoadFromString(...)`:
+    - **missing/empty tail token** -> apply defaults (`1.5m` / `true`)
+    - **malformed tail token** -> keep current runtime value
+  - preserves strict fallback defaults for missing data while avoiding unnecessary overrides on malformed-but-present tokens.
+- Added/updated tests:
+  - project/OsEngine.Tests/TradeGridPersistenceCoreTests.cs
+    - updated `...WithMalformedOptionalTail_ShouldApplyDefaults` expectations to match malformed-token preservation semantics.
+    - added `Stage2Step2_2_TradeGrid_LoadFromString_WithMissingDistanceAndMakerOnlyTail_ShouldApplyDefaults`.
+- Scope:
+  - parser/runtime hardening only
+  - no behavior changes for valid payloads.
+
+### Verification
+
+- Host-context verification (outside sandbox, per dotnet-build-policy):
+  - dotnet restore project/OsEngine/OsEngine.csproj --nologo -> success
+  - dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo -> success
+  - dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900 -> success, 0 warnings, 0 errors
+  - dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo -> passed 575/575
+
+## 2026-03-01 - Step 4.2 (nullable annotations) - TradeGridCreator enum range guards in LoadFromString (#730)
+
+- Applied localized nullable-safe hardening in:
+  - project/OsEngine/OsTrader/Grids/TradeGridCreator.cs
+- Changes:
+  - `LoadFromString(...)` enum assignments now accept only valid business values:
+    - `GridSide` -> `Side.Buy`/`Side.Sell`
+    - `TypeStep`/`TypeProfit` -> `TradeGridValueType.Absolute`/`TradeGridValueType.Percent`
+    - `TypeVolume` -> `Contracts`/`ContractCurrency`/`DepositPercent`
+  - out-of-range numeric enum payload tokens no longer overwrite current runtime configuration.
+- Added/updated tests:
+  - project/OsEngine.Tests/TradeGridPersistenceCoreTests.cs
+    - added `Stage2Step2_2_TradeGridCreator_LoadFromString_WithOutOfRangeEnumFields_ShouldKeepExistingValues`.
+- Scope:
+  - parser/runtime hardening only
+  - no behavior changes for valid enum payload values.
+
+### Verification
+
+- Host-context verification (outside sandbox, per dotnet-build-policy):
+  - dotnet restore project/OsEngine/OsEngine.csproj --nologo -> success
+  - dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo -> success
+  - dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900 -> success, 0 warnings, 0 errors
+  - dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo -> passed 576/576
+
+## 2026-03-01 - Step 4.2 (nullable annotations) - TradeGridCreator FirstPrice non-negative guard in LoadFromString (#731)
+
+- Applied localized nullable-safe hardening in:
+  - project/OsEngine/OsTrader/Grids/TradeGridCreator.cs
+- Changes:
+  - `LoadFromString(...)` now applies `FirstPrice` only for non-negative payload values.
+  - negative `FirstPrice` payload token no longer overwrites current runtime value.
+- Added/updated tests:
+  - project/OsEngine.Tests/TradeGridPersistenceCoreTests.cs
+    - added `Stage2Step2_2_TradeGridCreator_LoadFromString_WithNegativeFirstPrice_ShouldKeepExistingValue`.
+- Scope:
+  - parser/runtime hardening only
+  - no behavior changes for valid non-negative payload values.
+
+### Verification
+
+- Host-context verification (outside sandbox, per dotnet-build-policy):
+  - dotnet restore project/OsEngine/OsEngine.csproj --nologo -> success
+  - dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo -> success
+  - dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900 -> success, 0 warnings, 0 errors
+  - dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo -> passed 577/577
+
+## 2026-03-01 - Step 4.2 (nullable annotations) - TradeGridCreator LineCountStart positive-bound guard in LoadFromString (#732)
+
+- Applied localized nullable-safe hardening in:
+  - project/OsEngine/OsTrader/Grids/TradeGridCreator.cs
+- Changes:
+  - `LoadFromString(...)` now applies `LineCountStart` only for strictly positive payload values.
+  - zero/negative payload value no longer overwrites current runtime `LineCountStart`.
+- Added/updated tests:
+  - project/OsEngine.Tests/TradeGridPersistenceCoreTests.cs
+    - added `Stage2Step2_2_TradeGridCreator_LoadFromString_WithZeroLineCountStart_ShouldKeepExistingValue`.
+- Scope:
+  - parser/runtime hardening only
+  - no behavior changes for valid positive payload values.
+
+### Verification
+
+- Host-context verification (outside sandbox, per dotnet-build-policy):
+  - dotnet restore project/OsEngine/OsEngine.csproj --nologo -> success
+  - dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo -> success
+  - dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900 -> success, 0 warnings, 0 errors
+  - dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo -> passed 578/578
+
+## 2026-03-01 - Step 4.2 (nullable annotations) - TradeGridCreator LineStep positive-bound guard in LoadFromString (#733)
+
+- Applied localized nullable-safe hardening in:
+  - project/OsEngine/OsTrader/Grids/TradeGridCreator.cs
+- Changes:
+  - `LoadFromString(...)` now applies `LineStep` only for strictly positive payload values.
+  - zero/negative payload value no longer overwrites current runtime `LineStep`.
+- Added/updated tests:
+  - project/OsEngine.Tests/TradeGridPersistenceCoreTests.cs
+    - added `Stage2Step2_2_TradeGridCreator_LoadFromString_WithZeroLineStep_ShouldKeepExistingValue`.
+- Scope:
+  - parser/runtime hardening only
+  - no behavior changes for valid positive payload values.
+
+### Verification
+
+- Host-context verification (outside sandbox, per dotnet-build-policy):
+  - dotnet restore project/OsEngine/OsEngine.csproj --nologo -> success
+  - dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo -> success
+  - dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900 -> success, 0 warnings, 0 errors
+  - dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo -> passed 579/579

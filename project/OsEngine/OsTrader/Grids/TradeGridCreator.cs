@@ -94,21 +94,28 @@ namespace OsEngine.OsTrader.Grids
                 {
                     if (TryParseEnumFlexible(values[0], out Side parsedValue))
                     {
-                        GridSide = parsedValue;
+                        if (parsedValue == Side.Buy
+                            || parsedValue == Side.Sell)
+                        {
+                            GridSide = parsedValue;
+                        }
                     }
                 }
                 if (values.Length > 1 && string.IsNullOrWhiteSpace(values[1]) == false)
                 {
                     if (TryParseDecimal(values[1], out decimal parsedValue))
                     {
-                        FirstPrice = parsedValue;
+                        if (parsedValue >= 0)
+                        {
+                            FirstPrice = parsedValue;
+                        }
                     }
                 }
                 if (values.Length > 2 && string.IsNullOrWhiteSpace(values[2]) == false)
                 {
                     if (int.TryParse(values[2], NumberStyles.Integer, CultureInfo.InvariantCulture, out int parsedValue))
                     {
-                        if (parsedValue >= 0)
+                        if (parsedValue > 0)
                         {
                             LineCountStart = parsedValue;
                         }
@@ -118,14 +125,18 @@ namespace OsEngine.OsTrader.Grids
                 {
                     if (TryParseEnumFlexible(values[3], out TradeGridValueType parsedValue))
                     {
-                        TypeStep = parsedValue;
+                        if (parsedValue == TradeGridValueType.Absolute
+                            || parsedValue == TradeGridValueType.Percent)
+                        {
+                            TypeStep = parsedValue;
+                        }
                     }
                 }
                 if (values.Length > 4 && string.IsNullOrWhiteSpace(values[4]) == false)
                 {
                     if (TryParseDecimal(values[4], out decimal parsedValue))
                     {
-                        if (parsedValue >= 0)
+                        if (parsedValue > 0)
                         {
                             LineStep = parsedValue;
                         }
@@ -145,7 +156,11 @@ namespace OsEngine.OsTrader.Grids
                 {
                     if (TryParseEnumFlexible(values[6], out TradeGridValueType parsedValue))
                     {
-                        TypeProfit = parsedValue;
+                        if (parsedValue == TradeGridValueType.Absolute
+                            || parsedValue == TradeGridValueType.Percent)
+                        {
+                            TypeProfit = parsedValue;
+                        }
                     }
                 }
                 if (values.Length > 7 && string.IsNullOrWhiteSpace(values[7]) == false)
@@ -172,7 +187,12 @@ namespace OsEngine.OsTrader.Grids
                 {
                     if (TryParseEnumFlexible(values[9], out TradeGridVolumeType parsedValue))
                     {
-                        TypeVolume = parsedValue;
+                        if (parsedValue == TradeGridVolumeType.Contracts
+                            || parsedValue == TradeGridVolumeType.ContractCurrency
+                            || parsedValue == TradeGridVolumeType.DepositPercent)
+                        {
+                            TypeVolume = parsedValue;
+                        }
                     }
                 }
                 if (values.Length > 10 && string.IsNullOrWhiteSpace(values[10]) == false)
@@ -781,6 +801,10 @@ namespace OsEngine.OsTrader.Grids
                 return false;
             }
             if (Enum.TryParse(sideRaw, true, out Side side) == false)
+            {
+                return false;
+            }
+            if (side != Side.Buy && side != Side.Sell)
             {
                 return false;
             }

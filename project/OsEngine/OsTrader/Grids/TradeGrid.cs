@@ -219,21 +219,36 @@ namespace OsEngine.OsTrader.Grids
                 {
                     if (TryParseEnumFlexible(values[1], out TradeGridPrimeType parsedValue))
                     {
-                        GridType = parsedValue;
+                        if (parsedValue == TradeGridPrimeType.MarketMaking
+                            || parsedValue == TradeGridPrimeType.OpenPosition)
+                        {
+                            GridType = parsedValue;
+                        }
                     }
                 }
                 if (values.Length > 2 && string.IsNullOrWhiteSpace(values[2]) == false)
                 {
                     if (TryParseEnumFlexible(values[2], out TradeGridRegime parsedValue))
                     {
-                        _regime = parsedValue;
+                        if (parsedValue == TradeGridRegime.Off
+                            || parsedValue == TradeGridRegime.OffAndCancelOrders
+                            || parsedValue == TradeGridRegime.On
+                            || parsedValue == TradeGridRegime.CloseOnly
+                            || parsedValue == TradeGridRegime.CloseForced)
+                        {
+                            _regime = parsedValue;
+                        }
                     }
                 }
                 if (values.Length > 3 && string.IsNullOrWhiteSpace(values[3]) == false)
                 {
                     if (TryParseEnumFlexible(values[3], out TradeGridLogicEntryRegime parsedValue))
                     {
-                        RegimeLogicEntry = parsedValue;
+                        if (parsedValue == TradeGridLogicEntryRegime.OnTrade
+                            || parsedValue == TradeGridLogicEntryRegime.OncePerSecond)
+                        {
+                            RegimeLogicEntry = parsedValue;
+                        }
                     }
                 }
                 if (values.Length > 4 && string.IsNullOrWhiteSpace(values[4]) == false)
@@ -312,7 +327,7 @@ namespace OsEngine.OsTrader.Grids
                 {
                     if (TryParseIntInvariant(values[11], out int delayParsed))
                     {
-                        if (delayParsed >= 0)
+                        if (delayParsed > 0)
                         {
                             DelayInReal = delayParsed;
                         }
@@ -330,21 +345,20 @@ namespace OsEngine.OsTrader.Grids
                     {
                         CheckMicroVolumes = microParsed;
                     }
-                    else
-                    {
-                        CheckMicroVolumes = true;
-                    }
                 }
 
                 if (values.Length <= 13
-                    || string.IsNullOrWhiteSpace(values[13])
-                    || TryParseDecimal(values[13], out decimal maxDistanceParsed) == false)
+                    || string.IsNullOrWhiteSpace(values[13]))
                 {
                     MaxDistanceToOrdersPercent = 1.5m;
                 }
                 else
                 {
-                    if (maxDistanceParsed >= 0)
+                    if (TryParseDecimal(values[13], out decimal maxDistanceParsed) == false)
+                    {
+                        // Keep current value on malformed token.
+                    }
+                    else if (maxDistanceParsed >= 0)
                     {
                         MaxDistanceToOrdersPercent = maxDistanceParsed;
                     }
@@ -355,14 +369,17 @@ namespace OsEngine.OsTrader.Grids
                 }
 
                 if (values.Length <= 14
-                    || string.IsNullOrWhiteSpace(values[14])
-                    || TryParseBoolFlexible(values[14], out bool makerOnlyParsed) == false)
+                    || string.IsNullOrWhiteSpace(values[14]))
                 {
                     OpenOrdersMakerOnly = true;
                 }
                 else
                 {
-                    OpenOrdersMakerOnly = makerOnlyParsed;
+                    if (TryParseBoolFlexible(values[14], out bool makerOnlyParsed))
+                    {
+                        OpenOrdersMakerOnly = makerOnlyParsed;
+                    }
+                    // Keep current value on malformed token.
                 }
 
                 // non trade periods

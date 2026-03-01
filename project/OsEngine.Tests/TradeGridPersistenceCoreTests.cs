@@ -467,6 +467,72 @@ public class TradeGridPersistenceCoreTests
     }
 
     [Fact]
+    public void Stage2Step2_2_TradeGridCreator_LoadFromString_WithOutOfRangeEnumFields_ShouldKeepExistingValues()
+    {
+        TradeGridCreator creator = new TradeGridCreator
+        {
+            GridSide = Side.Sell,
+            TypeStep = TradeGridValueType.Absolute,
+            TypeProfit = TradeGridValueType.Percent,
+            TypeVolume = TradeGridVolumeType.ContractCurrency
+        };
+
+        Exception? error = Record.Exception(() => creator.LoadFromString(
+            "999@100@3@999@1@1@999@2@1@999@5@1@USDT@"));
+
+        Assert.Null(error);
+        Assert.Equal(Side.Sell, creator.GridSide);
+        Assert.Equal(TradeGridValueType.Absolute, creator.TypeStep);
+        Assert.Equal(TradeGridValueType.Percent, creator.TypeProfit);
+        Assert.Equal(TradeGridVolumeType.ContractCurrency, creator.TypeVolume);
+    }
+
+    [Fact]
+    public void Stage2Step2_2_TradeGridCreator_LoadFromString_WithNegativeFirstPrice_ShouldKeepExistingValue()
+    {
+        TradeGridCreator creator = new TradeGridCreator
+        {
+            FirstPrice = 123.45m
+        };
+
+        Exception? error = Record.Exception(() => creator.LoadFromString(
+            "Buy@-100@3@Absolute@1@1@Absolute@2@1@Contracts@5@1@USDT@"));
+
+        Assert.Null(error);
+        Assert.Equal(123.45m, creator.FirstPrice);
+    }
+
+    [Fact]
+    public void Stage2Step2_2_TradeGridCreator_LoadFromString_WithZeroLineCountStart_ShouldKeepExistingValue()
+    {
+        TradeGridCreator creator = new TradeGridCreator
+        {
+            LineCountStart = 7
+        };
+
+        Exception? error = Record.Exception(() => creator.LoadFromString(
+            "Buy@100@0@Absolute@1@1@Absolute@2@1@Contracts@5@1@USDT@"));
+
+        Assert.Null(error);
+        Assert.Equal(7, creator.LineCountStart);
+    }
+
+    [Fact]
+    public void Stage2Step2_2_TradeGridCreator_LoadFromString_WithZeroLineStep_ShouldKeepExistingValue()
+    {
+        TradeGridCreator creator = new TradeGridCreator
+        {
+            LineStep = 1.25m
+        };
+
+        Exception? error = Record.Exception(() => creator.LoadFromString(
+            "Buy@100@3@Absolute@0@1@Absolute@2@1@Contracts@5@1@USDT@"));
+
+        Assert.Null(error);
+        Assert.Equal(1.25m, creator.LineStep);
+    }
+
+    [Fact]
     public void Stage2Step2_2_TradeGridCreator_LoadLines_WithNullLinesCollection_ShouldNotThrow()
     {
         TradeGridCreator creator = (TradeGridCreator)RuntimeHelpers.GetUninitializedObject(typeof(TradeGridCreator));
@@ -565,6 +631,19 @@ public class TradeGridPersistenceCoreTests
         Assert.Single(creator.Lines);
         Assert.Equal(200m, creator.Lines[0].PriceEnter);
         Assert.Equal(-1, creator.Lines[0].PositionNum);
+    }
+
+    [Fact]
+    public void Stage2Step2_2_TradeGridCreator_LoadLines_WithInvalidSide_ShouldSkipInvalidLine()
+    {
+        TradeGridCreator creator = new TradeGridCreator();
+
+        Exception? error = Record.Exception(() =>
+            creator.LoadLines("100|1|None|101|-1|^200|2|Sell|199|-1|^"));
+
+        Assert.Null(error);
+        Assert.Single(creator.Lines);
+        Assert.Equal(Side.Sell, creator.Lines[0].Side);
     }
 
     [Fact]
@@ -1017,9 +1096,9 @@ public class TradeGridPersistenceCoreTests
 
         Assert.Null(error);
         Assert.Equal(500, loaded.DelayInReal);
-        Assert.True(loaded.CheckMicroVolumes);
-        Assert.Equal(1.5m, loaded.MaxDistanceToOrdersPercent);
-        Assert.True(loaded.OpenOrdersMakerOnly);
+        Assert.False(loaded.CheckMicroVolumes);
+        Assert.Equal(9m, loaded.MaxDistanceToOrdersPercent);
+        Assert.False(loaded.OpenOrdersMakerOnly);
     }
 
     [Fact]
@@ -1211,6 +1290,135 @@ public class TradeGridPersistenceCoreTests
         Assert.Null(error);
         Assert.Equal(9, loaded.Number);
         Assert.Equal(123.45m, loaded.FirstPriceReal);
+    }
+
+    [Fact]
+    public void Stage2Step2_2_TradeGrid_LoadFromString_WithOutOfRangeRegimeLogicEntry_ShouldKeepExistingValue()
+    {
+        TradeGrid source = CreateBareGrid();
+        string save = source.GetSaveString();
+        string[] sections = save.Split('%');
+        string[] primeFields = sections[0].Split('@');
+        primeFields[3] = "999";
+        sections[0] = string.Join("@", primeFields);
+        string payload = string.Join("%", sections);
+
+        TradeGrid loaded = CreateBareGrid();
+        loaded.RegimeLogicEntry = TradeGridLogicEntryRegime.OnTrade;
+
+        Exception? error = Record.Exception(() => loaded.LoadFromString(payload));
+
+        Assert.Null(error);
+        Assert.Equal(TradeGridLogicEntryRegime.OnTrade, loaded.RegimeLogicEntry);
+    }
+
+    [Fact]
+    public void Stage2Step2_2_TradeGrid_LoadFromString_WithOutOfRangeGridType_ShouldKeepExistingValue()
+    {
+        TradeGrid source = CreateBareGrid();
+        string save = source.GetSaveString();
+        string[] sections = save.Split('%');
+        string[] primeFields = sections[0].Split('@');
+        primeFields[1] = "999";
+        sections[0] = string.Join("@", primeFields);
+        string payload = string.Join("%", sections);
+
+        TradeGrid loaded = CreateBareGrid();
+        loaded.GridType = TradeGridPrimeType.MarketMaking;
+
+        Exception? error = Record.Exception(() => loaded.LoadFromString(payload));
+
+        Assert.Null(error);
+        Assert.Equal(TradeGridPrimeType.MarketMaking, loaded.GridType);
+    }
+
+    [Fact]
+    public void Stage2Step2_2_TradeGrid_LoadFromString_WithOutOfRangeRegime_ShouldKeepExistingValue()
+    {
+        TradeGrid source = CreateBareGrid();
+        string save = source.GetSaveString();
+        string[] sections = save.Split('%');
+        string[] primeFields = sections[0].Split('@');
+        primeFields[2] = "999";
+        sections[0] = string.Join("@", primeFields);
+        string payload = string.Join("%", sections);
+
+        TradeGrid loaded = CreateBareGrid();
+        loaded.Regime = TradeGridRegime.On;
+
+        Exception? error = Record.Exception(() => loaded.LoadFromString(payload));
+
+        Assert.Null(error);
+        Assert.Equal(TradeGridRegime.On, loaded.Regime);
+    }
+
+    [Fact]
+    public void Stage2Step2_2_TradeGrid_LoadFromString_WithZeroDelay_ShouldApplyDefault()
+    {
+        TradeGrid source = CreateBareGrid();
+        string save = source.GetSaveString();
+        string[] sections = save.Split('%');
+        string[] primeFields = sections[0].Split('@');
+        primeFields[11] = "0";
+        sections[0] = string.Join("@", primeFields);
+        string payload = string.Join("%", sections);
+
+        TradeGrid loaded = CreateBareGrid();
+        loaded.DelayInReal = 777;
+
+        Exception? error = Record.Exception(() => loaded.LoadFromString(payload));
+
+        Assert.Null(error);
+        Assert.Equal(500, loaded.DelayInReal);
+    }
+
+    [Fact]
+    public void Stage2Step2_2_TradeGrid_LoadFromString_WithInvalidMicroVolumesBool_ShouldKeepExistingValue()
+    {
+        TradeGrid source = CreateBareGrid();
+        string save = source.GetSaveString();
+        string[] sections = save.Split('%');
+        string[] primeFields = sections[0].Split('@');
+        primeFields[11] = "250";
+        primeFields[12] = "badBool";
+        sections[0] = string.Join("@", primeFields);
+        string payload = string.Join("%", sections);
+
+        TradeGrid loaded = CreateBareGrid();
+        loaded.CheckMicroVolumes = false;
+
+        Exception? error = Record.Exception(() => loaded.LoadFromString(payload));
+
+        Assert.Null(error);
+        Assert.Equal(250, loaded.DelayInReal);
+        Assert.False(loaded.CheckMicroVolumes);
+    }
+
+    [Fact]
+    public void Stage2Step2_2_TradeGrid_LoadFromString_WithMissingDistanceAndMakerOnlyTail_ShouldApplyDefaults()
+    {
+        TradeGrid source = CreateBareGrid();
+        string save = source.GetSaveString();
+        string[] sections = save.Split('%');
+        string[] primeFields = sections[0].Split('@');
+        if (primeFields.Length > 14)
+        {
+            primeFields[13] = string.Empty;
+            primeFields[14] = string.Empty;
+        }
+
+        sections[0] = string.Join("@", primeFields);
+        string payload = string.Join("%", sections);
+
+        TradeGrid loaded = CreateBareGrid();
+        loaded.MaxDistanceToOrdersPercent = 9m;
+        loaded.OpenOrdersMakerOnly = false;
+
+        Exception? error = Record.Exception(() => loaded.LoadFromString(payload));
+
+        Assert.Null(error);
+        Assert.Equal(1.5m, loaded.MaxDistanceToOrdersPercent);
+        Assert.True(loaded.OpenOrdersMakerOnly);
     }
 
     [Fact]
