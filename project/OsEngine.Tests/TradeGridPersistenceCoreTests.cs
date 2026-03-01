@@ -353,6 +353,120 @@ public class TradeGridPersistenceCoreTests
     }
 
     [Fact]
+    public void Stage2Step2_2_TradeGridCreator_LoadFromString_WithMalformedMiddleFields_ShouldContinueTailParsing()
+    {
+        TradeGridCreator creator = new TradeGridCreator
+        {
+            LineCountStart = 9,
+            LineStep = 0.5m,
+            StartVolume = 1m,
+            TradeAssetInPortfolio = "Prime"
+        };
+
+        Exception? error = Record.Exception(() => creator.LoadFromString(
+            "Buy@101.5@badInt@Percent@badDecimal@1.2@Absolute@2@3@Contracts@5.5@2@USDT@100|1|Buy|101|-1|^"));
+
+        Assert.Null(error);
+        Assert.Equal(101.5m, creator.FirstPrice);
+        Assert.Equal(9, creator.LineCountStart);
+        Assert.Equal(0.5m, creator.LineStep);
+        Assert.Equal(1.2m, creator.StepMultiplicator);
+        Assert.Equal(5.5m, creator.StartVolume);
+        Assert.Equal(2m, creator.MartingaleMultiplicator);
+        Assert.Equal("USDT", creator.TradeAssetInPortfolio);
+        Assert.Single(creator.Lines);
+        Assert.Equal(100m, creator.Lines[0].PriceEnter);
+    }
+
+    [Fact]
+    public void Stage2Step2_2_TradeGridCreator_LoadFromString_WithLowercaseEnumFields_ShouldParse()
+    {
+        TradeGridCreator creator = new TradeGridCreator
+        {
+            GridSide = Side.None,
+            TypeStep = TradeGridValueType.Absolute,
+            TypeProfit = TradeGridValueType.Absolute,
+            TypeVolume = TradeGridVolumeType.Contracts
+        };
+
+        Exception? error = Record.Exception(() => creator.LoadFromString(
+            "buy@101.5@3@percent@1@1@absolute@2@1@depositpercent@5@1@prime@"));
+
+        Assert.Null(error);
+        Assert.Equal(Side.Buy, creator.GridSide);
+        Assert.Equal(TradeGridValueType.Percent, creator.TypeStep);
+        Assert.Equal(TradeGridValueType.Absolute, creator.TypeProfit);
+        Assert.Equal(TradeGridVolumeType.DepositPercent, creator.TypeVolume);
+    }
+
+    [Fact]
+    public void Stage2Step2_2_TradeGridCreator_LoadFromString_WithInvalidNumericInvariants_ShouldKeepSafeValues()
+    {
+        TradeGridCreator creator = new TradeGridCreator
+        {
+            LineCountStart = 5,
+            LineStep = 1m,
+            StepMultiplicator = 1m,
+            ProfitStep = 2m,
+            ProfitMultiplicator = 1m,
+            StartVolume = 3m,
+            MartingaleMultiplicator = 1m
+        };
+
+        Exception? error = Record.Exception(() => creator.LoadFromString(
+            "Buy@100@-5@Absolute@-1@0@Absolute@-2@0@Contracts@-3@0@Prime@"));
+
+        Assert.Null(error);
+        Assert.Equal(5, creator.LineCountStart);
+        Assert.Equal(1m, creator.LineStep);
+        Assert.Equal(1m, creator.StepMultiplicator);
+        Assert.Equal(2m, creator.ProfitStep);
+        Assert.Equal(1m, creator.ProfitMultiplicator);
+        Assert.Equal(3m, creator.StartVolume);
+        Assert.Equal(1m, creator.MartingaleMultiplicator);
+    }
+
+    [Fact]
+    public void Stage2Step2_2_TradeGridCreator_LoadFromString_TradeAssetWithWhitespace_ShouldBeTrimmed()
+    {
+        TradeGridCreator creator = new TradeGridCreator
+        {
+            TradeAssetInPortfolio = "Prime"
+        };
+
+        Exception? error = Record.Exception(() => creator.LoadFromString(
+            "Buy@100@3@Absolute@1@1@Absolute@1@1@Contracts@1@1@  USDT  @"));
+
+        Assert.Null(error);
+        Assert.Equal("USDT", creator.TradeAssetInPortfolio);
+    }
+
+    [Fact]
+    public void Stage2Step2_2_TradeGridCreator_LoadFromString_WithMixedWhitespaceTokens_ShouldParse()
+    {
+        TradeGridCreator creator = new TradeGridCreator
+        {
+            GridSide = Side.None,
+            FirstPrice = 0m,
+            LineCountStart = 0,
+            TypeStep = TradeGridValueType.Absolute,
+            TypeVolume = TradeGridVolumeType.Contracts,
+            TradeAssetInPortfolio = "Prime"
+        };
+
+        Exception? error = Record.Exception(() => creator.LoadFromString(
+            "  buy  @ 101.5 @ 3 @ percent @ 1.25 @ 1 @ absolute @ 2 @ 1 @ depositpercent @ 5 @ 1 @  USDT  @"));
+
+        Assert.Null(error);
+        Assert.Equal(Side.Buy, creator.GridSide);
+        Assert.Equal(101.5m, creator.FirstPrice);
+        Assert.Equal(3, creator.LineCountStart);
+        Assert.Equal(TradeGridValueType.Percent, creator.TypeStep);
+        Assert.Equal(TradeGridVolumeType.DepositPercent, creator.TypeVolume);
+        Assert.Equal("USDT", creator.TradeAssetInPortfolio);
+    }
+
+    [Fact]
     public void Stage2Step2_2_TradeGridCreator_LoadLines_WithNullLinesCollection_ShouldNotThrow()
     {
         TradeGridCreator creator = (TradeGridCreator)RuntimeHelpers.GetUninitializedObject(typeof(TradeGridCreator));
@@ -364,6 +478,93 @@ public class TradeGridPersistenceCoreTests
         Assert.NotNull(creator.Lines);
         Assert.Single(creator.Lines);
         Assert.Equal(100m, creator.Lines[0].PriceEnter);
+    }
+
+    [Fact]
+    public void Stage2Step2_2_TradeGridCreator_LoadLines_WithMixedInvalidPayload_ShouldKeepValidLines()
+    {
+        TradeGridCreator creator = new TradeGridCreator();
+        creator.LogMessageEvent += (_, _) => { };
+
+        Exception? error = Record.Exception(() =>
+            creator.LoadLines("100|1|Buy|101|-1|^broken^200|2|Sell|199|-1|^"));
+
+        Assert.Null(error);
+        Assert.Equal(2, creator.Lines.Count);
+        Assert.Equal(100m, creator.Lines[0].PriceEnter);
+        Assert.Equal(200m, creator.Lines[1].PriceEnter);
+    }
+
+    [Fact]
+    public void Stage2Step2_2_TradeGridCreator_LoadLines_WithLegacyLineWithoutPositionNum_ShouldLoadWithDefaultPosition()
+    {
+        TradeGridCreator creator = new TradeGridCreator();
+
+        Exception? error = Record.Exception(() => creator.LoadLines("100|1|Buy|101|^"));
+
+        Assert.Null(error);
+        Assert.Single(creator.Lines);
+        Assert.Equal(100m, creator.Lines[0].PriceEnter);
+        Assert.Equal(1m, creator.Lines[0].Volume);
+        Assert.Equal(Side.Buy, creator.Lines[0].Side);
+        Assert.Equal(101m, creator.Lines[0].PriceExit);
+        Assert.Equal(-1, creator.Lines[0].PositionNum);
+    }
+
+    [Fact]
+    public void Stage2Step2_2_TradeGridCreator_LoadLines_WithWhitespaceAndCrLf_ShouldParseValidLines()
+    {
+        TradeGridCreator creator = new TradeGridCreator();
+
+        Exception? error = Record.Exception(() =>
+            creator.LoadLines(" 100|1|Buy|101|-1| \r\n^   ^\r\n 200|2|Sell|199|-1|  ^"));
+
+        Assert.Null(error);
+        Assert.Equal(2, creator.Lines.Count);
+        Assert.Equal(100m, creator.Lines[0].PriceEnter);
+        Assert.Equal(200m, creator.Lines[1].PriceEnter);
+        Assert.Equal(Side.Sell, creator.Lines[1].Side);
+    }
+
+    [Fact]
+    public void Stage2Step2_2_TradeGridCreator_LoadLines_WithSpacedPositionNum_ShouldParse()
+    {
+        TradeGridCreator creator = new TradeGridCreator();
+
+        Exception? error = Record.Exception(() => creator.LoadLines("100|1|Buy|101|  42  |^"));
+
+        Assert.Null(error);
+        Assert.Single(creator.Lines);
+        Assert.Equal(42, creator.Lines[0].PositionNum);
+    }
+
+    [Fact]
+    public void Stage2Step2_2_TradeGridCreator_LoadLines_WithNegativeLineValues_ShouldSkipInvalidLine()
+    {
+        TradeGridCreator creator = new TradeGridCreator();
+
+        Exception? error = Record.Exception(() =>
+            creator.LoadLines("-100|1|Buy|101|-1|^200|2|Sell|199|-1|^"));
+
+        Assert.Null(error);
+        Assert.Single(creator.Lines);
+        Assert.Equal(200m, creator.Lines[0].PriceEnter);
+        Assert.Equal(2m, creator.Lines[0].Volume);
+        Assert.Equal(199m, creator.Lines[0].PriceExit);
+    }
+
+    [Fact]
+    public void Stage2Step2_2_TradeGridCreator_LoadLines_WithInvalidNegativePositionNum_ShouldSkipInvalidLine()
+    {
+        TradeGridCreator creator = new TradeGridCreator();
+
+        Exception? error = Record.Exception(() =>
+            creator.LoadLines("100|1|Buy|101|-5|^200|2|Sell|199|-1|^"));
+
+        Assert.Null(error);
+        Assert.Single(creator.Lines);
+        Assert.Equal(200m, creator.Lines[0].PriceEnter);
+        Assert.Equal(-1, creator.Lines[0].PositionNum);
     }
 
     [Fact]
@@ -751,6 +952,265 @@ public class TradeGridPersistenceCoreTests
         Assert.Equal(TradeGridPrimeType.OpenPosition, grid.GridType);
         Assert.Equal(TradeGridRegime.On, grid.Regime);
         Assert.Equal(11, grid.MaxOpenOrdersInMarket);
+    }
+
+    [Fact]
+    public void Stage2Step2_2_TradeGrid_LoadFromString_WithMalformedPrimeFields_ShouldContinueTailParsing()
+    {
+        TradeGrid source = CreateBareGrid();
+        source.Number = 5;
+        source.MaxClosePositionsInJournal = 77;
+        source.MaxOpenOrdersInMarket = 11;
+        source.OpenOrdersMakerOnly = false;
+        source.GridCreator.TradeAssetInPortfolio = "USDT";
+
+        string save = source.GetSaveString();
+        string[] sections = save.Split('%');
+        string[] primeFields = sections[0].Split('@');
+        primeFields[5] = "badInt";
+        primeFields[6] = "badInt";
+        primeFields[13] = "badDecimal";
+        sections[0] = string.Join("@", primeFields);
+        string payload = string.Join("%", sections);
+
+        TradeGrid loaded = CreateBareGrid();
+        loaded.MaxClosePositionsInJournal = 13;
+        loaded.MaxOpenOrdersInMarket = 17;
+        loaded.MaxDistanceToOrdersPercent = 1.5m;
+
+        Exception? error = Record.Exception(() => loaded.LoadFromString(payload));
+
+        Assert.Null(error);
+        Assert.Equal(13, loaded.MaxClosePositionsInJournal);
+        Assert.Equal(17, loaded.MaxOpenOrdersInMarket);
+        Assert.False(loaded.OpenOrdersMakerOnly);
+        Assert.Equal(1.5m, loaded.MaxDistanceToOrdersPercent);
+        Assert.Equal("USDT", loaded.GridCreator.TradeAssetInPortfolio);
+    }
+
+    [Fact]
+    public void Stage2Step2_2_TradeGrid_LoadFromString_WithMalformedOptionalTail_ShouldApplyDefaults()
+    {
+        TradeGrid source = CreateBareGrid();
+        source.DelayInReal = 100;
+        source.CheckMicroVolumes = false;
+        source.MaxDistanceToOrdersPercent = 2.25m;
+        source.OpenOrdersMakerOnly = false;
+
+        string save = source.GetSaveString();
+        string[] sections = save.Split('%');
+        string[] primeFields = sections[0].Split('@');
+        primeFields[11] = "badDelay";
+        primeFields[12] = "badBool";
+        primeFields[13] = "badDecimal";
+        primeFields[14] = "badBool";
+        sections[0] = string.Join("@", primeFields);
+        string payload = string.Join("%", sections);
+
+        TradeGrid loaded = CreateBareGrid();
+        loaded.DelayInReal = 777;
+        loaded.CheckMicroVolumes = false;
+        loaded.MaxDistanceToOrdersPercent = 9m;
+        loaded.OpenOrdersMakerOnly = false;
+
+        Exception? error = Record.Exception(() => loaded.LoadFromString(payload));
+
+        Assert.Null(error);
+        Assert.Equal(500, loaded.DelayInReal);
+        Assert.True(loaded.CheckMicroVolumes);
+        Assert.Equal(1.5m, loaded.MaxDistanceToOrdersPercent);
+        Assert.True(loaded.OpenOrdersMakerOnly);
+    }
+
+    [Fact]
+    public void Stage2Step2_2_TradeGrid_LoadFromString_WithFlexibleBooleanTail_ShouldParse()
+    {
+        TradeGrid source = CreateBareGrid();
+        source.AutoClearJournalIsOn = false;
+        source.CheckMicroVolumes = true;
+        source.OpenOrdersMakerOnly = true;
+
+        string save = source.GetSaveString();
+        string[] sections = save.Split('%');
+        string[] primeFields = sections[0].Split('@');
+        primeFields[4] = "1";
+        primeFields[12] = "off";
+        primeFields[14] = "0";
+        sections[0] = string.Join("@", primeFields);
+        string payload = string.Join("%", sections);
+
+        TradeGrid loaded = CreateBareGrid();
+        loaded.AutoClearJournalIsOn = false;
+        loaded.CheckMicroVolumes = true;
+        loaded.OpenOrdersMakerOnly = true;
+
+        Exception? error = Record.Exception(() => loaded.LoadFromString(payload));
+
+        Assert.Null(error);
+        Assert.True(loaded.AutoClearJournalIsOn);
+        Assert.False(loaded.CheckMicroVolumes);
+        Assert.False(loaded.OpenOrdersMakerOnly);
+    }
+
+    [Fact]
+    public void Stage2Step2_2_TradeGrid_LoadFromString_WithLowercaseEnumFields_ShouldParse()
+    {
+        TradeGrid source = CreateBareGrid();
+        source.Number = 12;
+
+        string save = source.GetSaveString();
+        string[] sections = save.Split('%');
+        string[] primeFields = sections[0].Split('@');
+        primeFields[1] = "openposition";
+        primeFields[2] = "closeonly";
+        primeFields[3] = "oncepersecond";
+        sections[0] = string.Join("@", primeFields);
+        string payload = string.Join("%", sections);
+
+        TradeGrid loaded = CreateBareGrid();
+        loaded.GridType = TradeGridPrimeType.MarketMaking;
+        loaded.Regime = TradeGridRegime.On;
+        loaded.RegimeLogicEntry = TradeGridLogicEntryRegime.OnTrade;
+
+        Exception? error = Record.Exception(() => loaded.LoadFromString(payload));
+
+        Assert.Null(error);
+        Assert.Equal(TradeGridPrimeType.OpenPosition, loaded.GridType);
+        Assert.Equal(TradeGridRegime.CloseOnly, loaded.Regime);
+        Assert.Equal(TradeGridLogicEntryRegime.OncePerSecond, loaded.RegimeLogicEntry);
+    }
+
+    [Fact]
+    public void Stage2Step2_2_TradeGrid_LoadFromString_WithMalformedFirstTradeTime_ShouldKeepExistingValue()
+    {
+        TradeGrid source = CreateBareGrid();
+        source.Number = 12;
+        source.Regime = TradeGridRegime.On;
+
+        string save = source.GetSaveString();
+        string[] sections = save.Split('%');
+        string[] primeFields = sections[0].Split('@');
+        primeFields[10] = "bad-date-value";
+        sections[0] = string.Join("@", primeFields);
+        string payload = string.Join("%", sections);
+
+        TradeGrid loaded = CreateBareGrid();
+        DateTime expected = new DateTime(2026, 3, 1, 10, 0, 0, DateTimeKind.Utc);
+        SetPrivateField(loaded, "_firstTradeTime", expected);
+
+        Exception? error = Record.Exception(() => loaded.LoadFromString(payload));
+
+        Assert.Null(error);
+        Assert.Equal(expected, loaded.FirstTradeTime);
+    }
+
+    [Fact]
+    public void Stage2Step2_2_TradeGrid_LoadFromString_WithNegativeNumericLimits_ShouldKeepSafeValues()
+    {
+        TradeGrid source = CreateBareGrid();
+        string save = source.GetSaveString();
+        string[] sections = save.Split('%');
+        string[] primeFields = sections[0].Split('@');
+        primeFields[5] = "-10";
+        primeFields[6] = "-2";
+        primeFields[7] = "-3";
+        primeFields[9] = "-4";
+        primeFields[11] = "-500";
+        primeFields[13] = "-1.2";
+        sections[0] = string.Join("@", primeFields);
+        string payload = string.Join("%", sections);
+
+        TradeGrid loaded = CreateBareGrid();
+        loaded.MaxClosePositionsInJournal = 101;
+        loaded.MaxOpenOrdersInMarket = 7;
+        loaded.MaxCloseOrdersInMarket = 8;
+        loaded.DelayInReal = 600;
+        loaded.MaxDistanceToOrdersPercent = 2m;
+        SetPrivateField(loaded, "_openPositionsBySession", 9);
+
+        Exception? error = Record.Exception(() => loaded.LoadFromString(payload));
+
+        Assert.Null(error);
+        Assert.Equal(101, loaded.MaxClosePositionsInJournal);
+        Assert.Equal(7, loaded.MaxOpenOrdersInMarket);
+        Assert.Equal(8, loaded.MaxCloseOrdersInMarket);
+        Assert.Equal(9, loaded.OpenPositionsCount);
+        Assert.Equal(500, loaded.DelayInReal);
+        Assert.Equal(1.5m, loaded.MaxDistanceToOrdersPercent);
+    }
+
+    [Fact]
+    public void Stage2Step2_2_TradeGrid_LoadFromString_WithMixedWhitespaceTokens_ShouldParse()
+    {
+        TradeGrid source = CreateBareGrid();
+        string save = source.GetSaveString();
+        string[] sections = save.Split('%');
+        string[] primeFields = sections[0].Split('@');
+        primeFields[1] = " openposition ";
+        primeFields[2] = " closeonly ";
+        primeFields[3] = " oncepersecond ";
+        primeFields[4] = " 1 ";
+        primeFields[12] = " off ";
+        primeFields[14] = " 0 ";
+        sections[0] = "  " + string.Join("@", primeFields) + "  ";
+        string payload = " \r\n " + string.Join("%", sections) + " \r\n ";
+
+        TradeGrid loaded = CreateBareGrid();
+        loaded.GridType = TradeGridPrimeType.MarketMaking;
+        loaded.Regime = TradeGridRegime.On;
+        loaded.RegimeLogicEntry = TradeGridLogicEntryRegime.OnTrade;
+        loaded.AutoClearJournalIsOn = false;
+        loaded.CheckMicroVolumes = true;
+        loaded.OpenOrdersMakerOnly = true;
+
+        Exception? error = Record.Exception(() => loaded.LoadFromString(payload));
+
+        Assert.Null(error);
+        Assert.Equal(TradeGridPrimeType.OpenPosition, loaded.GridType);
+        Assert.Equal(TradeGridRegime.CloseOnly, loaded.Regime);
+        Assert.Equal(TradeGridLogicEntryRegime.OncePerSecond, loaded.RegimeLogicEntry);
+        Assert.True(loaded.AutoClearJournalIsOn);
+        Assert.False(loaded.CheckMicroVolumes);
+        Assert.False(loaded.OpenOrdersMakerOnly);
+    }
+
+    [Fact]
+    public void Stage2Step2_2_TradeGrid_LoadFromString_WithWhitespaceOnlySections_ShouldSkipSubcomponentParsing()
+    {
+        TradeGrid grid = CreateBareGrid();
+        grid.GridCreator.TradeAssetInPortfolio = "USDT";
+
+        string payload =
+            "1@OpenPosition@On@OnTrade@true@10@5@5@0@0@2026-03-01T00:00:00.0000000Z@500@true@1.5@true%" +
+            "   %unused%   %   %   %   %   %   %";
+
+        Exception? error = Record.Exception(() => grid.LoadFromString(payload));
+
+        Assert.Null(error);
+        Assert.Equal("USDT", grid.GridCreator.TradeAssetInPortfolio);
+    }
+
+    [Fact]
+    public void Stage2Step2_2_TradeGrid_LoadFromString_WithNegativeNumberAndFirstPrice_ShouldKeepSafeValues()
+    {
+        TradeGrid source = CreateBareGrid();
+        string save = source.GetSaveString();
+        string[] sections = save.Split('%');
+        string[] primeFields = sections[0].Split('@');
+        primeFields[0] = "-7";
+        primeFields[8] = "-100.5";
+        sections[0] = string.Join("@", primeFields);
+        string payload = string.Join("%", sections);
+
+        TradeGrid loaded = CreateBareGrid();
+        loaded.Number = 9;
+        SetPrivateField(loaded, "_firstTradePrice", 123.45m);
+
+        Exception? error = Record.Exception(() => loaded.LoadFromString(payload));
+
+        Assert.Null(error);
+        Assert.Equal(9, loaded.Number);
+        Assert.Equal(123.45m, loaded.FirstPriceReal);
     }
 
     [Fact]
@@ -1193,6 +1653,68 @@ public class TradeGridPersistenceCoreTests
     }
 
     [Fact]
+    public void Stage2Step2_2_TradeGrid_HaveOrdersWithNoMarketOrders_ShouldRemoveStaleNoneOpenOrder()
+    {
+        TradeGrid grid = (TradeGrid)RuntimeHelpers.GetUninitializedObject(typeof(TradeGrid));
+        grid.GridCreator = new TradeGridCreator();
+        grid.LogMessageEvent += (_, _) => { };
+
+        Position position = (Position)RuntimeHelpers.GetUninitializedObject(typeof(Position));
+        SetPrivateField(position, "_openOrders", new List<Order>
+        {
+            new Order
+            {
+                State = OrderStateType.None,
+                NumberMarket = null
+            }
+        });
+        SetPrivateField(position, "_closeOrders", new List<Order>());
+
+        grid.GridCreator.Lines = new List<TradeGridLine>
+        {
+            new TradeGridLine { Position = position, PositionNum = 1 }
+        };
+
+        SetPrivateField(grid, "_lastNoneOrderTime", DateTime.Now.AddMinutes(-6));
+
+        bool hasNoMarketOrders = grid.HaveOrdersWithNoMarketOrders();
+
+        Assert.True(hasNoMarketOrders);
+        Assert.Empty(position.OpenOrders);
+    }
+
+    [Fact]
+    public void Stage2Step2_2_TradeGrid_HaveOrdersWithNoMarketOrders_ShouldRemoveStaleNoneCloseOrder()
+    {
+        TradeGrid grid = (TradeGrid)RuntimeHelpers.GetUninitializedObject(typeof(TradeGrid));
+        grid.GridCreator = new TradeGridCreator();
+        grid.LogMessageEvent += (_, _) => { };
+
+        Position position = (Position)RuntimeHelpers.GetUninitializedObject(typeof(Position));
+        SetPrivateField(position, "_openOrders", new List<Order>());
+        SetPrivateField(position, "_closeOrders", new List<Order>
+        {
+            new Order
+            {
+                State = OrderStateType.None,
+                NumberMarket = null
+            }
+        });
+
+        grid.GridCreator.Lines = new List<TradeGridLine>
+        {
+            new TradeGridLine { Position = position, PositionNum = 1 }
+        };
+
+        SetPrivateField(grid, "_lastNoneOrderTime", DateTime.Now.AddMinutes(-6));
+
+        bool hasNoMarketOrders = grid.HaveOrdersWithNoMarketOrders();
+
+        Assert.True(hasNoMarketOrders);
+        Assert.Empty(position.CloseOrders);
+    }
+
+    [Fact]
     public void Stage2Step2_2_TradeGrid_QueryMethods_WithSparseLines_ShouldNotThrow()
     {
         TradeGrid grid = CreateBareGrid();
@@ -1261,6 +1783,41 @@ public class TradeGridPersistenceCoreTests
     }
 
     [Fact]
+    public void Stage2Step2_2_TradeGrid_MiddleEntryPrice_WithZeroTradeVolume_ShouldReturnZero()
+    {
+        TradeGrid grid = (TradeGrid)RuntimeHelpers.GetUninitializedObject(typeof(TradeGrid));
+        grid.GridCreator = new TradeGridCreator();
+
+        Position position = (Position)RuntimeHelpers.GetUninitializedObject(typeof(Position));
+        Order openOrder = new Order();
+        SetPrivateField(openOrder, "_trades", new List<MyTrade>
+        {
+            new MyTrade
+            {
+                Volume = 0m,
+                Price = 100m
+            }
+        });
+        SetPrivateField(position, "_openOrders", new List<Order> { openOrder });
+        SetPrivateField(position, "_closeOrders", new List<Order>());
+
+        grid.GridCreator.Lines = new List<TradeGridLine>
+        {
+            new TradeGridLine
+            {
+                Position = position,
+                PositionNum = 1
+            }
+        };
+
+        decimal middleEntryPrice = -1m;
+        Exception? error = Record.Exception(() => middleEntryPrice = grid.MiddleEntryPrice);
+
+        Assert.Null(error);
+        Assert.Equal(0m, middleEntryPrice);
+    }
+
+    [Fact]
     public void Stage2Step2_2_TradeGrid_OrderHelpers_WithNullLastCandle_ShouldStaySafe()
     {
         TradeGrid grid = CreateBareGrid();
@@ -1271,6 +1828,43 @@ public class TradeGridPersistenceCoreTests
         CandleSeries series = new CandleSeries(builder, new Security(), StartProgram.IsTester)
         {
             CandlesAll = new List<Candle> { null! }
+        };
+        SetPrivateField(connector, "_mySeries", series);
+        SetPrivateField(tab, "_connector", connector);
+        SetPrivateField(tab, "_security", new Security
+        {
+            Name = connector.SecurityName,
+            PriceStep = 1m,
+            Lot = 1m
+        });
+        grid.Tab = tab;
+
+        List<Order>? openOrdersHole = null;
+        Exception? error = Record.Exception(() =>
+        {
+            InvokePrivateNoArg(grid, "TrySetOpenOrders");
+            InvokePrivateNoArg(grid, "TryRemoveWrongOrders");
+
+            MethodInfo method = typeof(TradeGrid).GetMethod("GetOpenOrdersGridHole", BindingFlags.NonPublic | BindingFlags.Instance)
+                ?? throw new InvalidOperationException("Method GetOpenOrdersGridHole not found.");
+            openOrdersHole = method.Invoke(grid, null) as List<Order>;
+        });
+
+        Assert.Null(error);
+        Assert.Null(openOrdersHole);
+    }
+
+    [Fact]
+    public void Stage2Step2_2_TradeGrid_OrderHelpers_WithEmptyCandles_ShouldStaySafe()
+    {
+        TradeGrid grid = CreateBareGrid();
+
+        BotTabSimple tab = (BotTabSimple)RuntimeHelpers.GetUninitializedObject(typeof(BotTabSimple));
+        ConnectorCandles connector = new ConnectorCandles("CodexGridOrderHelpersEmptyCandles", StartProgram.IsTester, false);
+        TimeFrameBuilder builder = new TimeFrameBuilder("CodexGridOrderHelpersEmptyCandles", StartProgram.IsTester);
+        CandleSeries series = new CandleSeries(builder, new Security(), StartProgram.IsTester)
+        {
+            CandlesAll = new List<Candle>()
         };
         SetPrivateField(connector, "_mySeries", series);
         SetPrivateField(tab, "_connector", connector);

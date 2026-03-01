@@ -181,6 +181,13 @@ namespace OsEngine.OsTrader.Grids
                 }
 
                 string[] array = value.Split('%');
+                for (int i = 0; i < array.Length; i++)
+                {
+                    if (array[i] != null)
+                    {
+                        array[i] = array[i].Trim();
+                    }
+                }
 
                 if (array.Length == 0 || string.IsNullOrWhiteSpace(array[0]))
                 {
@@ -188,108 +195,180 @@ namespace OsEngine.OsTrader.Grids
                 }
 
                 string[] values = array[0].Split('@');
+                for (int i = 0; i < values.Length; i++)
+                {
+                    if (values[i] != null)
+                    {
+                        values[i] = values[i].Trim();
+                    }
+                }
 
                 // settings prime
 
                 if (values.Length > 0 && string.IsNullOrWhiteSpace(values[0]) == false)
                 {
-                    Number = Convert.ToInt32(values[0], CultureInfo.InvariantCulture);
+                    if (TryParseIntInvariant(values[0], out int parsedValue))
+                    {
+                        if (parsedValue >= 0)
+                        {
+                            Number = parsedValue;
+                        }
+                    }
                 }
                 if (values.Length > 1 && string.IsNullOrWhiteSpace(values[1]) == false)
                 {
-                    Enum.TryParse(values[1], out GridType);
+                    if (TryParseEnumFlexible(values[1], out TradeGridPrimeType parsedValue))
+                    {
+                        GridType = parsedValue;
+                    }
                 }
                 if (values.Length > 2 && string.IsNullOrWhiteSpace(values[2]) == false)
                 {
-                    Enum.TryParse(values[2], out _regime);
+                    if (TryParseEnumFlexible(values[2], out TradeGridRegime parsedValue))
+                    {
+                        _regime = parsedValue;
+                    }
                 }
                 if (values.Length > 3 && string.IsNullOrWhiteSpace(values[3]) == false)
                 {
-                    Enum.TryParse(values[3], out RegimeLogicEntry);
+                    if (TryParseEnumFlexible(values[3], out TradeGridLogicEntryRegime parsedValue))
+                    {
+                        RegimeLogicEntry = parsedValue;
+                    }
                 }
                 if (values.Length > 4 && string.IsNullOrWhiteSpace(values[4]) == false)
                 {
-                    AutoClearJournalIsOn = Convert.ToBoolean(values[4]);
+                    if (TryParseBoolFlexible(values[4], out bool parsedValue))
+                    {
+                        AutoClearJournalIsOn = parsedValue;
+                    }
                 }
                 if (values.Length > 5 && string.IsNullOrWhiteSpace(values[5]) == false)
                 {
-                    MaxClosePositionsInJournal = Convert.ToInt32(values[5], CultureInfo.InvariantCulture);
+                    if (TryParseIntInvariant(values[5], out int parsedValue))
+                    {
+                        if (parsedValue >= 0)
+                        {
+                            MaxClosePositionsInJournal = parsedValue;
+                        }
+                    }
                 }
                 if (values.Length > 6 && string.IsNullOrWhiteSpace(values[6]) == false)
                 {
-                    MaxOpenOrdersInMarket = Convert.ToInt32(values[6], CultureInfo.InvariantCulture);
+                    if (TryParseIntInvariant(values[6], out int parsedValue))
+                    {
+                        if (parsedValue >= 0)
+                        {
+                            MaxOpenOrdersInMarket = parsedValue;
+                        }
+                    }
                 }
                 if (values.Length > 7 && string.IsNullOrWhiteSpace(values[7]) == false)
                 {
-                    MaxCloseOrdersInMarket = Convert.ToInt32(values[7], CultureInfo.InvariantCulture);
+                    if (TryParseIntInvariant(values[7], out int parsedValue))
+                    {
+                        if (parsedValue >= 0)
+                        {
+                            MaxCloseOrdersInMarket = parsedValue;
+                        }
+                    }
                 }
                 if (values.Length > 8 && string.IsNullOrWhiteSpace(values[8]) == false)
                 {
-                    _firstTradePrice = values[8].ToDecimal();
+                    if (TryParseDecimal(values[8], out decimal parsedValue))
+                    {
+                        if (parsedValue >= 0)
+                        {
+                            _firstTradePrice = parsedValue;
+                        }
+                    }
                 }
                 if (values.Length > 9 && string.IsNullOrWhiteSpace(values[9]) == false)
                 {
-                    _openPositionsBySession = Convert.ToInt32(values[9], CultureInfo.InvariantCulture);
+                    if (TryParseIntInvariant(values[9], out int parsedValue))
+                    {
+                        if (parsedValue >= 0)
+                        {
+                            _openPositionsBySession = parsedValue;
+                        }
+                    }
                 }
                 if (values.Length > 10 && string.IsNullOrWhiteSpace(values[10]) == false)
                 {
-                    _firstTradeTime = ParseDateInvariantOrCurrent(values[10]);
-                }
-
-                try
-                {
-                    if (values.Length <= 12
-                        || string.IsNullOrWhiteSpace(values[11])
-                        || string.IsNullOrWhiteSpace(values[12]))
+                    if (TryParseDateInvariantOrCurrent(values[10], out DateTime parsedValue))
                     {
-                        throw new FormatException("Legacy payload has no delay/micro-volume tail.");
-                    }
-
-                    if (values.Length > 11)
-                    {
-                        DelayInReal = Convert.ToInt32(values[11], CultureInfo.InvariantCulture);
-                    }
-                    if (values.Length > 12)
-                    {
-                        CheckMicroVolumes = Convert.ToBoolean(values[12]);
+                        _firstTradeTime = parsedValue;
                     }
                 }
-                catch
+
+                if (values.Length <= 12
+                    || string.IsNullOrWhiteSpace(values[11])
+                    || string.IsNullOrWhiteSpace(values[12]))
                 {
                     DelayInReal = 500;
                     CheckMicroVolumes = true;
                 }
-
-                try
+                else
                 {
-                    if (values.Length <= 13 || string.IsNullOrWhiteSpace(values[13]))
+                    if (TryParseIntInvariant(values[11], out int delayParsed))
                     {
-                        throw new FormatException("Legacy payload has no max-distance tail.");
+                        if (delayParsed >= 0)
+                        {
+                            DelayInReal = delayParsed;
+                        }
+                        else
+                        {
+                            DelayInReal = 500;
+                        }
+                    }
+                    else
+                    {
+                        DelayInReal = 500;
                     }
 
-                    MaxDistanceToOrdersPercent = values[13].ToDecimal();
+                    if (TryParseBoolFlexible(values[12], out bool microParsed))
+                    {
+                        CheckMicroVolumes = microParsed;
+                    }
+                    else
+                    {
+                        CheckMicroVolumes = true;
+                    }
                 }
-                catch
+
+                if (values.Length <= 13
+                    || string.IsNullOrWhiteSpace(values[13])
+                    || TryParseDecimal(values[13], out decimal maxDistanceParsed) == false)
                 {
                     MaxDistanceToOrdersPercent = 1.5m;
                 }
-
-                try
+                else
                 {
-                    if (values.Length <= 14 || string.IsNullOrWhiteSpace(values[14]))
+                    if (maxDistanceParsed >= 0)
                     {
-                        throw new FormatException("Legacy payload has no maker-only tail.");
+                        MaxDistanceToOrdersPercent = maxDistanceParsed;
                     }
-
-                    OpenOrdersMakerOnly = Convert.ToBoolean(values[14]);
+                    else
+                    {
+                        MaxDistanceToOrdersPercent = 1.5m;
+                    }
                 }
-                catch
+
+                if (values.Length <= 14
+                    || string.IsNullOrWhiteSpace(values[14])
+                    || TryParseBoolFlexible(values[14], out bool makerOnlyParsed) == false)
                 {
                     OpenOrdersMakerOnly = true;
                 }
+                else
+                {
+                    OpenOrdersMakerOnly = makerOnlyParsed;
+                }
 
                 // non trade periods
-                if (array.Length > 1 && NonTradePeriods != null)
+                if (array.Length > 1
+                    && NonTradePeriods != null
+                    && IsPayloadSegmentPresent(array[1]))
                 {
                     NonTradePeriods.LoadFromString(array[1]);
                 }
@@ -298,37 +377,49 @@ namespace OsEngine.OsTrader.Grids
                 // removed
 
                 // stop grid by event
-                if (array.Length > 3 && StopBy != null)
+                if (array.Length > 3
+                    && StopBy != null
+                    && IsPayloadSegmentPresent(array[3]))
                 {
                     StopBy.LoadFromString(array[3]);
                 }
 
                 // grid lines creation and storage
-                if (array.Length > 4 && GridCreator != null)
+                if (array.Length > 4
+                    && GridCreator != null
+                    && IsPayloadSegmentPresent(array[4]))
                 {
                     GridCreator.LoadFromString(array[4]);
                 }
 
                 // stop and profit 
-                if (array.Length > 5 && StopAndProfit != null)
+                if (array.Length > 5
+                    && StopAndProfit != null
+                    && IsPayloadSegmentPresent(array[5]))
                 {
                     StopAndProfit.LoadFromString(array[5]);
                 }
 
                 // auto start
-                if (array.Length > 6 && AutoStarter != null)
+                if (array.Length > 6
+                    && AutoStarter != null
+                    && IsPayloadSegmentPresent(array[6]))
                 {
                     AutoStarter.LoadFromString(array[6]);
                 }
 
                 // errors reaction
-                if (array.Length > 7 && ErrorsReaction != null)
+                if (array.Length > 7
+                    && ErrorsReaction != null
+                    && IsPayloadSegmentPresent(array[7]))
                 {
                     ErrorsReaction.LoadFromString(array[7]);
                 }
 
                 // trailing up / down
-                if (array.Length > 8 && TrailingUp != null)
+                if (array.Length > 8
+                    && TrailingUp != null
+                    && IsPayloadSegmentPresent(array[8]))
                 {
                     TrailingUp.LoadFromString(array[8]);
                 }
@@ -339,29 +430,91 @@ namespace OsEngine.OsTrader.Grids
             }
         }
 
-        private static DateTime ParseDateInvariantOrCurrent(string value)
+        private static bool TryParseDateInvariantOrCurrent(string value, out DateTime parsed)
         {
-            if (DateTime.TryParse(value, CultureInfo.InvariantCulture, DateTimeStyles.RoundtripKind, out DateTime parsed))
+            if (DateTime.TryParse(value, CultureInfo.InvariantCulture, DateTimeStyles.RoundtripKind, out parsed))
             {
-                return parsed;
+                return true;
             }
 
             if (DateTime.TryParse(value, CultureInfo.InvariantCulture, DateTimeStyles.None, out parsed))
             {
-                return parsed;
+                return true;
             }
 
             if (DateTime.TryParse(value, CultureInfo.CurrentCulture, DateTimeStyles.None, out parsed))
             {
-                return parsed;
+                return true;
             }
 
             if (DateTime.TryParse(value, new CultureInfo("ru-RU"), DateTimeStyles.None, out parsed))
             {
-                return parsed;
+                return true;
             }
 
-            return DateTime.MinValue;
+            parsed = default;
+            return false;
+        }
+
+        private static bool TryParseIntInvariant(string value, out int parsed)
+        {
+            return int.TryParse(value, NumberStyles.Integer, CultureInfo.InvariantCulture, out parsed);
+        }
+
+        private static bool IsPayloadSegmentPresent(string value)
+        {
+            return string.IsNullOrWhiteSpace(value) == false;
+        }
+
+        private static bool TryParseEnumFlexible<TEnum>(string value, out TEnum parsed)
+            where TEnum : struct
+        {
+            return Enum.TryParse(value, true, out parsed);
+        }
+
+        private static bool TryParseBoolFlexible(string value, out bool parsed)
+        {
+            if (bool.TryParse(value, out parsed))
+            {
+                return true;
+            }
+
+            string normalized = value?.Trim().ToLowerInvariant();
+            if (normalized == "1" || normalized == "yes" || normalized == "y" || normalized == "on")
+            {
+                parsed = true;
+                return true;
+            }
+
+            if (normalized == "0" || normalized == "no" || normalized == "n" || normalized == "off")
+            {
+                parsed = false;
+                return true;
+            }
+
+            parsed = false;
+            return false;
+        }
+
+        private static bool TryParseDecimal(string value, out decimal parsed)
+        {
+            if (decimal.TryParse(value, NumberStyles.Any, CultureInfo.InvariantCulture, out parsed))
+            {
+                return true;
+            }
+
+            if (decimal.TryParse(value, NumberStyles.Any, CultureInfo.CurrentCulture, out parsed))
+            {
+                return true;
+            }
+
+            if (decimal.TryParse(value, NumberStyles.Any, new CultureInfo("ru-RU"), out parsed))
+            {
+                return true;
+            }
+
+            parsed = 0;
+            return false;
         }
 
         public void Delete()
@@ -1880,15 +2033,7 @@ namespace OsEngine.OsTrader.Grids
                 return 0;
             }
 
-            List<Candle> candles = tab.CandlesAll;
-
-            if (candles == null || candles.Count == 0)
-            {
-                return 0;
-            }
-
-            Candle lastCandle = candles[candles.Count - 1];
-            if (lastCandle == null)
+            if (TryGetLastCandle(tab.CandlesAll, out Candle lastCandle) == false)
             {
                 return 0;
             }
@@ -2060,15 +2205,7 @@ namespace OsEngine.OsTrader.Grids
                 return null;
             }
 
-            List<Candle> candles = tab.CandlesAll;
-
-            if (candles == null || candles.Count == 0)
-            {
-                return null;
-            }
-
-            Candle lastCandle = candles[candles.Count - 1];
-            if (lastCandle == null)
+            if (TryGetLastCandle(tab.CandlesAll, out Candle lastCandle) == false)
             {
                 return null;
             }
@@ -2423,15 +2560,7 @@ namespace OsEngine.OsTrader.Grids
                 return;
             }
 
-            List<Candle> candles = tab.CandlesAll;
-
-            if (candles == null || candles.Count == 0)
-            {
-                return;
-            }
-
-            Candle lastCandle = candles[candles.Count - 1];
-            if (lastCandle == null)
+            if (TryGetLastCandle(tab.CandlesAll, out Candle lastCandle) == false)
             {
                 return;
             }
@@ -2824,6 +2953,19 @@ namespace OsEngine.OsTrader.Grids
             }
         }
 
+        private static bool TryGetLastCandle(List<Candle> candles, out Candle candle)
+        {
+            candle = null;
+
+            if (candles == null || candles.Count == 0)
+            {
+                return false;
+            }
+
+            candle = candles[candles.Count - 1];
+            return candle != null;
+        }
+
         #endregion
 
         #region Public interface
@@ -2941,60 +3083,61 @@ namespace OsEngine.OsTrader.Grids
                     continue;
                 }
 
-                if (line.Position != null)
+                Position position = line.Position;
+
+                if (position.OpenActive)
                 {
-                    Position position = line.Position;
-
-                    if (position.OpenActive)
+                    if (TryGetLastOrder(position.OpenOrders, out Order openOrder) == false)
                     {
-                        if (TryGetLastOrder(position.OpenOrders, out Order openOrder) == false)
-                        {
-                            continue;
-                        }
-
-                        if (string.IsNullOrEmpty(openOrder.NumberMarket))
-                        {
-                            if (openOrder.State == OrderStateType.None
-                                && _lastNoneOrderTime == DateTime.MinValue)
-                            {
-                                _lastNoneOrderTime = DateTime.Now;
-                            }
-                            else if (openOrder.State == OrderStateType.None
-                                && _lastNoneOrderTime.AddMinutes(5) < DateTime.Now)
-                            {// 5ть минут висит ордер со статусом NONE. Утерян
-                                position.OpenOrders.RemoveAt(position.OpenOrders.Count - 1);
-                                SendNewLogMessage("Remove NONE open order. Five minutes rule", LogMessageType.Error);
-                                return true;
-                            }
-
-                            return true;
-                        }
+                        continue;
                     }
 
-                    if (position.CloseActive)
+                    if (string.IsNullOrEmpty(openOrder.NumberMarket))
                     {
-                        if (TryGetLastOrder(position.CloseOrders, out Order closeOrder) == false)
+                        if (openOrder.State == OrderStateType.None
+                            && _lastNoneOrderTime == DateTime.MinValue)
                         {
-                            continue;
+                            _lastNoneOrderTime = DateTime.Now;
                         }
-
-                        if (string.IsNullOrEmpty(closeOrder.NumberMarket))
-                        {
-                            if (closeOrder.State == OrderStateType.None
-                                && _lastNoneOrderTime == DateTime.MinValue)
+                        else if (openOrder.State == OrderStateType.None
+                            && _lastNoneOrderTime.AddMinutes(5) < DateTime.Now)
+                        {// 5ть минут висит ордер со статусом NONE. Утерян
+                            if (TryRemoveLastOrder(position.OpenOrders))
                             {
-                                _lastNoneOrderTime = DateTime.Now;
+                                SendNewLogMessage("Remove NONE open order. Five minutes rule", LogMessageType.Error);
                             }
-                            else if (closeOrder.State == OrderStateType.None
-                                && _lastNoneOrderTime.AddMinutes(5) < DateTime.Now)
-                            {// 5ть минут висит ордер со статусом NONE. Утерян
-                                position.CloseOrders.RemoveAt(position.CloseOrders.Count - 1);
-                                SendNewLogMessage("Remove NONE close order. Five minutes rule", LogMessageType.Error);
-                                return true;
-                            }
-
                             return true;
                         }
+
+                        return true;
+                    }
+                }
+
+                if (position.CloseActive)
+                {
+                    if (TryGetLastOrder(position.CloseOrders, out Order closeOrder) == false)
+                    {
+                        continue;
+                    }
+
+                    if (string.IsNullOrEmpty(closeOrder.NumberMarket))
+                    {
+                        if (closeOrder.State == OrderStateType.None
+                            && _lastNoneOrderTime == DateTime.MinValue)
+                        {
+                            _lastNoneOrderTime = DateTime.Now;
+                        }
+                        else if (closeOrder.State == OrderStateType.None
+                            && _lastNoneOrderTime.AddMinutes(5) < DateTime.Now)
+                        {// 5ть минут висит ордер со статусом NONE. Утерян
+                            if (TryRemoveLastOrder(position.CloseOrders))
+                            {
+                                SendNewLogMessage("Remove NONE close order. Five minutes rule", LogMessageType.Error);
+                            }
+                            return true;
+                        }
+
+                        return true;
                     }
                 }
             }
@@ -3030,47 +3173,55 @@ namespace OsEngine.OsTrader.Grids
                     continue;
                 }
 
-                if (line.Position != null)
+                Position position = line.Position;
+
+                if (position.OpenActive)
                 {
-                    Position position = line.Position;
-
-                    if (position.OpenActive)
+                    if (TryGetLastOrder(position.OpenOrders, out Order openOrder) == false)
                     {
-                        if (TryGetLastOrder(position.OpenOrders, out Order openOrder) == false)
-                        {
-                            continue;
-                        }
-
-                        if (openOrder.State == OrderStateType.Active
-                            && openOrder.IsSendToCancel == true)
-                        {
-                            if (openOrder.LastCancelTryLocalTime.AddSeconds(3) > DateTime.Now)
-                            {
-                                return true;
-                            }
-                        }
+                        continue;
                     }
 
-                    if (position.CloseActive)
+                    if (openOrder.State == OrderStateType.Active
+                        && openOrder.IsSendToCancel == true)
                     {
-                        if (TryGetLastOrder(position.CloseOrders, out Order closeOrder) == false)
+                        if (openOrder.LastCancelTryLocalTime.AddSeconds(3) > DateTime.Now)
                         {
-                            continue;
+                            return true;
                         }
+                    }
+                }
 
-                        if (closeOrder.State == OrderStateType.Active
-                            && closeOrder.IsSendToCancel == true)
+                if (position.CloseActive)
+                {
+                    if (TryGetLastOrder(position.CloseOrders, out Order closeOrder) == false)
+                    {
+                        continue;
+                    }
+
+                    if (closeOrder.State == OrderStateType.Active
+                        && closeOrder.IsSendToCancel == true)
+                    {
+                        if (closeOrder.LastCancelTryLocalTime.AddSeconds(3) > DateTime.Now)
                         {
-                            if (closeOrder.LastCancelTryLocalTime.AddSeconds(3) > DateTime.Now)
-                            {
-                                return true;
-                            }
+                            return true;
                         }
                     }
                 }
             }
 
             return false;
+        }
+
+        private static bool TryRemoveLastOrder(List<Order> orders)
+        {
+            if (orders == null || orders.Count == 0)
+            {
+                return false;
+            }
+
+            orders.RemoveAt(orders.Count - 1);
+            return true;
         }
 
         public bool HaveCloseOrders
@@ -3220,6 +3371,11 @@ namespace OsEngine.OsTrader.Grids
 
                     volume += trade.Volume;
                     summ += trade.Volume * trade.Price;
+                }
+
+                if (volume == 0)
+                {
+                    return 0;
                 }
 
                 decimal result = summ / volume;

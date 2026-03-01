@@ -14200,3 +14200,558 @@
   - dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900 -> success, 0 warnings, 0 errors
   - dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo -> passed 542/542
 
+
+## 2026-03-01 - Step 4.2 (nullable annotations) - TradeGridCreator LoadLines mixed-invalid payload tolerance (#700)
+
+- Applied localized nullable-safe hardening in:
+  - project/OsEngine/OsTrader/Grids/TradeGridCreator.cs
+- Changes:
+  - `LoadLines(...)` now handles per-line parse failures and continues processing remaining lines.
+  - malformed line entries are skipped instead of aborting the entire load operation.
+  - preserves successful deserialization for valid lines in mixed payloads.
+- Added/updated tests:
+  - project/OsEngine.Tests/TradeGridPersistenceCoreTests.cs
+    - added `Stage2Step2_2_TradeGridCreator_LoadLines_WithMixedInvalidPayload_ShouldKeepValidLines`.
+    - test subscribes to `LogMessageEvent` to avoid modal fallback during expected parse-error branch.
+- Scope:
+  - nullable/runtime guard cleanup only
+  - no behavior changes for fully valid payloads.
+
+### Verification
+
+- Host-context verification (outside sandbox, per dotnet-build-policy):
+  - dotnet restore project/OsEngine/OsEngine.csproj --nologo -> success
+  - dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo -> success
+  - dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900 -> success, 0 warnings, 0 errors
+  - dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo -> passed 545/545
+
+## 2026-03-01 - Step 4.2 (nullable annotations) - TradeGridCreator LoadFromString parser tolerance batch (#701)
+
+- Applied localized nullable-safe hardening in:
+  - project/OsEngine/OsTrader/Grids/TradeGridCreator.cs
+- Changes:
+  - `LoadFromString(...)` switched numeric parsing from exception-prone conversion to guarded `TryParse` flow.
+  - malformed middle numeric fields no longer abort deserialization of subsequent valid tail fields.
+  - added local decimal parser helper with `InvariantCulture`/`CurrentCulture`/`ru-RU` fallback.
+  - preserves previous behavior for valid payloads while improving mixed-legacy payload tolerance.
+- Added/updated tests:
+  - project/OsEngine.Tests/TradeGridPersistenceCoreTests.cs
+    - added `Stage2Step2_2_TradeGridCreator_LoadFromString_WithMalformedMiddleFields_ShouldContinueTailParsing`.
+- Scope:
+  - parser/nullable hardening only
+  - no business-logic changes for valid settings payloads.
+
+### Verification
+
+- Host-context verification (outside sandbox, per dotnet-build-policy):
+  - dotnet restore project/OsEngine/OsEngine.csproj --nologo -> success
+  - dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo -> success
+  - dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900 -> success, 0 warnings, 0 errors
+  - dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo -> passed 546/546
+
+## 2026-03-01 - Step 4.2 (nullable annotations) - TradeGrid stale-NONE order recovery hardening batch (#702)
+
+- Applied localized nullable-safe hardening in:
+  - project/OsEngine/OsTrader/Grids/TradeGrid.cs
+- Changes:
+  - `HaveOrdersWithNoMarketOrders()` refactored to use stable local `position` snapshot without redundant dereference branches.
+  - added guarded helper `TryRemoveLastOrder(List<Order>)` and switched stale-NONE cleanup branches to safe removal path.
+  - stale `NONE` order cleanup now no longer assumes list size at removal point.
+  - `HaveOrdersTryToCancelLastSecond()` aligned to same local-snapshot pattern for consistency/readability.
+- Added/updated tests:
+  - project/OsEngine.Tests/TradeGridPersistenceCoreTests.cs
+    - added `Stage2Step2_2_TradeGrid_HaveOrdersWithNoMarketOrders_ShouldRemoveStaleNoneOpenOrder`.
+    - added `Stage2Step2_2_TradeGrid_HaveOrdersWithNoMarketOrders_ShouldRemoveStaleNoneCloseOrder`.
+- Scope:
+  - nullable/runtime safety hardening only
+  - no business-logic changes for valid order-state flows.
+
+### Verification
+
+- Host-context verification (outside sandbox, per dotnet-build-policy):
+  - dotnet restore project/OsEngine/OsEngine.csproj --nologo -> success
+  - dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo -> success
+  - dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900 -> success, 0 warnings, 0 errors
+  - dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo -> passed 548/548
+
+## 2026-03-01 - Step 4.2 (nullable annotations) - TradeGrid MiddleEntryPrice zero-volume guard (#703)
+
+- Applied localized nullable-safe hardening in:
+  - project/OsEngine/OsTrader/Grids/TradeGrid.cs
+- Changes:
+  - `MiddleEntryPrice` now returns `0` when aggregated trade volume equals `0` before average-price division.
+  - prevents divide-by-zero faults on sparse/malformed trade snapshots where `MyTrade.Volume` sums to zero.
+- Added/updated tests:
+  - project/OsEngine.Tests/TradeGridPersistenceCoreTests.cs
+    - added `Stage2Step2_2_TradeGrid_MiddleEntryPrice_WithZeroTradeVolume_ShouldReturnZero`.
+- Scope:
+  - runtime safety hardening only
+  - no behavior changes for non-zero aggregate trade volume paths.
+
+### Verification
+
+- Host-context verification (outside sandbox, per dotnet-build-policy):
+  - dotnet restore project/OsEngine/OsEngine.csproj --nologo -> success
+  - dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo -> success
+  - dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900 -> success, 0 warnings, 0 errors
+  - dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo -> passed 549/549
+
+## 2026-03-01 - Step 4.2 (nullable annotations) - TradeGrid LoadFromString prime parser tolerance batch (#704)
+
+- Applied localized nullable-safe hardening in:
+  - project/OsEngine/OsTrader/Grids/TradeGrid.cs
+- Changes:
+  - `LoadFromString(...)` prime-field parsing migrated from exception-prone conversions to guarded `TryParse` flow.
+  - malformed numeric/boolean prime fields now preserve current/default values and do not abort tail section parsing.
+  - added local helpers `TryParseIntInvariant(...)` and `TryParseDecimal(...)` (`InvariantCulture`/`CurrentCulture`/`ru-RU` fallback for decimals).
+- Added/updated tests:
+  - project/OsEngine.Tests/TradeGridPersistenceCoreTests.cs
+    - added `Stage2Step2_2_TradeGrid_LoadFromString_WithMalformedPrimeFields_ShouldContinueTailParsing`.
+- Scope:
+  - parser/nullable hardening only
+  - no behavior changes for valid payloads.
+
+### Verification
+
+- Host-context verification (outside sandbox, per dotnet-build-policy):
+  - dotnet restore project/OsEngine/OsEngine.csproj --nologo -> success
+  - dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo -> success
+  - dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900 -> success, 0 warnings, 0 errors
+  - dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo -> passed 550/550
+
+## 2026-03-01 - Step 4.2 (nullable annotations) - TradeGrid last-candle access helper consolidation (#705)
+
+- Applied localized nullable-safe hardening in:
+  - project/OsEngine/OsTrader/Grids/TradeGrid.cs
+- Changes:
+  - introduced shared helper `TryGetLastCandle(List<Candle>, out Candle)`.
+  - replaced duplicated direct last-candle indexing in:
+    - `TryRemoveWrongOrders()`
+    - `GetOpenOrdersGridHole()`
+    - `TrySetOpenOrders()`
+  - reduces repeated edge-risk from manual `candles[candles.Count - 1]` checks and keeps behavior consistent across order-helper paths.
+- Added/updated tests:
+  - project/OsEngine.Tests/TradeGridPersistenceCoreTests.cs
+    - added `Stage2Step2_2_TradeGrid_OrderHelpers_WithEmptyCandles_ShouldStaySafe`.
+- Scope:
+  - runtime safety/refactor hardening only
+  - no behavior changes for valid candle streams.
+
+### Verification
+
+- Host-context verification (outside sandbox, per dotnet-build-policy):
+  - dotnet restore project/OsEngine/OsEngine.csproj --nologo -> success
+  - dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo -> success
+  - dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900 -> success, 0 warnings, 0 errors
+  - dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo -> passed 551/551
+
+## 2026-03-01 - Step 4.2 (nullable annotations) - TradeGrid optional-tail deterministic fallback parsing (#706)
+
+- Applied localized nullable-safe hardening in:
+  - project/OsEngine/OsTrader/Grids/TradeGrid.cs
+- Changes:
+  - `LoadFromString(...)` optional prime-tail fields now apply deterministic defaults on malformed values (not only on missing tail):
+    - `DelayInReal` -> `500`
+    - `CheckMicroVolumes` -> `true`
+    - `MaxDistanceToOrdersPercent` -> `1.5m`
+    - `OpenOrdersMakerOnly` -> `true`
+  - removed exception-driven parsing branches for these tail fields and replaced with explicit guarded logic.
+- Added/updated tests:
+  - project/OsEngine.Tests/TradeGridPersistenceCoreTests.cs
+    - added `Stage2Step2_2_TradeGrid_LoadFromString_WithMalformedOptionalTail_ShouldApplyDefaults`.
+- Scope:
+  - parser/runtime hardening only
+  - preserves behavior for valid payloads while making malformed-tail handling deterministic.
+
+### Verification
+
+- Host-context verification (outside sandbox, per dotnet-build-policy):
+  - dotnet restore project/OsEngine/OsEngine.csproj --nologo -> success
+  - dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo -> success
+  - dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900 -> success, 0 warnings, 0 errors
+  - dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo -> passed 552/552
+
+## 2026-03-01 - Step 4.2 (nullable annotations) - TradeGridCreator line-parser legacy compatibility hardening (#707)
+
+- Applied localized nullable-safe hardening in:
+  - project/OsEngine/OsTrader/Grids/TradeGridCreator.cs
+- Changes:
+  - `TradeGridLine.SetFromStr(...)` now uses guarded parsing and returns success flag.
+  - `LoadLines(...)` now adds line only when `SetFromStr(...)` reports successful parse.
+  - parser now accepts legacy 4-field line payload (`PriceEnter|Volume|Side|PriceExit|`) with default `PositionNum = -1`.
+  - malformed/short line payloads are safely skipped without exception-driven control flow.
+- Added/updated tests:
+  - project/OsEngine.Tests/TradeGridPersistenceCoreTests.cs
+    - added `Stage2Step2_2_TradeGridCreator_LoadLines_WithLegacyLineWithoutPositionNum_ShouldLoadWithDefaultPosition`.
+- Scope:
+  - parser/runtime hardening only
+  - preserves behavior for valid payloads and improves compatibility for legacy line format.
+
+### Verification
+
+- Host-context verification (outside sandbox, per dotnet-build-policy):
+  - dotnet restore project/OsEngine/OsEngine.csproj --nologo -> success
+  - dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo -> success
+  - dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900 -> success, 0 warnings, 0 errors
+  - dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo -> passed 553/553
+
+## 2026-03-01 - Step 4.2 (nullable annotations) - TradeGrid flexible boolean parser compatibility batch (#708)
+
+- Applied localized nullable-safe hardening in:
+  - project/OsEngine/OsTrader/Grids/TradeGrid.cs
+- Changes:
+  - introduced `TryParseBoolFlexible(...)` for resilient bool parsing in `LoadFromString(...)`.
+  - supported legacy boolean forms in prime/tail fields (`1/0`, `yes/no`, `on/off`, plus standard `true/false`).
+  - applied flexible parsing to:
+    - `AutoClearJournalIsOn`
+    - `CheckMicroVolumes`
+    - `OpenOrdersMakerOnly`
+- Added/updated tests:
+  - project/OsEngine.Tests/TradeGridPersistenceCoreTests.cs
+    - added `Stage2Step2_2_TradeGrid_LoadFromString_WithFlexibleBooleanTail_ShouldParse`.
+- Scope:
+  - parser compatibility hardening only
+  - no behavior changes for standard boolean payloads.
+
+### Verification
+
+- Host-context verification (outside sandbox, per dotnet-build-policy):
+  - dotnet restore project/OsEngine/OsEngine.csproj --nologo -> success
+  - dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo -> success
+  - dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900 -> success, 0 warnings, 0 errors
+  - dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo -> passed 554/554
+
+## 2026-03-01 - Step 4.2 (nullable annotations) - TradeGrid enum parser case-insensitive compatibility batch (#709)
+
+- Applied localized nullable-safe hardening in:
+  - project/OsEngine/OsTrader/Grids/TradeGrid.cs
+- Changes:
+  - introduced generic helper `TryParseEnumFlexible<TEnum>(...)` with case-insensitive parsing.
+  - switched `LoadFromString(...)` enum prime fields to guarded flexible parsing:
+    - `GridType`
+    - `Regime`
+    - `RegimeLogicEntry`
+  - improves compatibility for lowercase/mixed-case legacy payloads without affecting valid current payloads.
+- Added/updated tests:
+  - project/OsEngine.Tests/TradeGridPersistenceCoreTests.cs
+    - added `Stage2Step2_2_TradeGrid_LoadFromString_WithLowercaseEnumFields_ShouldParse`.
+- Scope:
+  - parser compatibility hardening only
+  - no behavior changes for standard enum payloads.
+
+### Verification
+
+- Host-context verification (outside sandbox, per dotnet-build-policy):
+  - dotnet restore project/OsEngine/OsEngine.csproj --nologo -> success
+  - dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo -> success
+  - dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900 -> success, 0 warnings, 0 errors
+  - dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo -> passed 555/555
+
+## 2026-03-01 - Step 4.2 (nullable annotations) - TradeGridCreator enum parser case-insensitive compatibility batch (#710)
+
+- Applied localized nullable-safe hardening in:
+  - project/OsEngine/OsTrader/Grids/TradeGridCreator.cs
+- Changes:
+  - added `TryParseEnumFlexible<TEnum>(...)` for case-insensitive enum parsing.
+  - switched `LoadFromString(...)` enum fields to guarded flexible parser:
+    - `GridSide`
+    - `TypeStep`
+    - `TypeProfit`
+    - `TypeVolume`
+  - improves compatibility for lowercase/mixed-case creator payloads.
+- Added/updated tests:
+  - project/OsEngine.Tests/TradeGridPersistenceCoreTests.cs
+    - added `Stage2Step2_2_TradeGridCreator_LoadFromString_WithLowercaseEnumFields_ShouldParse`.
+- Scope:
+  - parser compatibility hardening only
+  - no behavior changes for standard enum payloads.
+
+### Verification
+
+- Host-context verification (outside sandbox, per dotnet-build-policy):
+  - dotnet restore project/OsEngine/OsEngine.csproj --nologo -> success
+  - dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo -> success
+  - dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900 -> success, 0 warnings, 0 errors
+  - dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo -> passed 556/556
+
+## 2026-03-01 - Step 4.2 (nullable annotations) - TradeGridCreator line payload whitespace/CRLF parser compatibility batch (#711)
+
+- Applied localized nullable-safe hardening in:
+  - project/OsEngine/OsTrader/Grids/TradeGridCreator.cs
+- Changes:
+  - `LoadLines(...)` now trims each line token and skips whitespace-only entries before parsing.
+  - `TradeGridLine.SetFromStr(...)` now trims per-field raw values before decimal/enum/int parsing.
+  - improves compatibility for legacy payloads with surrounding spaces/CRLF noise around line records.
+- Added/updated tests:
+  - project/OsEngine.Tests/TradeGridPersistenceCoreTests.cs
+    - added `Stage2Step2_2_TradeGridCreator_LoadLines_WithWhitespaceAndCrLf_ShouldParseValidLines`.
+- Scope:
+  - parser compatibility hardening only
+  - no behavior changes for clean line payloads.
+
+### Verification
+
+- Host-context verification (outside sandbox, per dotnet-build-policy):
+  - dotnet restore project/OsEngine/OsEngine.csproj --nologo -> success
+  - dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo -> success
+  - dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900 -> success, 0 warnings, 0 errors
+  - dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo -> passed 557/557
+
+## 2026-03-01 - Step 4.2 (nullable annotations) - TradeGridCreator numeric invariant guards in LoadFromString (#712)
+
+- Applied localized nullable-safe hardening in:
+  - project/OsEngine/OsTrader/Grids/TradeGridCreator.cs
+- Changes:
+  - added invariant guards for parsed numeric fields in `LoadFromString(...)`:
+    - `LineCountStart`, `LineStep`, `ProfitStep`, `StartVolume` accept only `>= 0`
+    - `StepMultiplicator`, `ProfitMultiplicator`, `MartingaleMultiplicator` accept only `> 0`
+  - malformed or invalid-invariant numeric payload values now do not overwrite existing safe state.
+- Added/updated tests:
+  - project/OsEngine.Tests/TradeGridPersistenceCoreTests.cs
+    - added `Stage2Step2_2_TradeGridCreator_LoadFromString_WithInvalidNumericInvariants_ShouldKeepSafeValues`.
+- Scope:
+  - parser/runtime safety hardening only
+  - no behavior changes for valid numeric payloads.
+
+### Verification
+
+- Host-context verification (outside sandbox, per dotnet-build-policy):
+  - dotnet restore project/OsEngine/OsEngine.csproj --nologo -> success
+  - dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo -> success
+  - dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900 -> success, 0 warnings, 0 errors
+  - dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo -> passed 558/558
+
+## 2026-03-01 - Step 4.2 (nullable annotations) - TradeGrid firstTradeTime parse fallback hardening (#713)
+
+- Applied localized nullable-safe hardening in:
+  - project/OsEngine/OsTrader/Grids/TradeGrid.cs
+- Changes:
+  - replaced `ParseDateInvariantOrCurrent(...)` (which forced `DateTime.MinValue` on parse fail) with `TryParseDateInvariantOrCurrent(...)`.
+  - `LoadFromString(...)` now updates `_firstTradeTime` only on successful date parse.
+  - malformed date payload no longer overwrites existing runtime state.
+- Added/updated tests:
+  - project/OsEngine.Tests/TradeGridPersistenceCoreTests.cs
+    - added `Stage2Step2_2_TradeGrid_LoadFromString_WithMalformedFirstTradeTime_ShouldKeepExistingValue`.
+- Scope:
+  - parser/runtime safety hardening only
+  - no behavior changes for valid datetime payloads.
+
+### Verification
+
+- Host-context verification (outside sandbox, per dotnet-build-policy):
+  - dotnet restore project/OsEngine/OsEngine.csproj --nologo -> success
+  - dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo -> success
+  - dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900 -> success, 0 warnings, 0 errors
+  - dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo -> passed 559/559
+
+## 2026-03-01 - Step 4.2 (nullable annotations) - TradeGrid prime numeric invariant guards in LoadFromString (#714)
+
+- Applied localized nullable-safe hardening in:
+  - project/OsEngine/OsTrader/Grids/TradeGrid.cs
+- Changes:
+  - added invariant guards for parsed prime numeric fields in `LoadFromString(...)`:
+    - `MaxClosePositionsInJournal`, `MaxOpenOrdersInMarket`, `MaxCloseOrdersInMarket`, `_openPositionsBySession` accept only `>= 0`
+    - `DelayInReal` applies fallback `500` for negative values
+    - `MaxDistanceToOrdersPercent` applies fallback `1.5m` for negative values
+  - invalid-negative payload values now do not overwrite safe runtime configuration.
+- Added/updated tests:
+  - project/OsEngine.Tests/TradeGridPersistenceCoreTests.cs
+    - added `Stage2Step2_2_TradeGrid_LoadFromString_WithNegativeNumericLimits_ShouldKeepSafeValues`.
+- Scope:
+  - parser/runtime safety hardening only
+  - no behavior changes for valid numeric payloads.
+
+### Verification
+
+- Host-context verification (outside sandbox, per dotnet-build-policy):
+  - dotnet restore project/OsEngine/OsEngine.csproj --nologo -> success
+  - dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo -> success
+  - dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900 -> success, 0 warnings, 0 errors
+  - dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo -> passed 560/560
+
+## 2026-03-01 - Step 4.2 (nullable annotations) - TradeGridLine PositionNum parser compatibility hardening (#715)
+
+- Applied localized nullable-safe hardening in:
+  - project/OsEngine/OsTrader/Grids/TradeGridCreator.cs
+- Changes:
+  - `TradeGridLine.SetFromStr(...)` switched `PositionNum` parse to shared flexible int parser (`InvariantCulture`/`CurrentCulture`/`ru-RU`) with trimmed input.
+  - improves compatibility for legacy line payloads with formatted/spaced numeric position values.
+- Added/updated tests:
+  - project/OsEngine.Tests/TradeGridPersistenceCoreTests.cs
+    - added `Stage2Step2_2_TradeGridCreator_LoadLines_WithSpacedPositionNum_ShouldParse`.
+- Scope:
+  - parser compatibility hardening only
+  - no behavior changes for standard numeric payloads.
+
+### Verification
+
+- Host-context verification (outside sandbox, per dotnet-build-policy):
+  - dotnet restore project/OsEngine/OsEngine.csproj --nologo -> success
+  - dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo -> success
+  - dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900 -> success, 0 warnings, 0 errors
+  - dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo -> passed 561/561
+
+## 2026-03-01 - Step 4.2 (nullable annotations) - TradeGridCreator TradeAsset parser normalization batch (#716)
+
+- Applied localized nullable-safe hardening in:
+  - project/OsEngine/OsTrader/Grids/TradeGridCreator.cs
+- Changes:
+  - `LoadFromString(...)` now trims `TradeAssetInPortfolio` payload value before assignment.
+  - guarded assignment keeps current value if incoming trimmed asset is empty/whitespace.
+  - improves compatibility with noisy payloads containing extra whitespace around portfolio asset name.
+- Added/updated tests:
+  - project/OsEngine.Tests/TradeGridPersistenceCoreTests.cs
+    - added `Stage2Step2_2_TradeGridCreator_LoadFromString_TradeAssetWithWhitespace_ShouldBeTrimmed`.
+- Scope:
+  - parser normalization hardening only
+  - no behavior changes for clean payload values.
+
+### Verification
+
+- Host-context verification (outside sandbox, per dotnet-build-policy):
+  - dotnet restore project/OsEngine/OsEngine.csproj --nologo -> success
+  - dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo -> success
+  - dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900 -> success, 0 warnings, 0 errors
+  - dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo -> passed 562/562
+
+## 2026-03-01 - Step 4.2 (nullable annotations) - TradeGridCreator full-token whitespace normalization in LoadFromString (#717)
+
+- Applied localized nullable-safe hardening in:
+  - project/OsEngine/OsTrader/Grids/TradeGridCreator.cs
+- Changes:
+  - `LoadFromString(...)` now normalizes all split tokens with pre-trim pass right after `Split('@')`.
+  - all subsequent enum/numeric/string parsing in creator now consistently receives trimmed payload values.
+  - improves compatibility for mixed payloads containing leading/trailing spaces and CRLF artifacts across multiple fields.
+- Added/updated tests:
+  - project/OsEngine.Tests/TradeGridPersistenceCoreTests.cs
+    - added `Stage2Step2_2_TradeGridCreator_LoadFromString_WithMixedWhitespaceTokens_ShouldParse`.
+- Scope:
+  - parser normalization hardening only
+  - no behavior changes for clean payloads.
+
+### Verification
+
+- Host-context verification (outside sandbox, per dotnet-build-policy):
+  - dotnet restore project/OsEngine/OsEngine.csproj --nologo -> success
+  - dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo -> success
+  - dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900 -> success, 0 warnings, 0 errors
+  - dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo -> passed 563/563
+
+## 2026-03-01 - Step 4.2 (nullable annotations) - TradeGrid full-token whitespace normalization in LoadFromString (#718)
+
+- Applied localized nullable-safe hardening in:
+  - project/OsEngine/OsTrader/Grids/TradeGrid.cs
+- Changes:
+  - `LoadFromString(...)` now applies pre-trim normalization for:
+    - section tokens after `Split('%')`
+    - prime tokens after `Split('@')`
+  - all downstream enum/bool/numeric parsing now consistently receives trimmed input.
+  - improves compatibility for noisy payloads with leading/trailing spaces and CRLF artifacts.
+- Added/updated tests:
+  - project/OsEngine.Tests/TradeGridPersistenceCoreTests.cs
+    - added `Stage2Step2_2_TradeGrid_LoadFromString_WithMixedWhitespaceTokens_ShouldParse`.
+- Scope:
+  - parser normalization hardening only
+  - no behavior changes for clean payloads.
+
+### Verification
+
+- Host-context verification (outside sandbox, per dotnet-build-policy):
+  - dotnet restore project/OsEngine/OsEngine.csproj --nologo -> success
+  - dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo -> success
+  - dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900 -> success, 0 warnings, 0 errors
+  - dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo -> passed 564/564
+
+## 2026-03-01 - Step 4.2 (nullable annotations) - TradeGrid whitespace-only section skip guards in LoadFromString (#719)
+
+- Applied localized nullable-safe hardening in:
+  - project/OsEngine/OsTrader/Grids/TradeGrid.cs
+- Changes:
+  - `LoadFromString(...)` now invokes subcomponent parsers only when corresponding section token is non-empty/non-whitespace.
+  - added helper `IsPayloadSegmentPresent(...)`.
+  - avoids unnecessary subcomponent parsing on noisy payloads with `%   %` tails.
+- Added/updated tests:
+  - project/OsEngine.Tests/TradeGridPersistenceCoreTests.cs
+    - added `Stage2Step2_2_TradeGrid_LoadFromString_WithWhitespaceOnlySections_ShouldSkipSubcomponentParsing`.
+- Scope:
+  - parser/runtime hardening only
+  - no behavior changes for payloads with meaningful section content.
+
+### Verification
+
+- Host-context verification (outside sandbox, per dotnet-build-policy):
+  - dotnet restore project/OsEngine/OsEngine.csproj --nologo -> success
+  - dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo -> success
+  - dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900 -> success, 0 warnings, 0 errors
+  - dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo -> passed 565/565
+
+## 2026-03-01 - Step 4.2 (nullable annotations) - TradeGrid Number/FirstPrice invariant guards in LoadFromString (#720)
+
+- Applied localized nullable-safe hardening in:
+  - project/OsEngine/OsTrader/Grids/TradeGrid.cs
+- Changes:
+  - `LoadFromString(...)` now applies invariant guards for:
+    - `Number` (`>= 0`)
+    - `_firstTradePrice` (`>= 0`)
+  - negative payload values for these fields no longer overwrite safe runtime state.
+- Added/updated tests:
+  - project/OsEngine.Tests/TradeGridPersistenceCoreTests.cs
+    - added `Stage2Step2_2_TradeGrid_LoadFromString_WithNegativeNumberAndFirstPrice_ShouldKeepSafeValues`.
+- Scope:
+  - parser/runtime safety hardening only
+  - no behavior changes for valid payload values.
+
+### Verification
+
+- Host-context verification (outside sandbox, per dotnet-build-policy):
+  - dotnet restore project/OsEngine/OsEngine.csproj --nologo -> success
+  - dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo -> success
+  - dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900 -> success, 0 warnings, 0 errors
+  - dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo -> passed 566/566
+
+## 2026-03-01 - Step 4.2 (nullable annotations) - TradeGridLine non-negative invariant guard in parser (#721)
+
+- Applied localized nullable-safe hardening in:
+  - project/OsEngine/OsTrader/Grids/TradeGridCreator.cs
+- Changes:
+  - `TradeGridLine.SetFromStr(...)` now enforces non-negative invariants for parsed line values:
+    - `PriceEnter >= 0`
+    - `Volume >= 0`
+    - `PriceExit >= 0`
+  - lines violating these invariants are rejected and not added by `LoadLines(...)`.
+- Added/updated tests:
+  - project/OsEngine.Tests/TradeGridPersistenceCoreTests.cs
+    - added `Stage2Step2_2_TradeGridCreator_LoadLines_WithNegativeLineValues_ShouldSkipInvalidLine`.
+- Scope:
+  - parser/runtime safety hardening only
+  - no behavior changes for valid line payloads.
+
+### Verification
+
+- Host-context verification (outside sandbox, per dotnet-build-policy):
+  - dotnet restore project/OsEngine/OsEngine.csproj --nologo -> success
+  - dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo -> success
+  - dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900 -> success, 0 warnings, 0 errors
+  - dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo -> passed 567/567
+
+## 2026-03-01 - Step 4.2 (nullable annotations) - TradeGridLine PositionNum lower-bound invariant guard (#722)
+
+- Applied localized nullable-safe hardening in:
+  - project/OsEngine/OsTrader/Grids/TradeGridCreator.cs
+- Changes:
+  - `TradeGridLine.SetFromStr(...)` now enforces lower bound for parsed `PositionNum` (`>= -1`).
+  - payload lines with `PositionNum < -1` are rejected and skipped by `LoadLines(...)`.
+- Added/updated tests:
+  - project/OsEngine.Tests/TradeGridPersistenceCoreTests.cs
+    - added `Stage2Step2_2_TradeGridCreator_LoadLines_WithInvalidNegativePositionNum_ShouldSkipInvalidLine`.
+- Scope:
+  - parser/runtime safety hardening only
+  - no behavior changes for valid `PositionNum` values (`-1` and above).
+
+### Verification
+
+- Host-context verification (outside sandbox, per dotnet-build-policy):
+  - dotnet restore project/OsEngine/OsEngine.csproj --nologo -> success
+  - dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo -> success
+  - dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900 -> success, 0 warnings, 0 errors
+  - dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo -> passed 568/568

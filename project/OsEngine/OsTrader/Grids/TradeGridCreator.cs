@@ -82,58 +82,126 @@ namespace OsEngine.OsTrader.Grids
                 }
 
                 string[] values = value.Split('@');
+                for (int i = 0; i < values.Length; i++)
+                {
+                    if (values[i] != null)
+                    {
+                        values[i] = values[i].Trim();
+                    }
+                }
 
                 if (values.Length > 0 && string.IsNullOrWhiteSpace(values[0]) == false)
                 {
-                    Enum.TryParse(values[0], out GridSide);
+                    if (TryParseEnumFlexible(values[0], out Side parsedValue))
+                    {
+                        GridSide = parsedValue;
+                    }
                 }
                 if (values.Length > 1 && string.IsNullOrWhiteSpace(values[1]) == false)
                 {
-                    FirstPrice = values[1].ToDecimal();
+                    if (TryParseDecimal(values[1], out decimal parsedValue))
+                    {
+                        FirstPrice = parsedValue;
+                    }
                 }
                 if (values.Length > 2 && string.IsNullOrWhiteSpace(values[2]) == false)
                 {
-                    LineCountStart = Convert.ToInt32(values[2], CultureInfo.InvariantCulture);
+                    if (int.TryParse(values[2], NumberStyles.Integer, CultureInfo.InvariantCulture, out int parsedValue))
+                    {
+                        if (parsedValue >= 0)
+                        {
+                            LineCountStart = parsedValue;
+                        }
+                    }
                 }
                 if (values.Length > 3 && string.IsNullOrWhiteSpace(values[3]) == false)
                 {
-                    Enum.TryParse(values[3], out TypeStep);
+                    if (TryParseEnumFlexible(values[3], out TradeGridValueType parsedValue))
+                    {
+                        TypeStep = parsedValue;
+                    }
                 }
                 if (values.Length > 4 && string.IsNullOrWhiteSpace(values[4]) == false)
                 {
-                    LineStep = values[4].ToDecimal();
+                    if (TryParseDecimal(values[4], out decimal parsedValue))
+                    {
+                        if (parsedValue >= 0)
+                        {
+                            LineStep = parsedValue;
+                        }
+                    }
                 }
                 if (values.Length > 5 && string.IsNullOrWhiteSpace(values[5]) == false)
                 {
-                    StepMultiplicator = values[5].ToDecimal();
+                    if (TryParseDecimal(values[5], out decimal parsedValue))
+                    {
+                        if (parsedValue > 0)
+                        {
+                            StepMultiplicator = parsedValue;
+                        }
+                    }
                 }
                 if (values.Length > 6 && string.IsNullOrWhiteSpace(values[6]) == false)
                 {
-                    Enum.TryParse(values[6], out TypeProfit);
+                    if (TryParseEnumFlexible(values[6], out TradeGridValueType parsedValue))
+                    {
+                        TypeProfit = parsedValue;
+                    }
                 }
                 if (values.Length > 7 && string.IsNullOrWhiteSpace(values[7]) == false)
                 {
-                    ProfitStep = values[7].ToDecimal();
+                    if (TryParseDecimal(values[7], out decimal parsedValue))
+                    {
+                        if (parsedValue >= 0)
+                        {
+                            ProfitStep = parsedValue;
+                        }
+                    }
                 }
                 if (values.Length > 8 && string.IsNullOrWhiteSpace(values[8]) == false)
                 {
-                    ProfitMultiplicator = values[8].ToDecimal();
+                    if (TryParseDecimal(values[8], out decimal parsedValue))
+                    {
+                        if (parsedValue > 0)
+                        {
+                            ProfitMultiplicator = parsedValue;
+                        }
+                    }
                 }
                 if (values.Length > 9 && string.IsNullOrWhiteSpace(values[9]) == false)
                 {
-                    Enum.TryParse(values[9], out TypeVolume);
+                    if (TryParseEnumFlexible(values[9], out TradeGridVolumeType parsedValue))
+                    {
+                        TypeVolume = parsedValue;
+                    }
                 }
                 if (values.Length > 10 && string.IsNullOrWhiteSpace(values[10]) == false)
                 {
-                    StartVolume = values[10].ToDecimal();
+                    if (TryParseDecimal(values[10], out decimal parsedValue))
+                    {
+                        if (parsedValue >= 0)
+                        {
+                            StartVolume = parsedValue;
+                        }
+                    }
                 }
                 if (values.Length > 11 && string.IsNullOrWhiteSpace(values[11]) == false)
                 {
-                    MartingaleMultiplicator = values[11].ToDecimal();
+                    if (TryParseDecimal(values[11], out decimal parsedValue))
+                    {
+                        if (parsedValue > 0)
+                        {
+                            MartingaleMultiplicator = parsedValue;
+                        }
+                    }
                 }
                 if (values.Length > 12 && string.IsNullOrWhiteSpace(values[12]) == false)
                 {
-                    TradeAssetInPortfolio = values[12];
+                    string tradeAsset = values[12].Trim();
+                    if (string.IsNullOrWhiteSpace(tradeAsset) == false)
+                    {
+                        TradeAssetInPortfolio = tradeAsset;
+                    }
                 }
                 if (values.Length > 13 && string.IsNullOrWhiteSpace(values[13]) == false)
                 {
@@ -420,15 +488,28 @@ namespace OsEngine.OsTrader.Grids
                 for(int i = 0;i < linesInStr.Length;i++)
                 {
                     string line = linesInStr[i];
+                    if (line != null)
+                    {
+                        line = line.Trim();
+                    }
 
-                    if(string.IsNullOrEmpty(line))
+                    if(string.IsNullOrWhiteSpace(line))
                     {
                         continue;
                     }
 
-                    TradeGridLine newLine = new TradeGridLine();
-                    newLine.SetFromStr(line);
-                    Lines.Add(newLine);
+                    try
+                    {
+                        TradeGridLine newLine = new TradeGridLine();
+                        if (newLine.SetFromStr(line))
+                        {
+                            Lines.Add(newLine);
+                        }
+                    }
+                    catch (Exception e)
+                    {
+                        SendNewLogMessage(e.ToString(), LogMessageType.Error);
+                    }
                 }
             }
             catch (Exception e)
@@ -597,6 +678,33 @@ namespace OsEngine.OsTrader.Grids
             return security.DecimalsVolume;
         }
 
+        private bool TryParseDecimal(string value, out decimal parsedValue)
+        {
+            if (decimal.TryParse(value, NumberStyles.Any, CultureInfo.InvariantCulture, out parsedValue))
+            {
+                return true;
+            }
+
+            if (decimal.TryParse(value, NumberStyles.Any, CultureInfo.CurrentCulture, out parsedValue))
+            {
+                return true;
+            }
+
+            if (decimal.TryParse(value, NumberStyles.Any, new CultureInfo("ru-RU"), out parsedValue))
+            {
+                return true;
+            }
+
+            parsedValue = 0;
+            return false;
+        }
+
+        private bool TryParseEnumFlexible<TEnum>(string value, out TEnum parsedValue)
+            where TEnum : struct
+        {
+            return Enum.TryParse(value, true, out parsedValue);
+        }
+
         #endregion
 
         #region Log
@@ -645,15 +753,109 @@ namespace OsEngine.OsTrader.Grids
             return result;
         }
 
-        public void SetFromStr(string str)
+        public bool SetFromStr(string str)
         {
+            if (string.IsNullOrWhiteSpace(str))
+            {
+                return false;
+            }
+
             string[] saveArray = str.Split('|');
 
-            PriceEnter = saveArray[0].ToDecimal();
-            Volume = saveArray[1].ToDecimal();
-            Enum.TryParse(saveArray[2], out Side);
-            PriceExit = saveArray[3].ToDecimal();
-            PositionNum = Convert.ToInt32(saveArray[4], CultureInfo.InvariantCulture);
+            if (saveArray.Length < 4)
+            {
+                return false;
+            }
+
+            string priceEnterRaw = saveArray[0]?.Trim();
+            string volumeRaw = saveArray[1]?.Trim();
+            string sideRaw = saveArray[2]?.Trim();
+            string priceExitRaw = saveArray[3]?.Trim();
+
+            if (TryParseDecimal(priceEnterRaw, out decimal priceEnter) == false)
+            {
+                return false;
+            }
+            if (TryParseDecimal(volumeRaw, out decimal volume) == false)
+            {
+                return false;
+            }
+            if (Enum.TryParse(sideRaw, true, out Side side) == false)
+            {
+                return false;
+            }
+            if (TryParseDecimal(priceExitRaw, out decimal priceExit) == false)
+            {
+                return false;
+            }
+
+            if (priceEnter < 0 || volume < 0 || priceExit < 0)
+            {
+                return false;
+            }
+
+            PriceEnter = priceEnter;
+            Volume = volume;
+            Side = side;
+            PriceExit = priceExit;
+
+            if (saveArray.Length > 4
+                && string.IsNullOrWhiteSpace(saveArray[4]) == false
+                && TryParseInt(saveArray[4].Trim(), out int positionNum))
+            {
+                if (positionNum >= -1)
+                {
+                    PositionNum = positionNum;
+                }
+                else
+                {
+                    return false;
+                }
+            }
+
+            return true;
+        }
+
+        private static bool TryParseDecimal(string value, out decimal parsed)
+        {
+            if (decimal.TryParse(value, NumberStyles.Any, CultureInfo.InvariantCulture, out parsed))
+            {
+                return true;
+            }
+
+            if (decimal.TryParse(value, NumberStyles.Any, CultureInfo.CurrentCulture, out parsed))
+            {
+                return true;
+            }
+
+            if (decimal.TryParse(value, NumberStyles.Any, new CultureInfo("ru-RU"), out parsed))
+            {
+                return true;
+            }
+
+            parsed = 0;
+            return false;
+        }
+
+        private static bool TryParseInt(string value, out int parsed)
+        {
+            if (int.TryParse(value, NumberStyles.Integer, CultureInfo.InvariantCulture, out parsed))
+            {
+                return true;
+            }
+
+            if (int.TryParse(value, NumberStyles.Integer, CultureInfo.CurrentCulture, out parsed))
+            {
+                return true;
+            }
+
+            if (int.TryParse(value, NumberStyles.Integer, new CultureInfo("ru-RU"), out parsed))
+            {
+                return true;
+            }
+
+            parsed = 0;
+            return false;
         }
 
     }
