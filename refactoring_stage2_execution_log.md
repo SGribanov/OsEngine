@@ -16319,3 +16319,63 @@
   - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed `629/629`
 - **Commit:** n/a
 - **Push:** n/a
+
+### Step 4.2 - Nullable Annotations (Incremental Adoption #784-#789)
+
+- **Status:** In Progress (increment block completed)
+- **Plan item:** `refactoring_stage2_plan.md` -> Phase 4 / Step 4.2
+- **Changes (TradeGridErrorsReaction parser hardening):**
+  - Updated `project/OsEngine/OsTrader/Grids/TradeGridErrorsReaction.cs`:
+    - `LoadFromString(...)` now uses flexible bool parsing and guarded positive-int parsing instead of exception-driven conversions.
+    - optional tail fields now parse independently, so one malformed tail token no longer resets the whole optional tail to defaults.
+    - invalid or non-positive numeric tokens now preserve current configured values.
+  - Updated tests in `project/OsEngine.Tests/TradeGridPersistenceCoreTests.cs`:
+    - added `Stage2Step2_2_TradeGridErrorsReaction_LoadFromString_WithInvalidBoolToken_ShouldKeepValueAndContinueParsing`.
+    - added `Stage2Step2_2_TradeGridErrorsReaction_LoadFromString_WithInvalidCountToken_ShouldKeepValueAndContinueParsing`.
+    - added `Stage2Step2_2_TradeGridErrorsReaction_LoadFromString_WithInvalidWaitBoolAndValidTail_ShouldKeepBoolAndContinueTailParsing`.
+    - added `Stage2Step2_2_TradeGridErrorsReaction_LoadFromString_WithInvalidWaitSecondsAndValidReduceFlag_ShouldKeepSecondsAndParseReduceFlag`.
+- **Verification (outside sandbox, per dotnet-build-policy):**
+  - `dotnet restore project/OsEngine/OsEngine.csproj --nologo` -> success
+  - `dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo` -> success
+  - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` -> success, 0 warnings, 0 errors
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed `633/633`
+- **Commit:** n/a
+- **Push:** n/a
+
+### Step 4.2 - Nullable Annotations (Incremental Adoption #790-#793)
+
+- **Status:** In Progress (increment block completed)
+- **Plan item:** `refactoring_stage2_plan.md` -> Phase 4 / Step 4.2
+- **Changes (TradeGridErrorsReaction guarded-parser regression coverage):**
+  - Updated tests in `project/OsEngine.Tests/TradeGridPersistenceCoreTests.cs`:
+    - added `Stage2Step2_2_TradeGridErrorsReaction_LoadFromString_WithZeroCounts_ShouldKeepExistingValues`.
+    - added `Stage2Step2_2_TradeGridErrorsReaction_LoadFromString_WithNegativeWaitSeconds_ShouldKeepExistingValue`.
+    - added `Stage2Step2_2_TradeGridErrorsReaction_LoadFromString_WithFlexiblePrimaryBools_ShouldParse`.
+    - added `Stage2Step2_2_TradeGridErrorsReaction_LoadFromString_WithFlexibleOptionalBools_ShouldParse`.
+  - Locked non-positive numeric and flexible-bool behavior after the new guarded parser changes.
+- **Verification (outside sandbox, per dotnet-build-policy):**
+  - `dotnet restore project/OsEngine/OsEngine.csproj --nologo` -> success
+  - `dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo` -> success
+  - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` -> success, 0 warnings, 0 errors
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed `637/637`
+- **Commit:** n/a
+- **Push:** n/a
+
+### Step 4.2 - Nullable Annotations (Incremental Adoption #794-#797)
+
+- **Status:** In Progress (increment block completed)
+- **Plan item:** `refactoring_stage2_plan.md` -> Phase 4 / Step 4.2
+- **Changes (TradeGridErrorsReaction optional-tail partial-payload regression coverage):**
+  - Updated tests in `project/OsEngine.Tests/TradeGridPersistenceCoreTests.cs`:
+    - added `Stage2Step2_2_TradeGridErrorsReaction_LoadFromString_WithMissingWaitBool_ShouldKeepValueAndContinueTailParsing`.
+    - added `Stage2Step2_2_TradeGridErrorsReaction_LoadFromString_WithMissingWaitSeconds_ShouldKeepValueAndParseReduceFlag`.
+    - added `Stage2Step2_2_TradeGridErrorsReaction_LoadFromString_WithMissingReduceFlag_ShouldKeepValueAndPreserveParsedTailPrefix`.
+    - added `Stage2Step2_2_TradeGridErrorsReaction_LoadFromString_WithInvalidWaitBoolAndMissingWaitSeconds_ShouldKeepValuesAndParseReduceFlag`.
+  - Locked missing and mixed optional-tail behavior for the three optional tail fields after the parser-hardening changes.
+- **Verification (outside sandbox, per dotnet-build-policy):**
+  - `dotnet restore project/OsEngine/OsEngine.csproj --nologo` -> success
+  - `dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo` -> success
+  - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` -> success, 0 warnings, 0 errors
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed `641/641`
+- **Commit:** n/a
+- **Push:** n/a
