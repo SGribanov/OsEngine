@@ -1315,6 +1315,258 @@ public class TradeGridPersistenceCoreTests
     }
 
     [Fact]
+    public void Stage2Step2_2_TradeGridErrorsReaction_LoadFromString_WithInvalidBoolToken_ShouldKeepValueAndContinueParsing()
+    {
+        TradeGrid grid = CreateBareGrid();
+        TradeGridErrorsReaction reaction = new TradeGridErrorsReaction(grid)
+        {
+            FailOpenOrdersReactionIsOn = false,
+            FailOpenOrdersCountToReaction = 10,
+            FailCancelOrdersCountToReaction = 11,
+            FailCancelOrdersReactionIsOn = true,
+            WaitOnStartConnectorIsOn = false,
+            WaitSecondsOnStartConnector = 31,
+            ReduceOrdersCountInMarketOnNoFundsError = false
+        };
+
+        Exception? error = Record.Exception(() => reaction.LoadFromString("badBool@@15@@17@False@True@35@1"));
+
+        Assert.Null(error);
+        Assert.False(reaction.FailOpenOrdersReactionIsOn);
+        Assert.Equal(15, reaction.FailOpenOrdersCountToReaction);
+        Assert.Equal(17, reaction.FailCancelOrdersCountToReaction);
+        Assert.False(reaction.FailCancelOrdersReactionIsOn);
+        Assert.True(reaction.WaitOnStartConnectorIsOn);
+        Assert.Equal(35, reaction.WaitSecondsOnStartConnector);
+        Assert.True(reaction.ReduceOrdersCountInMarketOnNoFundsError);
+    }
+
+    [Fact]
+    public void Stage2Step2_2_TradeGridErrorsReaction_LoadFromString_WithInvalidCountToken_ShouldKeepValueAndContinueParsing()
+    {
+        TradeGrid grid = CreateBareGrid();
+        TradeGridErrorsReaction reaction = new TradeGridErrorsReaction(grid)
+        {
+            FailOpenOrdersCountToReaction = 10,
+            FailCancelOrdersCountToReaction = 11
+        };
+
+        Exception? error = Record.Exception(() => reaction.LoadFromString("True@@badCount@@17@False@True@35@False"));
+
+        Assert.Null(error);
+        Assert.True(reaction.FailOpenOrdersReactionIsOn);
+        Assert.Equal(10, reaction.FailOpenOrdersCountToReaction);
+        Assert.Equal(17, reaction.FailCancelOrdersCountToReaction);
+        Assert.False(reaction.FailCancelOrdersReactionIsOn);
+        Assert.True(reaction.WaitOnStartConnectorIsOn);
+        Assert.Equal(35, reaction.WaitSecondsOnStartConnector);
+        Assert.False(reaction.ReduceOrdersCountInMarketOnNoFundsError);
+    }
+
+    [Fact]
+    public void Stage2Step2_2_TradeGridErrorsReaction_LoadFromString_WithInvalidWaitBoolAndValidTail_ShouldKeepBoolAndContinueTailParsing()
+    {
+        TradeGrid grid = CreateBareGrid();
+        TradeGridErrorsReaction reaction = new TradeGridErrorsReaction(grid)
+        {
+            WaitOnStartConnectorIsOn = false,
+            WaitSecondsOnStartConnector = 31,
+            ReduceOrdersCountInMarketOnNoFundsError = false
+        };
+
+        Exception? error = Record.Exception(() => reaction.LoadFromString("True@@15@@17@False@badBool@45@1"));
+
+        Assert.Null(error);
+        Assert.False(reaction.WaitOnStartConnectorIsOn);
+        Assert.Equal(45, reaction.WaitSecondsOnStartConnector);
+        Assert.True(reaction.ReduceOrdersCountInMarketOnNoFundsError);
+        Assert.Equal(15, reaction.FailOpenOrdersCountToReaction);
+        Assert.Equal(17, reaction.FailCancelOrdersCountToReaction);
+    }
+
+    [Fact]
+    public void Stage2Step2_2_TradeGridErrorsReaction_LoadFromString_WithInvalidWaitSecondsAndValidReduceFlag_ShouldKeepSecondsAndParseReduceFlag()
+    {
+        TradeGrid grid = CreateBareGrid();
+        TradeGridErrorsReaction reaction = new TradeGridErrorsReaction(grid)
+        {
+            WaitOnStartConnectorIsOn = false,
+            WaitSecondsOnStartConnector = 31,
+            ReduceOrdersCountInMarketOnNoFundsError = true
+        };
+
+        Exception? error = Record.Exception(() => reaction.LoadFromString("True@@15@@17@False@on@badInt@0"));
+
+        Assert.Null(error);
+        Assert.True(reaction.WaitOnStartConnectorIsOn);
+        Assert.Equal(31, reaction.WaitSecondsOnStartConnector);
+        Assert.False(reaction.ReduceOrdersCountInMarketOnNoFundsError);
+        Assert.Equal(15, reaction.FailOpenOrdersCountToReaction);
+        Assert.Equal(17, reaction.FailCancelOrdersCountToReaction);
+    }
+
+    [Fact]
+    public void Stage2Step2_2_TradeGridErrorsReaction_LoadFromString_WithZeroCounts_ShouldKeepExistingValues()
+    {
+        TradeGrid grid = CreateBareGrid();
+        TradeGridErrorsReaction reaction = new TradeGridErrorsReaction(grid)
+        {
+            FailOpenOrdersCountToReaction = 10,
+            FailCancelOrdersCountToReaction = 11
+        };
+
+        Exception? error = Record.Exception(() => reaction.LoadFromString("True@@0@@0@False@True@35@False"));
+
+        Assert.Null(error);
+        Assert.Equal(10, reaction.FailOpenOrdersCountToReaction);
+        Assert.Equal(11, reaction.FailCancelOrdersCountToReaction);
+        Assert.False(reaction.FailCancelOrdersReactionIsOn);
+        Assert.True(reaction.WaitOnStartConnectorIsOn);
+        Assert.Equal(35, reaction.WaitSecondsOnStartConnector);
+        Assert.False(reaction.ReduceOrdersCountInMarketOnNoFundsError);
+    }
+
+    [Fact]
+    public void Stage2Step2_2_TradeGridErrorsReaction_LoadFromString_WithNegativeWaitSeconds_ShouldKeepExistingValue()
+    {
+        TradeGrid grid = CreateBareGrid();
+        TradeGridErrorsReaction reaction = new TradeGridErrorsReaction(grid)
+        {
+            WaitSecondsOnStartConnector = 31,
+            ReduceOrdersCountInMarketOnNoFundsError = true
+        };
+
+        Exception? error = Record.Exception(() => reaction.LoadFromString("True@@15@@17@False@True@-5@0"));
+
+        Assert.Null(error);
+        Assert.Equal(31, reaction.WaitSecondsOnStartConnector);
+        Assert.False(reaction.ReduceOrdersCountInMarketOnNoFundsError);
+        Assert.Equal(15, reaction.FailOpenOrdersCountToReaction);
+        Assert.Equal(17, reaction.FailCancelOrdersCountToReaction);
+    }
+
+    [Fact]
+    public void Stage2Step2_2_TradeGridErrorsReaction_LoadFromString_WithFlexiblePrimaryBools_ShouldParse()
+    {
+        TradeGrid grid = CreateBareGrid();
+        TradeGridErrorsReaction reaction = new TradeGridErrorsReaction(grid)
+        {
+            FailOpenOrdersReactionIsOn = false,
+            FailCancelOrdersReactionIsOn = true
+        };
+
+        Exception? error = Record.Exception(() => reaction.LoadFromString("yes@@15@@17@off"));
+
+        Assert.Null(error);
+        Assert.True(reaction.FailOpenOrdersReactionIsOn);
+        Assert.Equal(15, reaction.FailOpenOrdersCountToReaction);
+        Assert.Equal(17, reaction.FailCancelOrdersCountToReaction);
+        Assert.False(reaction.FailCancelOrdersReactionIsOn);
+    }
+
+    [Fact]
+    public void Stage2Step2_2_TradeGridErrorsReaction_LoadFromString_WithFlexibleOptionalBools_ShouldParse()
+    {
+        TradeGrid grid = CreateBareGrid();
+        TradeGridErrorsReaction reaction = new TradeGridErrorsReaction(grid)
+        {
+            WaitOnStartConnectorIsOn = false,
+            ReduceOrdersCountInMarketOnNoFundsError = false
+        };
+
+        Exception? error = Record.Exception(() => reaction.LoadFromString("True@@15@@17@False@on@35@yes"));
+
+        Assert.Null(error);
+        Assert.True(reaction.WaitOnStartConnectorIsOn);
+        Assert.Equal(35, reaction.WaitSecondsOnStartConnector);
+        Assert.True(reaction.ReduceOrdersCountInMarketOnNoFundsError);
+    }
+
+    [Fact]
+    public void Stage2Step2_2_TradeGridErrorsReaction_LoadFromString_WithMissingWaitBool_ShouldKeepValueAndContinueTailParsing()
+    {
+        TradeGrid grid = CreateBareGrid();
+        TradeGridErrorsReaction reaction = new TradeGridErrorsReaction(grid)
+        {
+            WaitOnStartConnectorIsOn = false,
+            WaitSecondsOnStartConnector = 31,
+            ReduceOrdersCountInMarketOnNoFundsError = false
+        };
+
+        Exception? error = Record.Exception(() => reaction.LoadFromString("True@@15@@17@False@@45@1"));
+
+        Assert.Null(error);
+        Assert.False(reaction.WaitOnStartConnectorIsOn);
+        Assert.Equal(45, reaction.WaitSecondsOnStartConnector);
+        Assert.True(reaction.ReduceOrdersCountInMarketOnNoFundsError);
+        Assert.Equal(15, reaction.FailOpenOrdersCountToReaction);
+        Assert.Equal(17, reaction.FailCancelOrdersCountToReaction);
+    }
+
+    [Fact]
+    public void Stage2Step2_2_TradeGridErrorsReaction_LoadFromString_WithMissingWaitSeconds_ShouldKeepValueAndParseReduceFlag()
+    {
+        TradeGrid grid = CreateBareGrid();
+        TradeGridErrorsReaction reaction = new TradeGridErrorsReaction(grid)
+        {
+            WaitOnStartConnectorIsOn = false,
+            WaitSecondsOnStartConnector = 31,
+            ReduceOrdersCountInMarketOnNoFundsError = true
+        };
+
+        Exception? error = Record.Exception(() => reaction.LoadFromString("True@@15@@17@False@on@@0"));
+
+        Assert.Null(error);
+        Assert.True(reaction.WaitOnStartConnectorIsOn);
+        Assert.Equal(31, reaction.WaitSecondsOnStartConnector);
+        Assert.False(reaction.ReduceOrdersCountInMarketOnNoFundsError);
+        Assert.Equal(15, reaction.FailOpenOrdersCountToReaction);
+        Assert.Equal(17, reaction.FailCancelOrdersCountToReaction);
+    }
+
+    [Fact]
+    public void Stage2Step2_2_TradeGridErrorsReaction_LoadFromString_WithMissingReduceFlag_ShouldKeepValueAndPreserveParsedTailPrefix()
+    {
+        TradeGrid grid = CreateBareGrid();
+        TradeGridErrorsReaction reaction = new TradeGridErrorsReaction(grid)
+        {
+            WaitOnStartConnectorIsOn = false,
+            WaitSecondsOnStartConnector = 31,
+            ReduceOrdersCountInMarketOnNoFundsError = false
+        };
+
+        Exception? error = Record.Exception(() => reaction.LoadFromString("True@@15@@17@False@on@45"));
+
+        Assert.Null(error);
+        Assert.True(reaction.WaitOnStartConnectorIsOn);
+        Assert.Equal(45, reaction.WaitSecondsOnStartConnector);
+        Assert.False(reaction.ReduceOrdersCountInMarketOnNoFundsError);
+        Assert.Equal(15, reaction.FailOpenOrdersCountToReaction);
+        Assert.Equal(17, reaction.FailCancelOrdersCountToReaction);
+    }
+
+    [Fact]
+    public void Stage2Step2_2_TradeGridErrorsReaction_LoadFromString_WithInvalidWaitBoolAndMissingWaitSeconds_ShouldKeepValuesAndParseReduceFlag()
+    {
+        TradeGrid grid = CreateBareGrid();
+        TradeGridErrorsReaction reaction = new TradeGridErrorsReaction(grid)
+        {
+            WaitOnStartConnectorIsOn = false,
+            WaitSecondsOnStartConnector = 31,
+            ReduceOrdersCountInMarketOnNoFundsError = true
+        };
+
+        Exception? error = Record.Exception(() => reaction.LoadFromString("True@@15@@17@False@badBool@@0"));
+
+        Assert.Null(error);
+        Assert.False(reaction.WaitOnStartConnectorIsOn);
+        Assert.Equal(31, reaction.WaitSecondsOnStartConnector);
+        Assert.False(reaction.ReduceOrdersCountInMarketOnNoFundsError);
+        Assert.Equal(15, reaction.FailOpenOrdersCountToReaction);
+        Assert.Equal(17, reaction.FailCancelOrdersCountToReaction);
+    }
+
+    [Fact]
     public void Stage2Step2_2_TrailingUp_LoadFromString_LegacyWithoutMoveFlags_ShouldKeepDefaultMoveFlags()
     {
         TradeGrid grid = CreateBareGrid();

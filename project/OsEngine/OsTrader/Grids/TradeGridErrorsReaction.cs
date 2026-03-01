@@ -92,49 +92,108 @@ namespace OsEngine.OsTrader.Grids
 
                 if (values.Length > 0 && string.IsNullOrWhiteSpace(values[0]) == false)
                 {
-                    FailOpenOrdersReactionIsOn = Convert.ToBoolean(values[0]);
+                    if (TryParseBoolFlexible(values[0], out bool parsed))
+                    {
+                        FailOpenOrdersReactionIsOn = parsed;
+                    }
                 }
                 //Enum.TryParse(values[1], out FailOpenOrdersReaction);
                 if (values.Length > 2 && string.IsNullOrWhiteSpace(values[2]) == false)
                 {
-                    FailOpenOrdersCountToReaction = Convert.ToInt32(values[2], CultureInfo.InvariantCulture);
+                    if (TryParsePositiveInt(values[2], out int parsed))
+                    {
+                        FailOpenOrdersCountToReaction = parsed;
+                    }
                 }
                 //Enum.TryParse(values[3], out FailCancelOrdersReaction);
                 if (values.Length > 4 && string.IsNullOrWhiteSpace(values[4]) == false)
                 {
-                    FailCancelOrdersCountToReaction = Convert.ToInt32(values[4], CultureInfo.InvariantCulture);
+                    if (TryParsePositiveInt(values[4], out int parsed))
+                    {
+                        FailCancelOrdersCountToReaction = parsed;
+                    }
                 }
                 if (values.Length > 5 && string.IsNullOrWhiteSpace(values[5]) == false)
                 {
-                    FailCancelOrdersReactionIsOn = Convert.ToBoolean(values[5]);
+                    if (TryParseBoolFlexible(values[5], out bool parsed))
+                    {
+                        FailCancelOrdersReactionIsOn = parsed;
+                    }
                 }
 
-                try
+                if (values.Length > 6 && string.IsNullOrWhiteSpace(values[6]) == false)
                 {
-                    if (values.Length > 6 && string.IsNullOrWhiteSpace(values[6]) == false)
+                    if (TryParseBoolFlexible(values[6], out bool parsed))
                     {
-                        WaitOnStartConnectorIsOn = Convert.ToBoolean(values[6]);
-                    }
-                    if (values.Length > 7 && string.IsNullOrWhiteSpace(values[7]) == false)
-                    {
-                        WaitSecondsOnStartConnector = Convert.ToInt32(values[7], CultureInfo.InvariantCulture);
-                    }
-                    if (values.Length > 8 && string.IsNullOrWhiteSpace(values[8]) == false)
-                    {
-                        ReduceOrdersCountInMarketOnNoFundsError = Convert.ToBoolean(values[8]);
+                        WaitOnStartConnectorIsOn = parsed;
                     }
                 }
-                catch
+                if (values.Length > 7 && string.IsNullOrWhiteSpace(values[7]) == false)
                 {
-                    WaitOnStartConnectorIsOn = true;
-                    WaitSecondsOnStartConnector = 30;
-                    ReduceOrdersCountInMarketOnNoFundsError = true;
+                    if (TryParsePositiveInt(values[7], out int parsed))
+                    {
+                        WaitSecondsOnStartConnector = parsed;
+                    }
+                }
+                if (values.Length > 8 && string.IsNullOrWhiteSpace(values[8]) == false)
+                {
+                    if (TryParseBoolFlexible(values[8], out bool parsed))
+                    {
+                        ReduceOrdersCountInMarketOnNoFundsError = parsed;
+                    }
                 }
             }
             catch (Exception e)
             {
                 SendNewLogMessage(e.ToString(), LogMessageType.Error);
             }
+        }
+
+        private static bool TryParseBoolFlexible(string value, out bool parsed)
+        {
+            if (bool.TryParse(value, out parsed))
+            {
+                return true;
+            }
+
+            string normalized = value.Trim();
+
+            if (string.Equals(normalized, "1", StringComparison.OrdinalIgnoreCase)
+                || string.Equals(normalized, "yes", StringComparison.OrdinalIgnoreCase)
+                || string.Equals(normalized, "on", StringComparison.OrdinalIgnoreCase))
+            {
+                parsed = true;
+                return true;
+            }
+
+            if (string.Equals(normalized, "0", StringComparison.OrdinalIgnoreCase)
+                || string.Equals(normalized, "no", StringComparison.OrdinalIgnoreCase)
+                || string.Equals(normalized, "off", StringComparison.OrdinalIgnoreCase))
+            {
+                parsed = false;
+                return true;
+            }
+
+            parsed = false;
+            return false;
+        }
+
+        private static bool TryParsePositiveInt(string value, out int parsed)
+        {
+            if (int.TryParse(value, NumberStyles.Any, CultureInfo.InvariantCulture, out parsed) == false
+                && int.TryParse(value, NumberStyles.Any, CultureInfo.CurrentCulture, out parsed) == false)
+            {
+                parsed = 0;
+                return false;
+            }
+
+            if (parsed <= 0)
+            {
+                parsed = 0;
+                return false;
+            }
+
+            return true;
         }
 
         #endregion

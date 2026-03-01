@@ -15736,3 +15736,80 @@
   - dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo -> success
   - dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900 -> success, 0 warnings, 0 errors
   - dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo -> passed 629/629
+
+## 2026-03-01 - Step 4.2 (nullable annotations) - TradeGridErrorsReaction parser hardening (#784-#789)
+
+- Applied localized parser hardening in:
+  - project/OsEngine/OsTrader/Grids/TradeGridErrorsReaction.cs
+- Changes:
+  - `LoadFromString(...)` no longer relies on exception-driven `Convert.ToBoolean/ToInt32`.
+  - added flexible bool parsing (`true/false`, `1/0`, `yes/no`, `on/off`) and guarded positive-int parsing for reaction counters and wait seconds.
+  - optional tail fields (`WaitOnStartConnectorIsOn`, `WaitSecondsOnStartConnector`, `ReduceOrdersCountInMarketOnNoFundsError`) are now parsed independently instead of resetting the whole tail on the first bad token.
+  - invalid or non-positive numeric tokens now preserve the current configured value.
+- Added/updated tests:
+  - project/OsEngine.Tests/TradeGridPersistenceCoreTests.cs
+    - added `Stage2Step2_2_TradeGridErrorsReaction_LoadFromString_WithInvalidBoolToken_ShouldKeepValueAndContinueParsing`.
+    - added `Stage2Step2_2_TradeGridErrorsReaction_LoadFromString_WithInvalidCountToken_ShouldKeepValueAndContinueParsing`.
+    - added `Stage2Step2_2_TradeGridErrorsReaction_LoadFromString_WithInvalidWaitBoolAndValidTail_ShouldKeepBoolAndContinueTailParsing`.
+    - added `Stage2Step2_2_TradeGridErrorsReaction_LoadFromString_WithInvalidWaitSecondsAndValidReduceFlag_ShouldKeepSecondsAndParseReduceFlag`.
+- Scope:
+  - parser/runtime hardening only
+  - valid payload behavior remains unchanged
+
+### Verification
+
+- Host-context verification (outside sandbox, per dotnet-build-policy):
+  - dotnet restore project/OsEngine/OsEngine.csproj --nologo -> success
+  - dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo -> success
+  - dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900 -> success, 0 warnings, 0 errors
+  - dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo -> passed 633/633
+
+## 2026-03-01 - Step 4.2 (nullable annotations) - TradeGridErrorsReaction guarded-parser regression coverage (#790-#793)
+
+- Added targeted regression coverage in:
+  - project/OsEngine.Tests/TradeGridPersistenceCoreTests.cs
+- Changes:
+  - locked non-positive numeric handling for reaction counters and wait-seconds after the guarded parser change.
+  - locked flexible bool parsing for both primary bool fields and optional tail bool fields.
+- Added/updated tests:
+  - project/OsEngine.Tests/TradeGridPersistenceCoreTests.cs
+    - added `Stage2Step2_2_TradeGridErrorsReaction_LoadFromString_WithZeroCounts_ShouldKeepExistingValues`.
+    - added `Stage2Step2_2_TradeGridErrorsReaction_LoadFromString_WithNegativeWaitSeconds_ShouldKeepExistingValue`.
+    - added `Stage2Step2_2_TradeGridErrorsReaction_LoadFromString_WithFlexiblePrimaryBools_ShouldParse`.
+    - added `Stage2Step2_2_TradeGridErrorsReaction_LoadFromString_WithFlexibleOptionalBools_ShouldParse`.
+- Scope:
+  - test-only regression coverage
+  - no production behavior change
+
+### Verification
+
+- Host-context verification (outside sandbox, per dotnet-build-policy):
+  - dotnet restore project/OsEngine/OsEngine.csproj --nologo -> success
+  - dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo -> success
+  - dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900 -> success, 0 warnings, 0 errors
+  - dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo -> passed 637/637
+
+## 2026-03-01 - Step 4.2 (nullable annotations) - TradeGridErrorsReaction optional-tail partial-payload regression coverage (#794-#797)
+
+- Added targeted regression coverage in:
+  - project/OsEngine.Tests/TradeGridPersistenceCoreTests.cs
+- Changes:
+  - locked partial optional-tail behavior for `WaitOnStartConnectorIsOn`, `WaitSecondsOnStartConnector`, and `ReduceOrdersCountInMarketOnNoFundsError`.
+  - covered missing wait-bool, missing wait-seconds, missing reduce-flag, and a mixed invalid/missing tail case.
+- Added/updated tests:
+  - project/OsEngine.Tests/TradeGridPersistenceCoreTests.cs
+    - added `Stage2Step2_2_TradeGridErrorsReaction_LoadFromString_WithMissingWaitBool_ShouldKeepValueAndContinueTailParsing`.
+    - added `Stage2Step2_2_TradeGridErrorsReaction_LoadFromString_WithMissingWaitSeconds_ShouldKeepValueAndParseReduceFlag`.
+    - added `Stage2Step2_2_TradeGridErrorsReaction_LoadFromString_WithMissingReduceFlag_ShouldKeepValueAndPreserveParsedTailPrefix`.
+    - added `Stage2Step2_2_TradeGridErrorsReaction_LoadFromString_WithInvalidWaitBoolAndMissingWaitSeconds_ShouldKeepValuesAndParseReduceFlag`.
+- Scope:
+  - test-only regression coverage
+  - no production behavior change
+
+### Verification
+
+- Host-context verification (outside sandbox, per dotnet-build-policy):
+  - dotnet restore project/OsEngine/OsEngine.csproj --nologo -> success
+  - dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo -> success
+  - dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900 -> success, 0 warnings, 0 errors
+  - dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo -> passed 641/641
