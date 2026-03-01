@@ -529,8 +529,14 @@ namespace OsEngine.OsTrader.Grids
 
                 for (int i = 0; i < lines.Count; i++)
                 {
-                    lines[i].Position = null;
-                    lines[i].PositionNum = 0;
+                    TradeGridLine line = lines[i];
+                    if (line == null)
+                    {
+                        continue;
+                    }
+
+                    line.Position = null;
+                    line.PositionNum = 0;
                 }
             }
             catch (Exception e)
@@ -562,6 +568,10 @@ namespace OsEngine.OsTrader.Grids
                     for (int i = 0; i < lines.Count; i++)
                     {
                         TradeGridLine line = lines[i];
+                        if (line == null)
+                        {
+                            continue;
+                        }
 
                         if (line.Position != null
                             && line.Position.Number == position.Number)
@@ -612,6 +622,10 @@ namespace OsEngine.OsTrader.Grids
                     for (int i = 0; i < lines.Count; i++)
                     {
                         TradeGridLine line = lines[i];
+                        if (line == null)
+                        {
+                            continue;
+                        }
 
                         if (line.Position != null
                             && line.Position.Number == position.Number)
@@ -882,12 +896,16 @@ namespace OsEngine.OsTrader.Grids
                 {
                     int curNumber = numbers[i];
 
-                    if (curNumber >= lines.Count)
+                    if (curNumber < 0 || curNumber >= lines.Count)
                     {
                         continue;
                     }
 
                     TradeGridLine line = lines[curNumber];
+                    if (line == null)
+                    {
+                        continue;
+                    }
 
                     if (line.Position != null
                         && line.Position.OpenActive
@@ -991,6 +1009,10 @@ namespace OsEngine.OsTrader.Grids
                 for (int i = 0; i < lines.Count; i++)
                 {
                     TradeGridLine line = lines[i];
+                    if (line == null)
+                    {
+                        continue;
+                    }
 
                     if (line.Position != null
                         && line.Position.Number == position.Number)
@@ -1555,6 +1577,10 @@ namespace OsEngine.OsTrader.Grids
             for (int i = 0; i < lines.Count; i++)
             {
                 TradeGridLine line = lines[i];
+                if (line == null)
+                {
+                    continue;
+                }
 
                 if (line.Position != null)
                 {
@@ -1628,14 +1654,20 @@ namespace OsEngine.OsTrader.Grids
             for (int i = 0; i < lines.Count; i++)
             {
                 TradeGridLine line = lines[i];
-
-                if (line.Position == null
-                    || line.Position.CloseActive == false)
+                if (line == null)
                 {
                     continue;
                 }
 
-                if (TryGetLastOrder(lines[i].Position.CloseOrders, out Order order) == false)
+                Position pos = line.Position;
+
+                if (pos == null
+                    || pos.CloseActive == false)
+                {
+                    continue;
+                }
+
+                if (TryGetLastOrder(pos.CloseOrders, out Order order) == false)
                 {
                     continue;
                 }
@@ -1643,8 +1675,8 @@ namespace OsEngine.OsTrader.Grids
                 if (order.NumberMarket != null
                     && order.LastCancelTryLocalTime.AddSeconds(5) < DateTime.Now)
                 {
-                    if (order.Price != line.Position.ProfitOrderPrice
-                        || order.Volume - order.VolumeExecute != line.Position.OpenVolume)
+                    if (order.Price != pos.ProfitOrderPrice
+                        || order.Volume - order.VolumeExecute != pos.OpenVolume)
                     {
                         tab.CloseOrder(order);
                         cancelledOrders++;
@@ -1672,8 +1704,17 @@ namespace OsEngine.OsTrader.Grids
 
             for (int i = 0; i < linesOpenPoses.Count; i++)
             {
-                Position pos = linesOpenPoses[i].Position;
                 TradeGridLine line = linesOpenPoses[i];
+                if (line == null)
+                {
+                    continue;
+                }
+
+                Position pos = line.Position;
+                if (pos == null)
+                {
+                    continue;
+                }
 
                 if (pos.CloseActive == true)
                 {
@@ -1846,7 +1887,13 @@ namespace OsEngine.OsTrader.Grids
                 return 0;
             }
 
-            decimal lastPrice = candles[candles.Count - 1].Close;
+            Candle lastCandle = candles[candles.Count - 1];
+            if (lastCandle == null)
+            {
+                return 0;
+            }
+
+            decimal lastPrice = lastCandle.Close;
 
             // 1 убираем ордера на открытие и закрытие с неправильной ценой.
 
@@ -2020,7 +2067,13 @@ namespace OsEngine.OsTrader.Grids
                 return null;
             }
 
-            decimal lastPrice = candles[candles.Count - 1].Close;
+            Candle lastCandle = candles[candles.Count - 1];
+            if (lastCandle == null)
+            {
+                return null;
+            }
+
+            decimal lastPrice = lastCandle.Close;
 
             // 1 берём текущие линии с позициями
 
@@ -2049,6 +2102,14 @@ namespace OsEngine.OsTrader.Grids
 
             TradeGridLine firstLineLastNeed = linesWithOrdersToOpenNeed[^1];
             TradeGridLine firstLineLastFact = linesWithOrdersToOpenFact[^1];
+
+            if (firstLineFirstNeed == null
+                || firstLineFirstFact == null
+                || firstLineLastNeed == null
+                || firstLineLastFact == null)
+            {
+                return null;
+            }
 
             if (firstLineFirstFact.PriceEnter == firstLineFirstNeed.PriceEnter
                 && firstLineLastFact.PriceEnter == firstLineLastNeed.PriceEnter)
@@ -2149,14 +2210,20 @@ namespace OsEngine.OsTrader.Grids
             for (int i = 0; i < lines.Count; i++)
             {
                 TradeGridLine line = lines[i];
-
-                if (line.Position == null
-                    || line.Position.OpenActive == false)
+                if (line == null)
                 {
                     continue;
                 }
 
-                if (TryGetLastOrder(lines[i].Position.OpenOrders, out Order order) == false)
+                Position pos = line.Position;
+
+                if (pos == null
+                    || pos.OpenActive == false)
+                {
+                    continue;
+                }
+
+                if (TryGetLastOrder(pos.OpenOrders, out Order order) == false)
                 {
                     continue;
                 }
@@ -2197,8 +2264,17 @@ namespace OsEngine.OsTrader.Grids
 
             for (int i = startIndex; i < linesOpenPoses.Count; i++)
             {
-                Position pos = linesOpenPoses[i].Position;
                 TradeGridLine line = linesOpenPoses[i];
+                if (line == null)
+                {
+                    continue;
+                }
+
+                Position pos = line.Position;
+                if (pos == null)
+                {
+                    continue;
+                }
 
                 if (pos.CloseActive == true)
                 {
@@ -2259,6 +2335,10 @@ namespace OsEngine.OsTrader.Grids
             for (int i = 0; i < linesAll.Count; i++)
             {
                 TradeGridLine curLine = linesAll[i];
+                if (curLine == null)
+                {
+                    continue;
+                }
                 Position pos = curLine.Position;
 
                 if (pos == null)
@@ -2300,14 +2380,20 @@ namespace OsEngine.OsTrader.Grids
             for (int i = 0; i < lines.Count; i++)
             {
                 TradeGridLine line = lines[i];
-
-                if (line.Position == null
-                    || line.Position.CloseActive == false)
+                if (line == null)
                 {
                     continue;
                 }
 
-                if (TryGetLastOrder(lines[i].Position.CloseOrders, out Order order) == false)
+                Position pos = line.Position;
+
+                if (pos == null
+                    || pos.CloseActive == false)
+                {
+                    continue;
+                }
+
+                if (TryGetLastOrder(pos.CloseOrders, out Order order) == false)
                 {
                     continue;
                 }
@@ -2344,7 +2430,13 @@ namespace OsEngine.OsTrader.Grids
                 return;
             }
 
-            decimal lastPrice = candles[candles.Count - 1].Close;
+            Candle lastCandle = candles[candles.Count - 1];
+            if (lastCandle == null)
+            {
+                return;
+            }
+
+            decimal lastPrice = lastCandle.Close;
 
             if (lastPrice == 0)
             {
@@ -2375,6 +2467,10 @@ namespace OsEngine.OsTrader.Grids
             for (int i = 0; i < linesWithOrdersToOpenNeed.Count; i++)
             {
                 TradeGridLine curLineNeed = linesWithOrdersToOpenNeed[i];
+                if (curLineNeed == null)
+                {
+                    continue;
+                }
 
                 if (curLineNeed.Position != null)
                 {
@@ -2542,7 +2638,13 @@ namespace OsEngine.OsTrader.Grids
 
             for (int i = 0; lines != null && i < lines.Count; i++)
             {
-                if (lines[i].PositionNum == position.Number)
+                TradeGridLine line = lines[i];
+                if (line == null)
+                {
+                    continue;
+                }
+
+                if (line.PositionNum == position.Number)
                 {
                     isInGridNow = true;
                     break;
@@ -2573,6 +2675,10 @@ namespace OsEngine.OsTrader.Grids
             for (int i = 0; i < lines.Count; i++)
             {
                 TradeGridLine line = lines[i];
+                if (line == null)
+                {
+                    continue;
+                }
 
                 if (line.Position != null)
                 {
@@ -2616,6 +2722,10 @@ namespace OsEngine.OsTrader.Grids
             for (int i = 0; i < lines.Count; i++)
             {
                 TradeGridLine line = lines[i];
+                if (line == null)
+                {
+                    continue;
+                }
 
                 // проблема 1. Номер позиции есть - самой позиции нет. 
                 // произошёл перезапуск терминала. Ищем позу в журнале
@@ -2668,6 +2778,10 @@ namespace OsEngine.OsTrader.Grids
             for (int i = 0; i < lines.Count; i++)
             {
                 TradeGridLine line = lines[i];
+                if (line == null)
+                {
+                    continue;
+                }
 
                 if (line.Position == null
                     || line.Position.CloseActive == true)
@@ -2751,12 +2865,13 @@ namespace OsEngine.OsTrader.Grids
 
                 for (int i = 0; i < linesWithPositions.Count; i++)
                 {
-                    if (linesWithPositions[i].Position == null)
+                    TradeGridLine line = linesWithPositions[i];
+                    if (line == null || line.Position == null)
                     {
                         continue;
                     }
 
-                    result += linesWithPositions[i].Position.OpenVolume;
+                    result += line.Position.OpenVolume;
                 }
 
                 return result;
@@ -2785,7 +2900,13 @@ namespace OsEngine.OsTrader.Grids
 
                 for (int i = 0; i < lines.Count; i++)
                 {
-                    result += lines[i].Volume;
+                    TradeGridLine line = lines[i];
+                    if (line == null)
+                    {
+                        continue;
+                    }
+
+                    result += line.Volume;
                 }
 
                 return result;
@@ -2814,9 +2935,15 @@ namespace OsEngine.OsTrader.Grids
 
             for (int i = 0; linesAll != null && i < linesAll.Count; i++)
             {
-                if (linesAll[i].Position != null)
+                TradeGridLine line = linesAll[i];
+                if (line == null || line.Position == null)
                 {
-                    Position position = linesAll[i].Position;
+                    continue;
+                }
+
+                if (line.Position != null)
+                {
+                    Position position = line.Position;
 
                     if (position.OpenActive)
                     {
@@ -2897,9 +3024,15 @@ namespace OsEngine.OsTrader.Grids
 
             for (int i = 0; linesAll != null && i < linesAll.Count; i++)
             {
-                if (linesAll[i].Position != null)
+                TradeGridLine line = linesAll[i];
+                if (line == null || line.Position == null)
                 {
-                    Position position = linesAll[i].Position;
+                    continue;
+                }
+
+                if (line.Position != null)
+                {
+                    Position position = line.Position;
 
                     if (position.OpenActive)
                     {
@@ -2950,7 +3083,13 @@ namespace OsEngine.OsTrader.Grids
 
                 for (int i = 0; i < linesWithOpenPositions.Count; i++)
                 {
-                    Position pos = linesWithOpenPositions[i].Position;
+                    TradeGridLine line = linesWithOpenPositions[i];
+                    if (line == null)
+                    {
+                        continue;
+                    }
+
+                    Position pos = line.Position;
 
                     if (pos == null)
                     {
@@ -3150,10 +3289,16 @@ namespace OsEngine.OsTrader.Grids
 
             for (int i = 0; linesAll != null && i < linesAll.Count; i++)
             {
-                if (linesAll[i].Position != null
-                    && linesAll[i].Position.OpenVolume != 0)
+                TradeGridLine line = linesAll[i];
+                if (line == null)
                 {
-                    linesWithPositionFact.Add(linesAll[i]);
+                    continue;
+                }
+
+                if (line.Position != null
+                    && line.Position.OpenVolume != 0)
+                {
+                    linesWithPositionFact.Add(line);
                 }
             }
             return linesWithPositionFact;
@@ -3179,7 +3324,13 @@ namespace OsEngine.OsTrader.Grids
 
             for (int i = 0; linesAll != null && i < linesAll.Count; i++)
             {
-                Position position = linesAll[i].Position;
+                TradeGridLine line = linesAll[i];
+                if (line == null)
+                {
+                    continue;
+                }
+
+                Position position = line.Position;
 
                 if (position != null)
                 {
@@ -3226,6 +3377,10 @@ namespace OsEngine.OsTrader.Grids
                 for (int i = 0; i < linesAll.Count; i++)
                 {
                     TradeGridLine curLine = linesAll[i];
+                    if (curLine == null)
+                    {
+                        continue;
+                    }
 
                     Position position = curLine.Position;
 
@@ -3290,6 +3445,10 @@ namespace OsEngine.OsTrader.Grids
                 for (int i = 0; i < linesAll.Count; i++)
                 {
                     TradeGridLine curLine = linesAll[i];
+                    if (curLine == null)
+                    {
+                        continue;
+                    }
 
                     Position position = curLine.Position;
 
@@ -3354,10 +3513,16 @@ namespace OsEngine.OsTrader.Grids
 
             for (int i = 0; linesAll != null && i < linesAll.Count; i++)
             {
-                if (linesAll[i].Position != null
-                    && linesAll[i].Position.OpenActive)
+                TradeGridLine line = linesAll[i];
+                if (line == null)
                 {
-                    linesWithOpenOrder.Add(linesAll[i]);
+                    continue;
+                }
+
+                if (line.Position != null
+                    && line.Position.OpenActive)
+                {
+                    linesWithOpenOrder.Add(line);
                 }
             }
             return linesWithOpenOrder;
@@ -3380,10 +3545,16 @@ namespace OsEngine.OsTrader.Grids
 
             for (int i = 0; linesAll != null && i < linesAll.Count; i++)
             {
-                if (linesAll[i].Position != null
-                    && linesAll[i].Position.CloseActive)
+                TradeGridLine line = linesAll[i];
+                if (line == null)
                 {
-                    linesWithCloseOrder.Add(linesAll[i]);
+                    continue;
+                }
+
+                if (line.Position != null
+                    && line.Position.CloseActive)
+                {
+                    linesWithCloseOrder.Add(line);
                 }
             }
             return linesWithCloseOrder;

@@ -185,6 +185,40 @@ public class TradeGridPersistenceCoreTests
     }
 
     [Fact]
+    public void Stage2Step2_2_TradeGridStopAndProfit_PrivateSetters_WithSparsePositionsList_ShouldNotThrow()
+    {
+        TradeGridStopAndProfit stopAndProfit = new TradeGridStopAndProfit();
+        TradeGrid grid = CreateBareGrid();
+
+        BotTabSimple tab = (BotTabSimple)RuntimeHelpers.GetUninitializedObject(typeof(BotTabSimple));
+        ConnectorCandles connector = new ConnectorCandles("CodexGridSparsePositions", StartProgram.IsTester, false);
+        TimeFrameBuilder builder = new TimeFrameBuilder("CodexGridSparsePositions", StartProgram.IsTester);
+        CandleSeries series = new CandleSeries(builder, new Security(), StartProgram.IsTester)
+        {
+            CandlesAll = new List<Candle> { new Candle { Close = 100m } }
+        };
+        SetPrivateField(connector, "_mySeries", series);
+        SetPrivateField(tab, "_connector", connector);
+        SetPrivateField(tab, "_security", new Security
+        {
+            Name = connector.SecurityName,
+            PriceStep = 1m
+        });
+        grid.Tab = tab;
+
+        List<Position> sparsePositions = new List<Position> { null! };
+
+        Exception? error = Record.Exception(() =>
+        {
+            InvokePrivateWithArgs(stopAndProfit, "SetProfit", grid, 100m, sparsePositions);
+            InvokePrivateWithArgs(stopAndProfit, "SetStop", grid, 100m, sparsePositions);
+            InvokePrivateWithArgs(stopAndProfit, "SetTrailStop", grid, sparsePositions);
+        });
+
+        Assert.Null(error);
+    }
+
+    [Fact]
     public void Stage2Step2_2_TrailingUp_RuntimeContextMissing_ShouldStaySafe()
     {
         TradeGrid grid = (TradeGrid)RuntimeHelpers.GetUninitializedObject(typeof(TradeGrid));
@@ -215,6 +249,36 @@ public class TradeGridPersistenceCoreTests
         Assert.False(moved);
         Assert.Equal(0, max);
         Assert.Equal(0, min);
+    }
+
+    [Fact]
+    public void Stage2Step2_2_TrailingUp_TryTrailingGrid_WithNullLastCandle_ShouldReturnFalse()
+    {
+        TradeGrid grid = CreateBareGrid();
+        TrailingUp trailing = new TrailingUp(grid)
+        {
+            TrailingUpIsOn = true,
+            TrailingUpStep = 1m,
+            TrailingUpLimit = 1000m,
+            TrailingDownIsOn = false
+        };
+
+        BotTabSimple tab = (BotTabSimple)RuntimeHelpers.GetUninitializedObject(typeof(BotTabSimple));
+        ConnectorCandles connector = new ConnectorCandles("CodexGridTrailingNullCandle", StartProgram.IsTester, false);
+        TimeFrameBuilder builder = new TimeFrameBuilder("CodexGridTrailingNullCandle", StartProgram.IsTester);
+        CandleSeries series = new CandleSeries(builder, new Security(), StartProgram.IsTester)
+        {
+            CandlesAll = new List<Candle> { null! }
+        };
+        SetPrivateField(connector, "_mySeries", series);
+        SetPrivateField(tab, "_connector", connector);
+        grid.Tab = tab;
+
+        bool moved = true;
+        Exception? error = Record.Exception(() => moved = trailing.TryTrailingGrid());
+
+        Assert.Null(error);
+        Assert.False(moved);
     }
 
     [Fact]
@@ -289,6 +353,207 @@ public class TradeGridPersistenceCoreTests
     }
 
     [Fact]
+    public void Stage2Step2_2_TradeGridCreator_LoadLines_WithNullLinesCollection_ShouldNotThrow()
+    {
+        TradeGridCreator creator = (TradeGridCreator)RuntimeHelpers.GetUninitializedObject(typeof(TradeGridCreator));
+        creator.Lines = null!;
+
+        Exception? error = Record.Exception(() => creator.LoadLines("100|1|Buy|101|-1|^"));
+
+        Assert.Null(error);
+        Assert.NotNull(creator.Lines);
+        Assert.Single(creator.Lines);
+        Assert.Equal(100m, creator.Lines[0].PriceEnter);
+    }
+
+    [Fact]
+    public void Stage2Step2_2_TradeGridCreator_Mutators_WithNullLinesOrTab_ShouldNotThrow()
+    {
+        TradeGridCreator creator = (TradeGridCreator)RuntimeHelpers.GetUninitializedObject(typeof(TradeGridCreator));
+        creator.Lines = null!;
+
+        string? saved = null;
+        Exception? error = Record.Exception(() =>
+        {
+            creator.DeleteGrid();
+            creator.CreateNewLine();
+            saved = creator.GetSaveLinesString();
+            creator.CreateNewGrid(null!, TradeGridPrimeType.MarketMaking);
+        });
+
+        Assert.Null(error);
+        Assert.NotNull(creator.Lines);
+        Assert.Single(creator.Lines);
+        Assert.NotNull(saved);
+    }
+
+    [Fact]
+    public void Stage2Step2_2_TradeGridCreator_GetVolume_WithNullRuntimeContext_ShouldStaySafe()
+    {
+        TradeGridCreator creator = new TradeGridCreator();
+        TradeGridLine line = new TradeGridLine
+        {
+            Volume = 7m,
+            PriceEnter = 100m
+        };
+
+        creator.TypeVolume = TradeGridVolumeType.Contracts;
+        decimal contractsVolume = creator.GetVolume(line, null!);
+
+        creator.TypeVolume = TradeGridVolumeType.ContractCurrency;
+        BotTabSimple nullSecurityTab = (BotTabSimple)RuntimeHelpers.GetUninitializedObject(typeof(BotTabSimple));
+        decimal contractCurrencyVolume = creator.GetVolume(line, nullSecurityTab);
+        TradeGridLine zeroPriceLine = new TradeGridLine
+        {
+            Volume = 7m,
+            PriceEnter = 0m
+        };
+        BotTabSimple zeroPriceTab = (BotTabSimple)RuntimeHelpers.GetUninitializedObject(typeof(BotTabSimple));
+        SetPrivateField(zeroPriceTab, "_security", new Security
+        {
+            Lot = 1m,
+            DecimalsVolume = 4
+        });
+        decimal contractCurrencyZeroPriceVolume = creator.GetVolume(zeroPriceLine, zeroPriceTab);
+        decimal nullLineVolume = creator.GetVolume(null!, nullSecurityTab);
+
+        BotTabSimple negativeDecimalsContractTab = (BotTabSimple)RuntimeHelpers.GetUninitializedObject(typeof(BotTabSimple));
+        ConnectorCandles connectorNegativeDecimalsContract = new ConnectorCandles("CodexGridCreatorVolumeNegativeDecimalsContract", StartProgram.IsTester, false);
+        SetPrivateField(negativeDecimalsContractTab, "_connector", connectorNegativeDecimalsContract);
+        SetPrivateField(negativeDecimalsContractTab, "_security", new Security
+        {
+            Name = connectorNegativeDecimalsContract.SecurityName,
+            Lot = 1m,
+            DecimalsVolume = -1
+        });
+        decimal contractCurrencyNegativeDecimalsVolume = creator.GetVolume(line, negativeDecimalsContractTab);
+
+        creator.TypeVolume = TradeGridVolumeType.DepositPercent;
+        BotTabSimple tabWithZeroBestAsk = (BotTabSimple)RuntimeHelpers.GetUninitializedObject(typeof(BotTabSimple));
+        ConnectorCandles connector = new ConnectorCandles("CodexGridCreatorVolume", StartProgram.IsTester, false);
+        SetPrivateField(tabWithZeroBestAsk, "_connector", connector);
+        SetPrivateField(tabWithZeroBestAsk, "_security", new Security
+        {
+            Name = connector.SecurityName,
+            Lot = 1m
+        });
+        SetPrivateField(tabWithZeroBestAsk, "_portfolio", new Portfolio
+        {
+            ValueCurrent = 1000m
+        });
+        decimal depositPercentVolume = creator.GetVolume(line, tabWithZeroBestAsk);
+
+        BotTabSimple tabWithLotZeroAndSparsePortfolio = (BotTabSimple)RuntimeHelpers.GetUninitializedObject(typeof(BotTabSimple));
+        ConnectorCandles connectorWithBestAsk = new ConnectorCandles("CodexGridCreatorVolumeLotZero", StartProgram.IsTester, false);
+        SetPrivateField(connectorWithBestAsk, "_bestAsk", 100m);
+        SetPrivateField(tabWithLotZeroAndSparsePortfolio, "_connector", connectorWithBestAsk);
+        SetPrivateField(tabWithLotZeroAndSparsePortfolio, "_security", new Security
+        {
+            Name = connectorWithBestAsk.SecurityName,
+            Lot = 0m,
+            DecimalsVolume = 4
+        });
+        SetPrivateField(tabWithLotZeroAndSparsePortfolio, "_portfolio", new Portfolio
+        {
+            PositionOnBoard = new List<PositionOnBoard>
+            {
+                null!,
+                new PositionOnBoard
+                {
+                    SecurityNameCode = "USDT",
+                    ValueCurrent = 1000m
+                }
+            }
+        });
+        creator.TradeAssetInPortfolio = "USDT";
+        decimal depositPercentWithLotZero = creator.GetVolume(line, tabWithLotZeroAndSparsePortfolio);
+
+        BotTabSimple negativeDecimalsDepositTab = (BotTabSimple)RuntimeHelpers.GetUninitializedObject(typeof(BotTabSimple));
+        ConnectorCandles connectorNegativeDecimals = new ConnectorCandles("CodexGridCreatorVolumeNegativeDecimals", StartProgram.IsTester, false);
+        SetPrivateField(connectorNegativeDecimals, "_bestAsk", 100m);
+        SetPrivateField(negativeDecimalsDepositTab, "_connector", connectorNegativeDecimals);
+        SetPrivateField(negativeDecimalsDepositTab, "_security", new Security
+        {
+            Name = connectorNegativeDecimals.SecurityName,
+            Lot = 1m,
+            DecimalsVolume = -1
+        });
+        SetPrivateField(negativeDecimalsDepositTab, "_portfolio", new Portfolio
+        {
+            ValueCurrent = 1000m
+        });
+        creator.TypeVolume = TradeGridVolumeType.DepositPercent;
+        creator.TradeAssetInPortfolio = "Prime";
+        decimal depositPercentNegativeDecimalsVolume = creator.GetVolume(new TradeGridLine
+        {
+            Volume = 10m,
+            PriceEnter = 100m
+        }, negativeDecimalsDepositTab);
+
+        Assert.Equal(7m, contractsVolume);
+        Assert.Equal(0m, contractCurrencyVolume);
+        Assert.Equal(0m, contractCurrencyZeroPriceVolume);
+        Assert.Equal(0.07m, contractCurrencyNegativeDecimalsVolume);
+        Assert.Equal(0m, nullLineVolume);
+        Assert.Equal(0m, depositPercentVolume);
+        Assert.Equal(0.7m, depositPercentWithLotZero);
+        Assert.Equal(1m, depositPercentNegativeDecimalsVolume);
+    }
+
+    [Fact]
+    public void Stage2Step2_2_TradeGridCreator_GetSaveLinesString_WithSparseLines_ShouldNotThrow()
+    {
+        TradeGridCreator creator = new TradeGridCreator();
+        creator.Lines = new List<TradeGridLine>
+        {
+            null!,
+            new TradeGridLine
+            {
+                PriceEnter = 100m,
+                Volume = 1m,
+                Side = Side.Buy,
+                PriceExit = 101m,
+                PositionNum = 7
+            }
+        };
+
+        string? saved = null;
+        Exception? error = Record.Exception(() => saved = creator.GetSaveLinesString());
+
+        Assert.Null(error);
+        Assert.NotNull(saved);
+        Assert.Contains("100", saved);
+        Assert.DoesNotContain("^^", saved);
+    }
+
+    [Fact]
+    public void Stage2Step2_2_TradeGridCreator_RemoveSelected_WithNullOrSparseInputs_ShouldNotThrow()
+    {
+        TradeGridCreator creator = (TradeGridCreator)RuntimeHelpers.GetUninitializedObject(typeof(TradeGridCreator));
+        creator.Lines = new List<TradeGridLine>
+        {
+            null!,
+            new TradeGridLine
+            {
+                PriceEnter = 100m,
+                Side = Side.Buy
+            }
+        };
+
+        Exception? error = Record.Exception(() =>
+        {
+            creator.RemoveSelected(null!);
+            creator.RemoveSelected(new List<int>());
+            creator.RemoveSelected(new List<int> { -1 });
+            creator.RemoveSelected(new List<int> { 0 });
+        });
+
+        Assert.Null(error);
+        Assert.Single(creator.Lines);
+        Assert.Equal(100m, creator.Lines[0].PriceEnter);
+    }
+
+    [Fact]
     public void Stage2Step2_2_TradeGridAutoStarter_LoadFromString_LegacyShortTail_ShouldKeepDefaultTimeSection()
     {
         TradeGridAutoStarter autoStarter = new TradeGridAutoStarter();
@@ -305,6 +570,56 @@ public class TradeGridPersistenceCoreTests
         Assert.Equal(15, autoStarter.StartGridByTimeOfDayMinute);
         Assert.Equal(0, autoStarter.StartGridByTimeOfDaySecond);
         Assert.True(autoStarter.SingleActivationMode);
+    }
+
+    [Fact]
+    public void Stage2Step2_2_TradeGridAutoStarter_RuntimeContextMissing_ShouldStaySafe()
+    {
+        TradeGridAutoStarter autoStarter = new TradeGridAutoStarter
+        {
+            AutoStartRegime = TradeGridAutoStartRegime.HigherOrEqual,
+            AutoStartPrice = 100m,
+            ShiftFirstPrice = 1m
+        };
+
+        TradeGrid grid = (TradeGrid)RuntimeHelpers.GetUninitializedObject(typeof(TradeGrid));
+
+        bool haveEvent = true;
+        decimal startPrice = -1m;
+
+        Exception? error = Record.Exception(() =>
+        {
+            haveEvent = autoStarter.HaveEventToStart(grid);
+            startPrice = autoStarter.GetNewGridPriceStart(grid);
+            autoStarter.ShiftGridOnNewPrice(100m, grid);
+        });
+
+        Assert.Null(error);
+        Assert.False(haveEvent);
+        Assert.Equal(0m, startPrice);
+    }
+
+    [Fact]
+    public void Stage2Step2_2_TradeGridAutoStarter_ShiftGridOnNewPrice_WithSparseLines_ShouldNotThrow()
+    {
+        TradeGridAutoStarter autoStarter = new TradeGridAutoStarter();
+        TradeGrid grid = CreateBareGrid();
+        grid.GridCreator.Lines = new List<TradeGridLine>
+        {
+            null!,
+            new TradeGridLine
+            {
+                Side = Side.Buy,
+                PriceEnter = 100m,
+                PriceExit = 110m
+            }
+        };
+
+        Exception? error = Record.Exception(() => autoStarter.ShiftGridOnNewPrice(120m, grid));
+
+        Assert.Null(error);
+        Assert.Equal(120m, grid.GridCreator.Lines[1].PriceEnter);
+        Assert.Equal(130m, grid.GridCreator.Lines[1].PriceExit);
     }
 
     [Fact]
@@ -875,6 +1190,266 @@ public class TradeGridPersistenceCoreTests
         });
 
         Assert.Null(error);
+    }
+
+    [Fact]
+    public void Stage2Step2_2_TradeGrid_QueryMethods_WithSparseLines_ShouldNotThrow()
+    {
+        TradeGrid grid = CreateBareGrid();
+        grid.GridCreator.GridSide = Side.Buy;
+
+        BotTabSimple tab = (BotTabSimple)RuntimeHelpers.GetUninitializedObject(typeof(BotTabSimple));
+        ConnectorCandles connector = new ConnectorCandles("CodexGridSparseLines", StartProgram.IsTester, false);
+        SetPrivateField(tab, "_connector", connector);
+        SetPrivateField(tab, "_security", new Security
+        {
+            Name = connector.SecurityName,
+            PriceStep = 1m
+        });
+        grid.Tab = tab;
+
+        Position position = (Position)RuntimeHelpers.GetUninitializedObject(typeof(Position));
+        SetPrivateField(position, "_openOrders", new List<Order>
+        {
+            new Order { State = OrderStateType.Active, VolumeExecute = 1m }
+        });
+        SetPrivateField(position, "_closeOrders", new List<Order>
+        {
+            new Order { State = OrderStateType.Active, VolumeExecute = 0m }
+        });
+
+        grid.GridCreator.Lines = new List<TradeGridLine>
+        {
+            null!,
+            new TradeGridLine
+            {
+                Side = Side.Buy,
+                PriceEnter = 100m,
+                PriceExit = 101m,
+                Volume = 1m,
+                Position = position,
+                PositionNum = 1
+            }
+        };
+
+        List<TradeGridLine>? openPositions = null;
+        List<Position>? positions = null;
+        List<TradeGridLine>? openNeed = null;
+        List<TradeGridLine>? openFact = null;
+        List<TradeGridLine>? closeFact = null;
+
+        Exception? error = Record.Exception(() =>
+        {
+            openPositions = grid.GetLinesWithOpenPosition();
+            positions = grid.GetPositionByGrid();
+            openNeed = grid.GetLinesWithOpenOrdersNeed(100m);
+            openFact = grid.GetLinesWithOpenOrdersFact();
+            closeFact = grid.GetLinesWithClosingOrdersFact();
+        });
+
+        Assert.Null(error);
+        Assert.NotNull(openPositions);
+        Assert.NotNull(positions);
+        Assert.NotNull(openNeed);
+        Assert.NotNull(openFact);
+        Assert.NotNull(closeFact);
+        Assert.Single(openPositions);
+        Assert.Single(positions);
+        Assert.Single(openNeed);
+        Assert.Single(openFact);
+        Assert.Single(closeFact);
+    }
+
+    [Fact]
+    public void Stage2Step2_2_TradeGrid_OrderHelpers_WithNullLastCandle_ShouldStaySafe()
+    {
+        TradeGrid grid = CreateBareGrid();
+
+        BotTabSimple tab = (BotTabSimple)RuntimeHelpers.GetUninitializedObject(typeof(BotTabSimple));
+        ConnectorCandles connector = new ConnectorCandles("CodexGridOrderHelpers", StartProgram.IsTester, false);
+        TimeFrameBuilder builder = new TimeFrameBuilder("CodexGridOrderHelpers", StartProgram.IsTester);
+        CandleSeries series = new CandleSeries(builder, new Security(), StartProgram.IsTester)
+        {
+            CandlesAll = new List<Candle> { null! }
+        };
+        SetPrivateField(connector, "_mySeries", series);
+        SetPrivateField(tab, "_connector", connector);
+        SetPrivateField(tab, "_security", new Security
+        {
+            Name = connector.SecurityName,
+            PriceStep = 1m,
+            Lot = 1m
+        });
+        grid.Tab = tab;
+
+        List<Order>? openOrdersHole = null;
+        Exception? error = Record.Exception(() =>
+        {
+            InvokePrivateNoArg(grid, "TrySetOpenOrders");
+            InvokePrivateNoArg(grid, "TryRemoveWrongOrders");
+
+            MethodInfo method = typeof(TradeGrid).GetMethod("GetOpenOrdersGridHole", BindingFlags.NonPublic | BindingFlags.Instance)
+                ?? throw new InvalidOperationException("Method GetOpenOrdersGridHole not found.");
+            openOrdersHole = method.Invoke(grid, null) as List<Order>;
+        });
+
+        Assert.Null(error);
+        Assert.Null(openOrdersHole);
+    }
+
+    [Fact]
+    public void Stage2Step2_2_TradeGrid_SparseLines_JournalAndOrderStatePaths_ShouldStaySafe()
+    {
+        TradeGrid grid = (TradeGrid)RuntimeHelpers.GetUninitializedObject(typeof(TradeGrid));
+        grid.GridCreator = new TradeGridCreator();
+
+        Position journalPosition = (Position)RuntimeHelpers.GetUninitializedObject(typeof(Position));
+        journalPosition.Number = 42;
+        SetPrivateField(journalPosition, "_openOrders", new List<Order>());
+        SetPrivateField(journalPosition, "_closeOrders", new List<Order>());
+
+        grid.GridCreator.Lines = new List<TradeGridLine>
+        {
+            null!,
+            new TradeGridLine
+            {
+                Volume = 2m,
+                PositionNum = 42,
+                Position = null
+            }
+        };
+
+        BotTabSimple tab = (BotTabSimple)RuntimeHelpers.GetUninitializedObject(typeof(BotTabSimple));
+        OsEngine.Journal.Journal journal =
+            (OsEngine.Journal.Journal)RuntimeHelpers.GetUninitializedObject(typeof(OsEngine.Journal.Journal));
+        PositionController controller = (PositionController)RuntimeHelpers.GetUninitializedObject(typeof(PositionController));
+        SetPrivateField(controller, "_deals", new List<Position> { journalPosition });
+        SetPrivateField(journal, "_positionController", controller);
+        tab._journal = journal;
+        grid.Tab = tab;
+
+        decimal allVolume = -1m;
+        bool hasNoMarketOrders = true;
+        bool hasRecentCancel = true;
+
+        Exception? error = Record.Exception(() =>
+        {
+            InvokePrivateNoArg(grid, "TryDeleteDonePositions");
+            InvokePrivateNoArg(grid, "TryFindPositionsInJournalAfterReconnect");
+            InvokePrivateWithArgs(grid, "TryDeletePositionsFromJournal", journalPosition);
+            allVolume = grid.AllVolumeInLines;
+            hasNoMarketOrders = grid.HaveOrdersWithNoMarketOrders();
+            hasRecentCancel = grid.HaveOrdersTryToCancelLastSecond();
+        });
+
+        Assert.Null(error);
+        Assert.Equal(2m, allVolume);
+        Assert.False(hasNoMarketOrders);
+        Assert.False(hasRecentCancel);
+        Assert.NotNull(grid.GridCreator.Lines[1].Position);
+        Assert.Equal(42, grid.GridCreator.Lines[1].PositionNum);
+    }
+
+    [Fact]
+    public void Stage2Step2_2_TradeGrid_EventAndLifecycle_WithSparseLines_ShouldStaySafe()
+    {
+        TradeGrid grid = (TradeGrid)RuntimeHelpers.GetUninitializedObject(typeof(TradeGrid));
+        grid.GridCreator = new TradeGridCreator();
+        grid.Regime = TradeGridRegime.On;
+
+        Position position = (Position)RuntimeHelpers.GetUninitializedObject(typeof(Position));
+        position.Number = 7;
+        position.State = PositionStateType.OpeningFail;
+        SetPrivateField(position, "_openOrders", new List<Order>());
+        SetPrivateField(position, "_closeOrders", new List<Order>());
+
+        grid.GridCreator.Lines = new List<TradeGridLine>
+        {
+            null!,
+            new TradeGridLine
+            {
+                Position = position,
+                PositionNum = position.Number
+            }
+        };
+
+        Exception? error = Record.Exception(() =>
+        {
+            InvokePrivateWithArgs(grid, "Tab_PositionOpeningSuccesEvent", position);
+            InvokePrivateWithArgs(grid, "Tab_PositionOpeningFailEvent", position);
+            InvokePrivateWithArgs(grid, "Tab_PositionClosingFailEvent", position);
+            InvokePrivateNoArg(grid, "TryDeleteOpeningFailPositions");
+            InvokePrivateNoArg(grid, "Connector_TestStartEvent");
+        });
+
+        Assert.Null(error);
+        Assert.Null(grid.GridCreator.Lines[1].Position);
+        Assert.Equal(0, grid.GridCreator.Lines[1].PositionNum);
+    }
+
+    [Fact]
+    public void Stage2Step2_2_TradeGrid_RemoveSelected_WithSparseLines_ShouldNotThrow()
+    {
+        TradeGrid grid = (TradeGrid)RuntimeHelpers.GetUninitializedObject(typeof(TradeGrid));
+        grid.GridCreator = new TradeGridCreator();
+        grid.GridCreator.Lines = new List<TradeGridLine>
+        {
+            null!,
+            new TradeGridLine { PriceEnter = 100m, Side = Side.Buy }
+        };
+
+        Exception? error = Record.Exception(() =>
+        {
+            grid.RemoveSelected(new List<int> { -1 });
+            grid.RemoveSelected(new List<int> { 0 });
+            grid.RemoveSelected(new List<int> { 0 });
+        });
+
+        Assert.Null(error);
+        Assert.Empty(grid.GridCreator.Lines);
+    }
+
+    [Fact]
+    public void Stage2Step2_2_TradeGrid_ForcedCloseAndVolume_WithSparseLines_ShouldStaySafe()
+    {
+        TradeGrid grid = (TradeGrid)RuntimeHelpers.GetUninitializedObject(typeof(TradeGrid));
+        grid.GridCreator = new TradeGridCreator();
+        grid.Tab = (BotTabSimple)RuntimeHelpers.GetUninitializedObject(typeof(BotTabSimple));
+        grid.CheckMicroVolumes = false;
+        grid.Regime = TradeGridRegime.CloseForced;
+
+        Position position = (Position)RuntimeHelpers.GetUninitializedObject(typeof(Position));
+        position.State = PositionStateType.Done;
+        SetPrivateField(position, "_openOrders", new List<Order>());
+        SetPrivateField(position, "_closeOrders", new List<Order>
+        {
+            new Order { State = OrderStateType.Done, VolumeExecute = 1m }
+        });
+
+        grid.GridCreator.Lines = new List<TradeGridLine>
+        {
+            null!,
+            new TradeGridLine
+            {
+                Position = position,
+                PositionNum = 1
+            }
+        };
+
+        decimal openVolumeByLines = 0m;
+        bool haveCloseOrders = true;
+
+        Exception? error = Record.Exception(() =>
+        {
+            openVolumeByLines = grid.OpenVolumeByLines;
+            haveCloseOrders = grid.HaveCloseOrders;
+            InvokePrivateNoArg(grid, "TryForcedCloseGrid");
+        });
+
+        Assert.Null(error);
+        Assert.Equal(-1m, openVolumeByLines);
+        Assert.False(haveCloseOrders);
+        Assert.Equal(TradeGridRegime.Off, grid.Regime);
     }
 
     private static TradeGrid CreateBareGrid()

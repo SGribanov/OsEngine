@@ -14767,3 +14767,360 @@
 - **Commit:** n/a
 - **Push:** n/a
 
+
+### Step 4.2 - Nullable Annotations (Incremental Adoption #682)
+
+- **Status:** In Progress (increment completed)
+- **Plan item:** `refactoring_stage2_plan.md` -> Phase 4 / Step 4.2
+- **Changes (TradeGridStopAndProfit sparse positions null-entry guard block):**
+  - Updated `project/OsEngine/OsTrader/Grids/TradeGridStopAndProfit.cs`:
+    - `SetProfit(...)`, `SetStop(...)`, `SetTrailStop(...)` now skip null entries in `positions` lists.
+    - protected all touched position-iteration loops from sparse-list null-reference.
+  - Updated tests in `project/OsEngine.Tests/TradeGridPersistenceCoreTests.cs`:
+    - `...TradeGridStopAndProfit_PrivateSetters_WithSparsePositionsList_ShouldNotThrow`
+- **Verification (outside sandbox, per dotnet-build-policy):**
+  - `dotnet restore project/OsEngine/OsEngine.csproj --nologo` -> success
+  - `dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo` -> success
+  - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` -> success, 0 warnings, 0 errors
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed `530/530`
+- **Commit:** n/a
+- **Push:** n/a
+
+
+### Step 4.2 - Nullable Annotations (Incremental Adoption #683)
+
+- **Status:** In Progress (increment completed)
+- **Plan item:** `refactoring_stage2_plan.md` -> Phase 4 / Step 4.2
+- **Changes (TradeGridAutoStarter runtime/sparse lifecycle guards block):**
+  - Updated `project/OsEngine/OsTrader/Grids/TradeGridAutoStarter.cs`:
+    - `HaveEventToStart(...)` now guards null `grid`/`tab` and null tail candle.
+    - `GetNewGridPriceStart(...)` now guards null `grid`/`tab`/`GridCreator`, null tail candle, and missing `Security` before rounding.
+    - `ShiftGridOnNewPrice(...)` now guards null `grid`/`GridCreator`, sparse/null line entries, and derives side from first non-null line.
+  - Updated tests in `project/OsEngine.Tests/TradeGridPersistenceCoreTests.cs`:
+    - `...TradeGridAutoStarter_RuntimeContextMissing_ShouldStaySafe`
+    - `...TradeGridAutoStarter_ShiftGridOnNewPrice_WithSparseLines_ShouldNotThrow`
+- **Verification (outside sandbox, per dotnet-build-policy):**
+  - `dotnet restore project/OsEngine/OsEngine.csproj --nologo` -> success
+  - `dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo` -> success
+  - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` -> success, 0 warnings, 0 errors
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed `532/532`
+- **Commit:** n/a
+- **Push:** n/a
+
+
+### Step 4.2 - Nullable Annotations (Incremental Adoption #684)
+
+- **Status:** In Progress (increment completed)
+- **Plan item:** `refactoring_stage2_plan.md` -> Phase 4 / Step 4.2
+- **Changes (TradeGrid sparse-lines query guards block):**
+  - Updated `project/OsEngine/OsTrader/Grids/TradeGrid.cs`:
+    - `GetLinesWithOpenPosition()`, `GetPositionByGrid()`, `GetLinesWithOpenOrdersNeed(...)`, `GetLinesWithOpenOrdersFact()`, `GetLinesWithClosingOrdersFact()` now skip null entries in `GridCreator.Lines`.
+    - protected query/selection loops from sparse-list null-reference.
+  - Updated tests in `project/OsEngine.Tests/TradeGridPersistenceCoreTests.cs`:
+    - `...TradeGrid_QueryMethods_WithSparseLines_ShouldNotThrow`
+- **Verification (outside sandbox, per dotnet-build-policy):**
+  - `dotnet restore project/OsEngine/OsEngine.csproj --nologo` -> success
+  - `dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo` -> success
+  - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` -> success, 0 warnings, 0 errors
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed `533/533`
+- **Commit:** n/a
+- **Push:** n/a
+
+
+### Step 4.2 - Nullable Annotations (Incremental Adoption #685)
+
+- **Status:** In Progress (increment completed)
+- **Plan item:** `refactoring_stage2_plan.md` -> Phase 4 / Step 4.2
+- **Changes (TrailingUp null-last-candle trailing guard block):**
+  - Updated `project/OsEngine/OsTrader/Grids/TrailingUp.cs`:
+    - `TryTrailingGrid()` now guards null last candle entry before close-price access.
+  - Updated tests in `project/OsEngine.Tests/TradeGridPersistenceCoreTests.cs`:
+    - `...TrailingUp_TryTrailingGrid_WithNullLastCandle_ShouldReturnFalse`
+- **Verification (outside sandbox, per dotnet-build-policy):**
+  - `dotnet restore project/OsEngine/OsEngine.csproj --nologo` -> success
+  - `dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo` -> success
+  - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` -> success, 0 warnings, 0 errors
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed `534/534`
+- **Commit:** n/a
+- **Push:** n/a
+
+
+### Step 4.2 - Nullable Annotations (Incremental Adoption #686)
+
+- **Status:** In Progress (increment completed)
+- **Plan item:** `refactoring_stage2_plan.md` -> Phase 4 / Step 4.2
+- **Changes (TradeGridCreator get-volume runtime context guards block):**
+  - Updated `project/OsEngine/OsTrader/Grids/TradeGridCreator.cs`:
+    - `GetVolume(...)` now guards null `line`.
+    - for `Contracts`, returns volume before any tab/security access.
+    - for tab-dependent modes, now guards null `tab` and missing `Security`.
+    - deposit-percent branch now guards zero `PriceBestAsk` before division.
+    - touched internals use guarded local `security` snapshot.
+  - Updated tests in `project/OsEngine.Tests/TradeGridPersistenceCoreTests.cs`:
+    - `...TradeGridCreator_GetVolume_WithNullRuntimeContext_ShouldStaySafe`
+- **Verification (outside sandbox, per dotnet-build-policy):**
+  - `dotnet restore project/OsEngine/OsEngine.csproj --nologo` -> success
+  - `dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo` -> success
+  - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` -> success, 0 warnings, 0 errors
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed `535/535`
+- **Commit:** n/a
+- **Push:** n/a
+
+
+### Step 4.2 - Nullable Annotations (Incremental Adoption #687)
+
+- **Status:** In Progress (increment completed)
+- **Plan item:** `refactoring_stage2_plan.md` -> Phase 4 / Step 4.2
+- **Changes (TradeGridCreator sparse-lines save-string guard block):**
+  - Updated `project/OsEngine/OsTrader/Grids/TradeGridCreator.cs`:
+    - `GetSaveLinesString()` now skips null entries in `Lines`.
+  - Updated tests in `project/OsEngine.Tests/TradeGridPersistenceCoreTests.cs`:
+    - `...TradeGridCreator_GetSaveLinesString_WithSparseLines_ShouldNotThrow`
+- **Verification (outside sandbox, per dotnet-build-policy):**
+  - `dotnet restore project/OsEngine/OsEngine.csproj --nologo` -> success
+  - `dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo` -> success
+  - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` -> success, 0 warnings, 0 errors
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed `536/536`
+- **Commit:** n/a
+- **Push:** n/a
+
+
+### Step 4.2 - Nullable Annotations (Incremental Adoption #688)
+
+- **Status:** In Progress (increment completed)
+- **Plan item:** `refactoring_stage2_plan.md` -> Phase 4 / Step 4.2
+- **Changes (TradeGridCreator remove-selected null/sparse guard block):**
+  - Updated `project/OsEngine/OsTrader/Grids/TradeGridCreator.cs`:
+    - `RemoveSelected(...)` now guards null/empty `numbers`.
+    - `RemoveSelected(...)` now guards null/empty `Lines`.
+    - sparse/null line entry is checked before `Position` log check.
+  - Updated tests in `project/OsEngine.Tests/TradeGridPersistenceCoreTests.cs`:
+    - `...TradeGridCreator_RemoveSelected_WithNullOrSparseInputs_ShouldNotThrow`
+- **Verification (outside sandbox, per dotnet-build-policy):**
+  - `dotnet restore project/OsEngine/OsEngine.csproj --nologo` -> success
+  - `dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo` -> success
+  - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` -> success, 0 warnings, 0 errors
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed `537/537`
+- **Commit:** n/a
+- **Push:** n/a
+
+
+### Step 4.2 - Nullable Annotations (Incremental Adoption #689)
+
+- **Status:** In Progress (increment completed)
+- **Plan item:** `refactoring_stage2_plan.md` -> Phase 4 / Step 4.2
+- **Changes (TradeGrid order-helper null-tail candle guard block):**
+  - Updated `project/OsEngine/OsTrader/Grids/TradeGrid.cs`:
+    - `TryRemoveWrongOrders()`, `GetOpenOrdersGridHole()`, `TrySetOpenOrders()` now guard null last candle entry.
+    - `GetOpenOrdersGridHole()` now guards null first/last lines before entry-price comparison.
+    - `CheckWrongCloseOrders()` now skips null sparse lines.
+    - `TrySetOpenOrders()` now skips null sparse lines in opening loop.
+  - Updated tests in `project/OsEngine.Tests/TradeGridPersistenceCoreTests.cs`:
+    - `...TradeGrid_OrderHelpers_WithNullLastCandle_ShouldStaySafe`
+- **Verification (outside sandbox, per dotnet-build-policy):**
+  - `dotnet restore project/OsEngine/OsEngine.csproj --nologo` -> success
+  - `dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo` -> success
+  - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` -> success, 0 warnings, 0 errors
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed `538/538`
+- **Commit:** n/a
+- **Push:** n/a
+
+
+### Step 4.2 - Nullable Annotations (Incremental Adoption #690)
+
+- **Status:** In Progress (increment completed)
+- **Plan item:** `refactoring_stage2_plan.md` -> Phase 4 / Step 4.2
+- **Changes (TradeGrid sparse-lines journal/order-state guard block):**
+  - Updated `project/OsEngine/OsTrader/Grids/TradeGrid.cs`:
+    - `TryDeletePositionsFromJournal(...)`, `TryDeleteDonePositions()`, `TryFindPositionsInJournalAfterReconnect()` now skip null sparse lines.
+    - `AllVolumeInLines` now skips null sparse lines.
+    - `HaveOrdersWithNoMarketOrders()` and `HaveOrdersTryToCancelLastSecond()` now skip null sparse lines before position access.
+  - Updated tests in `project/OsEngine.Tests/TradeGridPersistenceCoreTests.cs`:
+    - `...TradeGrid_SparseLines_JournalAndOrderStatePaths_ShouldStaySafe`
+- **Verification (outside sandbox, per dotnet-build-policy):**
+  - `dotnet restore project/OsEngine/OsEngine.csproj --nologo` -> success
+  - `dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo` -> success
+  - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` -> success, 0 warnings, 0 errors
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed `539/539`
+- **Commit:** n/a
+- **Push:** n/a
+
+
+### Step 4.2 - Nullable Annotations (Incremental Adoption #691)
+
+- **Status:** In Progress (increment completed)
+- **Plan item:** `refactoring_stage2_plan.md` -> Phase 4 / Step 4.2
+- **Changes (TradeGrid sparse-lines event/lifecycle guard batch):**
+  - Updated `project/OsEngine/OsTrader/Grids/TradeGrid.cs`:
+    - `Connector_TestStartEvent()` now skips null sparse lines before reset.
+    - `Tab_PositionOpeningSuccesEvent(...)`, `Tab_PositionOpeningFailEvent(...)`, `Tab_PositionClosingFailEvent(...)` now skip null sparse lines while matching position numbers.
+    - `TryDeleteOpeningFailPositions()` now skips null sparse lines before state checks.
+  - Updated tests in `project/OsEngine.Tests/TradeGridPersistenceCoreTests.cs`:
+    - `...TradeGrid_EventAndLifecycle_WithSparseLines_ShouldStaySafe`
+- **Verification (outside sandbox, per dotnet-build-policy):**
+  - `dotnet restore project/OsEngine/OsEngine.csproj --nologo` -> success
+  - `dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo` -> success
+  - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` -> success, 0 warnings, 0 errors
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed `540/540`
+- **Commit:** n/a
+- **Push:** n/a
+
+
+### Step 4.2 - Nullable Annotations (Incremental Adoption #692)
+
+- **Status:** In Progress (increment completed)
+- **Plan item:** `refactoring_stage2_plan.md` -> Phase 4 / Step 4.2
+- **Changes (TradeGrid order-close/cancel sparse-line guard batch):**
+  - Updated `project/OsEngine/OsTrader/Grids/TradeGrid.cs`:
+    - `RemoveSelected(...)` now skips null sparse lines before open-order cancel logic.
+    - `TryCancelWrongCloseProfitOrders()` now uses guarded local position reference.
+    - `TrySetClosingProfitOrders(...)` now skips null lines/missing positions before checks.
+    - `TryCancelOpeningOrders()` and `TryCancelClosingOrders()` now use guarded local position reference.
+    - `TrySetClosingOrders(...)` now skips null lines/missing positions before checks.
+  - Updated tests in `project/OsEngine.Tests/TradeGridPersistenceCoreTests.cs`:
+    - `...TradeGrid_RemoveSelected_WithSparseLines_ShouldNotThrow`
+- **Verification (outside sandbox, per dotnet-build-policy):**
+  - `dotnet restore project/OsEngine/OsEngine.csproj --nologo` -> success
+  - `dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo` -> success
+  - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` -> success, 0 warnings, 0 errors
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed `541/541`
+- **Commit:** n/a
+- **Push:** n/a
+
+
+### Step 4.2 - Nullable Annotations (Incremental Adoption #693)
+
+- **Status:** In Progress (increment completed)
+- **Plan item:** `refactoring_stage2_plan.md` -> Phase 4 / Step 4.2
+- **Changes (TradeGrid sparse-lines forced-close/property guard batch):**
+  - Updated `project/OsEngine/OsTrader/Grids/TradeGrid.cs`:
+    - `TryForcedCloseGrid()` now skips null sparse lines before position checks.
+    - `OpenVolumeByLines` now skips null sparse lines before volume aggregation.
+    - `HaveCloseOrders` now skips null sparse lines before close-order checks.
+  - Updated tests in `project/OsEngine.Tests/TradeGridPersistenceCoreTests.cs`:
+    - `...TradeGrid_ForcedCloseAndVolume_WithSparseLines_ShouldStaySafe`
+- **Verification (outside sandbox, per dotnet-build-policy):**
+  - `dotnet restore project/OsEngine/OsEngine.csproj --nologo` -> success
+  - `dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo` -> success
+  - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` -> success, 0 warnings, 0 errors
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed `542/542`
+- **Commit:** n/a
+- **Push:** n/a
+
+
+### Step 4.2 - Nullable Annotations (Incremental Adoption #694)
+
+- **Status:** In Progress (increment completed)
+- **Plan item:** `refactoring_stage2_plan.md` -> Phase 4 / Step 4.2
+- **Changes (TradeGridCreator deposit-percent sparse portfolio/lot-zero guards):**
+  - Updated `project/OsEngine/OsTrader/Grids/TradeGridCreator.cs`:
+    - `GetVolume(...)` now skips null sparse entries in `Portfolio.GetPositionOnBoard()` iteration.
+    - `GetVolume(...)` deposit-percent calculation now handles `security.Lot == 0` with a safe fallback path.
+  - Updated tests in `project/OsEngine.Tests/TradeGridPersistenceCoreTests.cs`:
+    - extended `...TradeGridCreator_GetVolume_WithNullRuntimeContext_ShouldStaySafe` with sparse portfolio and zero-lot scenario.
+- **Verification (outside sandbox, per dotnet-build-policy):**
+  - `dotnet restore project/OsEngine/OsEngine.csproj --nologo` -> success
+  - `dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo` -> success
+  - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` -> success, 0 warnings, 0 errors
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed `542/542`
+- **Commit:** n/a
+- **Push:** n/a
+
+
+### Step 4.2 - Nullable Annotations (Incremental Adoption #695)
+
+- **Status:** In Progress (increment completed)
+- **Plan item:** `refactoring_stage2_plan.md` -> Phase 4 / Step 4.2
+- **Changes (TradeGridCreator contract-currency zero-price guard):**
+  - Updated `project/OsEngine/OsTrader/Grids/TradeGridCreator.cs`:
+    - `GetVolume(...)` in `ContractCurrency` mode now guards `line.PriceEnter == 0` and returns `0`.
+  - Updated tests in `project/OsEngine.Tests/TradeGridPersistenceCoreTests.cs`:
+    - extended `...TradeGridCreator_GetVolume_WithNullRuntimeContext_ShouldStaySafe` with zero-entry-price contract-currency scenario.
+- **Verification (outside sandbox, per dotnet-build-policy):**
+  - `dotnet restore project/OsEngine/OsEngine.csproj --nologo` -> success
+  - `dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo` -> success
+  - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` -> success, 0 warnings, 0 errors
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed `542/542`
+- **Commit:** n/a
+- **Push:** n/a
+
+
+### Step 4.2 - Nullable Annotations (Incremental Adoption #696)
+
+- **Status:** In Progress (increment completed)
+- **Plan item:** `refactoring_stage2_plan.md` -> Phase 4 / Step 4.2
+- **Changes (TradeGridCreator load-lines null-collection guard):**
+  - Updated `project/OsEngine/OsTrader/Grids/TradeGridCreator.cs`:
+    - `LoadLines(...)` now initializes `Lines` when collection is null before adding deserialized lines.
+  - Updated tests in `project/OsEngine.Tests/TradeGridPersistenceCoreTests.cs`:
+    - added `...TradeGridCreator_LoadLines_WithNullLinesCollection_ShouldNotThrow`.
+- **Verification (outside sandbox, per dotnet-build-policy):**
+  - `dotnet restore project/OsEngine/OsEngine.csproj --nologo` -> success
+  - `dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo` -> success
+  - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` -> success, 0 warnings, 0 errors
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed `543/543`
+- **Commit:** n/a
+- **Push:** n/a
+
+
+### Step 4.2 - Nullable Annotations (Incremental Adoption #697)
+
+- **Status:** In Progress (increment completed)
+- **Plan item:** `refactoring_stage2_plan.md` -> Phase 4 / Step 4.2
+- **Changes (TradeGridCreator mutators null-lines/tab guard batch):**
+  - Updated `project/OsEngine/OsTrader/Grids/TradeGridCreator.cs`:
+    - `CreateNewGrid(...)` now returns early on null `tab`.
+    - `DeleteGrid()` now guards null `Lines`.
+    - `CreateNewLine()` now initializes `Lines` when collection is null.
+    - `CreateMarketMakingGrid(...)` now guards null `tab` and `Lines`.
+    - `GetSaveLinesString()` now returns empty string for null/empty `Lines`.
+  - Updated tests in `project/OsEngine.Tests/TradeGridPersistenceCoreTests.cs`:
+    - added `...TradeGridCreator_Mutators_WithNullLinesOrTab_ShouldNotThrow`.
+- **Verification (outside sandbox, per dotnet-build-policy):**
+  - `dotnet restore project/OsEngine/OsEngine.csproj --nologo` -> success
+  - `dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo` -> success
+  - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` -> success, 0 warnings, 0 errors
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed `544/544`
+- **Commit:** n/a
+- **Push:** n/a
+
+
+### Step 4.2 - Nullable Annotations (Incremental Adoption #698)
+
+- **Status:** In Progress (increment completed)
+- **Plan item:** `refactoring_stage2_plan.md` -> Phase 4 / Step 4.2
+- **Changes (RemoveSelected negative-index guards in TradeGrid/TradeGridCreator):**
+  - Updated `project/OsEngine/OsTrader/Grids/TradeGridCreator.cs`:
+    - `RemoveSelected(...)` now guards negative indices before access/removal.
+  - Updated `project/OsEngine/OsTrader/Grids/TradeGrid.cs`:
+    - `RemoveSelected(...)` now guards negative indices before line lookup.
+  - Updated tests in `project/OsEngine.Tests/TradeGridPersistenceCoreTests.cs`:
+    - extended creator/remove-selected sparse-input test with negative-index case.
+    - extended tradegrid/remove-selected sparse-lines test with negative-index case.
+- **Verification (outside sandbox, per dotnet-build-policy):**
+  - `dotnet restore project/OsEngine/OsEngine.csproj --nologo` -> success
+  - `dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo` -> success
+  - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` -> success, 0 warnings, 0 errors
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed `544/544`
+- **Commit:** n/a
+- **Push:** n/a
+
+
+### Step 4.2 - Nullable Annotations (Incremental Adoption #699)
+
+- **Status:** In Progress (increment completed)
+- **Plan item:** `refactoring_stage2_plan.md` -> Phase 4 / Step 4.2
+- **Changes (TradeGridCreator GetVolume decimals-safety guard batch):**
+  - Updated `project/OsEngine/OsTrader/Grids/TradeGridCreator.cs`:
+    - added safe `DecimalsVolume` normalization for OsTrader rounding paths in `GetVolume(...)`.
+    - contract-currency and deposit-percent branches now avoid invalid `Math.Round(..., decimals)` values.
+  - Updated tests in `project/OsEngine.Tests/TradeGridPersistenceCoreTests.cs`:
+    - extended get-volume runtime-context test with negative-decimals scenarios for contract-currency and deposit-percent modes.
+- **Verification (outside sandbox, per dotnet-build-policy):**
+  - `dotnet restore project/OsEngine/OsEngine.csproj --nologo` -> success
+  - `dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo` -> success
+  - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` -> success, 0 warnings, 0 errors
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed `544/544`
+- **Commit:** n/a
+- **Push:** n/a
+

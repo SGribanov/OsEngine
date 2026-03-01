@@ -242,7 +242,8 @@ namespace OsEngine.OsTrader.Grids
             {
                 Position pos = positions[i];
 
-                if(pos.OpenVolume == 0
+                if (pos == null
+                    || pos.OpenVolume == 0
                     || pos.State == PositionStateType.Done)
                 {
                     continue;
@@ -310,7 +311,8 @@ namespace OsEngine.OsTrader.Grids
             {
                 Position pos = positions[i];
 
-                if (pos.OpenVolume == 0
+                if (pos == null
+                    || pos.OpenVolume == 0
                     || pos.State == PositionStateType.Done)
                 {
                     continue;
@@ -393,7 +395,8 @@ namespace OsEngine.OsTrader.Grids
             {
                 Position pos = positions[i];
 
-                if (pos.OpenVolume == 0
+                if (pos == null
+                    || pos.OpenVolume == 0
                     || pos.State == PositionStateType.Done
                     || pos.CloseActive == true)
                 {
@@ -415,7 +418,8 @@ namespace OsEngine.OsTrader.Grids
             {
                 Position pos = positions[i];
 
-                if (pos.OpenVolume == 0
+                if (pos == null
+                    || pos.OpenVolume == 0
                     || pos.State == PositionStateType.Done
                     || pos.CloseActive == true)
                 {
@@ -450,7 +454,8 @@ namespace OsEngine.OsTrader.Grids
                 {
                     Position pos = positions[i];
 
-                    if (pos.OpenVolume == 0
+                    if (pos == null
+                        || pos.OpenVolume == 0
                         || pos.State == PositionStateType.Done
                         || pos.CloseActive == true)
                     {

@@ -154,7 +154,13 @@ namespace OsEngine.OsTrader.Grids
                 return false;
             }
 
-            decimal lastPrice = candles[candles.Count - 1].Close;
+            Candle lastCandle = candles[candles.Count - 1];
+            if (lastCandle == null)
+            {
+                return false;
+            }
+
+            decimal lastPrice = lastCandle.Close;
 
             if (lastPrice == 0)
             {

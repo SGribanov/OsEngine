@@ -155,11 +155,21 @@ namespace OsEngine.OsTrader.Grids
 
         public void CreateNewGrid(BotTabSimple tab, TradeGridPrimeType gridType)
         {
+            if (tab == null)
+            {
+                return;
+            }
+
             CreateMarketMakingGrid(tab);
         }
 
         public void DeleteGrid()
         {
+            if (Lines == null)
+            {
+                return;
+            }
+
             if(Lines.Count > 0)
             {
                 Lines.Clear();
@@ -168,6 +178,11 @@ namespace OsEngine.OsTrader.Grids
 
         public void CreateNewLine()
         {
+            if (Lines == null)
+            {
+                Lines = new List<TradeGridLine>();
+            }
+
             TradeGridLine newLine = new TradeGridLine();
             newLine.PriceEnter = 0;
             newLine.Side = GridSide;
@@ -178,18 +193,28 @@ namespace OsEngine.OsTrader.Grids
 
         public void RemoveSelected(List<int> numbers)
         {
+            if (numbers == null || numbers.Count == 0)
+            {
+                return;
+            }
+
+            if (Lines == null || Lines.Count == 0)
+            {
+                return;
+            }
+
             for(int i = numbers.Count-1; i > -1; i--)
             {
                 int curNumber = numbers[i];
 
-                if(curNumber >= Lines.Count)
+                if (curNumber < 0 || curNumber >= Lines.Count)
                 {
                     continue;
                 }
 
                 TradeGridLine line = Lines[curNumber];
 
-                if(line.Position != null)
+                if(line != null && line.Position != null)
                 {
                     SendNewLogMessage("User remove line with Position!!! \n !!!!! \n !!!!!! \n Grid is broken!!!", LogMessageType.Error);
                 }
@@ -200,6 +225,16 @@ namespace OsEngine.OsTrader.Grids
 
         private void CreateMarketMakingGrid(BotTabSimple tab)
         {
+            if (tab == null)
+            {
+                return;
+            }
+
+            if (Lines == null)
+            {
+                Lines = new List<TradeGridLine>();
+            }
+
             Lines.Clear();
 
             decimal priceCurrent = FirstPrice;
@@ -339,11 +374,22 @@ namespace OsEngine.OsTrader.Grids
         {
             try
             {
+                if (Lines == null || Lines.Count == 0)
+                {
+                    return "";
+                }
+
                 string lines = "";
 
                 for (int i = 0; i < Lines.Count; i++)
                 {
-                    lines += Lines[i].GetSaveStr() + "^";
+                    TradeGridLine line = Lines[i];
+                    if (line == null)
+                    {
+                        continue;
+                    }
+
+                    lines += line.GetSaveStr() + "^";
                 }
                  
                 return lines;
@@ -364,6 +410,11 @@ namespace OsEngine.OsTrader.Grids
 
             try
             {
+                if (Lines == null)
+                {
+                    Lines = new List<TradeGridLine>();
+                }
+
                 string[] linesInStr = str.Split('^');
 
                 for(int i = 0;i < linesInStr.Length;i++)
@@ -388,6 +439,27 @@ namespace OsEngine.OsTrader.Grids
 
         public decimal GetVolume(TradeGridLine line, BotTabSimple tab)
         {
+            if (line == null)
+            {
+                return 0;
+            }
+
+            if (TypeVolume == TradeGridVolumeType.Contracts) // кол-во контрактов
+            {
+                return line.Volume;
+            }
+
+            if (tab == null)
+            {
+                return 0;
+            }
+
+            Security security = tab.Security;
+            if (security == null)
+            {
+                return 0;
+            }
+
             decimal volume = 0;
             decimal volumeFromLine = line.Volume;
             decimal priceEnterForLine = line.PriceEnter;
@@ -395,23 +467,28 @@ namespace OsEngine.OsTrader.Grids
             if (TypeVolume == TradeGridVolumeType.ContractCurrency) // "Валюта контракта"
             {
                 decimal contractPrice = priceEnterForLine;
+                if (contractPrice == 0)
+                {
+                    return 0;
+                }
 
                 if(tab.StartProgram == StartProgram.IsOsTrader)
                 {
-                    if(tab.Security.Lot != 0)
+                    int decimalsVolume = GetSafeDecimalsVolume(security);
+                    if(security.Lot != 0)
                     {
-                        volume = Math.Round(volumeFromLine / contractPrice / tab.Security.Lot, tab.Security.DecimalsVolume);
+                        volume = Math.Round(volumeFromLine / contractPrice / security.Lot, decimalsVolume);
                     }
                     else
                     {
-                        volume = Math.Round(volumeFromLine / contractPrice, tab.Security.DecimalsVolume);
+                        volume = Math.Round(volumeFromLine / contractPrice, decimalsVolume);
                     }
                 }
                 else
                 {
-                    if (tab.Security.Lot != 0)
+                    if (security.Lot != 0)
                     {
-                        volume = Math.Round(volumeFromLine / contractPrice / tab.Security.Lot, 7);
+                        volume = Math.Round(volumeFromLine / contractPrice / security.Lot, 7);
                     }
                     else
                     {
@@ -420,10 +497,6 @@ namespace OsEngine.OsTrader.Grids
                 }
 
                 return volume;
-            }
-            else if (TypeVolume == TradeGridVolumeType.Contracts) // кол-во контрактов
-            {
-                return line.Volume;
             }
             else // if (TypeVolume == Type_Volume.DepoPercent) // процент депозита
             {
@@ -451,9 +524,15 @@ namespace OsEngine.OsTrader.Grids
 
                     for (int i = 0; i < positionOnBoard.Count; i++)
                     {
-                        if (positionOnBoard[i].SecurityNameCode == TradeAssetInPortfolio)
+                        PositionOnBoard currentPosition = positionOnBoard[i];
+                        if (currentPosition == null)
                         {
-                            portfolioPrimeAsset = positionOnBoard[i].ValueCurrent;
+                            continue;
+                        }
+
+                        if (currentPosition.SecurityNameCode == TradeAssetInPortfolio)
+                        {
+                            portfolioPrimeAsset = currentPosition.ValueCurrent;
                             break;
                         }
                     }
@@ -466,19 +545,33 @@ namespace OsEngine.OsTrader.Grids
                     return 0;
                 }
                 decimal moneyOnPosition = portfolioPrimeAsset * (volumeFromLine / 100);
-                decimal qty = moneyOnPosition / tab.PriceBestAsk / tab.Security.Lot;
+                if (tab.PriceBestAsk == 0)
+                {
+                    return 0;
+                }
+
+                decimal qty = 0;
+                if (security.Lot != 0)
+                {
+                    qty = moneyOnPosition / tab.PriceBestAsk / security.Lot;
+                }
+                else
+                {
+                    qty = moneyOnPosition / tab.PriceBestAsk;
+                }
 
                 if (tab.StartProgram == StartProgram.IsOsTrader)
                 {
-                    if (tab.Security.UsePriceStepCostToCalculateVolume == true
-                      && tab.Security.PriceStep != tab.Security.PriceStepCost
+                    int decimalsVolume = GetSafeDecimalsVolume(security);
+                    if (security.UsePriceStepCostToCalculateVolume == true
+                      && security.PriceStep != security.PriceStepCost
                       && tab.PriceBestAsk != 0
-                      && tab.Security.PriceStep != 0
-                      && tab.Security.PriceStepCost != 0)
+                      && security.PriceStep != 0
+                      && security.PriceStepCost != 0)
                     {// расчёт количества контрактов для фьючерсов и опционов на Мосбирже
-                        qty = moneyOnPosition / (tab.PriceBestAsk / tab.Security.PriceStep * tab.Security.PriceStepCost);
+                        qty = moneyOnPosition / (tab.PriceBestAsk / security.PriceStep * security.PriceStepCost);
                     }
-                    qty = Math.Round(qty, tab.Security.DecimalsVolume);
+                    qty = Math.Round(qty, decimalsVolume);
                 }
                 else
                 {
@@ -487,6 +580,21 @@ namespace OsEngine.OsTrader.Grids
 
                 return qty;
             }
+        }
+
+        private int GetSafeDecimalsVolume(Security security)
+        {
+            if (security == null)
+            {
+                return 7;
+            }
+
+            if (security.DecimalsVolume < 0 || security.DecimalsVolume > 28)
+            {
+                return 7;
+            }
+
+            return security.DecimalsVolume;
         }
 
         #endregion

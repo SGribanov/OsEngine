@@ -131,9 +131,21 @@ namespace OsEngine.OsTrader.Grids
 
         public bool HaveEventToStart(TradeGrid grid)
         {
+            if (grid == null)
+            {
+                return false;
+            }
+
+            BotTabSimple tab = grid.Tab;
+
+            if (tab == null)
+            {
+                return false;
+            }
+
             if(AutoStartRegime != TradeGridAutoStartRegime.Off)
             {
-                List<Candle> candles = grid.Tab.CandlesAll;
+                List<Candle> candles = tab.CandlesAll;
 
                 if (candles == null
                     || candles.Count == 0)
@@ -141,7 +153,14 @@ namespace OsEngine.OsTrader.Grids
                     return false;
                 }
 
-                decimal price = candles[candles.Count - 1].Close;
+                Candle lastCandle = candles[candles.Count - 1];
+
+                if (lastCandle == null)
+                {
+                    return false;
+                }
+
+                decimal price = lastCandle.Close;
 
                 if (price == 0)
                 {
@@ -185,7 +204,7 @@ namespace OsEngine.OsTrader.Grids
 
             if (StartGridByTimeOfDayIsOn)
             {
-                DateTime time = grid.Tab.TimeServerCurrent;
+                DateTime time = tab.TimeServerCurrent;
 
                 if(time != DateTime.MinValue)
                 {
@@ -228,7 +247,18 @@ namespace OsEngine.OsTrader.Grids
 
         public decimal GetNewGridPriceStart(TradeGrid grid)
         {
+            if (grid == null)
+            {
+                return 0;
+            }
+
             BotTabSimple tab = grid.Tab;
+            TradeGridCreator gridCreator = grid.GridCreator;
+
+            if (tab == null || gridCreator == null)
+            {
+                return 0;
+            }
 
             List<Candle> candles = tab.CandlesAll;
 
@@ -238,7 +268,14 @@ namespace OsEngine.OsTrader.Grids
                 return 0;
             }
 
-            decimal lastPrice = candles[^1].Close;
+            Candle lastCandle = candles[^1];
+
+            if (lastCandle == null)
+            {
+                return 0;
+            }
+
+            decimal lastPrice = lastCandle.Close;
 
             if(lastPrice == 0)
             {
@@ -249,9 +286,15 @@ namespace OsEngine.OsTrader.Grids
 
             if(ShiftFirstPrice != 0)
             {
+                Security security = tab.Security;
+                if (security == null)
+                {
+                    return 0;
+                }
+
                 result = result + result * (ShiftFirstPrice / 100);
 
-                result = tab.RoundPrice(result,tab.Security,grid.GridCreator.GridSide);
+                result = tab.RoundPrice(result, security, gridCreator.GridSide);
             }
 
             return result;
@@ -259,7 +302,13 @@ namespace OsEngine.OsTrader.Grids
 
         public void ShiftGridOnNewPrice(decimal newPrice, TradeGrid grid)
         {
-            List<TradeGridLine> lines = grid.GridCreator.Lines;
+            if (grid == null)
+            {
+                return;
+            }
+
+            TradeGridCreator gridCreator = grid.GridCreator;
+            List<TradeGridLine> lines = gridCreator?.Lines;
 
             if (lines == null 
                 || lines.Count == 0)
@@ -269,10 +318,21 @@ namespace OsEngine.OsTrader.Grids
 
             decimal maxEntryPriceInGrid = decimal.MinValue;
             decimal minEntryPriceInGrid = decimal.MaxValue;
+            Side? gridSide = null;
 
             for (int i = 0; i < lines.Count; i++)
             {
                 TradeGridLine line = lines[i];
+
+                if (line == null)
+                {
+                    continue;
+                }
+
+                if (gridSide == null)
+                {
+                    gridSide = line.Side;
+                }
 
                 if(line.PriceEnter > maxEntryPriceInGrid)
                 {
@@ -286,18 +346,21 @@ namespace OsEngine.OsTrader.Grids
             }
 
             if(maxEntryPriceInGrid == 0 
-                || minEntryPriceInGrid == 0)
+                || minEntryPriceInGrid == 0
+                || maxEntryPriceInGrid == decimal.MinValue
+                || minEntryPriceInGrid == decimal.MaxValue
+                || gridSide == null)
             {
                 return;
             }
 
             decimal shift = 0;
 
-            if (lines[0].Side == Side.Buy)
+            if (gridSide == Side.Buy)
             {
                 shift = newPrice - maxEntryPriceInGrid;
             }
-            else if (lines[0].Side == Side.Sell)
+            else if (gridSide == Side.Sell)
             {
                 shift = newPrice - minEntryPriceInGrid;
             }
@@ -305,6 +368,12 @@ namespace OsEngine.OsTrader.Grids
             for (int i = 0; i < lines.Count; i++)
             {
                 TradeGridLine line = lines[i];
+
+                if (line == null)
+                {
+                    continue;
+                }
+
                 line.CanReplaceExitOrder = true;
                 line.PriceEnter += shift;
                 line.PriceExit += shift;

@@ -13752,3 +13752,451 @@
   - dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900 -> success, 0 warnings, 0 errors
   - dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo -> passed 529/529
 
+
+## 2026-03-01 - Step 4.2 (nullable annotations) - TradeGridStopAndProfit sparse-positions null-entry guard block (#682)
+
+- Applied localized nullable-safe lifecycle hardening in:
+  - project/OsEngine/OsTrader/Grids/TradeGridStopAndProfit.cs
+- Changes:
+  - `SetProfit(...)`, `SetStop(...)`, `SetTrailStop(...)` now skip null entries in `positions` lists.
+  - protects private stop/profit/trailing loops from null-reference on sparse/instrumented position collections.
+- Added/updated tests:
+  - project/OsEngine.Tests/TradeGridPersistenceCoreTests.cs
+    - `...TradeGridStopAndProfit_PrivateSetters_WithSparsePositionsList_ShouldNotThrow`
+- Scope:
+  - nullable lifecycle guard cleanup only
+  - no trade decision logic changes.
+
+### Verification
+
+- Host-context verification (outside sandbox, per dotnet-build-policy):
+  - dotnet restore project/OsEngine/OsEngine.csproj --nologo -> success
+  - dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo -> success
+  - dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900 -> success, 0 warnings, 0 errors
+  - dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo -> passed 530/530
+
+
+## 2026-03-01 - Step 4.2 (nullable annotations) - TradeGridAutoStarter runtime/sparse lifecycle guards block (#683)
+
+- Applied localized nullable-safe lifecycle hardening in:
+  - project/OsEngine/OsTrader/Grids/TradeGridAutoStarter.cs
+- Changes:
+  - `HaveEventToStart(...)` now guards null `grid`/`tab` and null tail candle.
+  - `GetNewGridPriceStart(...)` now guards null `grid`/`tab`/`GridCreator`, null tail candle, and missing `Security` before rounding.
+  - `ShiftGridOnNewPrice(...)` now guards null `grid`/`GridCreator`, sparse/null line entries, and removes `lines[0]` side assumption by using first non-null line.
+  - prevents null-reference in partial-init/post-delete runtime and sparse lines collections.
+- Added/updated tests:
+  - project/OsEngine.Tests/TradeGridPersistenceCoreTests.cs
+    - `...TradeGridAutoStarter_RuntimeContextMissing_ShouldStaySafe`
+    - `...TradeGridAutoStarter_ShiftGridOnNewPrice_WithSparseLines_ShouldNotThrow`
+- Scope:
+  - nullable lifecycle guard cleanup only
+  - no trade decision logic changes.
+
+### Verification
+
+- Host-context verification (outside sandbox, per dotnet-build-policy):
+  - dotnet restore project/OsEngine/OsEngine.csproj --nologo -> success
+  - dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo -> success
+  - dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900 -> success, 0 warnings, 0 errors
+  - dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo -> passed 532/532
+
+
+## 2026-03-01 - Step 4.2 (nullable annotations) - TradeGrid sparse-lines query guards block (#684)
+
+- Applied localized nullable-safe lifecycle hardening in:
+  - project/OsEngine/OsTrader/Grids/TradeGrid.cs
+- Changes:
+  - `GetLinesWithOpenPosition()`, `GetPositionByGrid()`, `GetLinesWithOpenOrdersNeed(...)`, `GetLinesWithOpenOrdersFact()`, `GetLinesWithClosingOrdersFact()` now skip null line entries in `GridCreator.Lines`.
+  - prevents null-reference in query/selection paths when line collections are sparse (contain null items).
+- Added/updated tests:
+  - project/OsEngine.Tests/TradeGridPersistenceCoreTests.cs
+    - `...TradeGrid_QueryMethods_WithSparseLines_ShouldNotThrow`
+- Scope:
+  - nullable lifecycle guard cleanup only
+  - no trade decision logic changes.
+
+### Verification
+
+- Host-context verification (outside sandbox, per dotnet-build-policy):
+  - dotnet restore project/OsEngine/OsEngine.csproj --nologo -> success
+  - dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo -> success
+  - dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900 -> success, 0 warnings, 0 errors
+  - dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo -> passed 533/533
+
+
+## 2026-03-01 - Step 4.2 (nullable annotations) - TrailingUp null-last-candle trailing guard block (#685)
+
+- Applied localized nullable-safe lifecycle hardening in:
+  - project/OsEngine/OsTrader/Grids/TrailingUp.cs
+- Changes:
+  - `TryTrailingGrid()` now guards null last candle entry before close-price access.
+  - prevents null-reference when candle stream tail contains sparse/null item.
+- Added/updated tests:
+  - project/OsEngine.Tests/TradeGridPersistenceCoreTests.cs
+    - `...TrailingUp_TryTrailingGrid_WithNullLastCandle_ShouldReturnFalse`
+- Scope:
+  - nullable lifecycle guard cleanup only
+  - no trade decision logic changes.
+
+### Verification
+
+- Host-context verification (outside sandbox, per dotnet-build-policy):
+  - dotnet restore project/OsEngine/OsEngine.csproj --nologo -> success
+  - dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo -> success
+  - dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900 -> success, 0 warnings, 0 errors
+  - dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo -> passed 534/534
+
+
+## 2026-03-01 - Step 4.2 (nullable annotations) - TradeGridCreator get-volume runtime context guards block (#686)
+
+- Applied localized nullable-safe lifecycle hardening in:
+  - project/OsEngine/OsTrader/Grids/TradeGridCreator.cs
+- Changes:
+  - `GetVolume(...)` now guards null `line`.
+  - `GetVolume(...)` now early-returns contract volume for `TypeVolume == Contracts` before tab-dependent access.
+  - `GetVolume(...)` now guards null `tab` and missing `Security` for context-dependent volume modes.
+  - deposit-percent path now guards zero best-ask before division.
+  - touched internals switched to local `security` snapshot in guarded branches.
+- Added/updated tests:
+  - project/OsEngine.Tests/TradeGridPersistenceCoreTests.cs
+    - `...TradeGridCreator_GetVolume_WithNullRuntimeContext_ShouldStaySafe`
+- Scope:
+  - nullable/runtime guard cleanup only
+  - no trade decision logic changes for valid runtime context.
+
+### Verification
+
+- Host-context verification (outside sandbox, per dotnet-build-policy):
+  - dotnet restore project/OsEngine/OsEngine.csproj --nologo -> success
+  - dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo -> success
+  - dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900 -> success, 0 warnings, 0 errors
+  - dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo -> passed 535/535
+
+
+## 2026-03-01 - Step 4.2 (nullable annotations) - TradeGridCreator sparse-lines save-string guard block (#687)
+
+- Applied localized nullable-safe lifecycle hardening in:
+  - project/OsEngine/OsTrader/Grids/TradeGridCreator.cs
+- Changes:
+  - `GetSaveLinesString()` now skips null entries in `Lines`.
+  - prevents null-reference during persistence serialization when grid lines collection is sparse.
+- Added/updated tests:
+  - project/OsEngine.Tests/TradeGridPersistenceCoreTests.cs
+    - `...TradeGridCreator_GetSaveLinesString_WithSparseLines_ShouldNotThrow`
+- Scope:
+  - nullable/runtime guard cleanup only
+  - no behavior changes for valid line collections.
+
+### Verification
+
+- Host-context verification (outside sandbox, per dotnet-build-policy):
+  - dotnet restore project/OsEngine/OsEngine.csproj --nologo -> success
+  - dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo -> success
+  - dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900 -> success, 0 warnings, 0 errors
+  - dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo -> passed 536/536
+
+
+## 2026-03-01 - Step 4.2 (nullable annotations) - TradeGridCreator remove-selected null/sparse guard block (#688)
+
+- Applied localized nullable-safe lifecycle hardening in:
+  - project/OsEngine/OsTrader/Grids/TradeGridCreator.cs
+- Changes:
+  - `RemoveSelected(...)` now guards null/empty `numbers` input.
+  - `RemoveSelected(...)` now guards null/empty `Lines` collection.
+  - logging check now handles sparse/null line entry before reading `Position`.
+  - prevents null-reference in manual line-removal path under partial-init and sparse-collection scenarios.
+- Added/updated tests:
+  - project/OsEngine.Tests/TradeGridPersistenceCoreTests.cs
+    - `...TradeGridCreator_RemoveSelected_WithNullOrSparseInputs_ShouldNotThrow`
+- Scope:
+  - nullable/runtime guard cleanup only
+  - no behavior changes for valid line-removal flow.
+
+### Verification
+
+- Host-context verification (outside sandbox, per dotnet-build-policy):
+  - dotnet restore project/OsEngine/OsEngine.csproj --nologo -> success
+  - dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo -> success
+  - dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900 -> success, 0 warnings, 0 errors
+  - dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo -> passed 537/537
+
+
+## 2026-03-01 - Step 4.2 (nullable annotations) - TradeGrid order-helper null-tail candle guard block (#689)
+
+- Applied localized nullable-safe lifecycle hardening in:
+  - project/OsEngine/OsTrader/Grids/TradeGrid.cs
+- Changes:
+  - `TryRemoveWrongOrders()`, `GetOpenOrdersGridHole()`, `TrySetOpenOrders()` now guard null last candle entry before close-price access.
+  - `GetOpenOrdersGridHole()` now guards null first/last line references before price comparison.
+  - `CheckWrongCloseOrders()` now skips null sparse line entries.
+  - `TrySetOpenOrders()` now skips null sparse line entries in opening loop.
+  - prevents null-reference in order-management helper paths under sparse candle/line collections.
+- Added/updated tests:
+  - project/OsEngine.Tests/TradeGridPersistenceCoreTests.cs
+    - `...TradeGrid_OrderHelpers_WithNullLastCandle_ShouldStaySafe`
+- Scope:
+  - nullable/runtime guard cleanup only
+  - no trading behavior changes for valid runtime collections.
+
+### Verification
+
+- Host-context verification (outside sandbox, per dotnet-build-policy):
+  - dotnet restore project/OsEngine/OsEngine.csproj --nologo -> success
+  - dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo -> success
+  - dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900 -> success, 0 warnings, 0 errors
+  - dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo -> passed 538/538
+
+
+## 2026-03-01 - Step 4.2 (nullable annotations) - TradeGrid sparse-lines journal/order-state guard block (#690)
+
+- Applied localized nullable-safe lifecycle hardening in:
+  - project/OsEngine/OsTrader/Grids/TradeGrid.cs
+- Changes:
+  - `TryDeletePositionsFromJournal(...)` now skips null sparse line entries before `PositionNum` access.
+  - `TryDeleteDonePositions()` now skips null sparse line entries.
+  - `TryFindPositionsInJournalAfterReconnect()` now skips null sparse line entries.
+  - `AllVolumeInLines` now skips null sparse line entries.
+  - `HaveOrdersWithNoMarketOrders()` and `HaveOrdersTryToCancelLastSecond()` now skip null sparse line entries before position access.
+  - prevents null-reference in journal maintenance and order-state checks for sparse line collections.
+- Added/updated tests:
+  - project/OsEngine.Tests/TradeGridPersistenceCoreTests.cs
+    - `...TradeGrid_SparseLines_JournalAndOrderStatePaths_ShouldStaySafe`
+- Scope:
+  - nullable/runtime guard cleanup only
+  - no behavior changes for valid line collections.
+
+### Verification
+
+- Host-context verification (outside sandbox, per dotnet-build-policy):
+  - dotnet restore project/OsEngine/OsEngine.csproj --nologo -> success
+  - dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo -> success
+  - dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900 -> success, 0 warnings, 0 errors
+  - dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo -> passed 539/539
+
+
+## 2026-03-01 - Step 4.2 (nullable annotations) - TradeGrid sparse-lines event/lifecycle guard batch (#691)
+
+- Applied localized nullable-safe lifecycle hardening in:
+  - project/OsEngine/OsTrader/Grids/TradeGrid.cs
+- Changes:
+  - `Connector_TestStartEvent()` now skips null sparse line entries before resetting `Position/PositionNum`.
+  - `Tab_PositionOpeningSuccesEvent(...)`, `Tab_PositionOpeningFailEvent(...)`, `Tab_PositionClosingFailEvent(...)` now skip null sparse line entries during position-number matching.
+  - `TryDeleteOpeningFailPositions()` now skips null sparse line entries before position-state checks.
+  - prevents null-reference in early event/lifecycle flows when grid lines collection contains null items.
+- Added/updated tests:
+  - project/OsEngine.Tests/TradeGridPersistenceCoreTests.cs
+    - `...TradeGrid_EventAndLifecycle_WithSparseLines_ShouldStaySafe`
+- Scope:
+  - nullable/runtime guard cleanup only
+  - no behavior changes for valid line collections.
+
+### Verification
+
+- Host-context verification (outside sandbox, per dotnet-build-policy):
+  - dotnet restore project/OsEngine/OsEngine.csproj --nologo -> success
+  - dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo -> success
+  - dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900 -> success, 0 warnings, 0 errors
+  - dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo -> passed 540/540
+
+
+## 2026-03-01 - Step 4.2 (nullable annotations) - TradeGrid order-close/cancel sparse-line guard batch (#692)
+
+- Applied localized nullable-safe lifecycle hardening in:
+  - project/OsEngine/OsTrader/Grids/TradeGrid.cs
+- Changes:
+  - `RemoveSelected(...)` now skips null sparse lines before open-order cancel path.
+  - `TryCancelWrongCloseProfitOrders()` now uses guarded local `pos` and avoids direct indexed position access.
+  - `TrySetClosingProfitOrders(...)` now skips null sparse lines and missing positions before close-profit checks.
+  - `TryCancelOpeningOrders()` and `TryCancelClosingOrders()` now use guarded local `pos` and avoid direct indexed position access.
+  - `TrySetClosingOrders(...)` now skips null sparse lines and missing positions before close-order placement checks.
+  - prevents null-reference in close/cancel helper paths under sparse line collections.
+- Added/updated tests:
+  - project/OsEngine.Tests/TradeGridPersistenceCoreTests.cs
+    - `...TradeGrid_RemoveSelected_WithSparseLines_ShouldNotThrow`
+- Scope:
+  - nullable/runtime guard cleanup only
+  - no behavior changes for valid order-management flow.
+
+### Verification
+
+- Host-context verification (outside sandbox, per dotnet-build-policy):
+  - dotnet restore project/OsEngine/OsEngine.csproj --nologo -> success
+  - dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo -> success
+  - dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900 -> success, 0 warnings, 0 errors
+  - dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo -> passed 541/541
+
+
+## 2026-03-01 - Step 4.2 (nullable annotations) - TradeGrid sparse-lines forced-close/property guard batch (#693)
+
+- Applied localized nullable-safe lifecycle hardening in:
+  - project/OsEngine/OsTrader/Grids/TradeGrid.cs
+- Changes:
+  - `TryForcedCloseGrid()` now skips null sparse line entries before position checks.
+  - `OpenVolumeByLines` now skips null sparse line entries before volume aggregation.
+  - `HaveCloseOrders` now skips null sparse line entries before close-order checks.
+  - prevents null-reference in forced-close/property flows under sparse line collections.
+- Added/updated tests:
+  - project/OsEngine.Tests/TradeGridPersistenceCoreTests.cs
+    - `...TradeGrid_ForcedCloseAndVolume_WithSparseLines_ShouldStaySafe`
+- Scope:
+  - nullable/runtime guard cleanup only
+  - no behavior changes for valid close/volume flows.
+
+### Verification
+
+- Host-context verification (outside sandbox, per dotnet-build-policy):
+  - dotnet restore project/OsEngine/OsEngine.csproj --nologo -> success
+  - dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo -> success
+  - dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900 -> success, 0 warnings, 0 errors
+  - dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo -> passed 542/542
+
+
+## 2026-03-01 - Step 4.2 (nullable annotations) - TradeGridCreator load-lines null-collection guard (#696)
+
+- Applied localized nullable-safe hardening in:
+  - project/OsEngine/OsTrader/Grids/TradeGridCreator.cs
+- Changes:
+  - `LoadLines(...)` now reinitializes `Lines` when the collection is null (`Lines ??= new List<TradeGridLine>()`).
+  - prevents null-reference when `Lines` was externally cleared before deserialization.
+- Added/updated tests:
+  - project/OsEngine.Tests/TradeGridPersistenceCoreTests.cs
+    - added `...TradeGridCreator_LoadLines_WithNullLinesCollection_ShouldNotThrow`.
+- Scope:
+  - nullable/runtime guard cleanup only
+  - no behavior changes for valid initialized `Lines` collection.
+
+### Verification
+
+- Host-context verification (outside sandbox, per dotnet-build-policy):
+  - dotnet restore project/OsEngine/OsEngine.csproj --nologo -> success
+  - dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo -> success
+  - dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900 -> success, 0 warnings, 0 errors
+  - dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo -> passed 543/543
+
+
+## 2026-03-01 - Step 4.2 (nullable annotations) - TradeGridCreator mutators null-lines/tab guard batch (#697)
+
+- Applied localized nullable-safe hardening in:
+  - project/OsEngine/OsTrader/Grids/TradeGridCreator.cs
+- Changes:
+  - `CreateNewGrid(...)` now returns early on null `tab`.
+  - `DeleteGrid()` now safely returns when `Lines` is null.
+  - `CreateNewLine()` now reinitializes `Lines` when collection is null.
+  - `CreateMarketMakingGrid(...)` now guards null `tab` and null `Lines` before `Clear()`.
+  - `GetSaveLinesString()` now early-returns empty string for null/empty `Lines`.
+  - prevents null-reference crashes in grid mutator/service calls after external lifecycle resets.
+- Added/updated tests:
+  - project/OsEngine.Tests/TradeGridPersistenceCoreTests.cs
+    - added `...TradeGridCreator_Mutators_WithNullLinesOrTab_ShouldNotThrow`.
+- Scope:
+  - nullable/runtime guard cleanup only
+  - no behavior changes for valid initialized runtime context.
+
+### Verification
+
+- Host-context verification (outside sandbox, per dotnet-build-policy):
+  - dotnet restore project/OsEngine/OsEngine.csproj --nologo -> success
+  - dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo -> success
+  - dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900 -> success, 0 warnings, 0 errors
+  - dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo -> passed 544/544
+
+
+## 2026-03-01 - Step 4.2 (nullable annotations) - TradeGridCreator GetVolume decimals-safety guard batch (#699)
+
+- Applied localized nullable-safe hardening in:
+  - project/OsEngine/OsTrader/Grids/TradeGridCreator.cs
+- Changes:
+  - Added safe decimals normalization in `GetVolume(...)` for OsTrader rounding paths.
+  - `ContractCurrency` and `DepositPercent` branches now use sanitized decimals when `Security.DecimalsVolume` is out of `[0..28]`.
+  - prevents `ArgumentOutOfRangeException` in `Math.Round` when malformed security metadata contains invalid decimals precision.
+- Added/updated tests:
+  - project/OsEngine.Tests/TradeGridPersistenceCoreTests.cs
+    - extended `...TradeGridCreator_GetVolume_WithNullRuntimeContext_ShouldStaySafe` with:
+      - contract-currency scenario with negative `DecimalsVolume`;
+      - deposit-percent scenario with negative `DecimalsVolume`.
+- Scope:
+  - nullable/runtime guard cleanup only
+  - no behavior changes for valid decimals precision.
+
+### Verification
+
+- Host-context verification (outside sandbox, per dotnet-build-policy):
+  - dotnet restore project/OsEngine/OsEngine.csproj --nologo -> success
+  - dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo -> success
+  - dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900 -> success, 0 warnings, 0 errors
+  - dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo -> passed 544/544
+
+
+## 2026-03-01 - Step 4.2 (nullable annotations) - RemoveSelected negative-index guards in TradeGrid/TradeGridCreator (#698)
+
+- Applied localized nullable-safe hardening in:
+  - project/OsEngine/OsTrader/Grids/TradeGridCreator.cs
+  - project/OsEngine/OsTrader/Grids/TradeGrid.cs
+- Changes:
+  - `TradeGridCreator.RemoveSelected(...)` now skips negative indexes (`curNumber < 0`) before array access/removal.
+  - `TradeGrid.RemoveSelected(...)` now skips negative indexes (`curNumber < 0`) before line lookup.
+  - prevents index-out-of-range exceptions for malformed external index input.
+- Added/updated tests:
+  - project/OsEngine.Tests/TradeGridPersistenceCoreTests.cs
+    - extended `...TradeGridCreator_RemoveSelected_WithNullOrSparseInputs_ShouldNotThrow` with negative-index case.
+    - extended `...TradeGrid_RemoveSelected_WithSparseLines_ShouldNotThrow` with negative-index case.
+- Scope:
+  - nullable/runtime guard cleanup only
+  - no behavior changes for valid non-negative index input.
+
+### Verification
+
+- Host-context verification (outside sandbox, per dotnet-build-policy):
+  - dotnet restore project/OsEngine/OsEngine.csproj --nologo -> success
+  - dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo -> success
+  - dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900 -> success, 0 warnings, 0 errors
+  - dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo -> passed 544/544
+
+
+## 2026-03-01 - Step 4.2 (nullable annotations) - TradeGridCreator contract-currency zero-price guard (#695)
+
+- Applied localized nullable-safe hardening in:
+  - project/OsEngine/OsTrader/Grids/TradeGridCreator.cs
+- Changes:
+  - `GetVolume(...)` in `ContractCurrency` mode now returns `0` when `line.PriceEnter == 0`.
+  - prevents divide-by-zero during contract-currency volume calculation under malformed/empty entry-price values.
+- Added/updated tests:
+  - project/OsEngine.Tests/TradeGridPersistenceCoreTests.cs
+    - extended `...TradeGridCreator_GetVolume_WithNullRuntimeContext_ShouldStaySafe` with zero-entry-price scenario for `ContractCurrency`.
+- Scope:
+  - nullable/runtime guard cleanup only
+  - no behavior changes for valid non-zero entry prices.
+
+### Verification
+
+- Host-context verification (outside sandbox, per dotnet-build-policy):
+  - dotnet restore project/OsEngine/OsEngine.csproj --nologo -> success
+  - dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo -> success
+  - dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900 -> success, 0 warnings, 0 errors
+  - dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo -> passed 542/542
+
+
+## 2026-03-01 - Step 4.2 (nullable annotations) - TradeGridCreator deposit-percent sparse portfolio/lot-zero guards (#694)
+
+- Applied localized nullable-safe hardening in:
+  - project/OsEngine/OsTrader/Grids/TradeGridCreator.cs
+- Changes:
+  - `GetVolume(...)` now skips null entries from `Portfolio.GetPositionOnBoard()` before security code/value access.
+  - `GetVolume(...)` deposit-percent branch now safely handles `security.Lot == 0` (fallback division by best ask only).
+  - prevents null-reference/divide-by-zero in deposit-percent volume calculations under sparse portfolio data and zero-lot securities.
+- Added/updated tests:
+  - project/OsEngine.Tests/TradeGridPersistenceCoreTests.cs
+    - `...TradeGridCreator_GetVolume_WithNullRuntimeContext_ShouldStaySafe` (extended with sparse portfolio + zero-lot scenario)
+- Scope:
+  - nullable/runtime guard cleanup only
+  - no behavior changes for valid non-sparse runtime inputs.
+
+### Verification
+
+- Host-context verification (outside sandbox, per dotnet-build-policy):
+  - dotnet restore project/OsEngine/OsEngine.csproj --nologo -> success
+  - dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo -> success
+  - dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900 -> success, 0 warnings, 0 errors
+  - dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo -> passed 542/542
+
