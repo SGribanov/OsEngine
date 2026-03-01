@@ -15321,3 +15321,135 @@
   - dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo -> success
   - dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900 -> success, 0 warnings, 0 errors
   - dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo -> passed 593/593
+
+## 2026-03-01 - Step 4.2 (nullable annotations) - TradeGrid partial optional-tail missing-delay parsed-micro regression coverage (#748)
+
+- Applied localized parser-contract coverage in:
+  - project/OsEngine.Tests/TradeGridPersistenceCoreTests.cs
+- Changes:
+  - added regression coverage for partial optional-tail parsing where `DelayInReal` is missing but `CheckMicroVolumes` is present and valid.
+  - default delay must be applied while the parsed micro-flag is preserved.
+- Added/updated tests:
+  - project/OsEngine.Tests/TradeGridPersistenceCoreTests.cs
+    - added `Stage2Step2_2_TradeGrid_LoadFromString_WithMissingDelayAndValidMicroTail_ShouldApplyDefaultDelayAndParseMicroFlag`.
+- Scope:
+  - parser/runtime hardening coverage only
+  - no production logic changes in this increment
+
+### Verification
+
+- Host-context verification (outside sandbox, per dotnet-build-policy):
+  - dotnet restore project/OsEngine/OsEngine.csproj --nologo -> success
+  - dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo -> success
+  - dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900 -> success, 0 warnings, 0 errors
+  - dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo -> passed 594/594
+
+## 2026-03-01 - Step 4.2 (nullable annotations) - TradeGrid partial optional-tail malformed-delay invalid-micro regression coverage (#749)
+
+- Applied localized parser-contract coverage in:
+  - project/OsEngine.Tests/TradeGridPersistenceCoreTests.cs
+- Changes:
+  - added regression coverage for partial optional-tail parsing where `DelayInReal` is malformed and `CheckMicroVolumes` is present but malformed.
+  - default delay must be applied while the current micro-flag is preserved.
+- Added/updated tests:
+  - project/OsEngine.Tests/TradeGridPersistenceCoreTests.cs
+    - added `Stage2Step2_2_TradeGrid_LoadFromString_WithMalformedDelayAndInvalidMicroTail_ShouldApplyDefaultDelayAndKeepMicroFlag`.
+- Scope:
+  - parser/runtime hardening coverage only
+  - no production logic changes in this increment
+
+### Verification
+
+- Host-context verification (outside sandbox, per dotnet-build-policy):
+  - dotnet restore project/OsEngine/OsEngine.csproj --nologo -> success
+  - dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo -> success
+  - dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900 -> success, 0 warnings, 0 errors
+  - dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo -> passed 595/595
+
+## 2026-03-01 - Step 4.2 (nullable annotations) - TradeGrid partial optional-tail missing-distance invalid-maker regression coverage (#750)
+
+- Applied localized parser-contract coverage in:
+  - project/OsEngine.Tests/TradeGridPersistenceCoreTests.cs
+- Changes:
+  - added regression coverage for partial optional-tail parsing where `MaxDistanceToOrdersPercent` is missing and `OpenOrdersMakerOnly` is present but malformed.
+  - default distance must be applied while the current maker-only flag is preserved.
+- Added/updated tests:
+  - project/OsEngine.Tests/TradeGridPersistenceCoreTests.cs
+    - added `Stage2Step2_2_TradeGrid_LoadFromString_WithMissingDistanceAndInvalidMakerTail_ShouldApplyDefaultDistanceAndKeepMakerFlag`.
+- Scope:
+  - parser/runtime hardening coverage only
+  - no production logic changes in this increment
+
+### Verification
+
+- Host-context verification (outside sandbox, per dotnet-build-policy):
+  - dotnet restore project/OsEngine/OsEngine.csproj --nologo -> success
+  - dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo -> success
+  - dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900 -> success, 0 warnings, 0 errors
+  - dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo -> passed 596/596
+
+## 2026-03-01 - Step 4.2 (nullable annotations) - TradeGrid partial optional-tail malformed-distance invalid-maker regression coverage (#751)
+
+- Applied localized parser-contract coverage in:
+  - project/OsEngine.Tests/TradeGridPersistenceCoreTests.cs
+- Changes:
+  - added regression coverage for partial optional-tail parsing where `MaxDistanceToOrdersPercent` and `OpenOrdersMakerOnly` are both present but malformed.
+  - current distance and current maker-only flag must both be preserved.
+- Added/updated tests:
+  - project/OsEngine.Tests/TradeGridPersistenceCoreTests.cs
+    - added `Stage2Step2_2_TradeGrid_LoadFromString_WithMalformedDistanceAndInvalidMakerTail_ShouldKeepDistanceAndKeepMakerFlag`.
+- Scope:
+  - parser/runtime hardening coverage only
+  - no production logic changes in this increment
+
+### Verification
+
+- Host-context verification (outside sandbox, per dotnet-build-policy):
+  - dotnet restore project/OsEngine/OsEngine.csproj --nologo -> success
+  - dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo -> success
+  - dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900 -> success, 0 warnings, 0 errors
+  - dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo -> passed 597/597
+
+## 2026-03-01 - Step 4.2 (nullable annotations) - TradeGrid partial optional-tail missing-delay invalid-micro regression coverage (#752)
+
+- Applied localized parser-contract coverage in:
+  - project/OsEngine.Tests/TradeGridPersistenceCoreTests.cs
+- Changes:
+  - added regression coverage for partial optional-tail parsing where `DelayInReal` is missing and `CheckMicroVolumes` is present but malformed.
+  - default delay must be applied while the current micro-flag is preserved.
+- Added/updated tests:
+  - project/OsEngine.Tests/TradeGridPersistenceCoreTests.cs
+    - added `Stage2Step2_2_TradeGrid_LoadFromString_WithMissingDelayAndInvalidMicroTail_ShouldApplyDefaultDelayAndKeepMicroFlag`.
+- Scope:
+  - parser/runtime hardening coverage only
+  - no production logic changes in this increment
+
+### Verification
+
+- Host-context verification (outside sandbox, per dotnet-build-policy):
+  - dotnet restore project/OsEngine/OsEngine.csproj --nologo -> success
+  - dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo -> success
+  - dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900 -> success, 0 warnings, 0 errors
+  - dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo -> passed 598/598
+
+## 2026-03-01 - Step 4.2 (nullable annotations) - TradeGrid malformed prime-bool regression coverage (#753)
+
+- Applied localized parser-contract coverage in:
+  - project/OsEngine.Tests/TradeGridPersistenceCoreTests.cs
+- Changes:
+  - added regression coverage for malformed `AutoClearJournalIsOn` token in the prime settings block.
+  - current `AutoClearJournalIsOn` value must be preserved when the bool token is malformed.
+- Added/updated tests:
+  - project/OsEngine.Tests/TradeGridPersistenceCoreTests.cs
+    - added `Stage2Step2_2_TradeGrid_LoadFromString_WithInvalidAutoClearBool_ShouldKeepExistingValue`.
+- Scope:
+  - parser/runtime hardening coverage only
+  - no production logic changes in this increment
+
+### Verification
+
+- Host-context verification (outside sandbox, per dotnet-build-policy):
+  - dotnet restore project/OsEngine/OsEngine.csproj --nologo -> success
+  - dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo -> success
+  - dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900 -> success, 0 warnings, 0 errors
+  - dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo -> passed 599/599
