@@ -533,6 +533,36 @@ public class TradeGridPersistenceCoreTests
     }
 
     [Fact]
+    public void Stage2Step2_2_TradeGridCreator_LoadFromString_WithZeroStepMultiplicator_ShouldKeepExistingValue()
+    {
+        TradeGridCreator creator = new TradeGridCreator
+        {
+            StepMultiplicator = 1.75m
+        };
+
+        Exception? error = Record.Exception(() => creator.LoadFromString(
+            "Buy@100@3@Absolute@1@0@Absolute@2@1@Contracts@5@1@USDT@"));
+
+        Assert.Null(error);
+        Assert.Equal(1.75m, creator.StepMultiplicator);
+    }
+
+    [Fact]
+    public void Stage2Step2_2_TradeGridCreator_LoadFromString_WithZeroProfitMultiplicator_ShouldKeepExistingValue()
+    {
+        TradeGridCreator creator = new TradeGridCreator
+        {
+            ProfitMultiplicator = 2.25m
+        };
+
+        Exception? error = Record.Exception(() => creator.LoadFromString(
+            "Buy@100@3@Absolute@1@1@Absolute@2@0@Contracts@5@1@USDT@"));
+
+        Assert.Null(error);
+        Assert.Equal(2.25m, creator.ProfitMultiplicator);
+    }
+
+    [Fact]
     public void Stage2Step2_2_TradeGridCreator_LoadLines_WithNullLinesCollection_ShouldNotThrow()
     {
         TradeGridCreator creator = (TradeGridCreator)RuntimeHelpers.GetUninitializedObject(typeof(TradeGridCreator));
@@ -778,6 +808,36 @@ public class TradeGridPersistenceCoreTests
         Assert.Equal(0m, depositPercentVolume);
         Assert.Equal(0.7m, depositPercentWithLotZero);
         Assert.Equal(1m, depositPercentNegativeDecimalsVolume);
+    }
+
+    [Fact]
+    public void Stage2Step2_2_TradeGridCreator_CreateNewGrid_WithZeroComputedPercentStep_ShouldNotCreateDegenerateLines()
+    {
+        TradeGridCreator creator = new TradeGridCreator
+        {
+            GridSide = Side.Buy,
+            FirstPrice = 0m,
+            LineCountStart = 3,
+            TypeStep = TradeGridValueType.Percent,
+            LineStep = 1m,
+            StepMultiplicator = 1m,
+            TypeProfit = TradeGridValueType.Absolute,
+            ProfitStep = 1m,
+            ProfitMultiplicator = 1m,
+            TypeVolume = TradeGridVolumeType.Contracts,
+            StartVolume = 1m,
+            MartingaleMultiplicator = 1m
+        };
+
+        BotTabSimple tab = (BotTabSimple)RuntimeHelpers.GetUninitializedObject(typeof(BotTabSimple));
+        ConnectorCandles connector = new ConnectorCandles("CodexGridCreatorZeroComputedPercentStep", StartProgram.IsTester, false);
+        SetPrivateField(tab, "_connector", connector);
+
+        Exception? error = Record.Exception(() => creator.CreateNewGrid(tab, TradeGridPrimeType.MarketMaking));
+
+        Assert.Null(error);
+        Assert.NotNull(creator.Lines);
+        Assert.Empty(creator.Lines);
     }
 
     [Fact]

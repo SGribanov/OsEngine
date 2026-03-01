@@ -352,6 +352,11 @@ namespace OsEngine.OsTrader.Grids
                 }
             }
 
+            if (curStep <= 0)
+            {
+                return;
+            }
+
             for (int i = 0; i < LineCountStart; i++)
             {
                 /*if (FirstPrice > 0 

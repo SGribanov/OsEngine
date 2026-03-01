@@ -15013,3 +15013,69 @@
   - dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo -> success
   - dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900 -> success, 0 warnings, 0 errors
   - dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo -> passed 579/579
+
+## 2026-03-01 - Step 4.2 (nullable annotations) - TradeGridCreator StepMultiplicator positive-bound regression coverage (#734)
+
+- Applied localized parser-contract coverage in:
+  - project/OsEngine.Tests/TradeGridPersistenceCoreTests.cs
+- Changes:
+  - added regression test for existing `LoadFromString(...)` positive-bound guard on `StepMultiplicator`.
+  - zero payload value must keep the current runtime `StepMultiplicator`.
+- Added/updated tests:
+  - project/OsEngine.Tests/TradeGridPersistenceCoreTests.cs
+    - added `Stage2Step2_2_TradeGridCreator_LoadFromString_WithZeroStepMultiplicator_ShouldKeepExistingValue`.
+- Scope:
+  - parser/runtime hardening coverage only
+  - no behavior changes for valid positive payload values
+
+### Verification
+
+- Host-context verification (outside sandbox, per dotnet-build-policy):
+  - dotnet restore project/OsEngine/OsEngine.csproj --nologo -> success
+  - dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo -> success
+  - dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900 -> success, 0 warnings, 0 errors
+  - dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo -> passed 580/580
+
+## 2026-03-01 - Step 4.2 (nullable annotations) - TradeGridCreator ProfitMultiplicator positive-bound regression coverage (#735)
+
+- Applied localized parser-contract coverage in:
+  - project/OsEngine.Tests/TradeGridPersistenceCoreTests.cs
+- Changes:
+  - added regression test for existing `LoadFromString(...)` positive-bound guard on `ProfitMultiplicator`.
+  - zero payload value must keep the current runtime `ProfitMultiplicator`.
+- Added/updated tests:
+  - project/OsEngine.Tests/TradeGridPersistenceCoreTests.cs
+    - added `Stage2Step2_2_TradeGridCreator_LoadFromString_WithZeroProfitMultiplicator_ShouldKeepExistingValue`.
+- Scope:
+  - parser/runtime hardening coverage only
+  - no behavior changes for valid positive payload values
+
+### Verification
+
+- Host-context verification (outside sandbox, per dotnet-build-policy):
+  - dotnet restore project/OsEngine/OsEngine.csproj --nologo -> success
+  - dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo -> success
+  - dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900 -> success, 0 warnings, 0 errors
+  - dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo -> passed 581/581
+
+## 2026-03-01 - Step 4.2 (nullable annotations) - TradeGridCreator computed percent-step guard in grid creation (#736)
+
+- Applied localized runtime hardening in:
+  - project/OsEngine/OsTrader/Grids/TradeGridCreator.cs
+- Changes:
+  - `CreateMarketMakingGrid(...)` now exits early when the computed effective grid step is `<= 0`.
+  - prevents creating degenerate repeated-price lines when `TypeStep = Percent` and runtime `FirstPrice` is zero/invalid.
+- Added/updated tests:
+  - project/OsEngine.Tests/TradeGridPersistenceCoreTests.cs
+    - added `Stage2Step2_2_TradeGridCreator_CreateNewGrid_WithZeroComputedPercentStep_ShouldNotCreateDegenerateLines`.
+- Scope:
+  - runtime hardening only
+  - valid positive-step grid creation behavior unchanged
+
+### Verification
+
+- Host-context verification (outside sandbox, per dotnet-build-policy):
+  - dotnet restore project/OsEngine/OsEngine.csproj --nologo -> success
+  - dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo -> success
+  - dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900 -> success, 0 warnings, 0 errors
+  - dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo -> passed 582/582
