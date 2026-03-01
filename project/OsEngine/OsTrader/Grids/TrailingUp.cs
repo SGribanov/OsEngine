@@ -92,7 +92,7 @@ namespace OsEngine.OsTrader.Grids
                 {
                     if (TryParseDecimalFlexible(values[1], out decimal parsed))
                     {
-                        if (parsed >= 0)
+                        if (parsed > 0)
                         {
                             TrailingUpStep = parsed;
                         }
@@ -102,7 +102,7 @@ namespace OsEngine.OsTrader.Grids
                 {
                     if (TryParseDecimalFlexible(values[2], out decimal parsed))
                     {
-                        if (parsed >= 0)
+                        if (parsed > 0)
                         {
                             TrailingUpLimit = parsed;
                         }
@@ -120,7 +120,7 @@ namespace OsEngine.OsTrader.Grids
                 {
                     if (TryParseDecimalFlexible(values[4], out decimal parsed))
                     {
-                        if (parsed >= 0)
+                        if (parsed > 0)
                         {
                             TrailingDownStep = parsed;
                         }
@@ -130,7 +130,7 @@ namespace OsEngine.OsTrader.Grids
                 {
                     if (TryParseDecimalFlexible(values[5], out decimal parsed))
                     {
-                        if (parsed >= 0)
+                        if (parsed > 0)
                         {
                             TrailingDownLimit = parsed;
                         }

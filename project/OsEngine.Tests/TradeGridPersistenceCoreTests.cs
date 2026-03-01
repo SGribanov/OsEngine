@@ -386,6 +386,110 @@ public class TradeGridPersistenceCoreTests
     }
 
     [Fact]
+    public void Stage2Step2_2_TrailingUp_TryTrailingGrid_WithZeroUpStepRuntimeValue_ShouldNotShiftGrid()
+    {
+        TradeGrid grid = CreateBareGrid();
+        grid.GridCreator.Lines = new List<TradeGridLine>
+        {
+            new TradeGridLine { PriceEnter = 100m, PriceExit = 110m }
+        };
+        AttachSingleCloseCandle(grid, 102m);
+
+        TrailingUp trailing = new TrailingUp(grid)
+        {
+            TrailingUpIsOn = true,
+            TrailingUpStep = 0m,
+            TrailingUpLimit = 200m
+        };
+
+        bool moved = true;
+        Exception? error = Record.Exception(() => moved = trailing.TryTrailingGrid());
+
+        Assert.Null(error);
+        Assert.False(moved);
+        Assert.Equal(100m, grid.GridCreator.Lines[0].PriceEnter);
+        Assert.Equal(110m, grid.GridCreator.Lines[0].PriceExit);
+    }
+
+    [Fact]
+    public void Stage2Step2_2_TrailingUp_TryTrailingGrid_WithZeroUpLimitRuntimeValue_ShouldNotShiftGrid()
+    {
+        TradeGrid grid = CreateBareGrid();
+        grid.GridCreator.Lines = new List<TradeGridLine>
+        {
+            new TradeGridLine { PriceEnter = 100m, PriceExit = 110m }
+        };
+        AttachSingleCloseCandle(grid, 102m);
+
+        TrailingUp trailing = new TrailingUp(grid)
+        {
+            TrailingUpIsOn = true,
+            TrailingUpStep = 1m,
+            TrailingUpLimit = 0m
+        };
+
+        bool moved = true;
+        Exception? error = Record.Exception(() => moved = trailing.TryTrailingGrid());
+
+        Assert.Null(error);
+        Assert.False(moved);
+        Assert.Equal(100m, grid.GridCreator.Lines[0].PriceEnter);
+        Assert.Equal(110m, grid.GridCreator.Lines[0].PriceExit);
+    }
+
+    [Fact]
+    public void Stage2Step2_2_TrailingUp_TryTrailingGrid_WithZeroDownStepRuntimeValue_ShouldNotShiftGrid()
+    {
+        TradeGrid grid = CreateBareGrid();
+        grid.GridCreator.Lines = new List<TradeGridLine>
+        {
+            new TradeGridLine { PriceEnter = 100m, PriceExit = 110m }
+        };
+        AttachSingleCloseCandle(grid, 98m);
+
+        TrailingUp trailing = new TrailingUp(grid)
+        {
+            TrailingDownIsOn = true,
+            TrailingDownStep = 0m,
+            TrailingDownLimit = 1m
+        };
+
+        bool moved = true;
+        Exception? error = Record.Exception(() => moved = trailing.TryTrailingGrid());
+
+        Assert.Null(error);
+        Assert.False(moved);
+        Assert.Equal(100m, grid.GridCreator.Lines[0].PriceEnter);
+        Assert.Equal(110m, grid.GridCreator.Lines[0].PriceExit);
+    }
+
+    [Fact]
+    public void Stage2Step2_2_TrailingUp_TryTrailingGrid_WithZeroDownLimitRuntimeValue_ShouldNotShiftGrid()
+    {
+        TradeGrid grid = CreateBareGrid();
+        grid.GridCreator.Lines = new List<TradeGridLine>
+        {
+            new TradeGridLine { PriceEnter = 100m, PriceExit = 110m }
+        };
+        AttachSingleCloseCandle(grid, 98m);
+
+        TrailingUp trailing = new TrailingUp(grid)
+        {
+            TrailingDownIsOn = true,
+            TrailingDownStep = 1m,
+            TrailingDownLimit = 0m
+        };
+
+        bool moved = true;
+        Exception? error = Record.Exception(() => moved = trailing.TryTrailingGrid());
+
+        Assert.Null(error);
+        Assert.False(moved);
+        Assert.Equal(100m, grid.GridCreator.Lines[0].PriceEnter);
+        Assert.Equal(110m, grid.GridCreator.Lines[0].PriceExit);
+    }
+
+    [Fact]
     public void Stage2Step2_2_TradeGridErrorsReaction_AwaitOnStartConnector_WithNullServer_ShouldReturnFalse()
     {
         TradeGridErrorsReaction reaction = new TradeGridErrorsReaction(CreateBareGrid());
@@ -1387,6 +1491,83 @@ public class TradeGridPersistenceCoreTests
     }
 
     [Fact]
+    public void Stage2Step2_2_TrailingUp_LoadFromString_WithZeroTrailingUpStep_ShouldKeepExistingValue()
+    {
+        TradeGrid grid = CreateBareGrid();
+        TrailingUp trailing = new TrailingUp(grid)
+        {
+            TrailingUpStep = 0.5m
+        };
+
+        Exception? error = Record.Exception(() => trailing.LoadFromString("True@0@10@False@0.5@5"));
+
+        Assert.Null(error);
+        Assert.Equal(0.5m, trailing.TrailingUpStep);
+        Assert.Equal(10m, trailing.TrailingUpLimit);
+        Assert.False(trailing.TrailingDownIsOn);
+    }
+
+    [Fact]
+    public void Stage2Step2_2_TrailingUp_LoadFromString_WithZeroTrailingUpLimit_ShouldKeepExistingValue()
+    {
+        TradeGrid grid = CreateBareGrid();
+        TrailingUp trailing = new TrailingUp(grid)
+        {
+            TrailingUpLimit = 11m
+        };
+
+        Exception? error = Record.Exception(() => trailing.LoadFromString("True@1.25@0@False@0.5@5"));
+
+        Assert.Null(error);
+        Assert.True(trailing.TrailingUpIsOn);
+        Assert.Equal(1.25m, trailing.TrailingUpStep);
+        Assert.Equal(11m, trailing.TrailingUpLimit);
+        Assert.False(trailing.TrailingDownIsOn);
+        Assert.Equal(0.5m, trailing.TrailingDownStep);
+        Assert.Equal(5m, trailing.TrailingDownLimit);
+    }
+
+    [Fact]
+    public void Stage2Step2_2_TrailingUp_LoadFromString_WithZeroTrailingDownStep_ShouldKeepExistingValue()
+    {
+        TradeGrid grid = CreateBareGrid();
+        TrailingUp trailing = new TrailingUp(grid)
+        {
+            TrailingDownStep = 2m
+        };
+
+        Exception? error = Record.Exception(() => trailing.LoadFromString("True@1.25@10@False@0@5"));
+
+        Assert.Null(error);
+        Assert.True(trailing.TrailingUpIsOn);
+        Assert.Equal(1.25m, trailing.TrailingUpStep);
+        Assert.Equal(10m, trailing.TrailingUpLimit);
+        Assert.False(trailing.TrailingDownIsOn);
+        Assert.Equal(2m, trailing.TrailingDownStep);
+        Assert.Equal(5m, trailing.TrailingDownLimit);
+    }
+
+    [Fact]
+    public void Stage2Step2_2_TrailingUp_LoadFromString_WithZeroTrailingDownLimit_ShouldKeepExistingValue()
+    {
+        TradeGrid grid = CreateBareGrid();
+        TrailingUp trailing = new TrailingUp(grid)
+        {
+            TrailingDownLimit = 7m
+        };
+
+        Exception? error = Record.Exception(() => trailing.LoadFromString("True@1.25@10@False@0.5@0"));
+
+        Assert.Null(error);
+        Assert.True(trailing.TrailingUpIsOn);
+        Assert.Equal(1.25m, trailing.TrailingUpStep);
+        Assert.Equal(10m, trailing.TrailingUpLimit);
+        Assert.False(trailing.TrailingDownIsOn);
+        Assert.Equal(0.5m, trailing.TrailingDownStep);
+        Assert.Equal(7m, trailing.TrailingDownLimit);
+    }
+
+    [Fact]
     public void Stage2Step2_2_TrailingUp_LoadFromString_WithInvalidUpMoveFlag_ShouldKeepValueAndParseDownMoveFlag()
     {
         TradeGrid grid = CreateBareGrid();
@@ -1463,6 +1644,80 @@ public class TradeGridPersistenceCoreTests
         Assert.False(trailing.TrailingDownCanMoveExitOrder);
         Assert.True(trailing.TrailingUpIsOn);
         Assert.False(trailing.TrailingDownIsOn);
+    }
+
+    [Fact]
+    public void Stage2Step2_2_TrailingUp_LoadFromString_WithFlexiblePrimaryBools_ShouldParse()
+    {
+        TradeGrid grid = CreateBareGrid();
+        TrailingUp trailing = new TrailingUp(grid)
+        {
+            TrailingUpIsOn = false,
+            TrailingDownIsOn = true
+        };
+
+        Exception? error = Record.Exception(() => trailing.LoadFromString("yes@1.25@10@off@0.5@5"));
+
+        Assert.Null(error);
+        Assert.True(trailing.TrailingUpIsOn);
+        Assert.False(trailing.TrailingDownIsOn);
+        Assert.Equal(1.25m, trailing.TrailingUpStep);
+        Assert.Equal(10m, trailing.TrailingUpLimit);
+        Assert.Equal(0.5m, trailing.TrailingDownStep);
+        Assert.Equal(5m, trailing.TrailingDownLimit);
+    }
+
+    [Fact]
+    public void Stage2Step2_2_TrailingUp_LoadFromString_WithFlexibleMoveFlagBools_ShouldParse()
+    {
+        TradeGrid grid = CreateBareGrid();
+        TrailingUp trailing = new TrailingUp(grid)
+        {
+            TrailingUpCanMoveExitOrder = false,
+            TrailingDownCanMoveExitOrder = true
+        };
+
+        Exception? error = Record.Exception(() => trailing.LoadFromString("True@1.25@10@False@0.5@5@on@no"));
+
+        Assert.Null(error);
+        Assert.True(trailing.TrailingUpCanMoveExitOrder);
+        Assert.False(trailing.TrailingDownCanMoveExitOrder);
+    }
+
+    [Fact]
+    public void Stage2Step2_2_TrailingUp_LoadFromString_WithNumericPrimaryBools_ShouldParse()
+    {
+        TradeGrid grid = CreateBareGrid();
+        TrailingUp trailing = new TrailingUp(grid)
+        {
+            TrailingUpIsOn = false,
+            TrailingDownIsOn = true
+        };
+
+        Exception? error = Record.Exception(() => trailing.LoadFromString("1@1.25@10@0@0.5@5"));
+
+        Assert.Null(error);
+        Assert.True(trailing.TrailingUpIsOn);
+        Assert.False(trailing.TrailingDownIsOn);
+        Assert.Equal(1.25m, trailing.TrailingUpStep);
+        Assert.Equal(10m, trailing.TrailingUpLimit);
+    }
+
+    [Fact]
+    public void Stage2Step2_2_TrailingUp_LoadFromString_WithNumericMoveFlagBools_ShouldParse()
+    {
+        TradeGrid grid = CreateBareGrid();
+        TrailingUp trailing = new TrailingUp(grid)
+        {
+            TrailingUpCanMoveExitOrder = false,
+            TrailingDownCanMoveExitOrder = false
+        };
+
+        Exception? error = Record.Exception(() => trailing.LoadFromString("True@1.25@10@False@0.5@5@1@0"));
+
+        Assert.Null(error);
+        Assert.True(trailing.TrailingUpCanMoveExitOrder);
+        Assert.False(trailing.TrailingDownCanMoveExitOrder);
     }
 
     [Fact]

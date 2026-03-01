@@ -15636,3 +15636,78 @@
   - dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo -> success
   - dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900 -> success, 0 warnings, 0 errors
   - dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo -> passed 613/613
+
+## 2026-03-01 - Step 4.2 (nullable annotations) - TrailingUp zero-value runtime regression coverage (#768-#771)
+
+- Added targeted regression coverage in:
+  - project/OsEngine.Tests/TradeGridPersistenceCoreTests.cs
+- Changes:
+  - locked `TrailingUp.TryTrailingGrid()` behavior for zero-valued runtime `step/limit` settings across both up/down branches.
+  - zero `step` or `limit` values now have explicit regression coverage showing that the grid must not shift.
+- Added/updated tests:
+  - project/OsEngine.Tests/TradeGridPersistenceCoreTests.cs
+    - added `Stage2Step2_2_TrailingUp_TryTrailingGrid_WithZeroUpStepRuntimeValue_ShouldNotShiftGrid`.
+    - added `Stage2Step2_2_TrailingUp_TryTrailingGrid_WithZeroUpLimitRuntimeValue_ShouldNotShiftGrid`.
+    - added `Stage2Step2_2_TrailingUp_TryTrailingGrid_WithZeroDownStepRuntimeValue_ShouldNotShiftGrid`.
+    - added `Stage2Step2_2_TrailingUp_TryTrailingGrid_WithZeroDownLimitRuntimeValue_ShouldNotShiftGrid`.
+- Scope:
+  - test-only regression coverage
+  - no production behavior change
+
+### Verification
+
+- Host-context verification (outside sandbox, per dotnet-build-policy):
+  - dotnet restore project/OsEngine/OsEngine.csproj --nologo -> success
+  - dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo -> success
+  - dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900 -> success, 0 warnings, 0 errors
+  - dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo -> passed 617/617
+
+## 2026-03-01 - Step 4.2 (nullable annotations) - TrailingUp zero-value parser guards (#772-#775)
+
+- Applied localized parser hardening in:
+  - project/OsEngine/OsTrader/Grids/TrailingUp.cs
+- Changes:
+  - `LoadFromString(...)` now ignores zero-valued `TrailingUpStep`, `TrailingUpLimit`, `TrailingDownStep`, and `TrailingDownLimit` payload values.
+  - this aligns parser behavior with the existing runtime `> 0` invariant in `TryTrailingGrid()`.
+- Added/updated tests:
+  - project/OsEngine.Tests/TradeGridPersistenceCoreTests.cs
+    - added `Stage2Step2_2_TrailingUp_LoadFromString_WithZeroTrailingUpStep_ShouldKeepExistingValue`.
+    - added `Stage2Step2_2_TrailingUp_LoadFromString_WithZeroTrailingUpLimit_ShouldKeepExistingValue`.
+    - added `Stage2Step2_2_TrailingUp_LoadFromString_WithZeroTrailingDownStep_ShouldKeepExistingValue`.
+    - added `Stage2Step2_2_TrailingUp_LoadFromString_WithZeroTrailingDownLimit_ShouldKeepExistingValue`.
+- Scope:
+  - parser/runtime hardening only
+  - valid positive payload behavior remains unchanged
+
+### Verification
+
+- Host-context verification (outside sandbox, per dotnet-build-policy):
+  - dotnet restore project/OsEngine/OsEngine.csproj --nologo -> success
+  - dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo -> success
+  - dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900 -> success, 0 warnings, 0 errors
+  - dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo -> passed 621/621
+
+## 2026-03-01 - Step 4.2 (nullable annotations) - TrailingUp flexible bool regression coverage (#776-#779)
+
+- Added targeted regression coverage in:
+  - project/OsEngine.Tests/TradeGridPersistenceCoreTests.cs
+- Changes:
+  - locked flexible bool parsing for primary trailing toggles and move-flag tail fields.
+  - covered mixed legacy forms (`yes/no/on/off`) and numeric forms (`1/0`) across both main bool slots and move-flag slots.
+- Added/updated tests:
+  - project/OsEngine.Tests/TradeGridPersistenceCoreTests.cs
+    - added `Stage2Step2_2_TrailingUp_LoadFromString_WithFlexiblePrimaryBools_ShouldParse`.
+    - added `Stage2Step2_2_TrailingUp_LoadFromString_WithFlexibleMoveFlagBools_ShouldParse`.
+    - added `Stage2Step2_2_TrailingUp_LoadFromString_WithNumericPrimaryBools_ShouldParse`.
+    - added `Stage2Step2_2_TrailingUp_LoadFromString_WithNumericMoveFlagBools_ShouldParse`.
+- Scope:
+  - test-only regression coverage
+  - no production behavior change
+
+### Verification
+
+- Host-context verification (outside sandbox, per dotnet-build-policy):
+  - dotnet restore project/OsEngine/OsEngine.csproj --nologo -> success
+  - dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo -> success
+  - dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900 -> success, 0 warnings, 0 errors
+  - dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo -> passed 625/625
