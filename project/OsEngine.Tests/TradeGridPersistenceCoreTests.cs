@@ -4720,6 +4720,49 @@ public class TradeGridPersistenceCoreTests
     }
 
     [Fact]
+    public void Stage2Step2_2_TradeGrid_EventDispatch_WithSubscribers_ShouldInvokeEachHandlerOnce()
+    {
+        TradeGrid grid = CreateBareGrid();
+        int saveCalls = 0;
+        int repaintCalls = 0;
+        int fullRepaintCalls = 0;
+
+        grid.NeedToSaveEvent += () => saveCalls++;
+        grid.RePaintSettingsEvent += () => repaintCalls++;
+        grid.FullRePaintGridEvent += () => fullRepaintCalls++;
+
+        grid.Save();
+        grid.RePaintGrid();
+        grid.FullRePaintGrid();
+
+        Assert.Equal(1, saveCalls);
+        Assert.Equal(1, repaintCalls);
+        Assert.Equal(1, fullRepaintCalls);
+    }
+
+    [Fact]
+    public void Stage2Step2_2_TradeGrid_SendNewLogMessage_WithSubscriber_ShouldForwardMessage()
+    {
+        TradeGrid grid = CreateBareGrid();
+        string? receivedMessage = null;
+        LogMessageType? receivedType = null;
+
+        grid.LogMessageEvent += (message, type) =>
+        {
+            receivedMessage = message;
+            receivedType = type;
+        };
+
+        grid.SendNewLogMessage("CodexTradeGridMessage", LogMessageType.Error);
+
+        Assert.NotNull(receivedMessage);
+        Assert.Contains("Grid error. Bot: unknown", receivedMessage);
+        Assert.Contains("Security name: unknown", receivedMessage);
+        Assert.Contains("CodexTradeGridMessage", receivedMessage);
+        Assert.Equal(LogMessageType.Error, receivedType);
+    }
+
+    [Fact]
     public void Stage2Step2_2_TradeGrid_SendNewLogMessage_WithNullTab_ShouldPublishErrorWithUnknownContext()
     {
         TradeGrid grid = (TradeGrid)RuntimeHelpers.GetUninitializedObject(typeof(TradeGrid));
