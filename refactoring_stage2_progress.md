@@ -16517,3 +16517,32 @@
   - dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo -> success
   - dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900 -> success, 0 warnings, 0 errors
   - dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo -> passed 743/743
+
+### Increment #911-#914
+
+- Component: `TradeGrid`
+- Focus: lock direct helper early-return contracts in private trading helpers
+- Added targeted regression coverage in:
+  - project/OsEngine.Tests/TradeGridPersistenceCoreTests.cs
+- Changes:
+  - locked the explicit `return 0` contract for `TryRemoveWrongOrders()` when `Tab` / `GridCreator` are unavailable.
+  - locked the explicit `return 0` contract for `TryCancelOpeningOrders()` when `Tab` is unavailable.
+  - locked the explicit `return 0` contract for `TryCancelClosingOrders()` when `Tab` is unavailable.
+  - locked the explicit no-op contract for `TrySetClosingOrders(...)` when `Tab.Security` is unavailable.
+- Added/updated tests:
+  - project/OsEngine.Tests/TradeGridPersistenceCoreTests.cs
+    - added `Stage2Step2_2_TradeGrid_TryRemoveWrongOrders_WithNullDependencies_ShouldReturnZero`.
+    - added `Stage2Step2_2_TradeGrid_TryCancelOpeningOrders_WithNullTab_ShouldReturnZero`.
+    - added `Stage2Step2_2_TradeGrid_TryCancelClosingOrders_WithNullTab_ShouldReturnZero`.
+    - added `Stage2Step2_2_TradeGrid_TrySetClosingOrders_WithNullSecurity_ShouldStayNoOp`.
+- Scope:
+  - test-only regression coverage
+  - no production behavior change
+
+### Verification
+
+- Host-context verification (outside sandbox, per dotnet-build-policy):
+  - dotnet restore project/OsEngine/OsEngine.csproj --nologo -> success
+  - dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo -> success
+  - dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900 -> success, 0 warnings, 0 errors
+  - dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo -> passed 747/747
