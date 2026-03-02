@@ -17208,6 +17208,33 @@
   - dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900 -> success, 0 warnings, 0 errors
   - dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo -> passed 811/811
 
+## 2026-03-02 - Incremental Update #982-#983
+
+### Scope
+
+- Closed the remaining direct public `TradeGridsMaster.Delete()` service-paths for non-optimizer mode.
+
+### What Changed
+
+- Updated tests in:
+  - project/OsEngine.Tests/TradeGridPersistenceCoreTests.cs
+- Changes:
+  - locked `TradeGridsMaster.Delete()` behavior when the settings file is absent in normal mode.
+  - locked `TradeGridsMaster.Delete()` behavior when the settings file exists and is deleted.
+  - verified that `_tab` is always nulled first and repeated delete remains safe.
+- Added/updated tests:
+  - project/OsEngine.Tests/TradeGridPersistenceCoreTests.cs
+    - added `Stage2Step2_2_TradeGridsMaster_Delete_WithMissingSettingsFile_ShouldClearTabAndNotThrow`.
+    - added `Stage2Step2_2_TradeGridsMaster_Delete_WithExistingSettingsFile_ShouldRemoveFileAndStayIdempotent`.
+
+### Verification
+
+- Host-context verification (outside sandbox, per dotnet-build-policy):
+  - dotnet restore project/OsEngine/OsEngine.csproj --nologo -> success
+  - dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo -> success
+  - dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900 -> success, 0 warnings, 0 errors
+  - dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo -> passed 813/813
+
 ## 2026-03-02 - Incremental Update #980-#981
 
 ### Scope
