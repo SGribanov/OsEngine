@@ -17235,6 +17235,38 @@
   - dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900 -> success, 0 warnings, 0 errors
   - dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo -> passed 813/813
 
+## 2026-03-02 - Incremental Update #984-#986
+
+### Scope
+
+- Locked the top-level early-return contract for `TradeGrid.LoadFromString(...)` on null/empty/whitespace payloads.
+
+### What Changed
+
+- Updated tests in:
+  - project/OsEngine.Tests/TradeGridPersistenceCoreTests.cs
+- Changes:
+  - added explicit regression coverage that top-level `TradeGrid.LoadFromString(...)` keeps existing state for:
+    - `null` payload
+    - empty string payload
+    - whitespace-only payload
+  - this closes the direct outer guard, independent from section-level whitespace parsing already covered before.
+- Added/updated tests:
+  - project/OsEngine.Tests/TradeGridPersistenceCoreTests.cs
+    - added `Stage2Step2_2_TradeGrid_LoadFromString_WithNullPayload_ShouldKeepExistingValues`.
+    - added `Stage2Step2_2_TradeGrid_LoadFromString_WithEmptyPayload_ShouldKeepExistingValues`.
+    - added `Stage2Step2_2_TradeGrid_LoadFromString_WithWhitespaceOnlyPayload_ShouldKeepExistingValues`.
+
+### Verification
+
+- Host-context verification (outside sandbox, per dotnet-build-policy):
+  - first full run hit a transient failure in the pre-existing time-based test `Stage2Step2_2_TradeGridStopBy_GetRegime_WithTimeOfDayNotReached_ShouldReturnOn`.
+  - immediate full rerun:
+    - dotnet restore project/OsEngine/OsEngine.csproj --nologo -> success
+    - dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo -> success
+    - dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900 -> success, 0 warnings, 0 errors
+    - dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo -> passed 816/816
+
 ## 2026-03-02 - Incremental Update #980-#981
 
 ### Scope
