@@ -6863,6 +6863,53 @@ public class TradeGridPersistenceCoreTests
     }
 
     [Fact]
+    public void Stage2Step2_2_TradeGrid_LoadFromString_WithOnlyAutoStarterSection_ShouldApplyPrimeAndTargetChildOnly()
+    {
+        TradeGrid grid = CreateBareGrid();
+        grid.NonTradePeriods.NonTradePeriod1Regime = TradeGridRegime.CloseOnly;
+        grid.StopBy.StopGridByMoveUpIsOn = true;
+        grid.GridCreator.TradeAssetInPortfolio = "USDT";
+        grid.StopAndProfit.ProfitValue = 2.2m;
+        grid.AutoStarter.AutoStartRegime = TradeGridAutoStartRegime.Off;
+        grid.AutoStarter.AutoStartPrice = 0.7m;
+        grid.ErrorsReaction.FailOpenOrdersCountToReaction = 3;
+        grid.TrailingUp.TrailingUpStep = 1.5m;
+
+        string payload =
+            "42@MarketMaking@CloseOnly@OncePerSecond@True@11@3@2@123.45@4@" +
+            new DateTime(2024, 1, 2, 3, 4, 5, DateTimeKind.Utc).ToString("O", CultureInfo.InvariantCulture) +
+            "@700@False@1.5@False@@@" +
+            "%%%%%%" +
+            "HigherOrEqual@101.25@On_ShiftOnNewPrice@1.5@True@9@30@45@False@@@@" +
+            "%%";
+
+        Exception? error = Record.Exception(() => grid.LoadFromString(payload));
+
+        Assert.Null(error);
+        Assert.Equal(42, grid.Number);
+        Assert.Equal(TradeGridPrimeType.MarketMaking, grid.GridType);
+        Assert.Equal(TradeGridRegime.CloseOnly, grid.Regime);
+
+        Assert.Equal(TradeGridRegime.CloseOnly, grid.NonTradePeriods.NonTradePeriod1Regime);
+        Assert.True(grid.StopBy.StopGridByMoveUpIsOn);
+        Assert.Equal("USDT", grid.GridCreator.TradeAssetInPortfolio);
+        Assert.Equal(2.2m, grid.StopAndProfit.ProfitValue);
+
+        Assert.Equal(TradeGridAutoStartRegime.HigherOrEqual, grid.AutoStarter.AutoStartRegime);
+        Assert.Equal(101.25m, grid.AutoStarter.AutoStartPrice);
+        Assert.Equal(GridAutoStartShiftFirstPriceRegime.On_ShiftOnNewPrice, grid.AutoStarter.RebuildGridRegime);
+        Assert.Equal(1.5m, grid.AutoStarter.ShiftFirstPrice);
+        Assert.True(grid.AutoStarter.StartGridByTimeOfDayIsOn);
+        Assert.Equal(9, grid.AutoStarter.StartGridByTimeOfDayHour);
+        Assert.Equal(30, grid.AutoStarter.StartGridByTimeOfDayMinute);
+        Assert.Equal(45, grid.AutoStarter.StartGridByTimeOfDaySecond);
+        Assert.False(grid.AutoStarter.SingleActivationMode);
+
+        Assert.Equal(3, grid.ErrorsReaction.FailOpenOrdersCountToReaction);
+        Assert.Equal(1.5m, grid.TrailingUp.TrailingUpStep);
+    }
+
+    [Fact]
     public void Stage2Step2_2_TradeGrid_GetSaveString_LoadFromString_ShouldRoundTrip()
     {
         TradeGrid source = CreateBareGrid();
