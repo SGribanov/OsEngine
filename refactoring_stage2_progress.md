@@ -17005,3 +17005,28 @@
   - dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo -> success
   - dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900 -> success, 0 warnings, 0 errors
   - dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo -> passed 786/786
+
+### Increment #956-#957
+
+- Component: `TradeGridLine`
+- Focus: lock remaining `SetFromStr()` boundary contracts
+- Added targeted regression coverage in:
+  - project/OsEngine.Tests/TradeGridPersistenceCoreTests.cs
+- Changes:
+  - locked reject-path for whitespace-only payload.
+  - locked behavior when `PositionNum` token is malformed: parse still succeeds and existing `PositionNum` is preserved.
+- Added/updated tests:
+  - project/OsEngine.Tests/TradeGridPersistenceCoreTests.cs
+    - added `Stage2Step2_2_TradeGridLine_SetFromStr_WithWhitespacePayload_ShouldReturnFalse`.
+    - added `Stage2Step2_2_TradeGridLine_SetFromStr_WithInvalidPositionNum_ShouldKeepDefaultPosition`.
+- Scope:
+  - test-only regression coverage
+  - no production behavior change
+
+### Verification
+
+- Host-context verification (outside sandbox, per dotnet-build-policy):
+  - dotnet restore project/OsEngine/OsEngine.csproj --nologo -> success
+  - dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo -> success
+  - dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900 -> success, 0 warnings, 0 errors
+  - dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo -> passed 788/788

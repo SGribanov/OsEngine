@@ -17240,3 +17240,20 @@
   - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed `786/786`
 - **Commit:** n/a
 - **Push:** n/a
+
+### Step 4.2 - Nullable Annotations (Incremental Adoption #956-#957)
+
+- **Status:** In Progress (increment block completed)
+- **Plan item:** `refactoring_stage2_plan.md` -> Phase 4 / Step 4.2
+- **Changes (TradeGridLine SetFromStr boundary coverage):**
+  - Updated tests in `project/OsEngine.Tests/TradeGridPersistenceCoreTests.cs`:
+    - added `Stage2Step2_2_TradeGridLine_SetFromStr_WithWhitespacePayload_ShouldReturnFalse`.
+    - added `Stage2Step2_2_TradeGridLine_SetFromStr_WithInvalidPositionNum_ShouldKeepDefaultPosition`.
+  - Locked two remaining boundary contracts of `SetFromStr()`.
+- **Verification (outside sandbox, per dotnet-build-policy):**
+  - `dotnet restore project/OsEngine/OsEngine.csproj --nologo` -> success
+  - `dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo` -> success
+  - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` -> success, 0 warnings, 0 errors
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed `788/788`
+- **Commit:** n/a
+- **Push:** n/a
