@@ -16705,3 +16705,28 @@
   - dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo -> success
   - dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900 -> success, 0 warnings, 0 errors
   - dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo -> passed 762/762
+
+### Increment #932-#933
+
+- Component: `TradeGrid`
+- Focus: lock positive-path query contracts for position selectors
+- Added targeted regression coverage in:
+  - project/OsEngine.Tests/TradeGridPersistenceCoreTests.cs
+- Changes:
+  - locked `GetLinesWithOpenPosition()` so it returns only lines with non-zero open volume, ignoring sparse/null lines.
+  - locked `GetPositionByGrid()` so it returns only existing positions, preserving order and skipping sparse/null lines.
+- Added/updated tests:
+  - project/OsEngine.Tests/TradeGridPersistenceCoreTests.cs
+    - added `Stage2Step2_2_TradeGrid_GetLinesWithOpenPosition_WithSparseLines_ShouldReturnOnlyOpenVolumeLines`.
+    - added `Stage2Step2_2_TradeGrid_GetPositionByGrid_WithSparseLines_ShouldReturnOnlyExistingPositions`.
+- Scope:
+  - test-only regression coverage
+  - no production behavior change
+
+### Verification
+
+- Host-context verification (outside sandbox, per dotnet-build-policy):
+  - dotnet restore project/OsEngine/OsEngine.csproj --nologo -> success
+  - dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo -> success
+  - dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900 -> success, 0 warnings, 0 errors
+  - dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo -> passed 764/764
