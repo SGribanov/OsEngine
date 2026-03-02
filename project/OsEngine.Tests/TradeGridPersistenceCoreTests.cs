@@ -1150,13 +1150,30 @@ public class TradeGridPersistenceCoreTests
     public void Stage2Step2_2_TradeGridStopBy_GetRegime_WithTimeOfDayLaterMinute_ShouldReturnConfiguredReaction()
     {
         DateTime now = DateTime.Now;
+        int targetHour = now.Hour;
+        int targetMinute = now.Minute;
+        int targetSecond = 0;
+
+        if (now.Minute > 0)
+        {
+            targetMinute = now.Minute - 1;
+        }
+        else if (now.Second > 0)
+        {
+            targetSecond = now.Second - 1;
+        }
+        else
+        {
+            targetHour = now.Hour == 0 ? 0 : now.Hour - 1;
+            targetMinute = 59;
+        }
 
         TradeGridStopBy stopBy = new TradeGridStopBy
         {
             StopGridByTimeOfDayIsOn = true,
-            StopGridByTimeOfDayHour = now.Hour,
-            StopGridByTimeOfDayMinute = now.Minute == 0 ? 0 : now.Minute - 1,
-            StopGridByTimeOfDaySecond = 59,
+            StopGridByTimeOfDayHour = targetHour,
+            StopGridByTimeOfDayMinute = targetMinute,
+            StopGridByTimeOfDaySecond = targetSecond,
             StopGridByTimeOfDayReaction = TradeGridRegime.CloseOnly
         };
 
@@ -5576,6 +5593,85 @@ public class TradeGridPersistenceCoreTests
 
         Assert.Null(error);
         Assert.Equal(0m, middleEntryPrice);
+    }
+
+    [Fact]
+    public void Stage2Step2_2_TradeGrid_MiddleEntryPrice_WithWeightedTrades_ShouldReturnAveragePrice()
+    {
+        TradeGrid grid = (TradeGrid)RuntimeHelpers.GetUninitializedObject(typeof(TradeGrid));
+        grid.GridCreator = new TradeGridCreator();
+
+        Order openOrder = new Order();
+        SetPrivateField(openOrder, "_trades", new List<MyTrade>
+        {
+            new MyTrade
+            {
+                Volume = 1m,
+                Price = 100m
+            },
+            new MyTrade
+            {
+                Volume = 2m,
+                Price = 103m
+            }
+        });
+
+        Position position = (Position)RuntimeHelpers.GetUninitializedObject(typeof(Position));
+        SetPrivateField(position, "_openOrders", new List<Order> { openOrder });
+        SetPrivateField(position, "_closeOrders", new List<Order>());
+
+        grid.GridCreator.Lines = new List<TradeGridLine>
+        {
+            new TradeGridLine
+            {
+                Position = position,
+                PositionNum = 1
+            }
+        };
+
+        decimal middleEntryPrice = grid.MiddleEntryPrice;
+
+        Assert.Equal((1m * 100m + 2m * 103m) / 3m, middleEntryPrice);
+    }
+
+    [Fact]
+    public void Stage2Step2_2_TradeGrid_MiddleEntryPrice_WithSparseOrders_ShouldIgnoreNullsAndEmptyTrades()
+    {
+        TradeGrid grid = (TradeGrid)RuntimeHelpers.GetUninitializedObject(typeof(TradeGrid));
+        grid.GridCreator = new TradeGridCreator();
+
+        Order openOrder = new Order();
+        SetPrivateField(openOrder, "_trades", new List<MyTrade>
+        {
+            null!,
+            new MyTrade
+            {
+                Volume = 2m,
+                Price = 101m
+            }
+        });
+
+        Position position = (Position)RuntimeHelpers.GetUninitializedObject(typeof(Position));
+        SetPrivateField(position, "_openOrders", new List<Order>
+        {
+            null!,
+            new Order(),
+            openOrder
+        });
+        SetPrivateField(position, "_closeOrders", new List<Order>());
+
+        grid.GridCreator.Lines = new List<TradeGridLine>
+        {
+            new TradeGridLine
+            {
+                Position = position,
+                PositionNum = 1
+            }
+        };
+
+        decimal middleEntryPrice = grid.MiddleEntryPrice;
+
+        Assert.Equal(101m, middleEntryPrice);
     }
 
     [Fact]
