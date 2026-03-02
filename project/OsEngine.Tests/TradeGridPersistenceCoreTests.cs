@@ -5119,6 +5119,54 @@ public class TradeGridPersistenceCoreTests
     }
 
     [Fact]
+    public void Stage2Step2_2_TradeGrid_LoadFromString_WithNullPayload_ShouldKeepExistingValues()
+    {
+        TradeGrid grid = CreateBareGrid();
+        grid.GridType = TradeGridPrimeType.OpenPosition;
+        grid.Regime = TradeGridRegime.CloseOnly;
+        grid.GridCreator.TradeAssetInPortfolio = "USDT";
+
+        Exception? error = Record.Exception(() => grid.LoadFromString(null));
+
+        Assert.Null(error);
+        Assert.Equal(TradeGridPrimeType.OpenPosition, grid.GridType);
+        Assert.Equal(TradeGridRegime.CloseOnly, grid.Regime);
+        Assert.Equal("USDT", grid.GridCreator.TradeAssetInPortfolio);
+    }
+
+    [Fact]
+    public void Stage2Step2_2_TradeGrid_LoadFromString_WithEmptyPayload_ShouldKeepExistingValues()
+    {
+        TradeGrid grid = CreateBareGrid();
+        grid.GridType = TradeGridPrimeType.OpenPosition;
+        grid.Regime = TradeGridRegime.CloseOnly;
+        grid.GridCreator.TradeAssetInPortfolio = "USDT";
+
+        Exception? error = Record.Exception(() => grid.LoadFromString(string.Empty));
+
+        Assert.Null(error);
+        Assert.Equal(TradeGridPrimeType.OpenPosition, grid.GridType);
+        Assert.Equal(TradeGridRegime.CloseOnly, grid.Regime);
+        Assert.Equal("USDT", grid.GridCreator.TradeAssetInPortfolio);
+    }
+
+    [Fact]
+    public void Stage2Step2_2_TradeGrid_LoadFromString_WithWhitespaceOnlyPayload_ShouldKeepExistingValues()
+    {
+        TradeGrid grid = CreateBareGrid();
+        grid.GridType = TradeGridPrimeType.OpenPosition;
+        grid.Regime = TradeGridRegime.CloseOnly;
+        grid.GridCreator.TradeAssetInPortfolio = "USDT";
+
+        Exception? error = Record.Exception(() => grid.LoadFromString("  \r\n \t  "));
+
+        Assert.Null(error);
+        Assert.Equal(TradeGridPrimeType.OpenPosition, grid.GridType);
+        Assert.Equal(TradeGridRegime.CloseOnly, grid.Regime);
+        Assert.Equal("USDT", grid.GridCreator.TradeAssetInPortfolio);
+    }
+
+    [Fact]
     public void Stage2Step2_2_TradeGrid_LoadFromString_WithWhitespaceOnlySections_ShouldSkipSubcomponentParsing()
     {
         TradeGrid grid = CreateBareGrid();
