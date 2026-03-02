@@ -16254,3 +16254,79 @@
   - dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo -> success
   - dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900 -> success, 0 warnings, 0 errors
   - dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo -> passed 714/714
+
+## 2026-03-01 - Step 4.2 (nullable annotations) - TradeGridsMaster runtime safe-path regression coverage (#882-#887)
+
+- Added targeted regression coverage in:
+  - project/OsEngine.Tests/TradeGridPersistenceCoreTests.cs
+- Changes:
+  - locked runtime-safe helper/service behavior in `TradeGridsMaster` without touching production code.
+  - covered settings-path composition, `Clear()` on empty state, `Delete()` optimizer short-circuit, `DeleteAtNum()` with a missing number, `StopPaint()` with null host, and private `LoadGrids()` / `PaintGridView()` early returns.
+- Added/updated tests:
+  - project/OsEngine.Tests/TradeGridPersistenceCoreTests.cs
+    - added `Stage2Step2_2_TradeGridsMaster_GetGridsSettingsPath_ShouldComposeExpectedPath`.
+    - added `Stage2Step2_2_TradeGridsMaster_Clear_WithEmptyCollectionInOptimizerMode_ShouldNotThrow`.
+    - added `Stage2Step2_2_TradeGridsMaster_Delete_WithOptimizerMode_ShouldClearTabAndNotThrow`.
+    - added `Stage2Step2_2_TradeGridsMaster_DeleteAtNum_WithMissingNumberInOptimizerMode_ShouldNotThrow`.
+    - added `Stage2Step2_2_TradeGridsMaster_StopPaint_WithNullHost_ShouldNotThrow`.
+    - added `Stage2Step2_2_TradeGridsMaster_LoadAndPaint_WithSafeEarlyReturns_ShouldNotThrow`.
+- Scope:
+  - test-only regression coverage
+  - no production behavior change
+
+### Verification
+
+- Host-context verification (outside sandbox, per dotnet-build-policy):
+  - dotnet restore project/OsEngine/OsEngine.csproj --nologo -> success
+  - dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo -> success
+  - dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900 -> success, 0 warnings, 0 errors
+  - dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo -> passed 720/720
+
+## 2026-03-01 - Step 4.2 (nullable annotations) - TradeGridsMaster orchestration regression coverage (#888-#891)
+
+- Added targeted regression coverage in:
+  - project/OsEngine.Tests/TradeGridPersistenceCoreTests.cs
+- Changes:
+  - extended `TradeGridsMaster` coverage into remaining safe orchestration paths without touching production code.
+  - covered `SaveGrids()` optimizer short-circuit, `ShowDialog()` with a missing grid, and `Ui_Closed(...)` behavior for stale/null and unrelated UI entries.
+- Added/updated tests:
+  - project/OsEngine.Tests/TradeGridPersistenceCoreTests.cs
+    - added `Stage2Step2_2_TradeGridsMaster_SaveGrids_WithOptimizerMode_ShouldNotThrow`.
+    - added `Stage2Step2_2_TradeGridsMaster_ShowDialog_WithMissingGrid_ShouldNotThrow`.
+    - added `Stage2Step2_2_TradeGridsMaster_UiClosed_WithNullTradeGridEntry_ShouldCleanList`.
+    - added `Stage2Step2_2_TradeGridsMaster_UiClosed_WithUnknownSender_ShouldKeepOtherEntries`.
+- Scope:
+  - test-only regression coverage
+  - no production behavior change
+
+### Verification
+
+- Host-context verification (outside sandbox, per dotnet-build-policy):
+  - dotnet restore project/OsEngine/OsEngine.csproj --nologo -> success
+  - dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo -> success
+  - dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900 -> success, 0 warnings, 0 errors
+  - dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo -> passed 724/724
+
+## 2026-03-01 - Step 4.2 (nullable annotations) - TradeGridsMaster paint-helper regression coverage (#892-#894)
+
+- Added targeted regression coverage in:
+  - project/OsEngine.Tests/TradeGridPersistenceCoreTests.cs
+- Changes:
+  - locked remaining private paint-helper behavior in `TradeGridsMaster`.
+  - covered `GetGridRow(...)`, `GetLastRow()`, and `_gridViewInstances_DataError(...)`.
+- Added/updated tests:
+  - project/OsEngine.Tests/TradeGridPersistenceCoreTests.cs
+    - added `Stage2Step2_2_TradeGridsMaster_GetGridRow_ShouldBuildExpectedCells`.
+    - added `Stage2Step2_2_TradeGridsMaster_GetLastRow_ShouldBuildAddButtonRow`.
+    - added `Stage2Step2_2_TradeGridsMaster_GridViewDataError_ShouldNotThrow`.
+- Scope:
+  - test-only regression coverage
+  - no production behavior change
+
+### Verification
+
+- Host-context verification (outside sandbox, per dotnet-build-policy):
+  - dotnet restore project/OsEngine/OsEngine.csproj --nologo -> success
+  - dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo -> success
+  - dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900 -> success, 0 warnings, 0 errors
+  - dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo -> passed 727/727

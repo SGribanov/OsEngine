@@ -8,11 +8,13 @@ using System.Reflection;
 using System.Runtime.CompilerServices;
 using OsEngine.Candles;
 using OsEngine.Entity;
+using OsEngine.Language;
 using OsEngine.Market.Connectors;
 using OsEngine.Journal.Internal;
 using OsEngine.Logging;
 using OsEngine.OsTrader.Grids;
 using OsEngine.OsTrader.Panels.Tab;
+using System.Windows.Forms;
 using Xunit;
 
 namespace OsEngine.Tests;
@@ -1218,6 +1220,242 @@ public class TradeGridPersistenceCoreTests
 
         Assert.False(parsed);
         Assert.Equal(0, (int)args[1]);
+    }
+
+    [Fact]
+    public void Stage2Step2_2_TradeGridsMaster_GetGridsSettingsPath_ShouldComposeExpectedPath()
+    {
+        TradeGridsMaster master =
+            (TradeGridsMaster)RuntimeHelpers.GetUninitializedObject(typeof(TradeGridsMaster));
+        SetPrivateField(master, "_nameBot", "CodexBot");
+
+        MethodInfo method = typeof(TradeGridsMaster).GetMethod("GetGridsSettingsPath", BindingFlags.NonPublic | BindingFlags.Instance)
+            ?? throw new InvalidOperationException("Method GetGridsSettingsPath not found.");
+
+        string path = (string)(method.Invoke(master, null)
+            ?? throw new InvalidOperationException("GetGridsSettingsPath returned null."));
+
+        Assert.Equal(@"Engine\CodexBotGridsSettings.txt", path);
+    }
+
+    [Fact]
+    public void Stage2Step2_2_TradeGridsMaster_Clear_WithEmptyCollectionInOptimizerMode_ShouldNotThrow()
+    {
+        TradeGridsMaster master =
+            (TradeGridsMaster)RuntimeHelpers.GetUninitializedObject(typeof(TradeGridsMaster));
+        SetPrivateField(master, "_startProgram", StartProgram.IsOsOptimizer);
+        master.TradeGrids = new List<TradeGrid>();
+
+        Exception? error = Record.Exception(master.Clear);
+
+        Assert.Null(error);
+        Assert.Empty(master.TradeGrids);
+    }
+
+    [Fact]
+    public void Stage2Step2_2_TradeGridsMaster_Delete_WithOptimizerMode_ShouldClearTabAndNotThrow()
+    {
+        TradeGridsMaster master =
+            (TradeGridsMaster)RuntimeHelpers.GetUninitializedObject(typeof(TradeGridsMaster));
+        SetPrivateField(master, "_startProgram", StartProgram.IsOsOptimizer);
+        SetPrivateField(master, "_tab", (BotTabSimple)RuntimeHelpers.GetUninitializedObject(typeof(BotTabSimple)));
+
+        Exception? error = Record.Exception(master.Delete);
+
+        FieldInfo tabField = typeof(TradeGridsMaster).GetField("_tab", BindingFlags.NonPublic | BindingFlags.Instance)
+            ?? throw new InvalidOperationException("Field _tab not found.");
+
+        Assert.Null(error);
+        Assert.Null(tabField.GetValue(master));
+    }
+
+    [Fact]
+    public void Stage2Step2_2_TradeGridsMaster_DeleteAtNum_WithMissingNumberInOptimizerMode_ShouldNotThrow()
+    {
+        TradeGridsMaster master =
+            (TradeGridsMaster)RuntimeHelpers.GetUninitializedObject(typeof(TradeGridsMaster));
+        SetPrivateField(master, "_startProgram", StartProgram.IsOsOptimizer);
+        master.TradeGrids = new List<TradeGrid>();
+
+        Exception? error = Record.Exception(() => master.DeleteAtNum(42, true));
+
+        Assert.Null(error);
+        Assert.Empty(master.TradeGrids);
+    }
+
+    [Fact]
+    public void Stage2Step2_2_TradeGridsMaster_StopPaint_WithNullHost_ShouldNotThrow()
+    {
+        TradeGridsMaster master =
+            (TradeGridsMaster)RuntimeHelpers.GetUninitializedObject(typeof(TradeGridsMaster));
+
+        Exception? error = Record.Exception(master.StopPaint);
+
+        Assert.Null(error);
+    }
+
+    [Fact]
+    public void Stage2Step2_2_TradeGridsMaster_LoadAndPaint_WithSafeEarlyReturns_ShouldNotThrow()
+    {
+        TradeGridsMaster testerMaster =
+            (TradeGridsMaster)RuntimeHelpers.GetUninitializedObject(typeof(TradeGridsMaster));
+        SetPrivateField(testerMaster, "_startProgram", StartProgram.IsTester);
+
+        MethodInfo loadMethod = typeof(TradeGridsMaster).GetMethod("LoadGrids", BindingFlags.NonPublic | BindingFlags.Instance)
+            ?? throw new InvalidOperationException("Method LoadGrids not found.");
+        MethodInfo paintMethod = typeof(TradeGridsMaster).GetMethod("PaintGridView", BindingFlags.NonPublic | BindingFlags.Instance)
+            ?? throw new InvalidOperationException("Method PaintGridView not found.");
+
+        Exception? error = Record.Exception(() =>
+        {
+            loadMethod.Invoke(testerMaster, null);
+            paintMethod.Invoke(testerMaster, null);
+        });
+
+        Assert.Null(error);
+    }
+
+    [Fact]
+    public void Stage2Step2_2_TradeGridsMaster_SaveGrids_WithOptimizerMode_ShouldNotThrow()
+    {
+        TradeGridsMaster master =
+            (TradeGridsMaster)RuntimeHelpers.GetUninitializedObject(typeof(TradeGridsMaster));
+        SetPrivateField(master, "_startProgram", StartProgram.IsOsOptimizer);
+        master.TradeGrids = new List<TradeGrid> { null! };
+
+        MethodInfo method = typeof(TradeGridsMaster).GetMethod("SaveGrids", BindingFlags.NonPublic | BindingFlags.Instance)
+            ?? throw new InvalidOperationException("Method SaveGrids not found.");
+
+        Exception? error = Record.Exception(() => method.Invoke(master, null));
+
+        Assert.Null(error);
+    }
+
+    [Fact]
+    public void Stage2Step2_2_TradeGridsMaster_ShowDialog_WithMissingGrid_ShouldNotThrow()
+    {
+        TradeGridsMaster master =
+            (TradeGridsMaster)RuntimeHelpers.GetUninitializedObject(typeof(TradeGridsMaster));
+        master.TradeGrids = new List<TradeGrid>();
+
+        Exception? error = Record.Exception(() => master.ShowDialog(7));
+
+        Assert.Null(error);
+    }
+
+    [Fact]
+    public void Stage2Step2_2_TradeGridsMaster_UiClosed_WithNullTradeGridEntry_ShouldCleanList()
+    {
+        TradeGridsMaster master =
+            (TradeGridsMaster)RuntimeHelpers.GetUninitializedObject(typeof(TradeGridsMaster));
+
+        TradeGridUi staleUi = (TradeGridUi)RuntimeHelpers.GetUninitializedObject(typeof(TradeGridUi));
+        TradeGridUi senderUi = (TradeGridUi)RuntimeHelpers.GetUninitializedObject(typeof(TradeGridUi));
+        staleUi.TradeGrid = null!;
+        senderUi.TradeGrid = CreateBareGrid();
+        staleUi.Number = 1;
+        senderUi.Number = 9;
+
+        List<TradeGridUi> uiList = new List<TradeGridUi> { staleUi };
+        SetPrivateField(master, "_tradeGridUis", uiList);
+
+        MethodInfo method = typeof(TradeGridsMaster).GetMethod("Ui_Closed", BindingFlags.NonPublic | BindingFlags.Instance)
+            ?? throw new InvalidOperationException("Method Ui_Closed not found.");
+
+        Exception? error = Record.Exception(() => method.Invoke(master, new object[] { senderUi, EventArgs.Empty }));
+
+        Assert.Null(error);
+        Assert.Empty(uiList);
+    }
+
+    [Fact]
+    public void Stage2Step2_2_TradeGridsMaster_UiClosed_WithUnknownSender_ShouldKeepOtherEntries()
+    {
+        TradeGridsMaster master =
+            (TradeGridsMaster)RuntimeHelpers.GetUninitializedObject(typeof(TradeGridsMaster));
+
+        TradeGrid trackedGrid = CreateBareGrid();
+        trackedGrid.Number = 5;
+        TradeGridUi trackedUi = (TradeGridUi)RuntimeHelpers.GetUninitializedObject(typeof(TradeGridUi));
+        trackedUi.TradeGrid = trackedGrid;
+        trackedUi.Number = 5;
+
+        TradeGrid senderGrid = CreateBareGrid();
+        senderGrid.Number = 9;
+        TradeGridUi senderUi = (TradeGridUi)RuntimeHelpers.GetUninitializedObject(typeof(TradeGridUi));
+        senderUi.TradeGrid = senderGrid;
+        senderUi.Number = 9;
+
+        List<TradeGridUi> uiList = new List<TradeGridUi> { trackedUi };
+        SetPrivateField(master, "_tradeGridUis", uiList);
+
+        MethodInfo method = typeof(TradeGridsMaster).GetMethod("Ui_Closed", BindingFlags.NonPublic | BindingFlags.Instance)
+            ?? throw new InvalidOperationException("Method Ui_Closed not found.");
+
+        Exception? error = Record.Exception(() => method.Invoke(master, new object[] { senderUi, EventArgs.Empty }));
+
+        Assert.Null(error);
+        Assert.Single(uiList);
+        Assert.Same(trackedUi, uiList[0]);
+    }
+
+    [Fact]
+    public void Stage2Step2_2_TradeGridsMaster_GetGridRow_ShouldBuildExpectedCells()
+    {
+        TradeGridsMaster master =
+            (TradeGridsMaster)RuntimeHelpers.GetUninitializedObject(typeof(TradeGridsMaster));
+        TradeGrid grid = CreateBareGrid();
+        grid.Number = 12;
+        grid.Regime = TradeGridRegime.CloseOnly;
+
+        MethodInfo method = typeof(TradeGridsMaster).GetMethod("GetGridRow", BindingFlags.NonPublic | BindingFlags.Instance)
+            ?? throw new InvalidOperationException("Method GetGridRow not found.");
+
+        DataGridViewRow row = (DataGridViewRow)(method.Invoke(master, new object[] { grid })
+            ?? throw new InvalidOperationException("GetGridRow returned null."));
+
+        Assert.Equal(5, row.Cells.Count);
+        Assert.Equal(12, row.Cells[0].Value);
+        Assert.Equal(grid.GridType.ToString(), row.Cells[1].Value);
+        Assert.Equal(TradeGridRegime.CloseOnly.ToString(), row.Cells[2].Value);
+        Assert.Equal(OsLocalization.Trader.Label469, row.Cells[3].Value);
+        Assert.Equal(OsLocalization.Trader.Label470, row.Cells[4].Value);
+    }
+
+    [Fact]
+    public void Stage2Step2_2_TradeGridsMaster_GetLastRow_ShouldBuildAddButtonRow()
+    {
+        TradeGridsMaster master =
+            (TradeGridsMaster)RuntimeHelpers.GetUninitializedObject(typeof(TradeGridsMaster));
+
+        MethodInfo method = typeof(TradeGridsMaster).GetMethod("GetLastRow", BindingFlags.NonPublic | BindingFlags.Instance)
+            ?? throw new InvalidOperationException("Method GetLastRow not found.");
+
+        DataGridViewRow row = (DataGridViewRow)(method.Invoke(master, null)
+            ?? throw new InvalidOperationException("GetLastRow returned null."));
+
+        Assert.Equal(5, row.Cells.Count);
+        Assert.Equal(OsLocalization.Trader.Label471, row.Cells[4].Value);
+    }
+
+    [Fact]
+    public void Stage2Step2_2_TradeGridsMaster_GridViewDataError_ShouldNotThrow()
+    {
+        TradeGridsMaster master =
+            (TradeGridsMaster)RuntimeHelpers.GetUninitializedObject(typeof(TradeGridsMaster));
+        master.LogMessageEvent += (_, _) => { };
+
+        MethodInfo method = typeof(TradeGridsMaster).GetMethod("_gridViewInstances_DataError", BindingFlags.NonPublic | BindingFlags.Instance)
+            ?? throw new InvalidOperationException("Method _gridViewInstances_DataError not found.");
+
+        DataGridView dataGridView = new DataGridView();
+        var exception = new FormatException("Codex");
+        DataGridViewDataErrorEventArgs eventArgs = new DataGridViewDataErrorEventArgs(
+            exception, 0, 0, DataGridViewDataErrorContexts.Commit);
+
+        Exception? error = Record.Exception(() => method.Invoke(master, new object[] { dataGridView, eventArgs }));
+
+        Assert.Null(error);
     }
 
     [Fact]
