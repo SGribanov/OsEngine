@@ -484,7 +484,11 @@ namespace OsEngine.OsTrader.Grids
 
         private void _gridViewInstances_DataError(object sender, DataGridViewDataErrorEventArgs e)
         {
-            SendNewLogMessage(e.ToString(), LogMessageType.Error);
+            string errorMessage = e.Exception != null
+                ? e.Exception.ToString()
+                : $"Grid instances DataError. Row: {e.RowIndex}. Column: {e.ColumnIndex}. Context: {e.Context}";
+
+            SendNewLogMessage(errorMessage, LogMessageType.Error);
         }
 
         private void PaintGridView()
