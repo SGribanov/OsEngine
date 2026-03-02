@@ -16713,3 +16713,61 @@
   - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed `714/714`
 - **Commit:** n/a
 - **Push:** n/a
+
+### Step 4.2 - Nullable Annotations (Incremental Adoption #882-#887)
+
+- **Status:** In Progress (increment block completed)
+- **Plan item:** `refactoring_stage2_plan.md` -> Phase 4 / Step 4.2
+- **Changes (TradeGridsMaster runtime safe-path regression coverage):**
+  - Updated tests in `project/OsEngine.Tests/TradeGridPersistenceCoreTests.cs`:
+    - added `Stage2Step2_2_TradeGridsMaster_GetGridsSettingsPath_ShouldComposeExpectedPath`.
+    - added `Stage2Step2_2_TradeGridsMaster_Clear_WithEmptyCollectionInOptimizerMode_ShouldNotThrow`.
+    - added `Stage2Step2_2_TradeGridsMaster_Delete_WithOptimizerMode_ShouldClearTabAndNotThrow`.
+    - added `Stage2Step2_2_TradeGridsMaster_DeleteAtNum_WithMissingNumberInOptimizerMode_ShouldNotThrow`.
+    - added `Stage2Step2_2_TradeGridsMaster_StopPaint_WithNullHost_ShouldNotThrow`.
+    - added `Stage2Step2_2_TradeGridsMaster_LoadAndPaint_WithSafeEarlyReturns_ShouldNotThrow`.
+  - Locked runtime-safe service paths and private early-return paths without changing production behavior.
+- **Verification (outside sandbox, per dotnet-build-policy):**
+  - `dotnet restore project/OsEngine/OsEngine.csproj --nologo` -> success
+  - `dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo` -> success
+  - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` -> success, 0 warnings, 0 errors
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed `720/720`
+- **Commit:** n/a
+- **Push:** n/a
+
+### Step 4.2 - Nullable Annotations (Incremental Adoption #888-#891)
+
+- **Status:** In Progress (increment block completed)
+- **Plan item:** `refactoring_stage2_plan.md` -> Phase 4 / Step 4.2
+- **Changes (TradeGridsMaster orchestration regression coverage):**
+  - Updated tests in `project/OsEngine.Tests/TradeGridPersistenceCoreTests.cs`:
+    - added `Stage2Step2_2_TradeGridsMaster_SaveGrids_WithOptimizerMode_ShouldNotThrow`.
+    - added `Stage2Step2_2_TradeGridsMaster_ShowDialog_WithMissingGrid_ShouldNotThrow`.
+    - added `Stage2Step2_2_TradeGridsMaster_UiClosed_WithNullTradeGridEntry_ShouldCleanList`.
+    - added `Stage2Step2_2_TradeGridsMaster_UiClosed_WithUnknownSender_ShouldKeepOtherEntries`.
+  - Extended coverage into the remaining safe orchestration branches around save/show/closed handling.
+- **Verification (outside sandbox, per dotnet-build-policy):**
+  - `dotnet restore project/OsEngine/OsEngine.csproj --nologo` -> success
+  - `dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo` -> success
+  - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` -> success, 0 warnings, 0 errors
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed `724/724`
+- **Commit:** n/a
+- **Push:** n/a
+
+### Step 4.2 - Nullable Annotations (Incremental Adoption #892-#894)
+
+- **Status:** In Progress (increment block completed)
+- **Plan item:** `refactoring_stage2_plan.md` -> Phase 4 / Step 4.2
+- **Changes (TradeGridsMaster paint-helper regression coverage):**
+  - Updated tests in `project/OsEngine.Tests/TradeGridPersistenceCoreTests.cs`:
+    - added `Stage2Step2_2_TradeGridsMaster_GetGridRow_ShouldBuildExpectedCells`.
+    - added `Stage2Step2_2_TradeGridsMaster_GetLastRow_ShouldBuildAddButtonRow`.
+    - added `Stage2Step2_2_TradeGridsMaster_GridViewDataError_ShouldNotThrow`.
+  - Locked the remaining private paint-helper contracts without changing production behavior.
+- **Verification (outside sandbox, per dotnet-build-policy):**
+  - `dotnet restore project/OsEngine/OsEngine.csproj --nologo` -> success
+  - `dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo` -> success
+  - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` -> success, 0 warnings, 0 errors
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed `727/727`
+- **Commit:** n/a
+- **Push:** n/a
