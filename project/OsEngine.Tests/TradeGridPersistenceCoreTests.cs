@@ -238,6 +238,78 @@ public class TradeGridPersistenceCoreTests
     }
 
     [Fact]
+    public void Stage2Step2_2_TradeGridStopBy_GetSaveString_ShouldKeepReservedTailShape()
+    {
+        TradeGridStopBy stopBy = new TradeGridStopBy
+        {
+            StopGridByMoveUpIsOn = true,
+            StopGridByMoveUpValuePercent = 2.5m,
+            StopGridByMoveUpReaction = TradeGridRegime.CloseOnly,
+            StopGridByMoveDownIsOn = false,
+            StopGridByMoveDownValuePercent = 1.5m,
+            StopGridByMoveDownReaction = TradeGridRegime.Off,
+            StopGridByPositionsCountIsOn = true,
+            StopGridByPositionsCountValue = 7,
+            StopGridByPositionsCountReaction = TradeGridRegime.CloseForced,
+            StopGridByLifeTimeIsOn = true,
+            StopGridByLifeTimeSecondsToLife = 600,
+            StopGridByLifeTimeReaction = TradeGridRegime.OffAndCancelOrders,
+            StopGridByTimeOfDayIsOn = true,
+            StopGridByTimeOfDayHour = 9,
+            StopGridByTimeOfDayMinute = 30,
+            StopGridByTimeOfDaySecond = 45,
+            StopGridByTimeOfDayReaction = TradeGridRegime.CloseOnly
+        };
+
+        string save = stopBy.GetSaveString();
+
+        Assert.Equal("True@2.5@CloseOnly@False@1.5@Off@True@7@CloseForced@True@600@OffAndCancelOrders@True@9@30@45@CloseOnly@@@@@@", save);
+    }
+
+    [Fact]
+    public void Stage2Step2_2_TradeGridCreator_GetSaveString_ShouldKeepReservedTailShape()
+    {
+        TradeGridCreator creator = new TradeGridCreator
+        {
+            GridSide = Side.Sell,
+            FirstPrice = 123.45m,
+            LineCountStart = 3,
+            TypeStep = TradeGridValueType.Absolute,
+            LineStep = 1.2m,
+            StepMultiplicator = 1.1m,
+            TypeProfit = TradeGridValueType.Percent,
+            ProfitStep = 0.8m,
+            ProfitMultiplicator = 1.3m,
+            TypeVolume = TradeGridVolumeType.Contracts,
+            StartVolume = 2.5m,
+            MartingaleMultiplicator = 1.4m,
+            TradeAssetInPortfolio = "AssetX",
+            Lines = new List<TradeGridLine>()
+        };
+
+        string save = creator.GetSaveString();
+
+        Assert.Equal("Sell@123.45@3@Absolute@1.2@1.1@Percent@0.8@1.3@Contracts@2.5@1.4@AssetX@@@@@@", save);
+    }
+
+    [Fact]
+    public void Stage2Step2_2_TradeGridLine_GetSaveStr_ShouldUseInvariantCultureAndTrailingSeparator()
+    {
+        TradeGridLine line = new TradeGridLine
+        {
+            PriceEnter = 123.45m,
+            Volume = 2.5m,
+            Side = Side.Buy,
+            PriceExit = 130.75m,
+            PositionNum = 7
+        };
+
+        string save = line.GetSaveStr();
+
+        Assert.Equal("123.45|2.5|Buy|130.75|7|", save);
+    }
+
+    [Fact]
     public void Stage2Step2_2_TradeGridStopBy_GetRegime_WithNullGridOrTab_ShouldReturnOn()
     {
         TradeGridStopBy stopBy = new TradeGridStopBy
