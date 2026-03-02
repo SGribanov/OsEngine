@@ -17053,3 +17053,28 @@
   - dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo -> success
   - dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900 -> success, 0 warnings, 0 errors
   - dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo -> passed 789/789
+
+### Increment #959-#960
+
+- Component: `TradeGridCreator`
+- Focus: lock positive runtime paths of `GetVolume()`
+- Added targeted regression coverage in:
+  - project/OsEngine.Tests/TradeGridPersistenceCoreTests.cs
+- Changes:
+  - locked positive-path contract for `TradeGridVolumeType.ContractCurrency`.
+  - locked positive-path contract for `TradeGridVolumeType.DepositPercent` with `TradeAssetInPortfolio = "Prime"`.
+- Added/updated tests:
+  - project/OsEngine.Tests/TradeGridPersistenceCoreTests.cs
+    - added `Stage2Step2_2_TradeGridCreator_GetVolume_WithContractCurrency_ShouldReturnRoundedVolume`.
+    - added `Stage2Step2_2_TradeGridCreator_GetVolume_WithDepositPercentPrime_ShouldReturnRoundedVolume`.
+- Scope:
+  - test-only regression coverage
+  - no production behavior change
+
+### Verification
+
+- Host-context verification (outside sandbox, per dotnet-build-policy):
+  - dotnet restore project/OsEngine/OsEngine.csproj --nologo -> success
+  - dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo -> success
+  - dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900 -> success, 0 warnings, 0 errors
+  - dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo -> passed 791/791
