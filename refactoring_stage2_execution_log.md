@@ -17332,3 +17332,26 @@
   - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed `797/797`
 - **Commit:** n/a
 - **Push:** n/a
+
+### Step 4.2 - Nullable Annotations (Incremental Adoption #966-#968)
+
+- **Status:** In Progress (increment block completed)
+- **Plan item:** `refactoring_stage2_plan.md` -> Phase 4 / Step 4.2
+- **Changes (no-subscriber safe paths for helper log forwarding):**
+  - Updated tests in `project/OsEngine.Tests/TradeGridPersistenceCoreTests.cs`:
+    - added `Stage2Step2_2_TradeGridStopBy_SendNewLogMessage_WithoutSubscriber_ShouldNotThrow`.
+    - added `Stage2Step2_2_TradeGridStopAndProfit_SendNewLogMessage_WithoutSubscriber_ShouldNotThrow`.
+    - added `Stage2Step2_2_TradeGridAutoStarter_SendNewLogMessage_WithoutSubscriber_ShouldNotThrow`.
+  - Outcome:
+    - locked the no-subscriber safe no-op contract for the three remaining helper `SendNewLogMessage(...)` wrappers.
+- **Verification (outside sandbox, per dotnet-build-policy):**
+  - First full run hit a transient unrelated file-lock failure:
+    - `AServerParamsPersistenceTests.LoadParam_ShouldSupportLegacyLineBasedFormat`
+    - `System.IO.IOException` on `YahooFinanceParams.txt` in test output.
+  - Immediate full rerun:
+    - `dotnet restore project/OsEngine/OsEngine.csproj --nologo` -> success
+    - `dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo` -> success
+    - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` -> success, 0 warnings, 0 errors
+    - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed `800/800`
+- **Commit:** n/a
+- **Push:** n/a

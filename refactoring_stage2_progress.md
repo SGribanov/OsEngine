@@ -17137,3 +17137,33 @@
   - dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo -> success
   - dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900 -> success, 0 warnings, 0 errors
   - dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo -> passed 797/797
+
+## 2026-03-02 - Incremental Update #966-#968
+
+### Scope
+
+- Added the symmetric no-subscriber safe-path coverage for helper log forwarding in remaining non-UI grid services.
+
+### What Changed
+
+- Updated tests in:
+  - project/OsEngine.Tests/TradeGridPersistenceCoreTests.cs
+- Changes:
+  - locked `TradeGridStopBy.SendNewLogMessage(...)` no-subscriber no-throw behavior.
+  - locked `TradeGridStopAndProfit.SendNewLogMessage(...)` no-subscriber no-throw behavior.
+  - locked `TradeGridAutoStarter.SendNewLogMessage(...)` no-subscriber no-throw behavior.
+- Added/updated tests:
+  - project/OsEngine.Tests/TradeGridPersistenceCoreTests.cs
+    - added `Stage2Step2_2_TradeGridStopBy_SendNewLogMessage_WithoutSubscriber_ShouldNotThrow`.
+    - added `Stage2Step2_2_TradeGridStopAndProfit_SendNewLogMessage_WithoutSubscriber_ShouldNotThrow`.
+    - added `Stage2Step2_2_TradeGridAutoStarter_SendNewLogMessage_WithoutSubscriber_ShouldNotThrow`.
+
+### Verification
+
+- Host-context verification (outside sandbox, per dotnet-build-policy):
+  - first full run hit a transient unrelated file-lock failure in `AServerParamsPersistenceTests.LoadParam_ShouldSupportLegacyLineBasedFormat` (`YahooFinanceParams.txt` in test output).
+  - repeated full verification immediately after:
+    - dotnet restore project/OsEngine/OsEngine.csproj --nologo -> success
+    - dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo -> success
+    - dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900 -> success, 0 warnings, 0 errors
+    - dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo -> passed 800/800
