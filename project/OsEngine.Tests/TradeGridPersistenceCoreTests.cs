@@ -5113,6 +5113,21 @@ public class TradeGridPersistenceCoreTests
     }
 
     [Fact]
+    public void Stage2Step2_2_TradeGrid_EventDispatch_WithoutSubscribers_ShouldNotThrow()
+    {
+        TradeGrid grid = CreateBareGrid();
+
+        Exception? error = Record.Exception(() =>
+        {
+            grid.Save();
+            grid.RePaintGrid();
+            grid.FullRePaintGrid();
+        });
+
+        Assert.Null(error);
+    }
+
+    [Fact]
     public void Stage2Step2_2_TradeGrid_SendNewLogMessage_WithSubscriber_ShouldForwardMessage()
     {
         TradeGrid grid = CreateBareGrid();
