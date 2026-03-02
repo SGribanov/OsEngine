@@ -16575,3 +16575,102 @@
   - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed `681/681`
 - **Commit:** n/a
 - **Push:** n/a
+
+### Step 4.2 - Nullable Annotations (Incremental Adoption #849-#853)
+
+- **Status:** In Progress (increment block completed)
+- **Plan item:** `refactoring_stage2_plan.md` -> Phase 4 / Step 4.2
+- **Changes (TradeGridStopBy runtime trigger regression coverage):**
+  - Updated tests in `project/OsEngine.Tests/TradeGridPersistenceCoreTests.cs`:
+    - added `Stage2Step2_2_TradeGridStopBy_GetRegime_WithPositionsCountLimitReached_ShouldReturnConfiguredReaction`.
+    - added `Stage2Step2_2_TradeGridStopBy_GetRegime_WithMoveUpLimitReached_ShouldReturnConfiguredReaction`.
+    - added `Stage2Step2_2_TradeGridStopBy_GetRegime_WithMoveDownLimitReached_ShouldReturnConfiguredReaction`.
+    - added `Stage2Step2_2_TradeGridStopBy_GetRegime_WithLifeTimeExpired_ShouldReturnConfiguredReaction`.
+    - added `Stage2Step2_2_TradeGridStopBy_GetRegime_WithTimeOfDayReached_ShouldReturnConfiguredReaction`.
+  - Locked direct runtime transition behavior for each primary stop trigger path.
+- **Verification (outside sandbox, per dotnet-build-policy):**
+  - `dotnet restore project/OsEngine/OsEngine.csproj --nologo` -> success
+  - `dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo` -> success
+  - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` -> success, 0 warnings, 0 errors
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed `686/686`
+- **Commit:** n/a
+- **Push:** n/a
+
+### Step 4.2 - Nullable Annotations (Incremental Adoption #854-#858)
+
+- **Status:** In Progress (increment block completed)
+- **Plan item:** `refactoring_stage2_plan.md` -> Phase 4 / Step 4.2
+- **Changes (TradeGridStopBy runtime non-trigger regression coverage):**
+  - Updated tests in `project/OsEngine.Tests/TradeGridPersistenceCoreTests.cs`:
+    - added `Stage2Step2_2_TradeGridStopBy_GetRegime_WithPositionsCountBelowLimit_ShouldReturnOn`.
+    - added `Stage2Step2_2_TradeGridStopBy_GetRegime_WithMoveUpBelowLimit_ShouldReturnOn`.
+    - added `Stage2Step2_2_TradeGridStopBy_GetRegime_WithMoveDownAboveLimit_ShouldReturnOn`.
+    - added `Stage2Step2_2_TradeGridStopBy_GetRegime_WithLifeTimeNotExpired_ShouldReturnOn`.
+    - added `Stage2Step2_2_TradeGridStopBy_GetRegime_WithTimeOfDayNotReached_ShouldReturnOn`.
+  - Locked the symmetric non-trigger paths so near-threshold runtime state keeps the regime unchanged.
+- **Verification (outside sandbox, per dotnet-build-policy):**
+  - `dotnet restore project/OsEngine/OsEngine.csproj --nologo` -> success
+  - `dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo` -> success
+  - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` -> success, 0 warnings, 0 errors
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed `691/691`
+- **Commit:** n/a
+- **Push:** n/a
+
+### Step 4.2 - Nullable Annotations (Incremental Adoption #859-#863)
+
+- **Status:** In Progress (increment block completed)
+- **Plan item:** `refactoring_stage2_plan.md` -> Phase 4 / Step 4.2
+- **Changes (TradeGridStopBy runtime safe-path regression coverage):**
+  - Updated tests in `project/OsEngine.Tests/TradeGridPersistenceCoreTests.cs`:
+    - added `Stage2Step2_2_TradeGridStopBy_GetRegime_WithNoTriggersEnabled_ShouldReturnOn`.
+    - added `Stage2Step2_2_TradeGridStopBy_GetRegime_WithEmptyCandles_ShouldReturnOn`.
+    - added `Stage2Step2_2_TradeGridStopBy_GetRegime_WithZeroFirstPrice_ShouldReturnOn`.
+    - added `Stage2Step2_2_TradeGridStopBy_GetRegime_WithMissingFirstTradeTime_ShouldReturnOn`.
+    - added `Stage2Step2_2_TradeGridStopBy_GetRegime_WithMissingServerTime_ShouldReturnOn`.
+  - Locked safe-path behavior so incomplete runtime context keeps the regime unchanged.
+- **Verification (outside sandbox, per dotnet-build-policy):**
+  - `dotnet restore project/OsEngine/OsEngine.csproj --nologo` -> success
+  - `dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo` -> success
+  - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` -> success, 0 warnings, 0 errors
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed `696/696`
+- **Commit:** n/a
+- **Push:** n/a
+
+### Step 4.2 - Nullable Annotations (Incremental Adoption #864-#868)
+
+- **Status:** In Progress (increment block completed)
+- **Plan item:** `refactoring_stage2_plan.md` -> Phase 4 / Step 4.2
+- **Changes (TradeGridStopBy runtime precedence regression coverage):**
+  - Updated tests in `project/OsEngine.Tests/TradeGridPersistenceCoreTests.cs`:
+    - added `Stage2Step2_2_TradeGridStopBy_GetRegime_WithPositionsAndMoveTriggersReady_ShouldPreferPositionsReaction`.
+    - added `Stage2Step2_2_TradeGridStopBy_GetRegime_WithMoveAndLifeTimeTriggersReady_ShouldPreferMoveReaction`.
+    - added `Stage2Step2_2_TradeGridStopBy_GetRegime_WithLifeTimeAndTimeTriggersReady_ShouldPreferLifeTimeReaction`.
+    - added `Stage2Step2_2_TradeGridStopBy_GetRegime_WithOnlyLaterTriggerReady_ShouldReturnLaterReaction`.
+    - added `Stage2Step2_2_TradeGridStopBy_GetRegime_WithMoveUpAndMoveDownBothReady_ShouldPreferMoveUpReaction`.
+  - Locked ordering semantics across multiple simultaneously-ready runtime triggers.
+- **Verification (outside sandbox, per dotnet-build-policy):**
+  - `dotnet restore project/OsEngine/OsEngine.csproj --nologo` -> success
+  - `dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo` -> success
+  - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` -> success, 0 warnings, 0 errors
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed `701/701`
+- **Commit:** n/a
+- **Push:** n/a
+
+### Step 4.2 - Nullable Annotations (Incremental Adoption #869-#872)
+
+- **Status:** In Progress (increment block completed)
+- **Plan item:** `refactoring_stage2_plan.md` -> Phase 4 / Step 4.2
+- **Changes (TradeGridStopBy runtime boundary regression coverage):**
+  - Updated tests in `project/OsEngine.Tests/TradeGridPersistenceCoreTests.cs`:
+    - added `Stage2Step2_2_TradeGridStopBy_GetRegime_WithZeroLastPrice_ShouldReturnOn`.
+    - added `Stage2Step2_2_TradeGridStopBy_GetRegime_WithTimeOfDayLaterMinute_ShouldReturnConfiguredReaction`.
+    - added `Stage2Step2_2_TradeGridStopBy_GetRegime_WithTimeOfDayLaterHour_ShouldReturnConfiguredReaction`.
+    - added `Stage2Step2_2_TradeGridStopBy_GetRegime_WithTimeOfDayFutureWithinSameDay_ShouldReturnOn`.
+  - Locked remaining inner-branch boundary behavior in the move/time-of-day runtime paths.
+- **Verification (outside sandbox, per dotnet-build-policy):**
+  - `dotnet restore project/OsEngine/OsEngine.csproj --nologo` -> success
+  - `dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo` -> success
+  - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` -> success, 0 warnings, 0 errors
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed `705/705`
+- **Commit:** n/a
+- **Push:** n/a
