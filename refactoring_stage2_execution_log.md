@@ -16771,3 +16771,39 @@
   - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed `727/727`
 - **Commit:** n/a
 - **Push:** n/a
+
+### Step 4.2 - Nullable Annotations (Incremental Adoption #895-#896)
+
+- **Status:** In Progress (increment block completed)
+- **Plan item:** `refactoring_stage2_plan.md` -> Phase 4 / Step 4.2
+- **Changes (TradeGridNonTradePeriods enum parser hardening):**
+  - Updated `project/OsEngine/OsTrader/Grids/TradeGridNonTradePeriods.cs`:
+    - replaced raw `Enum.TryParse(...)` assignments with guarded case-insensitive enum parsing that preserves current values on invalid tokens.
+  - Updated tests in `project/OsEngine.Tests/TradeGridPersistenceCoreTests.cs`:
+    - added `Stage2Step2_2_TradeGridNonTradePeriods_LoadFromString_WithInvalidEnumTokens_ShouldKeepExistingValues`.
+    - added `Stage2Step2_2_TradeGridNonTradePeriods_LoadFromString_WithCaseInsensitiveEnums_ShouldParse`.
+- **Verification (outside sandbox, per dotnet-build-policy):**
+  - `dotnet restore project/OsEngine/OsEngine.csproj --nologo` -> success
+  - `dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo` -> success
+  - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` -> success, 0 warnings, 0 errors
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed `729/729`
+- **Commit:** n/a
+- **Push:** n/a
+
+### Step 4.2 - Nullable Annotations (Incremental Adoption #897-#899)
+
+- **Status:** In Progress (increment block completed)
+- **Plan item:** `refactoring_stage2_plan.md` -> Phase 4 / Step 4.2
+- **Changes (TradeGridNonTradePeriods runtime priority coverage):**
+  - Updated tests in `project/OsEngine.Tests/TradeGridPersistenceCoreTests.cs`:
+    - added `Stage2Step2_2_TradeGridNonTradePeriods_GetRegime_WithFirstPeriodBlocked_ShouldPreferFirstRegime`.
+    - added `Stage2Step2_2_TradeGridNonTradePeriods_GetRegime_WithSecondPeriodBlocked_ShouldReturnSecondRegime`.
+    - added `Stage2Step2_2_TradeGridNonTradePeriods_GetRegime_WithBothPeriodsOpen_ShouldReturnOn`.
+  - Locked runtime priority behavior across the first and second non-trade period buckets.
+- **Verification (outside sandbox, per dotnet-build-policy):**
+  - `dotnet restore project/OsEngine/OsEngine.csproj --nologo` -> success
+  - `dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo` -> success
+  - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` -> success, 0 warnings, 0 errors
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed `732/732`
+- **Commit:** n/a
+- **Push:** n/a
