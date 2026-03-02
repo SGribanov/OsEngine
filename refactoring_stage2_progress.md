@@ -16330,3 +16330,50 @@
   - dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo -> success
   - dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900 -> success, 0 warnings, 0 errors
   - dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo -> passed 727/727
+
+## 2026-03-01 - Step 4.2 (nullable annotations) - TradeGridNonTradePeriods enum parser hardening (#895-#896)
+
+- Applied localized parser hardening in:
+  - project/OsEngine/OsTrader/Grids/TradeGridNonTradePeriods.cs
+- Changes:
+  - `LoadFromString(...)` no longer lets invalid enum tokens overwrite the existing regimes.
+  - added guarded enum parsing with case-insensitive matching and `Enum.IsDefined(...)` validation.
+- Added/updated tests:
+  - project/OsEngine.Tests/TradeGridPersistenceCoreTests.cs
+    - added `Stage2Step2_2_TradeGridNonTradePeriods_LoadFromString_WithInvalidEnumTokens_ShouldKeepExistingValues`.
+    - added `Stage2Step2_2_TradeGridNonTradePeriods_LoadFromString_WithCaseInsensitiveEnums_ShouldParse`.
+- Scope:
+  - parser hardening only
+  - valid payload behavior remains unchanged
+
+### Verification
+
+- Host-context verification (outside sandbox, per dotnet-build-policy):
+  - dotnet restore project/OsEngine/OsEngine.csproj --nologo -> success
+  - dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo -> success
+  - dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900 -> success, 0 warnings, 0 errors
+  - dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo -> passed 729/729
+
+## 2026-03-01 - Step 4.2 (nullable annotations) - TradeGridNonTradePeriods runtime priority coverage (#897-#899)
+
+- Added targeted regression coverage in:
+  - project/OsEngine.Tests/TradeGridPersistenceCoreTests.cs
+- Changes:
+  - locked `GetNonTradePeriodsRegime(...)` priority behavior across the two configured period buckets.
+  - covered first-period precedence, second-period fallback, and the all-clear `On` path.
+- Added/updated tests:
+  - project/OsEngine.Tests/TradeGridPersistenceCoreTests.cs
+    - added `Stage2Step2_2_TradeGridNonTradePeriods_GetRegime_WithFirstPeriodBlocked_ShouldPreferFirstRegime`.
+    - added `Stage2Step2_2_TradeGridNonTradePeriods_GetRegime_WithSecondPeriodBlocked_ShouldReturnSecondRegime`.
+    - added `Stage2Step2_2_TradeGridNonTradePeriods_GetRegime_WithBothPeriodsOpen_ShouldReturnOn`.
+- Scope:
+  - test-only regression coverage
+  - no production behavior change
+
+### Verification
+
+- Host-context verification (outside sandbox, per dotnet-build-policy):
+  - dotnet restore project/OsEngine/OsEngine.csproj --nologo -> success
+  - dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo -> success
+  - dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900 -> success, 0 warnings, 0 errors
+  - dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo -> passed 732/732

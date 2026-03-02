@@ -91,6 +91,125 @@ public class TradeGridPersistenceCoreTests
     }
 
     [Fact]
+    public void Stage2Step2_2_TradeGridNonTradePeriods_LoadFromString_WithInvalidEnumTokens_ShouldKeepExistingValues()
+    {
+        TradeGridNonTradePeriods periods = new TradeGridNonTradePeriods("CodexGridPeriods");
+        periods.NonTradePeriod1Regime = TradeGridRegime.CloseOnly;
+        periods.NonTradePeriod2Regime = TradeGridRegime.OffAndCancelOrders;
+
+        Exception? error = Record.Exception(() => periods.LoadFromString("badEnum@alsoBad"));
+
+        Assert.Null(error);
+        Assert.Equal(TradeGridRegime.CloseOnly, periods.NonTradePeriod1Regime);
+        Assert.Equal(TradeGridRegime.OffAndCancelOrders, periods.NonTradePeriod2Regime);
+    }
+
+    [Fact]
+    public void Stage2Step2_2_TradeGridNonTradePeriods_LoadFromString_WithCaseInsensitiveEnums_ShouldParse()
+    {
+        TradeGridNonTradePeriods periods = new TradeGridNonTradePeriods("CodexGridPeriods");
+
+        Exception? error = Record.Exception(() => periods.LoadFromString("closeonly@offandcancelorders"));
+
+        Assert.Null(error);
+        Assert.Equal(TradeGridRegime.CloseOnly, periods.NonTradePeriod1Regime);
+        Assert.Equal(TradeGridRegime.OffAndCancelOrders, periods.NonTradePeriod2Regime);
+    }
+
+    [Fact]
+    public void Stage2Step2_2_TradeGridNonTradePeriods_GetRegime_WithFirstPeriodBlocked_ShouldPreferFirstRegime()
+    {
+        TradeGridNonTradePeriods periods = new TradeGridNonTradePeriods("CodexGridPeriods");
+        DateTime curTime = DateTime.Today;
+        periods.NonTradePeriod1Regime = TradeGridRegime.CloseOnly;
+        periods.NonTradePeriod2Regime = TradeGridRegime.OffAndCancelOrders;
+
+        switch (curTime.DayOfWeek)
+        {
+            case DayOfWeek.Monday:
+                periods.SettingsPeriod1.TradeInMonday = false;
+                periods.SettingsPeriod2.TradeInMonday = false;
+                break;
+            case DayOfWeek.Tuesday:
+                periods.SettingsPeriod1.TradeInTuesday = false;
+                periods.SettingsPeriod2.TradeInTuesday = false;
+                break;
+            case DayOfWeek.Wednesday:
+                periods.SettingsPeriod1.TradeInWednesday = false;
+                periods.SettingsPeriod2.TradeInWednesday = false;
+                break;
+            case DayOfWeek.Thursday:
+                periods.SettingsPeriod1.TradeInThursday = false;
+                periods.SettingsPeriod2.TradeInThursday = false;
+                break;
+            case DayOfWeek.Friday:
+                periods.SettingsPeriod1.TradeInFriday = false;
+                periods.SettingsPeriod2.TradeInFriday = false;
+                break;
+            case DayOfWeek.Saturday:
+                periods.SettingsPeriod1.TradeInSaturday = false;
+                periods.SettingsPeriod2.TradeInSaturday = false;
+                break;
+            case DayOfWeek.Sunday:
+                periods.SettingsPeriod1.TradeInSunday = false;
+                periods.SettingsPeriod2.TradeInSunday = false;
+                break;
+        }
+
+        TradeGridRegime regime = periods.GetNonTradePeriodsRegime(curTime);
+
+        Assert.Equal(TradeGridRegime.CloseOnly, regime);
+    }
+
+    [Fact]
+    public void Stage2Step2_2_TradeGridNonTradePeriods_GetRegime_WithSecondPeriodBlocked_ShouldReturnSecondRegime()
+    {
+        TradeGridNonTradePeriods periods = new TradeGridNonTradePeriods("CodexGridPeriods");
+        DateTime curTime = DateTime.Today;
+        periods.NonTradePeriod1Regime = TradeGridRegime.CloseOnly;
+        periods.NonTradePeriod2Regime = TradeGridRegime.OffAndCancelOrders;
+
+        switch (curTime.DayOfWeek)
+        {
+            case DayOfWeek.Monday:
+                periods.SettingsPeriod2.TradeInMonday = false;
+                break;
+            case DayOfWeek.Tuesday:
+                periods.SettingsPeriod2.TradeInTuesday = false;
+                break;
+            case DayOfWeek.Wednesday:
+                periods.SettingsPeriod2.TradeInWednesday = false;
+                break;
+            case DayOfWeek.Thursday:
+                periods.SettingsPeriod2.TradeInThursday = false;
+                break;
+            case DayOfWeek.Friday:
+                periods.SettingsPeriod2.TradeInFriday = false;
+                break;
+            case DayOfWeek.Saturday:
+                periods.SettingsPeriod2.TradeInSaturday = false;
+                break;
+            case DayOfWeek.Sunday:
+                periods.SettingsPeriod2.TradeInSunday = false;
+                break;
+        }
+
+        TradeGridRegime regime = periods.GetNonTradePeriodsRegime(curTime);
+
+        Assert.Equal(TradeGridRegime.OffAndCancelOrders, regime);
+    }
+
+    [Fact]
+    public void Stage2Step2_2_TradeGridNonTradePeriods_GetRegime_WithBothPeriodsOpen_ShouldReturnOn()
+    {
+        TradeGridNonTradePeriods periods = new TradeGridNonTradePeriods("CodexGridPeriods");
+
+        TradeGridRegime regime = periods.GetNonTradePeriodsRegime(DateTime.Today);
+
+        Assert.Equal(TradeGridRegime.On, regime);
+    }
+
+    [Fact]
     public void Stage2Step2_2_TradeGridStopBy_GetRegime_WithNullGridOrTab_ShouldReturnOn()
     {
         TradeGridStopBy stopBy = new TradeGridStopBy

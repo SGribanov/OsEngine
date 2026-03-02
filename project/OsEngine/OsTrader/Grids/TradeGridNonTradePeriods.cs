@@ -82,18 +82,40 @@ namespace OsEngine.OsTrader.Grids
 
                 if (values.Length > 0 && string.IsNullOrWhiteSpace(values[0]) == false)
                 {
-                    Enum.TryParse(values[0], out NonTradePeriod1Regime);
+                    if (TryParseEnumValue(values[0], out TradeGridRegime parsed))
+                    {
+                        NonTradePeriod1Regime = parsed;
+                    }
                 }
 
                 if (values.Length > 1 && string.IsNullOrWhiteSpace(values[1]) == false)
                 {
-                    Enum.TryParse(values[1], out NonTradePeriod2Regime);
+                    if (TryParseEnumValue(values[1], out TradeGridRegime parsed))
+                    {
+                        NonTradePeriod2Regime = parsed;
+                    }
                 }
             }
             catch (Exception e)
             {
                 SendNewLogMessage(e.ToString(), LogMessageType.Error);
             }
+        }
+
+        private static bool TryParseEnumValue<TEnum>(string value, out TEnum parsed)
+            where TEnum : struct
+        {
+            if (Enum.TryParse(value, true, out parsed) == false)
+            {
+                return false;
+            }
+
+            if (Enum.IsDefined(typeof(TEnum), parsed) == false)
+            {
+                return false;
+            }
+
+            return true;
         }
 
         #endregion
