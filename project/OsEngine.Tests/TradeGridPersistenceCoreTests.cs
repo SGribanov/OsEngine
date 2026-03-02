@@ -5456,6 +5456,78 @@ public class TradeGridPersistenceCoreTests
     }
 
     [Fact]
+    public void Stage2Step2_2_TradeGrid_GetOrdersBadLinesMaxCount_WithNegativeLimit_ShouldTreatAsZero()
+    {
+        TradeGrid grid = CreateBareGrid();
+        Order openOrder = new Order
+        {
+            NumberUser = 101,
+            State = OrderStateType.Active,
+            Volume = 1,
+            VolumeExecute = 1
+        };
+        Position position = new Position();
+        position.AddNewOpenOrder(openOrder);
+        grid.GridCreator.Lines = new List<TradeGridLine>
+        {
+            new TradeGridLine
+            {
+                Position = position
+            }
+        };
+        grid.MaxOpenOrdersInMarket = -1;
+
+        MethodInfo method = typeof(TradeGrid).GetMethod("GetOrdersBadLinesMaxCount", BindingFlags.NonPublic | BindingFlags.Instance)
+            ?? throw new InvalidOperationException("Method GetOrdersBadLinesMaxCount not found.");
+
+        List<Order> orders = (List<Order>)(method.Invoke(grid, null)
+            ?? throw new InvalidOperationException("GetOrdersBadLinesMaxCount returned null."));
+
+        Assert.Single(orders);
+        Assert.Same(openOrder, orders[0]);
+    }
+
+    [Fact]
+    public void Stage2Step2_2_TradeGrid_GetCloseOrdersGridHole_WithNegativeLimit_ShouldTreatAsZero()
+    {
+        TradeGrid grid = CreateBareGrid();
+        Order openOrder = new Order
+        {
+            NumberUser = 201,
+            State = OrderStateType.Done,
+            Volume = 1,
+            VolumeExecute = 1
+        };
+        Order closeOrder = new Order
+        {
+            NumberUser = 202,
+            State = OrderStateType.Active,
+            Volume = 1,
+            VolumeExecute = 0
+        };
+        Position position = new Position();
+        position.AddNewOpenOrder(openOrder);
+        position.AddNewCloseOrder(closeOrder);
+        grid.GridCreator.Lines = new List<TradeGridLine>
+        {
+            new TradeGridLine
+            {
+                Position = position
+            }
+        };
+        grid.MaxCloseOrdersInMarket = -1;
+
+        MethodInfo method = typeof(TradeGrid).GetMethod("GetCloseOrdersGridHole", BindingFlags.NonPublic | BindingFlags.Instance)
+            ?? throw new InvalidOperationException("Method GetCloseOrdersGridHole not found.");
+
+        List<Order> orders = (List<Order>)(method.Invoke(grid, null)
+            ?? throw new InvalidOperationException("GetCloseOrdersGridHole returned null."));
+
+        Assert.Single(orders);
+        Assert.Same(closeOrder, orders[0]);
+    }
+
+    [Fact]
     public void Stage2Step2_2_TradeGrid_GetOrdersBadPriceToGrid_WithNullOrderLines_ShouldReturnEmpty()
     {
         TradeGrid grid = (TradeGrid)RuntimeHelpers.GetUninitializedObject(typeof(TradeGrid));

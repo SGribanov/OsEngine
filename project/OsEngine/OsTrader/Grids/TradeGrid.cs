@@ -2199,12 +2199,13 @@ namespace OsEngine.OsTrader.Grids
         private List<Order> GetOrdersBadLinesMaxCount()
         {
             List<TradeGridLine> linesWithOrdersToOpenFact = GetLinesWithOpenOrdersFact();
+            int maxOpenOrdersInMarket = Math.Max(0, MaxOpenOrdersInMarket);
 
             List<Order> ordersToCancel = new List<Order>();
 
             // 1 Открытие. Смотрим чтобы не было ордеров больше чем указал пользователь
 
-            for (int i = MaxOpenOrdersInMarket; i < linesWithOrdersToOpenFact.Count; i++)
+            for (int i = maxOpenOrdersInMarket; i < linesWithOrdersToOpenFact.Count; i++)
             {
                 Position curPosition = linesWithOrdersToOpenFact[i].Position;
                 if (TryGetLastOrder(curPosition.OpenOrders, out Order order))
@@ -2294,12 +2295,13 @@ namespace OsEngine.OsTrader.Grids
         private List<Order> GetCloseOrdersGridHole()
         {
             List<TradeGridLine> linesOpenPoses = GetLinesWithOpenPosition();
+            int maxCloseOrdersInMarket = Math.Max(0, MaxCloseOrdersInMarket);
 
             List<Order> ordersToCancel = new List<Order>();
 
             // 1 отправляем на отзыв ордера которые за пределами желаемого пользователем кол-ва
 
-            for (int i = 0; i < linesOpenPoses.Count - MaxCloseOrdersInMarket; i++)
+            for (int i = 0; i < linesOpenPoses.Count - maxCloseOrdersInMarket; i++)
             {
                 Position pos = linesOpenPoses[i].Position;
                 TradeGridLine line = linesOpenPoses[i];
