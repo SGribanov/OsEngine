@@ -3081,6 +3081,50 @@ public class TradeGridPersistenceCoreTests
     }
 
     [Fact]
+    public void Stage2Step2_2_TradeGridCreator_GetSaveLinesString_WithEmptyLines_ShouldReturnEmptyString()
+    {
+        TradeGridCreator creator = new TradeGridCreator
+        {
+            Lines = new List<TradeGridLine>()
+        };
+
+        string saved = creator.GetSaveLinesString();
+
+        Assert.Equal(string.Empty, saved);
+    }
+
+    [Fact]
+    public void Stage2Step2_2_TradeGridCreator_GetSaveLinesString_WithMultipleLines_ShouldConcatenateWithCaretSeparators()
+    {
+        TradeGridCreator creator = new TradeGridCreator
+        {
+            Lines = new List<TradeGridLine>
+            {
+                new TradeGridLine
+                {
+                    PriceEnter = 100m,
+                    Volume = 1m,
+                    Side = Side.Buy,
+                    PriceExit = 101m,
+                    PositionNum = 7
+                },
+                new TradeGridLine
+                {
+                    PriceEnter = 102.5m,
+                    Volume = 2m,
+                    Side = Side.Sell,
+                    PriceExit = 99.5m,
+                    PositionNum = 8
+                }
+            }
+        };
+
+        string saved = creator.GetSaveLinesString();
+
+        Assert.Equal("100|1|Buy|101|7|^102.5|2|Sell|99.5|8|^", saved);
+    }
+
+    [Fact]
     public void Stage2Step2_2_TradeGridCreator_RemoveSelected_WithNullOrSparseInputs_ShouldNotThrow()
     {
         TradeGridCreator creator = (TradeGridCreator)RuntimeHelpers.GetUninitializedObject(typeof(TradeGridCreator));
