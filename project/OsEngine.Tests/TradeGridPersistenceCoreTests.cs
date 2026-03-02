@@ -369,6 +369,54 @@ public class TradeGridPersistenceCoreTests
     }
 
     [Fact]
+    public void Stage2Step2_2_TradeGridStopBy_GetSaveString_LoadFromString_ShouldRoundTrip()
+    {
+        TradeGridStopBy source = new TradeGridStopBy
+        {
+            StopGridByMoveUpIsOn = true,
+            StopGridByMoveUpValuePercent = 2.5m,
+            StopGridByMoveUpReaction = TradeGridRegime.CloseOnly,
+            StopGridByMoveDownIsOn = true,
+            StopGridByMoveDownValuePercent = 1.5m,
+            StopGridByMoveDownReaction = TradeGridRegime.Off,
+            StopGridByPositionsCountIsOn = true,
+            StopGridByPositionsCountValue = 7,
+            StopGridByPositionsCountReaction = TradeGridRegime.CloseForced,
+            StopGridByLifeTimeIsOn = true,
+            StopGridByLifeTimeSecondsToLife = 600,
+            StopGridByLifeTimeReaction = TradeGridRegime.OffAndCancelOrders,
+            StopGridByTimeOfDayIsOn = true,
+            StopGridByTimeOfDayHour = 9,
+            StopGridByTimeOfDayMinute = 30,
+            StopGridByTimeOfDaySecond = 45,
+            StopGridByTimeOfDayReaction = TradeGridRegime.CloseOnly
+        };
+
+        TradeGridStopBy loaded = new TradeGridStopBy();
+
+        Exception? error = Record.Exception(() => loaded.LoadFromString(source.GetSaveString()));
+
+        Assert.Null(error);
+        Assert.True(loaded.StopGridByMoveUpIsOn);
+        Assert.Equal(2.5m, loaded.StopGridByMoveUpValuePercent);
+        Assert.Equal(TradeGridRegime.CloseOnly, loaded.StopGridByMoveUpReaction);
+        Assert.True(loaded.StopGridByMoveDownIsOn);
+        Assert.Equal(1.5m, loaded.StopGridByMoveDownValuePercent);
+        Assert.Equal(TradeGridRegime.Off, loaded.StopGridByMoveDownReaction);
+        Assert.True(loaded.StopGridByPositionsCountIsOn);
+        Assert.Equal(7, loaded.StopGridByPositionsCountValue);
+        Assert.Equal(TradeGridRegime.CloseForced, loaded.StopGridByPositionsCountReaction);
+        Assert.True(loaded.StopGridByLifeTimeIsOn);
+        Assert.Equal(600, loaded.StopGridByLifeTimeSecondsToLife);
+        Assert.Equal(TradeGridRegime.OffAndCancelOrders, loaded.StopGridByLifeTimeReaction);
+        Assert.True(loaded.StopGridByTimeOfDayIsOn);
+        Assert.Equal(9, loaded.StopGridByTimeOfDayHour);
+        Assert.Equal(30, loaded.StopGridByTimeOfDayMinute);
+        Assert.Equal(45, loaded.StopGridByTimeOfDaySecond);
+        Assert.Equal(TradeGridRegime.CloseOnly, loaded.StopGridByTimeOfDayReaction);
+    }
+
+    [Fact]
     public void Stage2Step2_2_TradeGridCreator_GetSaveString_ShouldKeepReservedTailShape()
     {
         TradeGridCreator creator = new TradeGridCreator
@@ -2267,6 +2315,40 @@ public class TradeGridPersistenceCoreTests
     }
 
     [Fact]
+    public void Stage2Step2_2_TradeGridStopAndProfit_GetSaveString_LoadFromString_ShouldRoundTrip()
+    {
+        TradeGridStopAndProfit source = new TradeGridStopAndProfit
+        {
+            ProfitRegime = OnOffRegime.On,
+            ProfitValueType = TradeGridValueType.Absolute,
+            ProfitValue = 2.2m,
+            StopRegime = OnOffRegime.On,
+            StopValueType = TradeGridValueType.Percent,
+            StopValue = 1.1m,
+            TrailStopRegime = OnOffRegime.On,
+            TrailStopValueType = TradeGridValueType.Absolute,
+            TrailStopValue = 0.9m,
+            StopTradingAfterProfit = false
+        };
+
+        TradeGridStopAndProfit loaded = new TradeGridStopAndProfit();
+
+        Exception? error = Record.Exception(() => loaded.LoadFromString(source.GetSaveString()));
+
+        Assert.Null(error);
+        Assert.Equal(OnOffRegime.On, loaded.ProfitRegime);
+        Assert.Equal(TradeGridValueType.Absolute, loaded.ProfitValueType);
+        Assert.Equal(2.2m, loaded.ProfitValue);
+        Assert.Equal(OnOffRegime.On, loaded.StopRegime);
+        Assert.Equal(TradeGridValueType.Percent, loaded.StopValueType);
+        Assert.Equal(1.1m, loaded.StopValue);
+        Assert.Equal(OnOffRegime.On, loaded.TrailStopRegime);
+        Assert.Equal(TradeGridValueType.Absolute, loaded.TrailStopValueType);
+        Assert.Equal(0.9m, loaded.TrailStopValue);
+        Assert.False(loaded.StopTradingAfterProfit);
+    }
+
+    [Fact]
     public void Stage2Step2_2_TradeGridStopAndProfit_SendNewLogMessage_WithSubscriber_ShouldForwardMessage()
     {
         TradeGridStopAndProfit stopAndProfit = new TradeGridStopAndProfit();
@@ -4006,6 +4088,38 @@ public class TradeGridPersistenceCoreTests
         Assert.Equal(TradeGridAutoStartRegime.HigherOrEqual, autoStarter.AutoStartRegime);
         Assert.Equal(101.25m, autoStarter.AutoStartPrice);
         Assert.Equal(GridAutoStartShiftFirstPriceRegime.On_ShiftOnNewPrice, autoStarter.RebuildGridRegime);
+    }
+
+    [Fact]
+    public void Stage2Step2_2_TradeGridAutoStarter_GetSaveString_LoadFromString_ShouldRoundTrip()
+    {
+        TradeGridAutoStarter source = new TradeGridAutoStarter
+        {
+            AutoStartRegime = TradeGridAutoStartRegime.HigherOrEqual,
+            AutoStartPrice = 101.25m,
+            RebuildGridRegime = GridAutoStartShiftFirstPriceRegime.On_ShiftOnNewPrice,
+            ShiftFirstPrice = 1.5m,
+            StartGridByTimeOfDayIsOn = true,
+            StartGridByTimeOfDayHour = 9,
+            StartGridByTimeOfDayMinute = 30,
+            StartGridByTimeOfDaySecond = 45,
+            SingleActivationMode = false
+        };
+
+        TradeGridAutoStarter loaded = new TradeGridAutoStarter();
+
+        Exception? error = Record.Exception(() => loaded.LoadFromString(source.GetSaveString()));
+
+        Assert.Null(error);
+        Assert.Equal(TradeGridAutoStartRegime.HigherOrEqual, loaded.AutoStartRegime);
+        Assert.Equal(101.25m, loaded.AutoStartPrice);
+        Assert.Equal(GridAutoStartShiftFirstPriceRegime.On_ShiftOnNewPrice, loaded.RebuildGridRegime);
+        Assert.Equal(1.5m, loaded.ShiftFirstPrice);
+        Assert.True(loaded.StartGridByTimeOfDayIsOn);
+        Assert.Equal(9, loaded.StartGridByTimeOfDayHour);
+        Assert.Equal(30, loaded.StartGridByTimeOfDayMinute);
+        Assert.Equal(45, loaded.StartGridByTimeOfDaySecond);
+        Assert.False(loaded.SingleActivationMode);
     }
 
     [Fact]
