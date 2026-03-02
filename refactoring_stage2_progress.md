@@ -17207,3 +17207,31 @@
   - dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo -> success
   - dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900 -> success, 0 warnings, 0 errors
   - dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo -> passed 811/811
+
+## 2026-03-02 - Incremental Update #980-#981
+
+### Scope
+
+- Removed the remaining modal popup source during tests for the missing deposit-percent asset guard in `TradeGridCreator.GetVolume()`.
+
+### What Changed
+
+- Updated production code in:
+  - project/OsEngine/OsTrader/Grids/TradeGridCreator.cs
+- Updated tests in:
+  - project/OsEngine.Tests/TradeGridPersistenceCoreTests.cs
+- Changes:
+  - the `TradeGridCreator.GetVolume()` guard for a missing `TradeAssetInPortfolio` still logs the message and returns `0`.
+  - but the log type is now `System` instead of `Error`, so this path no longer escalates into the intrusive modal popup during tests.
+  - extended the existing regression to lock both the message text and the downgraded log level.
+- Added/updated tests:
+  - project/OsEngine.Tests/TradeGridPersistenceCoreTests.cs
+    - updated `Stage2Step2_2_TradeGridCreator_GetVolume_WithMissingCustomAsset_ShouldReturnZero`.
+
+### Verification
+
+- Host-context verification (outside sandbox, per dotnet-build-policy):
+  - dotnet restore project/OsEngine/OsEngine.csproj --nologo -> success
+  - dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo -> success
+  - dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900 -> success, 0 warnings, 0 errors
+  - dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo -> passed 811/811

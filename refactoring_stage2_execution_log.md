@@ -17382,3 +17382,24 @@
   - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed `811/811`
 - **Commit:** n/a
 - **Push:** n/a
+
+### Step 4.2 - Nullable Annotations (Incremental Adoption #980-#981)
+
+- **Status:** In Progress (increment block completed)
+- **Plan item:** `refactoring_stage2_plan.md` -> Phase 4 / Step 4.2
+- **Changes (suppress modal popup source for missing deposit-percent asset guard):**
+  - Updated production code in `project/OsEngine/OsTrader/Grids/TradeGridCreator.cs`:
+    - the missing-asset guard in `GetVolume()` now logs with `LogMessageType.System` instead of `LogMessageType.Error`.
+    - behavior remains the same otherwise: message is preserved and the method still returns `0`.
+  - Updated tests in `project/OsEngine.Tests/TradeGridPersistenceCoreTests.cs`:
+    - extended `Stage2Step2_2_TradeGridCreator_GetVolume_WithMissingCustomAsset_ShouldReturnZero`.
+    - now locks both the exact message text and the downgraded log type.
+  - Outcome:
+    - the `Can\`t found portfolio in Deposit Percent volume mode USDT` path no longer raises the intrusive modal popup during tests.
+- **Verification (outside sandbox, per dotnet-build-policy):**
+  - `dotnet restore project/OsEngine/OsEngine.csproj --nologo` -> success
+  - `dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo` -> success
+  - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` -> success, 0 warnings, 0 errors
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed `811/811`
+- **Commit:** n/a
+- **Push:** n/a
