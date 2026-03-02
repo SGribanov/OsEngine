@@ -4867,6 +4867,114 @@ public class TradeGridPersistenceCoreTests
     }
 
     [Fact]
+    public void Stage2Step2_2_TradeGrid_HaveOpenPositionsByGrid_WithOpenVolumeLine_ShouldReturnTrue()
+    {
+        TradeGrid grid = CreateBareGrid();
+        Position position = new Position();
+        position.AddNewOpenOrder(new Order
+        {
+            State = OrderStateType.Done,
+            Volume = 1,
+            VolumeExecute = 1
+        });
+        grid.GridCreator.Lines = new List<TradeGridLine>
+        {
+            new TradeGridLine
+            {
+                Position = position
+            }
+        };
+
+        bool haveOpenPositions = grid.HaveOpenPositionsByGrid;
+
+        Assert.True(haveOpenPositions);
+    }
+
+    [Fact]
+    public void Stage2Step2_2_TradeGrid_HaveOrdersInMarketInGrid_WithActiveOpenOrder_ShouldReturnTrue()
+    {
+        TradeGrid grid = CreateBareGrid();
+        Position position = new Position();
+        position.AddNewOpenOrder(new Order
+        {
+            State = OrderStateType.Active,
+            Volume = 1,
+            VolumeExecute = 0
+        });
+        grid.GridCreator.Lines = new List<TradeGridLine>
+        {
+            new TradeGridLine
+            {
+                Position = position
+            }
+        };
+
+        bool haveOrdersInMarket = grid.HaveOrdersInMarketInGrid;
+
+        Assert.True(haveOrdersInMarket);
+    }
+
+    [Fact]
+    public void Stage2Step2_2_TradeGrid_HaveOrdersInMarketInGrid_WithActiveCloseOrder_ShouldReturnTrue()
+    {
+        TradeGrid grid = CreateBareGrid();
+        Position position = new Position();
+        position.AddNewOpenOrder(new Order
+        {
+            State = OrderStateType.Done,
+            Volume = 1,
+            VolumeExecute = 1
+        });
+        position.AddNewCloseOrder(new Order
+        {
+            State = OrderStateType.Active,
+            Volume = 1,
+            VolumeExecute = 0
+        });
+        grid.GridCreator.Lines = new List<TradeGridLine>
+        {
+            new TradeGridLine
+            {
+                Position = position
+            }
+        };
+
+        bool haveOrdersInMarket = grid.HaveOrdersInMarketInGrid;
+
+        Assert.True(haveOrdersInMarket);
+    }
+
+    [Fact]
+    public void Stage2Step2_2_TradeGrid_HaveCloseOrders_WithActiveCloseOrder_ShouldReturnTrue()
+    {
+        TradeGrid grid = CreateBareGrid();
+        Position position = new Position();
+        position.AddNewOpenOrder(new Order
+        {
+            State = OrderStateType.Done,
+            Volume = 1,
+            VolumeExecute = 1
+        });
+        position.AddNewCloseOrder(new Order
+        {
+            State = OrderStateType.Active,
+            Volume = 1,
+            VolumeExecute = 0
+        });
+        grid.GridCreator.Lines = new List<TradeGridLine>
+        {
+            new TradeGridLine
+            {
+                Position = position
+            }
+        };
+
+        bool haveCloseOrders = grid.HaveCloseOrders;
+
+        Assert.True(haveCloseOrders);
+    }
+
+    [Fact]
     public void Stage2Step2_2_TradeGrid_PublicGridManagement_WithNullGridCreator_ShouldNotThrow()
     {
         TradeGrid grid = (TradeGrid)RuntimeHelpers.GetUninitializedObject(typeof(TradeGrid));
