@@ -6677,6 +6677,51 @@ public class TradeGridPersistenceCoreTests
     }
 
     [Fact]
+    public void Stage2Step2_2_TradeGrid_LoadFromString_WithPrimeOnlyPayload_ShouldApplyPrimeAndKeepExistingChildValues()
+    {
+        TradeGrid grid = CreateBareGrid();
+        grid.NonTradePeriods.NonTradePeriod1Regime = TradeGridRegime.CloseOnly;
+        grid.StopBy.StopGridByMoveUpIsOn = true;
+        grid.GridCreator.TradeAssetInPortfolio = "USDT";
+        grid.StopAndProfit.ProfitValue = 2.2m;
+        grid.AutoStarter.AutoStartPrice = 101.25m;
+        grid.ErrorsReaction.FailOpenOrdersCountToReaction = 3;
+        grid.TrailingUp.TrailingUpStep = 1.5m;
+
+        string payload =
+            "42@MarketMaking@CloseOnly@OncePerSecond@True@11@3@2@123.45@4@" +
+            new DateTime(2024, 1, 2, 3, 4, 5, DateTimeKind.Utc).ToString("O", CultureInfo.InvariantCulture) +
+            "@700@False@1.5@False@@@";
+
+        Exception? error = Record.Exception(() => grid.LoadFromString(payload));
+
+        Assert.Null(error);
+        Assert.Equal(42, grid.Number);
+        Assert.Equal(TradeGridPrimeType.MarketMaking, grid.GridType);
+        Assert.Equal(TradeGridRegime.CloseOnly, grid.Regime);
+        Assert.Equal(TradeGridLogicEntryRegime.OncePerSecond, grid.RegimeLogicEntry);
+        Assert.True(grid.AutoClearJournalIsOn);
+        Assert.Equal(11, grid.MaxClosePositionsInJournal);
+        Assert.Equal(3, grid.MaxOpenOrdersInMarket);
+        Assert.Equal(2, grid.MaxCloseOrdersInMarket);
+        Assert.Equal(123.45m, grid.FirstPriceReal);
+        Assert.Equal(4, grid.OpenPositionsCount);
+        Assert.Equal(new DateTime(2024, 1, 2, 3, 4, 5, DateTimeKind.Utc), grid.FirstTradeTime);
+        Assert.Equal(700, grid.DelayInReal);
+        Assert.False(grid.CheckMicroVolumes);
+        Assert.Equal(1.5m, grid.MaxDistanceToOrdersPercent);
+        Assert.False(grid.OpenOrdersMakerOnly);
+
+        Assert.Equal(TradeGridRegime.CloseOnly, grid.NonTradePeriods.NonTradePeriod1Regime);
+        Assert.True(grid.StopBy.StopGridByMoveUpIsOn);
+        Assert.Equal("USDT", grid.GridCreator.TradeAssetInPortfolio);
+        Assert.Equal(2.2m, grid.StopAndProfit.ProfitValue);
+        Assert.Equal(101.25m, grid.AutoStarter.AutoStartPrice);
+        Assert.Equal(3, grid.ErrorsReaction.FailOpenOrdersCountToReaction);
+        Assert.Equal(1.5m, grid.TrailingUp.TrailingUpStep);
+    }
+
+    [Fact]
     public void Stage2Step2_2_TradeGrid_GetSaveString_LoadFromString_ShouldRoundTrip()
     {
         TradeGrid source = CreateBareGrid();
