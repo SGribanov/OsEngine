@@ -287,6 +287,22 @@ public class TradeGridPersistenceCoreTests
     }
 
     [Fact]
+    public void Stage2Step2_2_TradeGridNonTradePeriods_GetSaveString_LoadFromString_ShouldRoundTrip()
+    {
+        TradeGridNonTradePeriods source = new TradeGridNonTradePeriods("CodexGridPeriods");
+        source.NonTradePeriod1Regime = TradeGridRegime.CloseOnly;
+        source.NonTradePeriod2Regime = TradeGridRegime.OffAndCancelOrders;
+
+        TradeGridNonTradePeriods loaded = new TradeGridNonTradePeriods("CodexGridPeriodsLoaded");
+
+        Exception? error = Record.Exception(() => loaded.LoadFromString(source.GetSaveString()));
+
+        Assert.Null(error);
+        Assert.Equal(TradeGridRegime.CloseOnly, loaded.NonTradePeriod1Regime);
+        Assert.Equal(TradeGridRegime.OffAndCancelOrders, loaded.NonTradePeriod2Regime);
+    }
+
+    [Fact]
     public void Stage2Step2_2_TradeGridStopBy_GetSaveString_ShouldKeepReservedTailShape()
     {
         TradeGridStopBy stopBy = new TradeGridStopBy
@@ -463,6 +479,46 @@ public class TradeGridPersistenceCoreTests
         Assert.Equal(Side.Sell, creator.GridSide);
         Assert.Equal(TradeGridVolumeType.Contracts, creator.TypeVolume);
         Assert.Equal("AssetX", creator.TradeAssetInPortfolio);
+    }
+
+    [Fact]
+    public void Stage2Step2_2_TradeGridCreator_GetSaveString_LoadFromString_ShouldRoundTrip()
+    {
+        TradeGridCreator source = new TradeGridCreator
+        {
+            GridSide = Side.Sell,
+            FirstPrice = 123.45m,
+            LineCountStart = 3,
+            TypeStep = TradeGridValueType.Absolute,
+            LineStep = 1.2m,
+            StepMultiplicator = 1.1m,
+            TypeProfit = TradeGridValueType.Percent,
+            ProfitStep = 0.8m,
+            ProfitMultiplicator = 1.3m,
+            TypeVolume = TradeGridVolumeType.Contracts,
+            StartVolume = 2.5m,
+            MartingaleMultiplicator = 1.4m,
+            TradeAssetInPortfolio = "AssetX"
+        };
+
+        TradeGridCreator loaded = new TradeGridCreator();
+
+        Exception? error = Record.Exception(() => loaded.LoadFromString(source.GetSaveString()));
+
+        Assert.Null(error);
+        Assert.Equal(Side.Sell, loaded.GridSide);
+        Assert.Equal(123.45m, loaded.FirstPrice);
+        Assert.Equal(3, loaded.LineCountStart);
+        Assert.Equal(TradeGridValueType.Absolute, loaded.TypeStep);
+        Assert.Equal(1.2m, loaded.LineStep);
+        Assert.Equal(1.1m, loaded.StepMultiplicator);
+        Assert.Equal(TradeGridValueType.Percent, loaded.TypeProfit);
+        Assert.Equal(0.8m, loaded.ProfitStep);
+        Assert.Equal(1.3m, loaded.ProfitMultiplicator);
+        Assert.Equal(TradeGridVolumeType.Contracts, loaded.TypeVolume);
+        Assert.Equal(2.5m, loaded.StartVolume);
+        Assert.Equal(1.4m, loaded.MartingaleMultiplicator);
+        Assert.Equal("AssetX", loaded.TradeAssetInPortfolio);
     }
 
     [Fact]
@@ -4572,6 +4628,34 @@ public class TradeGridPersistenceCoreTests
         Assert.False(reaction.FailOpenOrdersReactionIsOn);
         Assert.Equal(3, reaction.FailOpenOrdersCountToReaction);
         Assert.Equal(4, reaction.FailCancelOrdersCountToReaction);
+    }
+
+    [Fact]
+    public void Stage2Step2_2_TradeGridErrorsReaction_GetSaveString_LoadFromString_ShouldRoundTrip()
+    {
+        TradeGridErrorsReaction source = new TradeGridErrorsReaction(CreateBareGrid())
+        {
+            FailOpenOrdersReactionIsOn = false,
+            FailOpenOrdersCountToReaction = 3,
+            FailCancelOrdersCountToReaction = 4,
+            FailCancelOrdersReactionIsOn = true,
+            WaitOnStartConnectorIsOn = false,
+            WaitSecondsOnStartConnector = 12,
+            ReduceOrdersCountInMarketOnNoFundsError = false
+        };
+
+        TradeGridErrorsReaction loaded = new TradeGridErrorsReaction(CreateBareGrid());
+
+        Exception? error = Record.Exception(() => loaded.LoadFromString(source.GetSaveString()));
+
+        Assert.Null(error);
+        Assert.False(loaded.FailOpenOrdersReactionIsOn);
+        Assert.Equal(3, loaded.FailOpenOrdersCountToReaction);
+        Assert.Equal(4, loaded.FailCancelOrdersCountToReaction);
+        Assert.True(loaded.FailCancelOrdersReactionIsOn);
+        Assert.False(loaded.WaitOnStartConnectorIsOn);
+        Assert.Equal(12, loaded.WaitSecondsOnStartConnector);
+        Assert.False(loaded.ReduceOrdersCountInMarketOnNoFundsError);
     }
 
     [Fact]
