@@ -310,6 +310,53 @@ public class TradeGridPersistenceCoreTests
     }
 
     [Fact]
+    public void Stage2Step2_2_TradeGridLine_SetFromStr_WithValidPayload_ShouldParseAllFields()
+    {
+        TradeGridLine line = new TradeGridLine();
+
+        bool parsed = line.SetFromStr("123.45|2.5|sell|130.75|7|");
+
+        Assert.True(parsed);
+        Assert.Equal(123.45m, line.PriceEnter);
+        Assert.Equal(2.5m, line.Volume);
+        Assert.Equal(Side.Sell, line.Side);
+        Assert.Equal(130.75m, line.PriceExit);
+        Assert.Equal(7, line.PositionNum);
+    }
+
+    [Fact]
+    public void Stage2Step2_2_TradeGridLine_SetFromStr_WithNegativeValue_ShouldReturnFalseAndKeepDefaults()
+    {
+        TradeGridLine line = new TradeGridLine
+        {
+            PriceEnter = 1m,
+            Volume = 1m,
+            Side = Side.Buy,
+            PriceExit = 2m,
+            PositionNum = 5
+        };
+
+        bool parsed = line.SetFromStr("-1|2|Buy|3|7|");
+
+        Assert.False(parsed);
+        Assert.Equal(1m, line.PriceEnter);
+        Assert.Equal(1m, line.Volume);
+        Assert.Equal(Side.Buy, line.Side);
+        Assert.Equal(2m, line.PriceExit);
+        Assert.Equal(5, line.PositionNum);
+    }
+
+    [Fact]
+    public void Stage2Step2_2_TradeGridLine_SetFromStr_WithInvalidSide_ShouldReturnFalse()
+    {
+        TradeGridLine line = new TradeGridLine();
+
+        bool parsed = line.SetFromStr("1|2|Hold|3|7|");
+
+        Assert.False(parsed);
+    }
+
+    [Fact]
     public void Stage2Step2_2_TradeGridStopBy_GetRegime_WithNullGridOrTab_ShouldReturnOn()
     {
         TradeGridStopBy stopBy = new TradeGridStopBy
