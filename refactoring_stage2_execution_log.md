@@ -17070,3 +17070,21 @@
   - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed `766/766`
 - **Commit:** n/a
 - **Push:** n/a
+
+### Step 4.2 - Nullable Annotations (Incremental Adoption #936-#938)
+
+- **Status:** In Progress (increment block completed)
+- **Plan item:** `refactoring_stage2_plan.md` -> Phase 4 / Step 4.2
+- **Changes (TradeGrid primitive getter + regime event coverage):**
+  - Updated tests in `project/OsEngine.Tests/TradeGridPersistenceCoreTests.cs`:
+    - added `Stage2Step2_2_TradeGrid_FirstPriceReal_ShouldReturnBackingField`.
+    - added `Stage2Step2_2_TradeGrid_Regime_SetSameValue_ShouldNotRaiseRepaintEvents`.
+    - added `Stage2Step2_2_TradeGrid_Regime_SetNewValue_ShouldRaiseRepaintEventsOnce`.
+  - Locked the direct getter contract for `FirstPriceReal` and the side-effect contract of the `Regime` property.
+- **Verification (outside sandbox, per dotnet-build-policy):**
+  - `dotnet restore project/OsEngine/OsEngine.csproj --nologo` -> success
+  - `dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo` -> success
+  - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` -> success, 0 warnings, 0 errors
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed `769/769`
+- **Commit:** n/a
+- **Push:** n/a

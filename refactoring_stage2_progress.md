@@ -16755,3 +16755,30 @@
   - dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo -> success
   - dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900 -> success, 0 warnings, 0 errors
   - dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo -> passed 766/766
+
+### Increment #936-#938
+
+- Component: `TradeGrid`
+- Focus: lock primitive getter and `Regime` property event contracts
+- Added targeted regression coverage in:
+  - project/OsEngine.Tests/TradeGridPersistenceCoreTests.cs
+- Changes:
+  - locked `FirstPriceReal` as a direct pass-through over `_firstTradePrice`.
+  - locked `Regime` so re-paint events do not fire when assigning the same value.
+  - locked `Regime` so both re-paint events fire exactly once when assigning a new value.
+- Added/updated tests:
+  - project/OsEngine.Tests/TradeGridPersistenceCoreTests.cs
+    - added `Stage2Step2_2_TradeGrid_FirstPriceReal_ShouldReturnBackingField`.
+    - added `Stage2Step2_2_TradeGrid_Regime_SetSameValue_ShouldNotRaiseRepaintEvents`.
+    - added `Stage2Step2_2_TradeGrid_Regime_SetNewValue_ShouldRaiseRepaintEventsOnce`.
+- Scope:
+  - test-only regression coverage
+  - no production behavior change
+
+### Verification
+
+- Host-context verification (outside sandbox, per dotnet-build-policy):
+  - dotnet restore project/OsEngine/OsEngine.csproj --nologo -> success
+  - dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo -> success
+  - dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900 -> success, 0 warnings, 0 errors
+  - dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo -> passed 769/769
