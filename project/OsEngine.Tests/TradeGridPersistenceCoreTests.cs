@@ -5439,6 +5439,77 @@ public class TradeGridPersistenceCoreTests
     }
 
     [Fact]
+    public void Stage2Step2_2_TradeGrid_GetSaveString_ShouldComposePrimeAndSectionPayloads()
+    {
+        TradeGrid grid = CreateBareGrid();
+        grid.Number = 42;
+        grid.GridType = TradeGridPrimeType.MarketMaking;
+        grid.Regime = TradeGridRegime.CloseOnly;
+        grid.RegimeLogicEntry = TradeGridLogicEntryRegime.OncePerSecond;
+        grid.AutoClearJournalIsOn = true;
+        grid.MaxClosePositionsInJournal = 11;
+        grid.MaxOpenOrdersInMarket = 3;
+        grid.MaxCloseOrdersInMarket = 2;
+        grid.DelayInReal = 700;
+        grid.CheckMicroVolumes = false;
+        grid.MaxDistanceToOrdersPercent = 1.5m;
+        grid.OpenOrdersMakerOnly = false;
+
+        SetPrivateField(grid, "_firstTradePrice", 123.45m);
+        SetPrivateField(grid, "_openPositionsBySession", 4);
+        DateTime firstTradeTime = new DateTime(2024, 1, 2, 3, 4, 5, DateTimeKind.Utc);
+        SetPrivateField(grid, "_firstTradeTime", firstTradeTime);
+
+        string expected =
+            "42@MarketMaking@CloseOnly@OncePerSecond@True@11@3@2@123.45@4@" + firstTradeTime.ToString("O", CultureInfo.InvariantCulture) + "@700@False@1.5@False@@@" +
+            "%" + grid.NonTradePeriods.GetSaveString() +
+            "%" +
+            "%" + grid.StopBy.GetSaveString() +
+            "%" + grid.GridCreator.GetSaveString() +
+            "%" + grid.StopAndProfit.GetSaveString() +
+            "%" + grid.AutoStarter.GetSaveString() +
+            "%" + grid.ErrorsReaction.GetSaveString() +
+            "%" + grid.TrailingUp.GetSaveString() +
+            "%";
+
+        string save = grid.GetSaveString();
+
+        Assert.Equal(expected, save);
+    }
+
+    [Fact]
+    public void Stage2Step2_2_TradeGrid_Delete_WithInitializedComponents_ShouldClearReferencesAndStayIdempotent()
+    {
+        TradeGrid grid = CreateBareGrid();
+        TradeGridErrorsReaction errorsReaction = grid.ErrorsReaction;
+        TrailingUp trailingUp = grid.TrailingUp;
+        grid.Tab = (BotTabSimple)RuntimeHelpers.GetUninitializedObject(typeof(BotTabSimple));
+
+        Exception? error = Record.Exception(() =>
+        {
+            grid.Delete();
+            grid.Delete();
+        });
+
+        object? isDeleted = typeof(TradeGrid).GetField("_isDeleted", BindingFlags.NonPublic | BindingFlags.Instance)?.GetValue(grid);
+        object? errorsReactionGrid = typeof(TradeGridErrorsReaction).GetField("_myGrid", BindingFlags.NonPublic | BindingFlags.Instance)?.GetValue(errorsReaction);
+        object? trailingGrid = typeof(TrailingUp).GetField("_grid", BindingFlags.NonPublic | BindingFlags.Instance)?.GetValue(trailingUp);
+
+        Assert.Null(error);
+        Assert.True((bool)(isDeleted ?? false));
+        Assert.Null(grid.Tab);
+        Assert.Null(grid.NonTradePeriods);
+        Assert.Null(grid.StopBy);
+        Assert.Null(grid.StopAndProfit);
+        Assert.Null(grid.AutoStarter);
+        Assert.Null(grid.GridCreator);
+        Assert.Null(grid.ErrorsReaction);
+        Assert.Null(grid.TrailingUp);
+        Assert.Null(errorsReactionGrid);
+        Assert.Null(trailingGrid);
+    }
+
+    [Fact]
     public void Stage2Step2_2_TradeGrid_TryDeletePositionsFromJournal_WithNullJournal_ShouldNotThrow()
     {
         TradeGrid grid = (TradeGrid)RuntimeHelpers.GetUninitializedObject(typeof(TradeGrid));
