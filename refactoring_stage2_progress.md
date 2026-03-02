@@ -16955,3 +16955,30 @@
   - dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo -> success
   - dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900 -> success, 0 warnings, 0 errors
   - dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo -> passed 782/782
+
+### Increment #952-#954
+
+- Component: `TradeGridLine`
+- Focus: lock parse contracts for `SetFromStr()`
+- Added targeted regression coverage in:
+  - project/OsEngine.Tests/TradeGridPersistenceCoreTests.cs
+- Changes:
+  - locked successful parse of all fields, including case-insensitive `Side`.
+  - locked reject-path for negative numeric values without mutating existing state.
+  - locked reject-path for invalid side token.
+- Added/updated tests:
+  - project/OsEngine.Tests/TradeGridPersistenceCoreTests.cs
+    - added `Stage2Step2_2_TradeGridLine_SetFromStr_WithValidPayload_ShouldParseAllFields`.
+    - added `Stage2Step2_2_TradeGridLine_SetFromStr_WithNegativeValue_ShouldReturnFalseAndKeepDefaults`.
+    - added `Stage2Step2_2_TradeGridLine_SetFromStr_WithInvalidSide_ShouldReturnFalse`.
+- Scope:
+  - test-only regression coverage
+  - no production behavior change
+
+### Verification
+
+- Host-context verification (outside sandbox, per dotnet-build-policy):
+  - dotnet restore project/OsEngine/OsEngine.csproj --nologo -> success
+  - dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo -> success
+  - dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900 -> success, 0 warnings, 0 errors
+  - dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo -> passed 785/785
