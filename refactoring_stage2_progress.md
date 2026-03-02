@@ -17355,6 +17355,35 @@
   - dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900 -> success, 0 warnings, 0 errors
   - dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo -> passed 826/826
 
+## 2026-03-02 - Incremental Update #997-#999
+
+### Scope
+
+- Added the next serializer round-trip batch for the remaining isolated child grid components.
+
+### What Changed
+
+- Updated tests in:
+  - project/OsEngine.Tests/TradeGridPersistenceCoreTests.cs
+- Changes:
+  - locked `GetSaveString() -> LoadFromString()` round-trip behavior for:
+    - `TradeGridNonTradePeriods`
+    - `TradeGridCreator`
+    - `TradeGridErrorsReaction`
+- Added/updated tests:
+  - project/OsEngine.Tests/TradeGridPersistenceCoreTests.cs
+    - added `Stage2Step2_2_TradeGridNonTradePeriods_GetSaveString_LoadFromString_ShouldRoundTrip`.
+    - added `Stage2Step2_2_TradeGridCreator_GetSaveString_LoadFromString_ShouldRoundTrip`.
+    - added `Stage2Step2_2_TradeGridErrorsReaction_GetSaveString_LoadFromString_ShouldRoundTrip`.
+
+### Verification
+
+- Host-context verification (outside sandbox, per dotnet-build-policy):
+  - dotnet restore project/OsEngine/OsEngine.csproj --nologo -> success
+  - dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo -> success
+  - dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900 -> success, 0 warnings, 0 errors
+  - dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo -> passed 829/829
+
 ## 2026-03-02 - Incremental Update #980-#981
 
 ### Scope
