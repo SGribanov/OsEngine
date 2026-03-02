@@ -17267,6 +17267,39 @@
     - dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900 -> success, 0 warnings, 0 errors
     - dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo -> passed 816/816
 
+## 2026-03-02 - Incremental Update #987-#991
+
+### Scope
+
+- Added a larger batch for top-level empty-input guards in remaining child `LoadFromString(...)` parsers.
+
+### What Changed
+
+- Updated tests in:
+  - project/OsEngine.Tests/TradeGridPersistenceCoreTests.cs
+- Changes:
+  - locked that these child parsers keep existing values on `null`, empty, and whitespace-only payloads:
+    - `TradeGridCreator`
+    - `TradeGridStopAndProfit`
+    - `TrailingUp`
+    - `TradeGridAutoStarter`
+    - `TradeGridErrorsReaction`
+- Added/updated tests:
+  - project/OsEngine.Tests/TradeGridPersistenceCoreTests.cs
+    - added `Stage2Step2_2_TradeGridCreator_LoadFromString_WithEmptyLikePayloads_ShouldKeepExistingValues`.
+    - added `Stage2Step2_2_TradeGridStopAndProfit_LoadFromString_WithEmptyLikePayloads_ShouldKeepExistingValues`.
+    - added `Stage2Step2_2_TrailingUp_LoadFromString_WithEmptyLikePayloads_ShouldKeepExistingValues`.
+    - added `Stage2Step2_2_TradeGridAutoStarter_LoadFromString_WithEmptyLikePayloads_ShouldKeepExistingValues`.
+    - added `Stage2Step2_2_TradeGridErrorsReaction_LoadFromString_WithEmptyLikePayloads_ShouldKeepExistingValues`.
+
+### Verification
+
+- Host-context verification (outside sandbox, per dotnet-build-policy):
+  - dotnet restore project/OsEngine/OsEngine.csproj --nologo -> success
+  - dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo -> success
+  - dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900 -> success, 0 warnings, 0 errors
+  - dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo -> passed 821/821
+
 ## 2026-03-02 - Incremental Update #980-#981
 
 ### Scope

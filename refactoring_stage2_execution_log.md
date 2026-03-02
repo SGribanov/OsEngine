@@ -17446,3 +17446,24 @@
     - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed `816/816`
 - **Commit:** n/a
 - **Push:** n/a
+
+### Step 4.2 - Nullable Annotations (Incremental Adoption #987-#991)
+
+- **Status:** In Progress (increment block completed)
+- **Plan item:** `refactoring_stage2_plan.md` -> Phase 4 / Step 4.2
+- **Changes (top-level empty-input guards for remaining child parsers):**
+  - Updated tests in `project/OsEngine.Tests/TradeGridPersistenceCoreTests.cs`:
+    - added `Stage2Step2_2_TradeGridCreator_LoadFromString_WithEmptyLikePayloads_ShouldKeepExistingValues`.
+    - added `Stage2Step2_2_TradeGridStopAndProfit_LoadFromString_WithEmptyLikePayloads_ShouldKeepExistingValues`.
+    - added `Stage2Step2_2_TrailingUp_LoadFromString_WithEmptyLikePayloads_ShouldKeepExistingValues`.
+    - added `Stage2Step2_2_TradeGridAutoStarter_LoadFromString_WithEmptyLikePayloads_ShouldKeepExistingValues`.
+    - added `Stage2Step2_2_TradeGridErrorsReaction_LoadFromString_WithEmptyLikePayloads_ShouldKeepExistingValues`.
+  - Outcome:
+    - locked the shared top-level `string.IsNullOrWhiteSpace(value)` early-return contract across the remaining child grid parsers.
+- **Verification (outside sandbox, per dotnet-build-policy):**
+  - `dotnet restore project/OsEngine/OsEngine.csproj --nologo` -> success
+  - `dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo` -> success
+  - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` -> success, 0 warnings, 0 errors
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed `821/821`
+- **Commit:** n/a
+- **Push:** n/a
