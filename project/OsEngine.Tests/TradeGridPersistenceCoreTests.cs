@@ -1982,6 +1982,25 @@ public class TradeGridPersistenceCoreTests
     }
 
     [Fact]
+    public void Stage2Step2_2_TradeGrid_MaxMinGridPrice_WithSparseLines_ShouldForwardTrailingBounds()
+    {
+        TradeGrid grid = CreateBareGrid();
+        grid.GridCreator.Lines = new List<TradeGridLine>
+        {
+            null!,
+            new TradeGridLine { PriceEnter = 105m },
+            new TradeGridLine { PriceEnter = 99m },
+            new TradeGridLine { PriceEnter = 101m }
+        };
+
+        decimal max = grid.MaxGridPrice;
+        decimal min = grid.MinGridPrice;
+
+        Assert.Equal(105m, max);
+        Assert.Equal(99m, min);
+    }
+
+    [Fact]
     public void Stage2Step2_2_TrailingUp_TryTrailingGrid_WithNullLastCandle_ShouldReturnFalse()
     {
         TradeGrid grid = CreateBareGrid();
