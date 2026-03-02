@@ -16680,3 +16680,28 @@
   - dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo -> success
   - dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900 -> success, 0 warnings, 0 errors
   - dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo -> passed 760/760
+
+### Increment #930-#931
+
+- Component: `TradeGrid`
+- Focus: lock helper positive-path contracts for open/closing line selectors
+- Added targeted regression coverage in:
+  - project/OsEngine.Tests/TradeGridPersistenceCoreTests.cs
+- Changes:
+  - locked `GetLinesWithOpenOrdersNeed(...)` for a simple eligible buy-side line.
+  - locked `GetLinesWithClosingOrdersFact()` for an active close-order line.
+- Added/updated tests:
+  - project/OsEngine.Tests/TradeGridPersistenceCoreTests.cs
+    - added `Stage2Step2_2_TradeGrid_GetLinesWithOpenOrdersNeed_WithEligibleBuyLine_ShouldReturnLine`.
+    - added `Stage2Step2_2_TradeGrid_GetLinesWithClosingOrdersFact_WithActiveCloseLine_ShouldReturnLine`.
+- Scope:
+  - test-only regression coverage
+  - no production behavior change
+
+### Verification
+
+- Host-context verification (outside sandbox, per dotnet-build-policy):
+  - dotnet restore project/OsEngine/OsEngine.csproj --nologo -> success
+  - dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo -> success
+  - dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900 -> success, 0 warnings, 0 errors
+  - dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo -> passed 762/762
