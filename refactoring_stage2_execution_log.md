@@ -16674,3 +16674,42 @@
   - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed `705/705`
 - **Commit:** n/a
 - **Push:** n/a
+
+### Step 4.2 - Nullable Annotations (Incremental Adoption #873-#877)
+
+- **Status:** In Progress (increment block completed)
+- **Plan item:** `refactoring_stage2_plan.md` -> Phase 4 / Step 4.2
+- **Changes (TradeGridsMaster helper parser regression coverage):**
+  - Updated tests in `project/OsEngine.Tests/TradeGridPersistenceCoreTests.cs`:
+    - added `Stage2Step2_2_TradeGridsMaster_ParseLegacyGridsSettings_WithWhitespaceContent_ShouldReturnNull`.
+    - added `Stage2Step2_2_TradeGridsMaster_ParseLegacyGridsSettings_WithMultilineContent_ShouldCollectNonEmptyLines`.
+    - added `Stage2Step2_2_TradeGridsMaster_TryExtractGridNumber_WithSeparator_ShouldParseNumber`.
+    - added `Stage2Step2_2_TradeGridsMaster_TryExtractGridNumber_WithoutSeparator_ShouldParseNumber`.
+    - added `Stage2Step2_2_TradeGridsMaster_TryExtractGridNumber_WithInvalidPrefix_ShouldReturnFalse`.
+  - Locked private legacy/settings helper contracts without changing production code.
+- **Verification (outside sandbox, per dotnet-build-policy):**
+  - `dotnet restore project/OsEngine/OsEngine.csproj --nologo` -> success
+  - `dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo` -> success
+  - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` -> success, 0 warnings, 0 errors
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed `710/710`
+- **Commit:** n/a
+- **Push:** n/a
+
+### Step 4.2 - Nullable Annotations (Incremental Adoption #878-#881)
+
+- **Status:** In Progress (increment block completed)
+- **Plan item:** `refactoring_stage2_plan.md` -> Phase 4 / Step 4.2
+- **Changes (TradeGridsMaster helper edge-case regression coverage):**
+  - Updated tests in `project/OsEngine.Tests/TradeGridPersistenceCoreTests.cs`:
+    - added `Stage2Step2_2_TradeGridsMaster_ParseLegacyGridsSettings_WithSingleLine_ShouldReturnSingleEntry`.
+    - added `Stage2Step2_2_TradeGridsMaster_TryExtractGridNumber_WithNullInput_ShouldReturnFalse`.
+    - added `Stage2Step2_2_TradeGridsMaster_TryExtractGridNumber_WithLeadingSeparator_ShouldReturnFalse`.
+    - added `Stage2Step2_2_TradeGridsMaster_TryExtractGridNumber_WithWhitespaceNumberPart_ShouldReturnFalse`.
+  - Extended helper coverage across the remaining invalid-prefix extraction cases.
+- **Verification (outside sandbox, per dotnet-build-policy):**
+  - `dotnet restore project/OsEngine/OsEngine.csproj --nologo` -> success
+  - `dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo` -> success
+  - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` -> success, 0 warnings, 0 errors
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed `714/714`
+- **Commit:** n/a
+- **Push:** n/a
