@@ -6571,6 +6571,31 @@ public class TradeGridPersistenceCoreTests
     }
 
     [Fact]
+    public void Stage2Step2_2_TradeGrid_GetSaveString_WithNullChildSections_ShouldKeepEmptySectionShape()
+    {
+        TradeGrid grid = CreateBareGrid();
+        grid.Number = 7;
+        grid.GridType = TradeGridPrimeType.OpenPosition;
+        grid.Regime = TradeGridRegime.On;
+        grid.RegimeLogicEntry = TradeGridLogicEntryRegime.OnTrade;
+        grid.NonTradePeriods = null;
+        grid.StopBy = null;
+        grid.GridCreator = null;
+        grid.StopAndProfit = null;
+        grid.AutoStarter = null;
+        grid.ErrorsReaction = null;
+        grid.TrailingUp = null;
+
+        string save = string.Empty;
+        Exception? error = Record.Exception(() => save = grid.GetSaveString());
+
+        Assert.Null(error);
+        Assert.Equal("7@OpenPosition@On@OnTrade@False@0@0@0@0@0@" +
+            DateTime.MinValue.ToString("O", CultureInfo.InvariantCulture) +
+            "@0@False@0@False@@@%%%%%%%%%", save);
+    }
+
+    [Fact]
     public void Stage2Step2_2_TradeGrid_GetSaveString_LoadFromString_ShouldRoundTrip()
     {
         TradeGrid source = CreateBareGrid();
