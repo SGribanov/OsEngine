@@ -5675,6 +5675,66 @@ public class TradeGridPersistenceCoreTests
     }
 
     [Fact]
+    public void Stage2Step2_2_TradeGrid_OpenVolumeByLines_WithMultipleOpenPositions_ShouldSumOpenVolume()
+    {
+        TradeGrid grid = CreateBareGrid();
+
+        Position firstPosition = new Position();
+        firstPosition.AddNewOpenOrder(new Order
+        {
+            State = OrderStateType.Done,
+            Volume = 1m,
+            VolumeExecute = 1m
+        });
+
+        Position secondPosition = new Position();
+        secondPosition.AddNewOpenOrder(new Order
+        {
+            State = OrderStateType.Done,
+            Volume = 2m,
+            VolumeExecute = 2m
+        });
+
+        grid.GridCreator.Lines = new List<TradeGridLine>
+        {
+            new TradeGridLine
+            {
+                Position = firstPosition
+            },
+            new TradeGridLine
+            {
+                Position = secondPosition
+            }
+        };
+
+        decimal openVolumeByLines = grid.OpenVolumeByLines;
+
+        Assert.Equal(3m, openVolumeByLines);
+    }
+
+    [Fact]
+    public void Stage2Step2_2_TradeGrid_AllVolumeInLines_WithSparseLines_ShouldSumLineVolumes()
+    {
+        TradeGrid grid = CreateBareGrid();
+        grid.GridCreator.Lines = new List<TradeGridLine>
+        {
+            null!,
+            new TradeGridLine
+            {
+                Volume = 1.25m
+            },
+            new TradeGridLine
+            {
+                Volume = 2.75m
+            }
+        };
+
+        decimal allVolumeInLines = grid.AllVolumeInLines;
+
+        Assert.Equal(4m, allVolumeInLines);
+    }
+
+    [Fact]
     public void Stage2Step2_2_TradeGrid_OrderHelpers_WithNullLastCandle_ShouldStaySafe()
     {
         TradeGrid grid = CreateBareGrid();
