@@ -2812,6 +2812,35 @@ public class TradeGridPersistenceCoreTests
     }
 
     [Fact]
+    public void Stage2Step2_2_TradeGridCreator_LoadLines_WithNullOrWhitespacePayload_ShouldKeepExistingLines()
+    {
+        TradeGridCreator creator = new TradeGridCreator();
+        creator.Lines = new List<TradeGridLine>
+        {
+            new TradeGridLine
+            {
+                PriceEnter = 100m,
+                Volume = 1m,
+                Side = Side.Buy,
+                PriceExit = 101m,
+                PositionNum = 7
+            }
+        };
+
+        Exception? error = Record.Exception(() =>
+        {
+            creator.LoadLines(null!);
+            creator.LoadLines(string.Empty);
+            creator.LoadLines("   ");
+        });
+
+        Assert.Null(error);
+        Assert.Single(creator.Lines);
+        Assert.Equal(100m, creator.Lines[0].PriceEnter);
+        Assert.Equal(7, creator.Lines[0].PositionNum);
+    }
+
+    [Fact]
     public void Stage2Step2_2_TradeGridCreator_Mutators_WithNullLinesOrTab_ShouldNotThrow()
     {
         TradeGridCreator creator = (TradeGridCreator)RuntimeHelpers.GetUninitializedObject(typeof(TradeGridCreator));
