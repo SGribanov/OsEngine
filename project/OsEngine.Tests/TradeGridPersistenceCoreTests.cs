@@ -238,6 +238,36 @@ public class TradeGridPersistenceCoreTests
     }
 
     [Fact]
+    public void Stage2Step2_2_TradeGridNonTradePeriods_SendNewLogMessage_WithSubscriber_ShouldForwardMessage()
+    {
+        TradeGridNonTradePeriods periods = new TradeGridNonTradePeriods("CodexGridPeriods");
+        string? receivedMessage = null;
+        LogMessageType? receivedType = null;
+
+        periods.LogMessageEvent += (message, type) =>
+        {
+            receivedMessage = message;
+            receivedType = type;
+        };
+
+        periods.SendNewLogMessage("CodexPeriodsMessage", LogMessageType.Signal);
+
+        Assert.Equal("CodexPeriodsMessage", receivedMessage);
+        Assert.Equal(LogMessageType.Signal, receivedType);
+    }
+
+    [Fact]
+    public void Stage2Step2_2_TradeGridNonTradePeriods_SendNewLogMessage_WithoutSubscriber_ShouldNotThrow()
+    {
+        TradeGridNonTradePeriods periods = new TradeGridNonTradePeriods("CodexGridPeriods");
+
+        Exception? error = Record.Exception(() =>
+            periods.SendNewLogMessage("CodexPeriodsNoSubscriber", LogMessageType.System));
+
+        Assert.Null(error);
+    }
+
+    [Fact]
     public void Stage2Step2_2_TradeGridStopBy_GetSaveString_ShouldKeepReservedTailShape()
     {
         TradeGridStopBy stopBy = new TradeGridStopBy
@@ -1580,6 +1610,38 @@ public class TradeGridPersistenceCoreTests
     }
 
     [Fact]
+    public void Stage2Step2_2_TradeGridsMaster_SendNewLogMessage_WithSubscriber_ShouldForwardMessage()
+    {
+        TradeGridsMaster master =
+            (TradeGridsMaster)RuntimeHelpers.GetUninitializedObject(typeof(TradeGridsMaster));
+        string? receivedMessage = null;
+        LogMessageType? receivedType = null;
+
+        master.LogMessageEvent += (message, type) =>
+        {
+            receivedMessage = message;
+            receivedType = type;
+        };
+
+        master.SendNewLogMessage("CodexGridsMasterMessage", LogMessageType.Signal);
+
+        Assert.Equal("CodexGridsMasterMessage", receivedMessage);
+        Assert.Equal(LogMessageType.Signal, receivedType);
+    }
+
+    [Fact]
+    public void Stage2Step2_2_TradeGridsMaster_SendNewLogMessage_WithoutSubscriber_ShouldNotThrow()
+    {
+        TradeGridsMaster master =
+            (TradeGridsMaster)RuntimeHelpers.GetUninitializedObject(typeof(TradeGridsMaster));
+
+        Exception? error = Record.Exception(() =>
+            master.SendNewLogMessage("CodexGridsMasterNoSubscriber", LogMessageType.System));
+
+        Assert.Null(error);
+    }
+
+    [Fact]
     public void Stage2Step2_2_TradeGridsMaster_Clear_WithEmptyCollectionInOptimizerMode_ShouldNotThrow()
     {
         TradeGridsMaster master =
@@ -2208,6 +2270,36 @@ public class TradeGridPersistenceCoreTests
         Assert.False(moved);
         Assert.Equal(0, max);
         Assert.Equal(0, min);
+    }
+
+    [Fact]
+    public void Stage2Step2_2_TrailingUp_SendNewLogMessage_WithSubscriber_ShouldForwardMessage()
+    {
+        TrailingUp trailing = new TrailingUp(CreateBareGrid());
+        string? receivedMessage = null;
+        LogMessageType? receivedType = null;
+
+        trailing.LogMessageEvent += (message, type) =>
+        {
+            receivedMessage = message;
+            receivedType = type;
+        };
+
+        trailing.SendNewLogMessage("CodexTrailingMessage", LogMessageType.Signal);
+
+        Assert.Equal("CodexTrailingMessage", receivedMessage);
+        Assert.Equal(LogMessageType.Signal, receivedType);
+    }
+
+    [Fact]
+    public void Stage2Step2_2_TrailingUp_SendNewLogMessage_WithoutSubscriber_ShouldNotThrow()
+    {
+        TrailingUp trailing = new TrailingUp(CreateBareGrid());
+
+        Exception? error = Record.Exception(() =>
+            trailing.SendNewLogMessage("CodexTrailingNoSubscriber", LogMessageType.System));
+
+        Assert.Null(error);
     }
 
     [Fact]
@@ -3750,6 +3842,36 @@ public class TradeGridPersistenceCoreTests
     }
 
     [Fact]
+    public void Stage2Step2_2_TradeGridCreator_SendNewLogMessage_WithSubscriber_ShouldForwardMessage()
+    {
+        TradeGridCreator creator = new TradeGridCreator();
+        string? receivedMessage = null;
+        LogMessageType? receivedType = null;
+
+        creator.LogMessageEvent += (message, type) =>
+        {
+            receivedMessage = message;
+            receivedType = type;
+        };
+
+        creator.SendNewLogMessage("CodexCreatorMessage", LogMessageType.Signal);
+
+        Assert.Equal("CodexCreatorMessage", receivedMessage);
+        Assert.Equal(LogMessageType.Signal, receivedType);
+    }
+
+    [Fact]
+    public void Stage2Step2_2_TradeGridCreator_SendNewLogMessage_WithoutSubscriber_ShouldNotThrow()
+    {
+        TradeGridCreator creator = new TradeGridCreator();
+
+        Exception? error = Record.Exception(() =>
+            creator.SendNewLogMessage("CodexCreatorNoSubscriber", LogMessageType.System));
+
+        Assert.Null(error);
+    }
+
+    [Fact]
     public void Stage2Step2_2_TradeGridAutoStarter_RuntimeContextMissing_ShouldStaySafe()
     {
         TradeGridAutoStarter autoStarter = new TradeGridAutoStarter
@@ -4046,6 +4168,36 @@ public class TradeGridPersistenceCoreTests
         Assert.False(reaction.ReduceOrdersCountInMarketOnNoFundsError);
         Assert.Equal(15, reaction.FailOpenOrdersCountToReaction);
         Assert.Equal(17, reaction.FailCancelOrdersCountToReaction);
+    }
+
+    [Fact]
+    public void Stage2Step2_2_TradeGridErrorsReaction_SendNewLogMessage_WithSubscriber_ShouldForwardMessage()
+    {
+        TradeGridErrorsReaction reaction = new TradeGridErrorsReaction(CreateBareGrid());
+        string? receivedMessage = null;
+        LogMessageType? receivedType = null;
+
+        reaction.LogMessageEvent += (message, type) =>
+        {
+            receivedMessage = message;
+            receivedType = type;
+        };
+
+        reaction.SendNewLogMessage("CodexErrorsReactionMessage", LogMessageType.Signal);
+
+        Assert.Equal("CodexErrorsReactionMessage", receivedMessage);
+        Assert.Equal(LogMessageType.Signal, receivedType);
+    }
+
+    [Fact]
+    public void Stage2Step2_2_TradeGridErrorsReaction_SendNewLogMessage_WithoutSubscriber_ShouldNotThrow()
+    {
+        TradeGridErrorsReaction reaction = new TradeGridErrorsReaction(CreateBareGrid());
+
+        Exception? error = Record.Exception(() =>
+            reaction.SendNewLogMessage("CodexErrorsReactionNoSubscriber", LogMessageType.System));
+
+        Assert.Null(error);
     }
 
     [Fact]
@@ -5418,6 +5570,17 @@ public class TradeGridPersistenceCoreTests
         Assert.Contains("Security name: unknown", receivedMessage);
         Assert.Contains("CodexTradeGridMessage", receivedMessage);
         Assert.Equal(LogMessageType.Error, receivedType);
+    }
+
+    [Fact]
+    public void Stage2Step2_2_TradeGrid_SendNewLogMessage_WithoutSubscriber_ShouldNotThrow()
+    {
+        TradeGrid grid = CreateBareGrid();
+
+        Exception? error = Record.Exception(() =>
+            grid.SendNewLogMessage("CodexTradeGridNoSubscriber", LogMessageType.System));
+
+        Assert.Null(error);
     }
 
     [Fact]
