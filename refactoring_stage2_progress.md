@@ -16878,3 +16878,30 @@
   - dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo -> success
   - dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900 -> success, 0 warnings, 0 errors
   - dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo -> passed 775/775
+
+### Increment #945-#947
+
+- Component: `TradeGridStopBy`, `TradeGridCreator`, `TradeGridLine`
+- Focus: lock remaining serialization/save-string contracts in one batch
+- Added targeted regression coverage in:
+  - project/OsEngine.Tests/TradeGridPersistenceCoreTests.cs
+- Changes:
+  - locked `TradeGridStopBy.GetSaveString()` reserved-tail shape and invariant-culture numeric formatting.
+  - locked `TradeGridCreator.GetSaveString()` reserved-tail shape, including the extra trailing separator after lines payload.
+  - locked `TradeGridLine.GetSaveStr()` invariant-culture formatting and trailing field separator.
+- Added/updated tests:
+  - project/OsEngine.Tests/TradeGridPersistenceCoreTests.cs
+    - added `Stage2Step2_2_TradeGridStopBy_GetSaveString_ShouldKeepReservedTailShape`.
+    - added `Stage2Step2_2_TradeGridCreator_GetSaveString_ShouldKeepReservedTailShape`.
+    - added `Stage2Step2_2_TradeGridLine_GetSaveStr_ShouldUseInvariantCultureAndTrailingSeparator`.
+- Scope:
+  - test-only regression coverage
+  - no production behavior change
+
+### Verification
+
+- Host-context verification (outside sandbox, per dotnet-build-policy):
+  - dotnet restore project/OsEngine/OsEngine.csproj --nologo -> success
+  - dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo -> success
+  - dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900 -> success, 0 warnings, 0 errors
+  - dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo -> passed 778/778
