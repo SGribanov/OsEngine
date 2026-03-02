@@ -3238,6 +3238,27 @@ public class TradeGridPersistenceCoreTests
     }
 
     [Fact]
+    public void Stage2Step2_2_TradeGridAutoStarter_GetSaveString_ShouldKeepReservedTailShape()
+    {
+        TradeGridAutoStarter autoStarter = new TradeGridAutoStarter
+        {
+            AutoStartRegime = TradeGridAutoStartRegime.HigherOrEqual,
+            AutoStartPrice = 101.25m,
+            RebuildGridRegime = GridAutoStartShiftFirstPriceRegime.On_ShiftOnNewPrice,
+            ShiftFirstPrice = 1.5m,
+            StartGridByTimeOfDayIsOn = true,
+            StartGridByTimeOfDayHour = 9,
+            StartGridByTimeOfDayMinute = 30,
+            StartGridByTimeOfDaySecond = 45,
+            SingleActivationMode = false
+        };
+
+        string save = autoStarter.GetSaveString();
+
+        Assert.Equal("HigherOrEqual@101.25@On_ShiftOnNewPrice@1.5@True@9@30@45@False@@@@", save);
+    }
+
+    [Fact]
     public void Stage2Step2_2_TradeGridAutoStarter_RuntimeContextMissing_ShouldStaySafe()
     {
         TradeGridAutoStarter autoStarter = new TradeGridAutoStarter
