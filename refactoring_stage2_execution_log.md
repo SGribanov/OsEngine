@@ -16930,3 +16930,22 @@
   - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed `747/747`
 - **Commit:** n/a
 - **Push:** n/a
+
+### Step 4.2 - Nullable Annotations (Incremental Adoption #915-#918)
+
+- **Status:** In Progress (increment block completed)
+- **Plan item:** `refactoring_stage2_plan.md` -> Phase 4 / Step 4.2
+- **Changes (TradeGrid order-state timing helper coverage):**
+  - Updated tests in `project/OsEngine.Tests/TradeGridPersistenceCoreTests.cs`:
+    - added `Stage2Step2_2_TradeGrid_HaveOrdersWithNoMarketOrders_WithFreshNoneOrder_ShouldPrimeTimestampAndReturnTrue`.
+    - added `Stage2Step2_2_TradeGrid_HaveOrdersWithNoMarketOrders_WithoutNoneOrders_ShouldResetTimestampAndReturnFalse`.
+    - added `Stage2Step2_2_TradeGrid_HaveOrdersTryToCancelLastSecond_WithRecentOpenCancel_ShouldReturnTrue`.
+    - added `Stage2Step2_2_TradeGrid_HaveOrdersTryToCancelLastSecond_WithExpiredCloseCancel_ShouldReturnFalse`.
+  - Locked the internal timing and state-transition contracts around `_lastNoneOrderTime` and the 3-second recent-cancel window.
+- **Verification (outside sandbox, per dotnet-build-policy):**
+  - `dotnet restore project/OsEngine/OsEngine.csproj --nologo` -> success
+  - `dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo` -> success
+  - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` -> success, 0 warnings, 0 errors
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed `751/751`
+- **Commit:** n/a
+- **Push:** n/a
