@@ -17355,3 +17355,30 @@
     - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed `800/800`
 - **Commit:** n/a
 - **Push:** n/a
+
+### Step 4.2 - Nullable Annotations (Incremental Adoption #969-#979)
+
+- **Status:** In Progress (increment block completed)
+- **Plan item:** `refactoring_stage2_plan.md` -> Phase 4 / Step 4.2
+- **Changes (remaining helper log wrapper contracts):**
+  - Updated tests in `project/OsEngine.Tests/TradeGridPersistenceCoreTests.cs`:
+    - added `Stage2Step2_2_TradeGridNonTradePeriods_SendNewLogMessage_WithSubscriber_ShouldForwardMessage`.
+    - added `Stage2Step2_2_TradeGridNonTradePeriods_SendNewLogMessage_WithoutSubscriber_ShouldNotThrow`.
+    - added `Stage2Step2_2_TrailingUp_SendNewLogMessage_WithSubscriber_ShouldForwardMessage`.
+    - added `Stage2Step2_2_TrailingUp_SendNewLogMessage_WithoutSubscriber_ShouldNotThrow`.
+    - added `Stage2Step2_2_TradeGridErrorsReaction_SendNewLogMessage_WithSubscriber_ShouldForwardMessage`.
+    - added `Stage2Step2_2_TradeGridErrorsReaction_SendNewLogMessage_WithoutSubscriber_ShouldNotThrow`.
+    - added `Stage2Step2_2_TradeGridCreator_SendNewLogMessage_WithSubscriber_ShouldForwardMessage`.
+    - added `Stage2Step2_2_TradeGridCreator_SendNewLogMessage_WithoutSubscriber_ShouldNotThrow`.
+    - added `Stage2Step2_2_TradeGrid_SendNewLogMessage_WithoutSubscriber_ShouldNotThrow`.
+    - added `Stage2Step2_2_TradeGridsMaster_SendNewLogMessage_WithSubscriber_ShouldForwardMessage`.
+    - added `Stage2Step2_2_TradeGridsMaster_SendNewLogMessage_WithoutSubscriber_ShouldNotThrow`.
+  - Outcome:
+    - finished the remaining simple non-UI `SendNewLogMessage(...)` wrapper coverage in the grid service layer.
+- **Verification (outside sandbox, per dotnet-build-policy):**
+  - `dotnet restore project/OsEngine/OsEngine.csproj --nologo` -> success
+  - `dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo` -> success
+  - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` -> success, 0 warnings, 0 errors
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed `811/811`
+- **Commit:** n/a
+- **Push:** n/a
