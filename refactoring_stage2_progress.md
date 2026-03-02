@@ -16604,3 +16604,31 @@
   - dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo -> success
   - dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900 -> success, 0 warnings, 0 errors
   - dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo -> passed 755/755
+
+### Increment #923-#926
+
+- Component: `TradeGrid`
+- Focus: lock `MiddleEntryPrice` positive-path contracts and stabilize a time-of-day regression
+- Added targeted regression coverage in:
+  - project/OsEngine.Tests/TradeGridPersistenceCoreTests.cs
+- Changes:
+  - locked weighted-average calculation in `MiddleEntryPrice`.
+  - locked sparse-order behavior in `MiddleEntryPrice` so `null` orders and empty trade lists are ignored.
+  - stabilized the existing `TradeGridStopBy` time-of-day regression to avoid minute/second boundary flakiness around `DateTime.Now`.
+- Added/updated tests:
+  - project/OsEngine.Tests/TradeGridPersistenceCoreTests.cs
+    - added `Stage2Step2_2_TradeGrid_MiddleEntryPrice_WithWeightedTrades_ShouldReturnAveragePrice`.
+    - added `Stage2Step2_2_TradeGrid_MiddleEntryPrice_WithSparseOrders_ShouldIgnoreNullsAndEmptyTrades`.
+    - hardened `Stage2Step2_2_TradeGridStopBy_GetRegime_WithTimeOfDayLaterMinute_ShouldReturnConfiguredReaction`.
+- Scope:
+  - test-only regression coverage
+  - test stability hardening
+  - no production behavior change
+
+### Verification
+
+- Host-context verification (outside sandbox, per dotnet-build-policy):
+  - dotnet restore project/OsEngine/OsEngine.csproj --nologo -> success
+  - dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo -> success
+  - dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900 -> success, 0 warnings, 0 errors
+  - dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo -> passed 757/757

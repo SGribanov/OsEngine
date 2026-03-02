@@ -16968,3 +16968,21 @@
   - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed `755/755`
 - **Commit:** n/a
 - **Push:** n/a
+
+### Step 4.2 - Nullable Annotations (Incremental Adoption #923-#926)
+
+- **Status:** In Progress (increment block completed)
+- **Plan item:** `refactoring_stage2_plan.md` -> Phase 4 / Step 4.2
+- **Changes (TradeGrid middle-price coverage + test stabilization):**
+  - Updated tests in `project/OsEngine.Tests/TradeGridPersistenceCoreTests.cs`:
+    - added `Stage2Step2_2_TradeGrid_MiddleEntryPrice_WithWeightedTrades_ShouldReturnAveragePrice`.
+    - added `Stage2Step2_2_TradeGrid_MiddleEntryPrice_WithSparseOrders_ShouldIgnoreNullsAndEmptyTrades`.
+    - hardened `Stage2Step2_2_TradeGridStopBy_GetRegime_WithTimeOfDayLaterMinute_ShouldReturnConfiguredReaction` against `DateTime.Now` boundary flakiness.
+  - Locked the positive-path `MiddleEntryPrice` behavior and removed a known time-of-day test race.
+- **Verification (outside sandbox, per dotnet-build-policy):**
+  - `dotnet restore project/OsEngine/OsEngine.csproj --nologo` -> success
+  - `dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo` -> success
+  - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` -> success, 0 warnings, 0 errors
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed `757/757`
+- **Commit:** n/a
+- **Push:** n/a
