@@ -16477,3 +16477,101 @@
   - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed `660/660`
 - **Commit:** n/a
 - **Push:** n/a
+
+### Step 4.2 - Nullable Annotations (Incremental Adoption #824-#831)
+
+- **Status:** In Progress (increment block completed)
+- **Plan item:** `refactoring_stage2_plan.md` -> Phase 4 / Step 4.2
+- **Changes (TradeGridStopBy parser hardening):**
+  - Updated `project/OsEngine/OsTrader/Grids/TradeGridStopBy.cs`:
+    - `LoadFromString(...)` now uses flexible bool parsing, guarded positive decimal/int parsing, range-checked time parsing, and guarded enum parsing instead of exception-driven conversions.
+    - invalid or non-positive numeric values now preserve current configured values.
+  - Updated tests in `project/OsEngine.Tests/TradeGridPersistenceCoreTests.cs`:
+    - added `Stage2Step2_2_TradeGridStopBy_LoadFromString_WithMalformedFields_ShouldKeepValuesAndContinueParsing`.
+    - added `Stage2Step2_2_TradeGridStopBy_LoadFromString_WithNonPositiveValues_ShouldKeepExistingValues`.
+    - added `Stage2Step2_2_TradeGridStopBy_LoadFromString_WithFlexibleBools_ShouldParse`.
+    - added `Stage2Step2_2_TradeGridStopBy_LoadFromString_WithOutOfRangeTimeFields_ShouldKeepExistingValues`.
+- **Verification (outside sandbox, per dotnet-build-policy):**
+  - `dotnet restore project/OsEngine/OsEngine.csproj --nologo` -> success
+  - `dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo` -> success
+  - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` -> success, 0 warnings, 0 errors
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed `664/664`
+- **Commit:** n/a
+- **Push:** n/a
+
+### Step 4.2 - Nullable Annotations (Incremental Adoption #832-#835)
+
+- **Status:** In Progress (increment block completed)
+- **Plan item:** `refactoring_stage2_plan.md` -> Phase 4 / Step 4.2
+- **Changes (TradeGridStopBy partial-payload regression coverage):**
+  - Updated tests in `project/OsEngine.Tests/TradeGridPersistenceCoreTests.cs`:
+    - added `Stage2Step2_2_TradeGridStopBy_LoadFromString_WithMissingMoveDownBool_ShouldKeepValueAndContinueParsing`.
+    - added `Stage2Step2_2_TradeGridStopBy_LoadFromString_WithInvalidPositionsReaction_ShouldKeepValueAndContinueParsing`.
+    - added `Stage2Step2_2_TradeGridStopBy_LoadFromString_WithMissingLifeTimeSeconds_ShouldKeepValueAndContinueParsing`.
+    - added `Stage2Step2_2_TradeGridStopBy_LoadFromString_WithInvalidTimeHourAndValidTail_ShouldKeepHourAndContinueParsing`.
+  - Locked missing and mixed malformed behavior across the mid/tail sections of the stop-by parser.
+- **Verification (outside sandbox, per dotnet-build-policy):**
+  - `dotnet restore project/OsEngine/OsEngine.csproj --nologo` -> success
+  - `dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo` -> success
+  - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` -> success, 0 warnings, 0 errors
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed `668/668`
+- **Commit:** n/a
+- **Push:** n/a
+
+### Step 4.2 - Nullable Annotations (Incremental Adoption #836-#840)
+
+- **Status:** In Progress (increment block completed)
+- **Plan item:** `refactoring_stage2_plan.md` -> Phase 4 / Step 4.2
+- **Changes (TradeGridStopBy prefix/time-tail regression coverage):**
+  - Updated tests in `project/OsEngine.Tests/TradeGridPersistenceCoreTests.cs`:
+    - added `Stage2Step2_2_TradeGridStopBy_LoadFromString_WithMissingMoveUpBool_ShouldKeepValueAndContinueParsing`.
+    - added `Stage2Step2_2_TradeGridStopBy_LoadFromString_WithInvalidMoveUpReaction_ShouldKeepValueAndContinueParsing`.
+    - added `Stage2Step2_2_TradeGridStopBy_LoadFromString_WithMissingTimeMinute_ShouldKeepValueAndContinueTailParsing`.
+    - added `Stage2Step2_2_TradeGridStopBy_LoadFromString_WithMissingTimeSecond_ShouldKeepValueAndParseReaction`.
+    - added `Stage2Step2_2_TradeGridStopBy_LoadFromString_WithInvalidTimeReaction_ShouldKeepValue`.
+  - Locked remaining prefix and late time-tail behavior after the parser-hardening changes.
+- **Verification (outside sandbox, per dotnet-build-policy):**
+  - `dotnet restore project/OsEngine/OsEngine.csproj --nologo` -> success
+  - `dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo` -> success
+  - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` -> success, 0 warnings, 0 errors
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed `677/677`
+- **Commit:** n/a
+- **Push:** n/a
+
+### Step 4.2 - Nullable Annotations (Incremental Adoption #841-#844)
+
+- **Status:** In Progress (increment block completed)
+- **Plan item:** `refactoring_stage2_plan.md` -> Phase 4 / Step 4.2
+- **Changes (TradeGridStopBy remaining parser regression coverage):**
+  - Updated tests in `project/OsEngine.Tests/TradeGridPersistenceCoreTests.cs`:
+    - added `Stage2Step2_2_TradeGridStopBy_LoadFromString_WithMissingMoveUpValue_ShouldKeepValueAndContinueParsing`.
+    - added `Stage2Step2_2_TradeGridStopBy_LoadFromString_WithInvalidMoveDownReaction_ShouldKeepValueAndContinueParsing`.
+    - added `Stage2Step2_2_TradeGridStopBy_LoadFromString_WithMissingPositionsCountValue_ShouldKeepValueAndContinueParsing`.
+    - added `Stage2Step2_2_TradeGridStopBy_LoadFromString_WithMissingTimeFlag_ShouldKeepValueAndContinueTailParsing`.
+  - Locked remaining early/mid parser gaps after the stop-by parser hardening.
+- **Verification (outside sandbox, per dotnet-build-policy):**
+  - `dotnet restore project/OsEngine/OsEngine.csproj --nologo` -> success
+  - `dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo` -> success
+  - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` -> success, 0 warnings, 0 errors
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed `677/677`
+- **Commit:** n/a
+- **Push:** n/a
+
+### Step 4.2 - Nullable Annotations (Incremental Adoption #845-#848)
+
+- **Status:** In Progress (increment block completed)
+- **Plan item:** `refactoring_stage2_plan.md` -> Phase 4 / Step 4.2
+- **Changes (TradeGridStopBy symmetric parser regression coverage):**
+  - Updated tests in `project/OsEngine.Tests/TradeGridPersistenceCoreTests.cs`:
+    - added `Stage2Step2_2_TradeGridStopBy_LoadFromString_WithMissingMoveDownValue_ShouldKeepValueAndContinueParsing`.
+    - added `Stage2Step2_2_TradeGridStopBy_LoadFromString_WithMissingPositionsReaction_ShouldKeepValueAndContinueParsing`.
+    - added `Stage2Step2_2_TradeGridStopBy_LoadFromString_WithInvalidLifeTimeReaction_ShouldKeepValueAndContinueParsing`.
+    - added `Stage2Step2_2_TradeGridStopBy_LoadFromString_WithMissingTimeHour_ShouldKeepValueAndContinueTailParsing`.
+  - Locked another symmetric set of missing/malformed parser cases without changing production code.
+- **Verification (outside sandbox, per dotnet-build-policy):**
+  - `dotnet restore project/OsEngine/OsEngine.csproj --nologo` -> success
+  - `dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo` -> success
+  - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` -> success, 0 warnings, 0 errors
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed `681/681`
+- **Commit:** n/a
+- **Push:** n/a
