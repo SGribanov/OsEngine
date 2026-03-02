@@ -1982,6 +1982,43 @@ public class TradeGridPersistenceCoreTests
     }
 
     [Fact]
+    public void Stage2Step2_2_TrailingUp_GetSaveString_ShouldKeepReservedTailShape()
+    {
+        TrailingUp trailing = new TrailingUp(CreateBareGrid())
+        {
+            TrailingUpIsOn = true,
+            TrailingUpStep = 1.5m,
+            TrailingUpLimit = 110m,
+            TrailingDownIsOn = false,
+            TrailingDownStep = 2.5m,
+            TrailingDownLimit = 90m,
+            TrailingUpCanMoveExitOrder = true,
+            TrailingDownCanMoveExitOrder = false
+        };
+
+        string save = trailing.GetSaveString();
+
+        Assert.Equal("True@1.5@110@False@2.5@90@True@False@@@@@@", save);
+    }
+
+    [Fact]
+    public void Stage2Step2_2_TrailingUp_Delete_ShouldClearGridAndStayIdempotent()
+    {
+        TrailingUp trailing = new TrailingUp(CreateBareGrid());
+
+        Exception? error = Record.Exception(() =>
+        {
+            trailing.Delete();
+            trailing.Delete();
+        });
+
+        object? grid = typeof(TrailingUp).GetField("_grid", BindingFlags.NonPublic | BindingFlags.Instance)?.GetValue(trailing);
+
+        Assert.Null(error);
+        Assert.Null(grid);
+    }
+
+    [Fact]
     public void Stage2Step2_2_TradeGrid_MaxMinGridPrice_WithSparseLines_ShouldForwardTrailingBounds()
     {
         TradeGrid grid = CreateBareGrid();
