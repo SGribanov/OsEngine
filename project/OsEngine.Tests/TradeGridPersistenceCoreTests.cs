@@ -6910,6 +6910,52 @@ public class TradeGridPersistenceCoreTests
     }
 
     [Fact]
+    public void Stage2Step2_2_TradeGrid_LoadFromString_WithOnlyErrorsReactionSection_ShouldApplyPrimeAndTargetChildOnly()
+    {
+        TradeGrid grid = CreateBareGrid();
+        grid.NonTradePeriods.NonTradePeriod1Regime = TradeGridRegime.CloseOnly;
+        grid.StopBy.StopGridByMoveUpIsOn = true;
+        grid.GridCreator.TradeAssetInPortfolio = "USDT";
+        grid.StopAndProfit.ProfitValue = 2.2m;
+        grid.AutoStarter.AutoStartPrice = 101.25m;
+        grid.ErrorsReaction.FailOpenOrdersReactionIsOn = true;
+        grid.ErrorsReaction.FailOpenOrdersCountToReaction = 1;
+        grid.ErrorsReaction.FailCancelOrdersCountToReaction = 2;
+        grid.TrailingUp.TrailingUpStep = 1.5m;
+
+        string payload =
+            "42@MarketMaking@CloseOnly@OncePerSecond@True@11@3@2@123.45@4@" +
+            new DateTime(2024, 1, 2, 3, 4, 5, DateTimeKind.Utc).ToString("O", CultureInfo.InvariantCulture) +
+            "@700@False@1.5@False@@@" +
+            "%%%%%%%" +
+            "False@@3@@4@True@False@12@False@@@@@@" +
+            "%";
+
+        Exception? error = Record.Exception(() => grid.LoadFromString(payload));
+
+        Assert.Null(error);
+        Assert.Equal(42, grid.Number);
+        Assert.Equal(TradeGridPrimeType.MarketMaking, grid.GridType);
+        Assert.Equal(TradeGridRegime.CloseOnly, grid.Regime);
+
+        Assert.Equal(TradeGridRegime.CloseOnly, grid.NonTradePeriods.NonTradePeriod1Regime);
+        Assert.True(grid.StopBy.StopGridByMoveUpIsOn);
+        Assert.Equal("USDT", grid.GridCreator.TradeAssetInPortfolio);
+        Assert.Equal(2.2m, grid.StopAndProfit.ProfitValue);
+        Assert.Equal(101.25m, grid.AutoStarter.AutoStartPrice);
+
+        Assert.False(grid.ErrorsReaction.FailOpenOrdersReactionIsOn);
+        Assert.Equal(3, grid.ErrorsReaction.FailOpenOrdersCountToReaction);
+        Assert.Equal(4, grid.ErrorsReaction.FailCancelOrdersCountToReaction);
+        Assert.True(grid.ErrorsReaction.FailCancelOrdersReactionIsOn);
+        Assert.False(grid.ErrorsReaction.WaitOnStartConnectorIsOn);
+        Assert.Equal(12, grid.ErrorsReaction.WaitSecondsOnStartConnector);
+        Assert.False(grid.ErrorsReaction.ReduceOrdersCountInMarketOnNoFundsError);
+
+        Assert.Equal(1.5m, grid.TrailingUp.TrailingUpStep);
+    }
+
+    [Fact]
     public void Stage2Step2_2_TradeGrid_GetSaveString_LoadFromString_ShouldRoundTrip()
     {
         TradeGrid source = CreateBareGrid();
