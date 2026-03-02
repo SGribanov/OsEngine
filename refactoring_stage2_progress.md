@@ -16730,3 +16730,28 @@
   - dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo -> success
   - dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900 -> success, 0 warnings, 0 errors
   - dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo -> passed 764/764
+
+### Increment #934-#935
+
+- Component: `TradeGrid`
+- Focus: lock trivial core getter contracts
+- Added targeted regression coverage in:
+  - project/OsEngine.Tests/TradeGridPersistenceCoreTests.cs
+- Changes:
+  - locked `OpenPositionsCount` as a direct pass-through over `_openPositionsBySession`.
+  - locked `FirstTradeTime` as a direct pass-through over `_firstTradeTime`.
+- Added/updated tests:
+  - project/OsEngine.Tests/TradeGridPersistenceCoreTests.cs
+    - added `Stage2Step2_2_TradeGrid_OpenPositionsCount_ShouldReturnBackingField`.
+    - added `Stage2Step2_2_TradeGrid_FirstTradeTime_ShouldReturnBackingField`.
+- Scope:
+  - test-only regression coverage
+  - no production behavior change
+
+### Verification
+
+- Host-context verification (outside sandbox, per dotnet-build-policy):
+  - dotnet restore project/OsEngine/OsEngine.csproj --nologo -> success
+  - dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo -> success
+  - dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900 -> success, 0 warnings, 0 errors
+  - dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo -> passed 766/766
