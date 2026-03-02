@@ -6632,6 +6632,51 @@ public class TradeGridPersistenceCoreTests
     }
 
     [Fact]
+    public void Stage2Step2_2_TradeGrid_LoadFromString_WithNullChildReferencesAndPresentPayloads_ShouldApplyPrimeAndNotThrow()
+    {
+        TradeGrid grid = CreateBareGrid();
+        grid.NonTradePeriods = null;
+        grid.StopBy = null;
+        grid.GridCreator = null;
+        grid.StopAndProfit = null;
+        grid.AutoStarter = null;
+        grid.ErrorsReaction = null;
+        grid.TrailingUp = null;
+
+        string payload =
+            "42@MarketMaking@CloseOnly@OncePerSecond@True@11@3@2@123.45@4@" +
+            new DateTime(2024, 1, 2, 3, 4, 5, DateTimeKind.Utc).ToString("O", CultureInfo.InvariantCulture) +
+            "@700@False@1.5@False@@@" +
+            "%CloseOnly@OffAndCancelOrders@@@@@" +
+            "%" +
+            "%True@2.5@CloseOnly@False@1.5@Off@True@7@CloseForced@True@600@OffAndCancelOrders@True@9@30@45@CloseOnly@@@@@@" +
+            "%Sell@123.45@3@Absolute@1.2@1.1@Percent@0.8@1.3@Contracts@2.5@1.4@AssetX@@@@@@" +
+            "%On@Absolute@2.2@On@Percent@1.1@On@Absolute@0.9@False@@@@@@" +
+            "%HigherOrEqual@101.25@On_ShiftOnNewPrice@1.5@True@9@30@45@False@@@@" +
+            "%False@@3@@4@True@False@12@False@@@@@@" +
+            "%True@1.5@110@False@2.5@90@True@False@@@@@@%";
+
+        Exception? error = Record.Exception(() => grid.LoadFromString(payload));
+
+        Assert.Null(error);
+        Assert.Equal(42, grid.Number);
+        Assert.Equal(TradeGridPrimeType.MarketMaking, grid.GridType);
+        Assert.Equal(TradeGridRegime.CloseOnly, grid.Regime);
+        Assert.Equal(TradeGridLogicEntryRegime.OncePerSecond, grid.RegimeLogicEntry);
+        Assert.True(grid.AutoClearJournalIsOn);
+        Assert.Equal(11, grid.MaxClosePositionsInJournal);
+        Assert.Equal(3, grid.MaxOpenOrdersInMarket);
+        Assert.Equal(2, grid.MaxCloseOrdersInMarket);
+        Assert.Equal(123.45m, grid.FirstPriceReal);
+        Assert.Equal(4, grid.OpenPositionsCount);
+        Assert.Equal(new DateTime(2024, 1, 2, 3, 4, 5, DateTimeKind.Utc), grid.FirstTradeTime);
+        Assert.Equal(700, grid.DelayInReal);
+        Assert.False(grid.CheckMicroVolumes);
+        Assert.Equal(1.5m, grid.MaxDistanceToOrdersPercent);
+        Assert.False(grid.OpenOrdersMakerOnly);
+    }
+
+    [Fact]
     public void Stage2Step2_2_TradeGrid_GetSaveString_LoadFromString_ShouldRoundTrip()
     {
         TradeGrid source = CreateBareGrid();
