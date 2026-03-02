@@ -267,6 +267,25 @@ public class TradeGridPersistenceCoreTests
     }
 
     [Fact]
+    public void Stage2Step2_2_TradeGridStopBy_SendNewLogMessage_WithSubscriber_ShouldForwardMessage()
+    {
+        TradeGridStopBy stopBy = new TradeGridStopBy();
+        string? receivedMessage = null;
+        LogMessageType? receivedType = null;
+
+        stopBy.LogMessageEvent += (message, type) =>
+        {
+            receivedMessage = message;
+            receivedType = type;
+        };
+
+        stopBy.SendNewLogMessage("CodexStopByMessage", LogMessageType.Signal);
+
+        Assert.Equal("CodexStopByMessage", receivedMessage);
+        Assert.Equal(LogMessageType.Signal, receivedType);
+    }
+
+    [Fact]
     public void Stage2Step2_2_TradeGridCreator_GetSaveString_ShouldKeepReservedTailShape()
     {
         TradeGridCreator creator = new TradeGridCreator
@@ -2035,6 +2054,25 @@ public class TradeGridPersistenceCoreTests
     }
 
     [Fact]
+    public void Stage2Step2_2_TradeGridStopAndProfit_SendNewLogMessage_WithSubscriber_ShouldForwardMessage()
+    {
+        TradeGridStopAndProfit stopAndProfit = new TradeGridStopAndProfit();
+        string? receivedMessage = null;
+        LogMessageType? receivedType = null;
+
+        stopAndProfit.LogMessageEvent += (message, type) =>
+        {
+            receivedMessage = message;
+            receivedType = type;
+        };
+
+        stopAndProfit.SendNewLogMessage("CodexStopAndProfitMessage", LogMessageType.System);
+
+        Assert.Equal("CodexStopAndProfitMessage", receivedMessage);
+        Assert.Equal(LogMessageType.System, receivedType);
+    }
+
+    [Fact]
     public void Stage2Step2_2_TradeGridStopAndProfit_LoadFromString_WithMissingProfitRegime_ShouldKeepValueAndContinueParsing()
     {
         TradeGridStopAndProfit stopAndProfit = new TradeGridStopAndProfit
@@ -3657,6 +3695,25 @@ public class TradeGridPersistenceCoreTests
         string save = autoStarter.GetSaveString();
 
         Assert.Equal("HigherOrEqual@101.25@On_ShiftOnNewPrice@1.5@True@9@30@45@False@@@@", save);
+    }
+
+    [Fact]
+    public void Stage2Step2_2_TradeGridAutoStarter_SendNewLogMessage_WithSubscriber_ShouldForwardMessage()
+    {
+        TradeGridAutoStarter autoStarter = new TradeGridAutoStarter();
+        string? receivedMessage = null;
+        LogMessageType? receivedType = null;
+
+        autoStarter.LogMessageEvent += (message, type) =>
+        {
+            receivedMessage = message;
+            receivedType = type;
+        };
+
+        autoStarter.SendNewLogMessage("CodexAutoStarterMessage", LogMessageType.Connect);
+
+        Assert.Equal("CodexAutoStarterMessage", receivedMessage);
+        Assert.Equal(LogMessageType.Connect, receivedType);
     }
 
     [Fact]
