@@ -6571,6 +6571,124 @@ public class TradeGridPersistenceCoreTests
     }
 
     [Fact]
+    public void Stage2Step2_2_TradeGrid_GetSaveString_LoadFromString_ShouldRoundTrip()
+    {
+        TradeGrid source = CreateBareGrid();
+        source.Number = 42;
+        source.GridType = TradeGridPrimeType.MarketMaking;
+        source.Regime = TradeGridRegime.CloseOnly;
+        source.RegimeLogicEntry = TradeGridLogicEntryRegime.OncePerSecond;
+        source.AutoClearJournalIsOn = true;
+        source.MaxClosePositionsInJournal = 11;
+        source.MaxOpenOrdersInMarket = 3;
+        source.MaxCloseOrdersInMarket = 2;
+        source.DelayInReal = 700;
+        source.CheckMicroVolumes = false;
+        source.MaxDistanceToOrdersPercent = 1.5m;
+        source.OpenOrdersMakerOnly = false;
+
+        SetPrivateField(source, "_firstTradePrice", 123.45m);
+        SetPrivateField(source, "_openPositionsBySession", 4);
+        DateTime firstTradeTime = new DateTime(2024, 1, 2, 3, 4, 5, DateTimeKind.Utc);
+        SetPrivateField(source, "_firstTradeTime", firstTradeTime);
+
+        source.NonTradePeriods.NonTradePeriod1Regime = TradeGridRegime.CloseOnly;
+        source.NonTradePeriods.NonTradePeriod2Regime = TradeGridRegime.OffAndCancelOrders;
+
+        source.StopBy.StopGridByMoveUpIsOn = true;
+        source.StopBy.StopGridByMoveUpValuePercent = 2.5m;
+        source.StopBy.StopGridByMoveUpReaction = TradeGridRegime.CloseOnly;
+
+        source.GridCreator.GridSide = Side.Sell;
+        source.GridCreator.FirstPrice = 123.45m;
+        source.GridCreator.LineCountStart = 3;
+        source.GridCreator.TypeStep = TradeGridValueType.Absolute;
+        source.GridCreator.LineStep = 1.2m;
+        source.GridCreator.StepMultiplicator = 1.1m;
+        source.GridCreator.TypeProfit = TradeGridValueType.Percent;
+        source.GridCreator.ProfitStep = 0.8m;
+        source.GridCreator.ProfitMultiplicator = 1.3m;
+        source.GridCreator.TypeVolume = TradeGridVolumeType.Contracts;
+        source.GridCreator.StartVolume = 2.5m;
+        source.GridCreator.MartingaleMultiplicator = 1.4m;
+        source.GridCreator.TradeAssetInPortfolio = "AssetX";
+
+        source.StopAndProfit.ProfitRegime = OnOffRegime.On;
+        source.StopAndProfit.ProfitValueType = TradeGridValueType.Absolute;
+        source.StopAndProfit.ProfitValue = 2.2m;
+
+        source.AutoStarter.AutoStartRegime = TradeGridAutoStartRegime.HigherOrEqual;
+        source.AutoStarter.AutoStartPrice = 101.25m;
+        source.AutoStarter.RebuildGridRegime = GridAutoStartShiftFirstPriceRegime.On_ShiftOnNewPrice;
+
+        source.ErrorsReaction.FailOpenOrdersReactionIsOn = false;
+        source.ErrorsReaction.FailOpenOrdersCountToReaction = 3;
+        source.ErrorsReaction.FailCancelOrdersCountToReaction = 4;
+
+        source.TrailingUp.TrailingUpIsOn = true;
+        source.TrailingUp.TrailingUpStep = 1.5m;
+        source.TrailingUp.TrailingUpLimit = 110m;
+
+        TradeGrid loaded = CreateBareGrid();
+
+        Exception? error = Record.Exception(() => loaded.LoadFromString(source.GetSaveString()));
+
+        Assert.Null(error);
+        Assert.Equal(42, loaded.Number);
+        Assert.Equal(TradeGridPrimeType.MarketMaking, loaded.GridType);
+        Assert.Equal(TradeGridRegime.CloseOnly, loaded.Regime);
+        Assert.Equal(TradeGridLogicEntryRegime.OncePerSecond, loaded.RegimeLogicEntry);
+        Assert.True(loaded.AutoClearJournalIsOn);
+        Assert.Equal(11, loaded.MaxClosePositionsInJournal);
+        Assert.Equal(3, loaded.MaxOpenOrdersInMarket);
+        Assert.Equal(2, loaded.MaxCloseOrdersInMarket);
+        Assert.Equal(123.45m, loaded.FirstPriceReal);
+        Assert.Equal(4, loaded.OpenPositionsCount);
+        Assert.Equal(firstTradeTime, loaded.FirstTradeTime);
+        Assert.Equal(700, loaded.DelayInReal);
+        Assert.False(loaded.CheckMicroVolumes);
+        Assert.Equal(1.5m, loaded.MaxDistanceToOrdersPercent);
+        Assert.False(loaded.OpenOrdersMakerOnly);
+
+        Assert.Equal(TradeGridRegime.CloseOnly, loaded.NonTradePeriods.NonTradePeriod1Regime);
+        Assert.Equal(TradeGridRegime.OffAndCancelOrders, loaded.NonTradePeriods.NonTradePeriod2Regime);
+
+        Assert.True(loaded.StopBy.StopGridByMoveUpIsOn);
+        Assert.Equal(2.5m, loaded.StopBy.StopGridByMoveUpValuePercent);
+        Assert.Equal(TradeGridRegime.CloseOnly, loaded.StopBy.StopGridByMoveUpReaction);
+
+        Assert.Equal(Side.Sell, loaded.GridCreator.GridSide);
+        Assert.Equal(123.45m, loaded.GridCreator.FirstPrice);
+        Assert.Equal(3, loaded.GridCreator.LineCountStart);
+        Assert.Equal(TradeGridValueType.Absolute, loaded.GridCreator.TypeStep);
+        Assert.Equal(1.2m, loaded.GridCreator.LineStep);
+        Assert.Equal(1.1m, loaded.GridCreator.StepMultiplicator);
+        Assert.Equal(TradeGridValueType.Percent, loaded.GridCreator.TypeProfit);
+        Assert.Equal(0.8m, loaded.GridCreator.ProfitStep);
+        Assert.Equal(1.3m, loaded.GridCreator.ProfitMultiplicator);
+        Assert.Equal(TradeGridVolumeType.Contracts, loaded.GridCreator.TypeVolume);
+        Assert.Equal(2.5m, loaded.GridCreator.StartVolume);
+        Assert.Equal(1.4m, loaded.GridCreator.MartingaleMultiplicator);
+        Assert.Equal("AssetX", loaded.GridCreator.TradeAssetInPortfolio);
+
+        Assert.Equal(OnOffRegime.On, loaded.StopAndProfit.ProfitRegime);
+        Assert.Equal(TradeGridValueType.Absolute, loaded.StopAndProfit.ProfitValueType);
+        Assert.Equal(2.2m, loaded.StopAndProfit.ProfitValue);
+
+        Assert.Equal(TradeGridAutoStartRegime.HigherOrEqual, loaded.AutoStarter.AutoStartRegime);
+        Assert.Equal(101.25m, loaded.AutoStarter.AutoStartPrice);
+        Assert.Equal(GridAutoStartShiftFirstPriceRegime.On_ShiftOnNewPrice, loaded.AutoStarter.RebuildGridRegime);
+
+        Assert.False(loaded.ErrorsReaction.FailOpenOrdersReactionIsOn);
+        Assert.Equal(3, loaded.ErrorsReaction.FailOpenOrdersCountToReaction);
+        Assert.Equal(4, loaded.ErrorsReaction.FailCancelOrdersCountToReaction);
+
+        Assert.True(loaded.TrailingUp.TrailingUpIsOn);
+        Assert.Equal(1.5m, loaded.TrailingUp.TrailingUpStep);
+        Assert.Equal(110m, loaded.TrailingUp.TrailingUpLimit);
+    }
+
+    [Fact]
     public void Stage2Step2_2_TradeGrid_Delete_WithInitializedComponents_ShouldClearReferencesAndStayIdempotent()
     {
         TradeGrid grid = CreateBareGrid();
