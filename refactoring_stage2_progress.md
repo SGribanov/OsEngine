@@ -16490,3 +16490,30 @@
   - dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo -> success
   - dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900 -> success, 0 warnings, 0 errors
   - dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo -> passed 741/741
+
+### Increment #909-#910
+
+- Component: `TradeGrid`
+- Focus: runtime hardening for negative order-count limits in helper paths
+- Added targeted production guard coverage in:
+  - project/OsEngine/OsTrader/Grids/TradeGrid.cs
+  - project/OsEngine.Tests/TradeGridPersistenceCoreTests.cs
+- Changes:
+  - normalized `MaxOpenOrdersInMarket` to `Math.Max(0, ...)` inside `GetOrdersBadLinesMaxCount()`.
+  - normalized `MaxCloseOrdersInMarket` to `Math.Max(0, ...)` inside `GetCloseOrdersGridHole()`.
+  - this prevents negative-index and out-of-range access when runtime state bypasses parser guards.
+- Added/updated tests:
+  - project/OsEngine.Tests/TradeGridPersistenceCoreTests.cs
+    - added `Stage2Step2_2_TradeGrid_GetOrdersBadLinesMaxCount_WithNegativeLimit_ShouldTreatAsZero`.
+    - added `Stage2Step2_2_TradeGrid_GetCloseOrdersGridHole_WithNegativeLimit_ShouldTreatAsZero`.
+- Scope:
+  - production hardening
+  - regression coverage
+
+### Verification
+
+- Host-context verification (outside sandbox, per dotnet-build-policy):
+  - dotnet restore project/OsEngine/OsEngine.csproj --nologo -> success
+  - dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo -> success
+  - dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900 -> success, 0 warnings, 0 errors
+  - dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo -> passed 743/743
