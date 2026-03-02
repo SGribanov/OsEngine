@@ -5719,6 +5719,29 @@ public class TradeGridPersistenceCoreTests
     }
 
     [Fact]
+    public void Stage2Step2_2_TradeGrid_OpenPositionsCount_ShouldReturnBackingField()
+    {
+        TradeGrid grid = (TradeGrid)RuntimeHelpers.GetUninitializedObject(typeof(TradeGrid));
+        SetPrivateField(grid, "_openPositionsBySession", 7);
+
+        int openPositionsCount = grid.OpenPositionsCount;
+
+        Assert.Equal(7, openPositionsCount);
+    }
+
+    [Fact]
+    public void Stage2Step2_2_TradeGrid_FirstTradeTime_ShouldReturnBackingField()
+    {
+        TradeGrid grid = (TradeGrid)RuntimeHelpers.GetUninitializedObject(typeof(TradeGrid));
+        DateTime expected = new DateTime(2024, 1, 2, 3, 4, 5, DateTimeKind.Utc);
+        SetPrivateField(grid, "_firstTradeTime", expected);
+
+        DateTime firstTradeTime = grid.FirstTradeTime;
+
+        Assert.Equal(expected, firstTradeTime);
+    }
+
+    [Fact]
     public void Stage2Step2_2_TradeGrid_MiddleEntryPrice_WithZeroTradeVolume_ShouldReturnZero()
     {
         TradeGrid grid = (TradeGrid)RuntimeHelpers.GetUninitializedObject(typeof(TradeGrid));
