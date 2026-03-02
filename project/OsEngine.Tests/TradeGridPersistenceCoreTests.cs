@@ -357,6 +357,34 @@ public class TradeGridPersistenceCoreTests
     }
 
     [Fact]
+    public void Stage2Step2_2_TradeGridLine_SetFromStr_WithWhitespacePayload_ShouldReturnFalse()
+    {
+        TradeGridLine line = new TradeGridLine();
+
+        bool parsed = line.SetFromStr("   ");
+
+        Assert.False(parsed);
+    }
+
+    [Fact]
+    public void Stage2Step2_2_TradeGridLine_SetFromStr_WithInvalidPositionNum_ShouldKeepDefaultPosition()
+    {
+        TradeGridLine line = new TradeGridLine
+        {
+            PositionNum = 9
+        };
+
+        bool parsed = line.SetFromStr("1|2|Buy|3|bad|");
+
+        Assert.True(parsed);
+        Assert.Equal(1m, line.PriceEnter);
+        Assert.Equal(2m, line.Volume);
+        Assert.Equal(Side.Buy, line.Side);
+        Assert.Equal(3m, line.PriceExit);
+        Assert.Equal(9, line.PositionNum);
+    }
+
+    [Fact]
     public void Stage2Step2_2_TradeGridStopBy_GetRegime_WithNullGridOrTab_ShouldReturnOn()
     {
         TradeGridStopBy stopBy = new TradeGridStopBy
