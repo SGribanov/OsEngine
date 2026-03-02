@@ -210,6 +210,34 @@ public class TradeGridPersistenceCoreTests
     }
 
     [Fact]
+    public void Stage2Step2_2_TradeGridNonTradePeriods_GetSaveString_ShouldKeepReservedTailShape()
+    {
+        TradeGridNonTradePeriods periods = new TradeGridNonTradePeriods("CodexGridPeriods");
+        periods.NonTradePeriod1Regime = TradeGridRegime.CloseOnly;
+        periods.NonTradePeriod2Regime = TradeGridRegime.OffAndCancelOrders;
+
+        string save = periods.GetSaveString();
+
+        Assert.Equal("CloseOnly@OffAndCancelOrders@@@@@", save);
+    }
+
+    [Fact]
+    public void Stage2Step2_2_TradeGridNonTradePeriods_Delete_ShouldClearSettingsAndStayIdempotent()
+    {
+        TradeGridNonTradePeriods periods = new TradeGridNonTradePeriods("CodexGridPeriods");
+
+        Exception? error = Record.Exception(() =>
+        {
+            periods.Delete();
+            periods.Delete();
+        });
+
+        Assert.Null(error);
+        Assert.Null(periods.SettingsPeriod1);
+        Assert.Null(periods.SettingsPeriod2);
+    }
+
+    [Fact]
     public void Stage2Step2_2_TradeGridStopBy_GetRegime_WithNullGridOrTab_ShouldReturnOn()
     {
         TradeGridStopBy stopBy = new TradeGridStopBy
