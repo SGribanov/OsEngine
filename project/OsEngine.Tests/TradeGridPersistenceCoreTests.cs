@@ -5570,6 +5570,59 @@ public class TradeGridPersistenceCoreTests
     }
 
     [Fact]
+    public void Stage2Step2_2_TradeGrid_TryRemoveWrongOrders_WithNullDependencies_ShouldReturnZero()
+    {
+        TradeGrid grid = (TradeGrid)RuntimeHelpers.GetUninitializedObject(typeof(TradeGrid));
+
+        MethodInfo method = typeof(TradeGrid).GetMethod("TryRemoveWrongOrders", BindingFlags.NonPublic | BindingFlags.Instance)
+            ?? throw new InvalidOperationException("Method TryRemoveWrongOrders not found.");
+
+        int cancelledOrders = (int)(method.Invoke(grid, null)
+            ?? throw new InvalidOperationException("TryRemoveWrongOrders returned null."));
+
+        Assert.Equal(0, cancelledOrders);
+    }
+
+    [Fact]
+    public void Stage2Step2_2_TradeGrid_TryCancelOpeningOrders_WithNullTab_ShouldReturnZero()
+    {
+        TradeGrid grid = (TradeGrid)RuntimeHelpers.GetUninitializedObject(typeof(TradeGrid));
+
+        MethodInfo method = typeof(TradeGrid).GetMethod("TryCancelOpeningOrders", BindingFlags.NonPublic | BindingFlags.Instance)
+            ?? throw new InvalidOperationException("Method TryCancelOpeningOrders not found.");
+
+        int cancelledOrders = (int)(method.Invoke(grid, null)
+            ?? throw new InvalidOperationException("TryCancelOpeningOrders returned null."));
+
+        Assert.Equal(0, cancelledOrders);
+    }
+
+    [Fact]
+    public void Stage2Step2_2_TradeGrid_TryCancelClosingOrders_WithNullTab_ShouldReturnZero()
+    {
+        TradeGrid grid = (TradeGrid)RuntimeHelpers.GetUninitializedObject(typeof(TradeGrid));
+
+        MethodInfo method = typeof(TradeGrid).GetMethod("TryCancelClosingOrders", BindingFlags.NonPublic | BindingFlags.Instance)
+            ?? throw new InvalidOperationException("Method TryCancelClosingOrders not found.");
+
+        int cancelledOrders = (int)(method.Invoke(grid, null)
+            ?? throw new InvalidOperationException("TryCancelClosingOrders returned null."));
+
+        Assert.Equal(0, cancelledOrders);
+    }
+
+    [Fact]
+    public void Stage2Step2_2_TradeGrid_TrySetClosingOrders_WithNullSecurity_ShouldStayNoOp()
+    {
+        TradeGrid grid = CreateBareGrid();
+        grid.Tab = (BotTabSimple)RuntimeHelpers.GetUninitializedObject(typeof(BotTabSimple));
+
+        Exception? error = Record.Exception(() => InvokePrivateWithArgs(grid, "TrySetClosingOrders", 100m));
+
+        Assert.Null(error);
+    }
+
+    [Fact]
     public void Stage2Step2_2_TradeGrid_SparseLines_JournalAndOrderStatePaths_ShouldStaySafe()
     {
         TradeGrid grid = (TradeGrid)RuntimeHelpers.GetUninitializedObject(typeof(TradeGrid));
