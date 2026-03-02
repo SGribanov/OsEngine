@@ -17593,3 +17593,21 @@
   - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed `833/833`
 - **Commit:** n/a
 - **Push:** n/a
+
+### Step 4.2 - Nullable Annotations (Incremental Adoption #1004)
+
+- **Status:** In Progress (increment block completed)
+- **Plan item:** `refactoring_stage2_plan.md` -> Phase 4 / Step 4.2
+- **Changes (top-level load with null child references and present child payloads):**
+  - Updated tests in `project/OsEngine.Tests/TradeGridPersistenceCoreTests.cs`:
+    - added `Stage2Step2_2_TradeGrid_LoadFromString_WithNullChildReferencesAndPresentPayloads_ShouldApplyPrimeAndNotThrow`.
+  - Outcome:
+    - locked null-safe behavior when child payload sections are present but the corresponding top-level child references are absent.
+    - verified prime fields still parse and the method remains safe.
+- **Verification (outside sandbox, per dotnet-build-policy):**
+  - `dotnet restore project/OsEngine/OsEngine.csproj --nologo` -> success
+  - `dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo` -> success
+  - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` -> success, 0 warnings, 0 errors
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed `834/834`
+- **Commit:** n/a
+- **Push:** n/a
