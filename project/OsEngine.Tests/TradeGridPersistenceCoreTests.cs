@@ -268,6 +268,25 @@ public class TradeGridPersistenceCoreTests
     }
 
     [Fact]
+    public void Stage2Step2_2_TradeGridNonTradePeriods_LoadFromString_WithEmptyLikePayloads_ShouldKeepExistingValues()
+    {
+        TradeGridNonTradePeriods periods = new TradeGridNonTradePeriods("CodexGridPeriods");
+        periods.NonTradePeriod1Regime = TradeGridRegime.CloseOnly;
+        periods.NonTradePeriod2Regime = TradeGridRegime.OffAndCancelOrders;
+
+        Exception? error = Record.Exception(() =>
+        {
+            periods.LoadFromString(null);
+            periods.LoadFromString(string.Empty);
+            periods.LoadFromString("  \r\n \t  ");
+        });
+
+        Assert.Null(error);
+        Assert.Equal(TradeGridRegime.CloseOnly, periods.NonTradePeriod1Regime);
+        Assert.Equal(TradeGridRegime.OffAndCancelOrders, periods.NonTradePeriod2Regime);
+    }
+
+    [Fact]
     public void Stage2Step2_2_TradeGridStopBy_GetSaveString_ShouldKeepReservedTailShape()
     {
         TradeGridStopBy stopBy = new TradeGridStopBy
@@ -324,6 +343,29 @@ public class TradeGridPersistenceCoreTests
             stopBy.SendNewLogMessage("CodexStopByNoSubscriber", LogMessageType.System));
 
         Assert.Null(error);
+    }
+
+    [Fact]
+    public void Stage2Step2_2_TradeGridStopBy_LoadFromString_WithEmptyLikePayloads_ShouldKeepExistingValues()
+    {
+        TradeGridStopBy stopBy = new TradeGridStopBy
+        {
+            StopGridByMoveUpIsOn = true,
+            StopGridByMoveUpValuePercent = 2.5m,
+            StopGridByMoveUpReaction = TradeGridRegime.CloseOnly
+        };
+
+        Exception? error = Record.Exception(() =>
+        {
+            stopBy.LoadFromString(null);
+            stopBy.LoadFromString(string.Empty);
+            stopBy.LoadFromString("  \r\n \t  ");
+        });
+
+        Assert.Null(error);
+        Assert.True(stopBy.StopGridByMoveUpIsOn);
+        Assert.Equal(2.5m, stopBy.StopGridByMoveUpValuePercent);
+        Assert.Equal(TradeGridRegime.CloseOnly, stopBy.StopGridByMoveUpReaction);
     }
 
     [Fact]
