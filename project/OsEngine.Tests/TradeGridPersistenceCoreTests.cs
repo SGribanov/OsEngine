@@ -5249,6 +5249,125 @@ public class TradeGridPersistenceCoreTests
     }
 
     [Fact]
+    public void Stage2Step2_2_TradeGrid_HaveOrdersWithNoMarketOrders_WithFreshNoneOrder_ShouldPrimeTimestampAndReturnTrue()
+    {
+        TradeGrid grid = (TradeGrid)RuntimeHelpers.GetUninitializedObject(typeof(TradeGrid));
+        grid.GridCreator = new TradeGridCreator();
+
+        Position position = (Position)RuntimeHelpers.GetUninitializedObject(typeof(Position));
+        SetPrivateField(position, "_openOrders", new List<Order>
+        {
+            new Order
+            {
+                State = OrderStateType.None,
+                NumberMarket = null
+            }
+        });
+        SetPrivateField(position, "_closeOrders", new List<Order>());
+
+        grid.GridCreator.Lines = new List<TradeGridLine>
+        {
+            new TradeGridLine { Position = position, PositionNum = 1 }
+        };
+
+        bool hasNoMarketOrders = grid.HaveOrdersWithNoMarketOrders();
+        DateTime lastNoneOrderTime = (DateTime)(typeof(TradeGrid).GetField("_lastNoneOrderTime", BindingFlags.NonPublic | BindingFlags.Instance)?.GetValue(grid)
+            ?? throw new InvalidOperationException("_lastNoneOrderTime not found."));
+
+        Assert.True(hasNoMarketOrders);
+        Assert.NotEqual(DateTime.MinValue, lastNoneOrderTime);
+        Assert.Single(position.OpenOrders);
+    }
+
+    [Fact]
+    public void Stage2Step2_2_TradeGrid_HaveOrdersWithNoMarketOrders_WithoutNoneOrders_ShouldResetTimestampAndReturnFalse()
+    {
+        TradeGrid grid = (TradeGrid)RuntimeHelpers.GetUninitializedObject(typeof(TradeGrid));
+        grid.GridCreator = new TradeGridCreator();
+
+        Position position = (Position)RuntimeHelpers.GetUninitializedObject(typeof(Position));
+        SetPrivateField(position, "_openOrders", new List<Order>
+        {
+            new Order
+            {
+                State = OrderStateType.Active,
+                NumberMarket = "mk-1"
+            }
+        });
+        SetPrivateField(position, "_closeOrders", new List<Order>());
+
+        grid.GridCreator.Lines = new List<TradeGridLine>
+        {
+            new TradeGridLine { Position = position, PositionNum = 1 }
+        };
+
+        SetPrivateField(grid, "_lastNoneOrderTime", DateTime.Now.AddMinutes(-1));
+
+        bool hasNoMarketOrders = grid.HaveOrdersWithNoMarketOrders();
+        DateTime lastNoneOrderTime = (DateTime)(typeof(TradeGrid).GetField("_lastNoneOrderTime", BindingFlags.NonPublic | BindingFlags.Instance)?.GetValue(grid)
+            ?? throw new InvalidOperationException("_lastNoneOrderTime not found."));
+
+        Assert.False(hasNoMarketOrders);
+        Assert.Equal(DateTime.MinValue, lastNoneOrderTime);
+    }
+
+    [Fact]
+    public void Stage2Step2_2_TradeGrid_HaveOrdersTryToCancelLastSecond_WithRecentOpenCancel_ShouldReturnTrue()
+    {
+        TradeGrid grid = (TradeGrid)RuntimeHelpers.GetUninitializedObject(typeof(TradeGrid));
+        grid.GridCreator = new TradeGridCreator();
+
+        Position position = (Position)RuntimeHelpers.GetUninitializedObject(typeof(Position));
+        SetPrivateField(position, "_openOrders", new List<Order>
+        {
+            new Order
+            {
+                State = OrderStateType.Active,
+                IsSendToCancel = true,
+                LastCancelTryLocalTime = DateTime.Now.AddSeconds(-1)
+            }
+        });
+        SetPrivateField(position, "_closeOrders", new List<Order>());
+
+        grid.GridCreator.Lines = new List<TradeGridLine>
+        {
+            new TradeGridLine { Position = position, PositionNum = 1 }
+        };
+
+        bool hasRecentCancel = grid.HaveOrdersTryToCancelLastSecond();
+
+        Assert.True(hasRecentCancel);
+    }
+
+    [Fact]
+    public void Stage2Step2_2_TradeGrid_HaveOrdersTryToCancelLastSecond_WithExpiredCloseCancel_ShouldReturnFalse()
+    {
+        TradeGrid grid = (TradeGrid)RuntimeHelpers.GetUninitializedObject(typeof(TradeGrid));
+        grid.GridCreator = new TradeGridCreator();
+
+        Position position = (Position)RuntimeHelpers.GetUninitializedObject(typeof(Position));
+        SetPrivateField(position, "_openOrders", new List<Order>());
+        SetPrivateField(position, "_closeOrders", new List<Order>
+        {
+            new Order
+            {
+                State = OrderStateType.Active,
+                IsSendToCancel = true,
+                LastCancelTryLocalTime = DateTime.Now.AddSeconds(-4)
+            }
+        });
+
+        grid.GridCreator.Lines = new List<TradeGridLine>
+        {
+            new TradeGridLine { Position = position, PositionNum = 1 }
+        };
+
+        bool hasRecentCancel = grid.HaveOrdersTryToCancelLastSecond();
+
+        Assert.False(hasRecentCancel);
+    }
+
+    [Fact]
     public void Stage2Step2_2_TradeGrid_QueryMethods_WithSparseLines_ShouldNotThrow()
     {
         TradeGrid grid = CreateBareGrid();
