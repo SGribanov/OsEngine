@@ -5470,6 +5470,34 @@ public class TradeGridPersistenceCoreTests
     }
 
     [Fact]
+    public void Stage2Step2_2_TradeGrid_GetOpenOrdersGridHole_WithNullTab_ShouldReturnNull()
+    {
+        TradeGrid grid = (TradeGrid)RuntimeHelpers.GetUninitializedObject(typeof(TradeGrid));
+        grid.GridCreator = new TradeGridCreator();
+
+        MethodInfo method = typeof(TradeGrid).GetMethod("GetOpenOrdersGridHole", BindingFlags.NonPublic | BindingFlags.Instance)
+            ?? throw new InvalidOperationException("Method GetOpenOrdersGridHole not found.");
+
+        object? result = method.Invoke(grid, null);
+
+        Assert.Null(result);
+    }
+
+    [Fact]
+    public void Stage2Step2_2_TradeGrid_GetOpenOrdersGridHole_WithNullGridCreator_ShouldReturnNull()
+    {
+        TradeGrid grid = (TradeGrid)RuntimeHelpers.GetUninitializedObject(typeof(TradeGrid));
+        grid.Tab = (BotTabSimple)RuntimeHelpers.GetUninitializedObject(typeof(BotTabSimple));
+
+        MethodInfo method = typeof(TradeGrid).GetMethod("GetOpenOrdersGridHole", BindingFlags.NonPublic | BindingFlags.Instance)
+            ?? throw new InvalidOperationException("Method GetOpenOrdersGridHole not found.");
+
+        object? result = method.Invoke(grid, null);
+
+        Assert.Null(result);
+    }
+
+    [Fact]
     public void Stage2Step2_2_TradeGrid_SparseLines_JournalAndOrderStatePaths_ShouldStaySafe()
     {
         TradeGrid grid = (TradeGrid)RuntimeHelpers.GetUninitializedObject(typeof(TradeGrid));
