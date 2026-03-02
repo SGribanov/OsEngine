@@ -2624,6 +2624,36 @@ public class TradeGridPersistenceCoreTests
     }
 
     [Fact]
+    public void Stage2Step2_2_TrailingUp_GetSaveString_LoadFromString_ShouldRoundTrip()
+    {
+        TrailingUp source = new TrailingUp(CreateBareGrid())
+        {
+            TrailingUpIsOn = true,
+            TrailingUpStep = 1.5m,
+            TrailingUpLimit = 110m,
+            TrailingDownIsOn = false,
+            TrailingDownStep = 2.5m,
+            TrailingDownLimit = 90m,
+            TrailingUpCanMoveExitOrder = true,
+            TrailingDownCanMoveExitOrder = false
+        };
+
+        TrailingUp loaded = new TrailingUp(CreateBareGrid());
+
+        Exception? error = Record.Exception(() => loaded.LoadFromString(source.GetSaveString()));
+
+        Assert.Null(error);
+        Assert.True(loaded.TrailingUpIsOn);
+        Assert.Equal(1.5m, loaded.TrailingUpStep);
+        Assert.Equal(110m, loaded.TrailingUpLimit);
+        Assert.False(loaded.TrailingDownIsOn);
+        Assert.Equal(2.5m, loaded.TrailingDownStep);
+        Assert.Equal(90m, loaded.TrailingDownLimit);
+        Assert.True(loaded.TrailingUpCanMoveExitOrder);
+        Assert.False(loaded.TrailingDownCanMoveExitOrder);
+    }
+
+    [Fact]
     public void Stage2Step2_2_TrailingUp_Delete_ShouldClearGridAndStayIdempotent()
     {
         TrailingUp trailing = new TrailingUp(CreateBareGrid());
