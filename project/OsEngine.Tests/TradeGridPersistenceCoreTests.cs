@@ -1866,6 +1866,28 @@ public class TradeGridPersistenceCoreTests
     }
 
     [Fact]
+    public void Stage2Step2_2_TradeGridStopAndProfit_GetSaveString_ShouldKeepReservedTailShape()
+    {
+        TradeGridStopAndProfit stopAndProfit = new TradeGridStopAndProfit
+        {
+            ProfitRegime = OnOffRegime.On,
+            ProfitValueType = TradeGridValueType.Absolute,
+            ProfitValue = 2.2m,
+            StopRegime = OnOffRegime.On,
+            StopValueType = TradeGridValueType.Percent,
+            StopValue = 1.1m,
+            TrailStopRegime = OnOffRegime.On,
+            TrailStopValueType = TradeGridValueType.Absolute,
+            TrailStopValue = 0.9m,
+            StopTradingAfterProfit = false
+        };
+
+        string save = stopAndProfit.GetSaveString();
+
+        Assert.Equal("On@Absolute@2.2@On@Percent@1.1@On@Absolute@0.9@False@@@@@@", save);
+    }
+
+    [Fact]
     public void Stage2Step2_2_TradeGridStopAndProfit_LoadFromString_WithMissingProfitRegime_ShouldKeepValueAndContinueParsing()
     {
         TradeGridStopAndProfit stopAndProfit = new TradeGridStopAndProfit
