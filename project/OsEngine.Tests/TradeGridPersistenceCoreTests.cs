@@ -5730,6 +5730,17 @@ public class TradeGridPersistenceCoreTests
     }
 
     [Fact]
+    public void Stage2Step2_2_TradeGrid_FirstPriceReal_ShouldReturnBackingField()
+    {
+        TradeGrid grid = (TradeGrid)RuntimeHelpers.GetUninitializedObject(typeof(TradeGrid));
+        SetPrivateField(grid, "_firstTradePrice", 123.45m);
+
+        decimal firstPriceReal = grid.FirstPriceReal;
+
+        Assert.Equal(123.45m, firstPriceReal);
+    }
+
+    [Fact]
     public void Stage2Step2_2_TradeGrid_FirstTradeTime_ShouldReturnBackingField()
     {
         TradeGrid grid = (TradeGrid)RuntimeHelpers.GetUninitializedObject(typeof(TradeGrid));
@@ -5739,6 +5750,39 @@ public class TradeGridPersistenceCoreTests
         DateTime firstTradeTime = grid.FirstTradeTime;
 
         Assert.Equal(expected, firstTradeTime);
+    }
+
+    [Fact]
+    public void Stage2Step2_2_TradeGrid_Regime_SetSameValue_ShouldNotRaiseRepaintEvents()
+    {
+        TradeGrid grid = (TradeGrid)RuntimeHelpers.GetUninitializedObject(typeof(TradeGrid));
+        SetPrivateField(grid, "_regime", TradeGridRegime.On);
+        int fullRepaintCalls = 0;
+        int settingsRepaintCalls = 0;
+        grid.FullRePaintGridEvent += () => fullRepaintCalls++;
+        grid.RePaintSettingsEvent += () => settingsRepaintCalls++;
+
+        grid.Regime = TradeGridRegime.On;
+
+        Assert.Equal(0, fullRepaintCalls);
+        Assert.Equal(0, settingsRepaintCalls);
+    }
+
+    [Fact]
+    public void Stage2Step2_2_TradeGrid_Regime_SetNewValue_ShouldRaiseRepaintEventsOnce()
+    {
+        TradeGrid grid = (TradeGrid)RuntimeHelpers.GetUninitializedObject(typeof(TradeGrid));
+        SetPrivateField(grid, "_regime", TradeGridRegime.Off);
+        int fullRepaintCalls = 0;
+        int settingsRepaintCalls = 0;
+        grid.FullRePaintGridEvent += () => fullRepaintCalls++;
+        grid.RePaintSettingsEvent += () => settingsRepaintCalls++;
+
+        grid.Regime = TradeGridRegime.On;
+
+        Assert.Equal(TradeGridRegime.On, grid.Regime);
+        Assert.Equal(1, fullRepaintCalls);
+        Assert.Equal(1, settingsRepaintCalls);
     }
 
     [Fact]
