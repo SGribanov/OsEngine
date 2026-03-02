@@ -131,6 +131,460 @@ public class TradeGridPersistenceCoreTests
     }
 
     [Fact]
+    public void Stage2Step2_2_TradeGridStopBy_LoadFromString_WithMalformedFields_ShouldKeepValuesAndContinueParsing()
+    {
+        TradeGridStopBy stopBy = new TradeGridStopBy
+        {
+            StopGridByMoveUpIsOn = false,
+            StopGridByMoveUpValuePercent = 2.5m,
+            StopGridByMoveUpReaction = TradeGridRegime.CloseForced,
+            StopGridByMoveDownIsOn = false,
+            StopGridByMoveDownValuePercent = 2.5m,
+            StopGridByMoveDownReaction = TradeGridRegime.CloseForced,
+            StopGridByPositionsCountIsOn = false,
+            StopGridByPositionsCountValue = 200,
+            StopGridByPositionsCountReaction = TradeGridRegime.CloseForced,
+            StopGridByLifeTimeIsOn = false,
+            StopGridByLifeTimeSecondsToLife = 600,
+            StopGridByLifeTimeReaction = TradeGridRegime.CloseForced,
+            StopGridByTimeOfDayIsOn = false,
+            StopGridByTimeOfDayHour = 14,
+            StopGridByTimeOfDayMinute = 15,
+            StopGridByTimeOfDaySecond = 16,
+            StopGridByTimeOfDayReaction = TradeGridRegime.CloseForced
+        };
+
+        Exception? error = Record.Exception(() => stopBy.LoadFromString(
+            "badBool@badDecimal@badEnum@on@3.5@Off@1@250@CloseForced@badBool@900@Off@on@20@30@40@CloseOnly"));
+
+        Assert.Null(error);
+        Assert.False(stopBy.StopGridByMoveUpIsOn);
+        Assert.Equal(2.5m, stopBy.StopGridByMoveUpValuePercent);
+        Assert.Equal(TradeGridRegime.CloseForced, stopBy.StopGridByMoveUpReaction);
+        Assert.True(stopBy.StopGridByMoveDownIsOn);
+        Assert.Equal(3.5m, stopBy.StopGridByMoveDownValuePercent);
+        Assert.Equal(TradeGridRegime.Off, stopBy.StopGridByMoveDownReaction);
+        Assert.True(stopBy.StopGridByPositionsCountIsOn);
+        Assert.Equal(250, stopBy.StopGridByPositionsCountValue);
+        Assert.Equal(TradeGridRegime.CloseForced, stopBy.StopGridByPositionsCountReaction);
+        Assert.False(stopBy.StopGridByLifeTimeIsOn);
+        Assert.Equal(900, stopBy.StopGridByLifeTimeSecondsToLife);
+        Assert.Equal(TradeGridRegime.Off, stopBy.StopGridByLifeTimeReaction);
+        Assert.True(stopBy.StopGridByTimeOfDayIsOn);
+        Assert.Equal(20, stopBy.StopGridByTimeOfDayHour);
+        Assert.Equal(30, stopBy.StopGridByTimeOfDayMinute);
+        Assert.Equal(40, stopBy.StopGridByTimeOfDaySecond);
+        Assert.Equal(TradeGridRegime.CloseOnly, stopBy.StopGridByTimeOfDayReaction);
+    }
+
+    [Fact]
+    public void Stage2Step2_2_TradeGridStopBy_LoadFromString_WithNonPositiveValues_ShouldKeepExistingValues()
+    {
+        TradeGridStopBy stopBy = new TradeGridStopBy
+        {
+            StopGridByMoveUpValuePercent = 2.5m,
+            StopGridByMoveDownValuePercent = 2.5m,
+            StopGridByPositionsCountValue = 200,
+            StopGridByLifeTimeSecondsToLife = 600
+        };
+
+        Exception? error = Record.Exception(() => stopBy.LoadFromString(
+            "on@0@Off@on@-1@Off@on@0@CloseForced@on@-5@Off@off@14@15@16@CloseForced"));
+
+        Assert.Null(error);
+        Assert.True(stopBy.StopGridByMoveUpIsOn);
+        Assert.Equal(2.5m, stopBy.StopGridByMoveUpValuePercent);
+        Assert.True(stopBy.StopGridByMoveDownIsOn);
+        Assert.Equal(2.5m, stopBy.StopGridByMoveDownValuePercent);
+        Assert.True(stopBy.StopGridByPositionsCountIsOn);
+        Assert.Equal(200, stopBy.StopGridByPositionsCountValue);
+        Assert.True(stopBy.StopGridByLifeTimeIsOn);
+        Assert.Equal(600, stopBy.StopGridByLifeTimeSecondsToLife);
+    }
+
+    [Fact]
+    public void Stage2Step2_2_TradeGridStopBy_LoadFromString_WithFlexibleBools_ShouldParse()
+    {
+        TradeGridStopBy stopBy = new TradeGridStopBy();
+
+        Exception? error = Record.Exception(() => stopBy.LoadFromString(
+            "yes@2.5@CloseForced@off@2.5@Off@1@200@CloseOnly@on@600@CloseForced@no@14@15@16@Off"));
+
+        Assert.Null(error);
+        Assert.True(stopBy.StopGridByMoveUpIsOn);
+        Assert.False(stopBy.StopGridByMoveDownIsOn);
+        Assert.True(stopBy.StopGridByPositionsCountIsOn);
+        Assert.True(stopBy.StopGridByLifeTimeIsOn);
+        Assert.False(stopBy.StopGridByTimeOfDayIsOn);
+        Assert.Equal(TradeGridRegime.CloseOnly, stopBy.StopGridByPositionsCountReaction);
+    }
+
+    [Fact]
+    public void Stage2Step2_2_TradeGridStopBy_LoadFromString_WithOutOfRangeTimeFields_ShouldKeepExistingValues()
+    {
+        TradeGridStopBy stopBy = new TradeGridStopBy
+        {
+            StopGridByTimeOfDayHour = 14,
+            StopGridByTimeOfDayMinute = 15,
+            StopGridByTimeOfDaySecond = 16
+        };
+
+        Exception? error = Record.Exception(() => stopBy.LoadFromString(
+            "on@2.5@CloseForced@off@2.5@Off@1@200@CloseOnly@on@600@CloseForced@on@24@60@61@Off"));
+
+        Assert.Null(error);
+        Assert.True(stopBy.StopGridByTimeOfDayIsOn);
+        Assert.Equal(14, stopBy.StopGridByTimeOfDayHour);
+        Assert.Equal(15, stopBy.StopGridByTimeOfDayMinute);
+        Assert.Equal(16, stopBy.StopGridByTimeOfDaySecond);
+        Assert.Equal(TradeGridRegime.Off, stopBy.StopGridByTimeOfDayReaction);
+    }
+
+    [Fact]
+    public void Stage2Step2_2_TradeGridStopBy_LoadFromString_WithMissingMoveDownBool_ShouldKeepValueAndContinueParsing()
+    {
+        TradeGridStopBy stopBy = new TradeGridStopBy
+        {
+            StopGridByMoveDownIsOn = false,
+            StopGridByMoveDownValuePercent = 2.5m,
+            StopGridByMoveDownReaction = TradeGridRegime.CloseForced
+        };
+
+        Exception? error = Record.Exception(() => stopBy.LoadFromString(
+            "on@2.5@CloseForced@@3.5@Off@1@250@CloseOnly@on@900@Off@on@20@30@40@CloseForced"));
+
+        Assert.Null(error);
+        Assert.True(stopBy.StopGridByMoveUpIsOn);
+        Assert.False(stopBy.StopGridByMoveDownIsOn);
+        Assert.Equal(3.5m, stopBy.StopGridByMoveDownValuePercent);
+        Assert.Equal(TradeGridRegime.Off, stopBy.StopGridByMoveDownReaction);
+        Assert.Equal(250, stopBy.StopGridByPositionsCountValue);
+    }
+
+    [Fact]
+    public void Stage2Step2_2_TradeGridStopBy_LoadFromString_WithInvalidPositionsReaction_ShouldKeepValueAndContinueParsing()
+    {
+        TradeGridStopBy stopBy = new TradeGridStopBy
+        {
+            StopGridByPositionsCountReaction = TradeGridRegime.CloseForced
+        };
+
+        Exception? error = Record.Exception(() => stopBy.LoadFromString(
+            "on@2.5@Off@on@3.5@Off@1@250@badEnum@on@900@Off@on@20@30@40@CloseOnly"));
+
+        Assert.Null(error);
+        Assert.True(stopBy.StopGridByPositionsCountIsOn);
+        Assert.Equal(250, stopBy.StopGridByPositionsCountValue);
+        Assert.Equal(TradeGridRegime.CloseForced, stopBy.StopGridByPositionsCountReaction);
+        Assert.Equal(TradeGridRegime.CloseOnly, stopBy.StopGridByTimeOfDayReaction);
+    }
+
+    [Fact]
+    public void Stage2Step2_2_TradeGridStopBy_LoadFromString_WithMissingLifeTimeSeconds_ShouldKeepValueAndContinueParsing()
+    {
+        TradeGridStopBy stopBy = new TradeGridStopBy
+        {
+            StopGridByLifeTimeSecondsToLife = 600,
+            StopGridByLifeTimeReaction = TradeGridRegime.CloseForced
+        };
+
+        Exception? error = Record.Exception(() => stopBy.LoadFromString(
+            "on@2.5@Off@on@3.5@Off@1@250@CloseOnly@on@@Off@on@20@30@40@CloseForced"));
+
+        Assert.Null(error);
+        Assert.True(stopBy.StopGridByLifeTimeIsOn);
+        Assert.Equal(600, stopBy.StopGridByLifeTimeSecondsToLife);
+        Assert.Equal(TradeGridRegime.Off, stopBy.StopGridByLifeTimeReaction);
+        Assert.True(stopBy.StopGridByTimeOfDayIsOn);
+    }
+
+    [Fact]
+    public void Stage2Step2_2_TradeGridStopBy_LoadFromString_WithInvalidTimeHourAndValidTail_ShouldKeepHourAndContinueParsing()
+    {
+        TradeGridStopBy stopBy = new TradeGridStopBy
+        {
+            StopGridByTimeOfDayHour = 14,
+            StopGridByTimeOfDayMinute = 15,
+            StopGridByTimeOfDaySecond = 16,
+            StopGridByTimeOfDayReaction = TradeGridRegime.CloseForced
+        };
+
+        Exception? error = Record.Exception(() => stopBy.LoadFromString(
+            "on@2.5@Off@on@3.5@Off@1@250@CloseOnly@on@900@Off@on@99@30@40@Off"));
+
+        Assert.Null(error);
+        Assert.True(stopBy.StopGridByTimeOfDayIsOn);
+        Assert.Equal(14, stopBy.StopGridByTimeOfDayHour);
+        Assert.Equal(30, stopBy.StopGridByTimeOfDayMinute);
+        Assert.Equal(40, stopBy.StopGridByTimeOfDaySecond);
+        Assert.Equal(TradeGridRegime.Off, stopBy.StopGridByTimeOfDayReaction);
+    }
+
+    [Fact]
+    public void Stage2Step2_2_TradeGridStopBy_LoadFromString_WithMissingMoveUpBool_ShouldKeepValueAndContinueParsing()
+    {
+        TradeGridStopBy stopBy = new TradeGridStopBy
+        {
+            StopGridByMoveUpIsOn = false,
+            StopGridByMoveUpValuePercent = 2.5m,
+            StopGridByMoveUpReaction = TradeGridRegime.CloseForced
+        };
+
+        Exception? error = Record.Exception(() => stopBy.LoadFromString(
+            "@3.5@Off@on@2.5@Off@1@250@CloseOnly@on@900@Off@on@20@30@40@CloseForced"));
+
+        Assert.Null(error);
+        Assert.False(stopBy.StopGridByMoveUpIsOn);
+        Assert.Equal(3.5m, stopBy.StopGridByMoveUpValuePercent);
+        Assert.Equal(TradeGridRegime.Off, stopBy.StopGridByMoveUpReaction);
+        Assert.True(stopBy.StopGridByMoveDownIsOn);
+    }
+
+    [Fact]
+    public void Stage2Step2_2_TradeGridStopBy_LoadFromString_WithInvalidMoveUpReaction_ShouldKeepValueAndContinueParsing()
+    {
+        TradeGridStopBy stopBy = new TradeGridStopBy
+        {
+            StopGridByMoveUpReaction = TradeGridRegime.CloseForced
+        };
+
+        Exception? error = Record.Exception(() => stopBy.LoadFromString(
+            "on@3.5@badEnum@on@2.5@Off@1@250@CloseOnly@on@900@Off@on@20@30@40@CloseForced"));
+
+        Assert.Null(error);
+        Assert.True(stopBy.StopGridByMoveUpIsOn);
+        Assert.Equal(3.5m, stopBy.StopGridByMoveUpValuePercent);
+        Assert.Equal(TradeGridRegime.CloseForced, stopBy.StopGridByMoveUpReaction);
+        Assert.Equal(TradeGridRegime.CloseOnly, stopBy.StopGridByPositionsCountReaction);
+    }
+
+    [Fact]
+    public void Stage2Step2_2_TradeGridStopBy_LoadFromString_WithMissingTimeMinute_ShouldKeepValueAndContinueTailParsing()
+    {
+        TradeGridStopBy stopBy = new TradeGridStopBy
+        {
+            StopGridByTimeOfDayMinute = 15,
+            StopGridByTimeOfDaySecond = 16,
+            StopGridByTimeOfDayReaction = TradeGridRegime.CloseForced
+        };
+
+        Exception? error = Record.Exception(() => stopBy.LoadFromString(
+            "on@2.5@Off@on@3.5@Off@1@250@CloseOnly@on@900@Off@on@20@@40@Off"));
+
+        Assert.Null(error);
+        Assert.True(stopBy.StopGridByTimeOfDayIsOn);
+        Assert.Equal(20, stopBy.StopGridByTimeOfDayHour);
+        Assert.Equal(15, stopBy.StopGridByTimeOfDayMinute);
+        Assert.Equal(40, stopBy.StopGridByTimeOfDaySecond);
+        Assert.Equal(TradeGridRegime.Off, stopBy.StopGridByTimeOfDayReaction);
+    }
+
+    [Fact]
+    public void Stage2Step2_2_TradeGridStopBy_LoadFromString_WithMissingTimeSecond_ShouldKeepValueAndParseReaction()
+    {
+        TradeGridStopBy stopBy = new TradeGridStopBy
+        {
+            StopGridByTimeOfDaySecond = 16,
+            StopGridByTimeOfDayReaction = TradeGridRegime.CloseForced
+        };
+
+        Exception? error = Record.Exception(() => stopBy.LoadFromString(
+            "on@2.5@Off@on@3.5@Off@1@250@CloseOnly@on@900@Off@on@20@30@@Off"));
+
+        Assert.Null(error);
+        Assert.True(stopBy.StopGridByTimeOfDayIsOn);
+        Assert.Equal(20, stopBy.StopGridByTimeOfDayHour);
+        Assert.Equal(30, stopBy.StopGridByTimeOfDayMinute);
+        Assert.Equal(16, stopBy.StopGridByTimeOfDaySecond);
+        Assert.Equal(TradeGridRegime.Off, stopBy.StopGridByTimeOfDayReaction);
+    }
+
+    [Fact]
+    public void Stage2Step2_2_TradeGridStopBy_LoadFromString_WithInvalidTimeReaction_ShouldKeepValue()
+    {
+        TradeGridStopBy stopBy = new TradeGridStopBy
+        {
+            StopGridByTimeOfDayReaction = TradeGridRegime.CloseForced
+        };
+
+        Exception? error = Record.Exception(() => stopBy.LoadFromString(
+            "on@2.5@Off@on@3.5@Off@1@250@CloseOnly@on@900@Off@on@20@30@40@badEnum"));
+
+        Assert.Null(error);
+        Assert.True(stopBy.StopGridByTimeOfDayIsOn);
+        Assert.Equal(20, stopBy.StopGridByTimeOfDayHour);
+        Assert.Equal(30, stopBy.StopGridByTimeOfDayMinute);
+        Assert.Equal(40, stopBy.StopGridByTimeOfDaySecond);
+        Assert.Equal(TradeGridRegime.CloseForced, stopBy.StopGridByTimeOfDayReaction);
+    }
+
+    [Fact]
+    public void Stage2Step2_2_TradeGridStopBy_LoadFromString_WithMissingMoveUpValue_ShouldKeepValueAndContinueParsing()
+    {
+        TradeGridStopBy stopBy = new TradeGridStopBy
+        {
+            StopGridByMoveUpValuePercent = 2.5m,
+            StopGridByMoveUpReaction = TradeGridRegime.CloseForced
+        };
+
+        Exception? error = Record.Exception(() => stopBy.LoadFromString(
+            "on@@Off@on@3.5@CloseOnly@1@250@Off@on@900@CloseForced@on@20@30@40@Off"));
+
+        Assert.Null(error);
+        Assert.True(stopBy.StopGridByMoveUpIsOn);
+        Assert.Equal(2.5m, stopBy.StopGridByMoveUpValuePercent);
+        Assert.Equal(TradeGridRegime.Off, stopBy.StopGridByMoveUpReaction);
+        Assert.True(stopBy.StopGridByMoveDownIsOn);
+        Assert.Equal(3.5m, stopBy.StopGridByMoveDownValuePercent);
+        Assert.Equal(TradeGridRegime.CloseOnly, stopBy.StopGridByMoveDownReaction);
+    }
+
+    [Fact]
+    public void Stage2Step2_2_TradeGridStopBy_LoadFromString_WithInvalidMoveDownReaction_ShouldKeepValueAndContinueParsing()
+    {
+        TradeGridStopBy stopBy = new TradeGridStopBy
+        {
+            StopGridByMoveDownReaction = TradeGridRegime.CloseForced
+        };
+
+        Exception? error = Record.Exception(() => stopBy.LoadFromString(
+            "on@2.5@Off@on@3.5@badEnum@1@250@CloseOnly@on@900@Off@on@20@30@40@CloseForced"));
+
+        Assert.Null(error);
+        Assert.True(stopBy.StopGridByMoveDownIsOn);
+        Assert.Equal(3.5m, stopBy.StopGridByMoveDownValuePercent);
+        Assert.Equal(TradeGridRegime.CloseForced, stopBy.StopGridByMoveDownReaction);
+        Assert.True(stopBy.StopGridByPositionsCountIsOn);
+        Assert.Equal(250, stopBy.StopGridByPositionsCountValue);
+        Assert.Equal(TradeGridRegime.CloseOnly, stopBy.StopGridByPositionsCountReaction);
+    }
+
+    [Fact]
+    public void Stage2Step2_2_TradeGridStopBy_LoadFromString_WithMissingPositionsCountValue_ShouldKeepValueAndContinueParsing()
+    {
+        TradeGridStopBy stopBy = new TradeGridStopBy
+        {
+            StopGridByPositionsCountValue = 200,
+            StopGridByPositionsCountReaction = TradeGridRegime.CloseForced
+        };
+
+        Exception? error = Record.Exception(() => stopBy.LoadFromString(
+            "on@2.5@Off@on@3.5@CloseOnly@1@@Off@on@900@CloseForced@on@20@30@40@Off"));
+
+        Assert.Null(error);
+        Assert.True(stopBy.StopGridByPositionsCountIsOn);
+        Assert.Equal(200, stopBy.StopGridByPositionsCountValue);
+        Assert.Equal(TradeGridRegime.Off, stopBy.StopGridByPositionsCountReaction);
+        Assert.True(stopBy.StopGridByLifeTimeIsOn);
+        Assert.Equal(900, stopBy.StopGridByLifeTimeSecondsToLife);
+    }
+
+    [Fact]
+    public void Stage2Step2_2_TradeGridStopBy_LoadFromString_WithMissingTimeFlag_ShouldKeepValueAndContinueTailParsing()
+    {
+        TradeGridStopBy stopBy = new TradeGridStopBy
+        {
+            StopGridByTimeOfDayIsOn = false,
+            StopGridByTimeOfDayHour = 14,
+            StopGridByTimeOfDayMinute = 15,
+            StopGridByTimeOfDaySecond = 16,
+            StopGridByTimeOfDayReaction = TradeGridRegime.CloseForced
+        };
+
+        Exception? error = Record.Exception(() => stopBy.LoadFromString(
+            "on@2.5@Off@on@3.5@CloseOnly@1@250@Off@on@900@CloseForced@@20@30@40@Off"));
+
+        Assert.Null(error);
+        Assert.False(stopBy.StopGridByTimeOfDayIsOn);
+        Assert.Equal(20, stopBy.StopGridByTimeOfDayHour);
+        Assert.Equal(30, stopBy.StopGridByTimeOfDayMinute);
+        Assert.Equal(40, stopBy.StopGridByTimeOfDaySecond);
+        Assert.Equal(TradeGridRegime.Off, stopBy.StopGridByTimeOfDayReaction);
+    }
+
+    [Fact]
+    public void Stage2Step2_2_TradeGridStopBy_LoadFromString_WithMissingMoveDownValue_ShouldKeepValueAndContinueParsing()
+    {
+        TradeGridStopBy stopBy = new TradeGridStopBy
+        {
+            StopGridByMoveDownValuePercent = 2.5m,
+            StopGridByMoveDownReaction = TradeGridRegime.CloseForced
+        };
+
+        Exception? error = Record.Exception(() => stopBy.LoadFromString(
+            "on@2.5@Off@on@@CloseOnly@1@250@Off@on@900@CloseForced@on@20@30@40@Off"));
+
+        Assert.Null(error);
+        Assert.True(stopBy.StopGridByMoveDownIsOn);
+        Assert.Equal(2.5m, stopBy.StopGridByMoveDownValuePercent);
+        Assert.Equal(TradeGridRegime.CloseOnly, stopBy.StopGridByMoveDownReaction);
+        Assert.True(stopBy.StopGridByPositionsCountIsOn);
+        Assert.Equal(250, stopBy.StopGridByPositionsCountValue);
+    }
+
+    [Fact]
+    public void Stage2Step2_2_TradeGridStopBy_LoadFromString_WithMissingPositionsReaction_ShouldKeepValueAndContinueParsing()
+    {
+        TradeGridStopBy stopBy = new TradeGridStopBy
+        {
+            StopGridByPositionsCountReaction = TradeGridRegime.CloseForced
+        };
+
+        Exception? error = Record.Exception(() => stopBy.LoadFromString(
+            "on@2.5@Off@on@3.5@CloseOnly@1@250@@on@900@Off@on@20@30@40@CloseOnly"));
+
+        Assert.Null(error);
+        Assert.True(stopBy.StopGridByPositionsCountIsOn);
+        Assert.Equal(250, stopBy.StopGridByPositionsCountValue);
+        Assert.Equal(TradeGridRegime.CloseForced, stopBy.StopGridByPositionsCountReaction);
+        Assert.True(stopBy.StopGridByLifeTimeIsOn);
+        Assert.Equal(900, stopBy.StopGridByLifeTimeSecondsToLife);
+        Assert.Equal(TradeGridRegime.Off, stopBy.StopGridByLifeTimeReaction);
+    }
+
+    [Fact]
+    public void Stage2Step2_2_TradeGridStopBy_LoadFromString_WithInvalidLifeTimeReaction_ShouldKeepValueAndContinueParsing()
+    {
+        TradeGridStopBy stopBy = new TradeGridStopBy
+        {
+            StopGridByLifeTimeReaction = TradeGridRegime.CloseForced
+        };
+
+        Exception? error = Record.Exception(() => stopBy.LoadFromString(
+            "on@2.5@Off@on@3.5@CloseOnly@1@250@Off@on@900@badEnum@on@20@30@40@CloseOnly"));
+
+        Assert.Null(error);
+        Assert.True(stopBy.StopGridByLifeTimeIsOn);
+        Assert.Equal(900, stopBy.StopGridByLifeTimeSecondsToLife);
+        Assert.Equal(TradeGridRegime.CloseForced, stopBy.StopGridByLifeTimeReaction);
+        Assert.True(stopBy.StopGridByTimeOfDayIsOn);
+        Assert.Equal(20, stopBy.StopGridByTimeOfDayHour);
+        Assert.Equal(TradeGridRegime.CloseOnly, stopBy.StopGridByTimeOfDayReaction);
+    }
+
+    [Fact]
+    public void Stage2Step2_2_TradeGridStopBy_LoadFromString_WithMissingTimeHour_ShouldKeepValueAndContinueTailParsing()
+    {
+        TradeGridStopBy stopBy = new TradeGridStopBy
+        {
+            StopGridByTimeOfDayHour = 14,
+            StopGridByTimeOfDayMinute = 15,
+            StopGridByTimeOfDaySecond = 16,
+            StopGridByTimeOfDayReaction = TradeGridRegime.CloseForced
+        };
+
+        Exception? error = Record.Exception(() => stopBy.LoadFromString(
+            "on@2.5@Off@on@3.5@CloseOnly@1@250@Off@on@900@CloseForced@on@@30@40@Off"));
+
+        Assert.Null(error);
+        Assert.True(stopBy.StopGridByTimeOfDayIsOn);
+        Assert.Equal(14, stopBy.StopGridByTimeOfDayHour);
+        Assert.Equal(30, stopBy.StopGridByTimeOfDayMinute);
+        Assert.Equal(40, stopBy.StopGridByTimeOfDaySecond);
+        Assert.Equal(TradeGridRegime.Off, stopBy.StopGridByTimeOfDayReaction);
+    }
+
+    [Fact]
     public void Stage2Step2_2_TradeGridStopAndProfit_Process_WithNullRuntimeContext_ShouldNotThrow()
     {
         TradeGridStopAndProfit stopAndProfit = new TradeGridStopAndProfit();

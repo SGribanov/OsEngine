@@ -93,81 +93,231 @@ namespace OsEngine.OsTrader.Grids
 
                 if (values.Length > 0 && string.IsNullOrWhiteSpace(values[0]) == false)
                 {
-                    StopGridByMoveUpIsOn = Convert.ToBoolean(values[0]);
+                    if (TryParseBoolFlexible(values[0], out bool parsed))
+                    {
+                        StopGridByMoveUpIsOn = parsed;
+                    }
                 }
                 if (values.Length > 1 && string.IsNullOrWhiteSpace(values[1]) == false)
                 {
-                    StopGridByMoveUpValuePercent = values[1].ToDecimal();
+                    if (TryParsePositiveDecimal(values[1], out decimal parsed))
+                    {
+                        StopGridByMoveUpValuePercent = parsed;
+                    }
                 }
                 if (values.Length > 2 && string.IsNullOrWhiteSpace(values[2]) == false)
                 {
-                    Enum.TryParse(values[2], out StopGridByMoveUpReaction);
+                    if (TryParseEnumValue(values[2], out TradeGridRegime parsed))
+                    {
+                        StopGridByMoveUpReaction = parsed;
+                    }
                 }
 
                 if (values.Length > 3 && string.IsNullOrWhiteSpace(values[3]) == false)
                 {
-                    StopGridByMoveDownIsOn = Convert.ToBoolean(values[3]);
+                    if (TryParseBoolFlexible(values[3], out bool parsed))
+                    {
+                        StopGridByMoveDownIsOn = parsed;
+                    }
                 }
                 if (values.Length > 4 && string.IsNullOrWhiteSpace(values[4]) == false)
                 {
-                    StopGridByMoveDownValuePercent = values[4].ToDecimal();
+                    if (TryParsePositiveDecimal(values[4], out decimal parsed))
+                    {
+                        StopGridByMoveDownValuePercent = parsed;
+                    }
                 }
                 if (values.Length > 5 && string.IsNullOrWhiteSpace(values[5]) == false)
                 {
-                    Enum.TryParse(values[5], out StopGridByMoveDownReaction);
+                    if (TryParseEnumValue(values[5], out TradeGridRegime parsed))
+                    {
+                        StopGridByMoveDownReaction = parsed;
+                    }
                 }
 
                 if (values.Length > 6 && string.IsNullOrWhiteSpace(values[6]) == false)
                 {
-                    StopGridByPositionsCountIsOn = Convert.ToBoolean(values[6]);
+                    if (TryParseBoolFlexible(values[6], out bool parsed))
+                    {
+                        StopGridByPositionsCountIsOn = parsed;
+                    }
                 }
                 if (values.Length > 7 && string.IsNullOrWhiteSpace(values[7]) == false)
                 {
-                    StopGridByPositionsCountValue = Convert.ToInt32(values[7], CultureInfo.InvariantCulture);
+                    if (TryParsePositiveInt(values[7], out int parsed))
+                    {
+                        StopGridByPositionsCountValue = parsed;
+                    }
                 }
                 if (values.Length > 8 && string.IsNullOrWhiteSpace(values[8]) == false)
                 {
-                    Enum.TryParse(values[8], out StopGridByPositionsCountReaction);
+                    if (TryParseEnumValue(values[8], out TradeGridRegime parsed))
+                    {
+                        StopGridByPositionsCountReaction = parsed;
+                    }
                 }
 
                 if (values.Length > 9 && string.IsNullOrWhiteSpace(values[9]) == false)
                 {
-                    StopGridByLifeTimeIsOn = Convert.ToBoolean(values[9]);
+                    if (TryParseBoolFlexible(values[9], out bool parsed))
+                    {
+                        StopGridByLifeTimeIsOn = parsed;
+                    }
                 }
                 if (values.Length > 10 && string.IsNullOrWhiteSpace(values[10]) == false)
                 {
-                    StopGridByLifeTimeSecondsToLife = Convert.ToInt32(values[10], CultureInfo.InvariantCulture);
+                    if (TryParsePositiveInt(values[10], out int parsed))
+                    {
+                        StopGridByLifeTimeSecondsToLife = parsed;
+                    }
                 }
                 if (values.Length > 11 && string.IsNullOrWhiteSpace(values[11]) == false)
                 {
-                    Enum.TryParse(values[11], out StopGridByLifeTimeReaction);
+                    if (TryParseEnumValue(values[11], out TradeGridRegime parsed))
+                    {
+                        StopGridByLifeTimeReaction = parsed;
+                    }
                 }
 
                 if (values.Length > 12 && string.IsNullOrWhiteSpace(values[12]) == false)
                 {
-                    StopGridByTimeOfDayIsOn = Convert.ToBoolean(values[12]);
+                    if (TryParseBoolFlexible(values[12], out bool parsed))
+                    {
+                        StopGridByTimeOfDayIsOn = parsed;
+                    }
                 }
                 if (values.Length > 13 && string.IsNullOrWhiteSpace(values[13]) == false)
                 {
-                    StopGridByTimeOfDayHour = Convert.ToInt32(values[13], CultureInfo.InvariantCulture);
+                    if (TryParseRangeInt(values[13], 0, 23, out int parsed))
+                    {
+                        StopGridByTimeOfDayHour = parsed;
+                    }
                 }
                 if (values.Length > 14 && string.IsNullOrWhiteSpace(values[14]) == false)
                 {
-                    StopGridByTimeOfDayMinute = Convert.ToInt32(values[14], CultureInfo.InvariantCulture);
+                    if (TryParseRangeInt(values[14], 0, 59, out int parsed))
+                    {
+                        StopGridByTimeOfDayMinute = parsed;
+                    }
                 }
                 if (values.Length > 15 && string.IsNullOrWhiteSpace(values[15]) == false)
                 {
-                    StopGridByTimeOfDaySecond = Convert.ToInt32(values[15], CultureInfo.InvariantCulture);
+                    if (TryParseRangeInt(values[15], 0, 59, out int parsed))
+                    {
+                        StopGridByTimeOfDaySecond = parsed;
+                    }
                 }
                 if (values.Length > 16 && string.IsNullOrWhiteSpace(values[16]) == false)
                 {
-                    Enum.TryParse(values[16], out StopGridByTimeOfDayReaction);
+                    if (TryParseEnumValue(values[16], out TradeGridRegime parsed))
+                    {
+                        StopGridByTimeOfDayReaction = parsed;
+                    }
                 }
             }
             catch (Exception e)
             {
                 SendNewLogMessage(e.ToString(),LogMessageType.Error);
             }
+        }
+
+        private static bool TryParseBoolFlexible(string value, out bool parsed)
+        {
+            if (bool.TryParse(value, out parsed))
+            {
+                return true;
+            }
+
+            string normalized = value.Trim();
+
+            if (string.Equals(normalized, "1", StringComparison.OrdinalIgnoreCase)
+                || string.Equals(normalized, "yes", StringComparison.OrdinalIgnoreCase)
+                || string.Equals(normalized, "on", StringComparison.OrdinalIgnoreCase))
+            {
+                parsed = true;
+                return true;
+            }
+
+            if (string.Equals(normalized, "0", StringComparison.OrdinalIgnoreCase)
+                || string.Equals(normalized, "no", StringComparison.OrdinalIgnoreCase)
+                || string.Equals(normalized, "off", StringComparison.OrdinalIgnoreCase))
+            {
+                parsed = false;
+                return true;
+            }
+
+            parsed = false;
+            return false;
+        }
+
+        private static bool TryParsePositiveDecimal(string value, out decimal parsed)
+        {
+            if (decimal.TryParse(value, NumberStyles.Any, CultureInfo.InvariantCulture, out parsed) == false
+                && decimal.TryParse(value, NumberStyles.Any, CultureInfo.CurrentCulture, out parsed) == false)
+            {
+                parsed = 0;
+                return false;
+            }
+
+            if (parsed <= 0)
+            {
+                parsed = 0;
+                return false;
+            }
+
+            return true;
+        }
+
+        private static bool TryParsePositiveInt(string value, out int parsed)
+        {
+            if (int.TryParse(value, NumberStyles.Any, CultureInfo.InvariantCulture, out parsed) == false
+                && int.TryParse(value, NumberStyles.Any, CultureInfo.CurrentCulture, out parsed) == false)
+            {
+                parsed = 0;
+                return false;
+            }
+
+            if (parsed <= 0)
+            {
+                parsed = 0;
+                return false;
+            }
+
+            return true;
+        }
+
+        private static bool TryParseRangeInt(string value, int min, int max, out int parsed)
+        {
+            if (int.TryParse(value, NumberStyles.Any, CultureInfo.InvariantCulture, out parsed) == false
+                && int.TryParse(value, NumberStyles.Any, CultureInfo.CurrentCulture, out parsed) == false)
+            {
+                parsed = 0;
+                return false;
+            }
+
+            if (parsed < min || parsed > max)
+            {
+                parsed = 0;
+                return false;
+            }
+
+            return true;
+        }
+
+        private static bool TryParseEnumValue<TEnum>(string value, out TEnum parsed)
+            where TEnum : struct
+        {
+            if (Enum.TryParse(value, true, out parsed) == false)
+            {
+                return false;
+            }
+
+            if (Enum.IsDefined(typeof(TEnum), parsed) == false)
+            {
+                return false;
+            }
+
+            return true;
         }
 
         #endregion

@@ -15944,3 +15944,133 @@
   - dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo -> success
   - dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900 -> success, 0 warnings, 0 errors
   - dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo -> passed 660/660
+
+## 2026-03-01 - Step 4.2 (nullable annotations) - TradeGridStopBy parser hardening (#824-#831)
+
+- Applied localized parser hardening in:
+  - project/OsEngine/OsTrader/Grids/TradeGridStopBy.cs
+- Changes:
+  - `LoadFromString(...)` no longer relies on exception-driven bool/decimal/int parsing.
+  - added flexible bool parsing (`true/false`, `1/0`, `yes/no`, `on/off`) for all stop toggles.
+  - added guarded positive-decimal parsing for move-up/move-down percentages.
+  - added guarded positive-int parsing for positions count and life-time seconds.
+  - added range-checked int parsing for time-of-day hour (`0..23`) and minute/second (`0..59`).
+  - added guarded enum parsing (case-insensitive, only defined enum values accepted) for all reaction fields.
+- Added/updated tests:
+  - project/OsEngine.Tests/TradeGridPersistenceCoreTests.cs
+    - added `Stage2Step2_2_TradeGridStopBy_LoadFromString_WithMalformedFields_ShouldKeepValuesAndContinueParsing`.
+    - added `Stage2Step2_2_TradeGridStopBy_LoadFromString_WithNonPositiveValues_ShouldKeepExistingValues`.
+    - added `Stage2Step2_2_TradeGridStopBy_LoadFromString_WithFlexibleBools_ShouldParse`.
+    - added `Stage2Step2_2_TradeGridStopBy_LoadFromString_WithOutOfRangeTimeFields_ShouldKeepExistingValues`.
+- Scope:
+  - parser/runtime hardening only
+  - valid payload behavior remains unchanged
+
+### Verification
+
+- Host-context verification (outside sandbox, per dotnet-build-policy):
+  - dotnet restore project/OsEngine/OsEngine.csproj --nologo -> success
+  - dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo -> success
+  - dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900 -> success, 0 warnings, 0 errors
+  - dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo -> passed 664/664
+
+## 2026-03-01 - Step 4.2 (nullable annotations) - TradeGridStopBy partial-payload regression coverage (#832-#835)
+
+- Added targeted regression coverage in:
+  - project/OsEngine.Tests/TradeGridPersistenceCoreTests.cs
+- Changes:
+  - locked missing and mixed malformed behavior across the mid/tail sections of `TradeGridStopBy.LoadFromString(...)`.
+  - covered missing move-down bool, malformed positions-count reaction, missing life-time seconds, and invalid time hour with still-valid later tail tokens.
+- Added/updated tests:
+  - project/OsEngine.Tests/TradeGridPersistenceCoreTests.cs
+    - added `Stage2Step2_2_TradeGridStopBy_LoadFromString_WithMissingMoveDownBool_ShouldKeepValueAndContinueParsing`.
+    - added `Stage2Step2_2_TradeGridStopBy_LoadFromString_WithInvalidPositionsReaction_ShouldKeepValueAndContinueParsing`.
+    - added `Stage2Step2_2_TradeGridStopBy_LoadFromString_WithMissingLifeTimeSeconds_ShouldKeepValueAndContinueParsing`.
+    - added `Stage2Step2_2_TradeGridStopBy_LoadFromString_WithInvalidTimeHourAndValidTail_ShouldKeepHourAndContinueParsing`.
+- Scope:
+  - test-only regression coverage
+  - no production behavior change
+
+### Verification
+
+- Host-context verification (outside sandbox, per dotnet-build-policy):
+  - dotnet restore project/OsEngine/OsEngine.csproj --nologo -> success
+  - dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo -> success
+  - dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900 -> success, 0 warnings, 0 errors
+  - dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo -> passed 668/668
+
+## 2026-03-01 - Step 4.2 (nullable annotations) - TradeGridStopBy prefix/time-tail regression coverage (#836-#840)
+
+- Added targeted regression coverage in:
+  - project/OsEngine.Tests/TradeGridPersistenceCoreTests.cs
+- Changes:
+  - locked remaining prefix and late time-tail behavior after the parser-hardening changes.
+  - covered missing move-up bool, malformed move-up reaction, missing time minute, missing time second, and malformed final time reaction.
+- Added/updated tests:
+  - project/OsEngine.Tests/TradeGridPersistenceCoreTests.cs
+    - added `Stage2Step2_2_TradeGridStopBy_LoadFromString_WithMissingMoveUpBool_ShouldKeepValueAndContinueParsing`.
+    - added `Stage2Step2_2_TradeGridStopBy_LoadFromString_WithInvalidMoveUpReaction_ShouldKeepValueAndContinueParsing`.
+    - added `Stage2Step2_2_TradeGridStopBy_LoadFromString_WithMissingTimeMinute_ShouldKeepValueAndContinueTailParsing`.
+    - added `Stage2Step2_2_TradeGridStopBy_LoadFromString_WithMissingTimeSecond_ShouldKeepValueAndParseReaction`.
+    - added `Stage2Step2_2_TradeGridStopBy_LoadFromString_WithInvalidTimeReaction_ShouldKeepValue`.
+- Scope:
+  - test-only regression coverage
+  - no production behavior change
+
+### Verification
+
+- Host-context verification (outside sandbox, per dotnet-build-policy):
+  - dotnet restore project/OsEngine/OsEngine.csproj --nologo -> success
+  - dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo -> success
+  - dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900 -> success, 0 warnings, 0 errors
+  - dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo -> passed 677/677
+
+## 2026-03-01 - Step 4.2 (nullable annotations) - TradeGridStopBy remaining parser regression coverage (#841-#844)
+
+- Added targeted regression coverage in:
+  - project/OsEngine.Tests/TradeGridPersistenceCoreTests.cs
+- Changes:
+  - locked remaining parser gaps around early move-up fields, mid positions-count section, and time-of-day flag handling.
+  - covered missing move-up value, malformed move-down reaction, missing positions-count value, and missing time-of-day toggle with still-valid tail tokens.
+- Added/updated tests:
+  - project/OsEngine.Tests/TradeGridPersistenceCoreTests.cs
+    - added `Stage2Step2_2_TradeGridStopBy_LoadFromString_WithMissingMoveUpValue_ShouldKeepValueAndContinueParsing`.
+    - added `Stage2Step2_2_TradeGridStopBy_LoadFromString_WithInvalidMoveDownReaction_ShouldKeepValueAndContinueParsing`.
+    - added `Stage2Step2_2_TradeGridStopBy_LoadFromString_WithMissingPositionsCountValue_ShouldKeepValueAndContinueParsing`.
+    - added `Stage2Step2_2_TradeGridStopBy_LoadFromString_WithMissingTimeFlag_ShouldKeepValueAndContinueTailParsing`.
+- Scope:
+  - test-only regression coverage
+  - no production behavior change
+
+### Verification
+
+- Host-context verification (outside sandbox, per dotnet-build-policy):
+  - dotnet restore project/OsEngine/OsEngine.csproj --nologo -> success
+  - dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo -> success
+  - dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900 -> success, 0 warnings, 0 errors
+  - dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo -> passed 677/677
+
+## 2026-03-01 - Step 4.2 (nullable annotations) - TradeGridStopBy symmetric parser regression coverage (#845-#848)
+
+- Added targeted regression coverage in:
+  - project/OsEngine.Tests/TradeGridPersistenceCoreTests.cs
+- Changes:
+  - closed another symmetric set of partial-payload gaps across move-down, positions-count, life-time, and the opening of the time-of-day tail.
+  - covered missing move-down value, missing positions-count reaction, malformed life-time reaction, and missing time-of-day hour with still-valid later tail tokens.
+- Added/updated tests:
+  - project/OsEngine.Tests/TradeGridPersistenceCoreTests.cs
+    - added `Stage2Step2_2_TradeGridStopBy_LoadFromString_WithMissingMoveDownValue_ShouldKeepValueAndContinueParsing`.
+    - added `Stage2Step2_2_TradeGridStopBy_LoadFromString_WithMissingPositionsReaction_ShouldKeepValueAndContinueParsing`.
+    - added `Stage2Step2_2_TradeGridStopBy_LoadFromString_WithInvalidLifeTimeReaction_ShouldKeepValueAndContinueParsing`.
+    - added `Stage2Step2_2_TradeGridStopBy_LoadFromString_WithMissingTimeHour_ShouldKeepValueAndContinueTailParsing`.
+- Scope:
+  - test-only regression coverage
+  - no production behavior change
+
+### Verification
+
+- Host-context verification (outside sandbox, per dotnet-build-policy):
+  - dotnet restore project/OsEngine/OsEngine.csproj --nologo -> success
+  - dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo -> success
+  - dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900 -> success, 0 warnings, 0 errors
+  - dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo -> passed 681/681
