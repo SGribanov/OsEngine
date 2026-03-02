@@ -5620,6 +5620,77 @@ public class TradeGridPersistenceCoreTests
     }
 
     [Fact]
+    public void Stage2Step2_2_TradeGrid_GetLinesWithOpenPosition_WithSparseLines_ShouldReturnOnlyOpenVolumeLines()
+    {
+        TradeGrid grid = CreateBareGrid();
+
+        Position openPosition = new Position();
+        openPosition.AddNewOpenOrder(new Order
+        {
+            State = OrderStateType.Done,
+            Volume = 1m,
+            VolumeExecute = 1m
+        });
+
+        Position flatPosition = (Position)RuntimeHelpers.GetUninitializedObject(typeof(Position));
+        SetPrivateField(flatPosition, "_openOrders", new List<Order>());
+        SetPrivateField(flatPosition, "_closeOrders", new List<Order>());
+
+        TradeGridLine openLine = new TradeGridLine
+        {
+            Position = openPosition,
+            PositionNum = 1
+        };
+
+        grid.GridCreator.Lines = new List<TradeGridLine>
+        {
+            null!,
+            new TradeGridLine
+            {
+                Position = flatPosition,
+                PositionNum = 2
+            },
+            openLine
+        };
+
+        List<TradeGridLine> openPositions = grid.GetLinesWithOpenPosition();
+
+        Assert.Single(openPositions);
+        Assert.Same(openLine, openPositions[0]);
+    }
+
+    [Fact]
+    public void Stage2Step2_2_TradeGrid_GetPositionByGrid_WithSparseLines_ShouldReturnOnlyExistingPositions()
+    {
+        TradeGrid grid = CreateBareGrid();
+        Position firstPosition = (Position)RuntimeHelpers.GetUninitializedObject(typeof(Position));
+        Position secondPosition = (Position)RuntimeHelpers.GetUninitializedObject(typeof(Position));
+
+        grid.GridCreator.Lines = new List<TradeGridLine>
+        {
+            null!,
+            new TradeGridLine
+            {
+                Position = null
+            },
+            new TradeGridLine
+            {
+                Position = firstPosition
+            },
+            new TradeGridLine
+            {
+                Position = secondPosition
+            }
+        };
+
+        List<Position> positions = grid.GetPositionByGrid();
+
+        Assert.Equal(2, positions.Count);
+        Assert.Same(firstPosition, positions[0]);
+        Assert.Same(secondPosition, positions[1]);
+    }
+
+    [Fact]
     public void Stage2Step2_2_TradeGrid_GetLinesWithClosingOrdersFact_WithActiveCloseLine_ShouldReturnLine()
     {
         TradeGrid grid = CreateBareGrid();
