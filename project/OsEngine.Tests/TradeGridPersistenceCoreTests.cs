@@ -6722,6 +6722,47 @@ public class TradeGridPersistenceCoreTests
     }
 
     [Fact]
+    public void Stage2Step2_2_TradeGrid_LoadFromString_WithOnlyStopBySection_ShouldApplyPrimeAndTargetChildOnly()
+    {
+        TradeGrid grid = CreateBareGrid();
+        grid.NonTradePeriods.NonTradePeriod1Regime = TradeGridRegime.CloseOnly;
+        grid.StopBy.StopGridByMoveUpIsOn = false;
+        grid.StopBy.StopGridByMoveUpValuePercent = 1.1m;
+        grid.GridCreator.TradeAssetInPortfolio = "USDT";
+        grid.StopAndProfit.ProfitValue = 2.2m;
+        grid.AutoStarter.AutoStartPrice = 101.25m;
+        grid.ErrorsReaction.FailOpenOrdersCountToReaction = 3;
+        grid.TrailingUp.TrailingUpStep = 1.5m;
+
+        string payload =
+            "42@MarketMaking@CloseOnly@OncePerSecond@True@11@3@2@123.45@4@" +
+            new DateTime(2024, 1, 2, 3, 4, 5, DateTimeKind.Utc).ToString("O", CultureInfo.InvariantCulture) +
+            "@700@False@1.5@False@@@" +
+            "%%%" +
+            "True@2.5@CloseOnly@False@1.5@Off@True@7@CloseForced@True@600@OffAndCancelOrders@True@9@30@45@CloseOnly@@@@@@" +
+            "%%%%%";
+
+        Exception? error = Record.Exception(() => grid.LoadFromString(payload));
+
+        Assert.Null(error);
+        Assert.Equal(42, grid.Number);
+        Assert.Equal(TradeGridPrimeType.MarketMaking, grid.GridType);
+        Assert.Equal(TradeGridRegime.CloseOnly, grid.Regime);
+
+        Assert.Equal(TradeGridRegime.CloseOnly, grid.NonTradePeriods.NonTradePeriod1Regime);
+
+        Assert.True(grid.StopBy.StopGridByMoveUpIsOn);
+        Assert.Equal(2.5m, grid.StopBy.StopGridByMoveUpValuePercent);
+        Assert.Equal(TradeGridRegime.CloseOnly, grid.StopBy.StopGridByMoveUpReaction);
+
+        Assert.Equal("USDT", grid.GridCreator.TradeAssetInPortfolio);
+        Assert.Equal(2.2m, grid.StopAndProfit.ProfitValue);
+        Assert.Equal(101.25m, grid.AutoStarter.AutoStartPrice);
+        Assert.Equal(3, grid.ErrorsReaction.FailOpenOrdersCountToReaction);
+        Assert.Equal(1.5m, grid.TrailingUp.TrailingUpStep);
+    }
+
+    [Fact]
     public void Stage2Step2_2_TradeGrid_GetSaveString_LoadFromString_ShouldRoundTrip()
     {
         TradeGrid source = CreateBareGrid();
