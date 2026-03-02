@@ -17300,6 +17300,32 @@
   - dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900 -> success, 0 warnings, 0 errors
   - dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo -> passed 821/821
 
+## 2026-03-02 - Incremental Update #992-#993
+
+### Scope
+
+- Closed the last two remaining top-level empty-input guards in child `LoadFromString(...)` parsers.
+
+### What Changed
+
+- Updated tests in:
+  - project/OsEngine.Tests/TradeGridPersistenceCoreTests.cs
+- Changes:
+  - locked `TradeGridNonTradePeriods.LoadFromString(...)` no-op behavior for `null`, empty, and whitespace-only payloads.
+  - locked `TradeGridStopBy.LoadFromString(...)` no-op behavior for `null`, empty, and whitespace-only payloads.
+- Added/updated tests:
+  - project/OsEngine.Tests/TradeGridPersistenceCoreTests.cs
+    - added `Stage2Step2_2_TradeGridNonTradePeriods_LoadFromString_WithEmptyLikePayloads_ShouldKeepExistingValues`.
+    - added `Stage2Step2_2_TradeGridStopBy_LoadFromString_WithEmptyLikePayloads_ShouldKeepExistingValues`.
+
+### Verification
+
+- Host-context verification (outside sandbox, per dotnet-build-policy):
+  - dotnet restore project/OsEngine/OsEngine.csproj --nologo -> success
+  - dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo -> success
+  - dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900 -> success, 0 warnings, 0 errors
+  - dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo -> passed 823/823
+
 ## 2026-03-02 - Incremental Update #980-#981
 
 ### Scope
