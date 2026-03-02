@@ -353,6 +353,29 @@ public class TradeGridPersistenceCoreTests
     }
 
     [Fact]
+    public void Stage2Step2_2_TradeGridCreator_LoadFromString_WithEmptyLikePayloads_ShouldKeepExistingValues()
+    {
+        TradeGridCreator creator = new TradeGridCreator
+        {
+            GridSide = Side.Sell,
+            TypeVolume = TradeGridVolumeType.Contracts,
+            TradeAssetInPortfolio = "AssetX"
+        };
+
+        Exception? error = Record.Exception(() =>
+        {
+            creator.LoadFromString(null);
+            creator.LoadFromString(string.Empty);
+            creator.LoadFromString("  \r\n \t  ");
+        });
+
+        Assert.Null(error);
+        Assert.Equal(Side.Sell, creator.GridSide);
+        Assert.Equal(TradeGridVolumeType.Contracts, creator.TypeVolume);
+        Assert.Equal("AssetX", creator.TradeAssetInPortfolio);
+    }
+
+    [Fact]
     public void Stage2Step2_2_TradeGridLine_GetSaveStr_ShouldUseInvariantCultureAndTrailingSeparator()
     {
         TradeGridLine line = new TradeGridLine
@@ -2179,6 +2202,29 @@ public class TradeGridPersistenceCoreTests
     }
 
     [Fact]
+    public void Stage2Step2_2_TradeGridStopAndProfit_LoadFromString_WithEmptyLikePayloads_ShouldKeepExistingValues()
+    {
+        TradeGridStopAndProfit stopAndProfit = new TradeGridStopAndProfit
+        {
+            ProfitRegime = OnOffRegime.On,
+            ProfitValueType = TradeGridValueType.Absolute,
+            ProfitValue = 2.2m
+        };
+
+        Exception? error = Record.Exception(() =>
+        {
+            stopAndProfit.LoadFromString(null);
+            stopAndProfit.LoadFromString(string.Empty);
+            stopAndProfit.LoadFromString("  \r\n \t  ");
+        });
+
+        Assert.Null(error);
+        Assert.Equal(OnOffRegime.On, stopAndProfit.ProfitRegime);
+        Assert.Equal(TradeGridValueType.Absolute, stopAndProfit.ProfitValueType);
+        Assert.Equal(2.2m, stopAndProfit.ProfitValue);
+    }
+
+    [Fact]
     public void Stage2Step2_2_TradeGridStopAndProfit_SendNewLogMessage_WithSubscriber_ShouldForwardMessage()
     {
         TradeGridStopAndProfit stopAndProfit = new TradeGridStopAndProfit();
@@ -2372,6 +2418,29 @@ public class TradeGridPersistenceCoreTests
         string save = trailing.GetSaveString();
 
         Assert.Equal("True@1.5@110@False@2.5@90@True@False@@@@@@", save);
+    }
+
+    [Fact]
+    public void Stage2Step2_2_TrailingUp_LoadFromString_WithEmptyLikePayloads_ShouldKeepExistingValues()
+    {
+        TrailingUp trailing = new TrailingUp(CreateBareGrid())
+        {
+            TrailingUpIsOn = true,
+            TrailingUpStep = 1.5m,
+            TrailingUpLimit = 110m
+        };
+
+        Exception? error = Record.Exception(() =>
+        {
+            trailing.LoadFromString(null);
+            trailing.LoadFromString(string.Empty);
+            trailing.LoadFromString("  \r\n \t  ");
+        });
+
+        Assert.Null(error);
+        Assert.True(trailing.TrailingUpIsOn);
+        Assert.Equal(1.5m, trailing.TrailingUpStep);
+        Assert.Equal(110m, trailing.TrailingUpLimit);
     }
 
     [Fact]
@@ -3875,6 +3944,29 @@ public class TradeGridPersistenceCoreTests
     }
 
     [Fact]
+    public void Stage2Step2_2_TradeGridAutoStarter_LoadFromString_WithEmptyLikePayloads_ShouldKeepExistingValues()
+    {
+        TradeGridAutoStarter autoStarter = new TradeGridAutoStarter
+        {
+            AutoStartRegime = TradeGridAutoStartRegime.HigherOrEqual,
+            AutoStartPrice = 101.25m,
+            RebuildGridRegime = GridAutoStartShiftFirstPriceRegime.On_ShiftOnNewPrice
+        };
+
+        Exception? error = Record.Exception(() =>
+        {
+            autoStarter.LoadFromString(null);
+            autoStarter.LoadFromString(string.Empty);
+            autoStarter.LoadFromString("  \r\n \t  ");
+        });
+
+        Assert.Null(error);
+        Assert.Equal(TradeGridAutoStartRegime.HigherOrEqual, autoStarter.AutoStartRegime);
+        Assert.Equal(101.25m, autoStarter.AutoStartPrice);
+        Assert.Equal(GridAutoStartShiftFirstPriceRegime.On_ShiftOnNewPrice, autoStarter.RebuildGridRegime);
+    }
+
+    [Fact]
     public void Stage2Step2_2_TradeGridAutoStarter_SendNewLogMessage_WithSubscriber_ShouldForwardMessage()
     {
         TradeGridAutoStarter autoStarter = new TradeGridAutoStarter();
@@ -4301,6 +4393,29 @@ public class TradeGridPersistenceCoreTests
         string save = reaction.GetSaveString();
 
         Assert.Equal("False@@3@@4@True@False@12@False@@@@@@", save);
+    }
+
+    [Fact]
+    public void Stage2Step2_2_TradeGridErrorsReaction_LoadFromString_WithEmptyLikePayloads_ShouldKeepExistingValues()
+    {
+        TradeGridErrorsReaction reaction = new TradeGridErrorsReaction(CreateBareGrid())
+        {
+            FailOpenOrdersReactionIsOn = false,
+            FailOpenOrdersCountToReaction = 3,
+            FailCancelOrdersCountToReaction = 4
+        };
+
+        Exception? error = Record.Exception(() =>
+        {
+            reaction.LoadFromString(null);
+            reaction.LoadFromString(string.Empty);
+            reaction.LoadFromString("  \r\n \t  ");
+        });
+
+        Assert.Null(error);
+        Assert.False(reaction.FailOpenOrdersReactionIsOn);
+        Assert.Equal(3, reaction.FailOpenOrdersCountToReaction);
+        Assert.Equal(4, reaction.FailCancelOrdersCountToReaction);
     }
 
     [Fact]
