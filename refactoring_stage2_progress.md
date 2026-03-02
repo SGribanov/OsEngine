@@ -16074,3 +16074,132 @@
   - dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo -> success
   - dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900 -> success, 0 warnings, 0 errors
   - dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo -> passed 681/681
+
+## 2026-03-01 - Step 4.2 (nullable annotations) - TradeGridStopBy runtime trigger regression coverage (#849-#853)
+
+- Added targeted regression coverage in:
+  - project/OsEngine.Tests/TradeGridPersistenceCoreTests.cs
+- Changes:
+  - locked direct runtime trigger behavior in `TradeGridStopBy.GetRegime(...)` for each primary stop path.
+  - covered positions-count, move-up, move-down, life-time, and time-of-day transitions returning their configured reactions when the trigger threshold is reached.
+- Added/updated tests:
+  - project/OsEngine.Tests/TradeGridPersistenceCoreTests.cs
+    - added `Stage2Step2_2_TradeGridStopBy_GetRegime_WithPositionsCountLimitReached_ShouldReturnConfiguredReaction`.
+    - added `Stage2Step2_2_TradeGridStopBy_GetRegime_WithMoveUpLimitReached_ShouldReturnConfiguredReaction`.
+    - added `Stage2Step2_2_TradeGridStopBy_GetRegime_WithMoveDownLimitReached_ShouldReturnConfiguredReaction`.
+    - added `Stage2Step2_2_TradeGridStopBy_GetRegime_WithLifeTimeExpired_ShouldReturnConfiguredReaction`.
+    - added `Stage2Step2_2_TradeGridStopBy_GetRegime_WithTimeOfDayReached_ShouldReturnConfiguredReaction`.
+- Scope:
+  - test-only regression coverage
+  - no production behavior change
+
+### Verification
+
+- Host-context verification (outside sandbox, per dotnet-build-policy):
+  - dotnet restore project/OsEngine/OsEngine.csproj --nologo -> success
+  - dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo -> success
+  - dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900 -> success, 0 warnings, 0 errors
+  - dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo -> passed 686/686
+
+## 2026-03-01 - Step 4.2 (nullable annotations) - TradeGridStopBy runtime non-trigger regression coverage (#854-#858)
+
+- Added targeted regression coverage in:
+  - project/OsEngine.Tests/TradeGridPersistenceCoreTests.cs
+- Changes:
+  - locked the symmetric non-trigger paths in `TradeGridStopBy.GetRegime(...)`.
+  - covered below-threshold positions-count, move-up, move-down, life-time, and not-yet-reached time-of-day scenarios, all of which must leave the regime at `On`.
+- Added/updated tests:
+  - project/OsEngine.Tests/TradeGridPersistenceCoreTests.cs
+    - added `Stage2Step2_2_TradeGridStopBy_GetRegime_WithPositionsCountBelowLimit_ShouldReturnOn`.
+    - added `Stage2Step2_2_TradeGridStopBy_GetRegime_WithMoveUpBelowLimit_ShouldReturnOn`.
+    - added `Stage2Step2_2_TradeGridStopBy_GetRegime_WithMoveDownAboveLimit_ShouldReturnOn`.
+    - added `Stage2Step2_2_TradeGridStopBy_GetRegime_WithLifeTimeNotExpired_ShouldReturnOn`.
+    - added `Stage2Step2_2_TradeGridStopBy_GetRegime_WithTimeOfDayNotReached_ShouldReturnOn`.
+- Scope:
+  - test-only regression coverage
+  - no production behavior change
+
+### Verification
+
+- Host-context verification (outside sandbox, per dotnet-build-policy):
+  - dotnet restore project/OsEngine/OsEngine.csproj --nologo -> success
+  - dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo -> success
+  - dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900 -> success, 0 warnings, 0 errors
+  - dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo -> passed 691/691
+
+## 2026-03-01 - Step 4.2 (nullable annotations) - TradeGridStopBy runtime safe-path regression coverage (#859-#863)
+
+- Added targeted regression coverage in:
+  - project/OsEngine.Tests/TradeGridPersistenceCoreTests.cs
+- Changes:
+  - locked safe-path behavior in `TradeGridStopBy.GetRegime(...)` when trigger infrastructure is enabled but runtime context is incomplete or intentionally inert.
+  - covered no enabled triggers, empty candles, zero first price, missing first-trade time, and missing server-time cases.
+- Added/updated tests:
+  - project/OsEngine.Tests/TradeGridPersistenceCoreTests.cs
+    - added `Stage2Step2_2_TradeGridStopBy_GetRegime_WithNoTriggersEnabled_ShouldReturnOn`.
+    - added `Stage2Step2_2_TradeGridStopBy_GetRegime_WithEmptyCandles_ShouldReturnOn`.
+    - added `Stage2Step2_2_TradeGridStopBy_GetRegime_WithZeroFirstPrice_ShouldReturnOn`.
+    - added `Stage2Step2_2_TradeGridStopBy_GetRegime_WithMissingFirstTradeTime_ShouldReturnOn`.
+    - added `Stage2Step2_2_TradeGridStopBy_GetRegime_WithMissingServerTime_ShouldReturnOn`.
+- Scope:
+  - test-only regression coverage
+  - no production behavior change
+
+### Verification
+
+- Host-context verification (outside sandbox, per dotnet-build-policy):
+  - dotnet restore project/OsEngine/OsEngine.csproj --nologo -> success
+  - dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo -> success
+  - dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900 -> success, 0 warnings, 0 errors
+  - dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo -> passed 696/696
+
+## 2026-03-01 - Step 4.2 (nullable annotations) - TradeGridStopBy runtime precedence regression coverage (#864-#868)
+
+- Added targeted regression coverage in:
+  - project/OsEngine.Tests/TradeGridPersistenceCoreTests.cs
+- Changes:
+  - locked precedence and mixed-trigger behavior in `TradeGridStopBy.GetRegime(...)` when multiple stop conditions are simultaneously ready.
+  - covered positions over move, move over life-time, life-time over time-of-day, later-trigger activation when earlier ones are inactive, and move-up precedence over move-down when both limits are simultaneously met.
+- Added/updated tests:
+  - project/OsEngine.Tests/TradeGridPersistenceCoreTests.cs
+    - added `Stage2Step2_2_TradeGridStopBy_GetRegime_WithPositionsAndMoveTriggersReady_ShouldPreferPositionsReaction`.
+    - added `Stage2Step2_2_TradeGridStopBy_GetRegime_WithMoveAndLifeTimeTriggersReady_ShouldPreferMoveReaction`.
+    - added `Stage2Step2_2_TradeGridStopBy_GetRegime_WithLifeTimeAndTimeTriggersReady_ShouldPreferLifeTimeReaction`.
+    - added `Stage2Step2_2_TradeGridStopBy_GetRegime_WithOnlyLaterTriggerReady_ShouldReturnLaterReaction`.
+    - added `Stage2Step2_2_TradeGridStopBy_GetRegime_WithMoveUpAndMoveDownBothReady_ShouldPreferMoveUpReaction`.
+- Scope:
+  - test-only regression coverage
+  - no production behavior change
+
+### Verification
+
+- Host-context verification (outside sandbox, per dotnet-build-policy):
+  - dotnet restore project/OsEngine/OsEngine.csproj --nologo -> success
+  - dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo -> success
+  - dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900 -> success, 0 warnings, 0 errors
+  - dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo -> passed 701/701
+
+## 2026-03-01 - Step 4.2 (nullable annotations) - TradeGridStopBy runtime boundary regression coverage (#869-#872)
+
+- Added targeted regression coverage in:
+  - project/OsEngine.Tests/TradeGridPersistenceCoreTests.cs
+- Changes:
+  - locked remaining inner-branch boundary behavior in `TradeGridStopBy.GetRegime(...)`.
+  - covered zero last candle price for move logic, time-of-day activation via later minute, time-of-day activation via later hour, and a future same-day time that must not activate early.
+- Added/updated tests:
+  - project/OsEngine.Tests/TradeGridPersistenceCoreTests.cs
+    - added `Stage2Step2_2_TradeGridStopBy_GetRegime_WithZeroLastPrice_ShouldReturnOn`.
+    - added `Stage2Step2_2_TradeGridStopBy_GetRegime_WithTimeOfDayLaterMinute_ShouldReturnConfiguredReaction`.
+    - added `Stage2Step2_2_TradeGridStopBy_GetRegime_WithTimeOfDayLaterHour_ShouldReturnConfiguredReaction`.
+    - added `Stage2Step2_2_TradeGridStopBy_GetRegime_WithTimeOfDayFutureWithinSameDay_ShouldReturnOn`.
+- Scope:
+  - test-only regression coverage
+  - no production behavior change
+
+### Verification
+
+- Host-context verification (outside sandbox, per dotnet-build-policy):
+  - dotnet restore project/OsEngine/OsEngine.csproj --nologo -> success
+  - dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo -> success
+  - dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900 -> success, 0 warnings, 0 errors
+  - dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo -> passed 705/705

@@ -585,6 +585,517 @@ public class TradeGridPersistenceCoreTests
     }
 
     [Fact]
+    public void Stage2Step2_2_TradeGridStopBy_GetRegime_WithPositionsCountLimitReached_ShouldReturnConfiguredReaction()
+    {
+        TradeGridStopBy stopBy = new TradeGridStopBy
+        {
+            StopGridByPositionsCountIsOn = true,
+            StopGridByPositionsCountValue = 3,
+            StopGridByPositionsCountReaction = TradeGridRegime.CloseOnly
+        };
+
+        TradeGrid grid = CreateBareGrid();
+        SetPrivateField(grid, "_openPositionsBySession", 3);
+
+        TradeGridRegime regime = stopBy.GetRegime(grid, (BotTabSimple)RuntimeHelpers.GetUninitializedObject(typeof(BotTabSimple)));
+
+        Assert.Equal(TradeGridRegime.CloseOnly, regime);
+    }
+
+    [Fact]
+    public void Stage2Step2_2_TradeGridStopBy_GetRegime_WithMoveUpLimitReached_ShouldReturnConfiguredReaction()
+    {
+        TradeGridStopBy stopBy = new TradeGridStopBy
+        {
+            StopGridByMoveUpIsOn = true,
+            StopGridByMoveUpValuePercent = 2m,
+            StopGridByMoveUpReaction = TradeGridRegime.CloseForced
+        };
+
+        TradeGrid grid = CreateBareGrid();
+        SetPrivateField(grid, "_firstTradePrice", 100m);
+        AttachSingleCloseCandle(grid, 102m);
+
+        TradeGridRegime regime = stopBy.GetRegime(grid, grid.Tab);
+
+        Assert.Equal(TradeGridRegime.CloseForced, regime);
+    }
+
+    [Fact]
+    public void Stage2Step2_2_TradeGridStopBy_GetRegime_WithMoveDownLimitReached_ShouldReturnConfiguredReaction()
+    {
+        TradeGridStopBy stopBy = new TradeGridStopBy
+        {
+            StopGridByMoveDownIsOn = true,
+            StopGridByMoveDownValuePercent = 2m,
+            StopGridByMoveDownReaction = TradeGridRegime.Off
+        };
+
+        TradeGrid grid = CreateBareGrid();
+        SetPrivateField(grid, "_firstTradePrice", 100m);
+        AttachSingleCloseCandle(grid, 98m);
+
+        TradeGridRegime regime = stopBy.GetRegime(grid, grid.Tab);
+
+        Assert.Equal(TradeGridRegime.Off, regime);
+    }
+
+    [Fact]
+    public void Stage2Step2_2_TradeGridStopBy_GetRegime_WithLifeTimeExpired_ShouldReturnConfiguredReaction()
+    {
+        TradeGridStopBy stopBy = new TradeGridStopBy
+        {
+            StopGridByLifeTimeIsOn = true,
+            StopGridByLifeTimeSecondsToLife = 5,
+            StopGridByLifeTimeReaction = TradeGridRegime.CloseOnly
+        };
+
+        TradeGrid grid = CreateBareGrid();
+        SetPrivateField(grid, "_firstTradeTime", DateTime.Now.AddSeconds(-10));
+        AttachSingleCloseCandle(grid, 100m);
+
+        TradeGridRegime regime = stopBy.GetRegime(grid, grid.Tab);
+
+        Assert.Equal(TradeGridRegime.CloseOnly, regime);
+    }
+
+    [Fact]
+    public void Stage2Step2_2_TradeGridStopBy_GetRegime_WithTimeOfDayReached_ShouldReturnConfiguredReaction()
+    {
+        TradeGridStopBy stopBy = new TradeGridStopBy
+        {
+            StopGridByTimeOfDayIsOn = true,
+            StopGridByTimeOfDayHour = DateTime.Now.Hour,
+            StopGridByTimeOfDayMinute = 0,
+            StopGridByTimeOfDaySecond = 0,
+            StopGridByTimeOfDayReaction = TradeGridRegime.CloseForced
+        };
+
+        TradeGrid grid = CreateBareGrid();
+        AttachSingleCloseCandle(grid, 100m);
+
+        TradeGridRegime regime = stopBy.GetRegime(grid, grid.Tab);
+
+        Assert.Equal(TradeGridRegime.CloseForced, regime);
+    }
+
+    [Fact]
+    public void Stage2Step2_2_TradeGridStopBy_GetRegime_WithPositionsCountBelowLimit_ShouldReturnOn()
+    {
+        TradeGridStopBy stopBy = new TradeGridStopBy
+        {
+            StopGridByPositionsCountIsOn = true,
+            StopGridByPositionsCountValue = 4,
+            StopGridByPositionsCountReaction = TradeGridRegime.CloseOnly
+        };
+
+        TradeGrid grid = CreateBareGrid();
+        SetPrivateField(grid, "_openPositionsBySession", 3);
+
+        TradeGridRegime regime = stopBy.GetRegime(grid, (BotTabSimple)RuntimeHelpers.GetUninitializedObject(typeof(BotTabSimple)));
+
+        Assert.Equal(TradeGridRegime.On, regime);
+    }
+
+    [Fact]
+    public void Stage2Step2_2_TradeGridStopBy_GetRegime_WithMoveUpBelowLimit_ShouldReturnOn()
+    {
+        TradeGridStopBy stopBy = new TradeGridStopBy
+        {
+            StopGridByMoveUpIsOn = true,
+            StopGridByMoveUpValuePercent = 2m,
+            StopGridByMoveUpReaction = TradeGridRegime.CloseForced
+        };
+
+        TradeGrid grid = CreateBareGrid();
+        SetPrivateField(grid, "_firstTradePrice", 100m);
+        AttachSingleCloseCandle(grid, 101.99m);
+
+        TradeGridRegime regime = stopBy.GetRegime(grid, grid.Tab);
+
+        Assert.Equal(TradeGridRegime.On, regime);
+    }
+
+    [Fact]
+    public void Stage2Step2_2_TradeGridStopBy_GetRegime_WithMoveDownAboveLimit_ShouldReturnOn()
+    {
+        TradeGridStopBy stopBy = new TradeGridStopBy
+        {
+            StopGridByMoveDownIsOn = true,
+            StopGridByMoveDownValuePercent = 2m,
+            StopGridByMoveDownReaction = TradeGridRegime.Off
+        };
+
+        TradeGrid grid = CreateBareGrid();
+        SetPrivateField(grid, "_firstTradePrice", 100m);
+        AttachSingleCloseCandle(grid, 98.01m);
+
+        TradeGridRegime regime = stopBy.GetRegime(grid, grid.Tab);
+
+        Assert.Equal(TradeGridRegime.On, regime);
+    }
+
+    [Fact]
+    public void Stage2Step2_2_TradeGridStopBy_GetRegime_WithLifeTimeNotExpired_ShouldReturnOn()
+    {
+        TradeGridStopBy stopBy = new TradeGridStopBy
+        {
+            StopGridByLifeTimeIsOn = true,
+            StopGridByLifeTimeSecondsToLife = 30,
+            StopGridByLifeTimeReaction = TradeGridRegime.CloseOnly
+        };
+
+        TradeGrid grid = CreateBareGrid();
+        SetPrivateField(grid, "_firstTradeTime", DateTime.Now.AddSeconds(-5));
+        AttachSingleCloseCandle(grid, 100m);
+
+        TradeGridRegime regime = stopBy.GetRegime(grid, grid.Tab);
+
+        Assert.Equal(TradeGridRegime.On, regime);
+    }
+
+    [Fact]
+    public void Stage2Step2_2_TradeGridStopBy_GetRegime_WithTimeOfDayNotReached_ShouldReturnOn()
+    {
+        DateTime now = DateTime.Now;
+
+        TradeGridStopBy stopBy = new TradeGridStopBy
+        {
+            StopGridByTimeOfDayIsOn = true,
+            StopGridByTimeOfDayHour = now.Hour,
+            StopGridByTimeOfDayMinute = now.Minute,
+            StopGridByTimeOfDaySecond = Math.Min(now.Second + 5, 59),
+            StopGridByTimeOfDayReaction = TradeGridRegime.CloseForced
+        };
+
+        TradeGrid grid = CreateBareGrid();
+        AttachSingleCloseCandle(grid, 100m);
+
+        TradeGridRegime regime = stopBy.GetRegime(grid, grid.Tab);
+
+        Assert.Equal(TradeGridRegime.On, regime);
+    }
+
+    [Fact]
+    public void Stage2Step2_2_TradeGridStopBy_GetRegime_WithNoTriggersEnabled_ShouldReturnOn()
+    {
+        TradeGridStopBy stopBy = new TradeGridStopBy();
+        TradeGrid grid = CreateBareGrid();
+        AttachSingleCloseCandle(grid, 100m);
+
+        TradeGridRegime regime = stopBy.GetRegime(grid, grid.Tab);
+
+        Assert.Equal(TradeGridRegime.On, regime);
+    }
+
+    [Fact]
+    public void Stage2Step2_2_TradeGridStopBy_GetRegime_WithEmptyCandles_ShouldReturnOn()
+    {
+        TradeGridStopBy stopBy = new TradeGridStopBy
+        {
+            StopGridByMoveUpIsOn = true,
+            StopGridByMoveUpValuePercent = 2m,
+            StopGridByMoveUpReaction = TradeGridRegime.CloseForced
+        };
+
+        TradeGrid grid = CreateBareGrid();
+        SetPrivateField(grid, "_firstTradePrice", 100m);
+        grid.Tab = (BotTabSimple)RuntimeHelpers.GetUninitializedObject(typeof(BotTabSimple));
+
+        TradeGridRegime regime = stopBy.GetRegime(grid, grid.Tab);
+
+        Assert.Equal(TradeGridRegime.On, regime);
+    }
+
+    [Fact]
+    public void Stage2Step2_2_TradeGridStopBy_GetRegime_WithZeroFirstPrice_ShouldReturnOn()
+    {
+        TradeGridStopBy stopBy = new TradeGridStopBy
+        {
+            StopGridByMoveUpIsOn = true,
+            StopGridByMoveUpValuePercent = 2m,
+            StopGridByMoveUpReaction = TradeGridRegime.CloseForced
+        };
+
+        TradeGrid grid = CreateBareGrid();
+        AttachSingleCloseCandle(grid, 102m);
+
+        TradeGridRegime regime = stopBy.GetRegime(grid, grid.Tab);
+
+        Assert.Equal(TradeGridRegime.On, regime);
+    }
+
+    [Fact]
+    public void Stage2Step2_2_TradeGridStopBy_GetRegime_WithMissingFirstTradeTime_ShouldReturnOn()
+    {
+        TradeGridStopBy stopBy = new TradeGridStopBy
+        {
+            StopGridByLifeTimeIsOn = true,
+            StopGridByLifeTimeSecondsToLife = 5,
+            StopGridByLifeTimeReaction = TradeGridRegime.CloseOnly
+        };
+
+        TradeGrid grid = CreateBareGrid();
+        AttachSingleCloseCandle(grid, 100m);
+
+        TradeGridRegime regime = stopBy.GetRegime(grid, grid.Tab);
+
+        Assert.Equal(TradeGridRegime.On, regime);
+    }
+
+    [Fact]
+    public void Stage2Step2_2_TradeGridStopBy_GetRegime_WithMissingServerTime_ShouldReturnOn()
+    {
+        TradeGridStopBy stopBy = new TradeGridStopBy
+        {
+            StopGridByLifeTimeIsOn = true,
+            StopGridByLifeTimeSecondsToLife = 10,
+            StopGridByLifeTimeReaction = TradeGridRegime.CloseOnly
+        };
+
+        TradeGrid grid = CreateBareGrid();
+        SetPrivateField(grid, "_firstTradeTime", DateTime.Now.AddSeconds(-100));
+        BotTabSimple tab = (BotTabSimple)RuntimeHelpers.GetUninitializedObject(typeof(BotTabSimple));
+        grid.Tab = tab;
+
+        TradeGridRegime regime = stopBy.GetRegime(grid, tab);
+
+        Assert.Equal(TradeGridRegime.On, regime);
+    }
+
+    [Fact]
+    public void Stage2Step2_2_TradeGridStopBy_GetRegime_WithPositionsAndMoveTriggersReady_ShouldPreferPositionsReaction()
+    {
+        TradeGridStopBy stopBy = new TradeGridStopBy
+        {
+            StopGridByPositionsCountIsOn = true,
+            StopGridByPositionsCountValue = 3,
+            StopGridByPositionsCountReaction = TradeGridRegime.CloseOnly,
+            StopGridByMoveUpIsOn = true,
+            StopGridByMoveUpValuePercent = 2m,
+            StopGridByMoveUpReaction = TradeGridRegime.CloseForced
+        };
+
+        TradeGrid grid = CreateBareGrid();
+        SetPrivateField(grid, "_openPositionsBySession", 3);
+        SetPrivateField(grid, "_firstTradePrice", 100m);
+        AttachSingleCloseCandle(grid, 102m);
+
+        TradeGridRegime regime = stopBy.GetRegime(grid, grid.Tab);
+
+        Assert.Equal(TradeGridRegime.CloseOnly, regime);
+    }
+
+    [Fact]
+    public void Stage2Step2_2_TradeGridStopBy_GetRegime_WithMoveAndLifeTimeTriggersReady_ShouldPreferMoveReaction()
+    {
+        TradeGridStopBy stopBy = new TradeGridStopBy
+        {
+            StopGridByMoveUpIsOn = true,
+            StopGridByMoveUpValuePercent = 2m,
+            StopGridByMoveUpReaction = TradeGridRegime.CloseForced,
+            StopGridByLifeTimeIsOn = true,
+            StopGridByLifeTimeSecondsToLife = 5,
+            StopGridByLifeTimeReaction = TradeGridRegime.CloseOnly
+        };
+
+        TradeGrid grid = CreateBareGrid();
+        SetPrivateField(grid, "_firstTradePrice", 100m);
+        SetPrivateField(grid, "_firstTradeTime", DateTime.Now.AddSeconds(-100));
+        AttachSingleCloseCandle(grid, 102m);
+
+        TradeGridRegime regime = stopBy.GetRegime(grid, grid.Tab);
+
+        Assert.Equal(TradeGridRegime.CloseForced, regime);
+    }
+
+    [Fact]
+    public void Stage2Step2_2_TradeGridStopBy_GetRegime_WithLifeTimeAndTimeTriggersReady_ShouldPreferLifeTimeReaction()
+    {
+        TradeGridStopBy stopBy = new TradeGridStopBy
+        {
+            StopGridByLifeTimeIsOn = true,
+            StopGridByLifeTimeSecondsToLife = 5,
+            StopGridByLifeTimeReaction = TradeGridRegime.CloseOnly,
+            StopGridByTimeOfDayIsOn = true,
+            StopGridByTimeOfDayHour = DateTime.Now.Hour,
+            StopGridByTimeOfDayMinute = 0,
+            StopGridByTimeOfDaySecond = 0,
+            StopGridByTimeOfDayReaction = TradeGridRegime.CloseForced
+        };
+
+        TradeGrid grid = CreateBareGrid();
+        SetPrivateField(grid, "_firstTradeTime", DateTime.Now.AddSeconds(-100));
+        AttachSingleCloseCandle(grid, 100m);
+
+        TradeGridRegime regime = stopBy.GetRegime(grid, grid.Tab);
+
+        Assert.Equal(TradeGridRegime.CloseOnly, regime);
+    }
+
+    [Fact]
+    public void Stage2Step2_2_TradeGridStopBy_GetRegime_WithOnlyLaterTriggerReady_ShouldReturnLaterReaction()
+    {
+        TradeGridStopBy stopBy = new TradeGridStopBy
+        {
+            StopGridByPositionsCountIsOn = true,
+            StopGridByPositionsCountValue = 10,
+            StopGridByPositionsCountReaction = TradeGridRegime.CloseOnly,
+            StopGridByLifeTimeIsOn = true,
+            StopGridByLifeTimeSecondsToLife = 5,
+            StopGridByLifeTimeReaction = TradeGridRegime.Off
+        };
+
+        TradeGrid grid = CreateBareGrid();
+        SetPrivateField(grid, "_openPositionsBySession", 3);
+        SetPrivateField(grid, "_firstTradeTime", DateTime.Now.AddSeconds(-100));
+        AttachSingleCloseCandle(grid, 100m);
+
+        TradeGridRegime regime = stopBy.GetRegime(grid, grid.Tab);
+
+        Assert.Equal(TradeGridRegime.Off, regime);
+    }
+
+    [Fact]
+    public void Stage2Step2_2_TradeGridStopBy_GetRegime_WithMoveUpAndMoveDownBothReady_ShouldPreferMoveUpReaction()
+    {
+        TradeGridStopBy stopBy = new TradeGridStopBy
+        {
+            StopGridByMoveUpIsOn = true,
+            StopGridByMoveUpValuePercent = 0m,
+            StopGridByMoveUpReaction = TradeGridRegime.CloseOnly,
+            StopGridByMoveDownIsOn = true,
+            StopGridByMoveDownValuePercent = 0m,
+            StopGridByMoveDownReaction = TradeGridRegime.CloseForced
+        };
+
+        TradeGrid grid = CreateBareGrid();
+        SetPrivateField(grid, "_firstTradePrice", 100m);
+        AttachSingleCloseCandle(grid, 100m);
+
+        TradeGridRegime regime = stopBy.GetRegime(grid, grid.Tab);
+
+        Assert.Equal(TradeGridRegime.CloseOnly, regime);
+    }
+
+    [Fact]
+    public void Stage2Step2_2_TradeGridStopBy_GetRegime_WithZeroLastPrice_ShouldReturnOn()
+    {
+        TradeGridStopBy stopBy = new TradeGridStopBy
+        {
+            StopGridByMoveUpIsOn = true,
+            StopGridByMoveUpValuePercent = 2m,
+            StopGridByMoveUpReaction = TradeGridRegime.CloseForced
+        };
+
+        TradeGrid grid = CreateBareGrid();
+        SetPrivateField(grid, "_firstTradePrice", 100m);
+        AttachSingleCloseCandle(grid, 0m);
+
+        TradeGridRegime regime = stopBy.GetRegime(grid, grid.Tab);
+
+        Assert.Equal(TradeGridRegime.On, regime);
+    }
+
+    [Fact]
+    public void Stage2Step2_2_TradeGridStopBy_GetRegime_WithTimeOfDayLaterMinute_ShouldReturnConfiguredReaction()
+    {
+        DateTime now = DateTime.Now;
+
+        TradeGridStopBy stopBy = new TradeGridStopBy
+        {
+            StopGridByTimeOfDayIsOn = true,
+            StopGridByTimeOfDayHour = now.Hour,
+            StopGridByTimeOfDayMinute = now.Minute == 0 ? 0 : now.Minute - 1,
+            StopGridByTimeOfDaySecond = 59,
+            StopGridByTimeOfDayReaction = TradeGridRegime.CloseOnly
+        };
+
+        TradeGrid grid = CreateBareGrid();
+        AttachSingleCloseCandle(grid, 100m);
+
+        TradeGridRegime regime = stopBy.GetRegime(grid, grid.Tab);
+
+        Assert.Equal(TradeGridRegime.CloseOnly, regime);
+    }
+
+    [Fact]
+    public void Stage2Step2_2_TradeGridStopBy_GetRegime_WithTimeOfDayLaterHour_ShouldReturnConfiguredReaction()
+    {
+        DateTime now = DateTime.Now;
+
+        TradeGridStopBy stopBy = new TradeGridStopBy
+        {
+            StopGridByTimeOfDayIsOn = true,
+            StopGridByTimeOfDayHour = now.Hour == 0 ? 0 : now.Hour - 1,
+            StopGridByTimeOfDayMinute = 59,
+            StopGridByTimeOfDaySecond = 59,
+            StopGridByTimeOfDayReaction = TradeGridRegime.Off
+        };
+
+        TradeGrid grid = CreateBareGrid();
+        AttachSingleCloseCandle(grid, 100m);
+
+        TradeGridRegime regime = stopBy.GetRegime(grid, grid.Tab);
+
+        Assert.Equal(TradeGridRegime.Off, regime);
+    }
+
+    [Fact]
+    public void Stage2Step2_2_TradeGridStopBy_GetRegime_WithTimeOfDayFutureWithinSameDay_ShouldReturnOn()
+    {
+        DateTime now = DateTime.Now;
+
+        int targetHour = now.Hour;
+        int targetMinute = now.Minute;
+        int targetSecond = now.Second;
+
+        if (now.Second < 59)
+        {
+            targetSecond = now.Second + 1;
+        }
+        else if (now.Minute < 59)
+        {
+            targetMinute = now.Minute + 1;
+            targetSecond = 0;
+        }
+        else if (now.Hour < 23)
+        {
+            targetHour = now.Hour + 1;
+            targetMinute = 0;
+            targetSecond = 0;
+        }
+        else
+        {
+            targetHour = now.Hour;
+            targetMinute = now.Minute;
+            targetSecond = now.Second;
+        }
+
+        TradeGridStopBy stopBy = new TradeGridStopBy
+        {
+            StopGridByTimeOfDayIsOn = true,
+            StopGridByTimeOfDayHour = targetHour,
+            StopGridByTimeOfDayMinute = targetMinute,
+            StopGridByTimeOfDaySecond = targetSecond,
+            StopGridByTimeOfDayReaction = TradeGridRegime.CloseForced
+        };
+
+        TradeGrid grid = CreateBareGrid();
+        AttachSingleCloseCandle(grid, 100m);
+
+        TradeGridRegime regime = stopBy.GetRegime(grid, grid.Tab);
+
+        if (now.Hour == 23 && now.Minute == 59 && now.Second == 59)
+        {
+            Assert.Equal(TradeGridRegime.CloseForced, regime);
+            return;
+        }
+
+        Assert.Equal(TradeGridRegime.On, regime);
+    }
+
+    [Fact]
     public void Stage2Step2_2_TradeGridStopAndProfit_Process_WithNullRuntimeContext_ShouldNotThrow()
     {
         TradeGridStopAndProfit stopAndProfit = new TradeGridStopAndProfit();
