@@ -1096,6 +1096,131 @@ public class TradeGridPersistenceCoreTests
     }
 
     [Fact]
+    public void Stage2Step2_2_TradeGridsMaster_ParseLegacyGridsSettings_WithWhitespaceContent_ShouldReturnNull()
+    {
+        MethodInfo method = typeof(TradeGridsMaster).GetMethod("ParseLegacyGridsSettings", BindingFlags.NonPublic | BindingFlags.Static)
+            ?? throw new InvalidOperationException("Method ParseLegacyGridsSettings not found.");
+
+        object? result = method.Invoke(null, new object?[] { "   \r\n  " });
+
+        Assert.Null(result);
+    }
+
+    [Fact]
+    public void Stage2Step2_2_TradeGridsMaster_ParseLegacyGridsSettings_WithMultilineContent_ShouldCollectNonEmptyLines()
+    {
+        MethodInfo method = typeof(TradeGridsMaster).GetMethod("ParseLegacyGridsSettings", BindingFlags.NonPublic | BindingFlags.Static)
+            ?? throw new InvalidOperationException("Method ParseLegacyGridsSettings not found.");
+
+        object result = method.Invoke(null, new object?[] { "1@gridA\r\n\r\n2@gridB\n3@gridC\r\n" })
+            ?? throw new InvalidOperationException("Legacy settings parse returned null.");
+        PropertyInfo property = result.GetType().GetProperty("GridSaveStrings")
+            ?? throw new InvalidOperationException("Property GridSaveStrings not found.");
+        List<string> values = (List<string>)(property.GetValue(result)
+            ?? throw new InvalidOperationException("GridSaveStrings value is null."));
+
+        Assert.Equal(3, values.Count);
+        Assert.Equal("1@gridA", values[0]);
+        Assert.Equal("2@gridB", values[1]);
+        Assert.Equal("3@gridC", values[2]);
+    }
+
+    [Fact]
+    public void Stage2Step2_2_TradeGridsMaster_TryExtractGridNumber_WithSeparator_ShouldParseNumber()
+    {
+        MethodInfo method = typeof(TradeGridsMaster).GetMethod("TryExtractGridNumber", BindingFlags.NonPublic | BindingFlags.Static)
+            ?? throw new InvalidOperationException("Method TryExtractGridNumber not found.");
+
+        object[] args = { "15@payload", 0 };
+        bool parsed = (bool)method.Invoke(null, args)!;
+
+        Assert.True(parsed);
+        Assert.Equal(15, (int)args[1]);
+    }
+
+    [Fact]
+    public void Stage2Step2_2_TradeGridsMaster_TryExtractGridNumber_WithoutSeparator_ShouldParseNumber()
+    {
+        MethodInfo method = typeof(TradeGridsMaster).GetMethod("TryExtractGridNumber", BindingFlags.NonPublic | BindingFlags.Static)
+            ?? throw new InvalidOperationException("Method TryExtractGridNumber not found.");
+
+        object[] args = { "42", 0 };
+        bool parsed = (bool)method.Invoke(null, args)!;
+
+        Assert.True(parsed);
+        Assert.Equal(42, (int)args[1]);
+    }
+
+    [Fact]
+    public void Stage2Step2_2_TradeGridsMaster_TryExtractGridNumber_WithInvalidPrefix_ShouldReturnFalse()
+    {
+        MethodInfo method = typeof(TradeGridsMaster).GetMethod("TryExtractGridNumber", BindingFlags.NonPublic | BindingFlags.Static)
+            ?? throw new InvalidOperationException("Method TryExtractGridNumber not found.");
+
+        object[] args = { "abc@payload", 0 };
+        bool parsed = (bool)method.Invoke(null, args)!;
+
+        Assert.False(parsed);
+        Assert.Equal(0, (int)args[1]);
+    }
+
+    [Fact]
+    public void Stage2Step2_2_TradeGridsMaster_ParseLegacyGridsSettings_WithSingleLine_ShouldReturnSingleEntry()
+    {
+        MethodInfo method = typeof(TradeGridsMaster).GetMethod("ParseLegacyGridsSettings", BindingFlags.NonPublic | BindingFlags.Static)
+            ?? throw new InvalidOperationException("Method ParseLegacyGridsSettings not found.");
+
+        object result = method.Invoke(null, new object?[] { "7@gridOnly" })
+            ?? throw new InvalidOperationException("Legacy settings parse returned null.");
+        PropertyInfo property = result.GetType().GetProperty("GridSaveStrings")
+            ?? throw new InvalidOperationException("Property GridSaveStrings not found.");
+        List<string> values = (List<string>)(property.GetValue(result)
+            ?? throw new InvalidOperationException("GridSaveStrings value is null."));
+
+        Assert.Single(values);
+        Assert.Equal("7@gridOnly", values[0]);
+    }
+
+    [Fact]
+    public void Stage2Step2_2_TradeGridsMaster_TryExtractGridNumber_WithNullInput_ShouldReturnFalse()
+    {
+        MethodInfo method = typeof(TradeGridsMaster).GetMethod("TryExtractGridNumber", BindingFlags.NonPublic | BindingFlags.Static)
+            ?? throw new InvalidOperationException("Method TryExtractGridNumber not found.");
+
+        object?[] args = { null, 0 };
+        bool parsed = (bool)method.Invoke(null, args)!;
+
+        Assert.False(parsed);
+        Assert.Equal(0, (int)args[1]!);
+    }
+
+    [Fact]
+    public void Stage2Step2_2_TradeGridsMaster_TryExtractGridNumber_WithLeadingSeparator_ShouldReturnFalse()
+    {
+        MethodInfo method = typeof(TradeGridsMaster).GetMethod("TryExtractGridNumber", BindingFlags.NonPublic | BindingFlags.Static)
+            ?? throw new InvalidOperationException("Method TryExtractGridNumber not found.");
+
+        object[] args = { "@payload", 0 };
+        bool parsed = (bool)method.Invoke(null, args)!;
+
+        Assert.False(parsed);
+        Assert.Equal(0, (int)args[1]);
+    }
+
+    [Fact]
+    public void Stage2Step2_2_TradeGridsMaster_TryExtractGridNumber_WithWhitespaceNumberPart_ShouldReturnFalse()
+    {
+        MethodInfo method = typeof(TradeGridsMaster).GetMethod("TryExtractGridNumber", BindingFlags.NonPublic | BindingFlags.Static)
+            ?? throw new InvalidOperationException("Method TryExtractGridNumber not found.");
+
+        object[] args = { "   @payload", 0 };
+        bool parsed = (bool)method.Invoke(null, args)!;
+
+        Assert.False(parsed);
+        Assert.Equal(0, (int)args[1]);
+    }
+
+    [Fact]
     public void Stage2Step2_2_TradeGridStopAndProfit_Process_WithNullRuntimeContext_ShouldNotThrow()
     {
         TradeGridStopAndProfit stopAndProfit = new TradeGridStopAndProfit();

@@ -16203,3 +16203,54 @@
   - dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo -> success
   - dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900 -> success, 0 warnings, 0 errors
   - dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo -> passed 705/705
+
+## 2026-03-01 - Step 4.2 (nullable annotations) - TradeGridsMaster helper parser regression coverage (#873-#877)
+
+- Added targeted regression coverage in:
+  - project/OsEngine.Tests/TradeGridPersistenceCoreTests.cs
+- Changes:
+  - locked the private legacy/settings helper contracts in `TradeGridsMaster`.
+  - covered whitespace legacy payloads, multiline legacy payload normalization, valid number extraction with and without separators, and invalid numeric prefixes.
+- Added/updated tests:
+  - project/OsEngine.Tests/TradeGridPersistenceCoreTests.cs
+    - added `Stage2Step2_2_TradeGridsMaster_ParseLegacyGridsSettings_WithWhitespaceContent_ShouldReturnNull`.
+    - added `Stage2Step2_2_TradeGridsMaster_ParseLegacyGridsSettings_WithMultilineContent_ShouldCollectNonEmptyLines`.
+    - added `Stage2Step2_2_TradeGridsMaster_TryExtractGridNumber_WithSeparator_ShouldParseNumber`.
+    - added `Stage2Step2_2_TradeGridsMaster_TryExtractGridNumber_WithoutSeparator_ShouldParseNumber`.
+    - added `Stage2Step2_2_TradeGridsMaster_TryExtractGridNumber_WithInvalidPrefix_ShouldReturnFalse`.
+- Scope:
+  - test-only regression coverage
+  - no production behavior change
+
+### Verification
+
+- Host-context verification (outside sandbox, per dotnet-build-policy):
+  - dotnet restore project/OsEngine/OsEngine.csproj --nologo -> success
+  - dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo -> success
+  - dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900 -> success, 0 warnings, 0 errors
+  - dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo -> passed 710/710
+
+## 2026-03-01 - Step 4.2 (nullable annotations) - TradeGridsMaster helper edge-case regression coverage (#878-#881)
+
+- Added targeted regression coverage in:
+  - project/OsEngine.Tests/TradeGridPersistenceCoreTests.cs
+- Changes:
+  - extended helper coverage for single-line legacy content and invalid `TryExtractGridNumber(...)` prefixes.
+  - covered null input, leading separator, and whitespace-only number prefix edge-cases.
+- Added/updated tests:
+  - project/OsEngine.Tests/TradeGridPersistenceCoreTests.cs
+    - added `Stage2Step2_2_TradeGridsMaster_ParseLegacyGridsSettings_WithSingleLine_ShouldReturnSingleEntry`.
+    - added `Stage2Step2_2_TradeGridsMaster_TryExtractGridNumber_WithNullInput_ShouldReturnFalse`.
+    - added `Stage2Step2_2_TradeGridsMaster_TryExtractGridNumber_WithLeadingSeparator_ShouldReturnFalse`.
+    - added `Stage2Step2_2_TradeGridsMaster_TryExtractGridNumber_WithWhitespaceNumberPart_ShouldReturnFalse`.
+- Scope:
+  - test-only regression coverage
+  - no production behavior change
+
+### Verification
+
+- Host-context verification (outside sandbox, per dotnet-build-policy):
+  - dotnet restore project/OsEngine/OsEngine.csproj --nologo -> success
+  - dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo -> success
+  - dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900 -> success, 0 warnings, 0 errors
+  - dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo -> passed 714/714
