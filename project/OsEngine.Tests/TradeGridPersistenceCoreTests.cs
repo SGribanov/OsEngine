@@ -3003,6 +3003,68 @@ public class TradeGridPersistenceCoreTests
     }
 
     [Fact]
+    public void Stage2Step2_2_TradeGridCreator_GetVolume_WithContractCurrency_ShouldReturnRoundedVolume()
+    {
+        TradeGridCreator creator = new TradeGridCreator
+        {
+            TypeVolume = TradeGridVolumeType.ContractCurrency
+        };
+        TradeGridLine line = new TradeGridLine
+        {
+            Volume = 100m,
+            PriceEnter = 25m
+        };
+
+        BotTabSimple tab = (BotTabSimple)RuntimeHelpers.GetUninitializedObject(typeof(BotTabSimple));
+        ConnectorCandles connector = new ConnectorCandles("CodexGridCreatorContractCurrencyPositive", StartProgram.IsTester, false);
+        SetPrivateField(tab, "_connector", connector);
+        SetPrivateField(tab, "_security", new Security
+        {
+            Name = connector.SecurityName,
+            Lot = 2m,
+            DecimalsVolume = 4
+        });
+
+        decimal volume = creator.GetVolume(line, tab);
+
+        Assert.Equal(2m, volume);
+    }
+
+    [Fact]
+    public void Stage2Step2_2_TradeGridCreator_GetVolume_WithDepositPercentPrime_ShouldReturnRoundedVolume()
+    {
+        TradeGridCreator creator = new TradeGridCreator
+        {
+            TypeVolume = TradeGridVolumeType.DepositPercent,
+            TradeAssetInPortfolio = "Prime"
+        };
+        TradeGridLine line = new TradeGridLine
+        {
+            Volume = 10m,
+            PriceEnter = 100m
+        };
+
+        BotTabSimple tab = (BotTabSimple)RuntimeHelpers.GetUninitializedObject(typeof(BotTabSimple));
+        ConnectorCandles connector = new ConnectorCandles("CodexGridCreatorDepositPercentPrime", StartProgram.IsTester, false);
+        SetPrivateField(connector, "_bestAsk", 100m);
+        SetPrivateField(tab, "_connector", connector);
+        SetPrivateField(tab, "_security", new Security
+        {
+            Name = connector.SecurityName,
+            Lot = 1m,
+            DecimalsVolume = 4
+        });
+        SetPrivateField(tab, "_portfolio", new Portfolio
+        {
+            ValueCurrent = 1000m
+        });
+
+        decimal volume = creator.GetVolume(line, tab);
+
+        Assert.Equal(1m, volume);
+    }
+
+    [Fact]
     public void Stage2Step2_2_TradeGridCreator_CreateNewGrid_WithZeroComputedPercentStep_ShouldNotCreateDegenerateLines()
     {
         TradeGridCreator creator = new TradeGridCreator
