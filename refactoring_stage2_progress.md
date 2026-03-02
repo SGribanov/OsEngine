@@ -17078,3 +17078,34 @@
   - dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo -> success
   - dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900 -> success, 0 warnings, 0 errors
   - dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo -> passed 791/791
+
+## 2026-03-02 - Incremental Update #961-#962
+
+### Scope
+
+- Investigated the runtime popup that displayed `System.Windows.Forms.DataGridViewDataErrorEventArgs`.
+- Fixed the concrete logging path in `TradeGridsMaster` and resolved the pending local test mismatch so the full suite is green again.
+
+### What Changed
+
+- Updated production code in:
+  - project/OsEngine/OsTrader/Grids/TradeGridsMaster.cs
+- Updated tests in:
+  - project/OsEngine.Tests/TradeGridPersistenceCoreTests.cs
+- Changes:
+  - `_gridViewInstances_DataError(...)` no longer logs `e.ToString()`, which only produced the type name.
+  - it now logs `e.Exception.ToString()` when an exception exists.
+  - when `Exception` is missing, it logs a fallback diagnostic with row, column, and `DataError` context.
+  - corrected the pending local `TradeGridCreator.GetVolume()` regression fixture so it matches the actual tester-mode contract.
+  - the test now explicitly locks that tester mode keeps the standard deposit-percent formula even when `UsePriceStepCostToCalculateVolume = true`.
+- Added/updated tests:
+  - project/OsEngine.Tests/TradeGridPersistenceCoreTests.cs
+    - renamed/updated `Stage2Step2_2_TradeGridCreator_GetVolume_WithPriceStepCostModeInTester_ShouldUseStandardFormula`.
+
+### Verification
+
+- Host-context verification (outside sandbox, per dotnet-build-policy):
+  - dotnet restore project/OsEngine/OsEngine.csproj --nologo -> success
+  - dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo -> success
+  - dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900 -> success, 0 warnings, 0 errors
+  - dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo -> passed 794/794
