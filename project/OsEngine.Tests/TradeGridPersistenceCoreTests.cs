@@ -5580,6 +5580,74 @@ public class TradeGridPersistenceCoreTests
     }
 
     [Fact]
+    public void Stage2Step2_2_TradeGrid_GetLinesWithOpenOrdersNeed_WithEligibleBuyLine_ShouldReturnLine()
+    {
+        TradeGrid grid = CreateBareGrid();
+        grid.GridCreator.GridSide = Side.Buy;
+        grid.MaxOpenOrdersInMarket = 1;
+        grid.OpenOrdersMakerOnly = false;
+
+        BotTabSimple tab = (BotTabSimple)RuntimeHelpers.GetUninitializedObject(typeof(BotTabSimple));
+        ConnectorCandles connector = new ConnectorCandles("CodexGridOpenNeed", StartProgram.IsTester, false);
+        SetPrivateField(tab, "_connector", connector);
+        SetPrivateField(tab, "_security", new Security
+        {
+            Name = connector.SecurityName,
+            PriceStep = 1m
+        });
+        grid.Tab = tab;
+
+        Position position = (Position)RuntimeHelpers.GetUninitializedObject(typeof(Position));
+        SetPrivateField(position, "_openOrders", new List<Order>
+        {
+            new Order { State = OrderStateType.Active, VolumeExecute = 0m }
+        });
+        SetPrivateField(position, "_closeOrders", new List<Order>());
+
+        TradeGridLine line = new TradeGridLine
+        {
+            Side = Side.Buy,
+            PriceEnter = 100m,
+            Position = position,
+            PositionNum = 1
+        };
+        grid.GridCreator.Lines = new List<TradeGridLine> { line };
+
+        List<TradeGridLine> openNeed = grid.GetLinesWithOpenOrdersNeed(100m);
+
+        Assert.Single(openNeed);
+        Assert.Same(line, openNeed[0]);
+    }
+
+    [Fact]
+    public void Stage2Step2_2_TradeGrid_GetLinesWithClosingOrdersFact_WithActiveCloseLine_ShouldReturnLine()
+    {
+        TradeGrid grid = CreateBareGrid();
+
+        Position position = (Position)RuntimeHelpers.GetUninitializedObject(typeof(Position));
+        SetPrivateField(position, "_openOrders", new List<Order>
+        {
+            new Order { State = OrderStateType.Done, VolumeExecute = 1m }
+        });
+        SetPrivateField(position, "_closeOrders", new List<Order>
+        {
+            new Order { State = OrderStateType.Active, VolumeExecute = 0m }
+        });
+
+        TradeGridLine line = new TradeGridLine
+        {
+            Position = position,
+            PositionNum = 1
+        };
+        grid.GridCreator.Lines = new List<TradeGridLine> { line };
+
+        List<TradeGridLine> closeFact = grid.GetLinesWithClosingOrdersFact();
+
+        Assert.Single(closeFact);
+        Assert.Same(line, closeFact[0]);
+    }
+
+    [Fact]
     public void Stage2Step2_2_TradeGrid_MiddleEntryPrice_WithZeroTradeVolume_ShouldReturnZero()
     {
         TradeGrid grid = (TradeGrid)RuntimeHelpers.GetUninitializedObject(typeof(TradeGrid));
