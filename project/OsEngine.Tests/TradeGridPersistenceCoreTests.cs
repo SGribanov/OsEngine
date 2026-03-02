@@ -286,6 +286,17 @@ public class TradeGridPersistenceCoreTests
     }
 
     [Fact]
+    public void Stage2Step2_2_TradeGridStopBy_SendNewLogMessage_WithoutSubscriber_ShouldNotThrow()
+    {
+        TradeGridStopBy stopBy = new TradeGridStopBy();
+
+        Exception? error = Record.Exception(() =>
+            stopBy.SendNewLogMessage("CodexStopByNoSubscriber", LogMessageType.System));
+
+        Assert.Null(error);
+    }
+
+    [Fact]
     public void Stage2Step2_2_TradeGridCreator_GetSaveString_ShouldKeepReservedTailShape()
     {
         TradeGridCreator creator = new TradeGridCreator
@@ -2073,6 +2084,17 @@ public class TradeGridPersistenceCoreTests
     }
 
     [Fact]
+    public void Stage2Step2_2_TradeGridStopAndProfit_SendNewLogMessage_WithoutSubscriber_ShouldNotThrow()
+    {
+        TradeGridStopAndProfit stopAndProfit = new TradeGridStopAndProfit();
+
+        Exception? error = Record.Exception(() =>
+            stopAndProfit.SendNewLogMessage("CodexStopAndProfitNoSubscriber", LogMessageType.System));
+
+        Assert.Null(error);
+    }
+
+    [Fact]
     public void Stage2Step2_2_TradeGridStopAndProfit_LoadFromString_WithMissingProfitRegime_ShouldKeepValueAndContinueParsing()
     {
         TradeGridStopAndProfit stopAndProfit = new TradeGridStopAndProfit
@@ -3714,6 +3736,17 @@ public class TradeGridPersistenceCoreTests
 
         Assert.Equal("CodexAutoStarterMessage", receivedMessage);
         Assert.Equal(LogMessageType.Connect, receivedType);
+    }
+
+    [Fact]
+    public void Stage2Step2_2_TradeGridAutoStarter_SendNewLogMessage_WithoutSubscriber_ShouldNotThrow()
+    {
+        TradeGridAutoStarter autoStarter = new TradeGridAutoStarter();
+
+        Exception? error = Record.Exception(() =>
+            autoStarter.SendNewLogMessage("CodexAutoStarterNoSubscriber", LogMessageType.System));
+
+        Assert.Null(error);
     }
 
     [Fact]
