@@ -3536,6 +3536,42 @@ public class TradeGridPersistenceCoreTests
     }
 
     [Fact]
+    public void Stage2Step2_2_TradeGridErrorsReaction_GetSaveString_ShouldKeepReservedTailShape()
+    {
+        TradeGridErrorsReaction reaction = new TradeGridErrorsReaction(CreateBareGrid())
+        {
+            FailOpenOrdersReactionIsOn = false,
+            FailOpenOrdersCountToReaction = 3,
+            FailCancelOrdersCountToReaction = 4,
+            FailCancelOrdersReactionIsOn = true,
+            WaitOnStartConnectorIsOn = false,
+            WaitSecondsOnStartConnector = 12,
+            ReduceOrdersCountInMarketOnNoFundsError = false
+        };
+
+        string save = reaction.GetSaveString();
+
+        Assert.Equal("False@@3@@4@True@False@12@False@@@@@@", save);
+    }
+
+    [Fact]
+    public void Stage2Step2_2_TradeGridErrorsReaction_Delete_ShouldClearGridAndStayIdempotent()
+    {
+        TradeGridErrorsReaction reaction = new TradeGridErrorsReaction(CreateBareGrid());
+
+        Exception? error = Record.Exception(() =>
+        {
+            reaction.Delete();
+            reaction.Delete();
+        });
+
+        object? grid = typeof(TradeGridErrorsReaction).GetField("_myGrid", BindingFlags.NonPublic | BindingFlags.Instance)?.GetValue(reaction);
+
+        Assert.Null(error);
+        Assert.Null(grid);
+    }
+
+    [Fact]
     public void Stage2Step2_2_TrailingUp_LoadFromString_LegacyWithoutMoveFlags_ShouldKeepDefaultMoveFlags()
     {
         TradeGrid grid = CreateBareGrid();
