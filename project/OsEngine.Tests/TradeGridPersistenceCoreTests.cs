@@ -5456,6 +5456,20 @@ public class TradeGridPersistenceCoreTests
     }
 
     [Fact]
+    public void Stage2Step2_2_TradeGrid_GetOrdersBadPriceToGrid_WithNullOrderLines_ShouldReturnEmpty()
+    {
+        TradeGrid grid = (TradeGrid)RuntimeHelpers.GetUninitializedObject(typeof(TradeGrid));
+
+        MethodInfo method = typeof(TradeGrid).GetMethod("GetOrdersBadPriceToGrid", BindingFlags.NonPublic | BindingFlags.Instance)
+            ?? throw new InvalidOperationException("Method GetOrdersBadPriceToGrid not found.");
+
+        List<Order> orders = (List<Order>)(method.Invoke(grid, null)
+            ?? throw new InvalidOperationException("GetOrdersBadPriceToGrid returned null."));
+
+        Assert.Empty(orders);
+    }
+
+    [Fact]
     public void Stage2Step2_2_TradeGrid_SparseLines_JournalAndOrderStatePaths_ShouldStaySafe()
     {
         TradeGrid grid = (TradeGrid)RuntimeHelpers.GetUninitializedObject(typeof(TradeGrid));
