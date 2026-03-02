@@ -3265,6 +3265,15 @@ public class TradeGridPersistenceCoreTests
             TypeVolume = TradeGridVolumeType.DepositPercent,
             TradeAssetInPortfolio = "USDT"
         };
+        string? receivedMessage = null;
+        LogMessageType? receivedType = null;
+
+        creator.LogMessageEvent += (message, type) =>
+        {
+            receivedMessage = message;
+            receivedType = type;
+        };
+
         TradeGridLine line = new TradeGridLine
         {
             Volume = 10m,
@@ -3296,6 +3305,8 @@ public class TradeGridPersistenceCoreTests
         decimal volume = creator.GetVolume(line, tab);
 
         Assert.Equal(0m, volume);
+        Assert.Equal("Can`t found portfolio in Deposit Percent volume mode USDT", receivedMessage);
+        Assert.Equal(LogMessageType.System, receivedType);
     }
 
     [Fact]

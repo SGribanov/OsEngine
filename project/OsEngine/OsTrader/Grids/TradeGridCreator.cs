@@ -662,7 +662,7 @@ namespace OsEngine.OsTrader.Grids
                 if (portfolioPrimeAsset == 0
                     || portfolioPrimeAsset == 1)
                 {
-                    SendNewLogMessage("Can`t found portfolio in Deposit Percent volume mode " + TradeAssetInPortfolio, OsEngine.Logging.LogMessageType.Error);
+                    SendNewLogMessage("Can`t found portfolio in Deposit Percent volume mode " + TradeAssetInPortfolio, OsEngine.Logging.LogMessageType.System);
                     return 0;
                 }
                 decimal moneyOnPosition = portfolioPrimeAsset * (volumeFromLine / 100);
