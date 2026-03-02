@@ -1673,6 +1673,58 @@ public class TradeGridPersistenceCoreTests
     }
 
     [Fact]
+    public void Stage2Step2_2_TradeGridsMaster_Delete_WithMissingSettingsFile_ShouldClearTabAndNotThrow()
+    {
+        TradeGridsMaster master =
+            (TradeGridsMaster)RuntimeHelpers.GetUninitializedObject(typeof(TradeGridsMaster));
+        SetPrivateField(master, "_startProgram", StartProgram.IsTester);
+        SetPrivateField(master, "_nameBot", "CodexMissingDelete");
+        SetPrivateField(master, "_tab", (BotTabSimple)RuntimeHelpers.GetUninitializedObject(typeof(BotTabSimple)));
+
+        string path = Path.Combine("Engine", "CodexMissingDeleteGridsSettings.txt");
+        if (File.Exists(path))
+        {
+            File.Delete(path);
+        }
+
+        Exception? error = Record.Exception(master.Delete);
+
+        FieldInfo tabField = typeof(TradeGridsMaster).GetField("_tab", BindingFlags.NonPublic | BindingFlags.Instance)
+            ?? throw new InvalidOperationException("Field _tab not found.");
+
+        Assert.Null(error);
+        Assert.False(File.Exists(path));
+        Assert.Null(tabField.GetValue(master));
+    }
+
+    [Fact]
+    public void Stage2Step2_2_TradeGridsMaster_Delete_WithExistingSettingsFile_ShouldRemoveFileAndStayIdempotent()
+    {
+        TradeGridsMaster master =
+            (TradeGridsMaster)RuntimeHelpers.GetUninitializedObject(typeof(TradeGridsMaster));
+        SetPrivateField(master, "_startProgram", StartProgram.IsTester);
+        SetPrivateField(master, "_nameBot", "CodexExistingDelete");
+        SetPrivateField(master, "_tab", (BotTabSimple)RuntimeHelpers.GetUninitializedObject(typeof(BotTabSimple)));
+
+        Directory.CreateDirectory("Engine");
+        string path = Path.Combine("Engine", "CodexExistingDeleteGridsSettings.txt");
+        File.WriteAllText(path, "codex");
+
+        Exception? error = Record.Exception(() =>
+        {
+            master.Delete();
+            master.Delete();
+        });
+
+        FieldInfo tabField = typeof(TradeGridsMaster).GetField("_tab", BindingFlags.NonPublic | BindingFlags.Instance)
+            ?? throw new InvalidOperationException("Field _tab not found.");
+
+        Assert.Null(error);
+        Assert.False(File.Exists(path));
+        Assert.Null(tabField.GetValue(master));
+    }
+
+    [Fact]
     public void Stage2Step2_2_TradeGridsMaster_DeleteAtNum_WithMissingNumberInOptimizerMode_ShouldNotThrow()
     {
         TradeGridsMaster master =
