@@ -368,7 +368,7 @@ namespace OsEngine.OsTrader.Grids
                         myGrid.Save();
                         myGrid.RePaintGrid();
 
-                        string message = "ERROR on open order. No money on deposit \n";
+                        string message = "Open order rejected: no funds on deposit.\n";
                         message += "Reduce open orders in market. " + "\n";
                         message += "New value open orders in market: " + myGrid.MaxOpenOrdersInMarket;
                         SendNewLogMessage(message, LogMessageType.Signal);
@@ -379,7 +379,7 @@ namespace OsEngine.OsTrader.Grids
                         myGrid.MaxCloseOrdersInMarket--;
                         myGrid.Save();
                         myGrid.RePaintGrid();
-                        string message = "ERROR on close order. No money on deposit \n";
+                        string message = "Close order rejected: no funds on deposit.\n";
                         message += "Reduce close orders in market. " + "\n";
                         message += "New value close orders in market: " + myGrid.MaxCloseOrdersInMarket;
                         SendNewLogMessage(message, LogMessageType.Signal);
@@ -408,7 +408,7 @@ namespace OsEngine.OsTrader.Grids
             {
                 if(FailOpenOrdersCountFact >= FailOpenOrdersCountToReaction)
                 {
-                    string message = "ERROR on open orders. \n";
+                    string message = "Open orders threshold reached.\n";
                     message += "Errors count: " + FailOpenOrdersCountFact.ToString() + "\n";
                     message += "New regime: Off";
                     SendNewLogMessage(message, LogMessageType.Signal);
@@ -421,7 +421,7 @@ namespace OsEngine.OsTrader.Grids
             {
                 if (FailCancelOrdersCountFact >= FailCancelOrdersCountToReaction)
                 {
-                    string message = "ERROR on cancel orders. \n";
+                    string message = "Cancel orders threshold reached.\n";
                     message += "Errors count: " + FailCancelOrdersCountFact.ToString() + "\n";
                     message += "New regime: Off";
                     SendNewLogMessage(message, LogMessageType.Signal);
