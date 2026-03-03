@@ -17755,3 +17755,23 @@
   - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed `842/842`
 - **Commit:** n/a
 - **Push:** n/a
+
+### Step 4.2 - Nullable Annotations (Incremental Adoption #1013)
+
+- **Status:** In Progress (increment block completed)
+- **Plan item:** `refactoring_stage2_plan.md` -> Phase 4 / Step 4.2
+- **Changes (upstream-aligned TradeGrid reaction path hardening):**
+  - Updated `project/OsEngine/OsTrader/Grids/TradeGrid.cs`:
+    - in `Process()` error-reaction branch, replaced direct `AutoStarter` field dereferences with the guarded local snapshot `autoStarter`.
+    - preserved runtime semantics while aligning the newly merged upstream code with existing nullable lifecycle safety style.
+  - Updated `project/OsEngine.Tests/TradeGridPersistenceCoreTests.cs`:
+    - added `Stage2Step2_2_TradeGrid_Process_WithErrorsReactionOff_ShouldDisableAutoStarterFlags`.
+    - locked behavior for error-threshold shutdown and explicit auto-starter disable.
+    - subscribed to `TradeGridErrorsReaction.LogMessageEvent` in test setup to avoid modal popup fallback during expected error-log paths.
+- **Verification (outside sandbox, per dotnet-build-policy):**
+  - `dotnet restore project/OsEngine/OsEngine.csproj --nologo` -> success
+  - `dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo` -> success
+  - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` -> success, 0 warnings, 0 errors
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed `843/843`
+- **Commit:** n/a
+- **Push:** n/a
