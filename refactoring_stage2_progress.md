@@ -17996,3 +17996,26 @@
   - baseline #1017: 4764.65 ns/op, 12952.02 bytes/op
   - current #1019: 4372.25 ns/op, 12952.02 bytes/op
   - allocations unchanged; timing improved in this run.
+
+## 2026-03-03 - Incremental Update #1020
+
+### Scope
+
+- Added explicit global Stage2 module coverage matrix.
+- Confirmed refreshed runtime-first plan applies to entire codebase, not only `TradeGrid`.
+
+### What Changed
+
+- Updated plan:
+  - refactoring_stage2_plan.md
+- Added new matrix document:
+  - refactoring_stage2_coverage_matrix.md
+- Changes:
+  - linked plan refresh governance to a dedicated module-by-module execution matrix.
+  - introduced global coverage table with domains, active wave, runtime impact, current status, KPI scenario, current baseline/outcome, and next action.
+  - included demoted/non-critical domains explicitly to avoid hidden scope drift.
+
+### Verification
+
+- Docs-only increment.
+- .NET restore/build/test not required for this change set.

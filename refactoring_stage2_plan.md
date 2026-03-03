@@ -141,6 +141,13 @@ The following items are now lower priority unless they unblock P0-P4:
 2. If `Runtime impact: yes`, increment note must include baseline vs after metrics.
 3. Increments with no measurable gain in target KPI should be split/reworked before merge.
 
+### Global coverage matrix (all codebase)
+
+Execution under the refreshed model is tracked globally across modules, not only `TradeGrid`.
+Current module-by-module coverage map is maintained in:
+
+- `refactoring_stage2_coverage_matrix.md`
+
 ---
 
 ## Plan Assessment and Required Additions

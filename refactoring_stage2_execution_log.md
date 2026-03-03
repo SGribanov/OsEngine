@@ -17916,3 +17916,26 @@
   - `indicator_cache_hit_path`: allocations unchanged, timing improved in run.
 - **Commit:** n/a
 - **Push:** n/a
+
+### Plan Governance - Global Coverage Matrix (Incremental Adoption #1020)
+
+- **Status:** In Progress (increment block completed)
+- **Plan item:** `refactoring_stage2_plan.md` -> Plan Refresh governance reinforcement
+- **Changes (whole-codebase coverage map):**
+  - Updated `refactoring_stage2_plan.md`:
+    - added `Global coverage matrix (all codebase)` section and pointer to dedicated matrix file.
+  - Added `refactoring_stage2_coverage_matrix.md`:
+    - defined module-level global matrix with columns:
+      - domain/module,
+      - primary paths,
+      - wave,
+      - runtime impact,
+      - status,
+      - KPI scenario,
+      - current baseline/outcome,
+      - next action.
+    - included active, planned, and demoted areas to make scope and sequencing explicit across the full repository.
+- **Verification (outside sandbox, per dotnet-build-policy):**
+  - Docs-only increment; .NET verification not required.
+- **Commit:** n/a
+- **Push:** n/a
