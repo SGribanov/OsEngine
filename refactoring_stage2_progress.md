@@ -17742,3 +17742,33 @@
   - dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo -> success
   - dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900 -> success, 0 warnings, 0 errors
   - dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo -> passed 811/811
+
+## 2026-03-03 - Incremental Update #1013
+
+### Scope
+
+- Aligned newly merged upstream `TradeGrid` error-reaction branch with Step 4.2 nullable-safe snapshot pattern.
+- Added regression coverage for auto-starter shutdown behavior when grid is switched off by error reaction.
+
+### What Changed
+
+- Updated production code in:
+  - project/OsEngine/OsTrader/Grids/TradeGrid.cs
+- Updated tests in:
+  - project/OsEngine.Tests/TradeGridPersistenceCoreTests.cs
+- Changes:
+  - in `TradeGrid.Process()` error-reaction branch, switched direct field dereferences (`AutoStarter`) to the guarded local snapshot (`autoStarter`) already captured at method entry.
+  - this keeps behavior unchanged for valid runtime state and removes a post-delete race window for nullable lifecycle paths.
+  - added test `Stage2Step2_2_TradeGrid_Process_WithErrorsReactionOff_ShouldDisableAutoStarterFlags` to lock:
+    - `Regime` transition to `Off` on configured open-order error threshold;
+    - auto-starter flags forced to OFF (AutoStartRegime, StartGridByTimeOfDayIsOn);
+    - presence of the expected auto-starter-off error log.
+  - suppressed modal popup side-effect in the test by subscribing to `TradeGridErrorsReaction.LogMessageEvent`.
+
+### Verification
+
+- Host-context verification (outside sandbox, per dotnet-build-policy):
+  - dotnet restore project/OsEngine/OsEngine.csproj --nologo -> success
+  - dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo -> success
+  - dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900 -> success, 0 warnings, 0 errors
+  - dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo -> passed 843/843

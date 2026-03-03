@@ -1478,17 +1478,17 @@ namespace OsEngine.OsTrader.Grids
                     baseRegime = reaction;
                     Regime = reaction;
 
-                    if(AutoStarter.AutoStartRegime != TradeGridAutoStartRegime.Off
-                        || AutoStarter.StartGridByTimeOfDayIsOn == true)
+                    if (autoStarter.AutoStartRegime != TradeGridAutoStartRegime.Off
+                        || autoStarter.StartGridByTimeOfDayIsOn == true)
                     {// Отключаем авто-стартер, если выключаемся по ошибкам
-                        if (AutoStarter.AutoStartRegime != TradeGridAutoStartRegime.Off)
+                        if (autoStarter.AutoStartRegime != TradeGridAutoStartRegime.Off)
                         {
-                            AutoStarter.AutoStartRegime = TradeGridAutoStartRegime.Off;
+                            autoStarter.AutoStartRegime = TradeGridAutoStartRegime.Off;
                         }
 
-                        if (AutoStarter.StartGridByTimeOfDayIsOn == true)
+                        if (autoStarter.StartGridByTimeOfDayIsOn == true)
                         {
-                            AutoStarter.StartGridByTimeOfDayIsOn = false;
+                            autoStarter.StartGridByTimeOfDayIsOn = false;
                         }
 
                         string message = "AutoStarter is OFF";

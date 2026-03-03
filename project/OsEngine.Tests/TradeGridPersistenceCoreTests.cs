@@ -10,6 +10,8 @@ using OsEngine.Candles;
 using OsEngine.Entity;
 using OsEngine.Language;
 using OsEngine.Market.Connectors;
+using OsEngine.Market.Servers;
+using OsEngine.Market.Servers.Tester;
 using OsEngine.Journal.Internal;
 using OsEngine.Logging;
 using OsEngine.OsTrader.Grids;
@@ -6384,6 +6386,58 @@ public class TradeGridPersistenceCoreTests
     }
 
     [Fact]
+    public void Stage2Step2_2_TradeGrid_Process_WithErrorsReactionOff_ShouldDisableAutoStarterFlags()
+    {
+        TradeGrid grid = CreateBareGrid();
+        grid.StartProgram = StartProgram.IsOsTrader;
+        grid.Regime = TradeGridRegime.On;
+        grid.GridCreator.Lines = new List<TradeGridLine> { new TradeGridLine() };
+
+        TradeGridErrorsReaction errorsReaction = grid.ErrorsReaction;
+        errorsReaction.FailOpenOrdersCountToReaction = 1;
+        errorsReaction.FailOpenOrdersCountFact = 1;
+        SetPrivateField(errorsReaction, "_lastResetTime", DateTime.UtcNow);
+        errorsReaction.LogMessageEvent += (_, _) => { };
+
+        TradeGridAutoStarter autoStarter = grid.AutoStarter;
+        autoStarter.AutoStartRegime = TradeGridAutoStartRegime.HigherOrEqual;
+        autoStarter.StartGridByTimeOfDayIsOn = true;
+
+        AttachReadyTabForProcess(grid);
+
+        bool previousProcessState = OsEngine.MainWindow.ProccesIsWorked;
+        OsEngine.MainWindow.ProccesIsWorked = true;
+
+        string? autoStarterOffLog = null;
+        grid.LogMessageEvent += (message, type) =>
+        {
+            if (type == LogMessageType.Error
+                && string.IsNullOrWhiteSpace(message) == false
+                && message.Contains("AutoStarter is OFF", StringComparison.Ordinal))
+            {
+                autoStarterOffLog = message;
+            }
+        };
+
+        Exception? error;
+        try
+        {
+            error = Record.Exception(() => InvokePrivateNoArg(grid, "Process"));
+        }
+        finally
+        {
+            OsEngine.MainWindow.ProccesIsWorked = previousProcessState;
+        }
+
+        Assert.Null(error);
+        Assert.Equal(TradeGridRegime.Off, grid.Regime);
+        Assert.Equal(0, errorsReaction.FailOpenOrdersCountFact);
+        Assert.Equal(TradeGridAutoStartRegime.Off, autoStarter.AutoStartRegime);
+        Assert.False(autoStarter.StartGridByTimeOfDayIsOn);
+        Assert.False(string.IsNullOrWhiteSpace(autoStarterOffLog));
+    }
+
+    [Fact]
     public void Stage2Step2_2_TradeGrid_ProfitAndMarketMakingHelpers_WithNullDependencies_ShouldNotThrow()
     {
         TradeGrid grid = (TradeGrid)RuntimeHelpers.GetUninitializedObject(typeof(TradeGrid));
@@ -8348,6 +8402,34 @@ public class TradeGridPersistenceCoreTests
 
         SetPrivateField(connector, "_mySeries", series);
         SetPrivateField(tab, "_connector", connector);
+        grid.Tab = tab;
+    }
+
+    private static void AttachReadyTabForProcess(TradeGrid grid)
+    {
+        BotTabSimple tab = (BotTabSimple)RuntimeHelpers.GetUninitializedObject(typeof(BotTabSimple));
+        tab.TabName = "CodextabProcess";
+
+        ConnectorCandles connector = (ConnectorCandles)RuntimeHelpers.GetUninitializedObject(typeof(ConnectorCandles));
+        connector.StartProgram = StartProgram.IsTester;
+
+        TimeFrameBuilder builder = new TimeFrameBuilder("CodexGridProcess", StartProgram.IsTester);
+        CandleSeries series = new CandleSeries(builder, new Security(), StartProgram.IsTester)
+        {
+            CandlesAll = new List<Candle> { new Candle { TimeStart = DateTime.UtcNow, Close = 100m } }
+        };
+
+        TesterServer server = (TesterServer)RuntimeHelpers.GetUninitializedObject(typeof(TesterServer));
+        server.LastStartServerTime = DateTime.UtcNow.AddMinutes(-10);
+
+        SetPrivateField(server, "_serverConnectStatus", ServerConnectStatus.Connect);
+        SetPrivateField(server, "_serverTime", DateTime.UtcNow);
+
+        SetPrivateField(connector, "_mySeries", series);
+        SetPrivateField(connector, "_myServer", server);
+        SetPrivateField(connector, "_eventsIsOn", true);
+        SetPrivateField(tab, "_connector", connector);
+
         grid.Tab = tab;
     }
 
