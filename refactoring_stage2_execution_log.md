@@ -18188,3 +18188,40 @@
   - `tradegrid_query_collections_hotpath`: `8612.08 ns/op`, `992.01 bytes/op`
 - **Commit:** n/a
 - **Push:** n/a
+
+### Wave P2 - Key-Build Micro Optimizations (Incremental Adoption #1028)
+
+- **Status:** In Progress (increment block completed)
+- **Plan item:** `refactoring_stage2_plan.md` -> Plan Refresh / Wave `P2`
+- **Changes (fast hash return + type-name caching):**
+  - Updated `project/OsEngine/OsOptimizer/OptEntity/IndicatorCache.cs`:
+    - `IndicatorCacheKey.GetHashCode()` now returns precomputed hash directly.
+    - precomputed hash normalized to non-zero in constructor path.
+  - Updated `project/OsEngine/OsOptimizer/OptEntity/OptimizerMethodCache.cs`:
+    - `OptimizerMethodCacheKey.GetHashCode()` now returns precomputed hash directly.
+    - precomputed hash normalized to non-zero in constructor path.
+  - Updated `project/OsEngine/Indicators/Aindicator.cs`:
+    - cached optimizer calculation type name for key-build reuse.
+  - Updated `project/OsEngine/OsTrader/Panels/BotPanel.cs`:
+    - static generic cache for method-cache result type name (`OptimizerMethodCacheTypeName<T>.Value`).
+  - Updated `project/OsEngine.Tests/Performance/Stage2PerformanceBaselineTests.cs`:
+    - key-build scenario checksum made deterministic across processes while preserving hash-call workload.
+  - Updated perf artifacts:
+    - `reports/stage2_perf_metrics.jsonl`
+    - `reports/stage2_perf_summary.json`
+  - Updated `refactoring_stage2_coverage_matrix.md`.
+- **Verification (outside sandbox, per dotnet-build-policy):**
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --configuration Release --nologo --filter "FullyQualifiedName~IndicatorCacheCoreTests|FullyQualifiedName~OptimizerMethodCacheCoreTests"` -> passed `9/9`
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --configuration Release --nologo --no-build --filter "FullyQualifiedName~Stage2Perf_"` -> passed `4/4`
+  - `pwsh -NoProfile -File tools/run-stage2-perf.ps1 -NoBuild -EnforceThresholds -Repeat 5` -> success; threshold check passed
+  - `dotnet restore project/OsEngine/OsEngine.csproj --nologo` -> success
+  - `dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo` -> success
+  - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` -> success, 0 warnings, 0 errors
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed `855/855`
+- **Metrics snapshot (median, Repeat=5):**
+  - `indicator_cache_hit_path`: `1943.85 ns/op`, `448.02 bytes/op`
+  - `optimizer_method_cache_hit_path`: `131.60 ns/op`, `0.01 bytes/op`
+  - `optimizer_cache_key_build_path`: `341.42 ns/op`, `0.01 bytes/op`
+  - `tradegrid_query_collections_hotpath`: `8234.64 ns/op`, `992.01 bytes/op`
+- **Commit:** n/a
+- **Push:** n/a
