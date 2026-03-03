@@ -18040,3 +18040,43 @@
   - `indicator_cache_hit_path`: `4979.60 ns/op`, `12952.02 bytes/op` (allocation unchanged).
 - **Commit:** n/a
 - **Push:** n/a
+
+### Wave P2 - Optimizer Indicator Cache Hit-Path (Incremental Adoption #1024)
+
+- **Status:** In Progress (increment block completed)
+- **Plan item:** `refactoring_stage2_plan.md` -> Plan Refresh / Wave `P2`
+- **Changes (trusted cache mode for optimizer-owned path):**
+  - Updated `project/OsEngine/OsOptimizer/OptEntity/IndicatorCache.cs`:
+    - added `IndicatorCacheIsolationMode` with two modes:
+      - `CloneOnReadAndWrite` (default),
+      - `TrustedReferences` (no clone on read/write).
+    - constructor now accepts isolation mode while preserving backward-compatible default behavior.
+    - clone-on-read/write behavior is now mode-gated.
+  - Updated `project/OsEngine/OsOptimizer/OptimizerExecutor.cs`:
+    - optimizer indicator cache now initialized with `IndicatorCacheIsolationMode.TrustedReferences`.
+  - Updated `project/OsEngine.Tests/Performance/Stage2PerformanceBaselineTests.cs`:
+    - `indicator_cache_hit_path` scenario switched to trusted mode to mirror optimizer runtime path.
+  - Updated `project/OsEngine.Tests/IndicatorCacheCoreTests.cs`:
+    - added `IndicatorCache_TrustedReferencesMode_ShouldReuseStoredSeries`.
+  - Updated perf artifacts:
+    - `reports/stage2_perf_metrics.jsonl`
+    - `reports/stage2_perf_summary.json`
+  - Updated `refactoring_stage2_coverage_matrix.md`.
+- **Verification (outside sandbox, per dotnet-build-policy):**
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --configuration Release --nologo --filter "FullyQualifiedName~IndicatorCacheCoreTests"` -> passed `5/5`
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --configuration Release --nologo --no-build --filter "FullyQualifiedName~Stage2Perf_"` -> passed `2/2`
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --configuration Release --nologo --no-build --filter "FullyQualifiedName~Stage2Step2_2_TradeGrid_"` -> passed `124/124`
+  - `pwsh -NoProfile -File tools/run-stage2-perf.ps1 -NoBuild -EnforceThresholds -Repeat 5` -> success; threshold check passed
+  - `dotnet restore project/OsEngine/OsEngine.csproj --nologo` -> success
+  - `dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo` -> success
+  - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` -> success, 0 warnings, 0 errors
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed `849/849`
+- **Measured delta (median, Repeat=5):**
+  - `indicator_cache_hit_path`:
+    - baseline `#1017`: `4764.65 ns/op`, `12952.02 bytes/op`
+    - previous `#1023`: `4979.60 ns/op`, `12952.02 bytes/op`
+    - current `#1024`: `2235.75 ns/op`, `448.02 bytes/op`
+    - delta vs baseline: `-53.08% ns/op`, `-96.54% bytes/op`
+  - `tradegrid_query_collections_hotpath`: `8111.60 ns/op`, `992.01 bytes/op` (stable vs previous pass).
+- **Commit:** n/a
+- **Push:** n/a

@@ -18156,3 +18156,61 @@
 - `indicator_cache_hit_path`:
   - current `#1023` (Repeat=5): `4979.60 ns/op`, `12952.02 bytes/op`
   - allocations unchanged.
+
+## 2026-03-03 - Incremental Update #1024
+
+### Scope
+
+- Wave `P2` start: reduce optimizer indicator cache hit-path allocations/latency by enabling trusted-reference mode for optimizer-owned cache usage.
+
+### What Changed
+
+- Updated production code:
+  - project/OsEngine/OsOptimizer/OptEntity/IndicatorCache.cs
+  - project/OsEngine/OsOptimizer/OptimizerExecutor.cs
+  - project/OsEngine/Indicators/Aindicator.cs (runtime usage unchanged; cache wiring updated through executor)
+- Updated tests/perf harness:
+  - project/OsEngine.Tests/IndicatorCacheCoreTests.cs
+  - project/OsEngine.Tests/Performance/Stage2PerformanceBaselineTests.cs
+- Changes:
+  - added `IndicatorCacheIsolationMode`:
+    - `CloneOnReadAndWrite` (default, backward-compatible behavior),
+    - `TrustedReferences` (no clone on set/get, for trusted internal pipelines).
+  - `IndicatorCache` constructor now accepts isolation mode; default remains strict clone semantics.
+  - in optimizer runtime wiring (`OptimizerExecutor.PrepareIndicatorCache`) switched to:
+    - `new IndicatorCache(..., IndicatorCacheIsolationMode.TrustedReferences)`.
+  - Stage2 perf indicator-cache scenario now uses trusted mode to reflect real optimizer path.
+  - added regression/contract test for trusted mode behavior:
+    - `IndicatorCache_TrustedReferencesMode_ShouldReuseStoredSeries`.
+- Updated perf artifacts:
+  - reports/stage2_perf_metrics.jsonl
+  - reports/stage2_perf_summary.json
+- Updated global coverage matrix:
+  - refactoring_stage2_coverage_matrix.md
+
+### Verification
+
+- Targeted checks:
+  - dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --configuration Release --nologo --filter "FullyQualifiedName~IndicatorCacheCoreTests" -> passed 5/5
+  - dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --configuration Release --nologo --no-build --filter "FullyQualifiedName~Stage2Perf_" -> passed 2/2
+  - dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --configuration Release --nologo --no-build --filter "FullyQualifiedName~Stage2Step2_2_TradeGrid_" -> passed 124/124
+- Perf command:
+  - pwsh -NoProfile -File tools/run-stage2-perf.ps1 -NoBuild -EnforceThresholds -Repeat 5 -> success
+  - threshold check passed (median mode).
+- Host-context verification (outside sandbox, per dotnet-build-policy):
+  - dotnet restore project/OsEngine/OsEngine.csproj --nologo -> success
+  - dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo -> success
+  - dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900 -> success, 0 warnings, 0 errors
+  - dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo -> passed 849/849
+
+### P0/P2 Metrics Delta (median, Repeat=5)
+
+- `indicator_cache_hit_path`:
+  - baseline `#1017`: `4764.65 ns/op`, `12952.02 bytes/op`
+  - previous `#1023`: `4979.60 ns/op`, `12952.02 bytes/op`
+  - current `#1024`: `2235.75 ns/op`, `448.02 bytes/op`
+  - delta vs baseline: `-53.08% ns/op`, `-96.54% bytes/op`
+  - delta vs `#1023`: `-55.10% ns/op`, `-96.54% bytes/op`
+- `tradegrid_query_collections_hotpath`:
+  - current `#1024`: `8111.60 ns/op`, `992.01 bytes/op`
+  - effectively stable vs `#1023` (`8094.29 ns/op`, `992.01 bytes/op`).
