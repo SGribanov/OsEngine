@@ -1,5 +1,5 @@
 {
-  "generated_at_utc": "2026-03-03T12:39:20.6195063Z",
+  "generated_at_utc": "2026-03-03T12:49:25.8832843Z",
   "repeat_count": 3,
   "metrics_file": "C:\\Repos\\MyCloneOsEngine\\reports\\stage2_perf_metrics.jsonl",
   "scenarios_median": [
@@ -7,8 +7,8 @@
       "scenario": "indicator_cache_hit_path",
       "iterations": 2000,
       "repeat_count": 3,
-      "elapsedMsTotal": 13.0792,
-      "nanosecondsPerOp": 6539.6,
+      "elapsedMsTotal": 11.306,
+      "nanosecondsPerOp": 5653.0,
       "allocatedBytesTotal": 25904040.0,
       "allocatedBytesPerOp": 12952.02,
       "gen0Collections": 3,
@@ -18,10 +18,10 @@
       "scenario": "tradegrid_query_collections_hotpath",
       "iterations": 4096,
       "repeat_count": 3,
-      "elapsedMsTotal": 47.8844,
-      "nanosecondsPerOp": 11690.52734375,
-      "allocatedBytesTotal": 6389800.0,
-      "allocatedBytesPerOp": 1560.009765625,
+      "elapsedMsTotal": 34.8767,
+      "nanosecondsPerOp": 8514.8193359375,
+      "allocatedBytesTotal": 5373992.0,
+      "allocatedBytesPerOp": 1312.009765625,
       "gen0Collections": 0,
       "checksum": 43593728.0
     }
@@ -31,73 +31,73 @@
       "run_index": 1,
       "scenario": "indicator_cache_hit_path",
       "iterations": 2000,
-      "elapsedMsTotal": 13.0792,
-      "nanosecondsPerOp": 6539.6,
+      "elapsedMsTotal": 13.0319,
+      "nanosecondsPerOp": 6515.95,
       "allocatedBytesTotal": 25904040.0,
       "allocatedBytesPerOp": 12952.02,
       "gen0Collections": 3,
       "checksum": 341508000.0,
-      "recordedAtUtc": "2026-03-03T12:39:15.4617026Z"
+      "recordedAtUtc": "2026-03-03T12:49:21.9180712Z"
     },
     {
       "run_index": 2,
       "scenario": "indicator_cache_hit_path",
       "iterations": 2000,
-      "elapsedMsTotal": 16.4202,
-      "nanosecondsPerOp": 8210.1,
+      "elapsedMsTotal": 10.1314,
+      "nanosecondsPerOp": 5065.7,
       "allocatedBytesTotal": 25904040.0,
       "allocatedBytesPerOp": 12952.02,
       "gen0Collections": 3,
       "checksum": 341508000.0,
-      "recordedAtUtc": "2026-03-03T12:39:18.0514075Z"
+      "recordedAtUtc": "2026-03-03T12:49:23.8525212Z"
     },
     {
       "run_index": 3,
       "scenario": "indicator_cache_hit_path",
       "iterations": 2000,
-      "elapsedMsTotal": 10.4214,
-      "nanosecondsPerOp": 5210.7,
+      "elapsedMsTotal": 11.306,
+      "nanosecondsPerOp": 5653.0,
       "allocatedBytesTotal": 25904040.0,
       "allocatedBytesPerOp": 12952.02,
       "gen0Collections": 3,
       "checksum": 341508000.0,
-      "recordedAtUtc": "2026-03-03T12:39:20.3685073Z"
+      "recordedAtUtc": "2026-03-03T12:49:25.6591905Z"
     },
     {
       "run_index": 1,
       "scenario": "tradegrid_query_collections_hotpath",
       "iterations": 4096,
-      "elapsedMsTotal": 45.7927,
-      "nanosecondsPerOp": 11179.8583984375,
-      "allocatedBytesTotal": 6389800.0,
-      "allocatedBytesPerOp": 1560.009765625,
+      "elapsedMsTotal": 34.8767,
+      "nanosecondsPerOp": 8514.8193359375,
+      "allocatedBytesTotal": 5373992.0,
+      "allocatedBytesPerOp": 1312.009765625,
       "gen0Collections": 0,
       "checksum": 43593728.0,
-      "recordedAtUtc": "2026-03-03T12:39:15.3977257Z"
+      "recordedAtUtc": "2026-03-03T12:49:21.8616131Z"
     },
     {
       "run_index": 2,
       "scenario": "tradegrid_query_collections_hotpath",
       "iterations": 4096,
-      "elapsedMsTotal": 47.8844,
-      "nanosecondsPerOp": 11690.52734375,
-      "allocatedBytesTotal": 6389800.0,
-      "allocatedBytesPerOp": 1560.009765625,
+      "elapsedMsTotal": 38.6505,
+      "nanosecondsPerOp": 9436.1572265625,
+      "allocatedBytesTotal": 5373992.0,
+      "allocatedBytesPerOp": 1312.009765625,
       "gen0Collections": 0,
       "checksum": 43593728.0,
-      "recordedAtUtc": "2026-03-03T12:39:17.9720373Z"
+      "recordedAtUtc": "2026-03-03T12:49:23.7982567Z"
     },
     {
       "run_index": 3,
       "scenario": "tradegrid_query_collections_hotpath",
       "iterations": 4096,
-      "elapsedMsTotal": 55.9511,
-      "nanosecondsPerOp": 13659.9365234375,
-      "allocatedBytesTotal": 6389800.0,
-      "allocatedBytesPerOp": 1560.009765625,
+      "elapsedMsTotal": 30.8513,
+      "nanosecondsPerOp": 7532.0556640625,
+      "allocatedBytesTotal": 5373992.0,
+      "allocatedBytesPerOp": 1312.009765625,
       "gen0Collections": 0,
       "checksum": 43593728.0,
-      "recordedAtUtc": "2026-03-03T12:39:20.3105128Z"
+      "recordedAtUtc": "2026-03-03T12:49:25.5989318Z"
     }
   ]
 }
