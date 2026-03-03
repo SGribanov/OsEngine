@@ -23,6 +23,12 @@
       "max_elapsed_ms_total": 5000,
       "max_allocated_bytes_per_op": 5000,
       "max_gen0_collections": 200
+    },
+    {
+      "name": "optimizer_method_parameter_hash_path",
+      "max_elapsed_ms_total": 5000,
+      "max_allocated_bytes_per_op": 5000,
+      "max_gen0_collections": 200
     }
   ]
 }

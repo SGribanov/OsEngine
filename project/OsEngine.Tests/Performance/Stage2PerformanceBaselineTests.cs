@@ -13,6 +13,7 @@ using OsEngine.Market.Connectors;
 using OsEngine.Market.Servers;
 using OsEngine.Market.Servers.Tester;
 using OsEngine.OsOptimizer.OptEntity;
+using OsEngine.OsTrader.Panels;
 using OsEngine.OsTrader.Grids;
 using OsEngine.OsTrader.Panels.Tab;
 using Xunit;
@@ -340,6 +341,58 @@ public class Stage2PerformanceBaselineTests
         });
     }
 
+    [Fact]
+    public void Stage2Perf_OptimizerMethodParameterHashPath_ShouldEmitMetricsAndStableChecksums()
+    {
+        const int warmupIterations = 400;
+        const int iterations = 30000;
+        const int seed = 37;
+
+        for (int i = 0; i < warmupIterations; i++)
+        {
+            _ = BotPanelMethodHashPerfAccessor.BuildInt(seed + (i & 31));
+        }
+
+        ForceGc();
+
+        long allocatedBefore = GC.GetAllocatedBytesForCurrentThread();
+        int gen0Before = GC.CollectionCount(0);
+        Stopwatch stopwatch = Stopwatch.StartNew();
+
+        long checksum = 0;
+
+        for (int i = 0; i < iterations; i++)
+        {
+            string hash = BotPanelMethodHashPerfAccessor.BuildInt(seed + (i & 63));
+            checksum += hash[0];
+            checksum += hash[7];
+        }
+
+        stopwatch.Stop();
+
+        long allocatedAfter = GC.GetAllocatedBytesForCurrentThread();
+        int gen0After = GC.CollectionCount(0);
+
+        long allocatedBytes = allocatedAfter - allocatedBefore;
+        double elapsedMs = stopwatch.Elapsed.TotalMilliseconds;
+        double nsPerOp = elapsedMs * 1_000_000d / iterations;
+        double allocatedBytesPerOp = (double)allocatedBytes / iterations;
+
+        Assert.True(checksum > 0);
+
+        Stage2PerfReportWriter.Append(new Stage2PerfMetric
+        {
+            Scenario = "optimizer_method_parameter_hash_path",
+            Iterations = iterations,
+            ElapsedMsTotal = elapsedMs,
+            NanosecondsPerOp = nsPerOp,
+            AllocatedBytesTotal = allocatedBytes,
+            AllocatedBytesPerOp = allocatedBytesPerOp,
+            Gen0Collections = gen0After - gen0Before,
+            Checksum = checksum
+        });
+    }
+
     private static long RunTradeGridQueryPass(TradeGrid grid)
     {
         List<TradeGridLine> openPositions = grid.GetLinesWithOpenPosition();
@@ -508,6 +561,18 @@ public class Stage2PerformanceBaselineTests
 [CollectionDefinition("Stage2PerfSerial", DisableParallelization = true)]
 public class Stage2PerfSerialCollectionDefinition
 {
+}
+
+internal sealed class BotPanelMethodHashPerfAccessor : BotPanel
+{
+    private BotPanelMethodHashPerfAccessor() : base("BotPanelMethodHashPerfAccessor", StartProgram.IsTester)
+    {
+    }
+
+    internal static string BuildInt(int value)
+    {
+        return BuildOptimizerMethodCacheParameterHash(value);
+    }
 }
 
 internal sealed class Stage2PerfMetric

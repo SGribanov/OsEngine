@@ -18425,3 +18425,56 @@
   - current `#1028`: `341.42 ns/op`, `0.01 bytes/op`
 - `tradegrid_query_collections_hotpath`:
   - current `#1028`: `8234.64 ns/op`, `992.01 bytes/op`
+
+## 2026-03-03 - Incremental Update #1029
+
+### Scope
+
+- Wave `P2` continuation: remove params-array/boxing overhead in optimizer method-parameter hash path and add dedicated KPI coverage.
+
+### What Changed
+
+- Updated production code:
+  - project/OsEngine/OsTrader/Panels/BotPanel.cs
+- Added/updated tests and perf harness:
+  - project/OsEngine.Tests/BotPanelOptimizerMethodHashTests.cs (new)
+  - project/OsEngine.Tests/Performance/Stage2PerformanceBaselineTests.cs
+  - tools/perf-thresholds.json
+- Changes:
+  - added `BuildOptimizerMethodCacheParameterHash(int part)` fast path in `BotPanel`.
+  - kept compatibility semantics for integer arguments (matches legacy `params object[]` hashing for the same single `int` input).
+  - added unit tests for overload equivalence and stable seed/null behavior.
+  - added new Stage2 perf scenario:
+    - `optimizer_method_parameter_hash_path`
+  - added threshold gate for the new scenario in `tools/perf-thresholds.json`.
+- Updated perf artifacts:
+  - reports/stage2_perf_metrics.jsonl
+  - reports/stage2_perf_summary.json
+- Updated global coverage matrix:
+  - refactoring_stage2_coverage_matrix.md
+
+### Verification
+
+- Targeted checks:
+  - dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --configuration Release --nologo --filter "FullyQualifiedName~BotPanelOptimizerMethodHashTests|FullyQualifiedName~Stage2Perf_" -> passed 13/13
+- Perf command:
+  - pwsh -NoProfile -File tools/run-stage2-perf.ps1 -NoBuild -EnforceThresholds -Repeat 5 -> success
+  - threshold check passed for all scenarios, including new parameter-hash KPI.
+- Host-context verification (outside sandbox, per dotnet-build-policy):
+  - dotnet restore project/OsEngine/OsEngine.csproj --nologo -> success
+  - dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo -> success
+  - dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900 -> success, 0 warnings, 0 errors
+  - dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo -> passed 864/864
+
+### P0/P2 Metrics Snapshot (median, Repeat=5)
+
+- `indicator_cache_hit_path`:
+  - current `#1029`: `1966.80 ns/op`, `448.02 bytes/op`
+- `optimizer_method_cache_hit_path`:
+  - current `#1029`: `150.22 ns/op`, `0.01 bytes/op`
+- `optimizer_cache_key_build_path`:
+  - current `#1029`: `320.15 ns/op`, `0.01 bytes/op`
+- `optimizer_method_parameter_hash_path` (new):
+  - current `#1029`: `184.79 ns/op`, `40.04 bytes/op`, `gen0=0`
+- `tradegrid_query_collections_hotpath`:
+  - current `#1029`: `9033.74 ns/op`, `992.01 bytes/op`

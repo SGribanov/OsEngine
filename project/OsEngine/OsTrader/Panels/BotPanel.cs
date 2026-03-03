@@ -297,6 +297,20 @@ namespace OsEngine.OsTrader.Panels
         /// <summary>
         /// Builds a stable parameter hash for optimizer method-cache keys.
         /// </summary>
+        protected static string BuildOptimizerMethodCacheParameterHash(int part)
+        {
+            unchecked
+            {
+                int hash = 17;
+                string normalized = part.ToString(CultureInfo.InvariantCulture);
+                hash = hash * 31 + StringComparer.Ordinal.GetHashCode(normalized);
+                return FormatMethodCacheParameterHash(hash);
+            }
+        }
+
+        /// <summary>
+        /// Builds a stable parameter hash for optimizer method-cache keys.
+        /// </summary>
         protected static string BuildOptimizerMethodCacheParameterHash(params object[] parts)
         {
             unchecked
@@ -312,8 +326,13 @@ namespace OsEngine.OsTrader.Panels
                     }
                 }
 
-                return hash.ToString("X8", CultureInfo.InvariantCulture);
+                return FormatMethodCacheParameterHash(hash);
             }
+        }
+
+        private static string FormatMethodCacheParameterHash(int hash)
+        {
+            return hash.ToString("X8", CultureInfo.InvariantCulture);
         }
 
         /// <summary>
