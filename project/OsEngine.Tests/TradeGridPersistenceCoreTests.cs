@@ -6477,7 +6477,7 @@ public class TradeGridPersistenceCoreTests
         string? autoStarterOffLog = null;
         grid.LogMessageEvent += (message, type) =>
         {
-            if (type == LogMessageType.Error
+            if (type == LogMessageType.Signal
                 && string.IsNullOrWhiteSpace(message) == false
                 && message.Contains("AutoStarter is OFF", StringComparison.Ordinal))
             {
@@ -6529,7 +6529,7 @@ public class TradeGridPersistenceCoreTests
         bool haveAutoStarterOffLog = false;
         grid.LogMessageEvent += (message, type) =>
         {
-            if (type == LogMessageType.Error
+            if (type == LogMessageType.Signal
                 && string.IsNullOrWhiteSpace(message) == false
                 && message.Contains("AutoStarter is OFF", StringComparison.Ordinal))
             {

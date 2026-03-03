@@ -1524,7 +1524,7 @@ namespace OsEngine.OsTrader.Grids
                         }
 
                         string message = "AutoStarter is OFF";
-                        SendNewLogMessage(message, LogMessageType.Error);
+                        SendNewLogMessage(message, LogMessageType.Signal);
                     }
 
                     Save();
