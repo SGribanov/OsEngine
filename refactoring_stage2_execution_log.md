@@ -17775,3 +17775,20 @@
   - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed `843/843`
 - **Commit:** n/a
 - **Push:** n/a
+
+### Step 4.2 - Nullable Annotations (Incremental Adoption #1014)
+
+- **Status:** In Progress (increment block completed)
+- **Plan item:** efactoring_stage2_plan.md -> Phase 4 / Step 4.2
+- **Changes (error-reaction auto-starter no-op branch coverage):**
+  - Updated project/OsEngine.Tests/TradeGridPersistenceCoreTests.cs:
+    - added Stage2Step2_2_TradeGrid_Process_WithErrorsReactionOffAndAutoStarterAlreadyOff_ShouldNotEmitAutoStarterOffLog.
+    - locked behavior where error-threshold shutdown keeps AutoStarter unchanged when it is already disabled and avoids duplicate AutoStarter is OFF logging.
+    - test keeps TradeGridErrorsReaction.LogMessageEvent subscribed to avoid modal fallback in expected error-log flows.
+- **Verification (outside sandbox, per dotnet-build-policy):**
+  - dotnet restore project/OsEngine/OsEngine.csproj --nologo -> success
+  - dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo -> success
+  - dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900 -> success, 0 warnings, 0 errors
+  - dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo -> passed 844/844
+- **Commit:** n/a
+- **Push:** n/a
