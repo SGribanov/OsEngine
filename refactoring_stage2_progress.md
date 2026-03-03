@@ -18019,3 +18019,33 @@
 
 - Docs-only increment.
 - .NET restore/build/test not required for this change set.
+
+## 2026-03-03 - Incremental Update #1021
+
+### Scope
+
+- Stabilized Wave `P0` measurement methodology to reduce single-run noise in perf decisions for all modules.
+
+### What Changed
+
+- Updated tooling:
+  - tools/run-stage2-perf.ps1
+- Updated perf artifacts (new format):
+  - reports/stage2_perf_metrics.jsonl
+  - reports/stage2_perf_summary.json
+- Updated global coverage matrix:
+  - refactoring_stage2_coverage_matrix.md
+- Changes:
+  - runner now supports repeated measurements (`-Repeat`, default `3`).
+  - stores per-run metrics with `run_index` in JSONL output.
+  - computes and prints median-by-scenario summary (`elapsed`, `ns/op`, `bytes/op`, `gen0`).
+  - threshold enforcement now checks median metrics, not a single run.
+  - fixed median calculation bug (`floor` midpoint) and normalized recorded timestamps to invariant UTC when possible.
+
+### Verification
+
+- Perf command:
+  - pwsh -NoProfile -File tools/run-stage2-perf.ps1 -NoBuild -EnforceThresholds -> success
+- Threshold check passed on median metrics (`Repeat=3`).
+- Runtime code rollback note:
+  - exploratory `TradeGrid` fast-active-check variant was not accepted because of latency regression and was fully reverted before finalizing this increment.

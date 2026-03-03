@@ -17939,3 +17939,27 @@
   - Docs-only increment; .NET verification not required.
 - **Commit:** n/a
 - **Push:** n/a
+
+### Wave P0 - Measurement and Guardrails (Incremental Adoption #1021)
+
+- **Status:** In Progress (increment block completed)
+- **Plan item:** `refactoring_stage2_plan.md` -> Plan Refresh / Wave `P0`
+- **Changes (measurement stability hardening):**
+  - Updated `tools/run-stage2-perf.ps1`:
+    - added `-Repeat` mode (default `3`) for repeated scenario runs,
+    - writes per-run metrics (`run_index`) to `reports/stage2_perf_metrics.jsonl`,
+    - computes median aggregate per scenario,
+    - applies threshold checks against medians,
+    - fixed median midpoint calculation,
+    - normalized `recordedAtUtc` serialization when parser returns `DateTime`.
+  - Updated generated artifacts:
+    - `reports/stage2_perf_metrics.jsonl`
+    - `reports/stage2_perf_summary.json`
+  - Updated global matrix entry in `refactoring_stage2_coverage_matrix.md` to reflect median-based guardrails.
+- **Verification (outside sandbox, per dotnet-build-policy):**
+  - `pwsh -NoProfile -File tools/run-stage2-perf.ps1 -NoBuild -EnforceThresholds` -> success.
+  - Threshold check passed using median metrics.
+- **Runtime safety note:**
+  - exploratory `TradeGrid` fast-active-check runtime variant was reverted and is not included due latency regression in harness results.
+- **Commit:** n/a
+- **Push:** n/a
