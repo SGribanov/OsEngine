@@ -1,0 +1,28 @@
+{
+  "generated_at_utc": "2026-03-03T12:01:20.5855656Z",
+  "metrics_file": "C:\\Repos\\MyCloneOsEngine\\reports\\stage2_perf_metrics.jsonl",
+  "scenarios": [
+    {
+      "Scenario": "tradegrid_query_collections_hotpath",
+      "Iterations": 4096,
+      "ElapsedMsTotal": 37.8122,
+      "NanosecondsPerOp": 9231.494140625,
+      "AllocatedBytesTotal": 7602216,
+      "AllocatedBytesPerOp": 1856.009765625,
+      "Gen0Collections": 0,
+      "Checksum": 43593728,
+      "RecordedAtUtc": "2026-03-03T12:01:20.3042109Z"
+    },
+    {
+      "Scenario": "indicator_cache_hit_path",
+      "Iterations": 2000,
+      "ElapsedMsTotal": 9.5293,
+      "NanosecondsPerOp": 4764.65,
+      "AllocatedBytesTotal": 25904040,
+      "AllocatedBytesPerOp": 12952.02,
+      "Gen0Collections": 3,
+      "Checksum": 341508000,
+      "RecordedAtUtc": "2026-03-03T12:01:20.3543936Z"
+    }
+  ]
+}
