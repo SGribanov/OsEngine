@@ -1,0 +1,26 @@
+{
+  "increment": 1017,
+  "captured_at_utc": "2026-03-03T12:01:20.5855656Z",
+  "scenarios": [
+    {
+      "scenario": "tradegrid_query_collections_hotpath",
+      "iterations": 4096,
+      "elapsed_ms_total": 37.8122,
+      "nanoseconds_per_op": 9231.494140625,
+      "allocated_bytes_total": 7602216,
+      "allocated_bytes_per_op": 1856.009765625,
+      "gen0_collections": 0,
+      "checksum": 43593728
+    },
+    {
+      "scenario": "indicator_cache_hit_path",
+      "iterations": 2000,
+      "elapsed_ms_total": 9.5293,
+      "nanoseconds_per_op": 4764.65,
+      "allocated_bytes_total": 25904040,
+      "allocated_bytes_per_op": 12952.02,
+      "gen0_collections": 3,
+      "checksum": 341508000
+    }
+  ]
+}

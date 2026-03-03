@@ -3470,18 +3470,19 @@ namespace OsEngine.OsTrader.Grids
 
         public List<TradeGridLine> GetLinesWithOpenPosition()
         {
-            List<TradeGridLine> linesWithPositionFact = new List<TradeGridLine>();
             TradeGridCreator gridCreator = GridCreator;
             if (gridCreator == null)
             {
-                return linesWithPositionFact;
+                return new List<TradeGridLine>();
             }
 
             List<TradeGridLine> linesAll = gridCreator.Lines;
             if (linesAll == null || linesAll.Count == 0)
             {
-                return linesWithPositionFact;
+                return new List<TradeGridLine>();
             }
+
+            List<TradeGridLine> linesWithPositionFact = new List<TradeGridLine>(linesAll.Count);
 
             for (int i = 0; linesAll != null && i < linesAll.Count; i++)
             {
@@ -3502,12 +3503,10 @@ namespace OsEngine.OsTrader.Grids
 
         public List<Position> GetPositionByGrid()
         {
-            List<Position> positions = new List<Position>();
-
             TradeGridCreator gridCreator = GridCreator;
             if (gridCreator == null)
             {
-                return positions;
+                return new List<Position>();
             }
 
             List<TradeGridLine> linesAll = gridCreator.Lines;
@@ -3515,8 +3514,10 @@ namespace OsEngine.OsTrader.Grids
             if (linesAll == null ||
                 linesAll.Count == 0)
             {
-                return positions;
+                return new List<Position>();
             }
+
+            List<Position> positions = new List<Position>(linesAll.Count);
 
             for (int i = 0; linesAll != null && i < linesAll.Count; i++)
             {
@@ -3538,25 +3539,33 @@ namespace OsEngine.OsTrader.Grids
 
         public List<TradeGridLine> GetLinesWithOpenOrdersNeed(decimal lastPrice)
         {
-            List<TradeGridLine> linesWithOrdersToOpenNeed = new List<TradeGridLine>();
             TradeGridCreator gridCreator = GridCreator;
             BotTabSimple tab = Tab;
 
             if (gridCreator == null || tab == null)
             {
-                return linesWithOrdersToOpenNeed;
+                return new List<TradeGridLine>();
             }
             Security security = tab.Security;
             if (security == null)
             {
-                return linesWithOrdersToOpenNeed;
+                return new List<TradeGridLine>();
             }
 
             List<TradeGridLine> linesAll = gridCreator.Lines;
             if (linesAll == null || linesAll.Count == 0)
             {
-                return linesWithOrdersToOpenNeed;
+                return new List<TradeGridLine>();
             }
+
+            int expectedCount = linesAll.Count;
+            int maxOpenOrdersInMarket = Math.Max(0, MaxOpenOrdersInMarket);
+            if (maxOpenOrdersInMarket > 0)
+            {
+                expectedCount = Math.Min(expectedCount, maxOpenOrdersInMarket);
+            }
+
+            List<TradeGridLine> linesWithOrdersToOpenNeed = new List<TradeGridLine>(expectedCount);
 
             decimal maxPriceUp = 0;
             decimal minPriceDown = 0;
@@ -3694,18 +3703,19 @@ namespace OsEngine.OsTrader.Grids
 
         public List<TradeGridLine> GetLinesWithOpenOrdersFact()
         {
-            List<TradeGridLine> linesWithOpenOrder = new List<TradeGridLine>();
             TradeGridCreator gridCreator = GridCreator;
             if (gridCreator == null)
             {
-                return linesWithOpenOrder;
+                return new List<TradeGridLine>();
             }
 
             List<TradeGridLine> linesAll = gridCreator.Lines;
             if (linesAll == null || linesAll.Count == 0)
             {
-                return linesWithOpenOrder;
+                return new List<TradeGridLine>();
             }
+
+            List<TradeGridLine> linesWithOpenOrder = new List<TradeGridLine>(linesAll.Count);
 
             for (int i = 0; linesAll != null && i < linesAll.Count; i++)
             {
@@ -3726,18 +3736,19 @@ namespace OsEngine.OsTrader.Grids
 
         public List<TradeGridLine> GetLinesWithClosingOrdersFact()
         {
-            List<TradeGridLine> linesWithCloseOrder = new List<TradeGridLine>();
             TradeGridCreator gridCreator = GridCreator;
             if (gridCreator == null)
             {
-                return linesWithCloseOrder;
+                return new List<TradeGridLine>();
             }
 
             List<TradeGridLine> linesAll = gridCreator.Lines;
             if (linesAll == null || linesAll.Count == 0)
             {
-                return linesWithCloseOrder;
+                return new List<TradeGridLine>();
             }
+
+            List<TradeGridLine> linesWithCloseOrder = new List<TradeGridLine>(linesAll.Count);
 
             for (int i = 0; linesAll != null && i < linesAll.Count; i++)
             {
