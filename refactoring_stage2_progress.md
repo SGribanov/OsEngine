@@ -20035,3 +20035,63 @@
   - current `#1056`: `2524.55 ns/op`, `466.14 bytes/op`
   - delta vs `#1042`: `-5.55% ns/op`, `-0.11 bytes/op`
   - delta vs `#1055`: `+0.15% ns/op`, allocation unchanged
+
+## 2026-03-03 - Incremental Update #1057
+
+### Scope
+
+- TradeGridErrorsReaction positive-int parser fast-path for digit-only tokens.
+
+### What Changed
+
+- Updated production code:
+  - project/OsEngine/OsTrader/Grids/TradeGridErrorsReaction.cs
+- Updated docs/artifacts:
+  - refactoring_stage2_progress.md
+  - refactoring_stage2_execution_log.md
+  - refactoring_stage2_coverage_matrix.md
+  - reports/stage2_perf_metrics.jsonl
+  - reports/stage2_perf_summary.json
+- Changes:
+  - `TryParsePositiveInt(ReadOnlySpan<char>, out int)` now:
+    - uses manual checked parse for digit-only tokens (fast-path);
+    - falls back to existing culture-aware `int.TryParse` branch for non-digit token shapes;
+    - preserves `> 0` contract.
+
+### Verification
+
+- Targeted checks:
+  - dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --configuration Release --nologo --filter "FullyQualifiedName~TradeGridErrorsReaction_LoadFromString|FullyQualifiedName~TradeGridErrorsReaction_PositionOpeningFail_WithNoFunds|FullyQualifiedName~TradeGridErrorsReaction_PositionClosingFail_WithNoFunds|FullyQualifiedName~TradeGrid_LoadFromString" -> passed 65/65
+- Perf command:
+  - pwsh -NoProfile -File tools/run-stage2-perf.ps1 -NoBuild -EnforceThresholds -Repeat 5 -> success
+  - threshold check passed for all scenarios.
+- Host-context verification (outside sandbox, per dotnet-build-policy):
+  - dotnet restore project/OsEngine/OsEngine.csproj --nologo -> success
+  - dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo -> success
+  - dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900 -> success, 0 warnings, 0 errors
+  - dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo -> passed 872/872
+
+### P0/P2/P3 Metrics Snapshot (median, Repeat=5)
+
+- `indicator_cache_hit_path`:
+  - current `#1057`: `1972.40 ns/op`, `448.02 bytes/op`
+- `optimizer_method_cache_hit_path`:
+  - current `#1057`: `143.95 ns/op`, `0.01 bytes/op`
+- `optimizer_cache_key_build_path`:
+  - current `#1057`: `295.54 ns/op`, `0.01 bytes/op`
+- `optimizer_method_parameter_hash_path`:
+  - current `#1057`: `55.46 ns/op`, `0.00 bytes/op`
+- `tradegrid_query_collections_hotpath`:
+  - current `#1057`: `8405.69 ns/op`, `992.01 bytes/op`
+- `tradegrid_load_from_string_ru_payload_path`:
+  - previous `#1042`: `2048.80 ns/op`, `32.22 bytes/op`
+  - previous `#1056`: `1648.70 ns/op`, `32.01 bytes/op`
+  - current `#1057`: `1590.28 ns/op`, `32.01 bytes/op`
+  - delta vs `#1042`: `-22.38% ns/op`, `-0.21 bytes/op`
+  - delta vs `#1056`: `-3.54% ns/op`, allocation unchanged
+- `tradegrid_load_from_string_malformed_tail_path`:
+  - previous `#1042`: `2672.87 ns/op`, `466.25 bytes/op`
+  - previous `#1056`: `2524.55 ns/op`, `466.14 bytes/op`
+  - current `#1057`: `2471.83 ns/op`, `466.14 bytes/op`
+  - delta vs `#1042`: `-7.52% ns/op`, `-0.11 bytes/op`
+  - delta vs `#1056`: `-2.09% ns/op`, allocation unchanged

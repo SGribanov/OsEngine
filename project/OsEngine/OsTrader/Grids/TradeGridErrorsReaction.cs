@@ -200,6 +200,45 @@ namespace OsEngine.OsTrader.Grids
         {
             ReadOnlySpan<char> valueSpan = value.Trim();
 
+            if (valueSpan.IsEmpty)
+            {
+                parsed = 0;
+                return false;
+            }
+
+            int manualValue = 0;
+            bool onlyDigits = true;
+
+            for (int i = 0; i < valueSpan.Length; i++)
+            {
+                int digit = valueSpan[i] - '0';
+                if ((uint)digit > 9u)
+                {
+                    onlyDigits = false;
+                    break;
+                }
+
+                if (manualValue > (int.MaxValue - digit) / 10)
+                {
+                    parsed = 0;
+                    return false;
+                }
+
+                manualValue = manualValue * 10 + digit;
+            }
+
+            if (onlyDigits)
+            {
+                if (manualValue <= 0)
+                {
+                    parsed = 0;
+                    return false;
+                }
+
+                parsed = manualValue;
+                return true;
+            }
+
             if (int.TryParse(valueSpan, NumberStyles.Any, CultureInfo.InvariantCulture, out parsed) == false
                 && int.TryParse(valueSpan, NumberStyles.Any, CultureInfo.CurrentCulture, out parsed) == false)
             {
