@@ -18102,3 +18102,57 @@
 - `indicator_cache_hit_path`:
   - current `#1022`: `5653.00 ns/op`, `12952.02 bytes/op`
   - allocations unchanged; timing remains noisy in short runs.
+
+## 2026-03-03 - Incremental Update #1023
+
+### Scope
+
+- Wave `P1` continuation: reduced transient allocations in TradeGrid wrong-order helper chain and tightened close-order fact-list capacity fallback in query hot path.
+
+### What Changed
+
+- Updated production code in:
+  - project/OsEngine/OsTrader/Grids/TradeGrid.cs
+- Changes:
+  - `TryRemoveWrongOrders()` now reuses local snapshots:
+    - `GetLinesWithOpenOrdersFact()` is computed once and reused across bad-price, max-count, and grid-hole checks.
+    - `GetLinesWithClosingOrdersFact()` is computed once for bad-price check.
+  - introduced internal helper methods to consume precomputed snapshots without changing existing private method contracts used by tests:
+    - `GetOrdersBadPriceToGridFromLines(...)`
+    - `GetOrdersBadLinesMaxCountFromLines(...)`
+    - `GetOpenOrdersGridHoleFromLines(...)`
+  - `GetOrdersBadLinesMaxCountFromLines(...)` now pre-sizes cancellation list when overflow is known and exits early for empty/non-overflow cases.
+  - `GetOpenOrdersGridHoleFromLines(...)` now allocates result list only when a cancellation candidate actually exists (single-item path).
+  - `GetLinesWithClosingOrdersFact()` capacity heuristic now has fallback when `MaxCloseOrdersInMarket <= 0`:
+    - bounded by `MaxOpenOrdersInMarket` (`min(linesAll.Count, max(MaxOpenOrdersInMarket * 2, 8))`) to avoid default full-grid over-allocation.
+- Updated perf artifacts:
+  - reports/stage2_perf_metrics.jsonl
+  - reports/stage2_perf_summary.json
+- Updated global coverage matrix:
+  - refactoring_stage2_coverage_matrix.md
+
+### Verification
+
+- Targeted checks:
+  - dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --configuration Release --nologo --filter "FullyQualifiedName~Stage2Step2_2_TradeGrid_" -> passed 124/124
+  - dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --configuration Release --nologo --no-build --filter "FullyQualifiedName~Stage2Perf_" -> passed 2/2
+- Perf command:
+  - pwsh -NoProfile -File tools/run-stage2-perf.ps1 -NoBuild -EnforceThresholds -Repeat 5 -> success
+  - threshold check passed (median mode).
+- Host-context verification (outside sandbox, per dotnet-build-policy):
+  - dotnet restore project/OsEngine/OsEngine.csproj --nologo -> success
+  - dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo -> success
+  - dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900 -> success, 0 warnings, 0 errors
+  - dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo -> passed 848/848
+
+### P0/P1 Metrics Delta (median, Repeat=5)
+
+- `tradegrid_query_collections_hotpath`:
+  - baseline `#1017`: `9231.49 ns/op`, `1856.01 bytes/op`
+  - previous `#1022` (Repeat=3): `8514.82 ns/op`, `1312.01 bytes/op`
+  - current `#1023` (Repeat=5): `8094.29 ns/op`, `992.01 bytes/op`
+  - delta vs baseline: `-12.32% ns/op`, `-46.55% bytes/op`
+  - delta vs `#1022`: `-4.94% ns/op`, `-24.39% bytes/op`
+- `indicator_cache_hit_path`:
+  - current `#1023` (Repeat=5): `4979.60 ns/op`, `12952.02 bytes/op`
+  - allocations unchanged.
