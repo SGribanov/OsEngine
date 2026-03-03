@@ -2080,7 +2080,10 @@ namespace OsEngine.OsTrader.Grids
 
             // 1 убираем ордера на открытие и закрытие с неправильной ценой.
 
-            List<Order> ordersToCancelBadPrice = GetOrdersBadPriceToGrid();
+            List<TradeGridLine> linesWithOrdersToOpenFact = GetLinesWithOpenOrdersFact();
+            List<TradeGridLine> linesWithOrdersToCloseFact = GetLinesWithClosingOrdersFact();
+
+            List<Order> ordersToCancelBadPrice = GetOrdersBadPriceToGridFromLines(linesWithOrdersToOpenFact, linesWithOrdersToCloseFact);
 
             if (ordersToCancelBadPrice != null
                 && ordersToCancelBadPrice.Count > 0)
@@ -2096,7 +2099,7 @@ namespace OsEngine.OsTrader.Grids
 
             // 2 убираем ордера лишние на открытие. Когда в сетке больше ордеров чем указал пользователь
 
-            List<Order> ordersToCancelBadLines = GetOrdersBadLinesMaxCount();
+            List<Order> ordersToCancelBadLines = GetOrdersBadLinesMaxCountFromLines(linesWithOrdersToOpenFact);
 
             if (ordersToCancelBadLines != null
                 && ordersToCancelBadLines.Count > 0)
@@ -2112,7 +2115,7 @@ namespace OsEngine.OsTrader.Grids
 
             // 3 убираем ордера на открытие, если имеет место дыра в сетке
 
-            List<Order> ordersToCancelOpenOrders = GetOpenOrdersGridHole();
+            List<Order> ordersToCancelOpenOrders = GetOpenOrdersGridHoleFromLines(linesWithOrdersToOpenFact, lastPrice);
 
             if (ordersToCancelOpenOrders != null
                 && ordersToCancelOpenOrders.Count > 0)
@@ -2151,12 +2154,15 @@ namespace OsEngine.OsTrader.Grids
 
         private List<Order> GetOrdersBadPriceToGrid()
         {
+            return GetOrdersBadPriceToGridFromLines(GetLinesWithOpenOrdersFact(), GetLinesWithClosingOrdersFact());
+        }
+
+        private List<Order> GetOrdersBadPriceToGridFromLines(List<TradeGridLine> linesWithOrdersToOpenFact, List<TradeGridLine> linesWithOrdersToCloseFact)
+        {
             // 1 смотрим совпадение цен у ордера на открытие с ценой открытия линии 
             // 2 смотрим совпадиние цен у ордера на закрытие с ценой закрытия линии
 
             List<Order> ordersToCancel = new List<Order>();
-
-            List<TradeGridLine> linesWithOrdersToOpenFact = GetLinesWithOpenOrdersFact();
 
             for (int i = 0; linesWithOrdersToOpenFact != null && i < linesWithOrdersToOpenFact.Count; i++)
             {
@@ -2176,8 +2182,6 @@ namespace OsEngine.OsTrader.Grids
                     }
                 }
             }
-
-            List<TradeGridLine> linesWithOrdersToCloseFact = GetLinesWithClosingOrdersFact();
 
             for (int i = 0; linesWithOrdersToCloseFact != null && i < linesWithOrdersToCloseFact.Count; i++)
             {
@@ -2216,10 +2220,20 @@ namespace OsEngine.OsTrader.Grids
 
         private List<Order> GetOrdersBadLinesMaxCount()
         {
-            List<TradeGridLine> linesWithOrdersToOpenFact = GetLinesWithOpenOrdersFact();
-            int maxOpenOrdersInMarket = Math.Max(0, MaxOpenOrdersInMarket);
+            return GetOrdersBadLinesMaxCountFromLines(GetLinesWithOpenOrdersFact());
+        }
 
-            List<Order> ordersToCancel = new List<Order>();
+        private List<Order> GetOrdersBadLinesMaxCountFromLines(List<TradeGridLine> linesWithOrdersToOpenFact)
+        {
+            int maxOpenOrdersInMarket = Math.Max(0, MaxOpenOrdersInMarket);
+            if (linesWithOrdersToOpenFact == null
+                || linesWithOrdersToOpenFact.Count == 0
+                || maxOpenOrdersInMarket >= linesWithOrdersToOpenFact.Count)
+            {
+                return new List<Order>();
+            }
+
+            List<Order> ordersToCancel = new List<Order>(linesWithOrdersToOpenFact.Count - maxOpenOrdersInMarket);
 
             // 1 Открытие. Смотрим чтобы не было ордеров больше чем указал пользователь
 
@@ -2249,13 +2263,20 @@ namespace OsEngine.OsTrader.Grids
                 return null;
             }
 
-            decimal lastPrice = lastCandle.Close;
+            return GetOpenOrdersGridHoleFromLines(GetLinesWithOpenOrdersFact(), lastCandle.Close);
+        }
+
+        private List<Order> GetOpenOrdersGridHoleFromLines(List<TradeGridLine> linesWithOrdersToOpenFact, decimal lastPrice)
+        {
+            TradeGridCreator gridCreator = GridCreator;
+            if (gridCreator == null)
+            {
+                return null;
+            }
 
             // 1 берём текущие линии с позициями
 
             List<TradeGridLine> linesWithOrdersToOpenNeed = GetLinesWithOpenOrdersNeed(lastPrice);
-
-            List<TradeGridLine> linesWithOrdersToOpenFact = GetLinesWithOpenOrdersFact();
 
             if (linesWithOrdersToOpenFact == null ||
                 linesWithOrdersToOpenFact.Count == 0)
@@ -2268,8 +2289,6 @@ namespace OsEngine.OsTrader.Grids
             {
                 return null;
             }
-
-            List<Order> ordersToCancel = new List<Order>();
 
             // 2 смотрим, Стоит ли первый ордер на своём месте
 
@@ -2303,11 +2322,11 @@ namespace OsEngine.OsTrader.Grids
 
                 if (TryGetLastOrder(lastLine.Position.OpenOrders, out Order order))
                 {
-                    ordersToCancel.Add(order);
+                    return new List<Order>(1) { order };
                 }
             }
 
-            return ordersToCancel;
+            return null;
         }
 
         private List<Order> GetCloseOrdersGridHole()
@@ -3767,6 +3786,14 @@ namespace OsEngine.OsTrader.Grids
             if (maxCloseOrdersInMarket > 0)
             {
                 expectedCapacity = Math.Min(expectedCapacity, Math.Max(maxCloseOrdersInMarket * 3, 4));
+            }
+            else
+            {
+                int maxOpenOrdersInMarket = Math.Max(0, MaxOpenOrdersInMarket);
+                if (maxOpenOrdersInMarket > 0)
+                {
+                    expectedCapacity = Math.Min(expectedCapacity, Math.Max(maxOpenOrdersInMarket * 2, 8));
+                }
             }
 
             List<TradeGridLine> linesWithCloseOrder = new List<TradeGridLine>(expectedCapacity);
