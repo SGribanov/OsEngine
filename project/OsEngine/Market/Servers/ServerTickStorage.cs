@@ -272,7 +272,9 @@ namespace OsEngine.Market.Servers
                     {
                         string[] array = saves[i].Split('\\');
 
-                        nameSecurity = array[2].Split('.')[0];
+                        string nameStr = array[2];
+
+                        nameSecurity = nameStr.Replace(".txt","");
                     }
                     catch (Exception ex)
                     {

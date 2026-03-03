@@ -1325,7 +1325,7 @@ namespace OsEngine.OsTrader.Panels.Tab
         public MarketDepth MarketDepth { get; set; }
 
         /// <summary>
-        /// лучший Bid в стакане
+        /// лучший Bid в стакане. Лучший уровень с покупками
         /// </summary>
         public decimal PriceBestBid
         {
@@ -1340,7 +1340,7 @@ namespace OsEngine.OsTrader.Panels.Tab
         }
 
         /// <summary>
-        /// лучший Аск в стакане
+        /// лучший Аск в стакане. Лучший уровень с продажами
         /// </summary>
         public decimal PriceBestAsk
         {
@@ -6202,6 +6202,32 @@ namespace OsEngine.OsTrader.Panels.Tab
         /// </summary>
         void _icebergMaker_NewOrderNeedToExecute(Order order)
         {
+            if (StartProgram == StartProgram.IsOsTrader
+                && Connector.EmulatorIsOn == false
+                && order.TypeOrder == OrderPriceType.Market)
+            {
+                decimal price = order.Price;
+
+                if (order.Side == Side.Buy
+                    && PriceBestAsk != 0)
+                {
+                    price = PriceBestAsk + Security.PriceStep * 40;
+                }
+                else if(order.Side == Side.Sell
+                    && PriceBestBid != 0)
+                {
+                    price = PriceBestBid - Security.PriceStep * 40;
+                }
+
+                order.Price = price;
+            }
+
+            if (order.TypeOrder == OrderPriceType.Market
+               && this.ServerIsSupportMarketOrders == false)
+            {
+                order.TypeOrder = OrderPriceType.Limit;
+            }
+
             _connector.OrderExecute(order);
         }
 

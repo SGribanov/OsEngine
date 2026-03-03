@@ -17,6 +17,7 @@ using OsEngine.Charts;
 using OsEngine.Logging;
 using OsEngine.Market;
 using OsEngine.Entity;
+using System.Windows.Threading;
 
 namespace OsEngine.OsTrader.SystemAnalyze
 {
@@ -127,6 +128,64 @@ namespace OsEngine.OsTrader.SystemAnalyze
 
             Layout.StickyBorders.Listen(this);
             Layout.StartupLocation.Start_MouseInCentre(this);
+
+            if (InteractiveInstructions.BotStationLightPosts.AllInstructionsInClass == null
+            || InteractiveInstructions.BotStationLightPosts.AllInstructionsInClass.Count == 0)
+            {
+                ButtonSystemAnalyze.Visibility = Visibility.Visible;
+            }
+
+            StartButtonBlinkAnimation();
+        }
+
+        private void StartButtonBlinkAnimation()
+        {
+            try
+            {
+                DispatcherTimer timer = new DispatcherTimer();
+                int blinkCount = 0;
+                bool isGreenVisible = true;
+
+                timer.Interval = TimeSpan.FromMilliseconds(300);
+                timer.Tick += (s, e) =>
+                {
+                    try
+                    {
+                        if (blinkCount >= 20)
+                        {
+                            timer.Stop();
+                            PostGreenSystemAnalyze.Opacity = 1;
+                            PostWhiteSystemAnalyze.Opacity = 0;
+                            return;
+                        }
+
+                        if (isGreenVisible)
+                        {
+                            PostGreenSystemAnalyze.Opacity = 0;
+                            PostWhiteSystemAnalyze.Opacity = 1;
+                        }
+                        else
+                        {
+                            PostGreenSystemAnalyze.Opacity = 1;
+                            PostWhiteSystemAnalyze.Opacity = 0;
+                        }
+
+                        isGreenVisible = !isGreenVisible;
+                        blinkCount++;
+                    }
+                    catch (Exception ex)
+                    {
+                        ServerMaster.SendNewLogMessage(ex.ToString(), Logging.LogMessageType.Error);
+                        timer.Stop();
+                    }
+                };
+
+                timer.Start();
+            }
+            catch (Exception ex)
+            {
+                ServerMaster.SendNewLogMessage(ex.ToString(), Logging.LogMessageType.Error);
+            }
         }
 
         private void SystemAnalyzeUi_Closed(object sender, EventArgs e)
@@ -950,6 +1009,21 @@ namespace OsEngine.OsTrader.SystemAnalyze
 
         #endregion
 
+        #region Posts collection
+
+        private void ButtonSystemAnalyze_Click(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                InteractiveInstructions.BotStationLightPosts.Link28.ShowLinkInBrowser();
+            }
+            catch (Exception ex)
+            {
+                ServerMaster.SendNewLogMessage(ex.ToString(), Logging.LogMessageType.Error);
+            }
+        }
+
+        #endregion
     }
 }
 

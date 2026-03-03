@@ -29,6 +29,14 @@ namespace OsEngine
         public static PositionComparisonInstructions PositionComparisonPosts = new PositionComparisonInstructions();
 
         public static OptimizerInstructions OptimizerPosts = new OptimizerInstructions();
+
+        public static AutoFollowInstructions AutoFollowPosts = new AutoFollowInstructions();
+
+        public static ClusterInstructions ClusterPosts = new ClusterInstructions();
+
+        public static IndexInstructions IndexPosts = new IndexInstructions();
+
+        public static PairInstructions PairPosts = new PairInstructions();
     }
 }
 

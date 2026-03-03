@@ -1477,6 +1477,24 @@ namespace OsEngine.OsTrader.Grids
                     errorsReaction.FailOpenOrdersCountFact = 0;
                     baseRegime = reaction;
                     Regime = reaction;
+
+                    if(AutoStarter.AutoStartRegime != TradeGridAutoStartRegime.Off
+                        || AutoStarter.StartGridByTimeOfDayIsOn == true)
+                    {// Отключаем авто-стартер, если выключаемся по ошибкам
+                        if (AutoStarter.AutoStartRegime != TradeGridAutoStartRegime.Off)
+                        {
+                            AutoStarter.AutoStartRegime = TradeGridAutoStartRegime.Off;
+                        }
+
+                        if (AutoStarter.StartGridByTimeOfDayIsOn == true)
+                        {
+                            AutoStarter.StartGridByTimeOfDayIsOn = false;
+                        }
+
+                        string message = "AutoStarter is OFF";
+                        SendNewLogMessage(message, LogMessageType.Error);
+                    }
+
                     Save();
                     RePaintGrid();
                 }

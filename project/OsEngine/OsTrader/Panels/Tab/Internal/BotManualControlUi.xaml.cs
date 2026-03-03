@@ -10,8 +10,10 @@ using System;
 using System.Globalization;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Threading;
 using OsEngine.Entity;
 using OsEngine.Language;
+using OsEngine.Market;
 using OsEngine.Market.Servers;
 
 namespace OsEngine.OsTrader.Panels.Tab.Internal
@@ -135,13 +137,71 @@ namespace OsEngine.OsTrader.Panels.Tab.Internal
 
             this.Activate();
             this.Focus();
+
+            if (InteractiveInstructions.TesterLightPosts.AllInstructionsInClass == null
+            || InteractiveInstructions.TesterLightPosts.AllInstructionsInClass.Count == 0)
+            {
+                ButtonBotManualControl.Visibility = Visibility.Visible;
+            }
+
+            StartButtonBlinkAnimation();
+        }
+
+        private void StartButtonBlinkAnimation()
+        {
+            try
+            {
+                DispatcherTimer timer = new DispatcherTimer();
+                int blinkCount = 0;
+                bool isGreenVisible = true;
+
+                timer.Interval = TimeSpan.FromMilliseconds(300);
+                timer.Tick += (s, e) =>
+                {
+                    try
+                    {
+                        if (blinkCount >= 20)
+                        {
+                            timer.Stop();
+                            PostGreenBotManualControl.Opacity = 1;
+                            PostWhiteBotManualControl.Opacity = 0;
+                            return;
+                        }
+
+                        if (isGreenVisible)
+                        {
+                            PostGreenBotManualControl.Opacity = 0;
+                            PostWhiteBotManualControl.Opacity = 1;
+                        }
+                        else
+                        {
+                            PostGreenBotManualControl.Opacity = 1;
+                            PostWhiteBotManualControl.Opacity = 0;
+                        }
+
+                        isGreenVisible = !isGreenVisible;
+                        blinkCount++;
+                    }
+                    catch (Exception ex)
+                    {
+                        ServerMaster.SendNewLogMessage(ex.ToString(), Logging.LogMessageType.Error);
+                        timer.Stop();
+                    }
+                };
+
+                timer.Start();
+            }
+            catch (Exception ex)
+            {
+                ServerMaster.SendNewLogMessage(ex.ToString(), Logging.LogMessageType.Error);
+            }
         }
 
         private void ComboBoxOrdersTypeTime_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             OrderTypeTime typeTime = OrderTypeTime.Specified;
 
-            if(Enum.TryParse(ComboBoxOrdersTypeTime.SelectedItem.ToString(),out  typeTime) == false)
+            if (Enum.TryParse(ComboBoxOrdersTypeTime.SelectedItem.ToString(), out typeTime) == false)
             {
                 return;
             }
@@ -153,7 +213,7 @@ namespace OsEngine.OsTrader.Panels.Tab.Internal
                 TextBoxSecondToOpen.IsEnabled = true;
                 TextBoxSecondToClose.IsEnabled = true;
             }
-            else if(typeTime == OrderTypeTime.GTC
+            else if (typeTime == OrderTypeTime.GTC
                 || typeTime == OrderTypeTime.Day)
             {
                 CheckBoxSecondToOpenIsOn.IsEnabled = false;
@@ -198,7 +258,7 @@ namespace OsEngine.OsTrader.Panels.Tab.Internal
                 // стоп
                 _strategySettings.StopIsOn = CheckBoxStopIsOn.IsChecked.Value;
                 _strategySettings.StopDistance = TextBoxStopPercentLength.Text.ToDecimal();
-                _strategySettings.StopSlippage =TextBoxSlippageStop.Text.ToDecimal();
+                _strategySettings.StopSlippage = TextBoxSlippageStop.Text.ToDecimal();
 
                 // profit
                 // профит
@@ -266,6 +326,23 @@ namespace OsEngine.OsTrader.Panels.Tab.Internal
         {
 
         }
+
+        #region Posts collection
+
+        private void ButtonBotManualControl_Click(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                InteractiveInstructions.TesterLightPosts.Link10.ShowLinkInBrowser();
+            }
+            catch (Exception ex)
+            {
+                ServerMaster.SendNewLogMessage(ex.ToString(), Logging.LogMessageType.Error);
+            }
+        }
+
+        #endregion
+
     }
 }
 

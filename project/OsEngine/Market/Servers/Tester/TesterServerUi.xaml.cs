@@ -15,6 +15,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Forms;
 using System.Windows.Forms.DataVisualization.Charting;
+using System.Windows.Threading;
 using OsEngine.Charts;
 using OsEngine.Entity;
 using OsEngine.Language;
@@ -90,7 +91,6 @@ namespace OsEngine.Market.Servers.Tester
 
             CreateGrid();
             PaintGrid();
-
 
             TextBoxFrom.TextChanged += TextBoxFrom_TextChanged;
             TextBoxTo.TextChanged += TextBoxTo_TextChanged;
@@ -221,6 +221,14 @@ namespace OsEngine.Market.Servers.Tester
             ButtonGoTo.Content = OsLocalization.Market.Label63;
             CheckBoxRemoveTrades.Content = OsLocalization.Market.Label130;
 
+            if (InteractiveInstructions.TesterLightPosts.AllInstructionsInClass == null
+             || InteractiveInstructions.TesterLightPosts.AllInstructionsInClass.Count == 0)
+            {
+                ButtonTesterServer.Visibility = Visibility.Visible;
+            }
+
+            StartButtonBlinkAnimation();
+
             Thread worker = new Thread(SecuritiesGridPainterWorkerPlace);
             worker.IsBackground = true;
             worker.Start();
@@ -251,6 +259,56 @@ namespace OsEngine.Market.Servers.Tester
             _timerTextBoxTo = new System.Windows.Forms.Timer();
             _timerTextBoxTo.Interval = 2000;
             _timerTextBoxTo.Tick += _timer_TextBoxTo;
+        }
+
+        private void StartButtonBlinkAnimation()
+        {
+            try
+            {
+                DispatcherTimer timer = new DispatcherTimer();
+                int blinkCount = 0;
+                bool isGreenVisible = true;
+
+                timer.Interval = TimeSpan.FromMilliseconds(300);
+                timer.Tick += (s, e) =>
+                {
+                    try
+                    {
+                        if (blinkCount >= 20)
+                        {
+                            timer.Stop();
+                            PostGreenTesterServer.Opacity = 1;
+                            PostWhiteTesterServer.Opacity = 0;
+                            return;
+                        }
+
+                        if (isGreenVisible)
+                        {
+                            PostGreenTesterServer.Opacity = 0;
+                            PostWhiteTesterServer.Opacity = 1;
+                        }
+                        else
+                        {
+                            PostGreenTesterServer.Opacity = 1;
+                            PostWhiteTesterServer.Opacity = 0;
+                        }
+
+                        isGreenVisible = !isGreenVisible;
+                        blinkCount++;
+                    }
+                    catch (Exception ex)
+                    {
+                        ServerMaster.SendNewLogMessage(ex.ToString(), Logging.LogMessageType.Error);
+                        timer.Stop();
+                    }
+                };
+
+                timer.Start();
+            }
+            catch (Exception ex)
+            {
+                ServerMaster.SendNewLogMessage(ex.ToString(), Logging.LogMessageType.Error);
+            }
         }
 
         private System.Windows.Forms.Timer _timerTextBoxFrom;
@@ -1787,7 +1845,7 @@ namespace OsEngine.Market.Servers.Tester
         }
 
         private void _timer_TextBoxTo(object sender, EventArgs e)
-        {   
+        {
             DateTime to;
             try
             {
@@ -1820,7 +1878,7 @@ namespace OsEngine.Market.Servers.Tester
                 _timerTextBoxFrom.Stop();
                 _timerTextBoxFrom.Start();
             }
-            catch (Exception ex) 
+            catch (Exception ex)
             {
                 _server.SendLogMessage(ex.ToString(), LogMessageType.Error);
             }
@@ -1939,6 +1997,22 @@ namespace OsEngine.Market.Servers.Tester
             else
             {
                 _server.ProfitMarketIsOn = false;
+            }
+        }
+
+        #endregion
+
+        #region Posts collection
+
+        private void ButtonTesterServer_Click(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                InteractiveInstructions.TesterLightPosts.Link9.ShowLinkInBrowser();
+            }
+            catch (Exception ex)
+            {
+                ServerMaster.SendNewLogMessage(ex.ToString(), Logging.LogMessageType.Error);
             }
         }
 

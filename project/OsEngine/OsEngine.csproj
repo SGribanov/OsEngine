@@ -94,6 +94,10 @@
       <HintPath>bin\Debug\MtClient.dll</HintPath>
       <Private>True</Private>
     </Reference>
+    <Reference Include="NSec.Cryptography">
+      <HintPath>bin\Debug\NSec.Cryptography.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
     <Reference Include="OpenFAST">
       <HintPath>bin\Debug\OpenFAST.dll</HintPath>
     </Reference>
@@ -107,11 +111,14 @@
     <PackageReference Include="Grpc.Net.Client" Version="2.76.0" />
     <PackageReference Include="LiteDB" Version="5.0.21" />
     <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="5.0.0" />
+    <PackageReference Include="Microsoft.CSharp" Version="4.7.0" />
     <PackageReference Include="NSec.Cryptography" Version="25.4.0" />
     <PackageReference Include="Google.Protobuf" Version="3.33.5" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.4" />
+    <PackageReference Include="System.Runtime.CompilerServices.Unsafe" Version="6.1.2" />
     <PackageReference Include="System.ServiceModel.Syndication" Version="10.0.3" />
     <PackageReference Include="System.Text.Encoding.CodePages" Version="10.0.3" />
+    <PackageReference Include="System.Threading.Channels" Version="9.0.5" />
     <PackageReference Include="System.ServiceModel.Primitives" Version="10.0.652802" />
     <PackageReference Include="System.ServiceModel.Http" Version="10.0.652802" />
     <PackageReference Include="System.ServiceModel.Duplex" Version="6.0.0" />
