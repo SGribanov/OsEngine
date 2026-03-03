@@ -17835,3 +17835,29 @@
   - Docs-only increment; .NET verification not required.
 - **Commit:** n/a
 - **Push:** n/a
+
+### Wave P0 - Measurement and Guardrails (Incremental Adoption #1017)
+
+- **Status:** In Progress (increment block completed)
+- **Plan item:** `refactoring_stage2_plan.md` -> 2026-03-03 Plan Refresh / Wave `P0`
+- **Changes (deterministic perf harness + threshold guard):**
+  - Added test harness: `project/OsEngine.Tests/Performance/Stage2PerformanceBaselineTests.cs`
+    - `Stage2Perf_TradeGrid_QueryCollectionsHotPath_ShouldEmitMetricsAndDeterministicChecksum`
+    - `Stage2Perf_IndicatorCache_HitPath_ShouldEmitMetricsAndStableChecksums`
+  - Added runner script: `tools/run-stage2-perf.ps1`
+  - Added threshold config: `tools/perf-thresholds.json`
+  - Added generated baseline artifacts:
+    - `reports/stage2_perf_metrics.jsonl`
+    - `reports/stage2_perf_summary.json`
+  - Baseline metrics snapshot:
+    - `tradegrid_query_collections_hotpath`: `9231.49 ns/op`, `1856.01 bytes/op`, `gen0=0`
+    - `indicator_cache_hit_path`: `4764.65 ns/op`, `12952.02 bytes/op`, `gen0=3`
+  - Threshold check with `-EnforceThresholds` passed.
+- **Verification (outside sandbox, per dotnet-build-policy):**
+  - `dotnet restore project/OsEngine/OsEngine.csproj --nologo` -> success
+  - `dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo` -> success
+  - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` -> success, 0 warnings, 0 errors
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed `848/848`
+  - `pwsh -NoProfile -File tools/run-stage2-perf.ps1 -NoBuild -EnforceThresholds` -> success
+- **Commit:** n/a
+- **Push:** n/a

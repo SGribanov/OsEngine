@@ -17859,3 +17859,50 @@
 
 - Docs-only increment.
 - .NET restore/build/test not required for this change set.
+
+## 2026-03-03 - Incremental Update #1017
+
+### Scope
+
+- Started Wave `P0` from replanned Stage2 roadmap: deterministic performance/allocation baseline harness and guardrails.
+
+### What Changed
+
+- Added runtime baseline harness tests:
+  - project/OsEngine.Tests/Performance/Stage2PerformanceBaselineTests.cs
+- Added perf runner and thresholds:
+  - tools/run-stage2-perf.ps1
+  - tools/perf-thresholds.json
+- Added baseline metric artifacts:
+  - reports/stage2_perf_metrics.jsonl
+  - reports/stage2_perf_summary.json
+- Scenarios implemented:
+  - `Stage2Perf_TradeGrid_QueryCollectionsHotPath_ShouldEmitMetricsAndDeterministicChecksum`
+  - `Stage2Perf_IndicatorCache_HitPath_ShouldEmitMetricsAndStableChecksums`
+- Captured baseline metrics (host run, 2026-03-03):
+  - tradegrid_query_collections_hotpath:
+    - iterations: 4096
+    - elapsed total: 37.8122 ms
+    - ns/op: 9231.49
+    - allocated bytes/op: 1856.01
+    - gen0 collections: 0
+    - checksum: 43593728
+  - indicator_cache_hit_path:
+    - iterations: 2000
+    - elapsed total: 9.5293 ms
+    - ns/op: 4764.65
+    - allocated bytes/op: 12952.02
+    - gen0 collections: 3
+    - checksum: 341508000
+- Threshold check:
+  - `tools/run-stage2-perf.ps1 -EnforceThresholds` -> passed.
+
+### Verification
+
+- Host-context verification (outside sandbox, per dotnet-build-policy):
+  - dotnet restore project/OsEngine/OsEngine.csproj --nologo -> success
+  - dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo -> success
+  - dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900 -> success, 0 warnings, 0 errors
+  - dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo -> passed 848/848
+- Perf baseline command:
+  - pwsh -NoProfile -File tools/run-stage2-perf.ps1 -NoBuild -EnforceThresholds -> success
