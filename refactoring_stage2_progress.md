@@ -18638,3 +18638,64 @@
   - current `#1032`: `1707.30 ns/op`, `696.22 bytes/op`
 - `tradegrid_load_from_string_malformed_tail_path` (new):
   - current `#1032`: `2693.27 ns/op`, `1280.25 bytes/op`
+
+## 2026-03-03 - Incremental Update #1033
+
+### Scope
+
+- TradeGrid parser hot-path optimization for malformed/legacy payloads: remove eager token trimming allocations and use span-based parse helpers.
+
+### What Changed
+
+- Updated production code:
+  - project/OsEngine/OsTrader/Grids/TradeGrid.cs
+- Changes:
+  - `LoadFromString` no longer trims all `%` sections and all `@` prime tokens eagerly.
+  - added lazy segment extraction:
+    - `TryGetPayloadSegment(...)`
+    - `GetTrimmedToken(...)`
+  - parse helpers switched to span-based parsing where available:
+    - `TryParseIntInvariant` -> `int.TryParse(ReadOnlySpan<char>, ...)`
+    - `TryParseDecimal` -> `decimal.TryParse(ReadOnlySpan<char>, ...)`
+    - `TryParseDateInvariantOrCurrent` -> `DateTime.TryParse(ReadOnlySpan<char>, ...)`
+    - `TryParseBoolFlexible` -> `bool.TryParse(ReadOnlySpan<char>, ...)` + span token checks
+  - enum parse remains string-based, but trims lazily only when needed.
+- Updated perf artifacts:
+  - reports/stage2_perf_metrics.jsonl
+  - reports/stage2_perf_summary.json
+- Updated global coverage matrix:
+  - refactoring_stage2_coverage_matrix.md
+
+### Verification
+
+- Targeted checks:
+  - dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --configuration Release --nologo --filter "FullyQualifiedName~Stage2Step2_2_TradeGrid_LoadFromString_|FullyQualifiedName~Stage2Perf_TradeGrid_LoadFromString" -> passed 46/46
+- Perf command:
+  - pwsh -NoProfile -File tools/run-stage2-perf.ps1 -NoBuild -EnforceThresholds -Repeat 5 -> success
+  - threshold check passed for all scenarios.
+- Host-context verification (outside sandbox, per dotnet-build-policy):
+  - dotnet restore project/OsEngine/OsEngine.csproj --nologo -> success
+  - dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo -> success
+  - dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900 -> success, 0 warnings, 0 errors
+  - dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo -> passed 867/867
+
+### P0/P2/P3 Metrics Snapshot (median, Repeat=5)
+
+- `indicator_cache_hit_path`:
+  - current `#1033`: `1877.60 ns/op`, `448.02 bytes/op`
+- `optimizer_method_cache_hit_path`:
+  - current `#1033`: `149.12 ns/op`, `0.01 bytes/op`
+- `optimizer_cache_key_build_path`:
+  - current `#1033`: `372.06 ns/op`, `0.01 bytes/op`
+- `optimizer_method_parameter_hash_path`:
+  - current `#1033`: `54.92 ns/op`, `0.00 bytes/op`
+- `tradegrid_query_collections_hotpath`:
+  - current `#1033`: `8479.96 ns/op`, `992.01 bytes/op`
+- `tradegrid_load_from_string_ru_payload_path`:
+  - previous `#1032`: `1707.30 ns/op`, `696.22 bytes/op`
+  - current `#1033`: `1599.07 ns/op`, `696.22 bytes/op`
+  - delta: `-6.34% ns/op`, allocation unchanged
+- `tradegrid_load_from_string_malformed_tail_path`:
+  - previous `#1032`: `2693.27 ns/op`, `1280.25 bytes/op`
+  - current `#1033`: `2286.85 ns/op`, `1184.25 bytes/op`
+  - delta: `-15.09% ns/op`, `-7.50% bytes/op`

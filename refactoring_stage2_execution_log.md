@@ -18363,3 +18363,41 @@
   - `tradegrid_load_from_string_malformed_tail_path`: `2693.27 ns/op`, `1280.25 bytes/op` (new KPI)
 - **Commit:** n/a
 - **Push:** n/a
+
+### Wave P3 - TradeGrid LoadFromString Allocation Trim (Incremental Adoption #1033)
+
+- **Status:** In Progress (increment block completed)
+- **Plan item:** `refactoring_stage2_plan.md` -> Plan Refresh / Wave `P3`
+- **Changes (remove eager trim allocations in parser path):**
+  - Updated `project/OsEngine/OsTrader/Grids/TradeGrid.cs`:
+    - `LoadFromString` now avoids eager `.Trim()` for all `%` sections and all `@` prime tokens.
+    - added lazy token/segment extraction helpers:
+      - `TryGetPayloadSegment(...)`
+      - `GetTrimmedToken(...)`
+    - switched parse helpers to span-based parsing where available:
+      - `TryParseIntInvariant`
+      - `TryParseDecimal`
+      - `TryParseDateInvariantOrCurrent`
+      - `TryParseBoolFlexible`
+    - enum parse remains string-based with lazy trim fallback only when needed.
+  - Updated perf artifacts:
+    - `reports/stage2_perf_metrics.jsonl`
+    - `reports/stage2_perf_summary.json`
+  - Updated `refactoring_stage2_coverage_matrix.md`.
+- **Verification (outside sandbox, per dotnet-build-policy):**
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --configuration Release --nologo --filter "FullyQualifiedName~Stage2Step2_2_TradeGrid_LoadFromString_|FullyQualifiedName~Stage2Perf_TradeGrid_LoadFromString"` -> passed `46/46`
+  - `pwsh -NoProfile -File tools/run-stage2-perf.ps1 -NoBuild -EnforceThresholds -Repeat 5` -> success; threshold check passed for all scenarios
+  - `dotnet restore project/OsEngine/OsEngine.csproj --nologo` -> success
+  - `dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo` -> success
+  - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` -> success, 0 warnings, 0 errors
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed `867/867`
+- **Metrics snapshot (median, Repeat=5):**
+  - `indicator_cache_hit_path`: `1877.60 ns/op`, `448.02 bytes/op`
+  - `optimizer_method_cache_hit_path`: `149.12 ns/op`, `0.01 bytes/op`
+  - `optimizer_cache_key_build_path`: `372.06 ns/op`, `0.01 bytes/op`
+  - `optimizer_method_parameter_hash_path`: `54.92 ns/op`, `0.00 bytes/op`
+  - `tradegrid_query_collections_hotpath`: `8479.96 ns/op`, `992.01 bytes/op`
+  - `tradegrid_load_from_string_ru_payload_path`: `1599.07 ns/op`, `696.22 bytes/op` (`-6.34% ns/op` vs `#1032`)
+  - `tradegrid_load_from_string_malformed_tail_path`: `2286.85 ns/op`, `1184.25 bytes/op` (`-15.09% ns/op`, `-7.50% bytes/op` vs `#1032`)
+- **Commit:** n/a
+- **Push:** n/a

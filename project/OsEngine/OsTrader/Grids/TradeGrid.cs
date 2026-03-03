@@ -183,27 +183,14 @@ namespace OsEngine.OsTrader.Grids
                 }
 
                 string[] array = value.Split('%');
-                for (int i = 0; i < array.Length; i++)
-                {
-                    if (array[i] != null)
-                    {
-                        array[i] = array[i].Trim();
-                    }
-                }
+                string primeSegment = GetTrimmedToken(array, 0);
 
-                if (array.Length == 0 || string.IsNullOrWhiteSpace(array[0]))
+                if (string.IsNullOrWhiteSpace(primeSegment))
                 {
                     return;
                 }
 
-                string[] values = array[0].Split('@');
-                for (int i = 0; i < values.Length; i++)
-                {
-                    if (values[i] != null)
-                    {
-                        values[i] = values[i].Trim();
-                    }
-                }
+                string[] values = primeSegment.Split('@');
 
                 // settings prime
 
@@ -388,62 +375,55 @@ namespace OsEngine.OsTrader.Grids
                 }
 
                 // non trade periods
-                if (array.Length > 1
-                    && NonTradePeriods != null
-                    && IsPayloadSegmentPresent(array[1]))
+                if (NonTradePeriods != null
+                    && TryGetPayloadSegment(array, 1, out string nonTradeSegment))
                 {
-                    NonTradePeriods.LoadFromString(array[1]);
+                    NonTradePeriods.LoadFromString(nonTradeSegment);
                 }
 
                 // trade days
                 // removed
 
                 // stop grid by event
-                if (array.Length > 3
-                    && StopBy != null
-                    && IsPayloadSegmentPresent(array[3]))
+                if (StopBy != null
+                    && TryGetPayloadSegment(array, 3, out string stopBySegment))
                 {
-                    StopBy.LoadFromString(array[3]);
+                    StopBy.LoadFromString(stopBySegment);
                 }
 
                 // grid lines creation and storage
-                if (array.Length > 4
-                    && GridCreator != null
-                    && IsPayloadSegmentPresent(array[4]))
+                if (GridCreator != null
+                    && TryGetPayloadSegment(array, 4, out string gridCreatorSegment))
                 {
-                    GridCreator.LoadFromString(array[4]);
+                    GridCreator.LoadFromString(gridCreatorSegment);
                 }
 
                 // stop and profit 
-                if (array.Length > 5
-                    && StopAndProfit != null
-                    && IsPayloadSegmentPresent(array[5]))
+                if (StopAndProfit != null
+                    && TryGetPayloadSegment(array, 5, out string stopAndProfitSegment))
                 {
-                    StopAndProfit.LoadFromString(array[5]);
+                    StopAndProfit.LoadFromString(stopAndProfitSegment);
                 }
 
                 // auto start
-                if (array.Length > 6
-                    && AutoStarter != null
-                    && IsPayloadSegmentPresent(array[6]))
+                if (AutoStarter != null
+                    && TryGetPayloadSegment(array, 6, out string autoStarterSegment))
                 {
-                    AutoStarter.LoadFromString(array[6]);
+                    AutoStarter.LoadFromString(autoStarterSegment);
                 }
 
                 // errors reaction
-                if (array.Length > 7
-                    && ErrorsReaction != null
-                    && IsPayloadSegmentPresent(array[7]))
+                if (ErrorsReaction != null
+                    && TryGetPayloadSegment(array, 7, out string errorsReactionSegment))
                 {
-                    ErrorsReaction.LoadFromString(array[7]);
+                    ErrorsReaction.LoadFromString(errorsReactionSegment);
                 }
 
                 // trailing up / down
-                if (array.Length > 8
-                    && TrailingUp != null
-                    && IsPayloadSegmentPresent(array[8]))
+                if (TrailingUp != null
+                    && TryGetPayloadSegment(array, 8, out string trailingUpSegment))
                 {
-                    TrailingUp.LoadFromString(array[8]);
+                    TrailingUp.LoadFromString(trailingUpSegment);
                 }
             }
             catch (Exception e)
@@ -454,22 +434,24 @@ namespace OsEngine.OsTrader.Grids
 
         private static bool TryParseDateInvariantOrCurrent(string value, out DateTime parsed)
         {
-            if (DateTime.TryParse(value, CultureInfo.InvariantCulture, DateTimeStyles.RoundtripKind, out parsed))
+            ReadOnlySpan<char> valueSpan = value.AsSpan().Trim();
+
+            if (DateTime.TryParse(valueSpan, CultureInfo.InvariantCulture, DateTimeStyles.RoundtripKind, out parsed))
             {
                 return true;
             }
 
-            if (DateTime.TryParse(value, CultureInfo.InvariantCulture, DateTimeStyles.None, out parsed))
+            if (DateTime.TryParse(valueSpan, CultureInfo.InvariantCulture, DateTimeStyles.None, out parsed))
             {
                 return true;
             }
 
-            if (DateTime.TryParse(value, CultureInfo.CurrentCulture, DateTimeStyles.None, out parsed))
+            if (DateTime.TryParse(valueSpan, CultureInfo.CurrentCulture, DateTimeStyles.None, out parsed))
             {
                 return true;
             }
 
-            if (DateTime.TryParse(value, RuCulture, DateTimeStyles.None, out parsed))
+            if (DateTime.TryParse(valueSpan, RuCulture, DateTimeStyles.None, out parsed))
             {
                 return true;
             }
@@ -480,35 +462,81 @@ namespace OsEngine.OsTrader.Grids
 
         private static bool TryParseIntInvariant(string value, out int parsed)
         {
-            return int.TryParse(value, NumberStyles.Integer, CultureInfo.InvariantCulture, out parsed);
+            return int.TryParse(value.AsSpan().Trim(), NumberStyles.Integer, CultureInfo.InvariantCulture, out parsed);
         }
 
-        private static bool IsPayloadSegmentPresent(string value)
+        private static bool TryGetPayloadSegment(string[] sections, int index, out string segment)
         {
-            return string.IsNullOrWhiteSpace(value) == false;
+            segment = string.Empty;
+
+            if (sections == null || index < 0 || index >= sections.Length)
+            {
+                return false;
+            }
+
+            string candidate = sections[index];
+
+            if (string.IsNullOrWhiteSpace(candidate))
+            {
+                return false;
+            }
+
+            segment = candidate.Trim();
+            return true;
+        }
+
+        private static string GetTrimmedToken(string[] values, int index)
+        {
+            if (values == null || index < 0 || index >= values.Length)
+            {
+                return string.Empty;
+            }
+
+            string value = values[index];
+            return value == null ? string.Empty : value.Trim();
         }
 
         private static bool TryParseEnumFlexible<TEnum>(string value, out TEnum parsed)
             where TEnum : struct
         {
-            return Enum.TryParse(value, true, out parsed);
+            if (value == null)
+            {
+                parsed = default;
+                return false;
+            }
+
+            ReadOnlySpan<char> trimmed = value.AsSpan().Trim();
+
+            if (trimmed.Length == value.Length)
+            {
+                return Enum.TryParse(value, true, out parsed);
+            }
+
+            return Enum.TryParse(trimmed.ToString(), true, out parsed);
         }
 
         private static bool TryParseBoolFlexible(string value, out bool parsed)
         {
-            if (bool.TryParse(value, out parsed))
+            ReadOnlySpan<char> normalized = value.AsSpan().Trim();
+
+            if (bool.TryParse(normalized, out parsed))
             {
                 return true;
             }
 
-            string normalized = value?.Trim().ToLowerInvariant();
-            if (normalized == "1" || normalized == "yes" || normalized == "y" || normalized == "on")
+            if (normalized.SequenceEqual("1".AsSpan())
+                || normalized.Equals("yes".AsSpan(), StringComparison.OrdinalIgnoreCase)
+                || normalized.Equals("y".AsSpan(), StringComparison.OrdinalIgnoreCase)
+                || normalized.Equals("on".AsSpan(), StringComparison.OrdinalIgnoreCase))
             {
                 parsed = true;
                 return true;
             }
 
-            if (normalized == "0" || normalized == "no" || normalized == "n" || normalized == "off")
+            if (normalized.SequenceEqual("0".AsSpan())
+                || normalized.Equals("no".AsSpan(), StringComparison.OrdinalIgnoreCase)
+                || normalized.Equals("n".AsSpan(), StringComparison.OrdinalIgnoreCase)
+                || normalized.Equals("off".AsSpan(), StringComparison.OrdinalIgnoreCase))
             {
                 parsed = false;
                 return true;
@@ -520,17 +548,19 @@ namespace OsEngine.OsTrader.Grids
 
         private static bool TryParseDecimal(string value, out decimal parsed)
         {
-            if (decimal.TryParse(value, NumberStyles.Any, CultureInfo.InvariantCulture, out parsed))
+            ReadOnlySpan<char> valueSpan = value.AsSpan().Trim();
+
+            if (decimal.TryParse(valueSpan, NumberStyles.Any, CultureInfo.InvariantCulture, out parsed))
             {
                 return true;
             }
 
-            if (decimal.TryParse(value, NumberStyles.Any, CultureInfo.CurrentCulture, out parsed))
+            if (decimal.TryParse(valueSpan, NumberStyles.Any, CultureInfo.CurrentCulture, out parsed))
             {
                 return true;
             }
 
-            if (decimal.TryParse(value, NumberStyles.Any, RuCulture, out parsed))
+            if (decimal.TryParse(valueSpan, NumberStyles.Any, RuCulture, out parsed))
             {
                 return true;
             }
