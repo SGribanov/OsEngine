@@ -19276,3 +19276,62 @@
   - previous `#1042`: `2672.87 ns/op`, `466.25 bytes/op`
   - current `#1043`: `6192.22 ns/op`, `466.25 bytes/op`
   - delta: `+131.66% ns/op`, allocation unchanged
+
+## 2026-03-03 - Incremental Update #1044
+
+### Scope
+
+- TradeGrid reliability hardening: lock no-funds `Signal` message contracts in `TradeGridErrorsReaction` with explicit regression tests.
+
+### What Changed
+
+- Updated tests/docs/artifacts:
+  - project/OsEngine.Tests/TradeGridPersistenceCoreTests.cs
+  - refactoring_stage2_progress.md
+  - refactoring_stage2_execution_log.md
+  - refactoring_stage2_coverage_matrix.md
+  - reports/stage2_perf_metrics.jsonl
+  - reports/stage2_perf_summary.json
+- Changes:
+  - added no-funds reaction tests:
+    - `Stage2Step2_2_TradeGridErrorsReaction_PositionOpeningFail_WithNoFunds_ShouldReduceOpenLimitAndEmitSignal`
+    - `Stage2Step2_2_TradeGridErrorsReaction_PositionClosingFail_WithNoFunds_ShouldReduceCloseLimitAndEmitSignal`
+  - tests assert:
+    - open/close limit reduction by 1 on no-funds path;
+    - emitted log type is `Signal`;
+    - emitted message uses normalized wording from `#1043`.
+  - set up TInvest-like server/test context with controlled `LastErrorMessages` and fail-order payloads.
+
+### Verification
+
+- Targeted checks:
+  - dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --configuration Release --nologo --filter "FullyQualifiedName~TradeGridErrorsReaction_PositionOpeningFail_WithNoFunds|FullyQualifiedName~TradeGridErrorsReaction_PositionClosingFail_WithNoFunds|FullyQualifiedName~TradeGridErrorsReaction_GetReactionOnErrors" -> passed 4/4
+- Perf command:
+  - pwsh -NoProfile -File tools/run-stage2-perf.ps1 -NoBuild -EnforceThresholds -Repeat 5 -> success
+  - threshold check passed for all scenarios.
+- Host-context verification (outside sandbox, per dotnet-build-policy):
+  - dotnet restore project/OsEngine/OsEngine.csproj --nologo -> success
+  - dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo -> success
+  - dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900 -> success, 0 warnings, 0 errors
+  - dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo -> passed 869/869
+
+### P0/P2/P3 Metrics Snapshot (median, Repeat=5)
+
+- `indicator_cache_hit_path`:
+  - current `#1044`: `1920.72 ns/op`, `448.02 bytes/op`
+- `optimizer_method_cache_hit_path`:
+  - current `#1044`: `159.55 ns/op`, `0.01 bytes/op`
+- `optimizer_cache_key_build_path`:
+  - current `#1044`: `336.76 ns/op`, `0.01 bytes/op`
+- `optimizer_method_parameter_hash_path`:
+  - current `#1044`: `51.09 ns/op`, `0.00 bytes/op`
+- `tradegrid_query_collections_hotpath`:
+  - current `#1044`: `8794.59 ns/op`, `992.01 bytes/op`
+- `tradegrid_load_from_string_ru_payload_path`:
+  - previous `#1042`: `2048.80 ns/op`, `32.22 bytes/op`
+  - current `#1044`: `2531.25 ns/op`, `32.22 bytes/op`
+  - delta: `+23.55% ns/op`, allocation unchanged
+- `tradegrid_load_from_string_malformed_tail_path`:
+  - previous `#1042`: `2672.87 ns/op`, `466.25 bytes/op`
+  - current `#1044`: `3240.03 ns/op`, `466.25 bytes/op`
+  - delta: `+21.22% ns/op`, allocation unchanged
