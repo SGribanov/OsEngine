@@ -19733,3 +19733,68 @@
   - previous `#1042`: `2672.87 ns/op`, `466.25 bytes/op`
   - current `#1051`: `3541.92 ns/op`, `466.25 bytes/op`
   - delta: `+32.51% ns/op`, allocation unchanged
+
+## 2026-03-03 - Incremental Update #1052
+
+### Scope
+
+- TradeGrid parser hot-path optimization in `LoadFromString` (enum/date parsing fast-paths).
+
+### What Changed
+
+- Updated production code:
+  - project/OsEngine/OsTrader/Grids/TradeGrid.cs
+- Updated docs/artifacts:
+  - refactoring_stage2_progress.md
+  - refactoring_stage2_execution_log.md
+  - refactoring_stage2_coverage_matrix.md
+  - reports/stage2_perf_metrics.jsonl
+  - reports/stage2_perf_summary.json
+- Changes:
+  - added direct span fast-paths for known enum tokens used in prime segment parsing:
+    - `TradeGridPrimeType`
+    - `TradeGridRegime`
+    - `TradeGridLogicEntryRegime`
+  - kept fallback `Enum.TryParse(..., ignoreCase: true)` for compatibility.
+  - added date parse heuristics in `TryParseDateInvariantOrCurrent`:
+    - ISO-like tokens (`T` + `-`) try invariant roundtrip first;
+    - RU-like tokens (`.` + `:` and no `-`) try `ru-RU` parse first;
+    - existing fallback chain preserved.
+
+### Verification
+
+- Targeted checks:
+  - dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --configuration Release --nologo --filter "FullyQualifiedName~TradeGrid_LoadFromString|FullyQualifiedName~TradeGridPersistenceCoreTests" -> passed 373/373
+- Perf command:
+  - pwsh -NoProfile -File tools/run-stage2-perf.ps1 -NoBuild -EnforceThresholds -Repeat 5 -> success
+  - threshold check passed for all scenarios.
+- Host-context verification (outside sandbox, per dotnet-build-policy):
+  - dotnet restore project/OsEngine/OsEngine.csproj --nologo -> success
+  - dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo -> success
+  - dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900 -> success, 0 warnings, 0 errors
+  - dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo -> passed 872/872
+
+### P0/P2/P3 Metrics Snapshot (median, Repeat=5)
+
+- `indicator_cache_hit_path`:
+  - current `#1052`: `2334.55 ns/op`, `448.02 bytes/op`
+- `optimizer_method_cache_hit_path`:
+  - current `#1052`: `177.40 ns/op`, `0.01 bytes/op`
+- `optimizer_cache_key_build_path`:
+  - current `#1052`: `387.90 ns/op`, `0.01 bytes/op`
+- `optimizer_method_parameter_hash_path`:
+  - current `#1052`: `65.14 ns/op`, `0.00 bytes/op`
+- `tradegrid_query_collections_hotpath`:
+  - current `#1052`: `8497.46 ns/op`, `992.01 bytes/op`
+- `tradegrid_load_from_string_ru_payload_path`:
+  - previous `#1042`: `2048.80 ns/op`, `32.22 bytes/op`
+  - previous `#1051`: `3036.88 ns/op`, `32.22 bytes/op`
+  - current `#1052`: `2444.10 ns/op`, `32.22 bytes/op`
+  - delta vs `#1042`: `+19.29% ns/op`, allocation unchanged
+  - delta vs `#1051`: `-19.52% ns/op`, allocation unchanged
+- `tradegrid_load_from_string_malformed_tail_path`:
+  - previous `#1042`: `2672.87 ns/op`, `466.25 bytes/op`
+  - previous `#1051`: `3541.92 ns/op`, `466.25 bytes/op`
+  - current `#1052`: `3219.05 ns/op`, `466.25 bytes/op`
+  - delta vs `#1042`: `+20.44% ns/op`, allocation unchanged
+  - delta vs `#1051`: `-9.11% ns/op`, allocation unchanged

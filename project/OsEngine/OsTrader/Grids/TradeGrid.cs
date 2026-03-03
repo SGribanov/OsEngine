@@ -227,7 +227,7 @@ namespace OsEngine.OsTrader.Grids
                                 }
                                 break;
                             case 1:
-                                if (TryParseEnumFlexible(token, out TradeGridPrimeType gridTypeParsed)
+                                if (TryParseGridPrimeType(token, out TradeGridPrimeType gridTypeParsed)
                                     && (gridTypeParsed == TradeGridPrimeType.MarketMaking
                                         || gridTypeParsed == TradeGridPrimeType.OpenPosition))
                                 {
@@ -235,7 +235,7 @@ namespace OsEngine.OsTrader.Grids
                                 }
                                 break;
                             case 2:
-                                if (TryParseEnumFlexible(token, out TradeGridRegime regimeParsed)
+                                if (TryParseTradeGridRegime(token, out TradeGridRegime regimeParsed)
                                     && (regimeParsed == TradeGridRegime.Off
                                         || regimeParsed == TradeGridRegime.OffAndCancelOrders
                                         || regimeParsed == TradeGridRegime.On
@@ -246,7 +246,7 @@ namespace OsEngine.OsTrader.Grids
                                 }
                                 break;
                             case 3:
-                                if (TryParseEnumFlexible(token, out TradeGridLogicEntryRegime logicParsed)
+                                if (TryParseTradeGridLogicEntryRegime(token, out TradeGridLogicEntryRegime logicParsed)
                                     && (logicParsed == TradeGridLogicEntryRegime.OnTrade
                                         || logicParsed == TradeGridLogicEntryRegime.OncePerSecond))
                                 {
@@ -423,6 +423,21 @@ namespace OsEngine.OsTrader.Grids
         {
             ReadOnlySpan<char> valueSpan = value.Trim();
 
+            if (valueSpan.IndexOf('T') >= 0
+                && valueSpan.IndexOf('-') >= 0
+                && DateTime.TryParse(valueSpan, CultureInfo.InvariantCulture, DateTimeStyles.RoundtripKind, out parsed))
+            {
+                return true;
+            }
+
+            if (valueSpan.IndexOf('.') >= 0
+                && valueSpan.IndexOf(':') >= 0
+                && valueSpan.IndexOf('-') < 0
+                && DateTime.TryParse(valueSpan, RuCulture, DateTimeStyles.None, out parsed))
+            {
+                return true;
+            }
+
             if (DateTime.TryParse(valueSpan, CultureInfo.InvariantCulture, DateTimeStyles.RoundtripKind, out parsed))
             {
                 return true;
@@ -488,6 +503,78 @@ namespace OsEngine.OsTrader.Grids
         {
             ReadOnlySpan<char> trimmed = value.Trim();
             return Enum.TryParse(trimmed, true, out parsed);
+        }
+
+        private static bool TryParseGridPrimeType(ReadOnlySpan<char> value, out TradeGridPrimeType parsed)
+        {
+            ReadOnlySpan<char> trimmed = value.Trim();
+            if (trimmed.SequenceEqual("MarketMaking".AsSpan()))
+            {
+                parsed = TradeGridPrimeType.MarketMaking;
+                return true;
+            }
+
+            if (trimmed.SequenceEqual("OpenPosition".AsSpan()))
+            {
+                parsed = TradeGridPrimeType.OpenPosition;
+                return true;
+            }
+
+            return TryParseEnumFlexible(trimmed, out parsed);
+        }
+
+        private static bool TryParseTradeGridRegime(ReadOnlySpan<char> value, out TradeGridRegime parsed)
+        {
+            ReadOnlySpan<char> trimmed = value.Trim();
+            if (trimmed.SequenceEqual("Off".AsSpan()))
+            {
+                parsed = TradeGridRegime.Off;
+                return true;
+            }
+
+            if (trimmed.SequenceEqual("OffAndCancelOrders".AsSpan()))
+            {
+                parsed = TradeGridRegime.OffAndCancelOrders;
+                return true;
+            }
+
+            if (trimmed.SequenceEqual("On".AsSpan()))
+            {
+                parsed = TradeGridRegime.On;
+                return true;
+            }
+
+            if (trimmed.SequenceEqual("CloseOnly".AsSpan()))
+            {
+                parsed = TradeGridRegime.CloseOnly;
+                return true;
+            }
+
+            if (trimmed.SequenceEqual("CloseForced".AsSpan()))
+            {
+                parsed = TradeGridRegime.CloseForced;
+                return true;
+            }
+
+            return TryParseEnumFlexible(trimmed, out parsed);
+        }
+
+        private static bool TryParseTradeGridLogicEntryRegime(ReadOnlySpan<char> value, out TradeGridLogicEntryRegime parsed)
+        {
+            ReadOnlySpan<char> trimmed = value.Trim();
+            if (trimmed.SequenceEqual("OnTrade".AsSpan()))
+            {
+                parsed = TradeGridLogicEntryRegime.OnTrade;
+                return true;
+            }
+
+            if (trimmed.SequenceEqual("OncePerSecond".AsSpan()))
+            {
+                parsed = TradeGridLogicEntryRegime.OncePerSecond;
+                return true;
+            }
+
+            return TryParseEnumFlexible(trimmed, out parsed);
         }
 
         private static bool TryParseBoolFlexible(ReadOnlySpan<char> value, out bool parsed)
