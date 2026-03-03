@@ -4783,6 +4783,112 @@ public class TradeGridPersistenceCoreTests
     }
 
     [Fact]
+    public void Stage2Step2_2_TradeGridErrorsReaction_PositionOpeningFail_WithNoFundsAndMinLimit_ShouldKeepLimitAndNotEmitSignal()
+    {
+        TradeGrid grid = CreateBareGrid();
+        grid.MaxOpenOrdersInMarket = 1;
+
+        TradeGridErrorsReaction reaction = new TradeGridErrorsReaction(grid);
+        grid.ErrorsReaction = reaction;
+
+        BotTabSimple tab = (BotTabSimple)RuntimeHelpers.GetUninitializedObject(typeof(BotTabSimple));
+        tab.StartProgram = StartProgram.IsOsTrader;
+        ConnectorCandles connector = (ConnectorCandles)RuntimeHelpers.GetUninitializedObject(typeof(ConnectorCandles));
+        connector.StartProgram = StartProgram.IsOsTrader;
+        SetPrivateField(tab, "_connector", connector);
+        grid.Tab = tab;
+
+        AServer tInvestServer = (AServer)RuntimeHelpers.GetUninitializedObject(typeof(OsEngine.Market.Servers.TInvest.TInvestServer));
+        object realization = RuntimeHelpers.GetUninitializedObject(typeof(OsEngine.Market.Servers.TInvest.TInvestServerRealization));
+        FieldInfo serverRealizationField = typeof(AServer).GetField("_serverRealization", BindingFlags.NonPublic | BindingFlags.Instance)
+            ?? throw new InvalidOperationException("Field _serverRealization not found on AServer.");
+        serverRealizationField.SetValue(tInvestServer, realization);
+
+        Log log = (Log)RuntimeHelpers.GetUninitializedObject(typeof(Log));
+        log.LastErrorMessages = new List<LogMessage>
+        {
+            new LogMessage { Message = (OsLocalization.Market.Label301 ?? string.Empty) + " no funds" }
+        };
+        tInvestServer.Log = log;
+
+        SetPrivateField(connector, "_myServer", tInvestServer);
+
+        Position position = (Position)RuntimeHelpers.GetUninitializedObject(typeof(Position));
+        SetPrivateField(position, "_openOrders", new List<Order>
+        {
+            new Order { State = OrderStateType.Fail }
+        });
+
+        int signalCount = 0;
+        reaction.LogMessageEvent += (_, type) =>
+        {
+            if (type == LogMessageType.Signal)
+            {
+                signalCount++;
+            }
+        };
+
+        Exception? error = Record.Exception(() => reaction.PositionOpeningFailEvent(position));
+
+        Assert.Null(error);
+        Assert.Equal(1, grid.MaxOpenOrdersInMarket);
+        Assert.Equal(0, signalCount);
+    }
+
+    [Fact]
+    public void Stage2Step2_2_TradeGridErrorsReaction_PositionClosingFail_WithNoFundsAndMinLimit_ShouldKeepLimitAndNotEmitSignal()
+    {
+        TradeGrid grid = CreateBareGrid();
+        grid.MaxCloseOrdersInMarket = 1;
+
+        TradeGridErrorsReaction reaction = new TradeGridErrorsReaction(grid);
+        grid.ErrorsReaction = reaction;
+
+        BotTabSimple tab = (BotTabSimple)RuntimeHelpers.GetUninitializedObject(typeof(BotTabSimple));
+        tab.StartProgram = StartProgram.IsOsTrader;
+        ConnectorCandles connector = (ConnectorCandles)RuntimeHelpers.GetUninitializedObject(typeof(ConnectorCandles));
+        connector.StartProgram = StartProgram.IsOsTrader;
+        SetPrivateField(tab, "_connector", connector);
+        grid.Tab = tab;
+
+        AServer tInvestServer = (AServer)RuntimeHelpers.GetUninitializedObject(typeof(OsEngine.Market.Servers.TInvest.TInvestServer));
+        object realization = RuntimeHelpers.GetUninitializedObject(typeof(OsEngine.Market.Servers.TInvest.TInvestServerRealization));
+        FieldInfo serverRealizationField = typeof(AServer).GetField("_serverRealization", BindingFlags.NonPublic | BindingFlags.Instance)
+            ?? throw new InvalidOperationException("Field _serverRealization not found on AServer.");
+        serverRealizationField.SetValue(tInvestServer, realization);
+
+        Log log = (Log)RuntimeHelpers.GetUninitializedObject(typeof(Log));
+        log.LastErrorMessages = new List<LogMessage>
+        {
+            new LogMessage { Message = (OsLocalization.Market.Label301 ?? string.Empty) + " no funds" }
+        };
+        tInvestServer.Log = log;
+
+        SetPrivateField(connector, "_myServer", tInvestServer);
+
+        Position position = (Position)RuntimeHelpers.GetUninitializedObject(typeof(Position));
+        SetPrivateField(position, "_closeOrders", new List<Order>
+        {
+            new Order { State = OrderStateType.Fail }
+        });
+
+        int signalCount = 0;
+        reaction.LogMessageEvent += (_, type) =>
+        {
+            if (type == LogMessageType.Signal)
+            {
+                signalCount++;
+            }
+        };
+
+        Exception? error = Record.Exception(() => reaction.PositionClosingFailEvent(position));
+
+        Assert.Null(error);
+        Assert.Equal(1, grid.MaxCloseOrdersInMarket);
+        Assert.Equal(0, signalCount);
+    }
+
+    [Fact]
     public void Stage2Step2_2_TradeGridErrorsReaction_LoadFromString_WithInvalidWaitBoolAndMissingWaitSeconds_ShouldKeepValuesAndParseReduceFlag()
     {
         TradeGrid grid = CreateBareGrid();
