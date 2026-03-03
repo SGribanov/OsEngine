@@ -81,7 +81,9 @@ public class Stage2PerformanceBaselineTests
         const int warmupIterations = 200;
         const int iterations = 2000;
 
-        IndicatorCache cache = new IndicatorCache(maxEntries: 64);
+        IndicatorCache cache = new IndicatorCache(
+            maxEntries: 64,
+            isolationMode: IndicatorCacheIsolationMode.TrustedReferences);
         IndicatorCacheKey key = new IndicatorCacheKey(
             securityName: "PERF",
             timeframeTicks: 60,

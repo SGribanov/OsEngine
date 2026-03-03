@@ -12,6 +12,12 @@ using System.Threading;
 
 namespace OsEngine.OsOptimizer.OptEntity
 {
+    public enum IndicatorCacheIsolationMode
+    {
+        CloneOnReadAndWrite = 0,
+        TrustedReferences = 1
+    }
+
     public readonly struct IndicatorCacheKey : IEquatable<IndicatorCacheKey>
     {
         public IndicatorCacheKey(
@@ -151,14 +157,20 @@ namespace OsEngine.OsOptimizer.OptEntity
 
         private readonly Lock _sync = new();
         private readonly int _maxEntries;
+        private readonly bool _cloneOnRead;
+        private readonly bool _cloneOnWrite;
         private long _hits;
         private long _misses;
         private long _writes;
         private long _evictions;
 
-        public IndicatorCache(int maxEntries = 512)
+        public IndicatorCache(
+            int maxEntries = 512,
+            IndicatorCacheIsolationMode isolationMode = IndicatorCacheIsolationMode.CloneOnReadAndWrite)
         {
             _maxEntries = maxEntries > 0 ? maxEntries : 1;
+            _cloneOnRead = isolationMode == IndicatorCacheIsolationMode.CloneOnReadAndWrite;
+            _cloneOnWrite = isolationMode == IndicatorCacheIsolationMode.CloneOnReadAndWrite;
         }
 
         public bool TryGet(in IndicatorCacheKey key, out List<decimal>[]? values)
@@ -170,6 +182,13 @@ namespace OsEngine.OsOptimizer.OptEntity
             {
                 Interlocked.Increment(ref _misses);
                 return false;
+            }
+
+            if (_cloneOnRead == false)
+            {
+                values = cachedValues;
+                Interlocked.Increment(ref _hits);
+                return true;
             }
 
             List<decimal>[]? clone = CloneSeries(cachedValues);
@@ -191,10 +210,17 @@ namespace OsEngine.OsOptimizer.OptEntity
                 return;
             }
 
-            List<decimal>[]? clone = CloneSeries(values);
-            if (clone == null)
+            List<decimal>[] storedValues = values;
+
+            if (_cloneOnWrite)
             {
-                return;
+                List<decimal>[]? clone = CloneSeries(values);
+                if (clone == null)
+                {
+                    return;
+                }
+
+                storedValues = clone;
             }
 
             lock (_sync)
@@ -208,7 +234,7 @@ namespace OsEngine.OsOptimizer.OptEntity
                     Interlocked.Add(ref _evictions, removed);
                 }
 
-                _cache[key] = clone;
+                _cache[key] = storedValues;
             }
 
             Interlocked.Increment(ref _writes);

@@ -119,6 +119,34 @@ public class IndicatorCacheCoreTests
         Assert.Equal(0, stats.EntriesCount);
     }
 
+    [Fact]
+    public void IndicatorCache_TrustedReferencesMode_ShouldReuseStoredSeries()
+    {
+        IndicatorCache cache = new IndicatorCache(
+            maxEntries: 8,
+            isolationMode: IndicatorCacheIsolationMode.TrustedReferences);
+        IndicatorCacheKey key = BuildKey("trusted");
+
+        List<decimal>[] values =
+        [
+            new List<decimal> { 1m, 2m },
+            new List<decimal> { 10m }
+        ];
+
+        cache.Set(key, values);
+
+        Assert.True(cache.TryGet(key, out List<decimal>[]? loaded));
+        Assert.NotNull(loaded);
+        Assert.Same(values, loaded);
+
+        loaded![0][0] = 999m;
+
+        Assert.True(cache.TryGet(key, out List<decimal>[]? loadedAgain));
+        Assert.NotNull(loadedAgain);
+        Assert.Same(values, loadedAgain);
+        Assert.Equal(999m, loadedAgain![0][0]);
+    }
+
     private static IndicatorCacheKey BuildKey(string id)
     {
         return new IndicatorCacheKey(

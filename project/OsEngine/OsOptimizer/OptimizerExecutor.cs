@@ -1850,7 +1850,9 @@ namespace OsEngine.OsOptimizer
 
             int indicatorMaxEntries = Math.Max(256, threadsCount * 128);
             int methodMaxEntries = Math.Max(512, threadsCount * 256);
-            IndicatorCache indicatorCache = new IndicatorCache(indicatorMaxEntries);
+            IndicatorCache indicatorCache = new IndicatorCache(
+                indicatorMaxEntries,
+                IndicatorCacheIsolationMode.TrustedReferences);
             OptimizerMethodCache methodCache = new OptimizerMethodCache(methodMaxEntries);
             Interlocked.Exchange(ref _indicatorCache, indicatorCache);
             Interlocked.Exchange(ref _optimizerMethodCache, methodCache);
