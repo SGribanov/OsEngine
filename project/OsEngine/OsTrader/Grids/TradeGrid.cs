@@ -3020,7 +3020,7 @@ namespace OsEngine.OsTrader.Grids
                         string message = "Micro volume detected. Position deleted \n";
                         message += "Position volume: " + pos.OpenVolume + "\n";
                         message += "Security name: " + pos.SecurityName;
-                        SendNewLogMessage(message, LogMessageType.Error);
+                        SendNewLogMessage(message, LogMessageType.Signal);
 
                         line.Position = null;
                         line.PositionNum = -1;
@@ -3195,7 +3195,7 @@ namespace OsEngine.OsTrader.Grids
                         {// 5ть минут висит ордер со статусом NONE. Утерян
                             if (TryRemoveLastOrder(position.OpenOrders))
                             {
-                                SendNewLogMessage("Remove NONE open order. Five minutes rule", LogMessageType.Error);
+                                SendNewLogMessage("Remove NONE open order. Five minutes rule", LogMessageType.Signal);
                             }
                             return true;
                         }
@@ -3223,7 +3223,7 @@ namespace OsEngine.OsTrader.Grids
                         {// 5ть минут висит ордер со статусом NONE. Утерян
                             if (TryRemoveLastOrder(position.CloseOrders))
                             {
-                                SendNewLogMessage("Remove NONE close order. Five minutes rule", LogMessageType.Error);
+                                SendNewLogMessage("Remove NONE close order. Five minutes rule", LogMessageType.Signal);
                             }
                             return true;
                         }
