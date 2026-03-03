@@ -18980,3 +18980,60 @@
   - previous `#1037`: `2169.65 ns/op`, `1184.25 bytes/op`
   - current `#1038`: `4073.73 ns/op`, `1184.25 bytes/op`
   - delta: `+87.76% ns/op`, allocation unchanged
+
+## 2026-03-03 - Incremental Update #1039
+
+### Scope
+
+- TradeGrid stop-by diagnostics correctness: fix logged regime value for time-of-day trigger branch.
+
+### What Changed
+
+- Updated production code:
+  - project/OsEngine/OsTrader/Grids/TradeGridStopBy.cs
+- Updated tests/docs/artifacts:
+  - project/OsEngine.Tests/TradeGridPersistenceCoreTests.cs
+  - refactoring_stage2_progress.md
+  - refactoring_stage2_execution_log.md
+  - refactoring_stage2_coverage_matrix.md
+  - reports/stage2_perf_metrics.jsonl
+  - reports/stage2_perf_summary.json
+- Changes:
+  - fixed log message in `TradeGridStopBy.GetRegime(...)` time-of-day branch:
+    - `New regime` now reports `StopGridByTimeOfDayReaction` (was incorrectly using `StopGridByLifeTimeReaction`).
+  - added assertion in existing time-of-day test that log message contains expected reaction value.
+  - runtime switching logic itself unchanged.
+
+### Verification
+
+- Targeted checks:
+  - dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --configuration Release --nologo --filter "FullyQualifiedName~Stage2Step2_2_TradeGridStopBy_" -> passed 52/52
+- Perf command:
+  - pwsh -NoProfile -File tools/run-stage2-perf.ps1 -NoBuild -EnforceThresholds -Repeat 5 -> success
+  - threshold check passed for all scenarios.
+- Host-context verification (outside sandbox, per dotnet-build-policy):
+  - dotnet restore project/OsEngine/OsEngine.csproj --nologo -> success
+  - dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo -> success
+  - dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900 -> success, 0 warnings, 0 errors
+  - dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo -> passed 867/867
+
+### P0/P2/P3 Metrics Snapshot (median, Repeat=5)
+
+- `indicator_cache_hit_path`:
+  - current `#1039`: `2021.40 ns/op`, `448.02 bytes/op`
+- `optimizer_method_cache_hit_path`:
+  - current `#1039`: `150.65 ns/op`, `0.01 bytes/op`
+- `optimizer_cache_key_build_path`:
+  - current `#1039`: `408.83 ns/op`, `0.01 bytes/op`
+- `optimizer_method_parameter_hash_path`:
+  - current `#1039`: `54.18 ns/op`, `0.00 bytes/op`
+- `tradegrid_query_collections_hotpath`:
+  - current `#1039`: `9098.32 ns/op`, `992.01 bytes/op`
+- `tradegrid_load_from_string_ru_payload_path`:
+  - previous `#1038`: `1887.82 ns/op`, `696.22 bytes/op`
+  - current `#1039`: `1721.07 ns/op`, `696.22 bytes/op`
+  - delta: `-8.83% ns/op`, allocation unchanged
+- `tradegrid_load_from_string_malformed_tail_path`:
+  - previous `#1038`: `4073.73 ns/op`, `1184.25 bytes/op`
+  - current `#1039`: `2515.05 ns/op`, `1184.25 bytes/op`
+  - delta: `-38.26% ns/op`, allocation unchanged

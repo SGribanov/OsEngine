@@ -1200,10 +1200,13 @@ public class TradeGridPersistenceCoreTests
 
         TradeGrid grid = CreateBareGrid();
         AttachSingleCloseCandle(grid, 100m);
+        string? capturedMessage = null;
+        stopBy.LogMessageEvent += (message, _) => capturedMessage = message;
 
         TradeGridRegime regime = stopBy.GetRegime(grid, grid.Tab);
 
         Assert.Equal(TradeGridRegime.CloseForced, regime);
+        Assert.Contains("New regime: CloseForced", capturedMessage ?? string.Empty, StringComparison.Ordinal);
     }
 
     [Fact]
