@@ -612,6 +612,17 @@ namespace OsEngine.OsTrader.Grids
         {
             ReadOnlySpan<char> valueSpan = value.Trim();
 
+            bool hasComma = valueSpan.IndexOf(',') >= 0;
+            bool hasDot = valueSpan.IndexOf('.') >= 0;
+
+            if (hasComma && hasDot == false)
+            {
+                if (decimal.TryParse(valueSpan, NumberStyles.Any, RuCulture, out parsed))
+                {
+                    return true;
+                }
+            }
+
             if (decimal.TryParse(valueSpan, NumberStyles.Any, CultureInfo.InvariantCulture, out parsed))
             {
                 return true;
