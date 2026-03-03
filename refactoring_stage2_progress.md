@@ -17772,3 +17772,29 @@
   - dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo -> success
   - dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900 -> success, 0 warnings, 0 errors
   - dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo -> passed 843/843
+
+## 2026-03-03 - Incremental Update #1014
+
+### Scope
+
+- Continued Step 4.2 regression coverage for the newly merged upstream TradeGrid error-reaction branch.
+- Locked no-op auto-starter behavior when it is already disabled before error-reaction shutdown.
+
+### What Changed
+
+- Updated tests in:
+  - project/OsEngine.Tests/TradeGridPersistenceCoreTests.cs
+- Changes:
+  - added test Stage2Step2_2_TradeGrid_Process_WithErrorsReactionOffAndAutoStarterAlreadyOff_ShouldNotEmitAutoStarterOffLog.
+  - verified that when ErrorsReaction forces grid Regime to Off and auto-starter is already disabled:
+    - auto-starter flags remain Off/false;
+    - no extra AutoStarter is OFF error log is emitted.
+  - kept popup-safe setup by subscribing to TradeGridErrorsReaction.LogMessageEvent in test context.
+
+### Verification
+
+- Host-context verification (outside sandbox, per dotnet-build-policy):
+  - dotnet restore project/OsEngine/OsEngine.csproj --nologo -> success
+  - dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo -> success
+  - dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900 -> success, 0 warnings, 0 errors
+  - dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo -> passed 844/844

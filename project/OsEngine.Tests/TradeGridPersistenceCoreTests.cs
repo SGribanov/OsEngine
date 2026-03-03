@@ -6438,6 +6438,58 @@ public class TradeGridPersistenceCoreTests
     }
 
     [Fact]
+    public void Stage2Step2_2_TradeGrid_Process_WithErrorsReactionOffAndAutoStarterAlreadyOff_ShouldNotEmitAutoStarterOffLog()
+    {
+        TradeGrid grid = CreateBareGrid();
+        grid.StartProgram = StartProgram.IsOsTrader;
+        grid.Regime = TradeGridRegime.On;
+        grid.GridCreator.Lines = new List<TradeGridLine> { new TradeGridLine() };
+
+        TradeGridErrorsReaction errorsReaction = grid.ErrorsReaction;
+        errorsReaction.FailOpenOrdersCountToReaction = 1;
+        errorsReaction.FailOpenOrdersCountFact = 1;
+        SetPrivateField(errorsReaction, "_lastResetTime", DateTime.UtcNow);
+        errorsReaction.LogMessageEvent += (_, _) => { };
+
+        TradeGridAutoStarter autoStarter = grid.AutoStarter;
+        autoStarter.AutoStartRegime = TradeGridAutoStartRegime.Off;
+        autoStarter.StartGridByTimeOfDayIsOn = false;
+
+        AttachReadyTabForProcess(grid);
+
+        bool previousProcessState = OsEngine.MainWindow.ProccesIsWorked;
+        OsEngine.MainWindow.ProccesIsWorked = true;
+
+        bool haveAutoStarterOffLog = false;
+        grid.LogMessageEvent += (message, type) =>
+        {
+            if (type == LogMessageType.Error
+                && string.IsNullOrWhiteSpace(message) == false
+                && message.Contains("AutoStarter is OFF", StringComparison.Ordinal))
+            {
+                haveAutoStarterOffLog = true;
+            }
+        };
+
+        Exception? error;
+        try
+        {
+            error = Record.Exception(() => InvokePrivateNoArg(grid, "Process"));
+        }
+        finally
+        {
+            OsEngine.MainWindow.ProccesIsWorked = previousProcessState;
+        }
+
+        Assert.Null(error);
+        Assert.Equal(TradeGridRegime.Off, grid.Regime);
+        Assert.Equal(0, errorsReaction.FailOpenOrdersCountFact);
+        Assert.Equal(TradeGridAutoStartRegime.Off, autoStarter.AutoStartRegime);
+        Assert.False(autoStarter.StartGridByTimeOfDayIsOn);
+        Assert.False(haveAutoStarterOffLog);
+    }
+
+    [Fact]
     public void Stage2Step2_2_TradeGrid_ProfitAndMarketMakingHelpers_WithNullDependencies_ShouldNotThrow()
     {
         TradeGrid grid = (TradeGrid)RuntimeHelpers.GetUninitializedObject(typeof(TradeGrid));
