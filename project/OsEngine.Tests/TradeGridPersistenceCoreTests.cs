@@ -4600,6 +4600,72 @@ public class TradeGridPersistenceCoreTests
     }
 
     [Fact]
+    public void Stage2Step2_2_TradeGridErrorsReaction_GetReactionOnErrors_WithOpenErrorsThresholdReached_ShouldReturnOffAndEmitOpenOrdersLog()
+    {
+        TradeGridErrorsReaction reaction = new TradeGridErrorsReaction(CreateBareGrid())
+        {
+            FailOpenOrdersReactionIsOn = true,
+            FailOpenOrdersCountToReaction = 2,
+            FailOpenOrdersCountFact = 2,
+            FailCancelOrdersReactionIsOn = true,
+            FailCancelOrdersCountToReaction = 5,
+            FailCancelOrdersCountFact = 1
+        };
+
+        int logCount = 0;
+        string? logMessage = null;
+        LogMessageType? logType = null;
+        reaction.LogMessageEvent += (message, type) =>
+        {
+            logCount++;
+            logMessage = message;
+            logType = type;
+        };
+
+        TradeGridRegime regime = TradeGridRegime.On;
+        Exception? error = Record.Exception(() => regime = reaction.GetReactionOnErrors(CreateBareGrid()));
+
+        Assert.Null(error);
+        Assert.Equal(TradeGridRegime.Off, regime);
+        Assert.Equal(1, logCount);
+        Assert.Equal(LogMessageType.Error, logType);
+        Assert.Equal("ERROR on open orders. \nErrors count: 2\nNew regime: Off", logMessage);
+    }
+
+    [Fact]
+    public void Stage2Step2_2_TradeGridErrorsReaction_GetReactionOnErrors_WithCancelErrorsThresholdReached_ShouldReturnOffAndEmitCancelOrdersLog()
+    {
+        TradeGridErrorsReaction reaction = new TradeGridErrorsReaction(CreateBareGrid())
+        {
+            FailOpenOrdersReactionIsOn = true,
+            FailOpenOrdersCountToReaction = 3,
+            FailOpenOrdersCountFact = 1,
+            FailCancelOrdersReactionIsOn = true,
+            FailCancelOrdersCountToReaction = 2,
+            FailCancelOrdersCountFact = 2
+        };
+
+        int logCount = 0;
+        string? logMessage = null;
+        LogMessageType? logType = null;
+        reaction.LogMessageEvent += (message, type) =>
+        {
+            logCount++;
+            logMessage = message;
+            logType = type;
+        };
+
+        TradeGridRegime regime = TradeGridRegime.On;
+        Exception? error = Record.Exception(() => regime = reaction.GetReactionOnErrors(CreateBareGrid()));
+
+        Assert.Null(error);
+        Assert.Equal(TradeGridRegime.Off, regime);
+        Assert.Equal(1, logCount);
+        Assert.Equal(LogMessageType.Error, logType);
+        Assert.Equal("ERROR on cancel orders. \nErrors count: 2\nNew regime: Off", logMessage);
+    }
+
+    [Fact]
     public void Stage2Step2_2_TradeGridErrorsReaction_LoadFromString_WithInvalidWaitBoolAndMissingWaitSeconds_ShouldKeepValuesAndParseReduceFlag()
     {
         TradeGrid grid = CreateBareGrid();
