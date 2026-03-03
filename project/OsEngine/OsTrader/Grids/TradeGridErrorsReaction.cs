@@ -151,24 +151,24 @@ namespace OsEngine.OsTrader.Grids
 
         private static bool TryParseBoolFlexible(string value, out bool parsed)
         {
-            if (bool.TryParse(value, out parsed))
+            ReadOnlySpan<char> normalized = value.AsSpan().Trim();
+
+            if (bool.TryParse(normalized, out parsed))
             {
                 return true;
             }
 
-            string normalized = value.Trim();
-
-            if (string.Equals(normalized, "1", StringComparison.OrdinalIgnoreCase)
-                || string.Equals(normalized, "yes", StringComparison.OrdinalIgnoreCase)
-                || string.Equals(normalized, "on", StringComparison.OrdinalIgnoreCase))
+            if (normalized.SequenceEqual("1".AsSpan())
+                || normalized.Equals("yes".AsSpan(), StringComparison.OrdinalIgnoreCase)
+                || normalized.Equals("on".AsSpan(), StringComparison.OrdinalIgnoreCase))
             {
                 parsed = true;
                 return true;
             }
 
-            if (string.Equals(normalized, "0", StringComparison.OrdinalIgnoreCase)
-                || string.Equals(normalized, "no", StringComparison.OrdinalIgnoreCase)
-                || string.Equals(normalized, "off", StringComparison.OrdinalIgnoreCase))
+            if (normalized.SequenceEqual("0".AsSpan())
+                || normalized.Equals("no".AsSpan(), StringComparison.OrdinalIgnoreCase)
+                || normalized.Equals("off".AsSpan(), StringComparison.OrdinalIgnoreCase))
             {
                 parsed = false;
                 return true;
@@ -180,8 +180,10 @@ namespace OsEngine.OsTrader.Grids
 
         private static bool TryParsePositiveInt(string value, out int parsed)
         {
-            if (int.TryParse(value, NumberStyles.Any, CultureInfo.InvariantCulture, out parsed) == false
-                && int.TryParse(value, NumberStyles.Any, CultureInfo.CurrentCulture, out parsed) == false)
+            ReadOnlySpan<char> valueSpan = value.AsSpan().Trim();
+
+            if (int.TryParse(valueSpan, NumberStyles.Any, CultureInfo.InvariantCulture, out parsed) == false
+                && int.TryParse(valueSpan, NumberStyles.Any, CultureInfo.CurrentCulture, out parsed) == false)
             {
                 parsed = 0;
                 return false;
