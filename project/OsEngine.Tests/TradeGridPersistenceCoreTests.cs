@@ -4628,7 +4628,7 @@ public class TradeGridPersistenceCoreTests
         Assert.Null(error);
         Assert.Equal(TradeGridRegime.Off, regime);
         Assert.Equal(1, logCount);
-        Assert.Equal(LogMessageType.Error, logType);
+        Assert.Equal(LogMessageType.Signal, logType);
         Assert.Equal("ERROR on open orders. \nErrors count: 2\nNew regime: Off", logMessage);
     }
 
@@ -4661,7 +4661,7 @@ public class TradeGridPersistenceCoreTests
         Assert.Null(error);
         Assert.Equal(TradeGridRegime.Off, regime);
         Assert.Equal(1, logCount);
-        Assert.Equal(LogMessageType.Error, logType);
+        Assert.Equal(LogMessageType.Signal, logType);
         Assert.Equal("ERROR on cancel orders. \nErrors count: 2\nNew regime: Off", logMessage);
     }
 

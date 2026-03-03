@@ -411,7 +411,7 @@ namespace OsEngine.OsTrader.Grids
                     string message = "ERROR on open orders. \n";
                     message += "Errors count: " + FailOpenOrdersCountFact.ToString() + "\n";
                     message += "New regime: Off";
-                    SendNewLogMessage(message, LogMessageType.Error);
+                    SendNewLogMessage(message, LogMessageType.Signal);
 
                     return TradeGridRegime.Off;
                 }
@@ -424,7 +424,7 @@ namespace OsEngine.OsTrader.Grids
                     string message = "ERROR on cancel orders. \n";
                     message += "Errors count: " + FailCancelOrdersCountFact.ToString() + "\n";
                     message += "New regime: Off";
-                    SendNewLogMessage(message, LogMessageType.Error);
+                    SendNewLogMessage(message, LogMessageType.Signal);
 
                     return TradeGridRegime.Off;
                 }
