@@ -4705,6 +4705,11 @@ public class TradeGridPersistenceCoreTests
             new Order { State = OrderStateType.Fail }
         });
 
+        int saveEventCount = 0;
+        int repaintEventCount = 0;
+        grid.NeedToSaveEvent += () => saveEventCount++;
+        grid.RePaintSettingsEvent += () => repaintEventCount++;
+
         string? logMessage = null;
         LogMessageType? logType = null;
         reaction.LogMessageEvent += (message, type) =>
@@ -4717,6 +4722,8 @@ public class TradeGridPersistenceCoreTests
 
         Assert.Null(error);
         Assert.Equal(2, grid.MaxOpenOrdersInMarket);
+        Assert.Equal(1, saveEventCount);
+        Assert.Equal(1, repaintEventCount);
         Assert.Equal(LogMessageType.Signal, logType);
         Assert.Equal(
             "Open order rejected: no funds on deposit.\n" +
@@ -4762,6 +4769,11 @@ public class TradeGridPersistenceCoreTests
             new Order { State = OrderStateType.Fail }
         });
 
+        int saveEventCount = 0;
+        int repaintEventCount = 0;
+        grid.NeedToSaveEvent += () => saveEventCount++;
+        grid.RePaintSettingsEvent += () => repaintEventCount++;
+
         string? logMessage = null;
         LogMessageType? logType = null;
         reaction.LogMessageEvent += (message, type) =>
@@ -4774,6 +4786,8 @@ public class TradeGridPersistenceCoreTests
 
         Assert.Null(error);
         Assert.Equal(2, grid.MaxCloseOrdersInMarket);
+        Assert.Equal(1, saveEventCount);
+        Assert.Equal(1, repaintEventCount);
         Assert.Equal(LogMessageType.Signal, logType);
         Assert.Equal(
             "Close order rejected: no funds on deposit.\n" +
