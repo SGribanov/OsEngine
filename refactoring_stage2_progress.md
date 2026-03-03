@@ -19676,3 +19676,60 @@
   - previous `#1042`: `2672.87 ns/op`, `466.25 bytes/op`
   - current `#1050`: `3785.33 ns/op`, `466.25 bytes/op`
   - delta: `+41.62% ns/op`, allocation unchanged
+
+## 2026-03-03 - Incremental Update #1051
+
+### Scope
+
+- TradeGridErrorsReaction no-funds log scan micro-optimization and determinism hardening.
+
+### What Changed
+
+- Updated production code:
+  - project/OsEngine/OsTrader/Grids/TradeGridErrorsReaction.cs
+- Updated docs/artifacts:
+  - refactoring_stage2_progress.md
+  - refactoring_stage2_execution_log.md
+  - refactoring_stage2_coverage_matrix.md
+  - reports/stage2_perf_metrics.jsonl
+  - reports/stage2_perf_summary.json
+- Changes:
+  - in `TryFindNoFundsError`:
+    - cached `OsLocalization.Market.Label301` into local `noFundsMarker`;
+    - added early guard for empty marker (`string.IsNullOrEmpty`);
+    - switched message matching from `Contains(...)` to `IndexOf(..., StringComparison.Ordinal) >= 0`.
+  - runtime behavior preserved for valid non-empty marker.
+
+### Verification
+
+- Targeted checks:
+  - dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --configuration Release --nologo --filter "FullyQualifiedName~TradeGridErrorsReaction_PositionOpeningFail_WithNoFunds|FullyQualifiedName~TradeGridErrorsReaction_PositionClosingFail_WithNoFunds|FullyQualifiedName~TradeGridErrorsReaction_GetReactionOnErrors" -> passed 6/6
+- Perf command:
+  - pwsh -NoProfile -File tools/run-stage2-perf.ps1 -NoBuild -EnforceThresholds -Repeat 5 -> success
+  - threshold check passed for all scenarios.
+- Host-context verification (outside sandbox, per dotnet-build-policy):
+  - dotnet restore project/OsEngine/OsEngine.csproj --nologo -> success
+  - dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo -> success
+  - dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900 -> success, 0 warnings, 0 errors
+  - dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo -> passed 872/872
+
+### P0/P2/P3 Metrics Snapshot (median, Repeat=5)
+
+- `indicator_cache_hit_path`:
+  - current `#1051`: `2077.50 ns/op`, `448.02 bytes/op`
+- `optimizer_method_cache_hit_path`:
+  - current `#1051`: `214.65 ns/op`, `0.01 bytes/op`
+- `optimizer_cache_key_build_path`:
+  - current `#1051`: `303.82 ns/op`, `0.01 bytes/op`
+- `optimizer_method_parameter_hash_path`:
+  - current `#1051`: `77.50 ns/op`, `0.00 bytes/op`
+- `tradegrid_query_collections_hotpath`:
+  - current `#1051`: `10925.71 ns/op`, `992.01 bytes/op`
+- `tradegrid_load_from_string_ru_payload_path`:
+  - previous `#1042`: `2048.80 ns/op`, `32.22 bytes/op`
+  - current `#1051`: `3036.88 ns/op`, `32.22 bytes/op`
+  - delta: `+48.23% ns/op`, allocation unchanged
+- `tradegrid_load_from_string_malformed_tail_path`:
+  - previous `#1042`: `2672.87 ns/op`, `466.25 bytes/op`
+  - current `#1051`: `3541.92 ns/op`, `466.25 bytes/op`
+  - delta: `+32.51% ns/op`, allocation unchanged

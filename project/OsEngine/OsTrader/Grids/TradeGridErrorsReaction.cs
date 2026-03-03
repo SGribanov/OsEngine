@@ -377,6 +377,12 @@ namespace OsEngine.OsTrader.Grids
                     return;
                 }
 
+                string noFundsMarker = OsLocalization.Market.Label301;
+                if (string.IsNullOrEmpty(noFundsMarker))
+                {
+                    return;
+                }
+
                 bool haveNoFundsError = false;
 
                 for (int i = 0; i < messages.Count; i++)
@@ -389,7 +395,7 @@ namespace OsEngine.OsTrader.Grids
 
                     string message = messageObj.Message;
 
-                    if(message.Contains(OsLocalization.Market.Label301))
+                    if (message.IndexOf(noFundsMarker, StringComparison.Ordinal) >= 0)
                     {
                         haveNoFundsError = true;
                         break;

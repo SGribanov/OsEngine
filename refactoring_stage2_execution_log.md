@@ -18942,3 +18942,34 @@
   - `tradegrid_load_from_string_malformed_tail_path`: `3785.33 ns/op`, `466.25 bytes/op`
 - **Commit:** n/a
 - **Push:** n/a
+
+### Wave P3 - TradeGridErrorsReaction No-Funds Marker Scan Tightening (Incremental Adoption #1051)
+
+- **Status:** In Progress (increment block completed)
+- **Plan item:** `refactoring_stage2_plan.md` -> Plan Refresh / Wave `P3` (runtime reliability/log contracts)
+- **Changes (deterministic + lower-overhead no-funds message detection):**
+  - Updated `project/OsEngine/OsTrader/Grids/TradeGridErrorsReaction.cs`:
+    - cached no-funds localization marker in local variable;
+    - added guard for empty marker;
+    - switched scan predicate to ordinal `IndexOf` over each error log message.
+  - Updated perf artifacts:
+    - `reports/stage2_perf_metrics.jsonl`
+    - `reports/stage2_perf_summary.json`
+  - Updated `refactoring_stage2_coverage_matrix.md`.
+- **Verification (outside sandbox, per dotnet-build-policy):**
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --configuration Release --nologo --filter "FullyQualifiedName~TradeGridErrorsReaction_PositionOpeningFail_WithNoFunds|FullyQualifiedName~TradeGridErrorsReaction_PositionClosingFail_WithNoFunds|FullyQualifiedName~TradeGridErrorsReaction_GetReactionOnErrors"` -> passed `6/6`
+  - `pwsh -NoProfile -File tools/run-stage2-perf.ps1 -NoBuild -EnforceThresholds -Repeat 5` -> success; threshold check passed for all scenarios
+  - `dotnet restore project/OsEngine/OsEngine.csproj --nologo` -> success
+  - `dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo` -> success
+  - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` -> success, 0 warnings, 0 errors
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed `872/872`
+- **Metrics snapshot (median, Repeat=5):**
+  - `indicator_cache_hit_path`: `2077.50 ns/op`, `448.02 bytes/op`
+  - `optimizer_method_cache_hit_path`: `214.65 ns/op`, `0.01 bytes/op`
+  - `optimizer_cache_key_build_path`: `303.82 ns/op`, `0.01 bytes/op`
+  - `optimizer_method_parameter_hash_path`: `77.50 ns/op`, `0.00 bytes/op`
+  - `tradegrid_query_collections_hotpath`: `10925.71 ns/op`, `992.01 bytes/op`
+  - `tradegrid_load_from_string_ru_payload_path`: `3036.88 ns/op`, `32.22 bytes/op`
+  - `tradegrid_load_from_string_malformed_tail_path`: `3541.92 ns/op`, `466.25 bytes/op`
+- **Commit:** n/a
+- **Push:** n/a
