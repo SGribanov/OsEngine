@@ -105,7 +105,7 @@ namespace OsEngine.OsOptimizer.OptEntity
             DataFingerprint = dataFingerprint;
             ResultTypeName = resultTypeNameSafe;
 
-            _hashCode = ComputeHashCode(
+            _hashCode = NormalizeHashCode(ComputeHashCode(
                 securityNameSafe,
                 timeframeTicks,
                 firstTimeTicks,
@@ -117,7 +117,7 @@ namespace OsEngine.OsOptimizer.OptEntity
                 sourceIdToken,
                 sourceIdIsToken,
                 dataFingerprint,
-                resultTypeNameSafe);
+                resultTypeNameSafe));
         }
 
         public string SecurityName { get; }
@@ -164,24 +164,7 @@ namespace OsEngine.OsOptimizer.OptEntity
 
         public override int GetHashCode()
         {
-            if (_hashCode != 0)
-            {
-                return _hashCode;
-            }
-
-            return ComputeHashCode(
-                SecurityName,
-                TimeframeTicks,
-                FirstTimeTicks,
-                LastTimeTicks,
-                CandleCount,
-                CalculationName,
-                ParametersHash,
-                SourceId,
-                _sourceIdToken,
-                _sourceIdIsToken,
-                DataFingerprint,
-                ResultTypeName);
+            return _hashCode;
         }
 
         private static int ComputeHashCode(
@@ -216,6 +199,11 @@ namespace OsEngine.OsOptimizer.OptEntity
                 hash = hash * 31 + StringComparer.Ordinal.GetHashCode(resultTypeName ?? string.Empty);
                 return hash;
             }
+        }
+
+        private static int NormalizeHashCode(int hash)
+        {
+            return hash == 0 ? 1 : hash;
         }
 
         public static bool operator ==(OptimizerMethodCacheKey left, OptimizerMethodCacheKey right)

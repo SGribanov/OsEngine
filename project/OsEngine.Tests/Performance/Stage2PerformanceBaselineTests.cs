@@ -303,8 +303,16 @@ public class Stage2PerformanceBaselineTests
                 dataFingerprint: 17,
                 resultTypeName: typeof(decimal).FullName ?? nameof(Decimal));
 
-            checksum += indicatorKey.GetHashCode();
-            checksum += methodKey.GetHashCode();
+            int indicatorHash = indicatorKey.GetHashCode();
+            int methodHash = methodKey.GetHashCode();
+
+            // Keep hash calculations in the hot path while preserving a deterministic checksum across processes.
+            if ((indicatorHash | methodHash) == int.MinValue)
+            {
+                checksum--;
+            }
+
+            checksum += indicatorKey.CandleCount + methodKey.CandleCount;
         }
 
         stopwatch.Stop();

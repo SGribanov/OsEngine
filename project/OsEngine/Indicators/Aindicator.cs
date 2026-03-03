@@ -437,6 +437,7 @@ namespace OsEngine.Indicators
         private List<IndicatorParameter> _parameters = new List<IndicatorParameter>();
         private string _optimizerParameterHash = "00000011";
         private bool _optimizerParameterHashDirty = true;
+        private string _optimizerCalculationName;
 
         /// <summary>
         /// digital parameters of the indicator
@@ -872,7 +873,7 @@ namespace OsEngine.Indicators
                 ? candles[1].TimeStart.Ticks - candles[0].TimeStart.Ticks
                 : 0L;
 
-            string calculationName = GetType().FullName ?? GetType().Name;
+            string calculationName = GetOptimizerCalculationName();
             string parameterHash = BuildOptimizerParameterHash();
             int sourceId = RuntimeHelpers.GetHashCode(candles);
             int dataFingerprint = BuildCandlesDataFingerprint(candles);
@@ -922,6 +923,16 @@ namespace OsEngine.Indicators
         private void MarkOptimizerParameterHashDirty()
         {
             _optimizerParameterHashDirty = true;
+        }
+
+        private string GetOptimizerCalculationName()
+        {
+            if (string.IsNullOrEmpty(_optimizerCalculationName))
+            {
+                _optimizerCalculationName = GetType().FullName ?? GetType().Name;
+            }
+
+            return _optimizerCalculationName;
         }
 
         private static int BuildCandlesDataFingerprint(List<Candle> candles)

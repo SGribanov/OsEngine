@@ -385,7 +385,7 @@ namespace OsEngine.OsTrader.Panels
                 calculationName,
                 parametersHash,
                 candles,
-                typeof(T).FullName ?? typeof(T).Name);
+                OptimizerMethodCacheTypeName<T>.Value);
 
             if (cache.TryGet(key, out T cachedValue))
             {
@@ -515,6 +515,11 @@ namespace OsEngine.OsTrader.Panels
             }
 
             return part.ToString() ?? string.Empty;
+        }
+
+        private static class OptimizerMethodCacheTypeName<T>
+        {
+            internal static readonly string Value = typeof(T).FullName ?? typeof(T).Name;
         }
 
         /// <summary>
