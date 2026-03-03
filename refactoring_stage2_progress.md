@@ -19037,3 +19037,60 @@
   - previous `#1038`: `4073.73 ns/op`, `1184.25 bytes/op`
   - current `#1039`: `2515.05 ns/op`, `1184.25 bytes/op`
   - delta: `-38.26% ns/op`, allocation unchanged
+
+## 2026-03-03 - Incremental Update #1040
+
+### Scope
+
+- TradeGrid reliability contract hardening: add explicit regression coverage for Signal severity in deterministic housekeeping branches.
+
+### What Changed
+
+- Updated tests:
+  - project/OsEngine.Tests/TradeGridPersistenceCoreTests.cs
+- Changes:
+  - enhanced stale `NONE` order cleanup tests to assert emitted log type/message:
+    - `Remove NONE open order. Five minutes rule` -> `Signal`
+    - `Remove NONE close order. Five minutes rule` -> `Signal`
+  - enhanced forced-close completion test to assert:
+    - `Close Forced regime ended. No positions` log emitted as `Signal`
+    - message contains `New regime: Off`.
+- Updated perf artifacts:
+  - reports/stage2_perf_metrics.jsonl
+  - reports/stage2_perf_summary.json
+- Updated global coverage matrix:
+  - refactoring_stage2_coverage_matrix.md
+
+### Verification
+
+- Targeted checks:
+  - dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --configuration Release --nologo --filter "FullyQualifiedName~Stage2Step2_2_TradeGrid_HaveOrdersWithNoMarketOrders_ShouldRemoveStaleNone|FullyQualifiedName~Stage2Step2_2_TradeGrid_ForcedCloseAndVolume_WithSparseLines_ShouldStaySafe" -> passed 3/3
+- Perf command:
+  - pwsh -NoProfile -File tools/run-stage2-perf.ps1 -NoBuild -EnforceThresholds -Repeat 5 -> success
+  - threshold check passed for all scenarios.
+- Host-context verification (outside sandbox, per dotnet-build-policy):
+  - dotnet restore project/OsEngine/OsEngine.csproj --nologo -> success
+  - dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo -> success
+  - dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900 -> success, 0 warnings, 0 errors
+  - dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo -> passed 867/867
+
+### P0/P2/P3 Metrics Snapshot (median, Repeat=5)
+
+- `indicator_cache_hit_path`:
+  - current `#1040`: `1881.40 ns/op`, `448.02 bytes/op`
+- `optimizer_method_cache_hit_path`:
+  - current `#1040`: `193.75 ns/op`, `0.01 bytes/op`
+- `optimizer_cache_key_build_path`:
+  - current `#1040`: `329.59 ns/op`, `0.01 bytes/op`
+- `optimizer_method_parameter_hash_path`:
+  - current `#1040`: `53.60 ns/op`, `0.00 bytes/op`
+- `tradegrid_query_collections_hotpath`:
+  - current `#1040`: `9766.92 ns/op`, `992.01 bytes/op`
+- `tradegrid_load_from_string_ru_payload_path`:
+  - previous `#1039`: `1721.07 ns/op`, `696.22 bytes/op`
+  - current `#1040`: `2307.38 ns/op`, `696.22 bytes/op`
+  - delta: `+34.07% ns/op`, allocation unchanged
+- `tradegrid_load_from_string_malformed_tail_path`:
+  - previous `#1039`: `2515.05 ns/op`, `1184.25 bytes/op`
+  - current `#1040`: `2794.08 ns/op`, `1184.25 bytes/op`
+  - delta: `+11.09% ns/op`, allocation unchanged

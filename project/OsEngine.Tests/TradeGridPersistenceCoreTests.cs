@@ -7448,7 +7448,13 @@ public class TradeGridPersistenceCoreTests
     {
         TradeGrid grid = (TradeGrid)RuntimeHelpers.GetUninitializedObject(typeof(TradeGrid));
         grid.GridCreator = new TradeGridCreator();
-        grid.LogMessageEvent += (_, _) => { };
+        string? logMessage = null;
+        LogMessageType? logType = null;
+        grid.LogMessageEvent += (message, type) =>
+        {
+            logMessage = message;
+            logType = type;
+        };
 
         Position position = (Position)RuntimeHelpers.GetUninitializedObject(typeof(Position));
         SetPrivateField(position, "_openOrders", new List<Order>
@@ -7472,6 +7478,8 @@ public class TradeGridPersistenceCoreTests
 
         Assert.True(hasNoMarketOrders);
         Assert.Empty(position.OpenOrders);
+        Assert.Equal(LogMessageType.Signal, logType);
+        Assert.Equal("Remove NONE open order. Five minutes rule", logMessage);
     }
 
     [Fact]
@@ -7479,7 +7487,13 @@ public class TradeGridPersistenceCoreTests
     {
         TradeGrid grid = (TradeGrid)RuntimeHelpers.GetUninitializedObject(typeof(TradeGrid));
         grid.GridCreator = new TradeGridCreator();
-        grid.LogMessageEvent += (_, _) => { };
+        string? logMessage = null;
+        LogMessageType? logType = null;
+        grid.LogMessageEvent += (message, type) =>
+        {
+            logMessage = message;
+            logType = type;
+        };
 
         Position position = (Position)RuntimeHelpers.GetUninitializedObject(typeof(Position));
         SetPrivateField(position, "_openOrders", new List<Order>());
@@ -7503,6 +7517,8 @@ public class TradeGridPersistenceCoreTests
 
         Assert.True(hasNoMarketOrders);
         Assert.Empty(position.CloseOrders);
+        Assert.Equal(LogMessageType.Signal, logType);
+        Assert.Equal("Remove NONE close order. Five minutes rule", logMessage);
     }
 
     [Fact]
@@ -8463,6 +8479,16 @@ public class TradeGridPersistenceCoreTests
         grid.Tab = (BotTabSimple)RuntimeHelpers.GetUninitializedObject(typeof(BotTabSimple));
         grid.CheckMicroVolumes = false;
         grid.Regime = TradeGridRegime.CloseForced;
+        string? logMessage = null;
+        LogMessageType? logType = null;
+        grid.LogMessageEvent += (message, type) =>
+        {
+            if (message != null && message.Contains("Close Forced regime ended. No positions", StringComparison.Ordinal))
+            {
+                logMessage = message;
+                logType = type;
+            }
+        };
 
         Position position = (Position)RuntimeHelpers.GetUninitializedObject(typeof(Position));
         position.State = PositionStateType.Done;
@@ -8496,6 +8522,8 @@ public class TradeGridPersistenceCoreTests
         Assert.Equal(-1m, openVolumeByLines);
         Assert.False(haveCloseOrders);
         Assert.Equal(TradeGridRegime.Off, grid.Regime);
+        Assert.Equal(LogMessageType.Signal, logType);
+        Assert.Contains("New regime: Off", logMessage ?? string.Empty, StringComparison.Ordinal);
     }
 
     private static TradeGrid CreateBareGrid()
