@@ -15,6 +15,8 @@ namespace OsEngine.OsOptimizer.OptEntity
     public readonly struct OptimizerMethodCacheKey : IEquatable<OptimizerMethodCacheKey>
     {
         private readonly int _hashCode;
+        private readonly int _sourceIdToken;
+        private readonly bool _sourceIdIsToken;
 
         public OptimizerMethodCacheKey(
             string securityName,
@@ -27,11 +29,67 @@ namespace OsEngine.OsOptimizer.OptEntity
             string sourceId,
             int dataFingerprint,
             string resultTypeName)
+            : this(
+                securityName,
+                timeframeTicks,
+                firstTimeTicks,
+                lastTimeTicks,
+                candleCount,
+                calculationName,
+                parametersHash,
+                sourceId,
+                sourceIdToken: 0,
+                sourceIdIsToken: false,
+                dataFingerprint,
+                resultTypeName)
+        {
+        }
+
+        public OptimizerMethodCacheKey(
+            string securityName,
+            long timeframeTicks,
+            long firstTimeTicks,
+            long lastTimeTicks,
+            int candleCount,
+            string calculationName,
+            string parametersHash,
+            int sourceId,
+            int dataFingerprint,
+            string resultTypeName)
+            : this(
+                securityName,
+                timeframeTicks,
+                firstTimeTicks,
+                lastTimeTicks,
+                candleCount,
+                calculationName,
+                parametersHash,
+                sourceIdText: string.Empty,
+                sourceIdToken: sourceId,
+                sourceIdIsToken: true,
+                dataFingerprint,
+                resultTypeName)
+        {
+        }
+
+        private OptimizerMethodCacheKey(
+            string securityName,
+            long timeframeTicks,
+            long firstTimeTicks,
+            long lastTimeTicks,
+            int candleCount,
+            string calculationName,
+            string parametersHash,
+            string sourceIdText,
+            int sourceIdToken,
+            bool sourceIdIsToken,
+            int dataFingerprint,
+            string resultTypeName)
         {
             string securityNameSafe = securityName ?? string.Empty;
             string calculationNameSafe = calculationName ?? string.Empty;
             string parametersHashSafe = parametersHash ?? string.Empty;
-            string sourceIdSafe = sourceId ?? string.Empty;
+            string sourceIdSafe = sourceIdText ?? string.Empty;
             string resultTypeNameSafe = resultTypeName ?? string.Empty;
 
             SecurityName = securityNameSafe;
@@ -42,6 +100,8 @@ namespace OsEngine.OsOptimizer.OptEntity
             CalculationName = calculationNameSafe;
             ParametersHash = parametersHashSafe;
             SourceId = sourceIdSafe;
+            _sourceIdToken = sourceIdToken;
+            _sourceIdIsToken = sourceIdIsToken;
             DataFingerprint = dataFingerprint;
             ResultTypeName = resultTypeNameSafe;
 
@@ -54,6 +114,8 @@ namespace OsEngine.OsOptimizer.OptEntity
                 calculationNameSafe,
                 parametersHashSafe,
                 sourceIdSafe,
+                sourceIdToken,
+                sourceIdIsToken,
                 dataFingerprint,
                 resultTypeNameSafe);
         }
@@ -88,7 +150,10 @@ namespace OsEngine.OsOptimizer.OptEntity
                 && StringComparer.Ordinal.Equals(SecurityName, other.SecurityName)
                 && StringComparer.Ordinal.Equals(CalculationName, other.CalculationName)
                 && StringComparer.Ordinal.Equals(ParametersHash, other.ParametersHash)
-                && StringComparer.Ordinal.Equals(SourceId, other.SourceId)
+                && _sourceIdIsToken == other._sourceIdIsToken
+                && (_sourceIdIsToken
+                    ? _sourceIdToken == other._sourceIdToken
+                    : StringComparer.Ordinal.Equals(SourceId, other.SourceId))
                 && StringComparer.Ordinal.Equals(ResultTypeName, other.ResultTypeName);
         }
 
@@ -113,6 +178,8 @@ namespace OsEngine.OsOptimizer.OptEntity
                 CalculationName,
                 ParametersHash,
                 SourceId,
+                _sourceIdToken,
+                _sourceIdIsToken,
                 DataFingerprint,
                 ResultTypeName);
         }
@@ -126,6 +193,8 @@ namespace OsEngine.OsOptimizer.OptEntity
             string calculationName,
             string parametersHash,
             string sourceId,
+            int sourceIdToken,
+            bool sourceIdIsToken,
             int dataFingerprint,
             string resultTypeName)
         {
@@ -137,11 +206,14 @@ namespace OsEngine.OsOptimizer.OptEntity
                 hash = hash * 31 + lastTimeTicks.GetHashCode();
                 hash = hash * 31 + candleCount;
                 hash = hash * 31 + dataFingerprint;
-                hash = hash * 31 + StringComparer.Ordinal.GetHashCode(securityName);
-                hash = hash * 31 + StringComparer.Ordinal.GetHashCode(calculationName);
-                hash = hash * 31 + StringComparer.Ordinal.GetHashCode(parametersHash);
-                hash = hash * 31 + StringComparer.Ordinal.GetHashCode(sourceId);
-                hash = hash * 31 + StringComparer.Ordinal.GetHashCode(resultTypeName);
+                hash = hash * 31 + StringComparer.Ordinal.GetHashCode(securityName ?? string.Empty);
+                hash = hash * 31 + StringComparer.Ordinal.GetHashCode(calculationName ?? string.Empty);
+                hash = hash * 31 + StringComparer.Ordinal.GetHashCode(parametersHash ?? string.Empty);
+                hash = hash * 31 + (sourceIdIsToken ? 1 : 0);
+                hash = sourceIdIsToken
+                    ? (hash * 31 + sourceIdToken)
+                    : (hash * 31 + StringComparer.Ordinal.GetHashCode(sourceId ?? string.Empty));
+                hash = hash * 31 + StringComparer.Ordinal.GetHashCode(resultTypeName ?? string.Empty);
                 return hash;
             }
         }

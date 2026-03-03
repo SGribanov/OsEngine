@@ -66,4 +66,25 @@ public class OptimizerMethodCacheCoreTests
         Assert.Equal(1, stats.Writes);
         Assert.Equal(1, stats.EntriesCount);
     }
+
+    [Fact]
+    public void OptimizerMethodCache_IntSourceIdKey_ShouldWorkInSetGet()
+    {
+        OptimizerMethodCache cache = new OptimizerMethodCache(maxEntries: 8);
+        OptimizerMethodCacheKey key = new OptimizerMethodCacheKey(
+            securityName: "SEC",
+            timeframeTicks: 60,
+            firstTimeTicks: 1,
+            lastTimeTicks: 2,
+            candleCount: 100,
+            calculationName: "Calc",
+            parametersHash: "p",
+            sourceId: 12345,
+            dataFingerprint: 1,
+            resultTypeName: typeof(int).FullName!);
+
+        cache.Set(key, 42);
+        Assert.True(cache.TryGet(key, out int value));
+        Assert.Equal(42, value);
+    }
 }

@@ -885,7 +885,7 @@ namespace OsEngine.Indicators
                 candleCount: candlesCount,
                 calculationName: calculationName,
                 parametersHash: parameterHash,
-                sourceId: sourceId.ToString(CultureInfo.InvariantCulture),
+                sourceId: sourceId,
                 outputSeriesCount: DataSeries.Count,
                 includeIndicatorsCount: IncludeIndicators.Count,
                 dataFingerprint: dataFingerprint);

@@ -21,6 +21,8 @@ namespace OsEngine.OsOptimizer.OptEntity
     public readonly struct IndicatorCacheKey : IEquatable<IndicatorCacheKey>
     {
         private readonly int _hashCode;
+        private readonly int _sourceIdToken;
+        private readonly bool _sourceIdIsToken;
 
         public IndicatorCacheKey(
             string securityName,
@@ -34,11 +36,71 @@ namespace OsEngine.OsOptimizer.OptEntity
             int outputSeriesCount,
             int includeIndicatorsCount,
             int dataFingerprint)
+            : this(
+                securityName,
+                timeframeTicks,
+                firstTimeTicks,
+                lastTimeTicks,
+                candleCount,
+                calculationName,
+                parametersHash,
+                sourceId,
+                sourceIdToken: 0,
+                sourceIdIsToken: false,
+                outputSeriesCount,
+                includeIndicatorsCount,
+                dataFingerprint)
+        {
+        }
+
+        public IndicatorCacheKey(
+            string securityName,
+            long timeframeTicks,
+            long firstTimeTicks,
+            long lastTimeTicks,
+            int candleCount,
+            string calculationName,
+            string parametersHash,
+            int sourceId,
+            int outputSeriesCount,
+            int includeIndicatorsCount,
+            int dataFingerprint)
+            : this(
+                securityName,
+                timeframeTicks,
+                firstTimeTicks,
+                lastTimeTicks,
+                candleCount,
+                calculationName,
+                parametersHash,
+                sourceIdText: string.Empty,
+                sourceIdToken: sourceId,
+                sourceIdIsToken: true,
+                outputSeriesCount,
+                includeIndicatorsCount,
+                dataFingerprint)
+        {
+        }
+
+        private IndicatorCacheKey(
+            string securityName,
+            long timeframeTicks,
+            long firstTimeTicks,
+            long lastTimeTicks,
+            int candleCount,
+            string calculationName,
+            string parametersHash,
+            string sourceIdText,
+            int sourceIdToken,
+            bool sourceIdIsToken,
+            int outputSeriesCount,
+            int includeIndicatorsCount,
+            int dataFingerprint)
         {
             string securityNameSafe = securityName ?? string.Empty;
             string calculationNameSafe = calculationName ?? string.Empty;
             string parametersHashSafe = parametersHash ?? string.Empty;
-            string sourceIdSafe = sourceId ?? string.Empty;
+            string sourceIdSafe = sourceIdText ?? string.Empty;
 
             SecurityName = securityNameSafe;
             TimeframeTicks = timeframeTicks;
@@ -48,6 +110,8 @@ namespace OsEngine.OsOptimizer.OptEntity
             CalculationName = calculationNameSafe;
             ParametersHash = parametersHashSafe;
             SourceId = sourceIdSafe;
+            _sourceIdToken = sourceIdToken;
+            _sourceIdIsToken = sourceIdIsToken;
             OutputSeriesCount = outputSeriesCount;
             IncludeIndicatorsCount = includeIndicatorsCount;
             DataFingerprint = dataFingerprint;
@@ -61,6 +125,8 @@ namespace OsEngine.OsOptimizer.OptEntity
                 calculationNameSafe,
                 parametersHashSafe,
                 sourceIdSafe,
+                sourceIdToken,
+                sourceIdIsToken,
                 outputSeriesCount,
                 includeIndicatorsCount,
                 dataFingerprint);
@@ -100,7 +166,10 @@ namespace OsEngine.OsOptimizer.OptEntity
                 && StringComparer.Ordinal.Equals(SecurityName, other.SecurityName)
                 && StringComparer.Ordinal.Equals(CalculationName, other.CalculationName)
                 && StringComparer.Ordinal.Equals(ParametersHash, other.ParametersHash)
-                && StringComparer.Ordinal.Equals(SourceId, other.SourceId);
+                && _sourceIdIsToken == other._sourceIdIsToken
+                && (_sourceIdIsToken
+                    ? _sourceIdToken == other._sourceIdToken
+                    : StringComparer.Ordinal.Equals(SourceId, other.SourceId));
         }
 
         public override bool Equals(object? obj)
@@ -124,6 +193,8 @@ namespace OsEngine.OsOptimizer.OptEntity
                 CalculationName,
                 ParametersHash,
                 SourceId,
+                _sourceIdToken,
+                _sourceIdIsToken,
                 OutputSeriesCount,
                 IncludeIndicatorsCount,
                 DataFingerprint);
@@ -138,6 +209,8 @@ namespace OsEngine.OsOptimizer.OptEntity
             string calculationName,
             string parametersHash,
             string sourceId,
+            int sourceIdToken,
+            bool sourceIdIsToken,
             int outputSeriesCount,
             int includeIndicatorsCount,
             int dataFingerprint)
@@ -152,10 +225,13 @@ namespace OsEngine.OsOptimizer.OptEntity
                 hash = hash * 31 + outputSeriesCount;
                 hash = hash * 31 + includeIndicatorsCount;
                 hash = hash * 31 + dataFingerprint;
-                hash = hash * 31 + StringComparer.Ordinal.GetHashCode(securityName);
-                hash = hash * 31 + StringComparer.Ordinal.GetHashCode(calculationName);
-                hash = hash * 31 + StringComparer.Ordinal.GetHashCode(parametersHash);
-                hash = hash * 31 + StringComparer.Ordinal.GetHashCode(sourceId);
+                hash = hash * 31 + StringComparer.Ordinal.GetHashCode(securityName ?? string.Empty);
+                hash = hash * 31 + StringComparer.Ordinal.GetHashCode(calculationName ?? string.Empty);
+                hash = hash * 31 + StringComparer.Ordinal.GetHashCode(parametersHash ?? string.Empty);
+                hash = hash * 31 + (sourceIdIsToken ? 1 : 0);
+                hash = sourceIdIsToken
+                    ? (hash * 31 + sourceIdToken)
+                    : (hash * 31 + StringComparer.Ordinal.GetHashCode(sourceId ?? string.Empty));
                 return hash;
             }
         }

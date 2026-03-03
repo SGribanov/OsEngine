@@ -430,7 +430,7 @@ namespace OsEngine.OsTrader.Panels
             }
 
             int dataFingerprint = BuildMethodCacheCandlesFingerprint(candles);
-            string sourceId = RuntimeHelpers.GetHashCode(candles).ToString(CultureInfo.InvariantCulture);
+            int sourceId = RuntimeHelpers.GetHashCode(candles);
 
             return new OptimizerMethodCacheKey(
                 securityName: securityName ?? string.Empty,

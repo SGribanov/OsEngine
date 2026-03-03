@@ -147,6 +147,31 @@ public class IndicatorCacheCoreTests
         Assert.Equal(999m, loadedAgain![0][0]);
     }
 
+    [Fact]
+    public void IndicatorCache_IntSourceIdKey_ShouldWorkInSetGet()
+    {
+        IndicatorCache cache = new IndicatorCache(maxEntries: 8);
+        IndicatorCacheKey key = new IndicatorCacheKey(
+            securityName: "A",
+            timeframeTicks: 60,
+            firstTimeTicks: 1,
+            lastTimeTicks: 2,
+            candleCount: 10,
+            calculationName: "Calc",
+            parametersHash: "H",
+            sourceId: 12345,
+            outputSeriesCount: 1,
+            includeIndicatorsCount: 0,
+            dataFingerprint: 7);
+
+        cache.Set(key, [new List<decimal> { 1m, 2m }]);
+
+        bool found = cache.TryGet(key, out List<decimal>[]? loaded);
+        Assert.True(found);
+        Assert.NotNull(loaded);
+        Assert.Equal(2, loaded![0].Count);
+    }
+
     private static IndicatorCacheKey BuildKey(string id)
     {
         return new IndicatorCacheKey(

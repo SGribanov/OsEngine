@@ -228,6 +228,110 @@ public class Stage2PerformanceBaselineTests
         });
     }
 
+    [Fact]
+    public void Stage2Perf_OptimizerCacheKeyBuildPath_ShouldEmitMetricsAndStableChecksums()
+    {
+        const int warmupIterations = 200;
+        const int iterations = 20000;
+
+        List<Candle> candles = BuildCandlesForKeyBuild(256);
+        int sourceId = RuntimeHelpers.GetHashCode(candles);
+        long firstTicks = candles[0].TimeStart.Ticks;
+        long lastTicks = candles[^1].TimeStart.Ticks;
+        const long timeframeTicks = 60L;
+
+        for (int i = 0; i < warmupIterations; i++)
+        {
+            _ = new IndicatorCacheKey(
+                securityName: string.Empty,
+                timeframeTicks: timeframeTicks,
+                firstTimeTicks: firstTicks,
+                lastTimeTicks: lastTicks,
+                candleCount: candles.Count,
+                calculationName: "Stage2Perf",
+                parametersHash: "P0",
+                sourceId: sourceId,
+                outputSeriesCount: 3,
+                includeIndicatorsCount: 0,
+                dataFingerprint: 11).GetHashCode();
+
+            _ = new OptimizerMethodCacheKey(
+                securityName: "PERF",
+                timeframeTicks: timeframeTicks,
+                firstTimeTicks: firstTicks,
+                lastTimeTicks: lastTicks,
+                candleCount: candles.Count,
+                calculationName: "Stage2PerfMethod",
+                parametersHash: "P0",
+                sourceId: sourceId,
+                dataFingerprint: 17,
+                resultTypeName: typeof(decimal).FullName ?? nameof(Decimal)).GetHashCode();
+        }
+
+        ForceGc();
+
+        long allocatedBefore = GC.GetAllocatedBytesForCurrentThread();
+        int gen0Before = GC.CollectionCount(0);
+        Stopwatch stopwatch = Stopwatch.StartNew();
+
+        long checksum = 0;
+
+        for (int i = 0; i < iterations; i++)
+        {
+            IndicatorCacheKey indicatorKey = new IndicatorCacheKey(
+                securityName: string.Empty,
+                timeframeTicks: timeframeTicks,
+                firstTimeTicks: firstTicks,
+                lastTimeTicks: lastTicks,
+                candleCount: candles.Count,
+                calculationName: "Stage2Perf",
+                parametersHash: "P0",
+                sourceId: sourceId,
+                outputSeriesCount: 3,
+                includeIndicatorsCount: 0,
+                dataFingerprint: 11);
+
+            OptimizerMethodCacheKey methodKey = new OptimizerMethodCacheKey(
+                securityName: "PERF",
+                timeframeTicks: timeframeTicks,
+                firstTimeTicks: firstTicks,
+                lastTimeTicks: lastTicks,
+                candleCount: candles.Count,
+                calculationName: "Stage2PerfMethod",
+                parametersHash: "P0",
+                sourceId: sourceId,
+                dataFingerprint: 17,
+                resultTypeName: typeof(decimal).FullName ?? nameof(Decimal));
+
+            checksum += indicatorKey.GetHashCode();
+            checksum += methodKey.GetHashCode();
+        }
+
+        stopwatch.Stop();
+
+        long allocatedAfter = GC.GetAllocatedBytesForCurrentThread();
+        int gen0After = GC.CollectionCount(0);
+
+        long allocatedBytes = allocatedAfter - allocatedBefore;
+        double elapsedMs = stopwatch.Elapsed.TotalMilliseconds;
+        double nsPerOp = elapsedMs * 1_000_000d / iterations;
+        double allocatedBytesPerOp = (double)allocatedBytes / iterations;
+
+        Assert.True(checksum != 0);
+
+        Stage2PerfReportWriter.Append(new Stage2PerfMetric
+        {
+            Scenario = "optimizer_cache_key_build_path",
+            Iterations = iterations,
+            ElapsedMsTotal = elapsedMs,
+            NanosecondsPerOp = nsPerOp,
+            AllocatedBytesTotal = allocatedBytes,
+            AllocatedBytesPerOp = allocatedBytesPerOp,
+            Gen0Collections = gen0After - gen0Before,
+            Checksum = checksum
+        });
+    }
+
     private static long RunTradeGridQueryPass(TradeGrid grid)
     {
         List<TradeGridLine> openPositions = grid.GetLinesWithOpenPosition();
@@ -258,6 +362,29 @@ public class Stage2PerformanceBaselineTests
         }
 
         return new[] { first, second, third };
+    }
+
+    private static List<Candle> BuildCandlesForKeyBuild(int count)
+    {
+        List<Candle> candles = new List<Candle>(count);
+        DateTime start = DateTime.UtcNow.AddMinutes(-count);
+        decimal value = 100m;
+
+        for (int i = 0; i < count; i++)
+        {
+            value = value + (i % 2 == 0 ? 0.1m : -0.05m);
+            candles.Add(new Candle
+            {
+                TimeStart = start.AddMinutes(i),
+                Open = value,
+                High = value + 0.2m,
+                Low = value - 0.2m,
+                Close = value + 0.05m,
+                Volume = 10m + i
+            });
+        }
+
+        return candles;
     }
 
     private static void SeedGridLines(TradeGrid grid, int count)
