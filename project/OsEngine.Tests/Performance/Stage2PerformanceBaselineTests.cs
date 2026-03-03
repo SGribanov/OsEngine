@@ -147,6 +147,83 @@ public class Stage2PerformanceBaselineTests
     }
 
     [Fact]
+    public void Stage2Perf_TradeGrid_LoadFromStringMalformedTailPath_ShouldEmitMetricsAndDeterministicChecksum()
+    {
+        const int warmupIterations = 200;
+        const int iterations = 6000;
+
+        string[] payloads =
+        [
+            "1@MarketMaking@On@OnTrade@true@5@10@3@100,5@1@03.03.2026 14:20:30@500@true@1,5@true@x@y% % %True@@11@@13@False%",
+            "1@MarketMaking@On@OnTrade@maybe@5@10@3@100,5@1@bad-date@bad-delay@??@bad-distance@??%%%%%%%",
+            " 1 @ MarketMaking @ On @ OncePerSecond @ true @ 5 @ 10 @ 3 @ 100,5 @ 1 @ 03.03.2026 14:20:30 @ 500 @ on @ 1,5 @ off @ @ %\t%\t%",
+            "1@MarketMaking@On@OnTrade@1@5@10@3@100,5@1@2026-03-03T14:20:30Z@0@0@-1@1@%@dummy%@"
+        ];
+
+        TradeGrid grid = CreateBareGrid();
+
+        CultureInfo originalCulture = CultureInfo.CurrentCulture;
+        CultureInfo originalUiCulture = CultureInfo.CurrentUICulture;
+        CultureInfo enUs = CultureInfo.GetCultureInfo("en-US");
+
+        try
+        {
+            CultureInfo.CurrentCulture = enUs;
+            CultureInfo.CurrentUICulture = enUs;
+
+            for (int i = 0; i < warmupIterations; i++)
+            {
+                grid.LoadFromString(payloads[i % payloads.Length]);
+            }
+
+            ForceGc();
+
+            long allocatedBefore = GC.GetAllocatedBytesForCurrentThread();
+            int gen0Before = GC.CollectionCount(0);
+            Stopwatch stopwatch = Stopwatch.StartNew();
+
+            long checksum = 0;
+
+            for (int i = 0; i < iterations; i++)
+            {
+                grid.LoadFromString(payloads[i % payloads.Length]);
+                checksum += grid.MaxOpenOrdersInMarket;
+                checksum += grid.CheckMicroVolumes ? 1 : 0;
+                checksum += grid.OpenOrdersMakerOnly ? 1 : 0;
+            }
+
+            stopwatch.Stop();
+
+            long allocatedAfter = GC.GetAllocatedBytesForCurrentThread();
+            int gen0After = GC.CollectionCount(0);
+
+            long allocatedBytes = allocatedAfter - allocatedBefore;
+            double elapsedMs = stopwatch.Elapsed.TotalMilliseconds;
+            double nsPerOp = elapsedMs * 1_000_000d / iterations;
+            double allocatedBytesPerOp = (double)allocatedBytes / iterations;
+
+            Assert.True(checksum > 0);
+
+            Stage2PerfReportWriter.Append(new Stage2PerfMetric
+            {
+                Scenario = "tradegrid_load_from_string_malformed_tail_path",
+                Iterations = iterations,
+                ElapsedMsTotal = elapsedMs,
+                NanosecondsPerOp = nsPerOp,
+                AllocatedBytesTotal = allocatedBytes,
+                AllocatedBytesPerOp = allocatedBytesPerOp,
+                Gen0Collections = gen0After - gen0Before,
+                Checksum = checksum
+            });
+        }
+        finally
+        {
+            CultureInfo.CurrentCulture = originalCulture;
+            CultureInfo.CurrentUICulture = originalUiCulture;
+        }
+    }
+
+    [Fact]
     public void Stage2Perf_IndicatorCache_HitPath_ShouldEmitMetricsAndStableChecksums()
     {
         const int warmupIterations = 200;

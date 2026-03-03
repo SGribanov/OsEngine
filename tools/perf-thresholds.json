@@ -35,6 +35,12 @@
       "max_elapsed_ms_total": 5000,
       "max_allocated_bytes_per_op": 50000,
       "max_gen0_collections": 200
+    },
+    {
+      "name": "tradegrid_load_from_string_malformed_tail_path",
+      "max_elapsed_ms_total": 5000,
+      "max_allocated_bytes_per_op": 50000,
+      "max_gen0_collections": 200
     }
   ]
 }

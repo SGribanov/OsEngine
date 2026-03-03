@@ -18586,3 +18586,55 @@
   - current `#1031`: `8331.27 ns/op`, `992.01 bytes/op`
 - `tradegrid_load_from_string_ru_payload_path` (new):
   - current `#1031`: `1605.42 ns/op`, `696.22 bytes/op`
+
+## 2026-03-03 - Incremental Update #1032
+
+### Scope
+
+- TradeGrid parser governance extension: add deterministic KPI coverage for malformed/mixed tail payloads in `LoadFromString`.
+
+### What Changed
+
+- Updated perf harness:
+  - project/OsEngine.Tests/Performance/Stage2PerformanceBaselineTests.cs
+  - tools/perf-thresholds.json
+- Changes:
+  - added new Stage2 perf scenario:
+    - `tradegrid_load_from_string_malformed_tail_path`
+  - scenario stresses malformed/mixed tail payload variants (missing/garbled tail tokens, mixed whitespace delimiters, invalid optional prime tokens) under non-ru current culture to validate fallback parser path behavior remains deterministic.
+  - added threshold gate for the new scenario in `tools/perf-thresholds.json`.
+- Updated perf artifacts:
+  - reports/stage2_perf_metrics.jsonl
+  - reports/stage2_perf_summary.json
+- Updated global coverage matrix:
+  - refactoring_stage2_coverage_matrix.md
+
+### Verification
+
+- Targeted checks:
+  - dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --configuration Release --nologo --filter "FullyQualifiedName~Stage2Step2_2_TradeGrid_|FullyQualifiedName~Stage2Perf_" -> passed 131/131
+- Perf command:
+  - pwsh -NoProfile -File tools/run-stage2-perf.ps1 -NoBuild -EnforceThresholds -Repeat 5 -> success
+  - threshold check passed for all scenarios, including new malformed-tail KPI.
+- Host-context verification (outside sandbox, per dotnet-build-policy):
+  - dotnet restore project/OsEngine/OsEngine.csproj --nologo -> success
+  - dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo -> success
+  - dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900 -> success, 0 warnings, 0 errors
+  - dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo -> passed 867/867
+
+### P0/P2/P3 Metrics Snapshot (median, Repeat=5)
+
+- `indicator_cache_hit_path`:
+  - current `#1032`: `1824.55 ns/op`, `448.02 bytes/op`
+- `optimizer_method_cache_hit_path`:
+  - current `#1032`: `143.12 ns/op`, `0.01 bytes/op`
+- `optimizer_cache_key_build_path`:
+  - current `#1032`: `295.74 ns/op`, `0.01 bytes/op`
+- `optimizer_method_parameter_hash_path`:
+  - current `#1032`: `49.48 ns/op`, `0.00 bytes/op`
+- `tradegrid_query_collections_hotpath`:
+  - current `#1032`: `8504.17 ns/op`, `992.01 bytes/op`
+- `tradegrid_load_from_string_ru_payload_path`:
+  - current `#1032`: `1707.30 ns/op`, `696.22 bytes/op`
+- `tradegrid_load_from_string_malformed_tail_path` (new):
+  - current `#1032`: `2693.27 ns/op`, `1280.25 bytes/op`

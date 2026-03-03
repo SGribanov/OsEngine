@@ -18331,3 +18331,35 @@
   - `tradegrid_load_from_string_ru_payload_path`: `1605.42 ns/op`, `696.22 bytes/op` (new KPI)
 - **Commit:** n/a
 - **Push:** n/a
+
+### Wave P0/P3 - TradeGrid Malformed-Tail Parser KPI (Incremental Adoption #1032)
+
+- **Status:** In Progress (increment block completed)
+- **Plan item:** `refactoring_stage2_plan.md` -> Plan Refresh / Wave `P0` governance + Wave `P3` parser reliability
+- **Changes (coverage expansion for malformed tail payload path):**
+  - Updated `project/OsEngine.Tests/Performance/Stage2PerformanceBaselineTests.cs`:
+    - added `Stage2Perf_TradeGrid_LoadFromStringMalformedTailPath_ShouldEmitMetricsAndDeterministicChecksum`.
+    - added metric scenario id: `tradegrid_load_from_string_malformed_tail_path`.
+  - Updated `tools/perf-thresholds.json`:
+    - added threshold block for `tradegrid_load_from_string_malformed_tail_path`.
+  - Updated perf artifacts:
+    - `reports/stage2_perf_metrics.jsonl`
+    - `reports/stage2_perf_summary.json`
+  - Updated `refactoring_stage2_coverage_matrix.md`.
+- **Verification (outside sandbox, per dotnet-build-policy):**
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --configuration Release --nologo --filter "FullyQualifiedName~Stage2Step2_2_TradeGrid_|FullyQualifiedName~Stage2Perf_"` -> passed `131/131`
+  - `pwsh -NoProfile -File tools/run-stage2-perf.ps1 -NoBuild -EnforceThresholds -Repeat 5` -> success; threshold check passed for all scenarios
+  - `dotnet restore project/OsEngine/OsEngine.csproj --nologo` -> success
+  - `dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo` -> success
+  - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` -> success, 0 warnings, 0 errors
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed `867/867`
+- **Metrics snapshot (median, Repeat=5):**
+  - `indicator_cache_hit_path`: `1824.55 ns/op`, `448.02 bytes/op`
+  - `optimizer_method_cache_hit_path`: `143.12 ns/op`, `0.01 bytes/op`
+  - `optimizer_cache_key_build_path`: `295.74 ns/op`, `0.01 bytes/op`
+  - `optimizer_method_parameter_hash_path`: `49.48 ns/op`, `0.00 bytes/op`
+  - `tradegrid_query_collections_hotpath`: `8504.17 ns/op`, `992.01 bytes/op`
+  - `tradegrid_load_from_string_ru_payload_path`: `1707.30 ns/op`, `696.22 bytes/op`
+  - `tradegrid_load_from_string_malformed_tail_path`: `2693.27 ns/op`, `1280.25 bytes/op` (new KPI)
+- **Commit:** n/a
+- **Push:** n/a
