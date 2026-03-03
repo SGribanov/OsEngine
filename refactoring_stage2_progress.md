@@ -17798,3 +17798,31 @@
   - dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo -> success
   - dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900 -> success, 0 warnings, 0 errors
   - dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo -> passed 844/844
+
+## 2026-03-03 - Incremental Update #1015
+
+### Scope
+
+- Continued Step 4.2 contract coverage for `TradeGridErrorsReaction.GetReactionOnErrors(...)`.
+- Locked exact error-log payloads for open/cancel threshold reactions (`New regime: Off`).
+
+### What Changed
+
+- Updated tests in:
+  - project/OsEngine.Tests/TradeGridPersistenceCoreTests.cs
+- Changes:
+  - added `Stage2Step2_2_TradeGridErrorsReaction_GetReactionOnErrors_WithOpenErrorsThresholdReached_ShouldReturnOffAndEmitOpenOrdersLog`.
+  - added `Stage2Step2_2_TradeGridErrorsReaction_GetReactionOnErrors_WithCancelErrorsThresholdReached_ShouldReturnOffAndEmitCancelOrdersLog`.
+  - both tests assert:
+    - returned regime is `Off` when threshold is reached;
+    - exactly one `Error` log event is emitted;
+    - emitted message exactly matches runtime contract text shown in UI (`ERROR on ... orders`, `Errors count: N`, `New regime: Off`).
+  - tests subscribe to `TradeGridErrorsReaction.LogMessageEvent` to keep popup-safe execution in test context.
+
+### Verification
+
+- Host-context verification (outside sandbox, per dotnet-build-policy):
+  - dotnet restore project/OsEngine/OsEngine.csproj --nologo -> success
+  - dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo -> success
+  - dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900 -> success, 0 warnings, 0 errors
+  - dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo -> passed 846/846
