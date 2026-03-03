@@ -89,99 +89,82 @@ namespace OsEngine.OsTrader.Grids
                 }
 
                 ReadOnlySpan<char> valueSpan = value.AsSpan();
+                int tokenIndex = 0;
+                int tokenStart = 0;
 
-                if (TryGetTokenAt(valueSpan, 0, out ReadOnlySpan<char> token0))
+                for (int i = 0; i <= valueSpan.Length; i++)
                 {
-                    if (TryParseBoolFlexible(token0, out bool parsed))
-                    {
-                        FailOpenOrdersReactionIsOn = parsed;
-                    }
-                }
-                //Enum.TryParse(values[1], out FailOpenOrdersReaction);
-                if (TryGetTokenAt(valueSpan, 2, out ReadOnlySpan<char> token2))
-                {
-                    if (TryParsePositiveInt(token2, out int parsed))
-                    {
-                        FailOpenOrdersCountToReaction = parsed;
-                    }
-                }
-                //Enum.TryParse(values[3], out FailCancelOrdersReaction);
-                if (TryGetTokenAt(valueSpan, 4, out ReadOnlySpan<char> token4))
-                {
-                    if (TryParsePositiveInt(token4, out int parsed))
-                    {
-                        FailCancelOrdersCountToReaction = parsed;
-                    }
-                }
-                if (TryGetTokenAt(valueSpan, 5, out ReadOnlySpan<char> token5))
-                {
-                    if (TryParseBoolFlexible(token5, out bool parsed))
-                    {
-                        FailCancelOrdersReactionIsOn = parsed;
-                    }
-                }
+                    bool atSeparator = i < valueSpan.Length && valueSpan[i] == '@';
+                    bool atEnd = i == valueSpan.Length;
 
-                if (TryGetTokenAt(valueSpan, 6, out ReadOnlySpan<char> token6))
-                {
-                    if (TryParseBoolFlexible(token6, out bool parsed))
+                    if (atSeparator == false && atEnd == false)
                     {
-                        WaitOnStartConnectorIsOn = parsed;
+                        continue;
                     }
-                }
-                if (TryGetTokenAt(valueSpan, 7, out ReadOnlySpan<char> token7))
-                {
-                    if (TryParsePositiveInt(token7, out int parsed))
+
+                    if (tokenIndex > 8)
                     {
-                        WaitSecondsOnStartConnector = parsed;
+                        break;
                     }
-                }
-                if (TryGetTokenAt(valueSpan, 8, out ReadOnlySpan<char> token8))
-                {
-                    if (TryParseBoolFlexible(token8, out bool parsed))
+
+                    ReadOnlySpan<char> token = valueSpan.Slice(tokenStart, i - tokenStart).Trim();
+                    if (token.IsEmpty == false)
                     {
-                        ReduceOrdersCountInMarketOnNoFundsError = parsed;
+                        switch (tokenIndex)
+                        {
+                            case 0:
+                                if (TryParseBoolFlexible(token, out bool failOpenParsed))
+                                {
+                                    FailOpenOrdersReactionIsOn = failOpenParsed;
+                                }
+                                break;
+                            case 2:
+                                if (TryParsePositiveInt(token, out int failOpenCountParsed))
+                                {
+                                    FailOpenOrdersCountToReaction = failOpenCountParsed;
+                                }
+                                break;
+                            case 4:
+                                if (TryParsePositiveInt(token, out int failCancelCountParsed))
+                                {
+                                    FailCancelOrdersCountToReaction = failCancelCountParsed;
+                                }
+                                break;
+                            case 5:
+                                if (TryParseBoolFlexible(token, out bool failCancelParsed))
+                                {
+                                    FailCancelOrdersReactionIsOn = failCancelParsed;
+                                }
+                                break;
+                            case 6:
+                                if (TryParseBoolFlexible(token, out bool waitOnStartParsed))
+                                {
+                                    WaitOnStartConnectorIsOn = waitOnStartParsed;
+                                }
+                                break;
+                            case 7:
+                                if (TryParsePositiveInt(token, out int waitSecondsParsed))
+                                {
+                                    WaitSecondsOnStartConnector = waitSecondsParsed;
+                                }
+                                break;
+                            case 8:
+                                if (TryParseBoolFlexible(token, out bool reduceOnNoFundsParsed))
+                                {
+                                    ReduceOrdersCountInMarketOnNoFundsError = reduceOnNoFundsParsed;
+                                }
+                                break;
+                        }
                     }
+
+                    tokenIndex++;
+                    tokenStart = i + 1;
                 }
             }
             catch (Exception e)
             {
                 SendNewLogMessage(e.ToString(), LogMessageType.Error);
             }
-        }
-
-        private static bool TryGetTokenAt(ReadOnlySpan<char> source, int targetIndex, out ReadOnlySpan<char> token)
-        {
-            token = default;
-
-            if (targetIndex < 0)
-            {
-                return false;
-            }
-
-            int currentIndex = 0;
-            int tokenStart = 0;
-
-            for (int i = 0; i <= source.Length; i++)
-            {
-                bool atSeparator = i < source.Length && source[i] == '@';
-                bool atEnd = i == source.Length;
-
-                if (atSeparator == false && atEnd == false)
-                {
-                    continue;
-                }
-
-                if (currentIndex == targetIndex)
-                {
-                    token = source.Slice(tokenStart, i - tokenStart).Trim();
-                    return token.IsEmpty == false;
-                }
-
-                currentIndex++;
-                tokenStart = i + 1;
-            }
-
-            return false;
         }
 
         private static bool TryParseBoolFlexible(ReadOnlySpan<char> value, out bool parsed)
