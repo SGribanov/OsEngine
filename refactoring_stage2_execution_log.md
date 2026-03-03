@@ -17887,3 +17887,32 @@
   - `indicator_cache_hit_path`: allocations unchanged, timing variance observed.
 - **Commit:** n/a
 - **Push:** n/a
+
+### Wave P1 - TradeGrid Hot-Path Allocation Reduction (Incremental Adoption #1019)
+
+- **Status:** In Progress (increment block completed)
+- **Plan item:** `refactoring_stage2_plan.md` -> Plan Refresh / Wave `P1`
+- **Changes (capacity heuristics refinement):**
+  - Updated `project/OsEngine/OsTrader/Grids/TradeGrid.cs`:
+    - `GetLinesWithOpenOrdersFact()` expected capacity now uses bounded heuristic:
+      - `min(linesAll.Count, max(MaxOpenOrdersInMarket, 4))` when limit is set.
+    - `GetLinesWithClosingOrdersFact()` expected capacity now uses bounded heuristic:
+      - `min(linesAll.Count, max(MaxCloseOrdersInMarket, 4))` when limit is set.
+  - semantics unchanged; only allocation profile tuned.
+- **Verification (outside sandbox, per dotnet-build-policy):**
+  - `dotnet restore project/OsEngine/OsEngine.csproj --nologo` -> success
+  - `dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo` -> success
+  - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` -> success, 0 warnings, 0 errors
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed `848/848`
+  - targeted perf tests (`Stage2Perf_*`) -> passed `2/2`
+  - targeted TradeGrid subset (`Stage2Step2_2_TradeGrid_*`) -> passed `124/124`
+  - `pwsh -NoProfile -File tools/run-stage2-perf.ps1 -NoBuild -EnforceThresholds` -> success
+- **Measured delta vs baseline / previous pass:**
+  - `tradegrid_query_collections_hotpath`:
+    - baseline `#1017`: `9231.49 ns/op`, `1856.01 bytes/op`
+    - previous `#1018`: `9054.52 ns/op`, `1760.01 bytes/op`
+    - current `#1019`: `8084.69 ns/op`, `1560.01 bytes/op`
+    - improvement vs baseline: `-12.42% ns/op`, `-15.95% bytes/op`
+  - `indicator_cache_hit_path`: allocations unchanged, timing improved in run.
+- **Commit:** n/a
+- **Push:** n/a

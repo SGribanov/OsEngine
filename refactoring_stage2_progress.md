@@ -17950,3 +17950,49 @@
   - baseline: 4764.65 ns/op, 12952.02 bytes/op
   - current: 5312.65 ns/op, 12952.02 bytes/op
   - allocation unchanged; timing variance observed in this short run.
+
+## 2026-03-03 - Incremental Update #1019
+
+### Scope
+
+- Wave `P1` continuation: second allocation-focused pass in `TradeGrid` fact-query paths with tighter expected capacities.
+
+### What Changed
+
+- Updated production code in:
+  - project/OsEngine/OsTrader/Grids/TradeGrid.cs
+- Changes:
+  - refined expected-capacity heuristics for high-frequency fact-query methods:
+    - `GetLinesWithOpenOrdersFact()`
+    - `GetLinesWithClosingOrdersFact()`
+  - capacity now bounded by current grid size and configured market-order limits (`MaxOpenOrdersInMarket` / `MaxCloseOrdersInMarket`) with floor safety.
+  - no changes to filtering logic, ordering, or method contracts.
+- Updated perf artifacts:
+  - reports/stage2_perf_metrics.jsonl
+  - reports/stage2_perf_summary.json
+
+### Verification
+
+- Targeted checks:
+  - dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --configuration Release --nologo --filter "FullyQualifiedName~Stage2Perf_" -> passed 2/2
+  - dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-build --configuration Release --nologo --filter "FullyQualifiedName~Stage2Step2_2_TradeGrid_" -> passed 124/124
+- Host-context verification (outside sandbox, per dotnet-build-policy):
+  - dotnet restore project/OsEngine/OsEngine.csproj --nologo -> success
+  - dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo -> success
+  - dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900 -> success, 0 warnings, 0 errors
+  - dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo -> passed 848/848
+
+### P0/P1 Metrics Delta (same harness)
+
+- command:
+  - pwsh -NoProfile -File tools/run-stage2-perf.ps1 -NoBuild -EnforceThresholds -> passed
+- `tradegrid_query_collections_hotpath`:
+  - baseline #1017: 9231.49 ns/op, 1856.01 bytes/op
+  - #1018: 9054.52 ns/op, 1760.01 bytes/op
+  - current #1019: 8084.69 ns/op, 1560.01 bytes/op
+  - delta vs #1017: -12.42% ns/op, -15.95% bytes/op
+  - delta vs #1018: -10.71% ns/op, -11.36% bytes/op
+- `indicator_cache_hit_path`:
+  - baseline #1017: 4764.65 ns/op, 12952.02 bytes/op
+  - current #1019: 4372.25 ns/op, 12952.02 bytes/op
+  - allocations unchanged; timing improved in this run.
