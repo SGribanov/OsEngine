@@ -127,6 +127,8 @@ namespace OsEngine.Indicators
                 }
                 _parameters.Clear();
                 _parameters = null;
+                _optimizerParameterHash = "00000011";
+                _optimizerParameterHashDirty = true;
             }
 
             if (ParametersDigit != null)
@@ -367,6 +369,7 @@ namespace OsEngine.Indicators
             newParameter.ValueChange += Parameter_ValueChange;
 
             _parameters.Add(newParameter);
+            MarkOptimizerParameterHashDirty();
 
             return newParameter;
         }
@@ -432,6 +435,8 @@ namespace OsEngine.Indicators
             get { return _parameters; }
         }
         private List<IndicatorParameter> _parameters = new List<IndicatorParameter>();
+        private string _optimizerParameterHash = "00000011";
+        private bool _optimizerParameterHashDirty = true;
 
         /// <summary>
         /// digital parameters of the indicator
@@ -443,6 +448,8 @@ namespace OsEngine.Indicators
         /// </summary>
         private void Parameter_ValueChange()
         {
+            MarkOptimizerParameterHashDirty();
+
             if (ParametersChangeByUser != null)
             {
                 ParametersChangeByUser();
@@ -886,20 +893,35 @@ namespace OsEngine.Indicators
 
         private string BuildOptimizerParameterHash()
         {
+            if (_optimizerParameterHashDirty == false)
+            {
+                return _optimizerParameterHash;
+            }
+
             unchecked
             {
                 int hash = 17;
 
-                for (int i = 0; i < _parameters.Count; i++)
+                if (_parameters != null)
                 {
-                    string parameterSave = _parameters[i]?.GetStringToSave();
-                    hash = hash * 31 + (parameterSave == null
-                        ? 0
-                        : StringComparer.Ordinal.GetHashCode(parameterSave));
+                    for (int i = 0; i < _parameters.Count; i++)
+                    {
+                        string parameterSave = _parameters[i]?.GetStringToSave();
+                        hash = hash * 31 + (parameterSave == null
+                            ? 0
+                            : StringComparer.Ordinal.GetHashCode(parameterSave));
+                    }
                 }
 
-                return hash.ToString("X8", CultureInfo.InvariantCulture);
+                _optimizerParameterHash = hash.ToString("X8", CultureInfo.InvariantCulture);
+                _optimizerParameterHashDirty = false;
+                return _optimizerParameterHash;
             }
+        }
+
+        private void MarkOptimizerParameterHashDirty()
+        {
+            _optimizerParameterHashDirty = true;
         }
 
         private static int BuildCandlesDataFingerprint(List<Candle> candles)

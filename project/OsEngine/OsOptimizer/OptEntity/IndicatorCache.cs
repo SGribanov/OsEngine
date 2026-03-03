@@ -20,6 +20,8 @@ namespace OsEngine.OsOptimizer.OptEntity
 
     public readonly struct IndicatorCacheKey : IEquatable<IndicatorCacheKey>
     {
+        private readonly int _hashCode;
+
         public IndicatorCacheKey(
             string securityName,
             long timeframeTicks,
@@ -33,17 +35,35 @@ namespace OsEngine.OsOptimizer.OptEntity
             int includeIndicatorsCount,
             int dataFingerprint)
         {
-            SecurityName = securityName ?? string.Empty;
+            string securityNameSafe = securityName ?? string.Empty;
+            string calculationNameSafe = calculationName ?? string.Empty;
+            string parametersHashSafe = parametersHash ?? string.Empty;
+            string sourceIdSafe = sourceId ?? string.Empty;
+
+            SecurityName = securityNameSafe;
             TimeframeTicks = timeframeTicks;
             FirstTimeTicks = firstTimeTicks;
             LastTimeTicks = lastTimeTicks;
             CandleCount = candleCount;
-            CalculationName = calculationName ?? string.Empty;
-            ParametersHash = parametersHash ?? string.Empty;
-            SourceId = sourceId ?? string.Empty;
+            CalculationName = calculationNameSafe;
+            ParametersHash = parametersHashSafe;
+            SourceId = sourceIdSafe;
             OutputSeriesCount = outputSeriesCount;
             IncludeIndicatorsCount = includeIndicatorsCount;
             DataFingerprint = dataFingerprint;
+
+            _hashCode = ComputeHashCode(
+                securityNameSafe,
+                timeframeTicks,
+                firstTimeTicks,
+                lastTimeTicks,
+                candleCount,
+                calculationNameSafe,
+                parametersHashSafe,
+                sourceIdSafe,
+                outputSeriesCount,
+                includeIndicatorsCount,
+                dataFingerprint);
         }
 
         public string SecurityName { get; }
@@ -90,20 +110,52 @@ namespace OsEngine.OsOptimizer.OptEntity
 
         public override int GetHashCode()
         {
+            if (_hashCode != 0)
+            {
+                return _hashCode;
+            }
+
+            return ComputeHashCode(
+                SecurityName,
+                TimeframeTicks,
+                FirstTimeTicks,
+                LastTimeTicks,
+                CandleCount,
+                CalculationName,
+                ParametersHash,
+                SourceId,
+                OutputSeriesCount,
+                IncludeIndicatorsCount,
+                DataFingerprint);
+        }
+
+        private static int ComputeHashCode(
+            string securityName,
+            long timeframeTicks,
+            long firstTimeTicks,
+            long lastTimeTicks,
+            int candleCount,
+            string calculationName,
+            string parametersHash,
+            string sourceId,
+            int outputSeriesCount,
+            int includeIndicatorsCount,
+            int dataFingerprint)
+        {
             unchecked
             {
                 int hash = 17;
-                hash = hash * 31 + TimeframeTicks.GetHashCode();
-                hash = hash * 31 + FirstTimeTicks.GetHashCode();
-                hash = hash * 31 + LastTimeTicks.GetHashCode();
-                hash = hash * 31 + CandleCount;
-                hash = hash * 31 + OutputSeriesCount;
-                hash = hash * 31 + IncludeIndicatorsCount;
-                hash = hash * 31 + DataFingerprint;
-                hash = hash * 31 + StringComparer.Ordinal.GetHashCode(SecurityName);
-                hash = hash * 31 + StringComparer.Ordinal.GetHashCode(CalculationName);
-                hash = hash * 31 + StringComparer.Ordinal.GetHashCode(ParametersHash);
-                hash = hash * 31 + StringComparer.Ordinal.GetHashCode(SourceId);
+                hash = hash * 31 + timeframeTicks.GetHashCode();
+                hash = hash * 31 + firstTimeTicks.GetHashCode();
+                hash = hash * 31 + lastTimeTicks.GetHashCode();
+                hash = hash * 31 + candleCount;
+                hash = hash * 31 + outputSeriesCount;
+                hash = hash * 31 + includeIndicatorsCount;
+                hash = hash * 31 + dataFingerprint;
+                hash = hash * 31 + StringComparer.Ordinal.GetHashCode(securityName);
+                hash = hash * 31 + StringComparer.Ordinal.GetHashCode(calculationName);
+                hash = hash * 31 + StringComparer.Ordinal.GetHashCode(parametersHash);
+                hash = hash * 31 + StringComparer.Ordinal.GetHashCode(sourceId);
                 return hash;
             }
         }
