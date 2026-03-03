@@ -350,7 +350,7 @@ public class Stage2PerformanceBaselineTests
 
         for (int i = 0; i < warmupIterations; i++)
         {
-            _ = BotPanelMethodHashPerfAccessor.BuildInt(seed + (i & 31));
+            _ = BotPanelMethodHashPerfAccessor.BuildInt(seed + (i & 63));
         }
 
         ForceGc();

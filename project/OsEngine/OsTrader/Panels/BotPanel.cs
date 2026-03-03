@@ -8,6 +8,7 @@
 
 using System;
 using System.Collections;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
@@ -282,6 +283,9 @@ namespace OsEngine.OsTrader.Panels
         public StartProgram StartProgram;
 
         private static OptimizerMethodCache _optimizerMethodCache;
+        private static readonly ConcurrentDictionary<int, string> _optimizerMethodParameterHashIntCache = new ConcurrentDictionary<int, string>();
+        private const int OptimizerMethodParameterHashIntCacheMaxEntries = 4096;
+        private static readonly Lock _optimizerMethodParameterHashIntCacheSync = new();
 
         internal static void SetOptimizerMethodCache(OptimizerMethodCache cache)
         {
@@ -299,13 +303,25 @@ namespace OsEngine.OsTrader.Panels
         /// </summary>
         protected static string BuildOptimizerMethodCacheParameterHash(int part)
         {
-            unchecked
+            if (_optimizerMethodParameterHashIntCache.TryGetValue(part, out string cached))
             {
-                int hash = 17;
-                string normalized = part.ToString(CultureInfo.InvariantCulture);
-                hash = hash * 31 + StringComparer.Ordinal.GetHashCode(normalized);
-                return FormatMethodCacheParameterHash(hash);
+                return cached;
             }
+
+            string computed = ComputeOptimizerMethodCacheParameterHashForInt(part);
+
+            if (_optimizerMethodParameterHashIntCache.Count >= OptimizerMethodParameterHashIntCacheMaxEntries)
+            {
+                lock (_optimizerMethodParameterHashIntCacheSync)
+                {
+                    if (_optimizerMethodParameterHashIntCache.Count >= OptimizerMethodParameterHashIntCacheMaxEntries)
+                    {
+                        _optimizerMethodParameterHashIntCache.Clear();
+                    }
+                }
+            }
+
+            return _optimizerMethodParameterHashIntCache.GetOrAdd(part, computed);
         }
 
         /// <summary>
@@ -333,6 +349,17 @@ namespace OsEngine.OsTrader.Panels
         private static string FormatMethodCacheParameterHash(int hash)
         {
             return hash.ToString("X8", CultureInfo.InvariantCulture);
+        }
+
+        private static string ComputeOptimizerMethodCacheParameterHashForInt(int part)
+        {
+            unchecked
+            {
+                int hash = 17;
+                string normalized = part.ToString(CultureInfo.InvariantCulture);
+                hash = hash * 31 + StringComparer.Ordinal.GetHashCode(normalized);
+                return FormatMethodCacheParameterHash(hash);
+            }
         }
 
         /// <summary>

@@ -41,6 +41,15 @@ public class BotPanelOptimizerMethodHashTests
         Assert.Equal(8, first.Length);
     }
 
+    [Fact]
+    public void BuildOptimizerMethodCacheParameterHash_IntOverload_ShouldReuseCachedStringInstance()
+    {
+        string first = BotPanelOptimizerMethodHashAccessor.BuildInt(42);
+        string second = BotPanelOptimizerMethodHashAccessor.BuildInt(42);
+
+        Assert.Same(first, second);
+    }
+
     private sealed class BotPanelOptimizerMethodHashAccessor : BotPanel
     {
         private BotPanelOptimizerMethodHashAccessor() : base("BotPanelOptimizerMethodHashAccessor", StartProgram.IsTester)
