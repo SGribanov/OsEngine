@@ -6,6 +6,143 @@
 
 ---
 
+## 2026-03-03 Plan Refresh (Reliability + Throughput + Low Allocation First)
+
+This section supersedes execution priority of the original phase order.
+The original phase descriptions remain as implementation backlog/details.
+
+### Why we are replanning
+
+1. Current execution has strong safety coverage but weak runtime-impact density.
+2. Build/test-only gates are insufficient for a "fast + low-allocation" target.
+3. Several hot paths still allocate on each cycle (`TradeGrid` query/cancel helpers and optimizer cache cloning paths).
+
+### New primary objective
+
+Deliver measurable runtime improvements first, while preserving behavior and compatibility:
+1. No reliability regressions.
+2. Lower tail latency in hot loops.
+3. Lower allocations/op and lower GC pressure.
+
+### Mandatory KPI gates (new Definition of Done)
+
+Every runtime-affecting step must ship with baseline and after-metrics for a fixed scenario set.
+
+1. Correctness gate:
+   - existing functional tests pass;
+   - new/changed behavior has focused regression tests.
+2. Performance gate:
+   - no latency regression in target scenarios;
+   - target path median or p95 latency improves by >= 10%, or change is rejected.
+3. Allocation gate:
+   - target path allocated bytes/op improves by >= 20%, or change is rejected;
+   - Gen0 collections per scenario do not increase.
+4. Reliability gate:
+   - negative-path behavior remains deterministic (no modal/UI side effects in tests, no silent failures).
+
+### Required baseline harness before next runtime changes
+
+Create and check in deterministic perf harnesses (repeatable on developer machine):
+1. `TradeGrid` process-loop scenario with fixed candles/orders/positions workload.
+2. Optimizer indicator-cache hit-path scenario.
+3. Settings save/load scenario for high-frequency write/read components.
+
+Minimum artifacts to store per run:
+1. elapsed time summary (median, p95 when applicable),
+2. allocated bytes/op,
+3. GC collections by generation for scenario run,
+4. scenario checksum/assertion proving equivalent functional result.
+
+### Re-prioritized execution waves
+
+#### Wave P0 (Immediate): Measurement and guardrails
+
+**Goal:** Make performance/allocation regressions visible before further refactors.
+
+**Actions:**
+1. Add perf regression test project area (`project/OsEngine.Tests/Performance/*`) for deterministic scenario runners.
+2. Add runner script (`tools/run-stage2-perf.ps1`) that emits comparable metrics.
+3. Add acceptance thresholds file (`tools/perf-thresholds.json`) and fail-fast check mode.
+
+**Exit criteria:**
+1. Baseline snapshot committed.
+2. CI/local command can reproduce metric report on demand.
+
+#### Wave P1: TradeGrid hot-path allocation reduction
+
+**Goal:** Remove avoidable allocations in `TradeGrid` runtime cycle.
+
+**Target files (first pass):**
+- `project/OsEngine/OsTrader/Grids/TradeGrid.cs`
+
+**Actions:**
+1. Replace repeated "build new list and return" patterns in high-frequency query methods with reusable buffers (`Fill...` pattern).
+2. Eliminate duplicate intermediate collections in order-cancel/selection logic.
+3. Keep external behavior and ordering stable; isolate refactor behind deterministic tests.
+
+**Exit criteria:**
+1. `TradeGrid` scenario allocations/op reduced by at least 30% from P0 baseline.
+2. No functional regressions in existing grid tests.
+
+#### Wave P2: Optimizer cache overhead reduction
+
+**Goal:** Keep cache hit-rate benefits while cutting clone/boxing/string overhead.
+
+**Target files (first pass):**
+- `project/OsEngine/OsOptimizer/OptEntity/IndicatorCache.cs`
+- `project/OsEngine/Indicators/Aindicator.cs`
+- `project/OsEngine/OsOptimizer/OptEntity/OptimizerMethodCache.cs`
+
+**Actions:**
+1. Remove unnecessary key/string materialization in cache keys where safe.
+2. Reduce clone depth/volume on hit path while preserving isolation guarantees.
+3. Revisit bounded eviction policy to avoid full-cache clear spikes when capacity is reached.
+
+**Exit criteria:**
+1. Cache hit-path allocations/op reduced by at least 40% from P0 baseline.
+2. Optimizer run-time improves measurably with no result drift.
+
+#### Wave P3: Reliability completion for persistence write paths
+
+**Goal:** Finish high-risk atomic write migration with proof by failure-injection scenarios.
+
+**Actions:**
+1. Complete migration of remaining direct write sites (`StreamWriter`, `File.WriteAllText`, `File.AppendAllText`) in critical settings/state paths.
+2. Add failure-injection tests for interrupted write and recovery behavior.
+3. Keep backward-compatible read paths unchanged.
+
+**Exit criteria:**
+1. No known critical settings write path bypasses `SafeFileWriter`.
+2. Crash/interruption scenarios keep previous-or-new valid file state.
+
+#### Wave P4: Security/perf balance and cleanup
+
+**Goal:** Close remaining high-impact security/transport risks without throughput regressions.
+
+**Actions:**
+1. Complete credential-at-rest hardening (`dpapi:` protocol marker).
+2. Complete OKX shared `HttpClient` refactor.
+3. Retain lock/nullable/dependency cleanups only when they do not delay P1/P2 outcomes.
+
+**Exit criteria:**
+1. Security steps merged with regression coverage.
+2. Perf/allocation gates stay green after integration.
+
+### Scope demotion (explicit)
+
+The following items are now lower priority unless they unblock P0-P4:
+1. Broad nullable sweep in low-risk/test-only areas without runtime impact.
+2. UI modernization and non-critical stylistic refactors.
+3. Optional format migrations not tied to reliability/performance bottlenecks.
+
+### Governance updates
+
+1. Each increment note must include: `Runtime impact: yes/no`.
+2. If `Runtime impact: yes`, increment note must include baseline vs after metrics.
+3. Increments with no measurable gain in target KPI should be split/reworked before merge.
+
+---
+
 ## Plan Assessment and Required Additions
 
 ### What is strong already

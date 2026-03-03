@@ -17812,3 +17812,26 @@
   - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed `846/846`
 - **Commit:** n/a
 - **Push:** n/a
+
+### Step 4.2 - Nullable Annotations (Incremental Adoption #1016)
+
+- **Status:** In Progress (increment block completed)
+- **Plan item:** `refactoring_stage2_plan.md` governance refresh for execution priority
+- **Changes (strategy replanning for runtime outcomes):**
+  - Updated `refactoring_stage2_plan.md` with `2026-03-03 Plan Refresh (Reliability + Throughput + Low Allocation First)`.
+  - Added mandatory KPI gates for runtime-affecting increments:
+    - latency gate,
+    - allocation/GC gate,
+    - correctness/reliability gates.
+  - Added required baseline harness definition and metric artifact requirements.
+  - Introduced wave execution order prioritizing runtime paths:
+    - `P0` measurement,
+    - `P1` TradeGrid hot path,
+    - `P2` optimizer cache hot path,
+    - `P3` persistence write-path reliability,
+    - `P4` security/perf integration.
+  - Marked low-impact broad sweeps as scope-demoted unless they unblock runtime goals.
+- **Verification (outside sandbox, per dotnet-build-policy):**
+  - Docs-only increment; .NET verification not required.
+- **Commit:** n/a
+- **Push:** n/a

@@ -17826,3 +17826,36 @@
   - dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo -> success
   - dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900 -> success, 0 warnings, 0 errors
   - dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo -> passed 846/846
+
+## 2026-03-03 - Incremental Update #1016
+
+### Scope
+
+- Replanned Stage2 execution priority around runtime reliability/performance/allocations.
+- Introduced KPI-driven gates and wave-based execution order focused on hot paths.
+
+### What Changed
+
+- Updated plan document:
+  - refactoring_stage2_plan.md
+- Changes:
+  - added `2026-03-03 Plan Refresh (Reliability + Throughput + Low Allocation First)` section.
+  - defined mandatory KPI gates for runtime-affecting increments:
+    - correctness,
+    - latency,
+    - allocated bytes/op + GC pressure,
+    - reliability determinism.
+  - introduced required baseline harness and per-run metric artifacts.
+  - replaced execution priority with waves:
+    - `P0` measurement/guardrails,
+    - `P1` TradeGrid hot-path allocation reduction,
+    - `P2` optimizer cache overhead reduction,
+    - `P3` persistence reliability completion,
+    - `P4` security/perf balance cleanup.
+  - explicitly demoted low-impact broad sweeps (test-only nullable/UI modernization/optional migrations) unless they unblock runtime goals.
+  - added governance rule: runtime-impact increments must include baseline-vs-after metrics.
+
+### Verification
+
+- Docs-only increment.
+- .NET restore/build/test not required for this change set.
