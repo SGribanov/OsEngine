@@ -4833,6 +4833,11 @@ public class TradeGridPersistenceCoreTests
             new Order { State = OrderStateType.Fail }
         });
 
+        int saveEventCount = 0;
+        int repaintEventCount = 0;
+        grid.NeedToSaveEvent += () => saveEventCount++;
+        grid.RePaintSettingsEvent += () => repaintEventCount++;
+
         int signalCount = 0;
         reaction.LogMessageEvent += (_, type) =>
         {
@@ -4846,6 +4851,8 @@ public class TradeGridPersistenceCoreTests
 
         Assert.Null(error);
         Assert.Equal(1, grid.MaxOpenOrdersInMarket);
+        Assert.Equal(0, saveEventCount);
+        Assert.Equal(0, repaintEventCount);
         Assert.Equal(0, signalCount);
     }
 
@@ -4886,6 +4893,11 @@ public class TradeGridPersistenceCoreTests
             new Order { State = OrderStateType.Fail }
         });
 
+        int saveEventCount = 0;
+        int repaintEventCount = 0;
+        grid.NeedToSaveEvent += () => saveEventCount++;
+        grid.RePaintSettingsEvent += () => repaintEventCount++;
+
         int signalCount = 0;
         reaction.LogMessageEvent += (_, type) =>
         {
@@ -4899,6 +4911,8 @@ public class TradeGridPersistenceCoreTests
 
         Assert.Null(error);
         Assert.Equal(1, grid.MaxCloseOrdersInMarket);
+        Assert.Equal(0, saveEventCount);
+        Assert.Equal(0, repaintEventCount);
         Assert.Equal(0, signalCount);
     }
 
