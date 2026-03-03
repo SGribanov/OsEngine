@@ -190,13 +190,48 @@ namespace OsEngine.OsTrader.Grids
                     return;
                 }
 
-                string[] values = primeSegment.Split('@');
+                ReadOnlySpan<char> primeValues = primeSegment.AsSpan();
+                Span<int> tokenStarts = stackalloc int[15];
+                Span<int> tokenLengths = stackalloc int[15];
+                ParseSeparatedTokenBounds(primeValues, '@', tokenStarts, tokenLengths);
+
+                ReadOnlySpan<char> value0 = GetTokenSpan(primeValues, tokenStarts, tokenLengths, 0);
+                ReadOnlySpan<char> value1 = GetTokenSpan(primeValues, tokenStarts, tokenLengths, 1);
+                ReadOnlySpan<char> value2 = GetTokenSpan(primeValues, tokenStarts, tokenLengths, 2);
+                ReadOnlySpan<char> value3 = GetTokenSpan(primeValues, tokenStarts, tokenLengths, 3);
+                ReadOnlySpan<char> value4 = GetTokenSpan(primeValues, tokenStarts, tokenLengths, 4);
+                ReadOnlySpan<char> value5 = GetTokenSpan(primeValues, tokenStarts, tokenLengths, 5);
+                ReadOnlySpan<char> value6 = GetTokenSpan(primeValues, tokenStarts, tokenLengths, 6);
+                ReadOnlySpan<char> value7 = GetTokenSpan(primeValues, tokenStarts, tokenLengths, 7);
+                ReadOnlySpan<char> value8 = GetTokenSpan(primeValues, tokenStarts, tokenLengths, 8);
+                ReadOnlySpan<char> value9 = GetTokenSpan(primeValues, tokenStarts, tokenLengths, 9);
+                ReadOnlySpan<char> value10 = GetTokenSpan(primeValues, tokenStarts, tokenLengths, 10);
+                ReadOnlySpan<char> value11 = GetTokenSpan(primeValues, tokenStarts, tokenLengths, 11);
+                ReadOnlySpan<char> value12 = GetTokenSpan(primeValues, tokenStarts, tokenLengths, 12);
+                ReadOnlySpan<char> value13 = GetTokenSpan(primeValues, tokenStarts, tokenLengths, 13);
+                ReadOnlySpan<char> value14 = GetTokenSpan(primeValues, tokenStarts, tokenLengths, 14);
+
+                bool hasValue0 = value0.IsEmpty == false;
+                bool hasValue1 = value1.IsEmpty == false;
+                bool hasValue2 = value2.IsEmpty == false;
+                bool hasValue3 = value3.IsEmpty == false;
+                bool hasValue4 = value4.IsEmpty == false;
+                bool hasValue5 = value5.IsEmpty == false;
+                bool hasValue6 = value6.IsEmpty == false;
+                bool hasValue7 = value7.IsEmpty == false;
+                bool hasValue8 = value8.IsEmpty == false;
+                bool hasValue9 = value9.IsEmpty == false;
+                bool hasValue10 = value10.IsEmpty == false;
+                bool hasValue11 = value11.IsEmpty == false;
+                bool hasValue12 = value12.IsEmpty == false;
+                bool hasValue13 = value13.IsEmpty == false;
+                bool hasValue14 = value14.IsEmpty == false;
 
                 // settings prime
 
-                if (values.Length > 0 && string.IsNullOrWhiteSpace(values[0]) == false)
+                if (hasValue0)
                 {
-                    if (TryParseIntInvariant(values[0], out int parsedValue))
+                    if (TryParseIntInvariant(value0, out int parsedValue))
                     {
                         if (parsedValue >= 0)
                         {
@@ -204,9 +239,9 @@ namespace OsEngine.OsTrader.Grids
                         }
                     }
                 }
-                if (values.Length > 1 && string.IsNullOrWhiteSpace(values[1]) == false)
+                if (hasValue1)
                 {
-                    if (TryParseEnumFlexible(values[1], out TradeGridPrimeType parsedValue))
+                    if (TryParseEnumFlexible(value1, out TradeGridPrimeType parsedValue))
                     {
                         if (parsedValue == TradeGridPrimeType.MarketMaking
                             || parsedValue == TradeGridPrimeType.OpenPosition)
@@ -215,9 +250,9 @@ namespace OsEngine.OsTrader.Grids
                         }
                     }
                 }
-                if (values.Length > 2 && string.IsNullOrWhiteSpace(values[2]) == false)
+                if (hasValue2)
                 {
-                    if (TryParseEnumFlexible(values[2], out TradeGridRegime parsedValue))
+                    if (TryParseEnumFlexible(value2, out TradeGridRegime parsedValue))
                     {
                         if (parsedValue == TradeGridRegime.Off
                             || parsedValue == TradeGridRegime.OffAndCancelOrders
@@ -229,9 +264,9 @@ namespace OsEngine.OsTrader.Grids
                         }
                     }
                 }
-                if (values.Length > 3 && string.IsNullOrWhiteSpace(values[3]) == false)
+                if (hasValue3)
                 {
-                    if (TryParseEnumFlexible(values[3], out TradeGridLogicEntryRegime parsedValue))
+                    if (TryParseEnumFlexible(value3, out TradeGridLogicEntryRegime parsedValue))
                     {
                         if (parsedValue == TradeGridLogicEntryRegime.OnTrade
                             || parsedValue == TradeGridLogicEntryRegime.OncePerSecond)
@@ -240,16 +275,16 @@ namespace OsEngine.OsTrader.Grids
                         }
                     }
                 }
-                if (values.Length > 4 && string.IsNullOrWhiteSpace(values[4]) == false)
+                if (hasValue4)
                 {
-                    if (TryParseBoolFlexible(values[4], out bool parsedValue))
+                    if (TryParseBoolFlexible(value4, out bool parsedValue))
                     {
                         AutoClearJournalIsOn = parsedValue;
                     }
                 }
-                if (values.Length > 5 && string.IsNullOrWhiteSpace(values[5]) == false)
+                if (hasValue5)
                 {
-                    if (TryParseIntInvariant(values[5], out int parsedValue))
+                    if (TryParseIntInvariant(value5, out int parsedValue))
                     {
                         if (parsedValue >= 0)
                         {
@@ -257,9 +292,9 @@ namespace OsEngine.OsTrader.Grids
                         }
                     }
                 }
-                if (values.Length > 6 && string.IsNullOrWhiteSpace(values[6]) == false)
+                if (hasValue6)
                 {
-                    if (TryParseIntInvariant(values[6], out int parsedValue))
+                    if (TryParseIntInvariant(value6, out int parsedValue))
                     {
                         if (parsedValue >= 0)
                         {
@@ -267,9 +302,9 @@ namespace OsEngine.OsTrader.Grids
                         }
                     }
                 }
-                if (values.Length > 7 && string.IsNullOrWhiteSpace(values[7]) == false)
+                if (hasValue7)
                 {
-                    if (TryParseIntInvariant(values[7], out int parsedValue))
+                    if (TryParseIntInvariant(value7, out int parsedValue))
                     {
                         if (parsedValue >= 0)
                         {
@@ -277,9 +312,9 @@ namespace OsEngine.OsTrader.Grids
                         }
                     }
                 }
-                if (values.Length > 8 && string.IsNullOrWhiteSpace(values[8]) == false)
+                if (hasValue8)
                 {
-                    if (TryParseDecimal(values[8], out decimal parsedValue))
+                    if (TryParseDecimal(value8, out decimal parsedValue))
                     {
                         if (parsedValue >= 0)
                         {
@@ -287,9 +322,9 @@ namespace OsEngine.OsTrader.Grids
                         }
                     }
                 }
-                if (values.Length > 9 && string.IsNullOrWhiteSpace(values[9]) == false)
+                if (hasValue9)
                 {
-                    if (TryParseIntInvariant(values[9], out int parsedValue))
+                    if (TryParseIntInvariant(value9, out int parsedValue))
                     {
                         if (parsedValue >= 0)
                         {
@@ -297,20 +332,19 @@ namespace OsEngine.OsTrader.Grids
                         }
                     }
                 }
-                if (values.Length > 10 && string.IsNullOrWhiteSpace(values[10]) == false)
+                if (hasValue10)
                 {
-                    if (TryParseDateInvariantOrCurrent(values[10], out DateTime parsedValue))
+                    if (TryParseDateInvariantOrCurrent(value10, out DateTime parsedValue))
                     {
                         _firstTradeTime = parsedValue;
                     }
                 }
 
-                if (values.Length <= 11
-                    || string.IsNullOrWhiteSpace(values[11]))
+                if (hasValue11 == false)
                 {
                     DelayInReal = 500;
                 }
-                else if (TryParseIntInvariant(values[11], out int delayParsed))
+                else if (TryParseIntInvariant(value11, out int delayParsed))
                 {
                     if (delayParsed > 0)
                     {
@@ -326,27 +360,25 @@ namespace OsEngine.OsTrader.Grids
                     DelayInReal = 500;
                 }
 
-                if (values.Length <= 12
-                    || string.IsNullOrWhiteSpace(values[12]))
+                if (hasValue12 == false)
                 {
                     CheckMicroVolumes = true;
                 }
                 else
                 {
-                    if (TryParseBoolFlexible(values[12], out bool microParsed))
+                    if (TryParseBoolFlexible(value12, out bool microParsed))
                     {
                         CheckMicroVolumes = microParsed;
                     }
                 }
 
-                if (values.Length <= 13
-                    || string.IsNullOrWhiteSpace(values[13]))
+                if (hasValue13 == false)
                 {
                     MaxDistanceToOrdersPercent = 1.5m;
                 }
                 else
                 {
-                    if (TryParseDecimal(values[13], out decimal maxDistanceParsed) == false)
+                    if (TryParseDecimal(value13, out decimal maxDistanceParsed) == false)
                     {
                         // Keep current value on malformed token.
                     }
@@ -360,14 +392,13 @@ namespace OsEngine.OsTrader.Grids
                     }
                 }
 
-                if (values.Length <= 14
-                    || string.IsNullOrWhiteSpace(values[14]))
+                if (hasValue14 == false)
                 {
                     OpenOrdersMakerOnly = true;
                 }
                 else
                 {
-                    if (TryParseBoolFlexible(values[14], out bool makerOnlyParsed))
+                    if (TryParseBoolFlexible(value14, out bool makerOnlyParsed))
                     {
                         OpenOrdersMakerOnly = makerOnlyParsed;
                     }
@@ -432,9 +463,9 @@ namespace OsEngine.OsTrader.Grids
             }
         }
 
-        private static bool TryParseDateInvariantOrCurrent(string value, out DateTime parsed)
+        private static bool TryParseDateInvariantOrCurrent(ReadOnlySpan<char> value, out DateTime parsed)
         {
-            ReadOnlySpan<char> valueSpan = value.AsSpan().Trim();
+            ReadOnlySpan<char> valueSpan = value.Trim();
 
             if (DateTime.TryParse(valueSpan, CultureInfo.InvariantCulture, DateTimeStyles.RoundtripKind, out parsed))
             {
@@ -460,9 +491,9 @@ namespace OsEngine.OsTrader.Grids
             return false;
         }
 
-        private static bool TryParseIntInvariant(string value, out int parsed)
+        private static bool TryParseIntInvariant(ReadOnlySpan<char> value, out int parsed)
         {
-            return int.TryParse(value.AsSpan().Trim(), NumberStyles.Integer, CultureInfo.InvariantCulture, out parsed);
+            return int.TryParse(value.Trim(), NumberStyles.Integer, CultureInfo.InvariantCulture, out parsed);
         }
 
         private static bool TryGetPayloadSegment(string[] sections, int index, out string segment)
@@ -496,28 +527,16 @@ namespace OsEngine.OsTrader.Grids
             return value == null ? string.Empty : value.Trim();
         }
 
-        private static bool TryParseEnumFlexible<TEnum>(string value, out TEnum parsed)
+        private static bool TryParseEnumFlexible<TEnum>(ReadOnlySpan<char> value, out TEnum parsed)
             where TEnum : struct
         {
-            if (value == null)
-            {
-                parsed = default;
-                return false;
-            }
-
-            ReadOnlySpan<char> trimmed = value.AsSpan().Trim();
-
-            if (trimmed.Length == value.Length)
-            {
-                return Enum.TryParse(value, true, out parsed);
-            }
-
-            return Enum.TryParse(trimmed.ToString(), true, out parsed);
+            ReadOnlySpan<char> trimmed = value.Trim();
+            return Enum.TryParse(trimmed, true, out parsed);
         }
 
-        private static bool TryParseBoolFlexible(string value, out bool parsed)
+        private static bool TryParseBoolFlexible(ReadOnlySpan<char> value, out bool parsed)
         {
-            ReadOnlySpan<char> normalized = value.AsSpan().Trim();
+            ReadOnlySpan<char> normalized = value.Trim();
 
             if (bool.TryParse(normalized, out parsed))
             {
@@ -546,9 +565,9 @@ namespace OsEngine.OsTrader.Grids
             return false;
         }
 
-        private static bool TryParseDecimal(string value, out decimal parsed)
+        private static bool TryParseDecimal(ReadOnlySpan<char> value, out decimal parsed)
         {
-            ReadOnlySpan<char> valueSpan = value.AsSpan().Trim();
+            ReadOnlySpan<char> valueSpan = value.Trim();
 
             if (decimal.TryParse(valueSpan, NumberStyles.Any, CultureInfo.InvariantCulture, out parsed))
             {
@@ -567,6 +586,76 @@ namespace OsEngine.OsTrader.Grids
 
             parsed = 0;
             return false;
+        }
+
+        private static void ParseSeparatedTokenBounds(ReadOnlySpan<char> source, char separator, Span<int> tokenStarts, Span<int> tokenLengths)
+        {
+            for (int i = 0; i < tokenStarts.Length; i++)
+            {
+                tokenStarts[i] = -1;
+                tokenLengths[i] = 0;
+            }
+
+            int currentTokenIndex = 0;
+            int tokenStart = 0;
+
+            for (int i = 0; i <= source.Length; i++)
+            {
+                bool atSeparator = i < source.Length && source[i] == separator;
+                bool atEnd = i == source.Length;
+
+                if (atSeparator == false && atEnd == false)
+                {
+                    continue;
+                }
+
+                if (currentTokenIndex >= tokenStarts.Length)
+                {
+                    break;
+                }
+
+                int tokenEnd = i - 1;
+                while (tokenStart <= tokenEnd && char.IsWhiteSpace(source[tokenStart]))
+                {
+                    tokenStart++;
+                }
+
+                while (tokenEnd >= tokenStart && char.IsWhiteSpace(source[tokenEnd]))
+                {
+                    tokenEnd--;
+                }
+
+                if (tokenEnd >= tokenStart)
+                {
+                    tokenStarts[currentTokenIndex] = tokenStart;
+                    tokenLengths[currentTokenIndex] = tokenEnd - tokenStart + 1;
+                }
+
+                currentTokenIndex++;
+                tokenStart = i + 1;
+            }
+        }
+
+        private static ReadOnlySpan<char> GetTokenSpan(ReadOnlySpan<char> source, ReadOnlySpan<int> tokenStarts, ReadOnlySpan<int> tokenLengths, int index)
+        {
+            if (index < 0
+                || index >= tokenStarts.Length
+                || index >= tokenLengths.Length)
+            {
+                return ReadOnlySpan<char>.Empty;
+            }
+
+            int start = tokenStarts[index];
+            int length = tokenLengths[index];
+
+            if (start < 0
+                || length <= 0
+                || start + length > source.Length)
+            {
+                return ReadOnlySpan<char>.Empty;
+            }
+
+            return source.Slice(start, length);
         }
 
         public void Delete()
