@@ -191,218 +191,174 @@ namespace OsEngine.OsTrader.Grids
                 }
 
                 ReadOnlySpan<char> primeValues = primeSegment.AsSpan();
-                Span<int> tokenStarts = stackalloc int[15];
-                Span<int> tokenLengths = stackalloc int[15];
-                ParseSeparatedTokenBounds(primeValues, '@', tokenStarts, tokenLengths);
+                bool hasDelay = false;
+                bool hasMicro = false;
+                bool hasMaxDistance = false;
+                bool hasMakerOnly = false;
 
-                ReadOnlySpan<char> value0 = GetTokenSpan(primeValues, tokenStarts, tokenLengths, 0);
-                ReadOnlySpan<char> value1 = GetTokenSpan(primeValues, tokenStarts, tokenLengths, 1);
-                ReadOnlySpan<char> value2 = GetTokenSpan(primeValues, tokenStarts, tokenLengths, 2);
-                ReadOnlySpan<char> value3 = GetTokenSpan(primeValues, tokenStarts, tokenLengths, 3);
-                ReadOnlySpan<char> value4 = GetTokenSpan(primeValues, tokenStarts, tokenLengths, 4);
-                ReadOnlySpan<char> value5 = GetTokenSpan(primeValues, tokenStarts, tokenLengths, 5);
-                ReadOnlySpan<char> value6 = GetTokenSpan(primeValues, tokenStarts, tokenLengths, 6);
-                ReadOnlySpan<char> value7 = GetTokenSpan(primeValues, tokenStarts, tokenLengths, 7);
-                ReadOnlySpan<char> value8 = GetTokenSpan(primeValues, tokenStarts, tokenLengths, 8);
-                ReadOnlySpan<char> value9 = GetTokenSpan(primeValues, tokenStarts, tokenLengths, 9);
-                ReadOnlySpan<char> value10 = GetTokenSpan(primeValues, tokenStarts, tokenLengths, 10);
-                ReadOnlySpan<char> value11 = GetTokenSpan(primeValues, tokenStarts, tokenLengths, 11);
-                ReadOnlySpan<char> value12 = GetTokenSpan(primeValues, tokenStarts, tokenLengths, 12);
-                ReadOnlySpan<char> value13 = GetTokenSpan(primeValues, tokenStarts, tokenLengths, 13);
-                ReadOnlySpan<char> value14 = GetTokenSpan(primeValues, tokenStarts, tokenLengths, 14);
+                int tokenIndex = 0;
+                int tokenStart = 0;
 
-                bool hasValue0 = value0.IsEmpty == false;
-                bool hasValue1 = value1.IsEmpty == false;
-                bool hasValue2 = value2.IsEmpty == false;
-                bool hasValue3 = value3.IsEmpty == false;
-                bool hasValue4 = value4.IsEmpty == false;
-                bool hasValue5 = value5.IsEmpty == false;
-                bool hasValue6 = value6.IsEmpty == false;
-                bool hasValue7 = value7.IsEmpty == false;
-                bool hasValue8 = value8.IsEmpty == false;
-                bool hasValue9 = value9.IsEmpty == false;
-                bool hasValue10 = value10.IsEmpty == false;
-                bool hasValue11 = value11.IsEmpty == false;
-                bool hasValue12 = value12.IsEmpty == false;
-                bool hasValue13 = value13.IsEmpty == false;
-                bool hasValue14 = value14.IsEmpty == false;
+                for (int i = 0; i <= primeValues.Length; i++)
+                {
+                    bool atSeparator = i < primeValues.Length && primeValues[i] == '@';
+                    bool atEnd = i == primeValues.Length;
 
-                // settings prime
+                    if (atSeparator == false && atEnd == false)
+                    {
+                        continue;
+                    }
 
-                if (hasValue0)
-                {
-                    if (TryParseIntInvariant(value0, out int parsedValue))
+                    if (tokenIndex > 14)
                     {
-                        if (parsedValue >= 0)
+                        break;
+                    }
+
+                    ReadOnlySpan<char> token = primeValues.Slice(tokenStart, i - tokenStart).Trim();
+
+                    if (token.IsEmpty == false)
+                    {
+                        switch (tokenIndex)
                         {
-                            Number = parsedValue;
+                            case 0:
+                                if (TryParseIntInvariant(token, out int numberParsed) && numberParsed >= 0)
+                                {
+                                    Number = numberParsed;
+                                }
+                                break;
+                            case 1:
+                                if (TryParseEnumFlexible(token, out TradeGridPrimeType gridTypeParsed)
+                                    && (gridTypeParsed == TradeGridPrimeType.MarketMaking
+                                        || gridTypeParsed == TradeGridPrimeType.OpenPosition))
+                                {
+                                    GridType = gridTypeParsed;
+                                }
+                                break;
+                            case 2:
+                                if (TryParseEnumFlexible(token, out TradeGridRegime regimeParsed)
+                                    && (regimeParsed == TradeGridRegime.Off
+                                        || regimeParsed == TradeGridRegime.OffAndCancelOrders
+                                        || regimeParsed == TradeGridRegime.On
+                                        || regimeParsed == TradeGridRegime.CloseOnly
+                                        || regimeParsed == TradeGridRegime.CloseForced))
+                                {
+                                    _regime = regimeParsed;
+                                }
+                                break;
+                            case 3:
+                                if (TryParseEnumFlexible(token, out TradeGridLogicEntryRegime logicParsed)
+                                    && (logicParsed == TradeGridLogicEntryRegime.OnTrade
+                                        || logicParsed == TradeGridLogicEntryRegime.OncePerSecond))
+                                {
+                                    RegimeLogicEntry = logicParsed;
+                                }
+                                break;
+                            case 4:
+                                if (TryParseBoolFlexible(token, out bool autoClearParsed))
+                                {
+                                    AutoClearJournalIsOn = autoClearParsed;
+                                }
+                                break;
+                            case 5:
+                                if (TryParseIntInvariant(token, out int maxClosePositionsParsed) && maxClosePositionsParsed >= 0)
+                                {
+                                    MaxClosePositionsInJournal = maxClosePositionsParsed;
+                                }
+                                break;
+                            case 6:
+                                if (TryParseIntInvariant(token, out int maxOpenOrdersParsed) && maxOpenOrdersParsed >= 0)
+                                {
+                                    MaxOpenOrdersInMarket = maxOpenOrdersParsed;
+                                }
+                                break;
+                            case 7:
+                                if (TryParseIntInvariant(token, out int maxCloseOrdersParsed) && maxCloseOrdersParsed >= 0)
+                                {
+                                    MaxCloseOrdersInMarket = maxCloseOrdersParsed;
+                                }
+                                break;
+                            case 8:
+                                if (TryParseDecimal(token, out decimal firstTradePriceParsed) && firstTradePriceParsed >= 0)
+                                {
+                                    _firstTradePrice = firstTradePriceParsed;
+                                }
+                                break;
+                            case 9:
+                                if (TryParseIntInvariant(token, out int openPositionsParsed) && openPositionsParsed >= 0)
+                                {
+                                    _openPositionsBySession = openPositionsParsed;
+                                }
+                                break;
+                            case 10:
+                                if (TryParseDateInvariantOrCurrent(token, out DateTime firstTradeTimeParsed))
+                                {
+                                    _firstTradeTime = firstTradeTimeParsed;
+                                }
+                                break;
+                            case 11:
+                                hasDelay = true;
+                                if (TryParseIntInvariant(token, out int delayParsed) && delayParsed > 0)
+                                {
+                                    DelayInReal = delayParsed;
+                                }
+                                else
+                                {
+                                    DelayInReal = 500;
+                                }
+                                break;
+                            case 12:
+                                hasMicro = true;
+                                if (TryParseBoolFlexible(token, out bool microParsed))
+                                {
+                                    CheckMicroVolumes = microParsed;
+                                }
+                                break;
+                            case 13:
+                                hasMaxDistance = true;
+                                if (TryParseDecimal(token, out decimal maxDistanceParsed))
+                                {
+                                    if (maxDistanceParsed >= 0)
+                                    {
+                                        MaxDistanceToOrdersPercent = maxDistanceParsed;
+                                    }
+                                    else
+                                    {
+                                        MaxDistanceToOrdersPercent = 1.5m;
+                                    }
+                                }
+                                break;
+                            case 14:
+                                hasMakerOnly = true;
+                                if (TryParseBoolFlexible(token, out bool makerOnlyParsed))
+                                {
+                                    OpenOrdersMakerOnly = makerOnlyParsed;
+                                }
+                                break;
                         }
                     }
-                }
-                if (hasValue1)
-                {
-                    if (TryParseEnumFlexible(value1, out TradeGridPrimeType parsedValue))
-                    {
-                        if (parsedValue == TradeGridPrimeType.MarketMaking
-                            || parsedValue == TradeGridPrimeType.OpenPosition)
-                        {
-                            GridType = parsedValue;
-                        }
-                    }
-                }
-                if (hasValue2)
-                {
-                    if (TryParseEnumFlexible(value2, out TradeGridRegime parsedValue))
-                    {
-                        if (parsedValue == TradeGridRegime.Off
-                            || parsedValue == TradeGridRegime.OffAndCancelOrders
-                            || parsedValue == TradeGridRegime.On
-                            || parsedValue == TradeGridRegime.CloseOnly
-                            || parsedValue == TradeGridRegime.CloseForced)
-                        {
-                            _regime = parsedValue;
-                        }
-                    }
-                }
-                if (hasValue3)
-                {
-                    if (TryParseEnumFlexible(value3, out TradeGridLogicEntryRegime parsedValue))
-                    {
-                        if (parsedValue == TradeGridLogicEntryRegime.OnTrade
-                            || parsedValue == TradeGridLogicEntryRegime.OncePerSecond)
-                        {
-                            RegimeLogicEntry = parsedValue;
-                        }
-                    }
-                }
-                if (hasValue4)
-                {
-                    if (TryParseBoolFlexible(value4, out bool parsedValue))
-                    {
-                        AutoClearJournalIsOn = parsedValue;
-                    }
-                }
-                if (hasValue5)
-                {
-                    if (TryParseIntInvariant(value5, out int parsedValue))
-                    {
-                        if (parsedValue >= 0)
-                        {
-                            MaxClosePositionsInJournal = parsedValue;
-                        }
-                    }
-                }
-                if (hasValue6)
-                {
-                    if (TryParseIntInvariant(value6, out int parsedValue))
-                    {
-                        if (parsedValue >= 0)
-                        {
-                            MaxOpenOrdersInMarket = parsedValue;
-                        }
-                    }
-                }
-                if (hasValue7)
-                {
-                    if (TryParseIntInvariant(value7, out int parsedValue))
-                    {
-                        if (parsedValue >= 0)
-                        {
-                            MaxCloseOrdersInMarket = parsedValue;
-                        }
-                    }
-                }
-                if (hasValue8)
-                {
-                    if (TryParseDecimal(value8, out decimal parsedValue))
-                    {
-                        if (parsedValue >= 0)
-                        {
-                            _firstTradePrice = parsedValue;
-                        }
-                    }
-                }
-                if (hasValue9)
-                {
-                    if (TryParseIntInvariant(value9, out int parsedValue))
-                    {
-                        if (parsedValue >= 0)
-                        {
-                            _openPositionsBySession = parsedValue;
-                        }
-                    }
-                }
-                if (hasValue10)
-                {
-                    if (TryParseDateInvariantOrCurrent(value10, out DateTime parsedValue))
-                    {
-                        _firstTradeTime = parsedValue;
-                    }
+
+                    tokenIndex++;
+                    tokenStart = i + 1;
                 }
 
-                if (hasValue11 == false)
-                {
-                    DelayInReal = 500;
-                }
-                else if (TryParseIntInvariant(value11, out int delayParsed))
-                {
-                    if (delayParsed > 0)
-                    {
-                        DelayInReal = delayParsed;
-                    }
-                    else
-                    {
-                        DelayInReal = 500;
-                    }
-                }
-                else
+                if (hasDelay == false)
                 {
                     DelayInReal = 500;
                 }
 
-                if (hasValue12 == false)
+                if (hasMicro == false)
                 {
                     CheckMicroVolumes = true;
                 }
-                else
-                {
-                    if (TryParseBoolFlexible(value12, out bool microParsed))
-                    {
-                        CheckMicroVolumes = microParsed;
-                    }
-                }
 
-                if (hasValue13 == false)
+                if (hasMaxDistance == false)
                 {
                     MaxDistanceToOrdersPercent = 1.5m;
                 }
-                else
-                {
-                    if (TryParseDecimal(value13, out decimal maxDistanceParsed) == false)
-                    {
-                        // Keep current value on malformed token.
-                    }
-                    else if (maxDistanceParsed >= 0)
-                    {
-                        MaxDistanceToOrdersPercent = maxDistanceParsed;
-                    }
-                    else
-                    {
-                        MaxDistanceToOrdersPercent = 1.5m;
-                    }
-                }
 
-                if (hasValue14 == false)
+                if (hasMakerOnly == false)
                 {
                     OpenOrdersMakerOnly = true;
-                }
-                else
-                {
-                    if (TryParseBoolFlexible(value14, out bool makerOnlyParsed))
-                    {
-                        OpenOrdersMakerOnly = makerOnlyParsed;
-                    }
-                    // Keep current value on malformed token.
                 }
 
                 // non trade periods
@@ -586,76 +542,6 @@ namespace OsEngine.OsTrader.Grids
 
             parsed = 0;
             return false;
-        }
-
-        private static void ParseSeparatedTokenBounds(ReadOnlySpan<char> source, char separator, Span<int> tokenStarts, Span<int> tokenLengths)
-        {
-            for (int i = 0; i < tokenStarts.Length; i++)
-            {
-                tokenStarts[i] = -1;
-                tokenLengths[i] = 0;
-            }
-
-            int currentTokenIndex = 0;
-            int tokenStart = 0;
-
-            for (int i = 0; i <= source.Length; i++)
-            {
-                bool atSeparator = i < source.Length && source[i] == separator;
-                bool atEnd = i == source.Length;
-
-                if (atSeparator == false && atEnd == false)
-                {
-                    continue;
-                }
-
-                if (currentTokenIndex >= tokenStarts.Length)
-                {
-                    break;
-                }
-
-                int tokenEnd = i - 1;
-                while (tokenStart <= tokenEnd && char.IsWhiteSpace(source[tokenStart]))
-                {
-                    tokenStart++;
-                }
-
-                while (tokenEnd >= tokenStart && char.IsWhiteSpace(source[tokenEnd]))
-                {
-                    tokenEnd--;
-                }
-
-                if (tokenEnd >= tokenStart)
-                {
-                    tokenStarts[currentTokenIndex] = tokenStart;
-                    tokenLengths[currentTokenIndex] = tokenEnd - tokenStart + 1;
-                }
-
-                currentTokenIndex++;
-                tokenStart = i + 1;
-            }
-        }
-
-        private static ReadOnlySpan<char> GetTokenSpan(ReadOnlySpan<char> source, ReadOnlySpan<int> tokenStarts, ReadOnlySpan<int> tokenLengths, int index)
-        {
-            if (index < 0
-                || index >= tokenStarts.Length
-                || index >= tokenLengths.Length)
-            {
-                return ReadOnlySpan<char>.Empty;
-            }
-
-            int start = tokenStarts[index];
-            int length = tokenLengths[index];
-
-            if (start < 0
-                || length <= 0
-                || start + length > source.Length)
-            {
-                return ReadOnlySpan<char>.Empty;
-            }
-
-            return source.Slice(start, length);
         }
 
         public void Delete()
