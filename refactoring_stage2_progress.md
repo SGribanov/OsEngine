@@ -18214,3 +18214,47 @@
 - `tradegrid_query_collections_hotpath`:
   - current `#1024`: `8111.60 ns/op`, `992.01 bytes/op`
   - effectively stable vs `#1023` (`8094.29 ns/op`, `992.01 bytes/op`).
+
+## 2026-03-03 - Incremental Update #1025
+
+### Scope
+
+- Wave `P2` governance extension: added deterministic Stage2 perf KPI for `OptimizerMethodCache` hit path and integrated it into threshold enforcement.
+
+### What Changed
+
+- Updated perf harness:
+  - project/OsEngine.Tests/Performance/Stage2PerformanceBaselineTests.cs
+  - tools/perf-thresholds.json
+- Added new scenario:
+  - `Stage2Perf_OptimizerMethodCache_HitPath_ShouldEmitMetricsAndStableChecksums`
+  - output metric id: `optimizer_method_cache_hit_path`.
+- Updated perf artifacts:
+  - reports/stage2_perf_metrics.jsonl
+  - reports/stage2_perf_summary.json
+- Updated global coverage matrix:
+  - refactoring_stage2_coverage_matrix.md
+
+### Verification
+
+- Targeted checks:
+  - dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --configuration Release --nologo --filter "FullyQualifiedName~Stage2Perf_" -> passed 3/3
+- Perf command:
+  - pwsh -NoProfile -File tools/run-stage2-perf.ps1 -NoBuild -EnforceThresholds -Repeat 5 -> success
+  - threshold check passed including new `optimizer_method_cache_hit_path` scenario.
+- Host-context verification (outside sandbox, per dotnet-build-policy):
+  - dotnet restore project/OsEngine/OsEngine.csproj --nologo -> success
+  - dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo -> success
+  - dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900 -> success, 0 warnings, 0 errors
+  - dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo -> passed 850/850
+
+### P0/P2 Metrics Snapshot (median, Repeat=5)
+
+- `indicator_cache_hit_path`:
+  - current `#1025`: `2193.65 ns/op`, `448.02 bytes/op`
+  - remains strongly improved vs pre-P2 baseline.
+- `optimizer_method_cache_hit_path` (new):
+  - current `#1025`: `211.55 ns/op`, `0.01 bytes/op`, `gen0=0`
+- `tradegrid_query_collections_hotpath`:
+  - current `#1025`: `8640.31 ns/op`, `992.01 bytes/op`
+  - allocation unchanged; short-run latency noise observed.

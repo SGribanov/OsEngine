@@ -18080,3 +18080,31 @@
   - `tradegrid_query_collections_hotpath`: `8111.60 ns/op`, `992.01 bytes/op` (stable vs previous pass).
 - **Commit:** n/a
 - **Push:** n/a
+
+### Wave P2 - Perf Governance Expansion (Incremental Adoption #1025)
+
+- **Status:** In Progress (increment block completed)
+- **Plan item:** `refactoring_stage2_plan.md` -> Plan Refresh / Wave `P2`
+- **Changes (new method-cache KPI scenario + thresholds):**
+  - Updated `project/OsEngine.Tests/Performance/Stage2PerformanceBaselineTests.cs`:
+    - added `Stage2Perf_OptimizerMethodCache_HitPath_ShouldEmitMetricsAndStableChecksums`.
+    - added metric scenario id: `optimizer_method_cache_hit_path`.
+  - Updated `tools/perf-thresholds.json`:
+    - added threshold block for `optimizer_method_cache_hit_path`.
+  - Updated perf artifacts:
+    - `reports/stage2_perf_metrics.jsonl`
+    - `reports/stage2_perf_summary.json`
+  - Updated `refactoring_stage2_coverage_matrix.md`.
+- **Verification (outside sandbox, per dotnet-build-policy):**
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --configuration Release --nologo --filter "FullyQualifiedName~Stage2Perf_"` -> passed `3/3`
+  - `pwsh -NoProfile -File tools/run-stage2-perf.ps1 -NoBuild -EnforceThresholds -Repeat 5` -> success; threshold check passed including new scenario
+  - `dotnet restore project/OsEngine/OsEngine.csproj --nologo` -> success
+  - `dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo` -> success
+  - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` -> success, 0 warnings, 0 errors
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed `850/850`
+- **Metrics snapshot (median, Repeat=5):**
+  - `indicator_cache_hit_path`: `2193.65 ns/op`, `448.02 bytes/op`
+  - `optimizer_method_cache_hit_path`: `211.55 ns/op`, `0.01 bytes/op`, `gen0=0`
+  - `tradegrid_query_collections_hotpath`: `8640.31 ns/op`, `992.01 bytes/op`
+- **Commit:** n/a
+- **Push:** n/a
