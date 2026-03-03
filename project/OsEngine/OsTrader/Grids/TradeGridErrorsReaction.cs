@@ -371,7 +371,7 @@ namespace OsEngine.OsTrader.Grids
                         string message = "ERROR on open order. No money on deposit \n";
                         message += "Reduce open orders in market. " + "\n";
                         message += "New value open orders in market: " + myGrid.MaxOpenOrdersInMarket;
-                        SendNewLogMessage(message, LogMessageType.Error);
+                        SendNewLogMessage(message, LogMessageType.Signal);
                     }
                     else if( isOpenOrder == false
                         && myGrid.MaxCloseOrdersInMarket > 1)
@@ -382,7 +382,7 @@ namespace OsEngine.OsTrader.Grids
                         string message = "ERROR on close order. No money on deposit \n";
                         message += "Reduce close orders in market. " + "\n";
                         message += "New value close orders in market: " + myGrid.MaxCloseOrdersInMarket;
-                        SendNewLogMessage(message, LogMessageType.Error);
+                        SendNewLogMessage(message, LogMessageType.Signal);
                     }
                 }
             }
