@@ -19618,3 +19618,61 @@
   - previous `#1042`: `2672.87 ns/op`, `466.25 bytes/op`
   - current `#1049`: `3857.23 ns/op`, `466.25 bytes/op`
   - delta: `+44.31% ns/op`, allocation unchanged
+
+## 2026-03-03 - Incremental Update #1050
+
+### Scope
+
+- TradeGridErrorsReaction parser tokenization cleanup in `LoadFromString`: remove `Split('@')` and parse tail tokens via span in one pass.
+
+### What Changed
+
+- Updated production code:
+  - project/OsEngine/OsTrader/Grids/TradeGridErrorsReaction.cs
+- Updated tests/docs/artifacts:
+  - project/OsEngine.Tests/TradeGridPersistenceCoreTests.cs
+  - refactoring_stage2_progress.md
+  - refactoring_stage2_execution_log.md
+  - refactoring_stage2_coverage_matrix.md
+  - reports/stage2_perf_metrics.jsonl
+  - reports/stage2_perf_summary.json
+- Changes:
+  - `LoadFromString(string? value)` switched from `string.Split('@')` to span token extraction (`TryGetTokenAt`).
+  - `TryParseBoolFlexible`/`TryParsePositiveInt` now consume `ReadOnlySpan<char>` directly.
+  - Added regression test:
+    - `Stage2Step2_2_TradeGridErrorsReaction_LoadFromString_WithWhitespaceAroundTokens_ShouldParse`.
+  - Parsing contracts preserved (including flexible bool aliases and positive-int checks).
+
+### Verification
+
+- Targeted checks:
+  - dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --configuration Release --nologo --filter "FullyQualifiedName~TradeGridErrorsReaction|FullyQualifiedName~Stage2Step2_2_TradeGrid_Process_WithErrorsReaction" -> passed 30/30
+- Perf command:
+  - pwsh -NoProfile -File tools/run-stage2-perf.ps1 -NoBuild -EnforceThresholds -Repeat 5 -> success
+  - threshold check passed for all scenarios.
+- Host-context verification (outside sandbox, per dotnet-build-policy):
+  - dotnet restore project/OsEngine/OsEngine.csproj --nologo -> success
+  - dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo -> success
+  - dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900 -> success, 0 warnings, 0 errors
+  - dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo -> passed 872/872
+
+### P0/P2/P3 Metrics Snapshot (median, Repeat=5)
+
+- `indicator_cache_hit_path`:
+  - current `#1050`: `2912.95 ns/op`, `448.02 bytes/op`
+- `optimizer_method_cache_hit_path`:
+  - current `#1050`: `146.80 ns/op`, `0.01 bytes/op`
+- `optimizer_cache_key_build_path`:
+  - current `#1050`: `340.53 ns/op`, `0.01 bytes/op`
+- `optimizer_method_parameter_hash_path`:
+  - current `#1050`: `71.70 ns/op`, `0.00 bytes/op`
+- `tradegrid_query_collections_hotpath`:
+  - current `#1050`: `10821.66 ns/op`, `992.01 bytes/op`
+- `tradegrid_load_from_string_ru_payload_path`:
+  - previous `#1042`: `2048.80 ns/op`, `32.22 bytes/op`
+  - current `#1050`: `2987.57 ns/op`, `32.22 bytes/op`
+  - delta: `+45.82% ns/op`, allocation unchanged
+- `tradegrid_load_from_string_malformed_tail_path`:
+  - previous `#1042`: `2672.87 ns/op`, `466.25 bytes/op`
+  - current `#1050`: `3785.33 ns/op`, `466.25 bytes/op`
+  - delta: `+41.62% ns/op`, allocation unchanged

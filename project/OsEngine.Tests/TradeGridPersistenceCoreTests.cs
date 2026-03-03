@@ -4510,6 +4510,33 @@ public class TradeGridPersistenceCoreTests
     }
 
     [Fact]
+    public void Stage2Step2_2_TradeGridErrorsReaction_LoadFromString_WithWhitespaceAroundTokens_ShouldParse()
+    {
+        TradeGrid grid = CreateBareGrid();
+        TradeGridErrorsReaction reaction = new TradeGridErrorsReaction(grid)
+        {
+            FailOpenOrdersReactionIsOn = false,
+            FailOpenOrdersCountToReaction = 10,
+            FailCancelOrdersCountToReaction = 11,
+            FailCancelOrdersReactionIsOn = true,
+            WaitOnStartConnectorIsOn = false,
+            WaitSecondsOnStartConnector = 31,
+            ReduceOrdersCountInMarketOnNoFundsError = false
+        };
+
+        Exception? error = Record.Exception(() => reaction.LoadFromString("  yes  @@  15  @@  17  @  off  @  on  @  35  @  1  "));
+
+        Assert.Null(error);
+        Assert.True(reaction.FailOpenOrdersReactionIsOn);
+        Assert.Equal(15, reaction.FailOpenOrdersCountToReaction);
+        Assert.Equal(17, reaction.FailCancelOrdersCountToReaction);
+        Assert.False(reaction.FailCancelOrdersReactionIsOn);
+        Assert.True(reaction.WaitOnStartConnectorIsOn);
+        Assert.Equal(35, reaction.WaitSecondsOnStartConnector);
+        Assert.True(reaction.ReduceOrdersCountInMarketOnNoFundsError);
+    }
+
+    [Fact]
     public void Stage2Step2_2_TradeGridErrorsReaction_LoadFromString_WithMissingWaitBool_ShouldKeepValueAndContinueTailParsing()
     {
         TradeGrid grid = CreateBareGrid();

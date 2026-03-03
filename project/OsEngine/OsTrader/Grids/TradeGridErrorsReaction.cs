@@ -88,56 +88,56 @@ namespace OsEngine.OsTrader.Grids
                     return;
                 }
 
-                string[] values = value.Split('@');
+                ReadOnlySpan<char> valueSpan = value.AsSpan();
 
-                if (values.Length > 0 && string.IsNullOrWhiteSpace(values[0]) == false)
+                if (TryGetTokenAt(valueSpan, 0, out ReadOnlySpan<char> token0))
                 {
-                    if (TryParseBoolFlexible(values[0], out bool parsed))
+                    if (TryParseBoolFlexible(token0, out bool parsed))
                     {
                         FailOpenOrdersReactionIsOn = parsed;
                     }
                 }
                 //Enum.TryParse(values[1], out FailOpenOrdersReaction);
-                if (values.Length > 2 && string.IsNullOrWhiteSpace(values[2]) == false)
+                if (TryGetTokenAt(valueSpan, 2, out ReadOnlySpan<char> token2))
                 {
-                    if (TryParsePositiveInt(values[2], out int parsed))
+                    if (TryParsePositiveInt(token2, out int parsed))
                     {
                         FailOpenOrdersCountToReaction = parsed;
                     }
                 }
                 //Enum.TryParse(values[3], out FailCancelOrdersReaction);
-                if (values.Length > 4 && string.IsNullOrWhiteSpace(values[4]) == false)
+                if (TryGetTokenAt(valueSpan, 4, out ReadOnlySpan<char> token4))
                 {
-                    if (TryParsePositiveInt(values[4], out int parsed))
+                    if (TryParsePositiveInt(token4, out int parsed))
                     {
                         FailCancelOrdersCountToReaction = parsed;
                     }
                 }
-                if (values.Length > 5 && string.IsNullOrWhiteSpace(values[5]) == false)
+                if (TryGetTokenAt(valueSpan, 5, out ReadOnlySpan<char> token5))
                 {
-                    if (TryParseBoolFlexible(values[5], out bool parsed))
+                    if (TryParseBoolFlexible(token5, out bool parsed))
                     {
                         FailCancelOrdersReactionIsOn = parsed;
                     }
                 }
 
-                if (values.Length > 6 && string.IsNullOrWhiteSpace(values[6]) == false)
+                if (TryGetTokenAt(valueSpan, 6, out ReadOnlySpan<char> token6))
                 {
-                    if (TryParseBoolFlexible(values[6], out bool parsed))
+                    if (TryParseBoolFlexible(token6, out bool parsed))
                     {
                         WaitOnStartConnectorIsOn = parsed;
                     }
                 }
-                if (values.Length > 7 && string.IsNullOrWhiteSpace(values[7]) == false)
+                if (TryGetTokenAt(valueSpan, 7, out ReadOnlySpan<char> token7))
                 {
-                    if (TryParsePositiveInt(values[7], out int parsed))
+                    if (TryParsePositiveInt(token7, out int parsed))
                     {
                         WaitSecondsOnStartConnector = parsed;
                     }
                 }
-                if (values.Length > 8 && string.IsNullOrWhiteSpace(values[8]) == false)
+                if (TryGetTokenAt(valueSpan, 8, out ReadOnlySpan<char> token8))
                 {
-                    if (TryParseBoolFlexible(values[8], out bool parsed))
+                    if (TryParseBoolFlexible(token8, out bool parsed))
                     {
                         ReduceOrdersCountInMarketOnNoFundsError = parsed;
                     }
@@ -149,9 +149,44 @@ namespace OsEngine.OsTrader.Grids
             }
         }
 
-        private static bool TryParseBoolFlexible(string value, out bool parsed)
+        private static bool TryGetTokenAt(ReadOnlySpan<char> source, int targetIndex, out ReadOnlySpan<char> token)
         {
-            ReadOnlySpan<char> normalized = value.AsSpan().Trim();
+            token = default;
+
+            if (targetIndex < 0)
+            {
+                return false;
+            }
+
+            int currentIndex = 0;
+            int tokenStart = 0;
+
+            for (int i = 0; i <= source.Length; i++)
+            {
+                bool atSeparator = i < source.Length && source[i] == '@';
+                bool atEnd = i == source.Length;
+
+                if (atSeparator == false && atEnd == false)
+                {
+                    continue;
+                }
+
+                if (currentIndex == targetIndex)
+                {
+                    token = source.Slice(tokenStart, i - tokenStart).Trim();
+                    return token.IsEmpty == false;
+                }
+
+                currentIndex++;
+                tokenStart = i + 1;
+            }
+
+            return false;
+        }
+
+        private static bool TryParseBoolFlexible(ReadOnlySpan<char> value, out bool parsed)
+        {
+            ReadOnlySpan<char> normalized = value.Trim();
 
             if (bool.TryParse(normalized, out parsed))
             {
@@ -178,9 +213,9 @@ namespace OsEngine.OsTrader.Grids
             return false;
         }
 
-        private static bool TryParsePositiveInt(string value, out int parsed)
+        private static bool TryParsePositiveInt(ReadOnlySpan<char> value, out int parsed)
         {
-            ReadOnlySpan<char> valueSpan = value.AsSpan().Trim();
+            ReadOnlySpan<char> valueSpan = value.Trim();
 
             if (int.TryParse(valueSpan, NumberStyles.Any, CultureInfo.InvariantCulture, out parsed) == false
                 && int.TryParse(valueSpan, NumberStyles.Any, CultureInfo.CurrentCulture, out parsed) == false)
