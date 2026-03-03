@@ -18311,3 +18311,62 @@
 - `tradegrid_query_collections_hotpath`:
   - current `#1026`: `8616.02 ns/op`, `992.01 bytes/op`
   - allocation stable; latency remains noisy but within gate.
+
+## 2026-03-03 - Incremental Update #1027
+
+### Scope
+
+- Wave `P2` continuation: remove source-id string conversion in optimizer cache key builders and add dedicated key-build KPI scenario.
+
+### What Changed
+
+- Updated production code:
+  - project/OsEngine/OsOptimizer/OptEntity/IndicatorCache.cs
+  - project/OsEngine/OsOptimizer/OptEntity/OptimizerMethodCache.cs
+  - project/OsEngine/Indicators/Aindicator.cs
+  - project/OsEngine/OsTrader/Panels/BotPanel.cs
+- Updated tests/perf harness:
+  - project/OsEngine.Tests/IndicatorCacheCoreTests.cs
+  - project/OsEngine.Tests/OptimizerMethodCacheCoreTests.cs
+  - project/OsEngine.Tests/Performance/Stage2PerformanceBaselineTests.cs
+  - tools/perf-thresholds.json
+- Changes:
+  - added `int sourceId` key constructors for `IndicatorCacheKey` and `OptimizerMethodCacheKey` (existing `string sourceId` constructors retained for compatibility).
+  - switched optimizer key-build callsites to `int sourceId`:
+    - `Aindicator.BuildOptimizerIndicatorCacheKey(...)`
+    - `BotPanel.BuildOptimizerMethodCacheKey(...)`
+  - kept precomputed key hash behavior and extended hashing/equality paths for token-based source-id mode.
+  - retained cached optimizer parameter-hash logic in `Aindicator`.
+  - added new Stage2 perf scenario:
+    - `optimizer_cache_key_build_path`
+  - added threshold gate for the new scenario in `tools/perf-thresholds.json`.
+- Updated perf artifacts:
+  - reports/stage2_perf_metrics.jsonl
+  - reports/stage2_perf_summary.json
+- Updated global coverage matrix:
+  - refactoring_stage2_coverage_matrix.md
+
+### Verification
+
+- Targeted checks:
+  - dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --configuration Release --nologo --filter "FullyQualifiedName~IndicatorCacheCoreTests|FullyQualifiedName~OptimizerMethodCacheCoreTests" -> passed 9/9
+  - dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --configuration Release --nologo --filter "FullyQualifiedName~Stage2Perf_" -> passed 4/4
+- Perf command:
+  - pwsh -NoProfile -File tools/run-stage2-perf.ps1 -NoBuild -EnforceThresholds -Repeat 5 -> success
+  - threshold check passed for all scenarios, including new key-build KPI.
+- Host-context verification (outside sandbox, per dotnet-build-policy):
+  - dotnet restore project/OsEngine/OsEngine.csproj --nologo -> success
+  - dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo -> success
+  - dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900 -> success, 0 warnings, 0 errors
+  - dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo -> passed 855/855
+
+### P0/P2 Metrics Snapshot (median, Repeat=5)
+
+- `indicator_cache_hit_path`:
+  - current `#1027`: `1900.40 ns/op`, `448.02 bytes/op`
+- `optimizer_method_cache_hit_path`:
+  - current `#1027`: `148.82 ns/op`, `0.01 bytes/op`
+- `optimizer_cache_key_build_path` (new):
+  - current `#1027`: `324.73 ns/op`, `0.01 bytes/op`
+- `tradegrid_query_collections_hotpath`:
+  - current `#1027`: `8612.08 ns/op`, `992.01 bytes/op`
