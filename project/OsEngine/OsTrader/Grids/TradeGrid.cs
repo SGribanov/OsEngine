@@ -3715,7 +3715,14 @@ namespace OsEngine.OsTrader.Grids
                 return new List<TradeGridLine>();
             }
 
-            List<TradeGridLine> linesWithOpenOrder = new List<TradeGridLine>(linesAll.Count);
+            int expectedCapacity = linesAll.Count;
+            int maxOpenOrdersInMarket = Math.Max(0, MaxOpenOrdersInMarket);
+            if (maxOpenOrdersInMarket > 0)
+            {
+                expectedCapacity = Math.Min(expectedCapacity, Math.Max(maxOpenOrdersInMarket, 4));
+            }
+
+            List<TradeGridLine> linesWithOpenOrder = new List<TradeGridLine>(expectedCapacity);
 
             for (int i = 0; linesAll != null && i < linesAll.Count; i++)
             {
@@ -3748,7 +3755,14 @@ namespace OsEngine.OsTrader.Grids
                 return new List<TradeGridLine>();
             }
 
-            List<TradeGridLine> linesWithCloseOrder = new List<TradeGridLine>(linesAll.Count);
+            int expectedCapacity = linesAll.Count;
+            int maxCloseOrdersInMarket = Math.Max(0, MaxCloseOrdersInMarket);
+            if (maxCloseOrdersInMarket > 0)
+            {
+                expectedCapacity = Math.Min(expectedCapacity, Math.Max(maxCloseOrdersInMarket, 4));
+            }
+
+            List<TradeGridLine> linesWithCloseOrder = new List<TradeGridLine>(expectedCapacity);
 
             for (int i = 0; linesAll != null && i < linesAll.Count; i++)
             {
