@@ -19101,3 +19101,32 @@
   - `tradegrid_load_from_string_malformed_tail_path`: `2520.73 ns/op`, `466.14 bytes/op`
 - **Commit:** n/a
 - **Push:** n/a
+
+### Wave P3 - TradeGrid Date Branch Symbol-Scan Hoist (Incremental Adoption #1056)
+
+- **Status:** In Progress (increment block completed)
+- **Plan item:** `refactoring_stage2_plan.md` -> Plan Refresh / Wave `P3` (parser/log contracts)
+- **Changes (remove repeated `IndexOf` scans in date parse branching):**
+  - Updated `project/OsEngine/OsTrader/Grids/TradeGrid.cs`:
+    - in `TryParseDateInvariantOrCurrent`, cached `hasT`, `hasDash`, `hasDot`, `hasColon` once per token and reused across branch checks.
+  - Updated perf artifacts:
+    - `reports/stage2_perf_metrics.jsonl`
+    - `reports/stage2_perf_summary.json`
+  - Updated `refactoring_stage2_coverage_matrix.md`.
+- **Verification (outside sandbox, per dotnet-build-policy):**
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --configuration Release --nologo --filter "FullyQualifiedName~TradeGrid_LoadFromString|FullyQualifiedName~TradeGridPersistenceCoreTests|FullyQualifiedName~TradeGridErrorsReaction_LoadFromString"` -> passed `373/373`
+  - `pwsh -NoProfile -File tools/run-stage2-perf.ps1 -NoBuild -EnforceThresholds -Repeat 5` -> success; threshold check passed for all scenarios
+  - `dotnet restore project/OsEngine/OsEngine.csproj --nologo` -> success
+  - `dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo` -> success
+  - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` -> success, 0 warnings, 0 errors
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed `872/872`
+- **Metrics snapshot (median, Repeat=5):**
+  - `indicator_cache_hit_path`: `2011.60 ns/op`, `448.02 bytes/op`
+  - `optimizer_method_cache_hit_path`: `149.10 ns/op`, `0.01 bytes/op`
+  - `optimizer_cache_key_build_path`: `300.39 ns/op`, `0.01 bytes/op`
+  - `optimizer_method_parameter_hash_path`: `58.48 ns/op`, `0.00 bytes/op`
+  - `tradegrid_query_collections_hotpath`: `9044.95 ns/op`, `992.01 bytes/op`
+  - `tradegrid_load_from_string_ru_payload_path`: `1648.70 ns/op`, `32.01 bytes/op`
+  - `tradegrid_load_from_string_malformed_tail_path`: `2524.55 ns/op`, `466.14 bytes/op`
+- **Commit:** n/a
+- **Push:** n/a

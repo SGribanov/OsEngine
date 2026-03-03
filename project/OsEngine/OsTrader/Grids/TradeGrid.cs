@@ -427,16 +427,21 @@ namespace OsEngine.OsTrader.Grids
                 return true;
             }
 
-            if (valueSpan.IndexOf('T') >= 0
-                && valueSpan.IndexOf('-') >= 0
+            bool hasT = valueSpan.IndexOf('T') >= 0;
+            bool hasDash = valueSpan.IndexOf('-') >= 0;
+            bool hasDot = valueSpan.IndexOf('.') >= 0;
+            bool hasColon = valueSpan.IndexOf(':') >= 0;
+
+            if (hasT
+                && hasDash
                 && DateTime.TryParse(valueSpan, CultureInfo.InvariantCulture, DateTimeStyles.RoundtripKind, out parsed))
             {
                 return true;
             }
 
-            if (valueSpan.IndexOf('.') >= 0
-                && valueSpan.IndexOf(':') >= 0
-                && valueSpan.IndexOf('-') < 0
+            if (hasDot
+                && hasColon
+                && hasDash == false
                 && DateTime.TryParse(valueSpan, RuCulture, DateTimeStyles.None, out parsed))
             {
                 return true;
