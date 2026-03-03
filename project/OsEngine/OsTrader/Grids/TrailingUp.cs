@@ -18,6 +18,8 @@ namespace OsEngine.OsTrader.Grids
 {
     public class TrailingUp
     {
+        private static readonly CultureInfo RuCulture = CultureInfo.GetCultureInfo("ru-RU");
+
         #region Service
 
         public TrailingUp(TradeGrid grid)
@@ -199,7 +201,7 @@ namespace OsEngine.OsTrader.Grids
                 return true;
             }
 
-            if (decimal.TryParse(value, NumberStyles.Any, new CultureInfo("ru-RU"), out parsed))
+            if (decimal.TryParse(value, NumberStyles.Any, RuCulture, out parsed))
             {
                 return true;
             }

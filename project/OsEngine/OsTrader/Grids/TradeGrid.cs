@@ -21,6 +21,8 @@ namespace OsEngine.OsTrader.Grids
 {
     public class TradeGrid
     {
+        private static readonly CultureInfo RuCulture = CultureInfo.GetCultureInfo("ru-RU");
+
         #region Service
 
         public TradeGrid(StartProgram startProgram, BotTabSimple tab, int number)
@@ -467,7 +469,7 @@ namespace OsEngine.OsTrader.Grids
                 return true;
             }
 
-            if (DateTime.TryParse(value, new CultureInfo("ru-RU"), DateTimeStyles.None, out parsed))
+            if (DateTime.TryParse(value, RuCulture, DateTimeStyles.None, out parsed))
             {
                 return true;
             }
@@ -528,7 +530,7 @@ namespace OsEngine.OsTrader.Grids
                 return true;
             }
 
-            if (decimal.TryParse(value, NumberStyles.Any, new CultureInfo("ru-RU"), out parsed))
+            if (decimal.TryParse(value, NumberStyles.Any, RuCulture, out parsed))
             {
                 return true;
             }

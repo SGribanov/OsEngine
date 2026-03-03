@@ -18,6 +18,8 @@ namespace OsEngine.OsTrader.Grids
 {
     public class TradeGridCreator
     {
+        private static readonly CultureInfo RuCulture = CultureInfo.GetCultureInfo("ru-RU");
+
         #region Service
 
         public Side GridSide = Side.Buy;
@@ -730,7 +732,7 @@ namespace OsEngine.OsTrader.Grids
                 return true;
             }
 
-            if (decimal.TryParse(value, NumberStyles.Any, new CultureInfo("ru-RU"), out parsedValue))
+            if (decimal.TryParse(value, NumberStyles.Any, RuCulture, out parsedValue))
             {
                 return true;
             }
@@ -766,6 +768,8 @@ namespace OsEngine.OsTrader.Grids
 
     public class TradeGridLine
     {
+        private static readonly CultureInfo RuCulture = CultureInfo.GetCultureInfo("ru-RU");
+
         public decimal PriceEnter;
 
         public decimal PriceExit;
@@ -872,7 +876,7 @@ namespace OsEngine.OsTrader.Grids
                 return true;
             }
 
-            if (decimal.TryParse(value, NumberStyles.Any, new CultureInfo("ru-RU"), out parsed))
+            if (decimal.TryParse(value, NumberStyles.Any, RuCulture, out parsed))
             {
                 return true;
             }
@@ -893,7 +897,7 @@ namespace OsEngine.OsTrader.Grids
                 return true;
             }
 
-            if (int.TryParse(value, NumberStyles.Integer, new CultureInfo("ru-RU"), out parsed))
+            if (int.TryParse(value, NumberStyles.Integer, RuCulture, out parsed))
             {
                 return true;
             }

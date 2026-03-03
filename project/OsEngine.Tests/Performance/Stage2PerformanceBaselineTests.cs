@@ -77,6 +77,76 @@ public class Stage2PerformanceBaselineTests
     }
 
     [Fact]
+    public void Stage2Perf_TradeGrid_LoadFromStringRuPayloadPath_ShouldEmitMetricsAndDeterministicChecksum()
+    {
+        const int warmupIterations = 200;
+        const int iterations = 6000;
+        const string payload =
+            "1@MarketMaking@On@OnTrade@true@5@10@3@100,5@1@03.03.2026 14:20:30@500@true@1,5@true@@";
+
+        TradeGrid grid = CreateBareGrid();
+
+        CultureInfo originalCulture = CultureInfo.CurrentCulture;
+        CultureInfo originalUiCulture = CultureInfo.CurrentUICulture;
+        CultureInfo enUs = CultureInfo.GetCultureInfo("en-US");
+
+        try
+        {
+            CultureInfo.CurrentCulture = enUs;
+            CultureInfo.CurrentUICulture = enUs;
+
+            for (int i = 0; i < warmupIterations; i++)
+            {
+                grid.LoadFromString(payload);
+            }
+
+            ForceGc();
+
+            long allocatedBefore = GC.GetAllocatedBytesForCurrentThread();
+            int gen0Before = GC.CollectionCount(0);
+            Stopwatch stopwatch = Stopwatch.StartNew();
+
+            long checksum = 0;
+
+            for (int i = 0; i < iterations; i++)
+            {
+                grid.LoadFromString(payload);
+                checksum += grid.MaxOpenOrdersInMarket;
+                checksum += (long)(grid.MaxDistanceToOrdersPercent * 100m);
+            }
+
+            stopwatch.Stop();
+
+            long allocatedAfter = GC.GetAllocatedBytesForCurrentThread();
+            int gen0After = GC.CollectionCount(0);
+
+            long allocatedBytes = allocatedAfter - allocatedBefore;
+            double elapsedMs = stopwatch.Elapsed.TotalMilliseconds;
+            double nsPerOp = elapsedMs * 1_000_000d / iterations;
+            double allocatedBytesPerOp = (double)allocatedBytes / iterations;
+
+            Assert.True(checksum > 0);
+
+            Stage2PerfReportWriter.Append(new Stage2PerfMetric
+            {
+                Scenario = "tradegrid_load_from_string_ru_payload_path",
+                Iterations = iterations,
+                ElapsedMsTotal = elapsedMs,
+                NanosecondsPerOp = nsPerOp,
+                AllocatedBytesTotal = allocatedBytes,
+                AllocatedBytesPerOp = allocatedBytesPerOp,
+                Gen0Collections = gen0After - gen0Before,
+                Checksum = checksum
+            });
+        }
+        finally
+        {
+            CultureInfo.CurrentCulture = originalCulture;
+            CultureInfo.CurrentUICulture = originalUiCulture;
+        }
+    }
+
+    [Fact]
     public void Stage2Perf_IndicatorCache_HitPath_ShouldEmitMetricsAndStableChecksums()
     {
         const int warmupIterations = 200;

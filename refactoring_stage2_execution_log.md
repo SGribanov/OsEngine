@@ -18295,3 +18295,39 @@
   - `tradegrid_query_collections_hotpath`: `8511.25 ns/op`, `992.01 bytes/op`
 - **Commit:** n/a
 - **Push:** n/a
+
+### Wave P3/P0 - TradeGrid Parser Culture Cache + KPI (Incremental Adoption #1031)
+
+- **Status:** In Progress (increment block completed)
+- **Plan item:** `refactoring_stage2_plan.md` -> Plan Refresh / Wave `P3` (reliability) + `P0` governance extension
+- **Changes (remove per-call ru-RU culture allocations in parser fallbacks):**
+  - Updated `project/OsEngine/OsTrader/Grids/TradeGrid.cs`:
+    - parser helpers now use cached `CultureInfo.GetCultureInfo("ru-RU")` instead of `new CultureInfo("ru-RU")` on each call.
+  - Updated `project/OsEngine/OsTrader/Grids/TradeGridCreator.cs`:
+    - decimal/int parse helpers for creator and `TradeGridLine` now use cached ru-RU culture.
+  - Updated `project/OsEngine/OsTrader/Grids/TrailingUp.cs`:
+    - decimal parse helper now uses cached ru-RU culture.
+  - Updated `project/OsEngine.Tests/Performance/Stage2PerformanceBaselineTests.cs`:
+    - added `Stage2Perf_TradeGrid_LoadFromStringRuPayloadPath_ShouldEmitMetricsAndDeterministicChecksum`.
+  - Updated `tools/perf-thresholds.json`:
+    - added threshold block for `tradegrid_load_from_string_ru_payload_path`.
+  - Updated perf artifacts:
+    - `reports/stage2_perf_metrics.jsonl`
+    - `reports/stage2_perf_summary.json`
+  - Updated `refactoring_stage2_coverage_matrix.md`.
+- **Verification (outside sandbox, per dotnet-build-policy):**
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --configuration Release --nologo --filter "FullyQualifiedName~Stage2Step2_2_TradeGrid_|FullyQualifiedName~Stage2Perf_"` -> passed `130/130`
+  - `pwsh -NoProfile -File tools/run-stage2-perf.ps1 -NoBuild -EnforceThresholds -Repeat 5` -> success; threshold check passed for all scenarios
+  - `dotnet restore project/OsEngine/OsEngine.csproj --nologo` -> success
+  - `dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo` -> success
+  - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` -> success, 0 warnings, 0 errors
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed `866/866`
+- **Metrics snapshot (median, Repeat=5):**
+  - `indicator_cache_hit_path`: `1995.85 ns/op`, `448.02 bytes/op`
+  - `optimizer_method_cache_hit_path`: `145.35 ns/op`, `0.01 bytes/op`
+  - `optimizer_cache_key_build_path`: `325.57 ns/op`, `0.01 bytes/op`
+  - `optimizer_method_parameter_hash_path`: `53.35 ns/op`, `0.00 bytes/op`
+  - `tradegrid_query_collections_hotpath`: `8331.27 ns/op`, `992.01 bytes/op`
+  - `tradegrid_load_from_string_ru_payload_path`: `1605.42 ns/op`, `696.22 bytes/op` (new KPI)
+- **Commit:** n/a
+- **Push:** n/a

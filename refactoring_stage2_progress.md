@@ -18530,3 +18530,59 @@
   - delta: `-69.39% ns/op`, `-100.00% bytes/op`
 - `tradegrid_query_collections_hotpath`:
   - current `#1030`: `8511.25 ns/op`, `992.01 bytes/op`
+
+## 2026-03-03 - Incremental Update #1031
+
+### Scope
+
+- Reliability/perf hardening for TradeGrid parser fallback path (`ru-RU` parsing) with low-allocation cultural parsing and dedicated KPI coverage.
+
+### What Changed
+
+- Updated production code:
+  - project/OsEngine/OsTrader/Grids/TradeGrid.cs
+  - project/OsEngine/OsTrader/Grids/TradeGridCreator.cs
+  - project/OsEngine/OsTrader/Grids/TrailingUp.cs
+- Updated perf harness:
+  - project/OsEngine.Tests/Performance/Stage2PerformanceBaselineTests.cs
+  - tools/perf-thresholds.json
+- Changes:
+  - replaced per-call `new CultureInfo("ru-RU")` allocations with cached `CultureInfo.GetCultureInfo("ru-RU")` in TradeGrid parser helpers.
+  - applied the same change to decimal/int parse helpers in `TradeGridCreator` and `TradeGridLine`.
+  - applied the same change to `TrailingUp` decimal parser helper.
+  - added new Stage2 perf scenario:
+    - `tradegrid_load_from_string_ru_payload_path`
+  - added threshold gate for new scenario in `tools/perf-thresholds.json`.
+- Updated perf artifacts:
+  - reports/stage2_perf_metrics.jsonl
+  - reports/stage2_perf_summary.json
+- Updated global coverage matrix:
+  - refactoring_stage2_coverage_matrix.md
+
+### Verification
+
+- Targeted checks:
+  - dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --configuration Release --nologo --filter "FullyQualifiedName~Stage2Step2_2_TradeGrid_|FullyQualifiedName~Stage2Perf_" -> passed 130/130
+- Perf command:
+  - pwsh -NoProfile -File tools/run-stage2-perf.ps1 -NoBuild -EnforceThresholds -Repeat 5 -> success
+  - threshold check passed for all scenarios, including new parser KPI.
+- Host-context verification (outside sandbox, per dotnet-build-policy):
+  - dotnet restore project/OsEngine/OsEngine.csproj --nologo -> success
+  - dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo -> success
+  - dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900 -> success, 0 warnings, 0 errors
+  - dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo -> passed 866/866
+
+### P0/P2 Metrics Snapshot (median, Repeat=5)
+
+- `indicator_cache_hit_path`:
+  - current `#1031`: `1995.85 ns/op`, `448.02 bytes/op`
+- `optimizer_method_cache_hit_path`:
+  - current `#1031`: `145.35 ns/op`, `0.01 bytes/op`
+- `optimizer_cache_key_build_path`:
+  - current `#1031`: `325.57 ns/op`, `0.01 bytes/op`
+- `optimizer_method_parameter_hash_path`:
+  - current `#1031`: `53.35 ns/op`, `0.00 bytes/op`
+- `tradegrid_query_collections_hotpath`:
+  - current `#1031`: `8331.27 ns/op`, `992.01 bytes/op`
+- `tradegrid_load_from_string_ru_payload_path` (new):
+  - current `#1031`: `1605.42 ns/op`, `696.22 bytes/op`
