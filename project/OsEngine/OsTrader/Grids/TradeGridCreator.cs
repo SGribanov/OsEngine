@@ -84,14 +84,6 @@ namespace OsEngine.OsTrader.Grids
                 }
 
                 string[] values = value.Split('@');
-                for (int i = 0; i < values.Length; i++)
-                {
-                    if (values[i] != null)
-                    {
-                        values[i] = values[i].Trim();
-                    }
-                }
-
                 if (values.Length > 0 && string.IsNullOrWhiteSpace(values[0]) == false)
                 {
                     if (TryParseEnumFlexible(values[0], out Side parsedValue))
@@ -744,7 +736,20 @@ namespace OsEngine.OsTrader.Grids
         private bool TryParseEnumFlexible<TEnum>(string value, out TEnum parsedValue)
             where TEnum : struct
         {
-            return Enum.TryParse(value, true, out parsedValue);
+            if (value == null)
+            {
+                parsedValue = default;
+                return false;
+            }
+
+            ReadOnlySpan<char> trimmed = value.AsSpan().Trim();
+
+            if (trimmed.Length == value.Length)
+            {
+                return Enum.TryParse(value, true, out parsedValue);
+            }
+
+            return Enum.TryParse(trimmed.ToString(), true, out parsedValue);
         }
 
         #endregion
