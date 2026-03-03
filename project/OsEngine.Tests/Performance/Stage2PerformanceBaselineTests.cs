@@ -155,6 +155,79 @@ public class Stage2PerformanceBaselineTests
         });
     }
 
+    [Fact]
+    public void Stage2Perf_OptimizerMethodCache_HitPath_ShouldEmitMetricsAndStableChecksums()
+    {
+        const int warmupIterations = 200;
+        const int iterations = 4000;
+
+        OptimizerMethodCache cache = new OptimizerMethodCache(maxEntries: 64);
+        OptimizerMethodCacheKey key = new OptimizerMethodCacheKey(
+            securityName: "PERF",
+            timeframeTicks: 60,
+            firstTimeTicks: 1,
+            lastTimeTicks: 2,
+            candleCount: 256,
+            calculationName: "Stage2MethodCachePerf",
+            parametersHash: "P0",
+            sourceId: "S0",
+            dataFingerprint: 17,
+            resultTypeName: typeof(decimal).FullName ?? nameof(Decimal));
+
+        cache.Set(key, 123.456m);
+
+        for (int i = 0; i < warmupIterations; i++)
+        {
+            bool warmupHit = cache.TryGet(key, out decimal _);
+            Assert.True(warmupHit);
+        }
+
+        cache.Clear();
+        cache.Set(key, 123.456m);
+
+        ForceGc();
+
+        long allocatedBefore = GC.GetAllocatedBytesForCurrentThread();
+        int gen0Before = GC.CollectionCount(0);
+        Stopwatch stopwatch = Stopwatch.StartNew();
+
+        long checksum = 0;
+
+        for (int i = 0; i < iterations; i++)
+        {
+            bool hit = cache.TryGet(key, out decimal value);
+            Assert.True(hit);
+            checksum += (long)(value * 1000m);
+        }
+
+        stopwatch.Stop();
+
+        long allocatedAfter = GC.GetAllocatedBytesForCurrentThread();
+        int gen0After = GC.CollectionCount(0);
+        OptimizerMethodCacheStatistics stats = cache.GetStatisticsSnapshot();
+
+        long allocatedBytes = allocatedAfter - allocatedBefore;
+        double elapsedMs = stopwatch.Elapsed.TotalMilliseconds;
+        double nsPerOp = elapsedMs * 1_000_000d / iterations;
+        double allocatedBytesPerOp = (double)allocatedBytes / iterations;
+
+        Assert.True(checksum > 0);
+        Assert.Equal(iterations, stats.Hits);
+        Assert.Equal(0, stats.Misses);
+
+        Stage2PerfReportWriter.Append(new Stage2PerfMetric
+        {
+            Scenario = "optimizer_method_cache_hit_path",
+            Iterations = iterations,
+            ElapsedMsTotal = elapsedMs,
+            NanosecondsPerOp = nsPerOp,
+            AllocatedBytesTotal = allocatedBytes,
+            AllocatedBytesPerOp = allocatedBytesPerOp,
+            Gen0Collections = gen0After - gen0Before,
+            Checksum = checksum
+        });
+    }
+
     private static long RunTradeGridQueryPass(TradeGrid grid)
     {
         List<TradeGridLine> openPositions = grid.GetLinesWithOpenPosition();
