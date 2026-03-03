@@ -17906,3 +17906,47 @@
   - dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo -> passed 848/848
 - Perf baseline command:
   - pwsh -NoProfile -File tools/run-stage2-perf.ps1 -NoBuild -EnforceThresholds -> success
+
+## 2026-03-03 - Incremental Update #1018
+
+### Scope
+
+- Wave `P1` first runtime pass: reduced allocation overhead in `TradeGrid` query collection methods without API/behavior changes.
+
+### What Changed
+
+- Updated production code in:
+  - project/OsEngine/OsTrader/Grids/TradeGrid.cs
+- Changes:
+  - optimized list allocation strategy in high-frequency query methods:
+    - `GetLinesWithOpenPosition()`
+    - `GetPositionByGrid()`
+    - `GetLinesWithOpenOrdersNeed(decimal)`
+    - `GetLinesWithOpenOrdersFact()`
+    - `GetLinesWithClosingOrdersFact()`
+  - replaced default-capacity list construction with bounded/pre-sized capacity based on current grid line count / configured limits.
+  - kept return types, ordering, filtering rules, and all runtime branches unchanged.
+
+### Verification
+
+- Targeted checks:
+  - dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --configuration Release --nologo --filter "FullyQualifiedName~Stage2Perf_" -> passed 2/2
+  - dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-build --configuration Release --nologo --filter "FullyQualifiedName~Stage2Step2_2_TradeGrid_" -> passed 124/124
+- Host-context verification (outside sandbox, per dotnet-build-policy):
+  - dotnet restore project/OsEngine/OsEngine.csproj --nologo -> success
+  - dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo -> success
+  - dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900 -> success, 0 warnings, 0 errors
+  - dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo -> passed 848/848
+
+### P0/P1 Metrics Delta (same harness)
+
+- command:
+  - pwsh -NoProfile -File tools/run-stage2-perf.ps1 -NoBuild -EnforceThresholds -> passed
+- `tradegrid_query_collections_hotpath`:
+  - baseline: 9231.49 ns/op, 1856.01 bytes/op
+  - current: 9054.52 ns/op, 1760.01 bytes/op
+  - delta: -1.92% ns/op, -5.17% bytes/op
+- `indicator_cache_hit_path`:
+  - baseline: 4764.65 ns/op, 12952.02 bytes/op
+  - current: 5312.65 ns/op, 12952.02 bytes/op
+  - allocation unchanged; timing variance observed in this short run.

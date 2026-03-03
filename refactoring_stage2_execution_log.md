@@ -17861,3 +17861,29 @@
   - `pwsh -NoProfile -File tools/run-stage2-perf.ps1 -NoBuild -EnforceThresholds` -> success
 - **Commit:** n/a
 - **Push:** n/a
+
+### Wave P1 - TradeGrid Hot-Path Allocation Reduction (Incremental Adoption #1018)
+
+- **Status:** In Progress (increment block completed)
+- **Plan item:** `refactoring_stage2_plan.md` -> Plan Refresh / Wave `P1`
+- **Changes (low-risk allocation pass, no behavior change):**
+  - Updated `project/OsEngine/OsTrader/Grids/TradeGrid.cs`:
+    - `GetLinesWithOpenPosition()` -> pre-sized list capacity by `linesAll.Count`.
+    - `GetPositionByGrid()` -> pre-sized list capacity by `linesAll.Count`.
+    - `GetLinesWithOpenOrdersNeed(decimal)` -> pre-sized capacity bounded by `Min(linesAll.Count, MaxOpenOrdersInMarket)`.
+    - `GetLinesWithOpenOrdersFact()` -> pre-sized capacity by `linesAll.Count`.
+    - `GetLinesWithClosingOrdersFact()` -> pre-sized capacity by `linesAll.Count`.
+  - Filtering/order semantics preserved.
+- **Verification (outside sandbox, per dotnet-build-policy):**
+  - `dotnet restore project/OsEngine/OsEngine.csproj --nologo` -> success
+  - `dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo` -> success
+  - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` -> success, 0 warnings, 0 errors
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed `848/848`
+  - targeted perf tests (`Stage2Perf_*`) -> passed `2/2`
+  - targeted TradeGrid regression subset (`Stage2Step2_2_TradeGrid_*`) -> passed `124/124`
+  - `pwsh -NoProfile -File tools/run-stage2-perf.ps1 -NoBuild -EnforceThresholds` -> success
+- **Measured delta vs P0 baseline:**
+  - `tradegrid_query_collections_hotpath`: `9231.49 -> 9054.52 ns/op` (`-1.92%`), `1856.01 -> 1760.01 bytes/op` (`-5.17%`)
+  - `indicator_cache_hit_path`: allocations unchanged, timing variance observed.
+- **Commit:** n/a
+- **Push:** n/a
