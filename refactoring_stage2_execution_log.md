@@ -17963,3 +17963,39 @@
   - exploratory `TradeGrid` fast-active-check runtime variant was reverted and is not included due latency regression in harness results.
 - **Commit:** n/a
 - **Push:** n/a
+
+### Wave P1 - TradeGrid Hot-Path Allocation Reduction (Incremental Adoption #1022)
+
+- **Status:** In Progress (increment block completed)
+- **Plan item:** `refactoring_stage2_plan.md` -> Plan Refresh / Wave `P1`
+- **Changes (capacity heuristic tuning under median-gated perf flow):**
+  - Updated `project/OsEngine/OsTrader/Grids/TradeGrid.cs`:
+    - `GetLinesWithOpenPosition()`:
+      - expected capacity bounded by `min(linesAll.Count, max(MaxOpenOrdersInMarket * 4, 8))` when limit is set.
+    - `GetLinesWithOpenOrdersFact()`:
+      - expected capacity bounded by `min(linesAll.Count, max(MaxOpenOrdersInMarket * 2, 4))` when limit is set.
+    - `GetLinesWithClosingOrdersFact()`:
+      - expected capacity bounded by `min(linesAll.Count, max(MaxCloseOrdersInMarket * 3, 4))` when limit is set.
+  - Updated generated perf artifacts:
+    - `reports/stage2_perf_metrics.jsonl`
+    - `reports/stage2_perf_summary.json`
+  - Updated global matrix entry in `refactoring_stage2_coverage_matrix.md`.
+  - Runtime semantics unchanged; only allocation/capacity profile tuned.
+- **Verification (outside sandbox, per dotnet-build-policy):**
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --configuration Release --nologo --filter "FullyQualifiedName~Stage2Perf_"` -> passed `2/2`
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --configuration Release --nologo --no-build --filter "FullyQualifiedName~Stage2Step2_2_TradeGrid_"` -> passed `124/124`
+  - `pwsh -NoProfile -File tools/run-stage2-perf.ps1 -NoBuild -EnforceThresholds` -> success; threshold check passed (`Repeat=3`, median mode)
+  - `dotnet restore project/OsEngine/OsEngine.csproj --nologo` -> success
+  - `dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo` -> success
+  - `dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900` -> success, 0 warnings, 0 errors
+  - `dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo` -> passed `848/848`
+- **Measured delta (median, Repeat=3):**
+  - `tradegrid_query_collections_hotpath`:
+    - baseline `#1017`: `9231.49 ns/op`, `1856.01 bytes/op`
+    - previous best `#1019`: `8084.69 ns/op`, `1560.01 bytes/op`
+    - current `#1022`: `8514.82 ns/op`, `1312.01 bytes/op`
+    - delta vs baseline: `-7.76% ns/op`, `-29.31% bytes/op`
+    - delta vs `#1019`: `+5.32% ns/op`, `-15.90% bytes/op`
+  - `indicator_cache_hit_path`: `5653.00 ns/op`, `12952.02 bytes/op` (alloc unchanged; short-run latency noise persists).
+- **Commit:** n/a
+- **Push:** n/a

@@ -18049,3 +18049,56 @@
 - Threshold check passed on median metrics (`Repeat=3`).
 - Runtime code rollback note:
   - exploratory `TradeGrid` fast-active-check variant was not accepted because of latency regression and was fully reverted before finalizing this increment.
+
+## 2026-03-03 - Incremental Update #1022
+
+### Scope
+
+- Wave `P1` continuation: refined `TradeGrid` query-list capacity heuristics for lower allocation pressure under median-based perf gating.
+
+### What Changed
+
+- Updated production code in:
+  - project/OsEngine/OsTrader/Grids/TradeGrid.cs
+- Changes:
+  - `GetLinesWithOpenPosition()`:
+    - expected capacity is now bounded by market-order limit heuristic:
+      - `min(linesAll.Count, max(MaxOpenOrdersInMarket * 4, 8))` when limit is set.
+  - `GetLinesWithOpenOrdersFact()`:
+    - expected capacity heuristic updated to:
+      - `min(linesAll.Count, max(MaxOpenOrdersInMarket * 2, 4))` when limit is set.
+  - `GetLinesWithClosingOrdersFact()`:
+    - expected capacity heuristic updated to:
+      - `min(linesAll.Count, max(MaxCloseOrdersInMarket * 3, 4))` when limit is set.
+  - filtering/order/return contracts preserved.
+- Updated perf artifacts:
+  - reports/stage2_perf_metrics.jsonl
+  - reports/stage2_perf_summary.json
+- Updated global coverage matrix:
+  - refactoring_stage2_coverage_matrix.md
+
+### Verification
+
+- Targeted checks:
+  - dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --configuration Release --nologo --filter "FullyQualifiedName~Stage2Perf_" -> passed 2/2
+  - dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --configuration Release --nologo --no-build --filter "FullyQualifiedName~Stage2Step2_2_TradeGrid_" -> passed 124/124
+- Perf command:
+  - pwsh -NoProfile -File tools/run-stage2-perf.ps1 -NoBuild -EnforceThresholds -> success
+  - threshold check passed (`Repeat=3`, median mode).
+- Host-context verification (outside sandbox, per dotnet-build-policy):
+  - dotnet restore project/OsEngine/OsEngine.csproj --nologo -> success
+  - dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo -> success
+  - dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900 -> success, 0 warnings, 0 errors
+  - dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo -> passed 848/848
+
+### P0/P1 Metrics Delta (median, Repeat=3)
+
+- `tradegrid_query_collections_hotpath`:
+  - baseline `#1017`: `9231.49 ns/op`, `1856.01 bytes/op`
+  - previous best (`#1019`): `8084.69 ns/op`, `1560.01 bytes/op`
+  - current `#1022`: `8514.82 ns/op`, `1312.01 bytes/op`
+  - delta vs baseline: `-7.76% ns/op`, `-29.31% bytes/op`
+  - delta vs `#1019`: `+5.32% ns/op`, `-15.90% bytes/op`
+- `indicator_cache_hit_path`:
+  - current `#1022`: `5653.00 ns/op`, `12952.02 bytes/op`
+  - allocations unchanged; timing remains noisy in short runs.
