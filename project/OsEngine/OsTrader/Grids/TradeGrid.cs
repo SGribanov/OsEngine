@@ -422,6 +422,10 @@ namespace OsEngine.OsTrader.Grids
         private static bool TryParseDateInvariantOrCurrent(ReadOnlySpan<char> value, out DateTime parsed)
         {
             ReadOnlySpan<char> valueSpan = value.Trim();
+            if (TryParseRuFixedDateTime(valueSpan, out parsed))
+            {
+                return true;
+            }
 
             if (valueSpan.IndexOf('T') >= 0
                 && valueSpan.IndexOf('-') >= 0
@@ -460,6 +464,95 @@ namespace OsEngine.OsTrader.Grids
 
             parsed = default;
             return false;
+        }
+
+        private static bool TryParseRuFixedDateTime(ReadOnlySpan<char> value, out DateTime parsed)
+        {
+            parsed = default;
+
+            if (value.Length != 19
+                || value[2] != '.'
+                || value[5] != '.'
+                || value[10] != ' '
+                || value[13] != ':'
+                || value[16] != ':')
+            {
+                return false;
+            }
+
+            if (TryParseTwoDigits(value, 0, out int day) == false
+                || TryParseTwoDigits(value, 3, out int month) == false
+                || TryParseFourDigits(value, 6, out int year) == false
+                || TryParseTwoDigits(value, 11, out int hour) == false
+                || TryParseTwoDigits(value, 14, out int minute) == false
+                || TryParseTwoDigits(value, 17, out int second) == false)
+            {
+                return false;
+            }
+
+            if (month < 1 || month > 12
+                || day < 1
+                || hour > 23
+                || minute > 59
+                || second > 59)
+            {
+                return false;
+            }
+
+            int daysInMonth = DateTime.DaysInMonth(year, month);
+            if (day > daysInMonth)
+            {
+                return false;
+            }
+
+            parsed = new DateTime(year, month, day, hour, minute, second);
+            return true;
+        }
+
+        private static bool TryParseTwoDigits(ReadOnlySpan<char> value, int startIndex, out int parsed)
+        {
+            parsed = 0;
+            if (startIndex < 0 || startIndex + 1 >= value.Length)
+            {
+                return false;
+            }
+
+            char c0 = value[startIndex];
+            char c1 = value[startIndex + 1];
+            if (c0 < '0' || c0 > '9' || c1 < '0' || c1 > '9')
+            {
+                return false;
+            }
+
+            parsed = (c0 - '0') * 10 + (c1 - '0');
+            return true;
+        }
+
+        private static bool TryParseFourDigits(ReadOnlySpan<char> value, int startIndex, out int parsed)
+        {
+            parsed = 0;
+            if (startIndex < 0 || startIndex + 3 >= value.Length)
+            {
+                return false;
+            }
+
+            char c0 = value[startIndex];
+            char c1 = value[startIndex + 1];
+            char c2 = value[startIndex + 2];
+            char c3 = value[startIndex + 3];
+            if (c0 < '0' || c0 > '9'
+                || c1 < '0' || c1 > '9'
+                || c2 < '0' || c2 > '9'
+                || c3 < '0' || c3 > '9')
+            {
+                return false;
+            }
+
+            parsed = (c0 - '0') * 1000
+                + (c1 - '0') * 100
+                + (c2 - '0') * 10
+                + (c3 - '0');
+            return true;
         }
 
         private static bool TryParseIntInvariant(ReadOnlySpan<char> value, out int parsed)

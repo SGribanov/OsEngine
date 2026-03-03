@@ -19858,3 +19858,63 @@
   - current `#1053`: `2916.33 ns/op`, `466.14 bytes/op`
   - delta vs `#1042`: `+9.11% ns/op`, `-0.11 bytes/op`
   - delta vs `#1052`: `-9.41% ns/op`, `-0.11 bytes/op`
+
+## 2026-03-03 - Incremental Update #1054
+
+### Scope
+
+- TradeGrid parser date fast-path optimization for RU fixed payload shape.
+
+### What Changed
+
+- Updated production code:
+  - project/OsEngine/OsTrader/Grids/TradeGrid.cs
+- Updated docs/artifacts:
+  - refactoring_stage2_progress.md
+  - refactoring_stage2_execution_log.md
+  - refactoring_stage2_coverage_matrix.md
+  - reports/stage2_perf_metrics.jsonl
+  - reports/stage2_perf_summary.json
+- Changes:
+  - added fixed-format RU datetime parser fast-path:
+    - `TryParseRuFixedDateTime(ReadOnlySpan<char>, out DateTime)` for `dd.MM.yyyy HH:mm:ss`.
+  - `TryParseDateInvariantOrCurrent` now tries fixed RU parser first, then existing culture fallback chain.
+  - no payload contract changes.
+
+### Verification
+
+- Targeted checks:
+  - dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --configuration Release --nologo --filter "FullyQualifiedName~TradeGrid_LoadFromString|FullyQualifiedName~TradeGridPersistenceCoreTests" -> passed 373/373
+- Perf command:
+  - pwsh -NoProfile -File tools/run-stage2-perf.ps1 -NoBuild -EnforceThresholds -Repeat 5 -> success
+  - threshold check passed for all scenarios.
+- Host-context verification (outside sandbox, per dotnet-build-policy):
+  - dotnet restore project/OsEngine/OsEngine.csproj --nologo -> success
+  - dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo -> success
+  - dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900 -> success, 0 warnings, 0 errors
+  - dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo -> passed 872/872
+
+### P0/P2/P3 Metrics Snapshot (median, Repeat=5)
+
+- `indicator_cache_hit_path`:
+  - current `#1054`: `1965.85 ns/op`, `448.02 bytes/op`
+- `optimizer_method_cache_hit_path`:
+  - current `#1054`: `199.72 ns/op`, `0.01 bytes/op`
+- `optimizer_cache_key_build_path`:
+  - current `#1054`: `402.82 ns/op`, `0.01 bytes/op`
+- `optimizer_method_parameter_hash_path`:
+  - current `#1054`: `59.26 ns/op`, `0.00 bytes/op`
+- `tradegrid_query_collections_hotpath`:
+  - current `#1054`: `10751.34 ns/op`, `992.01 bytes/op`
+- `tradegrid_load_from_string_ru_payload_path`:
+  - previous `#1042`: `2048.80 ns/op`, `32.22 bytes/op`
+  - previous `#1053`: `2197.15 ns/op`, `32.01 bytes/op`
+  - current `#1054`: `2013.45 ns/op`, `32.01 bytes/op`
+  - delta vs `#1042`: `-1.73% ns/op`, `-0.21 bytes/op`
+  - delta vs `#1053`: `-8.41% ns/op`, allocation unchanged
+- `tradegrid_load_from_string_malformed_tail_path`:
+  - previous `#1042`: `2672.87 ns/op`, `466.25 bytes/op`
+  - previous `#1053`: `2916.33 ns/op`, `466.14 bytes/op`
+  - current `#1054`: `2612.58 ns/op`, `466.14 bytes/op`
+  - delta vs `#1042`: `-2.26% ns/op`, `-0.11 bytes/op`
+  - delta vs `#1053`: `-10.41% ns/op`, allocation unchanged
