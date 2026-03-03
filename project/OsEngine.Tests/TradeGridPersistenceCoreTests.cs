@@ -4718,7 +4718,11 @@ public class TradeGridPersistenceCoreTests
         Assert.Null(error);
         Assert.Equal(2, grid.MaxOpenOrdersInMarket);
         Assert.Equal(LogMessageType.Signal, logType);
-        Assert.Contains("Open order rejected: no funds on deposit.", logMessage);
+        Assert.Equal(
+            "Open order rejected: no funds on deposit.\n" +
+            "Reduce open orders in market. \n" +
+            "New value open orders in market: 2",
+            logMessage);
     }
 
     [Fact]
@@ -4771,7 +4775,11 @@ public class TradeGridPersistenceCoreTests
         Assert.Null(error);
         Assert.Equal(2, grid.MaxCloseOrdersInMarket);
         Assert.Equal(LogMessageType.Signal, logType);
-        Assert.Contains("Close order rejected: no funds on deposit.", logMessage);
+        Assert.Equal(
+            "Close order rejected: no funds on deposit.\n" +
+            "Reduce close orders in market. \n" +
+            "New value close orders in market: 2",
+            logMessage);
     }
 
     [Fact]
