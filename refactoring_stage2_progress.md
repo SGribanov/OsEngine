@@ -18258,3 +18258,56 @@
 - `tradegrid_query_collections_hotpath`:
   - current `#1025`: `8640.31 ns/op`, `992.01 bytes/op`
   - allocation unchanged; short-run latency noise observed.
+
+## 2026-03-03 - Incremental Update #1026
+
+### Scope
+
+- Wave `P2` continuation: reduce key/hash overhead in optimizer cache lookups while preserving cache contracts.
+
+### What Changed
+
+- Updated production code:
+  - project/OsEngine/OsOptimizer/OptEntity/IndicatorCache.cs
+  - project/OsEngine/OsOptimizer/OptEntity/OptimizerMethodCache.cs
+  - project/OsEngine/Indicators/Aindicator.cs
+- Updated tests:
+  - project/OsEngine.Tests/OptimizerMethodCacheCoreTests.cs (new)
+  - project/OsEngine.Tests/IndicatorCacheCoreTests.cs
+- Changes:
+  - `IndicatorCacheKey` and `OptimizerMethodCacheKey` now precompute hash in constructor and reuse it in `GetHashCode()` (with safe fallback path).
+  - `Aindicator.BuildOptimizerParameterHash()` now caches computed hash string and invalidates on parameter changes.
+  - added core tests for `OptimizerMethodCache` key equality/hash and typed get/set stats.
+- Updated perf artifacts:
+  - reports/stage2_perf_metrics.jsonl
+  - reports/stage2_perf_summary.json
+- Updated global coverage matrix:
+  - refactoring_stage2_coverage_matrix.md
+
+### Verification
+
+- Targeted checks:
+  - dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --configuration Release --nologo --filter "FullyQualifiedName~IndicatorCacheCoreTests|FullyQualifiedName~OptimizerMethodCacheCoreTests" -> passed 7/7
+  - dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --configuration Release --nologo --no-build --filter "FullyQualifiedName~Stage2Perf_" -> passed 3/3
+- Perf command:
+  - pwsh -NoProfile -File tools/run-stage2-perf.ps1 -NoBuild -EnforceThresholds -Repeat 5 -> success
+  - threshold check passed.
+- Host-context verification (outside sandbox, per dotnet-build-policy):
+  - dotnet restore project/OsEngine/OsEngine.csproj --nologo -> success
+  - dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo -> success
+  - dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900 -> success, 0 warnings, 0 errors
+  - dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo -> passed 852/852
+
+### P0/P2 Metrics Delta (median, Repeat=5)
+
+- `indicator_cache_hit_path`:
+  - previous `#1025`: `2193.65 ns/op`, `448.02 bytes/op`
+  - current `#1026`: `1963.45 ns/op`, `448.02 bytes/op`
+  - delta vs `#1025`: `-10.49% ns/op`, allocation unchanged
+- `optimizer_method_cache_hit_path`:
+  - previous `#1025`: `211.55 ns/op`, `0.01 bytes/op`
+  - current `#1026`: `137.03 ns/op`, `0.01 bytes/op`
+  - delta vs `#1025`: `-35.22% ns/op`, allocation unchanged
+- `tradegrid_query_collections_hotpath`:
+  - current `#1026`: `8616.02 ns/op`, `992.01 bytes/op`
+  - allocation stable; latency remains noisy but within gate.
