@@ -196,3 +196,9 @@ The layer for creating robots is similar to the Wealth-Lab script and Ninja Scri
 3) Arbitrage strategies for trading divergences of correlating instruments, including one-legged arbitrage.
 
 By downloading Os Engine, you agree that if a critical error occurs, information about it will be sent to the developer. Instructions on how to disable this functionality: https://os-engine-eng.com/posts/crash-reception-server.html
+
+<!-- registry-link:start -->
+## Registry / Operations
+- Parent registry: https://github.com/SGribanov/Repos
+- Task tracking rule: product issues/PRs are maintained in this repository; the parent repo stores only cross-repo registry/governance.
+<!-- registry-link:end -->
