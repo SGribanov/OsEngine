@@ -307,8 +307,7 @@ namespace OsEngine.OsTrader.Grids
                                 break;
                             case 11:
                                 hasDelay = true;
-                                if (LooksLikeSignedNumber(token)
-                                    && TryParseIntInvariant(token, out int delayParsed)
+                                if (TryParseIntInvariant(token, out int delayParsed)
                                     && delayParsed > 0)
                                 {
                                     DelayInReal = delayParsed;
@@ -778,17 +777,6 @@ namespace OsEngine.OsTrader.Grids
 
             parsed = 0;
             return false;
-        }
-
-        private static bool LooksLikeSignedNumber(ReadOnlySpan<char> value)
-        {
-            if (value.IsEmpty)
-            {
-                return false;
-            }
-
-            char firstChar = value[0];
-            return (uint)(firstChar - '0') <= 9 || firstChar == '-' || firstChar == '+';
         }
 
         public void Delete()
