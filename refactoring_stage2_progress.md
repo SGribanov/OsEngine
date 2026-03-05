@@ -20191,3 +20191,51 @@
 - vs #1058:
   - RU payload: 1519.52 -> 1479.17 ns/op (-2.65%)
   - malformed tail: 2306.00 -> 2294.78 ns/op (-0.49%)
+
+## 2026-03-05 - Incremental Update #1060
+
+### Scope
+
+- TradeGrid prime tokenization micro-optimization in `LoadFromString`: switch from per-char scanner loop to `IndexOf('@')` segment walk.
+
+### What Changed
+
+- Updated production code:
+  - project/OsEngine/OsTrader/Grids/TradeGrid.cs
+- Changes:
+  - replaced `for (i=0..len)` separator scan in prime parser with bounded while-loop:
+    - `rest.IndexOf('@')` to find token boundary,
+    - token slice parse,
+    - preserves empty-token index advancement semantics and `<=14` field cap.
+  - no contract changes in field assignment/default behavior.
+
+### Verification
+
+- Host-context verification (outside sandbox, per dotnet-build-policy):
+  - dotnet restore project/OsEngine/OsEngine.csproj --nologo -> success
+  - dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo -> success
+  - dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900 -> success, 0 warnings, 0 errors
+  - dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo -> passed 872/872
+- Perf command:
+  - pwsh -NoProfile -File tools/run-stage2-perf.ps1 -NoBuild -EnforceThresholds -Repeat 5 -> success
+  - stability re-run with second Repeat=5 batch -> success
+  - threshold check passed for all scenarios.
+
+### P0/P2/P3 Metrics Snapshot (median, Repeat=5)
+
+- indicator_cache_hit_path: 1893.15 ns/op, 448.02 bytes/op
+- optimizer_method_cache_hit_path: 157.30 ns/op, 0.01 bytes/op
+- optimizer_cache_key_build_path: 303.20 ns/op, 0.01 bytes/op
+- optimizer_method_parameter_hash_path: 54.11 ns/op, 0.00 bytes/op
+- tradegrid_query_collections_hotpath: 8289.67 ns/op, 992.01 bytes/op
+- tradegrid_load_from_string_ru_payload_path: 1105.35 ns/op, 0.01 bytes/op
+- tradegrid_load_from_string_malformed_tail_path: 1908.00 ns/op, 466.14 bytes/op
+
+### KPI deltas
+
+- vs #1057 baseline:
+  - RU payload: 1590.28 -> 1105.35 ns/op (-30.49%), 32.01 -> 0.01 bytes/op
+  - malformed tail: 2471.83 -> 1908.00 ns/op (-22.81%), allocation unchanged
+- vs #1059:
+  - RU payload: 1479.17 -> 1105.35 ns/op (-25.27%)
+  - malformed tail: 2294.78 -> 1908.00 ns/op (-16.85%)

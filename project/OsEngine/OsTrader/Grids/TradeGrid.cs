@@ -209,22 +209,15 @@ namespace OsEngine.OsTrader.Grids
                 int tokenIndex = 0;
                 int tokenStart = 0;
 
-                for (int i = 0; i <= primeValues.Length; i++)
+                while (tokenIndex <= 14 && tokenStart <= primeValues.Length)
                 {
-                    bool atSeparator = i < primeValues.Length && primeValues[i] == '@';
-                    bool atEnd = i == primeValues.Length;
+                    ReadOnlySpan<char> rest = primeValues.Slice(tokenStart);
+                    int separatorOffset = rest.IndexOf('@');
+                    int tokenEnd = separatorOffset >= 0
+                        ? tokenStart + separatorOffset
+                        : primeValues.Length;
 
-                    if (atSeparator == false && atEnd == false)
-                    {
-                        continue;
-                    }
-
-                    if (tokenIndex > 14)
-                    {
-                        break;
-                    }
-
-                    ReadOnlySpan<char> token = primeValues.Slice(tokenStart, i - tokenStart).Trim();
+                    ReadOnlySpan<char> token = primeValues.Slice(tokenStart, tokenEnd - tokenStart).Trim();
 
                     if (token.IsEmpty == false)
                     {
@@ -349,7 +342,12 @@ namespace OsEngine.OsTrader.Grids
                     }
 
                     tokenIndex++;
-                    tokenStart = i + 1;
+                    if (separatorOffset < 0)
+                    {
+                        break;
+                    }
+
+                    tokenStart = tokenEnd + 1;
                 }
 
                 if (hasDelay == false)

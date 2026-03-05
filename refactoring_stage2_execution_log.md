@@ -19222,3 +19222,32 @@
   - vs #1058: both target parser scenarios additionally improved.
 - Commit: pending
 - Push: pending
+
+### Wave P3 - TradeGrid Prime Token Loop IndexOf Walk (Incremental Adoption #1060)
+
+- Status: In Progress (increment block completed)
+- Plan item: refactoring_stage2_plan.md -> Plan Refresh / Wave P3 (parser/log contracts)
+- Changes:
+  - Updated project/OsEngine/OsTrader/Grids/TradeGrid.cs.
+  - Replaced prime parser per-char separator scan with `IndexOf('@')` token walk in `LoadFromString`.
+  - Preserved empty token indexing, max-field cap (`0..14`), and all assignment/default semantics.
+- Verification (outside sandbox, per dotnet-build-policy):
+  - dotnet restore project/OsEngine/OsEngine.csproj --nologo -> success
+  - dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo -> success
+  - dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900 -> success, 0 warnings, 0 errors
+  - dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo -> passed 872/872
+  - pwsh -NoProfile -File tools/run-stage2-perf.ps1 -NoBuild -EnforceThresholds -Repeat 5 -> success; threshold check passed
+  - stability re-run with second Repeat=5 batch -> success
+- Metrics snapshot (median, Repeat=5):
+  - indicator_cache_hit_path: 1893.15 ns/op, 448.02 bytes/op
+  - optimizer_method_cache_hit_path: 157.30 ns/op, 0.01 bytes/op
+  - optimizer_cache_key_build_path: 303.20 ns/op, 0.01 bytes/op
+  - optimizer_method_parameter_hash_path: 54.11 ns/op, 0.00 bytes/op
+  - tradegrid_query_collections_hotpath: 8289.67 ns/op, 992.01 bytes/op
+  - tradegrid_load_from_string_ru_payload_path: 1105.35 ns/op, 0.01 bytes/op
+  - tradegrid_load_from_string_malformed_tail_path: 1908.00 ns/op, 466.14 bytes/op
+- Baseline comparison:
+  - vs #1057: both target parser scenarios significantly improved.
+  - vs #1059: both target parser scenarios significantly improved.
+- Commit: pending
+- Push: pending
