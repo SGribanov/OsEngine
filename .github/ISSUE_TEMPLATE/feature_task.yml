@@ -1,46 +1,49 @@
-name: Feature task
-description: Поставить задачу на доработку/новую функциональность
-title: "[Task] "
+name: Feature Task
+description: Планирование и выполнение фичи
+title: "[Feature] "
 labels:
-  - enhancement
+  - type:feature
+  - priority:medium
 body:
   - type: textarea
     id: context
     attributes:
-      label: Контекст
-      description: Зачем нужна задача, какая проблема решается
-      placeholder: Текущая боль, ограничения, предпосылки
-    validations:
-      required: true
-  - type: textarea
-    id: scope
-    attributes:
-      label: Что нужно сделать
-      description: Конкретный объем работы
-      placeholder: |
-        - ...
-        - ...
-    validations:
-      required: true
-  - type: textarea
-    id: acceptance
-    attributes:
-      label: Критерии готовности
-      description: Измеримые условия приемки
-      placeholder: |
-        - [ ] ...
-        - [ ] ...
-    validations:
-      required: true
-  - type: textarea
-    id: verification
-    attributes:
-      label: Шаги проверки
-      description: Как проверить результат
-      placeholder: |
-        1. ...
-        2. ...
-        3. ...
+      label: Context
+      description: Что нужно изменить и почему.
+      placeholder: Бизнес-контекст, ограничения, ссылки
     validations:
       required: true
 
+  - type: textarea
+    id: scope
+    attributes:
+      label: Scope
+      description: Что входит в задачу.
+      placeholder: Пункты реализации
+    validations:
+      required: true
+
+  - type: textarea
+    id: acceptance
+    attributes:
+      label: Acceptance Criteria
+      description: Критерии готовности.
+      placeholder: "- [ ] ..."
+    validations:
+      required: true
+
+  - type: textarea
+    id: verification
+    attributes:
+      label: Verification
+      description: Как проверить результат.
+      placeholder: Команды, тесты, сценарии ручной проверки
+    validations:
+      required: true
+
+  - type: textarea
+    id: links
+    attributes:
+      label: Links
+      description: Связанные issue/PR/документы.
+      placeholder: "Parent registry: https://github.com/SGribanov/Repos"
