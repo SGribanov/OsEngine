@@ -182,8 +182,18 @@ namespace OsEngine.OsTrader.Grids
                     return;
                 }
 
-                string[] array = value.Split('%');
-                string primeSegment = GetTrimmedToken(array, 0);
+                string[]? array = null;
+                string primeSegment;
+                int payloadSeparatorIndex = value.IndexOf('%');
+                if (payloadSeparatorIndex >= 0)
+                {
+                    array = value.Split('%');
+                    primeSegment = GetTrimmedToken(array, 0);
+                }
+                else
+                {
+                    primeSegment = value.Trim();
+                }
 
                 if (string.IsNullOrWhiteSpace(primeSegment))
                 {
@@ -297,7 +307,9 @@ namespace OsEngine.OsTrader.Grids
                                 break;
                             case 11:
                                 hasDelay = true;
-                                if (TryParseIntInvariant(token, out int delayParsed) && delayParsed > 0)
+                                if (LooksLikeSignedNumber(token)
+                                    && TryParseIntInvariant(token, out int delayParsed)
+                                    && delayParsed > 0)
                                 {
                                     DelayInReal = delayParsed;
                                 }
@@ -361,56 +373,59 @@ namespace OsEngine.OsTrader.Grids
                     OpenOrdersMakerOnly = true;
                 }
 
-                // non trade periods
-                if (NonTradePeriods != null
-                    && TryGetPayloadSegment(array, 1, out string nonTradeSegment))
+                if (array != null)
                 {
-                    NonTradePeriods.LoadFromString(nonTradeSegment);
-                }
+                    // non trade periods
+                    if (NonTradePeriods != null
+                        && TryGetPayloadSegment(array, 1, out string nonTradeSegment))
+                    {
+                        NonTradePeriods.LoadFromString(nonTradeSegment);
+                    }
 
-                // trade days
-                // removed
+                    // trade days
+                    // removed
 
-                // stop grid by event
-                if (StopBy != null
-                    && TryGetPayloadSegment(array, 3, out string stopBySegment))
-                {
-                    StopBy.LoadFromString(stopBySegment);
-                }
+                    // stop grid by event
+                    if (StopBy != null
+                        && TryGetPayloadSegment(array, 3, out string stopBySegment))
+                    {
+                        StopBy.LoadFromString(stopBySegment);
+                    }
 
-                // grid lines creation and storage
-                if (GridCreator != null
-                    && TryGetPayloadSegment(array, 4, out string gridCreatorSegment))
-                {
-                    GridCreator.LoadFromString(gridCreatorSegment);
-                }
+                    // grid lines creation and storage
+                    if (GridCreator != null
+                        && TryGetPayloadSegment(array, 4, out string gridCreatorSegment))
+                    {
+                        GridCreator.LoadFromString(gridCreatorSegment);
+                    }
 
-                // stop and profit 
-                if (StopAndProfit != null
-                    && TryGetPayloadSegment(array, 5, out string stopAndProfitSegment))
-                {
-                    StopAndProfit.LoadFromString(stopAndProfitSegment);
-                }
+                    // stop and profit 
+                    if (StopAndProfit != null
+                        && TryGetPayloadSegment(array, 5, out string stopAndProfitSegment))
+                    {
+                        StopAndProfit.LoadFromString(stopAndProfitSegment);
+                    }
 
-                // auto start
-                if (AutoStarter != null
-                    && TryGetPayloadSegment(array, 6, out string autoStarterSegment))
-                {
-                    AutoStarter.LoadFromString(autoStarterSegment);
-                }
+                    // auto start
+                    if (AutoStarter != null
+                        && TryGetPayloadSegment(array, 6, out string autoStarterSegment))
+                    {
+                        AutoStarter.LoadFromString(autoStarterSegment);
+                    }
 
-                // errors reaction
-                if (ErrorsReaction != null
-                    && TryGetPayloadSegment(array, 7, out string errorsReactionSegment))
-                {
-                    ErrorsReaction.LoadFromString(errorsReactionSegment);
-                }
+                    // errors reaction
+                    if (ErrorsReaction != null
+                        && TryGetPayloadSegment(array, 7, out string errorsReactionSegment))
+                    {
+                        ErrorsReaction.LoadFromString(errorsReactionSegment);
+                    }
 
-                // trailing up / down
-                if (TrailingUp != null
-                    && TryGetPayloadSegment(array, 8, out string trailingUpSegment))
-                {
-                    TrailingUp.LoadFromString(trailingUpSegment);
+                    // trailing up / down
+                    if (TrailingUp != null
+                        && TryGetPayloadSegment(array, 8, out string trailingUpSegment))
+                    {
+                        TrailingUp.LoadFromString(trailingUpSegment);
+                    }
                 }
             }
             catch (Exception e)
@@ -421,7 +436,20 @@ namespace OsEngine.OsTrader.Grids
 
         private static bool TryParseDateInvariantOrCurrent(ReadOnlySpan<char> value, out DateTime parsed)
         {
-            ReadOnlySpan<char> valueSpan = value.Trim();
+            ReadOnlySpan<char> valueSpan = value;
+            if (valueSpan.IsEmpty)
+            {
+                parsed = default;
+                return false;
+            }
+
+            char firstChar = valueSpan[0];
+            if ((uint)(firstChar - '0') > 9 && firstChar != '-' && firstChar != '+')
+            {
+                parsed = default;
+                return false;
+            }
+
             if (TryParseRuFixedDateTime(valueSpan, out parsed))
             {
                 return true;
@@ -562,7 +590,7 @@ namespace OsEngine.OsTrader.Grids
 
         private static bool TryParseIntInvariant(ReadOnlySpan<char> value, out int parsed)
         {
-            return int.TryParse(value.Trim(), NumberStyles.Integer, CultureInfo.InvariantCulture, out parsed);
+            return int.TryParse(value, NumberStyles.Integer, CultureInfo.InvariantCulture, out parsed);
         }
 
         private static bool TryGetPayloadSegment(string[] sections, int index, out string segment)
@@ -677,7 +705,7 @@ namespace OsEngine.OsTrader.Grids
 
         private static bool TryParseBoolFlexible(ReadOnlySpan<char> value, out bool parsed)
         {
-            ReadOnlySpan<char> normalized = value.Trim();
+            ReadOnlySpan<char> normalized = value;
 
             if (bool.TryParse(normalized, out parsed))
             {
@@ -708,7 +736,19 @@ namespace OsEngine.OsTrader.Grids
 
         private static bool TryParseDecimal(ReadOnlySpan<char> value, out decimal parsed)
         {
-            ReadOnlySpan<char> valueSpan = value.Trim();
+            ReadOnlySpan<char> valueSpan = value;
+            if (valueSpan.IsEmpty)
+            {
+                parsed = 0;
+                return false;
+            }
+
+            char firstChar = valueSpan[0];
+            if ((uint)(firstChar - '0') > 9 && firstChar != '-' && firstChar != '+')
+            {
+                parsed = 0;
+                return false;
+            }
 
             bool hasComma = valueSpan.IndexOf(',') >= 0;
             bool hasDot = valueSpan.IndexOf('.') >= 0;
@@ -738,6 +778,17 @@ namespace OsEngine.OsTrader.Grids
 
             parsed = 0;
             return false;
+        }
+
+        private static bool LooksLikeSignedNumber(ReadOnlySpan<char> value)
+        {
+            if (value.IsEmpty)
+            {
+                return false;
+            }
+
+            char firstChar = value[0];
+            return (uint)(firstChar - '0') <= 9 || firstChar == '-' || firstChar == '+';
         }
 
         public void Delete()

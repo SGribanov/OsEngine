@@ -20095,3 +20095,53 @@
   - current `#1057`: `2471.83 ns/op`, `466.14 bytes/op`
   - delta vs `#1042`: `-7.52% ns/op`, `-0.11 bytes/op`
   - delta vs `#1056`: `-2.09% ns/op`, allocation unchanged
+
+## 2026-03-05 - Incremental Update #1058
+
+### Scope
+
+- TradeGrid `LoadFromString` hot-path optimization for payloads without tail sections (`%`) and low-cost malformed guard rails in parser helpers.
+
+### What Changed
+
+- Updated production code:
+  - project/OsEngine/OsTrader/Grids/TradeGrid.cs
+- Changes:
+  - `LoadFromString` now avoids `Split('%')` when payload has no `%` separator (fast-path for prime-only payloads).
+  - tail section parsing (`NonTradePeriods` / `StopBy` / `GridCreator` / `StopAndProfit` / `AutoStarter` / `ErrorsReaction` / `TrailingUp`) is executed only when payload actually has `%`.
+  - `TryParseIntInvariant` no longer performs duplicate trim (tokens are already trimmed in the prime parser loop).
+  - added cheap signed-number shape guard for delay token before int parsing in case `11` (`LooksLikeSignedNumber`).
+  - `TryParseDateInvariantOrCurrent` and `TryParseDecimal` now use already-trimmed tokens and fast-fail on non numeric-leading token shapes.
+  - `TryParseBoolFlexible` and parse helpers now consume already-trimmed tokens from caller without extra trim pass.
+
+### Verification
+
+- Host-context verification (outside sandbox, per dotnet-build-policy):
+  - dotnet restore project/OsEngine/OsEngine.csproj --nologo -> success
+  - dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo -> success
+  - dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900 -> success, 0 warnings, 0 errors
+  - dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo -> passed 872/872
+- Perf command:
+  - pwsh -NoProfile -File tools/run-stage2-perf.ps1 -NoBuild -EnforceThresholds -Repeat 5 -> success
+  - threshold check passed for all scenarios.
+
+### P0/P2/P3 Metrics Snapshot (median, Repeat=5)
+
+- indicator_cache_hit_path: 1946.00 ns/op, 448.02 bytes/op
+- optimizer_method_cache_hit_path: 132.03 ns/op, 0.01 bytes/op
+- optimizer_cache_key_build_path: 317.98 ns/op, 0.01 bytes/op
+- optimizer_method_parameter_hash_path: 51.74 ns/op, 0.00 bytes/op
+- tradegrid_query_collections_hotpath: 9446.56 ns/op, 992.01 bytes/op
+- tradegrid_load_from_string_ru_payload_path: 1519.52 ns/op, 0.01 bytes/op
+- tradegrid_load_from_string_malformed_tail_path: 2306.00 ns/op, 466.14 bytes/op
+
+### KPI deltas vs #1057 baseline
+
+- tradegrid_load_from_string_ru_payload_path:
+  - baseline #1057: 1590.28 ns/op, 32.01 bytes/op
+  - current #1058: 1519.52 ns/op, 0.01 bytes/op
+  - delta: -4.45% ns/op, -32.00 bytes/op
+- tradegrid_load_from_string_malformed_tail_path:
+  - baseline #1057: 2471.83 ns/op, 466.14 bytes/op
+  - current #1058: 2306.00 ns/op, 466.14 bytes/op
+  - delta: -6.71% ns/op, allocation unchanged

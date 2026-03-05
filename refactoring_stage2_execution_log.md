@@ -19160,3 +19160,35 @@
   - `tradegrid_load_from_string_malformed_tail_path`: `2471.83 ns/op`, `466.14 bytes/op`
 - **Commit:** n/a
 - **Push:** n/a
+
+### Wave P3 - TradeGrid Prime-Only Payload Fast-Path + Parser Guard Rails (Incremental Adoption #1058)
+
+- Status: In Progress (increment block completed)
+- Plan item: refactoring_stage2_plan.md -> Plan Refresh / Wave P3 (parser/log contracts)
+- Changes:
+  - Updated project/OsEngine/OsTrader/Grids/TradeGrid.cs.
+  - `LoadFromString` now skips `%` split/all-tail handling when payload has no `%`.
+  - Tail parser branches execute only when `%` is present.
+  - Removed duplicate trim in `TryParseIntInvariant` (caller already passes trimmed spans).
+  - Added cheap signed-shape guard for delay token before int parse (case 11).
+  - `TryParseDateInvariantOrCurrent` and `TryParseDecimal` consume trimmed spans directly and fail fast on non numeric-leading tokens.
+  - `TryParseBoolFlexible` consumes already trimmed spans directly.
+- Verification (outside sandbox, per dotnet-build-policy):
+  - dotnet restore project/OsEngine/OsEngine.csproj --nologo -> success
+  - dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo -> success
+  - dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900 -> success, 0 warnings, 0 errors
+  - dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo -> passed 872/872
+  - pwsh -NoProfile -File tools/run-stage2-perf.ps1 -NoBuild -EnforceThresholds -Repeat 5 -> success; threshold check passed
+- Metrics snapshot (median, Repeat=5):
+  - indicator_cache_hit_path: 1946.00 ns/op, 448.02 bytes/op
+  - optimizer_method_cache_hit_path: 132.03 ns/op, 0.01 bytes/op
+  - optimizer_cache_key_build_path: 317.98 ns/op, 0.01 bytes/op
+  - optimizer_method_parameter_hash_path: 51.74 ns/op, 0.00 bytes/op
+  - tradegrid_query_collections_hotpath: 9446.56 ns/op, 992.01 bytes/op
+  - tradegrid_load_from_string_ru_payload_path: 1519.52 ns/op, 0.01 bytes/op
+  - tradegrid_load_from_string_malformed_tail_path: 2306.00 ns/op, 466.14 bytes/op
+- Baseline comparison vs #1057:
+  - RU payload: 1590.28 -> 1519.52 ns/op (improved), 32.01 -> 0.01 bytes/op
+  - malformed tail: 2471.83 -> 2306.00 ns/op (improved), 466.14 -> 466.14 bytes/op
+- Commit: pending
+- Push: pending
