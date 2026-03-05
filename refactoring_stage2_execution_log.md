@@ -19251,3 +19251,32 @@
   - vs #1059: both target parser scenarios significantly improved.
 - Commit: pending
 - Push: pending
+
+### Wave P3 - TradeGrid Bool Reject/Fast-Match Refinement (Incremental Adoption #1062)
+
+- Status: In Progress (increment block completed)
+- Plan item: refactoring_stage2_plan.md -> Plan Refresh / Wave P3 (parser/log contracts)
+- Changes:
+  - Updated project/OsEngine/OsTrader/Grids/TradeGrid.cs.
+  - `TryParseBoolFlexible` now applies first-char boolean-shape gate and exact lowercase `true`/`false` fast-match before `bool.TryParse`.
+  - Kept existing flexible boolean fallbacks unchanged (`1/0/yes/no/y/n/on/off`).
+- Verification (outside sandbox, per dotnet-build-policy):
+  - dotnet restore project/OsEngine/OsEngine.csproj --nologo -> success
+  - dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo -> success
+  - dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900 -> success, 0 warnings, 0 errors
+  - dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo -> passed 872/872
+  - pwsh -NoProfile -File tools/run-stage2-perf.ps1 -NoBuild -EnforceThresholds -Repeat 5 -> success; threshold check passed
+  - stability re-run with second Repeat=5 batch -> success
+- Metrics snapshot (median, Repeat=5):
+  - indicator_cache_hit_path: 2017.50 ns/op, 448.02 bytes/op
+  - optimizer_method_cache_hit_path: 135.38 ns/op, 0.01 bytes/op
+  - optimizer_cache_key_build_path: 297.77 ns/op, 0.01 bytes/op
+  - optimizer_method_parameter_hash_path: 53.16 ns/op, 0.00 bytes/op
+  - tradegrid_query_collections_hotpath: 9359.23 ns/op, 992.01 bytes/op
+  - tradegrid_load_from_string_ru_payload_path: 1097.97 ns/op, 0.01 bytes/op
+  - tradegrid_load_from_string_malformed_tail_path: 1679.38 ns/op, 466.14 bytes/op
+- Baseline comparison:
+  - vs #1057: both target parser scenarios significantly improved.
+  - vs #1060: RU slightly improved; malformed significantly improved.
+- Commit: pending
+- Push: pending

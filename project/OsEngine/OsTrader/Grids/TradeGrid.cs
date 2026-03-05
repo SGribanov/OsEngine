@@ -703,6 +703,50 @@ namespace OsEngine.OsTrader.Grids
         private static bool TryParseBoolFlexible(ReadOnlySpan<char> value, out bool parsed)
         {
             ReadOnlySpan<char> normalized = value;
+            if (normalized.IsEmpty)
+            {
+                parsed = false;
+                return false;
+            }
+
+            char first = normalized[0];
+            if ((uint)(first - 'A') <= ('Z' - 'A'))
+            {
+                first = (char)(first | 0x20);
+            }
+
+            if (first != 't'
+                && first != 'f'
+                && first != '1'
+                && first != '0'
+                && first != 'y'
+                && first != 'n'
+                && first != 'o')
+            {
+                parsed = false;
+                return false;
+            }
+
+            if (normalized.Length == 4
+                && normalized[0] == 't'
+                && normalized[1] == 'r'
+                && normalized[2] == 'u'
+                && normalized[3] == 'e')
+            {
+                parsed = true;
+                return true;
+            }
+
+            if (normalized.Length == 5
+                && normalized[0] == 'f'
+                && normalized[1] == 'a'
+                && normalized[2] == 'l'
+                && normalized[3] == 's'
+                && normalized[4] == 'e')
+            {
+                parsed = false;
+                return true;
+            }
 
             if (bool.TryParse(normalized, out parsed))
             {

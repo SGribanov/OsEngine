@@ -20239,3 +20239,51 @@
 - vs #1059:
   - RU payload: 1479.17 -> 1105.35 ns/op (-25.27%)
   - malformed tail: 2294.78 -> 1908.00 ns/op (-16.85%)
+
+## 2026-03-05 - Incremental Update #1062
+
+### Scope
+
+- TradeGrid bool parser malformed-token early reject with exact-token fast-path refinement.
+
+### What Changed
+
+- Updated production code:
+  - project/OsEngine/OsTrader/Grids/TradeGrid.cs
+- Changes:
+  - `TryParseBoolFlexible(ReadOnlySpan<char>)` now:
+    - early-rejects token shapes by first-char gate for non-boolean-leading tokens;
+    - fast-matches exact lowercase `true`/`false` before `bool.TryParse`;
+    - preserves existing flexible fallback (`1/0/yes/no/y/n/on/off`).
+  - parsing contract preserved.
+
+### Verification
+
+- Host-context verification (outside sandbox, per dotnet-build-policy):
+  - dotnet restore project/OsEngine/OsEngine.csproj --nologo -> success
+  - dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo -> success
+  - dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900 -> success, 0 warnings, 0 errors
+  - dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo -> passed 872/872
+- Perf command:
+  - pwsh -NoProfile -File tools/run-stage2-perf.ps1 -NoBuild -EnforceThresholds -Repeat 5 -> success
+  - stability re-run with second Repeat=5 batch -> success
+  - threshold check passed for all scenarios.
+
+### P0/P2/P3 Metrics Snapshot (median, Repeat=5)
+
+- indicator_cache_hit_path: 2017.50 ns/op, 448.02 bytes/op
+- optimizer_method_cache_hit_path: 135.38 ns/op, 0.01 bytes/op
+- optimizer_cache_key_build_path: 297.77 ns/op, 0.01 bytes/op
+- optimizer_method_parameter_hash_path: 53.16 ns/op, 0.00 bytes/op
+- tradegrid_query_collections_hotpath: 9359.23 ns/op, 992.01 bytes/op
+- tradegrid_load_from_string_ru_payload_path: 1097.97 ns/op, 0.01 bytes/op
+- tradegrid_load_from_string_malformed_tail_path: 1679.38 ns/op, 466.14 bytes/op
+
+### KPI deltas
+
+- vs #1057 baseline:
+  - RU payload: 1590.28 -> 1097.97 ns/op (-30.96%), 32.01 -> 0.01 bytes/op
+  - malformed tail: 2471.83 -> 1679.38 ns/op (-32.06%), allocation unchanged
+- vs #1060:
+  - RU payload: 1105.35 -> 1097.97 ns/op (-0.67%)
+  - malformed tail: 1908.00 -> 1679.38 ns/op (-11.98%)
