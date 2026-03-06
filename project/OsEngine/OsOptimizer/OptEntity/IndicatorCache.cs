@@ -207,13 +207,13 @@ namespace OsEngine.OsOptimizer.OptEntity
                 hash = hash * 31 + outputSeriesCount;
                 hash = hash * 31 + includeIndicatorsCount;
                 hash = hash * 31 + dataFingerprint;
-                hash = hash * 31 + StringComparer.Ordinal.GetHashCode(securityName ?? string.Empty);
-                hash = hash * 31 + StringComparer.Ordinal.GetHashCode(calculationName ?? string.Empty);
-                hash = hash * 31 + StringComparer.Ordinal.GetHashCode(parametersHash ?? string.Empty);
+                hash = hash * 31 + StringComparer.Ordinal.GetHashCode(securityName);
+                hash = hash * 31 + StringComparer.Ordinal.GetHashCode(calculationName);
+                hash = hash * 31 + StringComparer.Ordinal.GetHashCode(parametersHash);
                 hash = hash * 31 + (sourceIdIsToken ? 1 : 0);
                 hash = sourceIdIsToken
                     ? (hash * 31 + sourceIdToken)
-                    : (hash * 31 + StringComparer.Ordinal.GetHashCode(sourceId ?? string.Empty));
+                    : (hash * 31 + StringComparer.Ordinal.GetHashCode(sourceId));
                 return hash;
             }
         }
