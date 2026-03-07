@@ -72,6 +72,44 @@ namespace OsEngine.OsOptimizer.OptEntity
         {
         }
 
+        public OptimizerMethodCacheKey(
+            OrdinalHashedString securityName,
+            long timeframeTicks,
+            long firstTimeTicks,
+            long lastTimeTicks,
+            int candleCount,
+            OrdinalHashedString calculationName,
+            OrdinalHashedString parametersHash,
+            int sourceId,
+            int dataFingerprint,
+            OrdinalHashedString resultTypeName)
+        {
+            SecurityName = securityName.Value;
+            TimeframeTicks = timeframeTicks;
+            FirstTimeTicks = firstTimeTicks;
+            LastTimeTicks = lastTimeTicks;
+            CandleCount = candleCount;
+            CalculationName = calculationName.Value;
+            ParametersHash = parametersHash.Value;
+            SourceId = string.Empty;
+            _sourceIdToken = sourceId;
+            _sourceIdIsToken = true;
+            DataFingerprint = dataFingerprint;
+            ResultTypeName = resultTypeName.Value;
+
+            _hashCode = NormalizeHashCode(ComputeHashCodeForTokenSource(
+                securityName.HashCode,
+                timeframeTicks,
+                firstTimeTicks,
+                lastTimeTicks,
+                candleCount,
+                calculationName.HashCode,
+                parametersHash.HashCode,
+                sourceId,
+                dataFingerprint,
+                resultTypeName.HashCode));
+        }
+
         private OptimizerMethodCacheKey(
             string securityName,
             long timeframeTicks,
@@ -197,6 +235,36 @@ namespace OsEngine.OsOptimizer.OptEntity
                     ? (hash * 31 + sourceIdToken)
                     : (hash * 31 + sourceId.GetHashCode());
                 hash = hash * 31 + resultTypeName.GetHashCode();
+                return hash;
+            }
+        }
+
+        private static int ComputeHashCodeForTokenSource(
+            int securityNameHashCode,
+            long timeframeTicks,
+            long firstTimeTicks,
+            long lastTimeTicks,
+            int candleCount,
+            int calculationNameHashCode,
+            int parametersHashCode,
+            int sourceIdToken,
+            int dataFingerprint,
+            int resultTypeNameHashCode)
+        {
+            unchecked
+            {
+                int hash = 17;
+                hash = hash * 31 + timeframeTicks.GetHashCode();
+                hash = hash * 31 + firstTimeTicks.GetHashCode();
+                hash = hash * 31 + lastTimeTicks.GetHashCode();
+                hash = hash * 31 + candleCount;
+                hash = hash * 31 + dataFingerprint;
+                hash = hash * 31 + securityNameHashCode;
+                hash = hash * 31 + calculationNameHashCode;
+                hash = hash * 31 + parametersHashCode;
+                hash = hash * 31 + 1;
+                hash = hash * 31 + sourceIdToken;
+                hash = hash * 31 + resultTypeNameHashCode;
                 return hash;
             }
         }

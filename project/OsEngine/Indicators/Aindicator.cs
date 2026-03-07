@@ -128,6 +128,7 @@ namespace OsEngine.Indicators
                 _parameters.Clear();
                 _parameters = null;
                 _optimizerParameterHash = "00000011";
+                _optimizerParameterHashHashed = new OrdinalHashedString(_optimizerParameterHash);
                 _optimizerParameterHashDirty = true;
             }
 
@@ -436,8 +437,10 @@ namespace OsEngine.Indicators
         }
         private List<IndicatorParameter> _parameters = new List<IndicatorParameter>();
         private string _optimizerParameterHash = "00000011";
+        private OrdinalHashedString _optimizerParameterHashHashed = new OrdinalHashedString("00000011");
         private bool _optimizerParameterHashDirty = true;
         private string _optimizerCalculationName;
+        private OrdinalHashedString _optimizerCalculationNameHashed;
 
         /// <summary>
         /// digital parameters of the indicator
@@ -874,18 +877,18 @@ namespace OsEngine.Indicators
                 : 0L;
 
             string calculationName = GetOptimizerCalculationName();
-            string parameterHash = BuildOptimizerParameterHash();
+            BuildOptimizerParameterHash();
             int sourceId = RuntimeHelpers.GetHashCode(candles);
             int dataFingerprint = BuildCandlesDataFingerprint(candles);
 
             return new IndicatorCacheKey(
-                securityName: string.Empty,
+                securityName: OrdinalHashedString.Empty,
                 timeframeTicks: timeframeTicks,
                 firstTimeTicks: first.TimeStart.Ticks,
                 lastTimeTicks: last.TimeStart.Ticks,
                 candleCount: candlesCount,
-                calculationName: calculationName,
-                parametersHash: parameterHash,
+                calculationName: _optimizerCalculationNameHashed,
+                parametersHash: _optimizerParameterHashHashed,
                 sourceId: sourceId,
                 outputSeriesCount: DataSeries.Count,
                 includeIndicatorsCount: IncludeIndicators.Count,
@@ -915,6 +918,7 @@ namespace OsEngine.Indicators
                 }
 
                 _optimizerParameterHash = hash.ToString("X8", CultureInfo.InvariantCulture);
+                _optimizerParameterHashHashed = new OrdinalHashedString(_optimizerParameterHash);
                 _optimizerParameterHashDirty = false;
                 return _optimizerParameterHash;
             }
@@ -930,6 +934,11 @@ namespace OsEngine.Indicators
             if (string.IsNullOrEmpty(_optimizerCalculationName))
             {
                 _optimizerCalculationName = GetType().FullName ?? GetType().Name;
+                _optimizerCalculationNameHashed = new OrdinalHashedString(_optimizerCalculationName);
+            }
+            else if (string.IsNullOrEmpty(_optimizerCalculationNameHashed.Value))
+            {
+                _optimizerCalculationNameHashed = new OrdinalHashedString(_optimizerCalculationName);
             }
 
             return _optimizerCalculationName;

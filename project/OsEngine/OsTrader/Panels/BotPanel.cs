@@ -289,6 +289,19 @@ namespace OsEngine.OsTrader.Panels
         private static readonly string[] _optimizerMethodParameterHashIntFastCache = new string[OptimizerMethodParameterHashIntFastCacheMaxPart + 1];
         private static readonly Lock _optimizerMethodParameterHashIntCacheSync = new();
 
+        [ThreadStatic]
+        private static string _optimizerMethodKeySecurityNameHashSource;
+        [ThreadStatic]
+        private static OrdinalHashedString _optimizerMethodKeySecurityNameHashed;
+        [ThreadStatic]
+        private static string _optimizerMethodKeyCalculationNameHashSource;
+        [ThreadStatic]
+        private static OrdinalHashedString _optimizerMethodKeyCalculationNameHashed;
+        [ThreadStatic]
+        private static string _optimizerMethodKeyParametersHashSource;
+        [ThreadStatic]
+        private static OrdinalHashedString _optimizerMethodKeyParametersHashHashed;
+
         internal static void SetOptimizerMethodCache(OptimizerMethodCache cache)
         {
             Volatile.Write(ref _optimizerMethodCache, cache);
@@ -377,6 +390,42 @@ namespace OsEngine.OsTrader.Panels
             }
         }
 
+        private static OrdinalHashedString GetOptimizerMethodKeySecurityNameHashed(string value)
+        {
+            if (ReferenceEquals(_optimizerMethodKeySecurityNameHashSource, value))
+            {
+                return _optimizerMethodKeySecurityNameHashed;
+            }
+
+            _optimizerMethodKeySecurityNameHashSource = value;
+            _optimizerMethodKeySecurityNameHashed = new OrdinalHashedString(value);
+            return _optimizerMethodKeySecurityNameHashed;
+        }
+
+        private static OrdinalHashedString GetOptimizerMethodKeyCalculationNameHashed(string value)
+        {
+            if (ReferenceEquals(_optimizerMethodKeyCalculationNameHashSource, value))
+            {
+                return _optimizerMethodKeyCalculationNameHashed;
+            }
+
+            _optimizerMethodKeyCalculationNameHashSource = value;
+            _optimizerMethodKeyCalculationNameHashed = new OrdinalHashedString(value);
+            return _optimizerMethodKeyCalculationNameHashed;
+        }
+
+        private static OrdinalHashedString GetOptimizerMethodKeyParametersHashHashed(string value)
+        {
+            if (ReferenceEquals(_optimizerMethodKeyParametersHashSource, value))
+            {
+                return _optimizerMethodKeyParametersHashHashed;
+            }
+
+            _optimizerMethodKeyParametersHashSource = value;
+            _optimizerMethodKeyParametersHashHashed = new OrdinalHashedString(value);
+            return _optimizerMethodKeyParametersHashHashed;
+        }
+
         /// <summary>
         /// Returns cached method result or computes/stores it for optimizer runs.
         /// </summary>
@@ -446,7 +495,7 @@ namespace OsEngine.OsTrader.Panels
                 calculationName,
                 parametersHash,
                 candles,
-                OptimizerMethodCacheTypeName<T>.Value);
+                OptimizerMethodCacheTypeName<T>.Hashed);
 
             if (cache.TryGet(key, out T cachedValue))
             {
@@ -478,7 +527,7 @@ namespace OsEngine.OsTrader.Panels
             string calculationName,
             string parametersHash,
             List<Candle> candles,
-            string resultTypeName)
+            OrdinalHashedString resultTypeName)
         {
             int candlesCount = candles.Count;
             Candle first = candles[0];
@@ -493,14 +542,21 @@ namespace OsEngine.OsTrader.Panels
             int dataFingerprint = BuildMethodCacheCandlesFingerprint(candles);
             int sourceId = RuntimeHelpers.GetHashCode(candles);
 
+            string securityNameSafe = securityName ?? string.Empty;
+            string parametersHashSafe = parametersHash ?? string.Empty;
+
+            OrdinalHashedString securityNameHashed = GetOptimizerMethodKeySecurityNameHashed(securityNameSafe);
+            OrdinalHashedString calculationNameHashed = GetOptimizerMethodKeyCalculationNameHashed(calculationName);
+            OrdinalHashedString parametersHashHashed = GetOptimizerMethodKeyParametersHashHashed(parametersHashSafe);
+
             return new OptimizerMethodCacheKey(
-                securityName: securityName ?? string.Empty,
+                securityName: securityNameHashed,
                 timeframeTicks: timeframeTicks,
                 firstTimeTicks: first.TimeStart.Ticks,
                 lastTimeTicks: last.TimeStart.Ticks,
                 candleCount: candlesCount,
-                calculationName: calculationName,
-                parametersHash: parametersHash ?? string.Empty,
+                calculationName: calculationNameHashed,
+                parametersHash: parametersHashHashed,
                 sourceId: sourceId,
                 dataFingerprint: dataFingerprint,
                 resultTypeName: resultTypeName);
@@ -581,6 +637,7 @@ namespace OsEngine.OsTrader.Panels
         private static class OptimizerMethodCacheTypeName<T>
         {
             internal static readonly string Value = typeof(T).FullName ?? typeof(T).Name;
+            internal static readonly OrdinalHashedString Hashed = new OrdinalHashedString(Value);
         }
 
         /// <summary>
@@ -3186,4 +3243,3 @@ position => position.State != PositionStateType.OpeningFail
         SelectionColor		
     }	
 }
-
