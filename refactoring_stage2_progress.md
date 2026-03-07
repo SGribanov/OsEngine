@@ -20337,3 +20337,51 @@
   - delta vs #1057: -17.42%
   - delta vs #1062: -13.84%
   - allocation/op unchanged at 0.00 bytes/op, Gen0 unchanged (0).
+
+## 2026-03-07 - Incremental Update #1064
+
+### Scope
+
+- P2 optimizer path: reduce key-build hash overhead in optimizer cache key structs.
+
+### What Changed
+
+- Updated production code:
+  - project/OsEngine/OsOptimizer/OptEntity/IndicatorCache.cs
+  - project/OsEngine/OsOptimizer/OptEntity/OptimizerMethodCache.cs
+- Changes:
+  - in key hash builders (`ComputeHashCode`) replaced ordinal hash calls
+    - from `StringComparer.Ordinal.GetHashCode(...)`
+    - to direct `string.GetHashCode()` on normalized string fields.
+  - no changes to equality contracts (`Equals` still uses `StringComparer.Ordinal`).
+  - key field set and dictionary semantics preserved.
+
+### Verification
+
+- Host-context verification (outside sandbox, per dotnet-build-policy):
+  - dotnet restore project/OsEngine/OsEngine.csproj --nologo -> success
+  - dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo -> success
+  - dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900 -> success, 0 warnings, 0 errors
+  - dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo -> passed 873/873
+- Perf command:
+  - pwsh -NoProfile -File tools/run-stage2-perf.ps1 -NoBuild -EnforceThresholds -Repeat 15 -> success
+  - repeated confirmation run with second Repeat=15 batch -> success
+  - threshold check passed for all scenarios.
+
+### P0/P2/P3 Metrics Snapshot (median, Repeat=15)
+
+- indicator_cache_hit_path: 2106.90 ns/op, 448.02 bytes/op
+- optimizer_method_cache_hit_path: 146.03 ns/op, 0.01 bytes/op
+- optimizer_cache_key_build_path: 300.46 ns/op, 0.01 bytes/op
+- optimizer_method_parameter_hash_path: 47.93 ns/op, 0.00 bytes/op
+- tradegrid_query_collections_hotpath: 8633.47 ns/op, 992.01 bytes/op
+- tradegrid_load_from_string_ru_payload_path: 1165.97 ns/op, 0.01 bytes/op
+- tradegrid_load_from_string_malformed_tail_path: 1869.33 ns/op, 466.14 bytes/op
+
+### KPI deltas (target scenario)
+
+- optimizer_cache_key_build_path:
+  - previous #1063 (Repeat=15): 335.80 ns/op
+  - current #1064 (Repeat=15): 300.46 ns/op
+  - delta vs #1063: -10.52%
+  - allocation/op unchanged at 0.01 bytes/op, Gen0 unchanged (0).

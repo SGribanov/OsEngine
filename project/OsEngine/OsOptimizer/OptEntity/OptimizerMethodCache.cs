@@ -189,14 +189,14 @@ namespace OsEngine.OsOptimizer.OptEntity
                 hash = hash * 31 + lastTimeTicks.GetHashCode();
                 hash = hash * 31 + candleCount;
                 hash = hash * 31 + dataFingerprint;
-                hash = hash * 31 + StringComparer.Ordinal.GetHashCode(securityName);
-                hash = hash * 31 + StringComparer.Ordinal.GetHashCode(calculationName);
-                hash = hash * 31 + StringComparer.Ordinal.GetHashCode(parametersHash);
+                hash = hash * 31 + securityName.GetHashCode();
+                hash = hash * 31 + calculationName.GetHashCode();
+                hash = hash * 31 + parametersHash.GetHashCode();
                 hash = hash * 31 + (sourceIdIsToken ? 1 : 0);
                 hash = sourceIdIsToken
                     ? (hash * 31 + sourceIdToken)
-                    : (hash * 31 + StringComparer.Ordinal.GetHashCode(sourceId));
-                hash = hash * 31 + StringComparer.Ordinal.GetHashCode(resultTypeName);
+                    : (hash * 31 + sourceId.GetHashCode());
+                hash = hash * 31 + resultTypeName.GetHashCode();
                 return hash;
             }
         }

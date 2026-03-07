@@ -19316,3 +19316,37 @@
   - allocation/op and Gen0 unchanged.
 - Commit: pending
 - Push: pending
+
+### Wave P2 - Optimizer Cache Key Hash Call-Site Simplification (Incremental Adoption #1064)
+
+- Status: In Progress (increment block completed)
+- Plan item: refactoring_stage2_plan.md -> Plan Refresh / Wave P2
+- Runtime impact: yes
+- Changes:
+  - Updated:
+    - project/OsEngine/OsOptimizer/OptEntity/IndicatorCache.cs
+    - project/OsEngine/OsOptimizer/OptEntity/OptimizerMethodCache.cs
+  - In key hash builders replaced `StringComparer.Ordinal.GetHashCode(...)` with direct `string.GetHashCode()` on normalized strings.
+  - Kept ordinal equality checks and key contracts unchanged.
+- Verification (outside sandbox, per dotnet-build-policy):
+  - dotnet restore project/OsEngine/OsEngine.csproj --nologo -> success
+  - dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo -> success
+  - dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900 -> success, 0 warnings, 0 errors
+  - dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo -> passed 873/873
+  - pwsh -NoProfile -File tools/run-stage2-perf.ps1 -NoBuild -EnforceThresholds -Repeat 15 -> success
+  - second Repeat=15 confirmation run -> success
+- Metrics snapshot (median, Repeat=15):
+  - indicator_cache_hit_path: 2106.90 ns/op, 448.02 bytes/op
+  - optimizer_method_cache_hit_path: 146.03 ns/op, 0.01 bytes/op
+  - optimizer_cache_key_build_path: 300.46 ns/op, 0.01 bytes/op
+  - optimizer_method_parameter_hash_path: 47.93 ns/op, 0.00 bytes/op
+  - tradegrid_query_collections_hotpath: 8633.47 ns/op, 992.01 bytes/op
+  - tradegrid_load_from_string_ru_payload_path: 1165.97 ns/op, 0.01 bytes/op
+  - tradegrid_load_from_string_malformed_tail_path: 1869.33 ns/op, 466.14 bytes/op
+- KPI comparison (target scenario):
+  - previous #1063 (Repeat=15): 335.80 ns/op
+  - current #1064 (Repeat=15): 300.46 ns/op
+  - delta: -10.52%
+  - allocation/op and Gen0 unchanged.
+- Commit: pending
+- Push: pending
