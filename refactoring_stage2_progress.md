@@ -20287,3 +20287,53 @@
 - vs #1060:
   - RU payload: 1105.35 -> 1097.97 ns/op (-0.67%)
   - malformed tail: 1908.00 -> 1679.38 ns/op (-11.98%)
+
+## 2026-03-07 - Incremental Update #1063
+
+### Scope
+
+- P2 optimizer path: reduce overhead in `BuildOptimizerMethodCacheParameterHash(int)` hot path.
+
+### What Changed
+
+- Updated production code:
+  - project/OsEngine/OsTrader/Panels/BotPanel.cs
+- Changes:
+  - added bounded array fast-path cache for int hash inputs in range `0..4095`:
+    - `_optimizerMethodParameterHashIntFastCache` + direct index lookup;
+    - lock-free benign-race publish (`_cache[part] = computed`) without `Volatile`/`Interlocked` on hot reads.
+  - kept existing `ConcurrentDictionary<int, string>` path unchanged for out-of-range values.
+- Added regression tests:
+  - project/OsEngine.Tests/BotPanelOptimizerMethodHashTests.cs
+  - new test `BuildOptimizerMethodCacheParameterHash_IntOverload_FastCacheBoundaries_ShouldStayStable` for boundaries `4095/4096` (value equality + cached instance reuse).
+
+### Verification
+
+- Host-context verification (outside sandbox, per dotnet-build-policy):
+  - dotnet restore project/OsEngine/OsEngine.csproj --nologo -> success
+  - dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo -> success
+  - dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900 -> success, 0 warnings, 0 errors
+  - dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo -> passed 873/873
+- Perf command:
+  - pwsh -NoProfile -File tools/run-stage2-perf.ps1 -NoBuild -EnforceThresholds -Repeat 15 -> success
+  - threshold check passed for all scenarios.
+
+### P0/P2/P3 Metrics Snapshot (median, Repeat=15)
+
+- indicator_cache_hit_path: 2020.70 ns/op, 448.02 bytes/op
+- optimizer_method_cache_hit_path: 155.57 ns/op, 0.01 bytes/op
+- optimizer_cache_key_build_path: 335.80 ns/op, 0.01 bytes/op
+- optimizer_method_parameter_hash_path: 45.80 ns/op, 0.00 bytes/op
+- tradegrid_query_collections_hotpath: 8751.68 ns/op, 992.01 bytes/op
+- tradegrid_load_from_string_ru_payload_path: 1159.95 ns/op, 0.01 bytes/op
+- tradegrid_load_from_string_malformed_tail_path: 1925.38 ns/op, 466.14 bytes/op
+
+### KPI deltas (target scenario)
+
+- optimizer_method_parameter_hash_path:
+  - baseline #1057: 55.46 ns/op
+  - baseline #1062: 53.16 ns/op
+  - current #1063: 45.80 ns/op
+  - delta vs #1057: -17.42%
+  - delta vs #1062: -13.84%
+  - allocation/op unchanged at 0.00 bytes/op, Gen0 unchanged (0).

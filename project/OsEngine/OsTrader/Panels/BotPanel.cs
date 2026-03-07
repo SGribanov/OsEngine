@@ -285,6 +285,8 @@ namespace OsEngine.OsTrader.Panels
         private static OptimizerMethodCache _optimizerMethodCache;
         private static readonly ConcurrentDictionary<int, string> _optimizerMethodParameterHashIntCache = new ConcurrentDictionary<int, string>();
         private const int OptimizerMethodParameterHashIntCacheMaxEntries = 4096;
+        private const int OptimizerMethodParameterHashIntFastCacheMaxPart = 4095;
+        private static readonly string[] _optimizerMethodParameterHashIntFastCache = new string[OptimizerMethodParameterHashIntFastCacheMaxPart + 1];
         private static readonly Lock _optimizerMethodParameterHashIntCacheSync = new();
 
         internal static void SetOptimizerMethodCache(OptimizerMethodCache cache)
@@ -303,6 +305,19 @@ namespace OsEngine.OsTrader.Panels
         /// </summary>
         protected static string BuildOptimizerMethodCacheParameterHash(int part)
         {
+            if ((uint)part <= OptimizerMethodParameterHashIntFastCacheMaxPart)
+            {
+                string fastCached = _optimizerMethodParameterHashIntFastCache[part];
+                if (fastCached != null)
+                {
+                    return fastCached;
+                }
+
+                fastCached = ComputeOptimizerMethodCacheParameterHashForInt(part);
+                _optimizerMethodParameterHashIntFastCache[part] = fastCached;
+                return fastCached;
+            }
+
             if (_optimizerMethodParameterHashIntCache.TryGetValue(part, out string cached))
             {
                 return cached;

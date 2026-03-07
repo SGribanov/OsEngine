@@ -50,6 +50,20 @@ public class BotPanelOptimizerMethodHashTests
         Assert.Same(first, second);
     }
 
+    [Fact]
+    public void BuildOptimizerMethodCacheParameterHash_IntOverload_FastCacheBoundaries_ShouldStayStable()
+    {
+        string fastBoundaryFirst = BotPanelOptimizerMethodHashAccessor.BuildInt(4095);
+        string fastBoundarySecond = BotPanelOptimizerMethodHashAccessor.BuildInt(4095);
+        string fallbackBoundaryFirst = BotPanelOptimizerMethodHashAccessor.BuildInt(4096);
+        string fallbackBoundarySecond = BotPanelOptimizerMethodHashAccessor.BuildInt(4096);
+
+        Assert.Equal(BotPanelOptimizerMethodHashAccessor.BuildParams(4095), fastBoundaryFirst);
+        Assert.Equal(BotPanelOptimizerMethodHashAccessor.BuildParams(4096), fallbackBoundaryFirst);
+        Assert.Same(fastBoundaryFirst, fastBoundarySecond);
+        Assert.Same(fallbackBoundaryFirst, fallbackBoundarySecond);
+    }
+
     private sealed class BotPanelOptimizerMethodHashAccessor : BotPanel
     {
         private BotPanelOptimizerMethodHashAccessor() : base("BotPanelOptimizerMethodHashAccessor", StartProgram.IsTester)

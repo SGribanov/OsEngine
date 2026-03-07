@@ -19280,3 +19280,39 @@
   - vs #1060: RU slightly improved; malformed significantly improved.
 - Commit: pending
 - Push: pending
+
+### Wave P2 - BotPanel Int Parameter-Hash Fast Cache (Incremental Adoption #1063)
+
+- Status: In Progress (increment block completed)
+- Plan item: refactoring_stage2_plan.md -> Plan Refresh / Wave P2
+- Runtime impact: yes
+- Changes:
+  - Updated project/OsEngine/OsTrader/Panels/BotPanel.cs.
+  - Added bounded int fast-path cache for `BuildOptimizerMethodCacheParameterHash(int)` in range `0..4095`.
+  - Hot path now uses direct array lookup and lock-free benign-race publish for first fill.
+  - Kept existing `ConcurrentDictionary<int,string>` fallback for out-of-range inputs.
+  - Added boundary regression test in project/OsEngine.Tests/BotPanelOptimizerMethodHashTests.cs:
+    - `BuildOptimizerMethodCacheParameterHash_IntOverload_FastCacheBoundaries_ShouldStayStable`.
+- Verification (outside sandbox, per dotnet-build-policy):
+  - dotnet restore project/OsEngine/OsEngine.csproj --nologo -> success
+  - dotnet restore project/OsEngine.Tests/OsEngine.Tests.csproj --nologo -> success
+  - dotnet build project/OsEngine/OsEngine.csproj --no-restore --configuration Release --nologo -p:NoWarn=NU1900 -> success, 0 warnings, 0 errors
+  - dotnet test project/OsEngine.Tests/OsEngine.Tests.csproj --no-restore --configuration Release --nologo -> passed 873/873
+  - pwsh -NoProfile -File tools/run-stage2-perf.ps1 -NoBuild -EnforceThresholds -Repeat 15 -> success; threshold check passed
+- Metrics snapshot (median, Repeat=15):
+  - indicator_cache_hit_path: 2020.70 ns/op, 448.02 bytes/op
+  - optimizer_method_cache_hit_path: 155.57 ns/op, 0.01 bytes/op
+  - optimizer_cache_key_build_path: 335.80 ns/op, 0.01 bytes/op
+  - optimizer_method_parameter_hash_path: 45.80 ns/op, 0.00 bytes/op
+  - tradegrid_query_collections_hotpath: 8751.68 ns/op, 992.01 bytes/op
+  - tradegrid_load_from_string_ru_payload_path: 1159.95 ns/op, 0.01 bytes/op
+  - tradegrid_load_from_string_malformed_tail_path: 1925.38 ns/op, 466.14 bytes/op
+- KPI comparison (target scenario):
+  - baseline #1057: 55.46 ns/op
+  - baseline #1062: 53.16 ns/op
+  - current #1063: 45.80 ns/op
+  - delta vs #1057: -17.42%
+  - delta vs #1062: -13.84%
+  - allocation/op and Gen0 unchanged.
+- Commit: pending
+- Push: pending
