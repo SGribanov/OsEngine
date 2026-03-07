@@ -19,58 +19,139 @@ jobs:
     steps:
       - name: Move linked issues to In Progress
         uses: actions/github-script@v7
+        env:
+          PROJECT_BOARD_NUMBER: ${{ vars.PROJECT_BOARD_NUMBER }}
+          PROJECT_BOARD_TITLE: ${{ vars.PROJECT_BOARD_TITLE }}
         with:
           github-token: ${{ secrets.ADD_TO_PROJECT_PAT || github.token }}
           script: |
             const owner = context.repo.owner;
             const repo = context.repo.repo;
             const pull_number = context.payload.pull_request.number;
-            const projectNumber = 2;
+            const boardNumber = process.env.PROJECT_BOARD_NUMBER
+              ? Number(process.env.PROJECT_BOARD_NUMBER)
+              : null;
+            const boardTitle = (process.env.PROJECT_BOARD_TITLE || repo).trim();
+            const normalize = (value) => (value || "").trim().toLowerCase();
 
-            const projectData = await github.graphql(
-              `
-              query($owner:String!, $projectNumber:Int!) {
-                user(login:$owner) {
-                  projectV2(number:$projectNumber) {
-                    id
-                    fields(first:50) {
+            async function resolveProject() {
+              if (Number.isInteger(boardNumber) && boardNumber > 0) {
+                const byNumber = await github.graphql(
+                  `
+                  query($owner:String!, $number:Int!) {
+                    user(login:$owner) {
+                      projectV2(number:$number) {
+                        id
+                        title
+                        fields(first:50) {
+                          nodes {
+                            ... on ProjectV2SingleSelectField {
+                              id
+                              name
+                              options { id name }
+                            }
+                          }
+                        }
+                      }
+                    }
+                    organization(login:$owner) {
+                      projectV2(number:$number) {
+                        id
+                        title
+                        fields(first:50) {
+                          nodes {
+                            ... on ProjectV2SingleSelectField {
+                              id
+                              name
+                              options { id name }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                  `,
+                  { owner, number: boardNumber }
+                );
+
+                const project = byNumber.user?.projectV2 || byNumber.organization?.projectV2;
+                if (!project) {
+                  throw new Error(
+                    `PROJECT_BOARD_NUMBER=${boardNumber} is set, but project was not found for owner ${owner}`
+                  );
+                }
+                return project;
+              }
+
+              const byTitle = await github.graphql(
+                `
+                query($owner:String!, $first:Int!) {
+                  user(login:$owner) {
+                    projectsV2(first:$first) {
                       nodes {
-                        ... on ProjectV2SingleSelectField {
-                          id
-                          name
-                          options {
-                            id
-                            name
+                        id
+                        title
+                        fields(first:50) {
+                          nodes {
+                            ... on ProjectV2SingleSelectField {
+                              id
+                              name
+                              options { id name }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                  organization(login:$owner) {
+                    projectsV2(first:$first) {
+                      nodes {
+                        id
+                        title
+                        fields(first:50) {
+                          nodes {
+                            ... on ProjectV2SingleSelectField {
+                              id
+                              name
+                              options { id name }
+                            }
                           }
                         }
                       }
                     }
                   }
                 }
+                `,
+                { owner, first: 100 }
+              );
+
+              const projects = [
+                ...(byTitle.user?.projectsV2?.nodes || []),
+                ...(byTitle.organization?.projectsV2?.nodes || []),
+              ].filter(Boolean);
+
+              const project = projects.find((p) => normalize(p.title) === normalize(boardTitle));
+              if (!project) {
+                throw new Error(
+                  `Project board "${boardTitle}" was not found for owner ${owner}. ` +
+                    `Set repository variable PROJECT_BOARD_NUMBER or create board "${repo}".`
+                );
               }
-              `,
-              { owner, projectNumber }
-            );
 
-            const project = projectData.user?.projectV2;
-            if (!project) {
-              core.setFailed(`Project #${projectNumber} not found for user ${owner}`);
-              return;
+              return project;
             }
 
-            const statusField = project.fields.nodes.find(
-              (f) => f && f.name === "Status"
-            );
+            const project = await resolveProject();
+
+            const statusField = project.fields.nodes.find((f) => f && f.name === "Status");
             if (!statusField) {
-              core.setFailed("Status field not found in project");
+              core.setFailed(`Status field not found in project "${project.title}"`);
               return;
             }
 
-            const inProgressOption = statusField.options.find(
-              (o) => o.name === "In Progress"
-            );
+            const inProgressOption = statusField.options.find((o) => o.name === "In Progress");
             if (!inProgressOption) {
-              core.setFailed('Status option "In Progress" not found');
+              core.setFailed(`Status option "In Progress" not found in project "${project.title}"`);
               return;
             }
 

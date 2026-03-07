@@ -1,4 +1,4 @@
-name: Add issues to Tasks project
+name: Add issues to repository project board
 
 on:
   issues:
@@ -6,12 +6,157 @@ on:
       - opened
       - reopened
 
+permissions:
+  contents: read
+  issues: read
+  repository-projects: write
+
 jobs:
   add-to-project:
     runs-on: ubuntu-latest
     steps:
-      - name: Add issue to GitHub Project
-        uses: actions/add-to-project@v1.0.2
+      - name: Add issue to GitHub Project board
+        uses: actions/github-script@v7
+        env:
+          PROJECT_BOARD_NUMBER: ${{ vars.PROJECT_BOARD_NUMBER }}
+          PROJECT_BOARD_TITLE: ${{ vars.PROJECT_BOARD_TITLE }}
         with:
-          project-url: https://github.com/users/SGribanov/projects/2
           github-token: ${{ secrets.ADD_TO_PROJECT_PAT || github.token }}
+          script: |
+            const owner = context.repo.owner;
+            const repo = context.repo.repo;
+            const issueNumber = context.payload.issue?.number;
+            const issueNodeId = context.payload.issue?.node_id;
+
+            if (!issueNumber || !issueNodeId) {
+              core.info("Issue payload is incomplete. Skipping.");
+              return;
+            }
+
+            const boardNumber = process.env.PROJECT_BOARD_NUMBER
+              ? Number(process.env.PROJECT_BOARD_NUMBER)
+              : null;
+            const boardTitle = (process.env.PROJECT_BOARD_TITLE || repo).trim();
+
+            const normalize = (value) => (value || "").trim().toLowerCase();
+
+            async function resolveProject() {
+              if (Number.isInteger(boardNumber) && boardNumber > 0) {
+                const byNumber = await github.graphql(
+                  `
+                  query($owner:String!, $number:Int!) {
+                    user(login:$owner) {
+                      projectV2(number:$number) {
+                        id
+                        title
+                      }
+                    }
+                    organization(login:$owner) {
+                      projectV2(number:$number) {
+                        id
+                        title
+                      }
+                    }
+                  }
+                  `,
+                  { owner, number: boardNumber }
+                );
+
+                const project = byNumber.user?.projectV2 || byNumber.organization?.projectV2;
+                if (!project) {
+                  throw new Error(
+                    `PROJECT_BOARD_NUMBER=${boardNumber} is set, but project was not found for owner ${owner}`
+                  );
+                }
+
+                return project;
+              }
+
+              const byTitle = await github.graphql(
+                `
+                query($owner:String!, $first:Int!) {
+                  user(login:$owner) {
+                    projectsV2(first:$first) {
+                      nodes {
+                        id
+                        title
+                      }
+                    }
+                  }
+                  organization(login:$owner) {
+                    projectsV2(first:$first) {
+                      nodes {
+                        id
+                        title
+                      }
+                    }
+                  }
+                }
+                `,
+                { owner, first: 100 }
+              );
+
+              const projects = [
+                ...(byTitle.user?.projectsV2?.nodes || []),
+                ...(byTitle.organization?.projectsV2?.nodes || []),
+              ].filter(Boolean);
+
+              const project = projects.find((p) => normalize(p.title) === normalize(boardTitle));
+              if (!project) {
+                throw new Error(
+                  `Project board "${boardTitle}" was not found for owner ${owner}. ` +
+                    `Set repository variable PROJECT_BOARD_NUMBER or create board "${repo}".`
+                );
+              }
+
+              return project;
+            }
+
+            const project = await resolveProject();
+
+            const issueData = await github.graphql(
+              `
+              query($owner:String!, $repo:String!, $issueNumber:Int!) {
+                repository(owner:$owner, name:$repo) {
+                  issue(number:$issueNumber) {
+                    projectItems(first:100) {
+                      nodes {
+                        id
+                        project {
+                          id
+                          title
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+              `,
+              { owner, repo, issueNumber }
+            );
+
+            const existing = issueData.repository?.issue?.projectItems?.nodes?.find(
+              (item) => item.project?.id === project.id
+            );
+
+            if (existing) {
+              core.info(
+                `Issue #${issueNumber} is already linked to project "${project.title}".`
+              );
+              return;
+            }
+
+            await github.graphql(
+              `
+              mutation($projectId:ID!, $contentId:ID!) {
+                addProjectV2ItemById(input: { projectId:$projectId, contentId:$contentId }) {
+                  item {
+                    id
+                  }
+                }
+              }
+              `,
+              { projectId: project.id, contentId: issueNodeId }
+            );
+
+            core.info(`Issue #${issueNumber} added to project "${project.title}".`);

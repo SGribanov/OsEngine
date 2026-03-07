@@ -1,186 +1,121 @@
-# GitHub Projects AI Memory Setup
+# GitHub Projects AI Memory (Portable)
 
-Дата проверки: 2026-02-27  
-Репозиторий: `SGribanov/OsEngine`  
-Проект: `Tasks` (`https://github.com/users/SGribanov/projects/2`)
+Дата обновления: 2026-03-07
 
-## 1. Предусловия
+Этот документ сделан переносимым между аккаунтами Codex/Claude Code.
+Он не содержит жестких привязок к конкретному owner, project number или локальному пути пользователя.
 
-Установлен GitHub CLI:
+## 1. Политика досок
+
+- Одна доска GitHub Project v2 на один репозиторий.
+- Имя доски по умолчанию = имя репозитория.
+- Допускаются override-переменные репозитория:
+  - `PROJECT_BOARD_NUMBER` (приоритет 1);
+  - `PROJECT_BOARD_TITLE` (приоритет 2).
+- Если override не задан, используется доска с названием текущего репозитория.
+
+## 2. Быстрый bootstrap (owner/repo/board autodetect)
 
 ```powershell
-gh --version
+$repoFull = gh repo view --json nameWithOwner --jq .nameWithOwner
+$owner, $repo = $repoFull -split '/'
+
+$boardNumber = if ($env:PROJECT_BOARD_NUMBER) { [int]$env:PROJECT_BOARD_NUMBER } else { $null }
+$boardTitle = if ($env:PROJECT_BOARD_TITLE) { $env:PROJECT_BOARD_TITLE } else { $repo }
+
+gh project list --owner $owner --format json
 ```
 
-Важно: если в окружении задан `GITHUB_TOKEN`, `gh` будет использовать его вместо сохраненных credential-ов.
-
-Очистка переменной:
+Если доска не найдена:
 
 ```powershell
-# Текущая сессия
-Remove-Item Env:GITHUB_TOKEN -ErrorAction SilentlyContinue
-
-# Постоянные переменные
-[Environment]::SetEnvironmentVariable("GITHUB_TOKEN", $null, "User")
-[Environment]::SetEnvironmentVariable("GITHUB_TOKEN", $null, "Machine")
+gh project create --owner $owner --title $boardTitle
+gh project list --owner $owner --format json
 ```
 
-## 2. Авторизация и scope `project`
+Проверка полей:
 
 ```powershell
-gh auth login
-gh auth refresh --hostname github.com -s project
+# Подставьте номер доски
+gh project field-list <project-number> --owner $owner --format json
+```
+
+Обязательные статусы поля `Status`:
+- `Todo`
+- `In Progress`
+- `Done`
+
+## 3. Добавление issue в доску
+
+```powershell
+$issueUrl = gh issue create --repo $repoFull --title "Task title" --body "Task body"
+gh project item-add <project-number> --owner $owner --url $issueUrl
+```
+
+Проверка:
+
+```powershell
+gh project item-list <project-number> --owner $owner --format json
+```
+
+## 4. Единый источник статуса
+
+- Единственный источник прогресса: Project field `Status`.
+- `Issue open/closed` = факт завершения, а не отдельная прогресс-шкала.
+- Labels используются как метаданные (приоритет/тип), не как параллельный workflow-state.
+- `AI-CONTEXT` не должен дублировать статус `Todo/In Progress/Done`.
+
+## 5. AI-CONTEXT (handoff/resume)
+
+Использовать один блок контекста на issue:
+
+```markdown
+<!-- AI-CONTEXT:START -->
+## Context
+**Done:** ...
+**Next:** ...
+**Resume:** ...
+<!-- AI-CONTEXT:END -->
+```
+
+- На паузе/завершении обновлять существующий блок, не создавать дубликаты.
+- На старте сессии читать этот блок в первую очередь.
+
+## 6. GitHub auth (portable)
+
+Предпочтительно:
+
+```powershell
 gh auth status
 ```
 
-Ожидаемо в `gh auth status`:
-- активный аккаунт `SGribanov`
-- тип credential: `keyring`
-- scopes включают `project`, `repo`, `read:org`
-
-## 3. Проверка/создание проекта `Tasks`
-
-Проверка:
+Fallback, если keyring недоступен:
 
 ```powershell
-gh project list --owner SGribanov
+$tokenPath = Join-Path $HOME 'gh_pat.txt'
+if (Test-Path $tokenPath) { $env:GH_TOKEN = (Get-Content $tokenPath -Raw).Trim() }
 ```
 
-Создание (если нет):
+## 7. Учет главного реестра `C:\Repos`
+
+- Главный репозиторий `C:\Repos` хранит индекс child-репозиториев в `REPOSITORIES.md`.
+- Перед началом работ полезно проверить, что текущий child-репозиторий корректно отражен в реестре:
 
 ```powershell
-gh project create --owner SGribanov --title "Tasks"
+rg -n "\| <LocalFolderName> \|" C:\Repos\REPOSITORIES.md
 ```
 
-## 4. Проверка обязательных полей
+- Если появился новый top-level repo в `C:\Repos`, обновить реестр в parent-репозитории:
 
 ```powershell
-gh project field-list 2 --owner SGribanov --format json
+cd C:\Repos
+git registry-refresh
 ```
 
-Текущее состояние проекта `Tasks`:
-- поле `Status` с опциями `Todo`, `In Progress`, `Done`
-- системные поля (`Title`, `Assignees`, `Labels`, `Repository` и др.) присутствуют
+Обновление реестра коммитится отдельным commit в parent-репозитории.
 
-## 5. Создание issue и добавление в проект
+## 8. Репозиторий `OsEngine` (текущая фактическая привязка)
 
-```powershell
-$issueUrl = gh issue create --repo SGribanov/OsEngine --title "Название задачи" --body "Описание"
-gh project item-add 2 --owner SGribanov --url $issueUrl
-```
-
-Проверка:
-
-```powershell
-gh project item-list 2 --owner SGribanov
-```
-
-## 6. Воспроизводимый быстрый сценарий (новая машина)
-
-```powershell
-Remove-Item Env:GITHUB_TOKEN -ErrorAction SilentlyContinue
-gh auth login
-gh auth refresh --hostname github.com -s project
-gh project list --owner SGribanov
-```
-
-Дальше:
-
-```powershell
-$issueUrl = gh issue create --repo SGribanov/OsEngine --title "Test issue" --body "Smoke test"
-gh project item-add 2 --owner SGribanov --url $issueUrl
-gh project item-list 2 --owner SGribanov
-```
-
-## 7. Авто-добавление issues в проект `Tasks`
-
-В репозитории добавлен workflow:
-
-`/.github/workflows/add-issues-to-project.yml`
-
-Он срабатывает на `issues.opened` и `issues.reopened` и добавляет issue в:
-
-`https://github.com/users/SGribanov/projects/2`
-
-### Что нужно настроить один раз в GitHub
-
-1. Создать классический PAT (или fine-grained token с эквивалентными правами), у которого есть доступ к:
-- `project`
-- `repo`
-
-2. Добавить секрет в репозиторий:
-- Name: `ADD_TO_PROJECT_PAT`
-- Value: PAT из шага 1
-
-Путь в UI:
-- `Settings` -> `Secrets and variables` -> `Actions` -> `New repository secret`
-
-### Проверка
-
-1. Создать новую issue в `SGribanov/OsEngine`
-2. Открыть проект `Tasks`
-3. Убедиться, что карточка появилась автоматически в `Todo`
-
-Примечание: в workflow включен fallback на `github.token`, если `ADD_TO_PROJECT_PAT` не задан.
-
-## 8. Рабочий цикл задач в `Tasks`
-
-### Статусы и смысл
-
-- `Todo`: задача согласована и готова к старту, но работа еще не начата
-- `In Progress`: по задаче ведется активная разработка (есть ветка/PR или активные изменения)
-- `Done`: задача завершена и проверена, issue закрыта
-
-### Правила переходов
-
-- `Todo -> In Progress`
-- Когда исполнитель начал работу
-- Или автоматически при открытии PR (для связанной issue)
-
-- `In Progress -> Done`
-- При merge PR, закрывающем issue
-- Или при ручном закрытии issue, если работа завершена без PR
-
-- `Done -> In Progress`
-- Если issue переоткрыли и нужно доработать
-
-### Ответственность
-
-- Инициатор задачи: корректная постановка issue (цель, шаги, критерии)
-- Исполнитель: своевременный перевод в `In Progress`, обновление прогресса
-- Ревьюер/мейнтейнер: подтверждение завершения и перевод в `Done`
-
-### Минимальный операционный ритм
-
-- Раз в день проверять `Todo` и брать следующую задачу в работу
-- После merge/close в тот же день синхронизировать статус в проекте
-- Не оставлять закрытые issue в `Todo`/`In Progress`
-
-## 9. Шаблоны новых задач (Issue Templates)
-
-Добавлены шаблоны:
-
-- `/.github/ISSUE_TEMPLATE/feature_task.yml`
-- `/.github/ISSUE_TEMPLATE/bug_report.yml`
-- `/.github/ISSUE_TEMPLATE/config.yml`
-
-Что это дает:
-
-- единый формат постановки задач
-- обязательные поля: контекст, критерии готовности, шаги проверки
-- меньше неполных/непроверяемых задач
-
-## 10. Минимальная приоритизация задач
-
-Для задач используются labels:
-
-- `priority:critical` — блокирующая задача, берем немедленно
-- `priority:high` — берем в ближайшую итерацию
-- `priority:medium` — плановая работа
-- `priority:low` — можно отложить
-
-Правила применения:
-
-- у каждой рабочей issue должен быть ровно один `priority:*` label
-- если приоритет не задан, по умолчанию считать `priority:medium`
-- изменение приоритета фиксировать комментарием в issue
+- Для `SGribanov/OsEngine` сейчас используется доска:
+  - `OsEngine` — `https://github.com/users/SGribanov/projects/6`
+- Эта привязка является текущим состоянием, но automation построен так, чтобы не зависеть от hardcoded `#6`.

@@ -21,39 +21,118 @@ jobs:
     steps:
       - name: Update linked project items
         uses: actions/github-script@v7
+        env:
+          PROJECT_BOARD_NUMBER: ${{ vars.PROJECT_BOARD_NUMBER }}
+          PROJECT_BOARD_TITLE: ${{ vars.PROJECT_BOARD_TITLE }}
         with:
           github-token: ${{ secrets.ADD_TO_PROJECT_PAT || github.token }}
           script: |
             const owner = context.repo.owner;
             const repo = context.repo.repo;
-            const projectNumber = 2;
+            const boardNumber = process.env.PROJECT_BOARD_NUMBER
+              ? Number(process.env.PROJECT_BOARD_NUMBER)
+              : null;
+            const boardTitle = (process.env.PROJECT_BOARD_TITLE || repo).trim();
+            const normalize = (value) => (value || "").trim().toLowerCase();
 
             async function getProjectAndStatusField() {
-              const projectData = await github.graphql(
-                `
-                query($owner:String!, $projectNumber:Int!) {
-                  user(login:$owner) {
-                    projectV2(number:$projectNumber) {
-                      id
-                      fields(first:50) {
-                        nodes {
-                          ... on ProjectV2SingleSelectField {
-                            id
-                            name
-                            options { id name }
+              let project = null;
+
+              if (Number.isInteger(boardNumber) && boardNumber > 0) {
+                const byNumber = await github.graphql(
+                  `
+                  query($owner:String!, $number:Int!) {
+                    user(login:$owner) {
+                      projectV2(number:$number) {
+                        id
+                        title
+                        fields(first:50) {
+                          nodes {
+                            ... on ProjectV2SingleSelectField {
+                              id
+                              name
+                              options { id name }
+                            }
+                          }
+                        }
+                      }
+                    }
+                    organization(login:$owner) {
+                      projectV2(number:$number) {
+                        id
+                        title
+                        fields(first:50) {
+                          nodes {
+                            ... on ProjectV2SingleSelectField {
+                              id
+                              name
+                              options { id name }
+                            }
                           }
                         }
                       }
                     }
                   }
-                }
-                `,
-                { owner, projectNumber }
-              );
+                  `,
+                  { owner, number: boardNumber }
+                );
+                project = byNumber.user?.projectV2 || byNumber.organization?.projectV2;
+              } else {
+                const byTitle = await github.graphql(
+                  `
+                  query($owner:String!, $first:Int!) {
+                    user(login:$owner) {
+                      projectsV2(first:$first) {
+                        nodes {
+                          id
+                          title
+                          fields(first:50) {
+                            nodes {
+                              ... on ProjectV2SingleSelectField {
+                                id
+                                name
+                                options { id name }
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                    organization(login:$owner) {
+                      projectsV2(first:$first) {
+                        nodes {
+                          id
+                          title
+                          fields(first:50) {
+                            nodes {
+                              ... on ProjectV2SingleSelectField {
+                                id
+                                name
+                                options { id name }
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                  `,
+                  { owner, first: 100 }
+                );
 
-              const project = projectData.user?.projectV2;
+                const projects = [
+                  ...(byTitle.user?.projectsV2?.nodes || []),
+                  ...(byTitle.organization?.projectsV2?.nodes || []),
+                ].filter(Boolean);
+
+                project = projects.find((p) => normalize(p.title) === normalize(boardTitle)) || null;
+              }
+
               if (!project) {
-                throw new Error(`Project #${projectNumber} not found for user ${owner}`);
+                throw new Error(
+                  `Project board was not found for owner ${owner}. ` +
+                    `Expected PROJECT_BOARD_NUMBER=${boardNumber || "unset"} or title "${boardTitle}".`
+                );
               }
 
               const statusField = project.fields.nodes.find(
