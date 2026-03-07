@@ -81,6 +81,39 @@ public class IndicatorCacheCoreTests
     }
 
     [Fact]
+    public void IndicatorCacheKey_HashedCtor_ShouldMatchStringCtor()
+    {
+        IndicatorCacheKey stringKey = new IndicatorCacheKey(
+            securityName: "BTCUSDT",
+            timeframeTicks: 60,
+            firstTimeTicks: 1,
+            lastTimeTicks: 2,
+            candleCount: 100,
+            calculationName: "SMA",
+            parametersHash: "p1",
+            sourceId: 12345,
+            outputSeriesCount: 1,
+            includeIndicatorsCount: 0,
+            dataFingerprint: 42);
+
+        IndicatorCacheKey hashedKey = new IndicatorCacheKey(
+            securityName: new OrdinalHashedString("BTCUSDT"),
+            timeframeTicks: 60,
+            firstTimeTicks: 1,
+            lastTimeTicks: 2,
+            candleCount: 100,
+            calculationName: new OrdinalHashedString("SMA"),
+            parametersHash: new OrdinalHashedString("p1"),
+            sourceId: 12345,
+            outputSeriesCount: 1,
+            includeIndicatorsCount: 0,
+            dataFingerprint: 42);
+
+        Assert.Equal(stringKey, hashedKey);
+        Assert.Equal(stringKey.GetHashCode(), hashedKey.GetHashCode());
+    }
+
+    [Fact]
     public void IndicatorCache_ShouldEvict_WhenCapacityExceeded()
     {
         IndicatorCache cache = new IndicatorCache(maxEntries: 1);

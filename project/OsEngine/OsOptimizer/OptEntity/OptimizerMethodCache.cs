@@ -8,6 +8,7 @@
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 using System.Threading;
 
 namespace OsEngine.OsOptimizer.OptEntity
@@ -222,19 +223,19 @@ namespace OsEngine.OsOptimizer.OptEntity
             unchecked
             {
                 int hash = 17;
-                hash = hash * 31 + timeframeTicks.GetHashCode();
-                hash = hash * 31 + firstTimeTicks.GetHashCode();
-                hash = hash * 31 + lastTimeTicks.GetHashCode();
-                hash = hash * 31 + candleCount;
-                hash = hash * 31 + dataFingerprint;
-                hash = hash * 31 + securityName.GetHashCode();
-                hash = hash * 31 + calculationName.GetHashCode();
-                hash = hash * 31 + parametersHash.GetHashCode();
-                hash = hash * 31 + (sourceIdIsToken ? 1 : 0);
+                hash = MixInt(hash, candleCount);
+                hash = MixInt(hash, dataFingerprint);
+                hash = MixLong(hash, timeframeTicks);
+                hash = MixLong(hash, firstTimeTicks);
+                hash = MixLong(hash, lastTimeTicks);
+                hash = MixInt(hash, StringComparer.Ordinal.GetHashCode(securityName));
+                hash = MixInt(hash, StringComparer.Ordinal.GetHashCode(calculationName));
+                hash = MixInt(hash, StringComparer.Ordinal.GetHashCode(parametersHash));
+                hash = MixInt(hash, sourceIdIsToken ? 1 : 0);
                 hash = sourceIdIsToken
-                    ? (hash * 31 + sourceIdToken)
-                    : (hash * 31 + sourceId.GetHashCode());
-                hash = hash * 31 + resultTypeName.GetHashCode();
+                    ? MixInt(hash, sourceIdToken)
+                    : MixInt(hash, StringComparer.Ordinal.GetHashCode(sourceId));
+                hash = MixInt(hash, StringComparer.Ordinal.GetHashCode(resultTypeName));
                 return hash;
             }
         }
@@ -254,19 +255,31 @@ namespace OsEngine.OsOptimizer.OptEntity
             unchecked
             {
                 int hash = 17;
-                hash = hash * 31 + timeframeTicks.GetHashCode();
-                hash = hash * 31 + firstTimeTicks.GetHashCode();
-                hash = hash * 31 + lastTimeTicks.GetHashCode();
-                hash = hash * 31 + candleCount;
-                hash = hash * 31 + dataFingerprint;
-                hash = hash * 31 + securityNameHashCode;
-                hash = hash * 31 + calculationNameHashCode;
-                hash = hash * 31 + parametersHashCode;
-                hash = hash * 31 + 1;
-                hash = hash * 31 + sourceIdToken;
-                hash = hash * 31 + resultTypeNameHashCode;
+                hash = MixInt(hash, candleCount);
+                hash = MixInt(hash, dataFingerprint);
+                hash = MixLong(hash, timeframeTicks);
+                hash = MixLong(hash, firstTimeTicks);
+                hash = MixLong(hash, lastTimeTicks);
+                hash = MixInt(hash, securityNameHashCode);
+                hash = MixInt(hash, calculationNameHashCode);
+                hash = MixInt(hash, parametersHashCode);
+                hash = MixInt(hash, 1);
+                hash = MixInt(hash, sourceIdToken);
+                hash = MixInt(hash, resultTypeNameHashCode);
                 return hash;
             }
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private static int MixInt(int hash, int value)
+        {
+            return unchecked(hash * 31 + value);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private static int MixLong(int hash, long value)
+        {
+            return unchecked(hash * 31 + (int)value + (int)(value >> 32));
         }
 
         private static int NormalizeHashCode(int hash)

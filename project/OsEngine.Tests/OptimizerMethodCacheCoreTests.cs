@@ -68,6 +68,39 @@ public class OptimizerMethodCacheCoreTests
     }
 
     [Fact]
+    public void OptimizerMethodCacheKey_HashedCtor_ShouldMatchStringCtor()
+    {
+        string resultTypeName = typeof(decimal).FullName!;
+
+        OptimizerMethodCacheKey stringKey = new OptimizerMethodCacheKey(
+            securityName: "BTCUSDT",
+            timeframeTicks: 60,
+            firstTimeTicks: 1,
+            lastTimeTicks: 2,
+            candleCount: 100,
+            calculationName: "Calc",
+            parametersHash: "p1",
+            sourceId: 12345,
+            dataFingerprint: 42,
+            resultTypeName: resultTypeName);
+
+        OptimizerMethodCacheKey hashedKey = new OptimizerMethodCacheKey(
+            securityName: new OrdinalHashedString("BTCUSDT"),
+            timeframeTicks: 60,
+            firstTimeTicks: 1,
+            lastTimeTicks: 2,
+            candleCount: 100,
+            calculationName: new OrdinalHashedString("Calc"),
+            parametersHash: new OrdinalHashedString("p1"),
+            sourceId: 12345,
+            dataFingerprint: 42,
+            resultTypeName: new OrdinalHashedString(resultTypeName));
+
+        Assert.Equal(stringKey, hashedKey);
+        Assert.Equal(stringKey.GetHashCode(), hashedKey.GetHashCode());
+    }
+
+    [Fact]
     public void OptimizerMethodCache_IntSourceIdKey_ShouldWorkInSetGet()
     {
         OptimizerMethodCache cache = new OptimizerMethodCache(maxEntries: 8);
