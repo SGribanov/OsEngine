@@ -92,3 +92,44 @@
   - `$tokenPath = Join-Path $HOME 'gh_pat.txt'`
   - `if (Test-Path $tokenPath) { $env:GH_TOKEN = (Get-Content $tokenPath -Raw).Trim() }`
 - Run `gh` commands in the same command invocation/session where token is loaded.
+
+## OsEngine robot skill policy
+- For any robot task in OsEngine (create/edit/refactor robots in `Robots/*` or `Custom/Robots/*`), always load and follow local skill:
+  - `$HOME/.codex-personal/skills/osengine-robot-authoring/SKILL.md`
+- For script robots (`Custom/Robots/*`, `Custom/Robots/Scripts/*`, `project/OsEngine/bin/Debug/Custom/Robots/*`):
+  - before `restore/build/test/perf`, temporarily include the robot file in `project/OsEngine/Robots/<TempCategory>/`;
+  - after validation/testing, move it back to script location and remove the temporary project copy.
+- If the skill is temporarily unavailable, report it explicitly and use best-effort fallback with the same constraints.
+
+## .NET 10 / C# 14 baseline policy
+- Use `.NET 10 (LTS)` as the default production baseline in this repository.
+- Keep language/runtime compatibility aligned with TFM (`net10.0*` -> `C# 14` baseline by default).
+- Do not force `LangVersion=latest/default` in ways that can bypass TFM compatibility constraints.
+- Prefer `System.Threading.Lock` for new synchronization points; do not place `await` inside critical sections.
+- For hot paths, prefer `Span<T>/ReadOnlySpan<T>` for synchronous boundaries and `Memory<T>/ReadOnlyMemory<T>` for async boundaries.
+- Use `System.Text.Json` source generation for performance-critical or AOT-sensitive serialization paths.
+- Use `TimeProvider`/`FakeTimeProvider` where time-dependent logic must be testable and deterministic.
+- Keep .NET analyzers enabled and configure severities explicitly; avoid silently downgrading reliability/performance rules.
+- For read-mostly lookup tables, consider `FrozenDictionary/FrozenSet`.
+- Reference snapshot document for details and sources:
+  - `dotnet_csharp14_best_practices_2026.md`
+
+## General code quality and reuse policy
+- Prefer `KISS` and `YAGNI`: do not introduce abstractions, layers, or patterns before they solve a real repeated problem.
+- Apply `DRY` pragmatically: extract shared code only after stable repetition (`rule of three`), not after one-off similarity.
+- Enforce `SRP` on classes/methods and keep contracts explicit: clear inputs/outputs, predictable side effects, fail-fast guards.
+- Keep methods small and composable; avoid long \"god methods\" mixing domain logic, I/O, UI, and infrastructure concerns.
+- For .NET APIs:
+  - avoid `async void` (except event handlers);
+  - propagate `CancellationToken` on I/O and long operations;
+  - implement/dispose `IDisposable` resources deterministically;
+  - treat nullable warnings as design feedback, not noise.
+- `#region` policy:
+  - do not use `#region` to hide complexity in production logic;
+  - allowed only for generated/interoperability blocks or large test fixtures where navigation benefit is clear.
+- Reuse policy:
+  - prefer reuse of existing internal modules/utilities before creating new shared abstractions;
+  - new shared components must have clear ownership, tests, and at least two concrete call sites.
+- Reviewability-first:
+  - optimize for readability and maintainability over clever syntax;
+  - each non-trivial optimization/refactor should include rationale and verification evidence.

@@ -224,6 +224,63 @@ public class Stage2PerformanceBaselineTests
     }
 
     [Fact]
+    public void Stage2Perf_FractalAndCci_ManualSignalHotPath_ShouldEmitMetricsAndDeterministicChecksum()
+    {
+        const int period = 21;
+        const int warmupIterations = 512;
+        const int iterations = 20000;
+
+        List<Candle> candles = BuildCandlesForFractalSignalPath(600);
+        int minSignalIndex = period - 1;
+        int maxSignalIndex = candles.Count - 3;
+        int signalRange = maxSignalIndex - minSignalIndex + 1;
+
+        for (int i = 0; i < warmupIterations; i++)
+        {
+            int signalIndex = minSignalIndex + (i % signalRange);
+            _ = RunFractalAndCciManualSignalPass(candles, signalIndex, period);
+        }
+
+        ForceGc();
+
+        long allocatedBefore = GC.GetAllocatedBytesForCurrentThread();
+        int gen0Before = GC.CollectionCount(0);
+        Stopwatch stopwatch = Stopwatch.StartNew();
+
+        long checksum = 0;
+
+        for (int i = 0; i < iterations; i++)
+        {
+            int signalIndex = minSignalIndex + (i % signalRange);
+            checksum += RunFractalAndCciManualSignalPass(candles, signalIndex, period);
+        }
+
+        stopwatch.Stop();
+
+        long allocatedAfter = GC.GetAllocatedBytesForCurrentThread();
+        int gen0After = GC.CollectionCount(0);
+
+        long allocatedBytes = allocatedAfter - allocatedBefore;
+        double elapsedMs = stopwatch.Elapsed.TotalMilliseconds;
+        double nsPerOp = elapsedMs * 1_000_000d / iterations;
+        double allocatedBytesPerOp = (double)allocatedBytes / iterations;
+
+        Assert.True(checksum != 0);
+
+        Stage2PerfReportWriter.Append(new Stage2PerfMetric
+        {
+            Scenario = "fractal_and_cci_manual_signal_hotpath",
+            Iterations = iterations,
+            ElapsedMsTotal = elapsedMs,
+            NanosecondsPerOp = nsPerOp,
+            AllocatedBytesTotal = allocatedBytes,
+            AllocatedBytesPerOp = allocatedBytesPerOp,
+            Gen0Collections = gen0After - gen0Before,
+            Checksum = checksum
+        });
+    }
+
+    [Fact]
     public void Stage2Perf_IndicatorCache_HitPath_ShouldEmitMetricsAndStableChecksums()
     {
         const int warmupIterations = 200;
@@ -387,33 +444,40 @@ public class Stage2PerformanceBaselineTests
         long firstTicks = candles[0].TimeStart.Ticks;
         long lastTicks = candles[^1].TimeStart.Ticks;
         const long timeframeTicks = 60L;
+        OrdinalHashedString indicatorSecurityName = OrdinalHashedString.Empty;
+        OrdinalHashedString indicatorCalculationName = new OrdinalHashedString("Stage2Perf");
+        OrdinalHashedString indicatorParametersHash = new OrdinalHashedString("P0");
+        OrdinalHashedString methodSecurityName = new OrdinalHashedString("PERF");
+        OrdinalHashedString methodCalculationName = new OrdinalHashedString("Stage2PerfMethod");
+        OrdinalHashedString methodParametersHash = new OrdinalHashedString("P0");
+        OrdinalHashedString methodResultTypeName = new OrdinalHashedString(typeof(decimal).FullName ?? nameof(Decimal));
 
         for (int i = 0; i < warmupIterations; i++)
         {
             _ = new IndicatorCacheKey(
-                securityName: string.Empty,
+                securityName: indicatorSecurityName,
                 timeframeTicks: timeframeTicks,
                 firstTimeTicks: firstTicks,
                 lastTimeTicks: lastTicks,
                 candleCount: candles.Count,
-                calculationName: "Stage2Perf",
-                parametersHash: "P0",
+                calculationName: indicatorCalculationName,
+                parametersHash: indicatorParametersHash,
                 sourceId: sourceId,
                 outputSeriesCount: 3,
                 includeIndicatorsCount: 0,
                 dataFingerprint: 11).GetHashCode();
 
             _ = new OptimizerMethodCacheKey(
-                securityName: "PERF",
+                securityName: methodSecurityName,
                 timeframeTicks: timeframeTicks,
                 firstTimeTicks: firstTicks,
                 lastTimeTicks: lastTicks,
                 candleCount: candles.Count,
-                calculationName: "Stage2PerfMethod",
-                parametersHash: "P0",
+                calculationName: methodCalculationName,
+                parametersHash: methodParametersHash,
                 sourceId: sourceId,
                 dataFingerprint: 17,
-                resultTypeName: typeof(decimal).FullName ?? nameof(Decimal)).GetHashCode();
+                resultTypeName: methodResultTypeName).GetHashCode();
         }
 
         ForceGc();
@@ -427,29 +491,29 @@ public class Stage2PerformanceBaselineTests
         for (int i = 0; i < iterations; i++)
         {
             IndicatorCacheKey indicatorKey = new IndicatorCacheKey(
-                securityName: string.Empty,
+                securityName: indicatorSecurityName,
                 timeframeTicks: timeframeTicks,
                 firstTimeTicks: firstTicks,
                 lastTimeTicks: lastTicks,
                 candleCount: candles.Count,
-                calculationName: "Stage2Perf",
-                parametersHash: "P0",
+                calculationName: indicatorCalculationName,
+                parametersHash: indicatorParametersHash,
                 sourceId: sourceId,
                 outputSeriesCount: 3,
                 includeIndicatorsCount: 0,
                 dataFingerprint: 11);
 
             OptimizerMethodCacheKey methodKey = new OptimizerMethodCacheKey(
-                securityName: "PERF",
+                securityName: methodSecurityName,
                 timeframeTicks: timeframeTicks,
                 firstTimeTicks: firstTicks,
                 lastTimeTicks: lastTicks,
                 candleCount: candles.Count,
-                calculationName: "Stage2PerfMethod",
-                parametersHash: "P0",
+                calculationName: methodCalculationName,
+                parametersHash: methodParametersHash,
                 sourceId: sourceId,
                 dataFingerprint: 17,
-                resultTypeName: typeof(decimal).FullName ?? nameof(Decimal));
+                resultTypeName: methodResultTypeName);
 
             int indicatorHash = indicatorKey.GetHashCode();
             int methodHash = methodKey.GetHashCode();
@@ -553,6 +617,121 @@ public class Stage2PerformanceBaselineTests
                + (closeOrdersFact.Count * 1000L);
     }
 
+    private static long RunFractalAndCciManualSignalPass(List<Candle> candles, int signalIndex, int period)
+    {
+        int cciLastIndex = signalIndex + 1;
+        int cciPrevIndex = signalIndex;
+
+        decimal lastCci = CalculateManualCci(candles, cciLastIndex, period);
+        decimal prevCci = CalculateManualCci(candles, cciPrevIndex, period);
+        decimal upFractal = GetLastUpFractal(candles, signalIndex);
+        decimal downFractal = GetLastDownFractal(candles, signalIndex);
+        decimal lastPrice = candles[signalIndex].Close;
+
+        long checksum = (long)(lastCci * 10m)
+                        + (long)(prevCci * 10m)
+                        + (long)(upFractal * 100m)
+                        + (long)(downFractal * 100m)
+                        + signalIndex;
+
+        if (downFractal != 0m && downFractal < lastPrice && prevCci < -300m && lastCci > -300m)
+        {
+            checksum += 17;
+        }
+
+        if (upFractal != 0m && upFractal > lastPrice && prevCci > 300m && lastCci < 300m)
+        {
+            checksum += 31;
+        }
+
+        return checksum;
+    }
+
+    private static decimal CalculateManualCci(List<Candle> candles, int index, int period)
+    {
+        if (index < period - 1)
+        {
+            return 0m;
+        }
+
+        int start = index - period + 1;
+        decimal sumTypicalPrice = 0m;
+
+        for (int i = start; i <= index; i++)
+        {
+            sumTypicalPrice += GetTypicalPrice(candles[i]);
+        }
+
+        decimal sma = sumTypicalPrice / period;
+        decimal meanDeviationSum = 0m;
+
+        for (int i = start; i <= index; i++)
+        {
+            decimal typicalPrice = GetTypicalPrice(candles[i]);
+            meanDeviationSum += Math.Abs(typicalPrice - sma);
+        }
+
+        decimal meanDeviation = meanDeviationSum / period;
+        if (meanDeviation == 0m)
+        {
+            return 0m;
+        }
+
+        decimal currentTypicalPrice = GetTypicalPrice(candles[index]);
+        return (currentTypicalPrice - sma) / (0.015m * meanDeviation);
+    }
+
+    private static decimal GetTypicalPrice(Candle candle)
+    {
+        return (candle.High + candle.Low + candle.Close) / 3m;
+    }
+
+    private static decimal GetLastUpFractal(List<Candle> candles, int fromIndex)
+    {
+        for (int i = fromIndex; i >= 2; i--)
+        {
+            if (i + 2 >= candles.Count)
+            {
+                continue;
+            }
+
+            decimal high = candles[i].High;
+
+            if (high > candles[i - 1].High
+                && high > candles[i - 2].High
+                && high > candles[i + 1].High
+                && high > candles[i + 2].High)
+            {
+                return high;
+            }
+        }
+
+        return 0m;
+    }
+
+    private static decimal GetLastDownFractal(List<Candle> candles, int fromIndex)
+    {
+        for (int i = fromIndex; i >= 2; i--)
+        {
+            if (i + 2 >= candles.Count)
+            {
+                continue;
+            }
+
+            decimal low = candles[i].Low;
+
+            if (low < candles[i - 1].Low
+                && low < candles[i - 2].Low
+                && low < candles[i + 1].Low
+                && low < candles[i + 2].Low)
+            {
+                return low;
+            }
+        }
+
+        return 0m;
+    }
+
     private static List<decimal>[] BuildSeriesPayload()
     {
         List<decimal> first = new List<decimal>(256);
@@ -589,6 +768,31 @@ public class Stage2PerformanceBaselineTests
                 Low = value - 0.2m,
                 Close = value + 0.05m,
                 Volume = 10m + i
+            });
+        }
+
+        return candles;
+    }
+
+    private static List<Candle> BuildCandlesForFractalSignalPath(int count)
+    {
+        List<Candle> candles = new List<Candle>(count);
+        DateTime start = DateTime.UtcNow.AddMinutes(-count);
+
+        for (int i = 0; i < count; i++)
+        {
+            double wave = Math.Sin(i * 0.25d);
+            decimal center = 100m + (decimal)(wave * 4d) + (i * 0.01m);
+            decimal closeOffset = ((decimal)(i & 3) - 1.5m) * 0.1m;
+
+            candles.Add(new Candle
+            {
+                TimeStart = start.AddMinutes(i),
+                Open = center - 0.2m,
+                High = center + 0.6m + ((i % 3) * 0.05m),
+                Low = center - 0.6m - ((i & 1) * 0.05m),
+                Close = center + closeOffset,
+                Volume = 100m + (i % 11)
             });
         }
 
