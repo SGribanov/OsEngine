@@ -606,10 +606,11 @@ public class Stage2PerformanceBaselineTests
 
     private static long RunTradeGridQueryPass(TradeGrid grid)
     {
-        List<TradeGridLine> openPositions = grid.GetLinesWithOpenPosition();
-        List<TradeGridLine> openOrdersNeed = grid.GetLinesWithOpenOrdersNeed(100m);
-        List<TradeGridLine> openOrdersFact = grid.GetLinesWithOpenOrdersFact();
-        List<TradeGridLine> closeOrdersFact = grid.GetLinesWithClosingOrdersFact();
+        TradeGrid.QueryCollectionsSnapshot queryCollections = grid.GetQueryCollections(100m);
+        List<TradeGridLine> openPositions = queryCollections.OpenPositions;
+        List<TradeGridLine> openOrdersNeed = queryCollections.OpenOrdersNeed;
+        List<TradeGridLine> openOrdersFact = queryCollections.OpenOrdersFact;
+        List<TradeGridLine> closeOrdersFact = queryCollections.ClosingOrdersFact;
 
         return openPositions.Count
                + (openOrdersNeed.Count * 10L)

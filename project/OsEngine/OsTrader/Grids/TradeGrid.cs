@@ -23,6 +23,35 @@ namespace OsEngine.OsTrader.Grids
     {
         private static readonly CultureInfo RuCulture = CultureInfo.GetCultureInfo("ru-RU");
 
+        [Flags]
+        private enum QueryCollectionFlags
+        {
+            None = 0,
+            OpenPositions = 1,
+            OpenOrdersNeed = 2,
+            OpenOrdersFact = 4,
+            ClosingOrdersFact = 8,
+        }
+
+        public readonly struct QueryCollectionsSnapshot
+        {
+            public QueryCollectionsSnapshot(List<TradeGridLine> openPositions, List<TradeGridLine> openOrdersNeed, List<TradeGridLine> openOrdersFact, List<TradeGridLine> closingOrdersFact)
+            {
+                OpenPositions = openPositions;
+                OpenOrdersNeed = openOrdersNeed;
+                OpenOrdersFact = openOrdersFact;
+                ClosingOrdersFact = closingOrdersFact;
+            }
+
+            public List<TradeGridLine> OpenPositions { get; }
+
+            public List<TradeGridLine> OpenOrdersNeed { get; }
+
+            public List<TradeGridLine> OpenOrdersFact { get; }
+
+            public List<TradeGridLine> ClosingOrdersFact { get; }
+        }
+
         #region Service
 
         public TradeGrid(StartProgram startProgram, BotTabSimple tab, int number)
@@ -2364,8 +2393,9 @@ namespace OsEngine.OsTrader.Grids
 
             // 1 убираем ордера на открытие и закрытие с неправильной ценой.
 
-            List<TradeGridLine> linesWithOrdersToOpenFact = GetLinesWithOpenOrdersFact();
-            List<TradeGridLine> linesWithOrdersToCloseFact = GetLinesWithClosingOrdersFact();
+            QueryCollectionsSnapshot queryCollections = GetQueryCollectionsSnapshot(lastPrice, QueryCollectionFlags.OpenOrdersFact | QueryCollectionFlags.ClosingOrdersFact);
+            List<TradeGridLine> linesWithOrdersToOpenFact = queryCollections.OpenOrdersFact;
+            List<TradeGridLine> linesWithOrdersToCloseFact = queryCollections.ClosingOrdersFact;
 
             List<Order> ordersToCancelBadPrice = GetOrdersBadPriceToGridFromLines(linesWithOrdersToOpenFact, linesWithOrdersToCloseFact);
 
@@ -2923,9 +2953,9 @@ namespace OsEngine.OsTrader.Grids
 
             // 1 берём текущие линии с позициями
 
-            List<TradeGridLine> linesWithOrdersToOpenNeed = GetLinesWithOpenOrdersNeed(lastPrice);
-
-            List<TradeGridLine> linesWithOrdersToOpenFact = GetLinesWithOpenOrdersFact();
+            QueryCollectionsSnapshot queryCollections = GetQueryCollectionsSnapshot(lastPrice, QueryCollectionFlags.OpenOrdersNeed | QueryCollectionFlags.OpenOrdersFact);
+            List<TradeGridLine> linesWithOrdersToOpenNeed = queryCollections.OpenOrdersNeed;
+            List<TradeGridLine> linesWithOrdersToOpenFact = queryCollections.OpenOrdersFact;
 
             // 2 ничего не делаем если уже кол-во ордеров максимально
 
@@ -3620,8 +3650,9 @@ namespace OsEngine.OsTrader.Grids
         {
             get
             {
-                List<TradeGridLine> linesWithOpenOrders = GetLinesWithOpenOrdersFact();
-                List<TradeGridLine> linesWithCloseOrders = GetLinesWithClosingOrdersFact();
+                QueryCollectionsSnapshot queryCollections = GetQueryCollectionsSnapshot(0m, QueryCollectionFlags.OpenOrdersFact | QueryCollectionFlags.ClosingOrdersFact);
+                List<TradeGridLine> linesWithOpenOrders = queryCollections.OpenOrdersFact;
+                List<TradeGridLine> linesWithCloseOrders = queryCollections.ClosingOrdersFact;
 
                 if (linesWithOpenOrders != null
                     && linesWithOpenOrders.Count > 0)
@@ -3636,6 +3667,11 @@ namespace OsEngine.OsTrader.Grids
 
                 return false;
             }
+        }
+
+        public QueryCollectionsSnapshot GetQueryCollections(decimal lastPrice)
+        {
+            return GetQueryCollectionsSnapshot(lastPrice, QueryCollectionFlags.OpenPositions | QueryCollectionFlags.OpenOrdersNeed | QueryCollectionFlags.OpenOrdersFact | QueryCollectionFlags.ClosingOrdersFact);
         }
 
         public decimal MiddleEntryPrice
@@ -3773,42 +3809,7 @@ namespace OsEngine.OsTrader.Grids
 
         public List<TradeGridLine> GetLinesWithOpenPosition()
         {
-            TradeGridCreator gridCreator = GridCreator;
-            if (gridCreator == null)
-            {
-                return new List<TradeGridLine>();
-            }
-
-            List<TradeGridLine> linesAll = gridCreator.Lines;
-            if (linesAll == null || linesAll.Count == 0)
-            {
-                return new List<TradeGridLine>();
-            }
-
-            int expectedCapacity = linesAll.Count;
-            int maxOpenOrdersInMarket = Math.Max(0, MaxOpenOrdersInMarket);
-            if (maxOpenOrdersInMarket > 0)
-            {
-                expectedCapacity = Math.Min(expectedCapacity, Math.Max(maxOpenOrdersInMarket * 4, 8));
-            }
-
-            List<TradeGridLine> linesWithPositionFact = new List<TradeGridLine>(expectedCapacity);
-
-            for (int i = 0; linesAll != null && i < linesAll.Count; i++)
-            {
-                TradeGridLine line = linesAll[i];
-                if (line == null)
-                {
-                    continue;
-                }
-
-                if (line.Position != null
-                    && line.Position.OpenVolume != 0)
-                {
-                    linesWithPositionFact.Add(line);
-                }
-            }
-            return linesWithPositionFact;
+            return GetQueryCollectionsSnapshot(0m, QueryCollectionFlags.OpenPositions).OpenPositions;
         }
 
         public List<Position> GetPositionByGrid()
@@ -3849,192 +3850,111 @@ namespace OsEngine.OsTrader.Grids
 
         public List<TradeGridLine> GetLinesWithOpenOrdersNeed(decimal lastPrice)
         {
-            TradeGridCreator gridCreator = GridCreator;
-            BotTabSimple tab = Tab;
+            return GetQueryCollectionsSnapshot(lastPrice, QueryCollectionFlags.OpenOrdersNeed).OpenOrdersNeed;
+        }
 
-            if (gridCreator == null || tab == null)
+        public List<TradeGridLine> GetLinesWithOpenOrdersFact()
+        {
+            return GetQueryCollectionsSnapshot(0m, QueryCollectionFlags.OpenOrdersFact).OpenOrdersFact;
+        }
+
+        public List<TradeGridLine> GetLinesWithClosingOrdersFact()
+        {
+            return GetQueryCollectionsSnapshot(0m, QueryCollectionFlags.ClosingOrdersFact).ClosingOrdersFact;
+        }
+
+        private QueryCollectionsSnapshot GetQueryCollectionsSnapshot(decimal lastPrice, QueryCollectionFlags flags)
+        {
+            TradeGridCreator gridCreator = GridCreator;
+            if (gridCreator == null)
             {
-                return new List<TradeGridLine>();
-            }
-            Security security = tab.Security;
-            if (security == null)
-            {
-                return new List<TradeGridLine>();
+                return new QueryCollectionsSnapshot(
+                    new List<TradeGridLine>(),
+                    new List<TradeGridLine>(),
+                    new List<TradeGridLine>(),
+                    new List<TradeGridLine>());
             }
 
             List<TradeGridLine> linesAll = gridCreator.Lines;
             if (linesAll == null || linesAll.Count == 0)
             {
-                return new List<TradeGridLine>();
+                return new QueryCollectionsSnapshot(
+                    new List<TradeGridLine>(),
+                    new List<TradeGridLine>(),
+                    new List<TradeGridLine>(),
+                    new List<TradeGridLine>());
             }
 
-            int expectedCount = linesAll.Count;
+            BotTabSimple tab = Tab;
+            bool collectOpenPositions = (flags & QueryCollectionFlags.OpenPositions) != 0;
+            bool collectOpenOrdersNeed = (flags & QueryCollectionFlags.OpenOrdersNeed) != 0;
+            bool collectOpenOrdersFact = (flags & QueryCollectionFlags.OpenOrdersFact) != 0;
+            bool collectClosingOrdersFact = (flags & QueryCollectionFlags.ClosingOrdersFact) != 0;
+
+            Security security = null;
+            if (collectOpenOrdersNeed)
+            {
+                security = tab?.Security;
+                if (tab == null || security == null)
+                {
+                    collectOpenOrdersNeed = false;
+                }
+            }
+
             int maxOpenOrdersInMarket = Math.Max(0, MaxOpenOrdersInMarket);
+            int maxCloseOrdersInMarket = Math.Max(0, MaxCloseOrdersInMarket);
+
+            int openPositionsCapacity = linesAll.Count;
             if (maxOpenOrdersInMarket > 0)
             {
-                expectedCount = Math.Min(expectedCount, maxOpenOrdersInMarket);
+                openPositionsCapacity = Math.Min(openPositionsCapacity, Math.Max(maxOpenOrdersInMarket * 4, 8));
             }
 
-            List<TradeGridLine> linesWithOrdersToOpenNeed = new List<TradeGridLine>(expectedCount);
+            int openOrdersFactCapacity = linesAll.Count;
+            if (maxOpenOrdersInMarket > 0)
+            {
+                openOrdersFactCapacity = Math.Min(openOrdersFactCapacity, Math.Max(maxOpenOrdersInMarket * 2, 4));
+            }
+
+            int closingOrdersFactCapacity = linesAll.Count;
+            if (maxCloseOrdersInMarket > 0)
+            {
+                closingOrdersFactCapacity = Math.Min(closingOrdersFactCapacity, Math.Max(maxCloseOrdersInMarket * 3, 4));
+            }
+            else if (maxOpenOrdersInMarket > 0)
+            {
+                closingOrdersFactCapacity = Math.Min(closingOrdersFactCapacity, Math.Max(maxOpenOrdersInMarket * 2, 8));
+            }
+
+            int openOrdersNeedCapacity = linesAll.Count;
+            if (maxOpenOrdersInMarket > 0)
+            {
+                openOrdersNeedCapacity = Math.Min(openOrdersNeedCapacity, maxOpenOrdersInMarket);
+            }
+
+            List<TradeGridLine> openPositions = collectOpenPositions ? new List<TradeGridLine>(openPositionsCapacity) : new List<TradeGridLine>();
+            List<TradeGridLine> openOrdersNeed = collectOpenOrdersNeed ? new List<TradeGridLine>(openOrdersNeedCapacity) : new List<TradeGridLine>();
+            List<TradeGridLine> openOrdersFact = collectOpenOrdersFact ? new List<TradeGridLine>(openOrdersFactCapacity) : new List<TradeGridLine>();
+            List<TradeGridLine> closingOrdersFact = collectClosingOrdersFact ? new List<TradeGridLine>(closingOrdersFactCapacity) : new List<TradeGridLine>();
 
             decimal maxPriceUp = 0;
             decimal minPriceDown = 0;
 
-            if (tab.StartProgram == StartProgram.IsOsTrader
+            if (collectOpenOrdersNeed
+                && tab.StartProgram == StartProgram.IsOsTrader
                 && MaxDistanceToOrdersPercent != 0)
             {
                 maxPriceUp = lastPrice + lastPrice * (MaxDistanceToOrdersPercent / 100);
                 minPriceDown = lastPrice - lastPrice * (MaxDistanceToOrdersPercent / 100);
             }
 
-            if (gridCreator.GridSide == Side.Buy)
-            {
-                for (int i = 0; i < linesAll.Count; i++)
-                {
-                    TradeGridLine curLine = linesAll[i];
-                    if (curLine == null)
-                    {
-                        continue;
-                    }
+            bool havePriceLimits = collectOpenOrdersNeed
+                && security.PriceLimitHigh != 0
+                && security.PriceLimitLow != 0;
+            bool isBuyGrid = gridCreator.GridSide == Side.Buy;
+            bool isSellGrid = gridCreator.GridSide == Side.Sell;
 
-                    Position position = curLine.Position;
-
-                    if (position != null
-                        && position.OpenVolume > 0
-                        && position.OpenActive == false)
-                    {
-                        continue;
-                    }
-
-                    if (security.PriceLimitHigh != 0
-                        && security.PriceLimitLow != 0)
-                    {
-                        if (OpenOrdersMakerOnly == true
-                            &&
-                            (curLine.PriceEnter > security.PriceLimitHigh
-                            || curLine.PriceEnter < security.PriceLimitLow))
-                        {
-                            continue;
-                        }
-
-                        if (OpenOrdersMakerOnly == false
-                            && curLine.Side == Side.Buy
-                            && curLine.PriceEnter < security.PriceLimitLow)
-                        {
-                            continue;
-                        }
-                        if (OpenOrdersMakerOnly == false
-                            && curLine.Side == Side.Sell
-                            && curLine.PriceEnter > security.PriceLimitHigh)
-                        {
-                            continue;
-                        }
-                    }
-
-                    if (maxPriceUp != 0
-                        && minPriceDown != 0)
-                    {
-                        if (curLine.PriceEnter > maxPriceUp
-                         || curLine.PriceEnter < minPriceDown)
-                        {
-                            continue;
-                        }
-                    }
-
-                    if (OpenOrdersMakerOnly
-                        && curLine.PriceEnter > lastPrice)
-                    {
-                        continue;
-                    }
-
-                    linesWithOrdersToOpenNeed.Add(curLine);
-
-                    if (linesWithOrdersToOpenNeed.Count >= MaxOpenOrdersInMarket)
-                    {
-                        break;
-                    }
-                }
-            }
-            else if (gridCreator.GridSide == Side.Sell)
-            {
-                for (int i = 0; i < linesAll.Count; i++)
-                {
-                    TradeGridLine curLine = linesAll[i];
-                    if (curLine == null)
-                    {
-                        continue;
-                    }
-
-                    Position position = curLine.Position;
-
-                    if (position != null
-                        && position.OpenVolume > 0
-                        && position.OpenActive == false)
-                    {
-                        continue;
-                    }
-
-                    if (security.PriceLimitHigh != 0
-                        && security.PriceLimitLow != 0)
-                    {
-                        if (curLine.PriceEnter > security.PriceLimitHigh
-                            || curLine.PriceEnter < security.PriceLimitLow)
-                        {
-                            continue;
-                        }
-                    }
-
-                    if (maxPriceUp != 0
-                        && minPriceDown != 0)
-                    {
-                        if (curLine.PriceEnter > maxPriceUp
-                         || curLine.PriceEnter < minPriceDown)
-                        {
-                            continue;
-                        }
-                    }
-
-                    if (OpenOrdersMakerOnly
-                        && curLine.PriceEnter < lastPrice)
-                    {
-                        continue;
-                    }
-
-                    linesWithOrdersToOpenNeed.Add(curLine);
-
-                    if (linesWithOrdersToOpenNeed.Count >= MaxOpenOrdersInMarket)
-                    {
-                        break;
-                    }
-                }
-            }
-            return linesWithOrdersToOpenNeed;
-        }
-
-        public List<TradeGridLine> GetLinesWithOpenOrdersFact()
-        {
-            TradeGridCreator gridCreator = GridCreator;
-            if (gridCreator == null)
-            {
-                return new List<TradeGridLine>();
-            }
-
-            List<TradeGridLine> linesAll = gridCreator.Lines;
-            if (linesAll == null || linesAll.Count == 0)
-            {
-                return new List<TradeGridLine>();
-            }
-
-            int expectedCapacity = linesAll.Count;
-            int maxOpenOrdersInMarket = Math.Max(0, MaxOpenOrdersInMarket);
-            if (maxOpenOrdersInMarket > 0)
-            {
-                expectedCapacity = Math.Min(expectedCapacity, Math.Max(maxOpenOrdersInMarket * 2, 4));
-            }
-
-            List<TradeGridLine> linesWithOpenOrder = new List<TradeGridLine>(expectedCapacity);
-
-            for (int i = 0; linesAll != null && i < linesAll.Count; i++)
+            for (int i = 0; i < linesAll.Count; i++)
             {
                 TradeGridLine line = linesAll[i];
                 if (line == null)
@@ -4042,61 +3962,99 @@ namespace OsEngine.OsTrader.Grids
                     continue;
                 }
 
-                if (line.Position != null
-                    && line.Position.OpenActive)
+                Position position = line.Position;
+
+                if (collectOpenPositions
+                    && position != null
+                    && position.OpenVolume != 0)
                 {
-                    linesWithOpenOrder.Add(line);
+                    openPositions.Add(line);
                 }
-            }
-            return linesWithOpenOrder;
-        }
 
-        public List<TradeGridLine> GetLinesWithClosingOrdersFact()
-        {
-            TradeGridCreator gridCreator = GridCreator;
-            if (gridCreator == null)
-            {
-                return new List<TradeGridLine>();
-            }
-
-            List<TradeGridLine> linesAll = gridCreator.Lines;
-            if (linesAll == null || linesAll.Count == 0)
-            {
-                return new List<TradeGridLine>();
-            }
-
-            int expectedCapacity = linesAll.Count;
-            int maxCloseOrdersInMarket = Math.Max(0, MaxCloseOrdersInMarket);
-            if (maxCloseOrdersInMarket > 0)
-            {
-                expectedCapacity = Math.Min(expectedCapacity, Math.Max(maxCloseOrdersInMarket * 3, 4));
-            }
-            else
-            {
-                int maxOpenOrdersInMarket = Math.Max(0, MaxOpenOrdersInMarket);
-                if (maxOpenOrdersInMarket > 0)
+                if (collectOpenOrdersFact
+                    && position != null
+                    && position.OpenActive)
                 {
-                    expectedCapacity = Math.Min(expectedCapacity, Math.Max(maxOpenOrdersInMarket * 2, 8));
+                    openOrdersFact.Add(line);
                 }
-            }
 
-            List<TradeGridLine> linesWithCloseOrder = new List<TradeGridLine>(expectedCapacity);
+                if (collectClosingOrdersFact
+                    && position != null
+                    && position.CloseActive)
+                {
+                    closingOrdersFact.Add(line);
+                }
 
-            for (int i = 0; linesAll != null && i < linesAll.Count; i++)
-            {
-                TradeGridLine line = linesAll[i];
-                if (line == null)
+                if (collectOpenOrdersNeed == false
+                    || (maxOpenOrdersInMarket > 0 && openOrdersNeed.Count >= maxOpenOrdersInMarket))
                 {
                     continue;
                 }
 
-                if (line.Position != null
-                    && line.Position.CloseActive)
+                if (position != null
+                    && position.OpenVolume > 0
+                    && position.OpenActive == false)
                 {
-                    linesWithCloseOrder.Add(line);
+                    continue;
                 }
+
+                if (havePriceLimits)
+                {
+                    if (OpenOrdersMakerOnly == true
+                        && (line.PriceEnter > security.PriceLimitHigh
+                            || line.PriceEnter < security.PriceLimitLow))
+                    {
+                        continue;
+                    }
+
+                    if (OpenOrdersMakerOnly == false
+                        && line.Side == Side.Buy
+                        && line.PriceEnter < security.PriceLimitLow)
+                    {
+                        continue;
+                    }
+
+                    if (OpenOrdersMakerOnly == false
+                        && line.Side == Side.Sell
+                        && line.PriceEnter > security.PriceLimitHigh)
+                    {
+                        continue;
+                    }
+                }
+
+                if (maxPriceUp != 0
+                    && minPriceDown != 0
+                    && (line.PriceEnter > maxPriceUp
+                        || line.PriceEnter < minPriceDown))
+                {
+                    continue;
+                }
+
+                if (isBuyGrid)
+                {
+                    if (OpenOrdersMakerOnly
+                        && line.PriceEnter > lastPrice)
+                    {
+                        continue;
+                    }
+                }
+                else if (isSellGrid)
+                {
+                    if (OpenOrdersMakerOnly
+                        && line.PriceEnter < lastPrice)
+                    {
+                        continue;
+                    }
+                }
+                else
+                {
+                    continue;
+                }
+
+                openOrdersNeed.Add(line);
             }
-            return linesWithCloseOrder;
+
+            return new QueryCollectionsSnapshot(openPositions, openOrdersNeed, openOrdersFact, closingOrdersFact);
         }
 
         #endregion
