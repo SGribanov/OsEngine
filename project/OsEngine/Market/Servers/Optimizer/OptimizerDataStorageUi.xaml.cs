@@ -188,15 +188,66 @@ namespace OsEngine.Market.Servers.Optimizer
 
         private Log _log;
 
+        private static bool TryGetSelectedEnum<TEnum>(object selectedItem, out TEnum value)
+            where TEnum : struct
+        {
+            value = default;
+
+            if (selectedItem is TEnum typedValue)
+            {
+                value = typedValue;
+                return true;
+            }
+
+            return selectedItem != null
+                && Enum.TryParse(selectedItem.ToString(), true, out value);
+        }
+
+        private static bool TryReadCellText(DataGridView grid, int row, int column, out string value)
+        {
+            value = string.Empty;
+
+            if (grid == null
+                || row < 0
+                || column < 0
+                || row >= grid.Rows.Count
+                || column >= grid.Rows[row].Cells.Count)
+            {
+                return false;
+            }
+
+            object cellValue = grid.Rows[row].Cells[column].Value;
+            if (cellValue == null)
+            {
+                return false;
+            }
+
+            value = cellValue.ToString();
+            return string.IsNullOrWhiteSpace(value) == false;
+        }
+
+        private static bool TryReadInt(string value, out int result)
+        {
+            return int.TryParse(value, NumberStyles.Integer, CultureInfo.InvariantCulture, out result)
+                   || int.TryParse(value, NumberStyles.Integer, CultureInfo.CurrentCulture, out result)
+                   || int.TryParse(value, NumberStyles.Integer, CultureInfo.GetCultureInfo("ru-RU"), out result);
+        }
+
+        private static bool TryReadBool(string value, out bool result)
+        {
+            return bool.TryParse(value, out result);
+        }
+
         #region Data selection
 
         private void ComboBoxDataSourceType_SelectionChanged(object sender, System.Windows.Controls.SelectionChangedEventArgs e)
         {
             try
             {
-                TesterSourceDataType sourceDataType;
-                Enum.TryParse(ComboBoxDataSourceType.SelectedItem.ToString(), out sourceDataType);
-                _server.SourceDataType = sourceDataType;
+                if (TryGetSelectedEnum(ComboBoxDataSourceType.SelectedItem, out TesterSourceDataType sourceDataType))
+                {
+                    _server.SourceDataType = sourceDataType;
+                }
             }
             catch (Exception ex)
             {
@@ -208,9 +259,10 @@ namespace OsEngine.Market.Servers.Optimizer
         {
             try
             {
-                TesterDataType type;
-                Enum.TryParse(ComboBoxDataType.SelectedItem.ToString(), out type);
-                _server.TypeTesterData = type;
+                if (TryGetSelectedEnum(ComboBoxDataType.SelectedItem, out TesterDataType type))
+                {
+                    _server.TypeTesterData = type;
+                }
                 _server.Save();
 
                 PaintGrid();
@@ -225,7 +277,12 @@ namespace OsEngine.Market.Servers.Optimizer
         {
             try
             {
-                _server.SetNewSet(ComboBoxSets.SelectedItem.ToString());
+                object selectedItem = ComboBoxSets.SelectedItem;
+                if (selectedItem == null)
+                {
+                    return;
+                }
+                _server.SetNewSet(selectedItem.ToString());
                 PaintGrid();
             }
             catch (Exception ex)
@@ -507,9 +564,7 @@ namespace OsEngine.Market.Servers.Optimizer
         {
             try
             {
-                OrderExecutionType type = OrderExecutionType.Intersection;
-
-                if (Enum.TryParse(ComboBoxOrderActivationType.SelectedItem.ToString(), out type))
+                if (TryGetSelectedEnum(ComboBoxOrderActivationType.SelectedItem, out OrderExecutionType type))
                 {
                     _master.OrderExecutionType = type;
                 }
@@ -524,7 +579,14 @@ namespace OsEngine.Market.Servers.Optimizer
         {
             try
             {
-                _master.SlippageToSimpleOrder = Convert.ToInt32(TextBoxSlippageSimpleOrder.Text, CultureInfo.InvariantCulture);
+                if (TryReadInt(TextBoxSlippageSimpleOrder.Text, out int slippage))
+                {
+                    _master.SlippageToSimpleOrder = slippage;
+                }
+                else
+                {
+                    throw new FormatException();
+                }
             }
             catch
             {
@@ -538,7 +600,14 @@ namespace OsEngine.Market.Servers.Optimizer
         {
             try
             {
-                _master.SlippageToStopOrder = Convert.ToInt32(TextBoxSlippageStop.Text, CultureInfo.InvariantCulture);
+                if (TryReadInt(TextBoxSlippageStop.Text, out int slippage))
+                {
+                    _master.SlippageToStopOrder = slippage;
+                }
+                else
+                {
+                    throw new FormatException();
+                }
             }
             catch
             {
@@ -739,7 +808,10 @@ namespace OsEngine.Market.Servers.Optimizer
                 if (column == 1)
                 { // Изменилось время клиринга
 
-                    string value = _gridClearing.Rows[row].Cells[column].Value.ToString();
+                    if (TryReadCellText(_gridClearing, row, column, out string value) == false)
+                    {
+                        return;
+                    }
 
                     // "19:05"
 
@@ -751,26 +823,29 @@ namespace OsEngine.Market.Servers.Optimizer
 
                     string[] values = value.Split(':');
 
-                    int hour = int.Parse(values[0], CultureInfo.InvariantCulture);
-                    int minute = int.Parse(values[1], CultureInfo.InvariantCulture);
+                    if (TryReadInt(values[0], out int hour) == false
+                        || TryReadInt(values[1], out int minute) == false)
+                    {
+                        return;
+                    }
 
                     _master.ClearingTimes[row].Time = new DateTime(2022, 1, 1, hour, minute, 0);
                     _master.SaveClearingInfo();
                 }
                 else if (column == 2)
                 { // Изменилось состояние вкл/выкл
-                    string value = _gridClearing.Rows[row].Cells[column].Value.ToString();
+                    if (TryReadCellText(_gridClearing, row, column, out string value) == false)
+                    {
+                        return;
+                    }
 
-                    if (value == "True")
+                    if (TryReadBool(value, out bool isOn) == false)
                     {
-                        _master.ClearingTimes[row].IsOn = true;
-                        _master.SaveClearingInfo();
+                        return;
                     }
-                    else if (value == "False")
-                    {
-                        _master.ClearingTimes[row].IsOn = false;
-                        _master.SaveClearingInfo();
-                    }
+
+                    _master.ClearingTimes[row].IsOn = isOn;
+                    _master.SaveClearingInfo();
                 }
             }
             catch (Exception ex)
@@ -973,7 +1048,10 @@ namespace OsEngine.Market.Servers.Optimizer
 
                 if (column == 1)
                 { // Изменилось время старта периода
-                    string value = _gridNonTradePeriods.Rows[row].Cells[column].Value.ToString();
+                    if (TryReadCellText(_gridNonTradePeriods, row, column, out string value) == false)
+                    {
+                        return;
+                    }
 
                     if (TryParseDateInvariantOrCurrent(value, out DateTime time) == false)
                     {
@@ -985,7 +1063,10 @@ namespace OsEngine.Market.Servers.Optimizer
                 }
                 else if (column == 2)
                 { // Изменилось время конца периода
-                    string value = _gridNonTradePeriods.Rows[row].Cells[column].Value.ToString();
+                    if (TryReadCellText(_gridNonTradePeriods, row, column, out string value) == false)
+                    {
+                        return;
+                    }
 
                     if (TryParseDateInvariantOrCurrent(value, out DateTime time) == false)
                     {
@@ -999,18 +1080,18 @@ namespace OsEngine.Market.Servers.Optimizer
                 }
                 else if (column == 3)
                 { // Изменилось состояние вкл/выкл
-                    string value = _gridNonTradePeriods.Rows[row].Cells[column].Value.ToString();
+                    if (TryReadCellText(_gridNonTradePeriods, row, column, out string value) == false)
+                    {
+                        return;
+                    }
 
-                    if (value == "True")
+                    if (TryReadBool(value, out bool isOn) == false)
                     {
-                        _master.NonTradePeriods[row].IsOn = true;
-                        _master.SaveNonTradePeriods();
+                        return;
                     }
-                    else if (value == "False")
-                    {
-                        _master.NonTradePeriods[row].IsOn = false;
-                        _master.SaveNonTradePeriods();
-                    }
+
+                    _master.NonTradePeriods[row].IsOn = isOn;
+                    _master.SaveNonTradePeriods();
                 }
             }
             catch (Exception ex)
@@ -1043,3 +1124,5 @@ namespace OsEngine.Market.Servers.Optimizer
 
     }
 }
+
+
