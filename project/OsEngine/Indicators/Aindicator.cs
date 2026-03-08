@@ -65,6 +65,12 @@ namespace OsEngine.Indicators
             attributeInitializer.InitAttributes();
 
             OnStateChange(IndicatorState.Configure);
+
+            if (startProgram == StartProgram.IsOsOptimizer
+                && IsDeterministicForOptimizerCache)
+            {
+                EnsureOptimizerCacheIdentityReady();
+            }
         }
 
         public void Clear()
@@ -762,7 +768,13 @@ namespace OsEngine.Indicators
 
         private void ProcessAll(List<Candle> candles)
         {
-            if (TryRestoreSeriesFromOptimizerCache(candles))
+            bool canUseOptimizerCache = TryPrepareOptimizerCacheContext(
+                candles,
+                out IndicatorCache optimizerCache,
+                out IndicatorCacheKey optimizerCacheKey);
+
+            if (canUseOptimizerCache
+                && TryRestoreSeriesFromOptimizerCache(optimizerCache, optimizerCacheKey, candles))
             {
                 return;
             }
@@ -783,11 +795,20 @@ namespace OsEngine.Indicators
                 ProcessNew(candles, i);
             }
 
-            SaveSeriesToOptimizerCache(candles);
+            if (canUseOptimizerCache)
+            {
+                SaveSeriesToOptimizerCache(optimizerCache, optimizerCacheKey);
+            }
         }
 
-        private bool TryRestoreSeriesFromOptimizerCache(List<Candle> candles)
+        internal bool TryPrepareOptimizerCacheContext(
+            List<Candle> candles,
+            out IndicatorCache cache,
+            out IndicatorCacheKey cacheKey)
         {
+            cache = null;
+            cacheKey = default;
+
             if (StartProgram != StartProgram.IsOsOptimizer
                 || !IsDeterministicForOptimizerCache
                 || candles == null
@@ -798,15 +819,22 @@ namespace OsEngine.Indicators
                 return false;
             }
 
-            IndicatorCache cache = Volatile.Read(ref _optimizerIndicatorCache);
+            cache = Volatile.Read(ref _optimizerIndicatorCache);
 
             if (cache == null)
             {
                 return false;
             }
 
-            IndicatorCacheKey cacheKey = BuildOptimizerIndicatorCacheKey(candles);
+            cacheKey = BuildOptimizerIndicatorCacheKey(candles);
+            return true;
+        }
 
+        private bool TryRestoreSeriesFromOptimizerCache(
+            IndicatorCache cache,
+            IndicatorCacheKey cacheKey,
+            List<Candle> candles)
+        {
             if (!cache.TryGet(cacheKey, out List<decimal>[] cachedSeries)
                 || cachedSeries == null
                 || cachedSeries.Length != DataSeries.Count)
@@ -838,25 +866,10 @@ namespace OsEngine.Indicators
             return true;
         }
 
-        private void SaveSeriesToOptimizerCache(List<Candle> candles)
+        private void SaveSeriesToOptimizerCache(
+            IndicatorCache cache,
+            IndicatorCacheKey cacheKey)
         {
-            if (StartProgram != StartProgram.IsOsOptimizer
-                || !IsDeterministicForOptimizerCache
-                || candles == null
-                || candles.Count == 0
-                || DataSeries == null
-                || DataSeries.Count == 0)
-            {
-                return;
-            }
-
-            IndicatorCache cache = Volatile.Read(ref _optimizerIndicatorCache);
-
-            if (cache == null)
-            {
-                return;
-            }
-
             List<decimal>[] valuesSnapshot = new List<decimal>[DataSeries.Count];
 
             for (int i = 0; i < DataSeries.Count; i++)
@@ -864,7 +877,7 @@ namespace OsEngine.Indicators
                 valuesSnapshot[i] = new List<decimal>(DataSeries[i].Values);
             }
 
-            cache.Set(BuildOptimizerIndicatorCacheKey(candles), valuesSnapshot);
+            cache.Set(cacheKey, valuesSnapshot);
         }
 
         private IndicatorCacheKey BuildOptimizerIndicatorCacheKey(List<Candle> candles)
@@ -876,8 +889,7 @@ namespace OsEngine.Indicators
                 ? candles[1].TimeStart.Ticks - candles[0].TimeStart.Ticks
                 : 0L;
 
-            string calculationName = GetOptimizerCalculationName();
-            BuildOptimizerParameterHash();
+            EnsureOptimizerCacheIdentityReady();
             int sourceId = RuntimeHelpers.GetHashCode(candles);
             int dataFingerprint = BuildCandlesDataFingerprint(candles);
 
@@ -895,11 +907,17 @@ namespace OsEngine.Indicators
                 dataFingerprint: dataFingerprint);
         }
 
-        private string BuildOptimizerParameterHash()
+        private void EnsureOptimizerCacheIdentityReady()
+        {
+            EnsureOptimizerCalculationNameReady();
+            EnsureOptimizerParameterHashReady();
+        }
+
+        private void EnsureOptimizerParameterHashReady()
         {
             if (_optimizerParameterHashDirty == false)
             {
-                return _optimizerParameterHash;
+                return;
             }
 
             unchecked
@@ -920,7 +938,6 @@ namespace OsEngine.Indicators
                 _optimizerParameterHash = hash.ToString("X8", CultureInfo.InvariantCulture);
                 _optimizerParameterHashHashed = new OrdinalHashedString(_optimizerParameterHash);
                 _optimizerParameterHashDirty = false;
-                return _optimizerParameterHash;
             }
         }
 
@@ -929,7 +946,7 @@ namespace OsEngine.Indicators
             _optimizerParameterHashDirty = true;
         }
 
-        private string GetOptimizerCalculationName()
+        private void EnsureOptimizerCalculationNameReady()
         {
             if (string.IsNullOrEmpty(_optimizerCalculationName))
             {
@@ -940,8 +957,6 @@ namespace OsEngine.Indicators
             {
                 _optimizerCalculationNameHashed = new OrdinalHashedString(_optimizerCalculationName);
             }
-
-            return _optimizerCalculationName;
         }
 
         private static int BuildCandlesDataFingerprint(List<Candle> candles)
