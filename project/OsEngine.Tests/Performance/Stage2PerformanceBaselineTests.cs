@@ -1846,7 +1846,9 @@ public class Stage2PerformanceBaselineTests
     {
         public AindicatorOptimizerCachePerfScope(int maxEntries)
         {
-            Cache = new IndicatorCache(maxEntries: maxEntries);
+            Cache = new IndicatorCache(
+                maxEntries: maxEntries,
+                isolationMode: IndicatorCacheIsolationMode.TrustedReferences);
             Aindicator.SetOptimizerIndicatorCache(Cache);
         }
 

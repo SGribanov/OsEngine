@@ -100,6 +100,64 @@ public class AindicatorOptimizerCacheTests
         Assert.Equal(1, afterSecond.Writes);
     }
 
+    [Fact]
+    public void Process_WithTrustedReferenceOptimizerCache_ShouldReuseSeriesReferenceOnHit()
+    {
+        using OptimizerIndicatorCacheScope scope = new(IndicatorCacheIsolationMode.TrustedReferences);
+        List<Candle> candles = BuildCandles(8);
+        OptimizerCacheTestIndicator seedingIndicator = CreateOptimizerIndicator("CodexAindicatorTrustedSeed");
+        OptimizerCacheTestIndicator firstHitIndicator = CreateOptimizerIndicator("CodexAindicatorTrustedFirstHit");
+        OptimizerCacheTestIndicator secondHitIndicator = CreateOptimizerIndicator("CodexAindicatorTrustedSecondHit");
+
+        seedingIndicator.Process(candles);
+        firstHitIndicator.Process(candles);
+        secondHitIndicator.Process(candles);
+
+        IndicatorCacheStatistics stats = scope.Cache.GetStatisticsSnapshot();
+        Assert.Equal(0, firstHitIndicator.OnProcessCalls);
+        Assert.Equal(0, secondHitIndicator.OnProcessCalls);
+        Assert.Same(firstHitIndicator.DataSeries[0].Values, secondHitIndicator.DataSeries[0].Values);
+        Assert.NotSame(seedingIndicator.DataSeries[0].Values, firstHitIndicator.DataSeries[0].Values);
+        Assert.Equal(2, stats.Hits);
+        Assert.Equal(1, stats.Misses);
+        Assert.Equal(1, stats.Writes);
+    }
+
+    [Fact]
+    public void Process_AfterTrustedReferenceReuseOrRecompute_ShouldDetachBeforeMutationAndPreserveCache()
+    {
+        using OptimizerIndicatorCacheScope scope = new(IndicatorCacheIsolationMode.TrustedReferences);
+        List<Candle> baselineCandles = BuildCandles(8);
+        List<Candle> expandedCandles = AppendCandle(baselineCandles);
+        OptimizerCacheTestIndicator seedingIndicator = CreateOptimizerIndicator("CodexAindicatorSeedDetach");
+
+        seedingIndicator.Process(baselineCandles);
+        List<decimal> baselineValues = new(seedingIndicator.DataSeries[0].Values);
+
+        seedingIndicator.Process(expandedCandles);
+        Assert.NotEqual(baselineCandles.Count, seedingIndicator.DataSeries[0].Values.Count);
+
+        OptimizerCacheTestIndicator hitIndicator = CreateOptimizerIndicator("CodexAindicatorHitDetach");
+        hitIndicator.Process(baselineCandles);
+
+        List<decimal> cachedReference = hitIndicator.DataSeries[0].Values;
+        Assert.Equal(0, hitIndicator.OnProcessCalls);
+        Assert.Equal(baselineValues, cachedReference);
+
+        hitIndicator.Process(expandedCandles);
+
+        Assert.NotSame(cachedReference, hitIndicator.DataSeries[0].Values);
+        Assert.Equal(expandedCandles.Count, hitIndicator.DataSeries[0].Values.Count);
+
+        OptimizerCacheTestIndicator verificationIndicator = CreateOptimizerIndicator("CodexAindicatorVerifyDetach");
+        verificationIndicator.Process(baselineCandles);
+
+        Assert.Equal(0, verificationIndicator.OnProcessCalls);
+        Assert.Same(cachedReference, verificationIndicator.DataSeries[0].Values);
+        Assert.Equal(baselineValues, verificationIndicator.DataSeries[0].Values);
+        Assert.Equal(baselineValues, seedingIndicator.DataSeries[0].Values.GetRange(0, baselineValues.Count));
+    }
+
     private static OptimizerCacheTestIndicator CreateOptimizerIndicator(string name)
     {
         OptimizerCacheTestIndicator indicator = new();
@@ -147,11 +205,32 @@ public class AindicatorOptimizerCacheTests
         return candles;
     }
 
+    private static List<Candle> AppendCandle(List<Candle> source)
+    {
+        List<Candle> candles = new(source.Count + 1);
+        candles.AddRange(source);
+
+        Candle last = source[^1];
+        decimal basis = last.Close + 1m;
+        candles.Add(new Candle
+        {
+            TimeStart = last.TimeStart.AddMinutes(1),
+            Open = basis,
+            High = basis + 1m,
+            Low = basis - 1m,
+            Close = basis + 0.5m,
+            Volume = last.Volume + 1m
+        });
+
+        return candles;
+    }
+
     private sealed class OptimizerIndicatorCacheScope : IDisposable
     {
-        public OptimizerIndicatorCacheScope()
+        public OptimizerIndicatorCacheScope(
+            IndicatorCacheIsolationMode isolationMode = IndicatorCacheIsolationMode.CloneOnReadAndWrite)
         {
-            Cache = new IndicatorCache(maxEntries: 8);
+            Cache = new IndicatorCache(maxEntries: 8, isolationMode: isolationMode);
             Aindicator.SetOptimizerIndicatorCache(Cache);
         }
 

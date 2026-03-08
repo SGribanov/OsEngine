@@ -76,6 +76,7 @@ namespace OsEngine.Indicators
         public void Clear()
         {
             _myCandles = new List<Candle>();
+            EnsureDataSeriesWritable();
 
             if (DataSeries != null)
             {
@@ -143,6 +144,8 @@ namespace OsEngine.Indicators
                 ParametersDigit.Clear();
                 ParametersDigit = null;
             }
+
+            EnsureDataSeriesWritable();
 
             if (DataSeries != null)
             {
@@ -687,6 +690,8 @@ namespace OsEngine.Indicators
 
         private Candle _lastFirstCandle = null;
 
+        private bool _dataSeriesMayReferenceOptimizerCache;
+
         public int UpdateIntervalInSeconds = 0;
 
         private DateTime _nextUpdateIndicatorsTime;
@@ -733,10 +738,6 @@ namespace OsEngine.Indicators
                 }
                 else if (candles.Count < DataSeries[0].Values.Count)
                 {
-                    foreach (var ds in DataSeries)
-                    {
-                        ds.Values.Clear();
-                    }
                     ProcessAll(candles);
                 }
                 else if (_myCandles.Count == candles.Count)
@@ -784,6 +785,8 @@ namespace OsEngine.Indicators
                 IncludeIndicators[i].Clear();
                 IncludeIndicators[i].Process(candles);
             }
+
+            EnsureDataSeriesWritable();
 
             for (int i = 0; i < DataSeries.Count; i++)
             {
@@ -853,9 +856,10 @@ namespace OsEngine.Indicators
 
             for (int i = 0; i < DataSeries.Count; i++)
             {
-                DataSeries[i].Values.Clear();
-                DataSeries[i].Values.AddRange(cachedSeries[i]);
+                DataSeries[i].Values = cachedSeries[i];
             }
+
+            MarkDataSeriesAsOptimizerCacheBacked();
 
             for (int i = 0; i < IncludeIndicators.Count; i++)
             {
@@ -878,6 +882,7 @@ namespace OsEngine.Indicators
             }
 
             cache.Set(cacheKey, valuesSnapshot);
+            MarkDataSeriesAsOptimizerCacheBacked();
         }
 
         private IndicatorCacheKey BuildOptimizerIndicatorCacheKey(List<Candle> candles)
@@ -1002,6 +1007,8 @@ namespace OsEngine.Indicators
 
         private void ProcessLast(List<Candle> candles)
         {
+            EnsureDataSeriesWritable();
+
             for (int i = 0; i < DataSeries.Count; i++)
             {
                 while (DataSeries[i].Values.Count < candles.Count)
@@ -1056,6 +1063,8 @@ namespace OsEngine.Indicators
             {
                 return;
             }
+
+            EnsureDataSeriesWritable();
 
             for (int i = 0; i < DataSeries.Count; i++)
             {
@@ -1164,6 +1173,8 @@ namespace OsEngine.Indicators
                 IncludeIndicators[i].Process(values);
             }
 
+            EnsureDataSeriesWritable();
+
             for (int i = 0; i < DataSeries.Count; i++)
             {
                 DataSeries[i].Values.Clear();
@@ -1181,6 +1192,8 @@ namespace OsEngine.Indicators
             {
                 return;
             }
+
+            EnsureDataSeriesWritable();
 
             for (int i = 0; i < DataSeries.Count; i++)
             {
@@ -1235,6 +1248,8 @@ namespace OsEngine.Indicators
                 return;
             }
 
+            EnsureDataSeriesWritable();
+
             for (int i = 0; i < DataSeries.Count; i++)
             {
                 while (DataSeries[i].Values.Count < values.Count)
@@ -1278,6 +1293,36 @@ namespace OsEngine.Indicators
             _myCandles[index].Close = values[_myCandles.Count];
 
             OnProcess(_myCandles, index);
+        }
+
+        private void MarkDataSeriesAsOptimizerCacheBacked()
+        {
+            _dataSeriesMayReferenceOptimizerCache = DataSeries != null
+                && DataSeries.Count > 0;
+        }
+
+        private void EnsureDataSeriesWritable()
+        {
+            if (_dataSeriesMayReferenceOptimizerCache == false)
+            {
+                return;
+            }
+
+            if (DataSeries == null || DataSeries.Count == 0)
+            {
+                _dataSeriesMayReferenceOptimizerCache = false;
+                return;
+            }
+
+            for (int i = 0; i < DataSeries.Count; i++)
+            {
+                List<decimal> values = DataSeries[i].Values;
+                DataSeries[i].Values = values == null
+                    ? new List<decimal>()
+                    : new List<decimal>(values);
+            }
+
+            _dataSeriesMayReferenceOptimizerCache = false;
         }
 
         #endregion
