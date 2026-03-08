@@ -51,6 +51,25 @@ namespace OsEngine.OsTrader.Grids
 
             public List<TradeGridLine> ClosingOrdersFact { get; }
         }
+        private readonly struct QueryCollectionsSnapshotCore
+        {
+            public QueryCollectionsSnapshotCore(List<TradeGridLine> openPositions, List<TradeGridLine> openOrdersNeed, List<TradeGridLine> openOrdersFact, List<TradeGridLine> closingOrdersFact)
+            {
+                OpenPositions = openPositions;
+                OpenOrdersNeed = openOrdersNeed;
+                OpenOrdersFact = openOrdersFact;
+                ClosingOrdersFact = closingOrdersFact;
+            }
+
+            public List<TradeGridLine> OpenPositions { get; }
+
+            public List<TradeGridLine> OpenOrdersNeed { get; }
+
+            public List<TradeGridLine> OpenOrdersFact { get; }
+
+            public List<TradeGridLine> ClosingOrdersFact { get; }
+        }
+
 
         #region Service
 
@@ -2393,7 +2412,7 @@ namespace OsEngine.OsTrader.Grids
 
             // 1 убираем ордера на открытие и закрытие с неправильной ценой.
 
-            QueryCollectionsSnapshot queryCollections = GetQueryCollectionsSnapshot(lastPrice, QueryCollectionFlags.OpenOrdersFact | QueryCollectionFlags.ClosingOrdersFact);
+            QueryCollectionsSnapshotCore queryCollections = GetQueryCollectionsSnapshotCore(lastPrice, QueryCollectionFlags.OpenOrdersFact | QueryCollectionFlags.ClosingOrdersFact);
             List<TradeGridLine> linesWithOrdersToOpenFact = queryCollections.OpenOrdersFact;
             List<TradeGridLine> linesWithOrdersToCloseFact = queryCollections.ClosingOrdersFact;
 
@@ -2953,7 +2972,7 @@ namespace OsEngine.OsTrader.Grids
 
             // 1 берём текущие линии с позициями
 
-            QueryCollectionsSnapshot queryCollections = GetQueryCollectionsSnapshot(lastPrice, QueryCollectionFlags.OpenOrdersNeed | QueryCollectionFlags.OpenOrdersFact);
+            QueryCollectionsSnapshotCore queryCollections = GetQueryCollectionsSnapshotCore(lastPrice, QueryCollectionFlags.OpenOrdersNeed | QueryCollectionFlags.OpenOrdersFact);
             List<TradeGridLine> linesWithOrdersToOpenNeed = queryCollections.OpenOrdersNeed;
             List<TradeGridLine> linesWithOrdersToOpenFact = queryCollections.OpenOrdersFact;
 
@@ -3650,7 +3669,7 @@ namespace OsEngine.OsTrader.Grids
         {
             get
             {
-                QueryCollectionsSnapshot queryCollections = GetQueryCollectionsSnapshot(0m, QueryCollectionFlags.OpenOrdersFact | QueryCollectionFlags.ClosingOrdersFact);
+                QueryCollectionsSnapshotCore queryCollections = GetQueryCollectionsSnapshotCore(0m, QueryCollectionFlags.OpenOrdersFact | QueryCollectionFlags.ClosingOrdersFact);
                 List<TradeGridLine> linesWithOpenOrders = queryCollections.OpenOrdersFact;
                 List<TradeGridLine> linesWithCloseOrders = queryCollections.ClosingOrdersFact;
 
@@ -3671,7 +3690,13 @@ namespace OsEngine.OsTrader.Grids
 
         public QueryCollectionsSnapshot GetQueryCollections(decimal lastPrice)
         {
-            return GetQueryCollectionsSnapshot(lastPrice, QueryCollectionFlags.OpenPositions | QueryCollectionFlags.OpenOrdersNeed | QueryCollectionFlags.OpenOrdersFact | QueryCollectionFlags.ClosingOrdersFact);
+            QueryCollectionsSnapshotCore queryCollections = GetQueryCollectionsSnapshotCore(lastPrice, QueryCollectionFlags.OpenPositions | QueryCollectionFlags.OpenOrdersNeed | QueryCollectionFlags.OpenOrdersFact | QueryCollectionFlags.ClosingOrdersFact);
+
+            return new QueryCollectionsSnapshot(
+                queryCollections.OpenPositions ?? new List<TradeGridLine>(),
+                queryCollections.OpenOrdersNeed ?? new List<TradeGridLine>(),
+                queryCollections.OpenOrdersFact ?? new List<TradeGridLine>(),
+                queryCollections.ClosingOrdersFact ?? new List<TradeGridLine>());
         }
 
         public decimal MiddleEntryPrice
@@ -3809,7 +3834,9 @@ namespace OsEngine.OsTrader.Grids
 
         public List<TradeGridLine> GetLinesWithOpenPosition()
         {
-            return GetQueryCollectionsSnapshot(0m, QueryCollectionFlags.OpenPositions).OpenPositions;
+            QueryCollectionsSnapshotCore queryCollections = GetQueryCollectionsSnapshotCore(0m, QueryCollectionFlags.OpenPositions);
+
+            return queryCollections.OpenPositions ?? new List<TradeGridLine>();
         }
 
         public List<Position> GetPositionByGrid()
@@ -3850,39 +3877,37 @@ namespace OsEngine.OsTrader.Grids
 
         public List<TradeGridLine> GetLinesWithOpenOrdersNeed(decimal lastPrice)
         {
-            return GetQueryCollectionsSnapshot(lastPrice, QueryCollectionFlags.OpenOrdersNeed).OpenOrdersNeed;
+            QueryCollectionsSnapshotCore queryCollections = GetQueryCollectionsSnapshotCore(lastPrice, QueryCollectionFlags.OpenOrdersNeed);
+
+            return queryCollections.OpenOrdersNeed ?? new List<TradeGridLine>();
         }
 
         public List<TradeGridLine> GetLinesWithOpenOrdersFact()
         {
-            return GetQueryCollectionsSnapshot(0m, QueryCollectionFlags.OpenOrdersFact).OpenOrdersFact;
+            QueryCollectionsSnapshotCore queryCollections = GetQueryCollectionsSnapshotCore(0m, QueryCollectionFlags.OpenOrdersFact);
+
+            return queryCollections.OpenOrdersFact ?? new List<TradeGridLine>();
         }
 
         public List<TradeGridLine> GetLinesWithClosingOrdersFact()
         {
-            return GetQueryCollectionsSnapshot(0m, QueryCollectionFlags.ClosingOrdersFact).ClosingOrdersFact;
+            QueryCollectionsSnapshotCore queryCollections = GetQueryCollectionsSnapshotCore(0m, QueryCollectionFlags.ClosingOrdersFact);
+
+            return queryCollections.ClosingOrdersFact ?? new List<TradeGridLine>();
         }
 
-        private QueryCollectionsSnapshot GetQueryCollectionsSnapshot(decimal lastPrice, QueryCollectionFlags flags)
+        private QueryCollectionsSnapshotCore GetQueryCollectionsSnapshotCore(decimal lastPrice, QueryCollectionFlags flags)
         {
             TradeGridCreator gridCreator = GridCreator;
             if (gridCreator == null)
             {
-                return new QueryCollectionsSnapshot(
-                    new List<TradeGridLine>(),
-                    new List<TradeGridLine>(),
-                    new List<TradeGridLine>(),
-                    new List<TradeGridLine>());
+                return default;
             }
 
             List<TradeGridLine> linesAll = gridCreator.Lines;
             if (linesAll == null || linesAll.Count == 0)
             {
-                return new QueryCollectionsSnapshot(
-                    new List<TradeGridLine>(),
-                    new List<TradeGridLine>(),
-                    new List<TradeGridLine>(),
-                    new List<TradeGridLine>());
+                return default;
             }
 
             BotTabSimple tab = Tab;
@@ -3932,10 +3957,10 @@ namespace OsEngine.OsTrader.Grids
                 openOrdersNeedCapacity = Math.Min(openOrdersNeedCapacity, maxOpenOrdersInMarket);
             }
 
-            List<TradeGridLine> openPositions = collectOpenPositions ? new List<TradeGridLine>(openPositionsCapacity) : new List<TradeGridLine>();
-            List<TradeGridLine> openOrdersNeed = collectOpenOrdersNeed ? new List<TradeGridLine>(openOrdersNeedCapacity) : new List<TradeGridLine>();
-            List<TradeGridLine> openOrdersFact = collectOpenOrdersFact ? new List<TradeGridLine>(openOrdersFactCapacity) : new List<TradeGridLine>();
-            List<TradeGridLine> closingOrdersFact = collectClosingOrdersFact ? new List<TradeGridLine>(closingOrdersFactCapacity) : new List<TradeGridLine>();
+            List<TradeGridLine> openPositions = collectOpenPositions ? new List<TradeGridLine>(openPositionsCapacity) : null;
+            List<TradeGridLine> openOrdersNeed = collectOpenOrdersNeed ? new List<TradeGridLine>(openOrdersNeedCapacity) : null;
+            List<TradeGridLine> openOrdersFact = collectOpenOrdersFact ? new List<TradeGridLine>(openOrdersFactCapacity) : null;
+            List<TradeGridLine> closingOrdersFact = collectClosingOrdersFact ? new List<TradeGridLine>(closingOrdersFactCapacity) : null;
 
             decimal maxPriceUp = 0;
             decimal minPriceDown = 0;
@@ -4054,7 +4079,7 @@ namespace OsEngine.OsTrader.Grids
                 openOrdersNeed.Add(line);
             }
 
-            return new QueryCollectionsSnapshot(openPositions, openOrdersNeed, openOrdersFact, closingOrdersFact);
+            return new QueryCollectionsSnapshotCore(openPositions, openOrdersNeed, openOrdersFact, closingOrdersFact);
         }
 
         #endregion
