@@ -120,6 +120,12 @@ namespace OsEngine.Market.Servers.GateIoData
 
         private string _currSecurity = string.Empty;
 
+        private const int DailyArchiveIoBufferSize = 1024 * 1024;
+
+        private const int DailyArchiveFlushInterval = 10000;
+
+        private static readonly UTF8Encoding DailyArchiveEncoding = new UTF8Encoding(encoderShouldEmitUTF8Identifier: true);
+
         #endregion
 
         #region 3 Securities
@@ -1214,16 +1220,16 @@ namespace OsEngine.Market.Servers.GateIoData
         private List<string> ParseCsvFileToDailyArchives(string csvFilePath, Security security)
         {
             List<string> createdFiles = new List<string>();
+            StreamWriter currentDayWriter = null;
 
-            using (StreamReader reader = new StreamReader(csvFilePath, Encoding.UTF8, true, 1024 * 1024)) // 1MB буфер чтения
+            try
             {
-                StreamWriter currentDayWriter = null;
-                DateTime currentDay = DateTime.MinValue;
-                string line;
-                int linesProcessed = 0;
-
-                try
+                using (StreamReader reader = new StreamReader(csvFilePath, Encoding.UTF8, true, DailyArchiveIoBufferSize)) // 1MB буфер чтения
                 {
+                    DateTime currentDay = DateTime.MinValue;
+                    string line;
+                    int linesProcessed = 0;
+
                     while ((line = reader.ReadLine()) != null)
                     {
                         if (string.IsNullOrEmpty(line) || char.IsLetter(line[0]))
@@ -1242,19 +1248,13 @@ namespace OsEngine.Market.Servers.GateIoData
                         // Если день сменился - закрываем предыдущий файл и открываем новый
                         if (currentDayWriter == null || date != currentDay)
                         {
-                            // Закрываем предыдущий файл
-                            if (currentDayWriter != null)
-                            {
-                                currentDayWriter.Flush();
-                                currentDayWriter.Close();
-                                currentDayWriter.Dispose();
-                            }
+                            DisposeDailyArchiveWriter(ref currentDayWriter);
 
                             // Открываем новый файл
                             string fileName = $"{security.Name}{date:yyyyMMdd}.csv";
                             string filePath = Path.Combine(_tempDirectory, fileName);
 
-                            currentDayWriter = new StreamWriter(filePath, append: false, Encoding.UTF8, 1024 * 1024); // 1MB буфер записи
+                            currentDayWriter = CreateDailyArchiveWriter(filePath);
                             currentDay = date;
                             createdFiles.Add(filePath);
                             linesProcessed = 0;
@@ -1265,27 +1265,79 @@ namespace OsEngine.Market.Servers.GateIoData
                         linesProcessed++;
 
                         // Периодически сбрасываем буфер на диск
-                        if (linesProcessed % 10000 == 0)
+                        if (linesProcessed % DailyArchiveFlushInterval == 0)
                         {
-                            currentDayWriter.Flush();
+                            FlushDailyArchiveWriter(currentDayWriter);
                         }
                     }
                 }
-                finally
-                {
-                    // Закрываем последний файл
-                    if (currentDayWriter != null)
-                    {
-                        currentDayWriter.Flush();
-                        currentDayWriter.Close();
-                        currentDayWriter.Dispose();
-                    }
-                }
+            }
+            finally
+            {
+                DisposeDailyArchiveWriter(ref currentDayWriter);
+                File.Delete(_tempDirectory + "monthly.csv");
             }
 
-            File.Delete(_tempDirectory + "monthly.csv");
-
             return createdFiles;
+        }
+
+        private static StreamWriter CreateDailyArchiveWriter(string filePath)
+        {
+            string directory = Path.GetDirectoryName(filePath);
+
+            if (!string.IsNullOrEmpty(directory))
+            {
+                Directory.CreateDirectory(directory);
+            }
+
+            FileStream stream = new FileStream(
+                filePath,
+                FileMode.Create,
+                FileAccess.Write,
+                FileShare.Read,
+                DailyArchiveIoBufferSize,
+                FileOptions.SequentialScan);
+
+            return new StreamWriter(stream, DailyArchiveEncoding, DailyArchiveIoBufferSize);
+        }
+
+        private static void FlushDailyArchiveWriter(StreamWriter writer)
+        {
+            if (writer == null)
+            {
+                return;
+            }
+
+            writer.Flush();
+
+            if (writer.BaseStream is FileStream fileStream)
+            {
+                fileStream.Flush(flushToDisk: true);
+            }
+            else
+            {
+                writer.BaseStream.Flush();
+            }
+        }
+
+        private static void DisposeDailyArchiveWriter(ref StreamWriter writer)
+        {
+            StreamWriter currentWriter = writer;
+            writer = null;
+
+            if (currentWriter == null)
+            {
+                return;
+            }
+
+            try
+            {
+                FlushDailyArchiveWriter(currentWriter);
+            }
+            finally
+            {
+                currentWriter.Dispose();
+            }
         }
 
         private int CompareTradesByTime(Trade x, Trade y)
