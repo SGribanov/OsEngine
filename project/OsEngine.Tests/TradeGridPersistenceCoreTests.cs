@@ -7984,6 +7984,90 @@ public class TradeGridPersistenceCoreTests
     }
 
     [Fact]
+    public void Stage2Step2_2_TradeGrid_GetQueryCollections_WithMixedLineStates_ShouldMatchWrapperMethods()
+    {
+        TradeGrid grid = CreateBareGrid();
+        grid.GridCreator.GridSide = Side.Buy;
+        grid.MaxOpenOrdersInMarket = 10;
+        grid.OpenOrdersMakerOnly = false;
+
+        BotTabSimple tab = (BotTabSimple)RuntimeHelpers.GetUninitializedObject(typeof(BotTabSimple));
+        ConnectorCandles connector = new ConnectorCandles("CodexGridQueryCollections", StartProgram.IsTester, false);
+        SetPrivateField(tab, "_connector", connector);
+        SetPrivateField(tab, "_security", new Security
+        {
+            Name = connector.SecurityName,
+            PriceStep = 1m
+        });
+        grid.Tab = tab;
+
+        Position openPosition = new Position();
+        openPosition.AddNewOpenOrder(new Order
+        {
+            State = OrderStateType.Done,
+            Volume = 1m,
+            VolumeExecute = 1m
+        });
+
+        Position activeOpenOrder = (Position)RuntimeHelpers.GetUninitializedObject(typeof(Position));
+        SetPrivateField(activeOpenOrder, "_openOrders", new List<Order>
+        {
+            new Order { State = OrderStateType.Active, Volume = 1m, VolumeExecute = 0m }
+        });
+        SetPrivateField(activeOpenOrder, "_closeOrders", new List<Order>());
+
+        Position activeCloseOrder = new Position();
+        activeCloseOrder.AddNewOpenOrder(new Order
+        {
+            State = OrderStateType.Done,
+            Volume = 1m,
+            VolumeExecute = 1m
+        });
+        activeCloseOrder.AddNewCloseOrder(new Order
+        {
+            State = OrderStateType.Active,
+            Volume = 1m,
+            VolumeExecute = 0m
+        });
+
+        TradeGridLine lineOpen = new TradeGridLine { Side = Side.Buy, PriceEnter = 100m, PriceExit = 101m, Position = openPosition };
+        TradeGridLine lineOpenFact = new TradeGridLine { Side = Side.Buy, PriceEnter = 99m, PriceExit = 100m, Position = activeOpenOrder };
+        TradeGridLine lineCloseFact = new TradeGridLine { Side = Side.Buy, PriceEnter = 98m, PriceExit = 102m, Position = activeCloseOrder, CanReplaceExitOrder = true };
+
+        grid.GridCreator.Lines = new List<TradeGridLine>
+        {
+            null!,
+            lineOpen,
+            lineOpenFact,
+            lineCloseFact
+        };
+
+        var snapshot = grid.GetQueryCollections(100m);
+        List<TradeGridLine> openPositions = grid.GetLinesWithOpenPosition();
+        List<TradeGridLine> openNeed = grid.GetLinesWithOpenOrdersNeed(100m);
+        List<TradeGridLine> openFact = grid.GetLinesWithOpenOrdersFact();
+        List<TradeGridLine> closeFact = grid.GetLinesWithClosingOrdersFact();
+
+        Assert.Equal(openPositions, snapshot.OpenPositions);
+        Assert.Equal(openNeed, snapshot.OpenOrdersNeed);
+        Assert.Equal(openFact, snapshot.OpenOrdersFact);
+        Assert.Equal(closeFact, snapshot.ClosingOrdersFact);
+    }
+
+    [Fact]
+    public void Stage2Step2_2_TradeGrid_GetQueryCollections_WithNullDependencies_ShouldReturnEmptyCollections()
+    {
+        TradeGrid grid = (TradeGrid)RuntimeHelpers.GetUninitializedObject(typeof(TradeGrid));
+
+        var snapshot = grid.GetQueryCollections(100m);
+
+        Assert.Empty(snapshot.OpenPositions);
+        Assert.Empty(snapshot.OpenOrdersNeed);
+        Assert.Empty(snapshot.OpenOrdersFact);
+        Assert.Empty(snapshot.ClosingOrdersFact);
+    }
+
+    [Fact]
     public void Stage2Step2_2_TradeGrid_GetLinesWithOpenOrdersNeed_WithEligibleBuyLine_ShouldReturnLine()
     {
         TradeGrid grid = CreateBareGrid();
