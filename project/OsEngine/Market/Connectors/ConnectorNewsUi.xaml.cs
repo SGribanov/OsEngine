@@ -125,16 +125,12 @@ namespace OsEngine.Market.Connectors
         {
             try
             {
-                if(ComboBoxTypeServer.Text == null)
+                if (string.IsNullOrWhiteSpace(ComboBoxTypeServer.Text))
                 {
                     return;
                 }
-                int countNewsToSave = 0;
-                try
-                {
-                    countNewsToSave = Convert.ToInt32(TextBoxCountNewsToSave.Text, CultureInfo.InvariantCulture);
-                }
-                catch
+
+                if (TryParseNewsCount(TextBoxCountNewsToSave.Text, out int countNewsToSave) == false)
                 {
                     return;
                 }
@@ -159,15 +155,14 @@ namespace OsEngine.Market.Connectors
         {
             try
             {
-                if (ComboBoxTypeServer.SelectedItem == null)
+                if (TryGetSelectedComboBoxText(ComboBoxTypeServer, out string selectedServerName) == false)
                 {
                     return;
                 }
 
-                _selectedServerName = ComboBoxTypeServer.SelectedItem.ToString();
+                _selectedServerName = selectedServerName;
 
-                Enum.TryParse(_selectedServerName.Split('_')[0], 
-                    true, out _selectedServerType);
+                TryParseServerType(_selectedServerName, out _selectedServerType);
 
                
             }
@@ -175,6 +170,44 @@ namespace OsEngine.Market.Connectors
             {
                 SendNewLogMessage(error.ToString(), LogMessageType.Error);
             }
+        }
+
+        private static bool TryGetSelectedComboBoxText(System.Windows.Controls.ComboBox comboBox, out string selectedText)
+        {
+            selectedText = comboBox?.SelectedItem?.ToString();
+            return string.IsNullOrWhiteSpace(selectedText) == false;
+        }
+
+        private static bool TryParseServerType(string selectedServerName, out ServerType serverType)
+        {
+            serverType = default;
+
+            if (string.IsNullOrWhiteSpace(selectedServerName))
+            {
+                return false;
+            }
+
+            string[] nameParts = selectedServerName.Split('_');
+            string serverTypeText = nameParts.Length > 0
+                ? nameParts[0]
+                : selectedServerName;
+
+            return Enum.TryParse(serverTypeText, true, out serverType);
+        }
+
+        private static bool TryParseNewsCount(string value, out int parsed)
+        {
+            if (int.TryParse(value, NumberStyles.Integer, CultureInfo.InvariantCulture, out parsed))
+            {
+                return true;
+            }
+
+            if (int.TryParse(value, NumberStyles.Integer, CultureInfo.CurrentCulture, out parsed))
+            {
+                return true;
+            }
+
+            return int.TryParse(value, NumberStyles.Integer, new CultureInfo("ru-RU"), out parsed);
         }
 
         private ServerType _selectedServerType;
