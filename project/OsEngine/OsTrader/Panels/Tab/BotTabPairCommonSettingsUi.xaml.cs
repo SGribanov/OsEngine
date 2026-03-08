@@ -175,27 +175,73 @@ namespace OsEngine.OsTrader.Panels.Tab
         {
             try
             {
-                Enum.TryParse(ComboBoxSlippageTypeSec1.SelectedItem.ToString(), out _tabPair.Sec1SlippageType);
-                Enum.TryParse(ComboBoxVolumeTypeSec1.SelectedItem.ToString(), out _tabPair.Sec1VolumeType);
+                if (TryGetSelectedEnum(ComboBoxSlippageTypeSec1.SelectedItem, out PairTraderSlippageType sec1SlippageType))
+                {
+                    _tabPair.Sec1SlippageType = sec1SlippageType;
+                }
 
-                Enum.TryParse(ComboBoxSlippageTypeSec2.SelectedItem.ToString(), out _tabPair.Sec2SlippageType);
-                Enum.TryParse(ComboBoxVolumeTypeSec2.SelectedItem.ToString(), out _tabPair.Sec2VolumeType);
+                if (TryGetSelectedEnum(ComboBoxVolumeTypeSec1.SelectedItem, out PairTraderVolumeType sec1VolumeType))
+                {
+                    _tabPair.Sec1VolumeType = sec1VolumeType;
+                }
 
-                Enum.TryParse(ComboBoxRegime1.SelectedItem.ToString(), out _tabPair.Sec1TradeRegime);
-                Enum.TryParse(ComboBoxRegime2.SelectedItem.ToString(), out _tabPair.Sec2TradeRegime);
+                if (TryGetSelectedEnum(ComboBoxSlippageTypeSec2.SelectedItem, out PairTraderSlippageType sec2SlippageType))
+                {
+                    _tabPair.Sec2SlippageType = sec2SlippageType;
+                }
 
-                _tabPair.Sec1Slippage = TextBoxSlippage1.Text.ToDecimal();
-                _tabPair.Sec2Slippage = TextBoxSlippage2.Text.ToDecimal();
+                if (TryGetSelectedEnum(ComboBoxVolumeTypeSec2.SelectedItem, out PairTraderVolumeType sec2VolumeType))
+                {
+                    _tabPair.Sec2VolumeType = sec2VolumeType;
+                }
 
-                _tabPair.Sec1Volume = TextBoxVolume1.Text.ToDecimal();
-                _tabPair.Sec2Volume = TextBoxVolume2.Text.ToDecimal();
+                if (TryGetSelectedEnum(ComboBoxRegime1.SelectedItem, out PairTraderSecurityTradeRegime sec1TradeRegime))
+                {
+                    _tabPair.Sec1TradeRegime = sec1TradeRegime;
+                }
 
-                _tabPair.CorrelationLookBack = Convert.ToInt32(TextBoxCorrelationLookBack.Text, CultureInfo.InvariantCulture);
-                _tabPair.CointegrationLookBack = Convert.ToInt32(TextBoxCointegrationLookBack.Text, CultureInfo.InvariantCulture);
-                _tabPair.CointegrationDeviation = TextBoxCointegrationDeviation.Text.ToDecimal();
+                if (TryGetSelectedEnum(ComboBoxRegime2.SelectedItem, out PairTraderSecurityTradeRegime sec2TradeRegime))
+                {
+                    _tabPair.Sec2TradeRegime = sec2TradeRegime;
+                }
 
-                _tabPair.AutoRebuildCointegration = CheckBoxCointegrationAutoIsOn.IsChecked.Value;
-                _tabPair.AutoRebuildCorrelation = CheckBoxCorrelationAutoIsOn.IsChecked.Value;
+                if (TryReadDecimal(TextBoxSlippage1.Text, out decimal sec1Slippage))
+                {
+                    _tabPair.Sec1Slippage = sec1Slippage;
+                }
+
+                if (TryReadDecimal(TextBoxSlippage2.Text, out decimal sec2Slippage))
+                {
+                    _tabPair.Sec2Slippage = sec2Slippage;
+                }
+
+                if (TryReadDecimal(TextBoxVolume1.Text, out decimal sec1Volume))
+                {
+                    _tabPair.Sec1Volume = sec1Volume;
+                }
+
+                if (TryReadDecimal(TextBoxVolume2.Text, out decimal sec2Volume))
+                {
+                    _tabPair.Sec2Volume = sec2Volume;
+                }
+
+                if (TryReadInt(TextBoxCorrelationLookBack.Text, out int correlationLookBack))
+                {
+                    _tabPair.CorrelationLookBack = correlationLookBack;
+                }
+
+                if (TryReadInt(TextBoxCointegrationLookBack.Text, out int cointegrationLookBack))
+                {
+                    _tabPair.CointegrationLookBack = cointegrationLookBack;
+                }
+
+                if (TryReadDecimal(TextBoxCointegrationDeviation.Text, out decimal cointegrationDeviation))
+                {
+                    _tabPair.CointegrationDeviation = cointegrationDeviation;
+                }
+
+                _tabPair.AutoRebuildCointegration = CheckBoxCointegrationAutoIsOn.IsChecked == true;
+                _tabPair.AutoRebuildCorrelation = CheckBoxCorrelationAutoIsOn.IsChecked == true;
 
                 _tabPair.SaveStandartSettings();
             }
@@ -203,6 +249,34 @@ namespace OsEngine.OsTrader.Panels.Tab
             {
                 MessageBox.Show(error.ToString());
             }
+        }
+
+        private static bool TryGetSelectedEnum<TEnum>(object selectedItem, out TEnum value)
+            where TEnum : struct
+        {
+            value = default;
+
+            if (selectedItem is TEnum typedValue)
+            {
+                value = typedValue;
+                return true;
+            }
+
+            return selectedItem != null
+                   && Enum.TryParse(selectedItem.ToString(), true, out value);
+        }
+
+        private static bool TryReadDecimal(string text, out decimal value)
+        {
+            return decimal.TryParse(text, NumberStyles.Any, CultureInfo.InvariantCulture, out value)
+                   || decimal.TryParse(text, NumberStyles.Any, CultureInfo.CurrentCulture, out value)
+                   || decimal.TryParse(text, NumberStyles.Any, CultureInfo.GetCultureInfo("ru-RU"), out value);
+        }
+
+        private static bool TryReadInt(string text, out int value)
+        {
+            return int.TryParse(text, NumberStyles.Integer, CultureInfo.InvariantCulture, out value)
+                   || int.TryParse(text, NumberStyles.Integer, CultureInfo.CurrentCulture, out value);
         }
     }
 }
