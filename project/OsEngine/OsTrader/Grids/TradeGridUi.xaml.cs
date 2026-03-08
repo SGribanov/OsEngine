@@ -1252,12 +1252,12 @@ namespace OsEngine.OsTrader.Grids
         {
             try
             {
-                if (string.IsNullOrEmpty(TextBoxProfitValue.Text))
+                if (TryReadTextBoxDecimal(TextBoxProfitValue, out decimal value) == false)
                 {
                     return;
                 }
 
-                TradeGrid.StopAndProfit.ProfitValue = TextBoxProfitValue.Text.ToDecimal();
+                TradeGrid.StopAndProfit.ProfitValue = value;
                 TradeGrid.Save();
             }
             catch
@@ -1330,12 +1330,12 @@ namespace OsEngine.OsTrader.Grids
         {
             try
             {
-                if (string.IsNullOrEmpty(TextBoxStopValue.Text))
+                if (TryReadTextBoxDecimal(TextBoxStopValue, out decimal value) == false)
                 {
                     return;
                 }
 
-                TradeGrid.StopAndProfit.StopValue = TextBoxStopValue.Text.ToDecimal();
+                TradeGrid.StopAndProfit.StopValue = value;
                 TradeGrid.Save();
             }
             catch
@@ -1348,12 +1348,12 @@ namespace OsEngine.OsTrader.Grids
         {
             try
             {
-                if (string.IsNullOrEmpty(TextBoxTrailStopValue.Text))
+                if (TryReadTextBoxDecimal(TextBoxTrailStopValue, out decimal value) == false)
                 {
                     return;
                 }
 
-                TradeGrid.StopAndProfit.TrailStopValue = TextBoxTrailStopValue.Text.ToDecimal();
+                TradeGrid.StopAndProfit.TrailStopValue = value;
                 TradeGrid.Save();
             }
             catch
@@ -2239,12 +2239,12 @@ namespace OsEngine.OsTrader.Grids
         {
             try
             {
-                if (string.IsNullOrEmpty(TextBoxStopGridByMoveUpValuePercent.Text))
+                if (TryReadTextBoxDecimal(TextBoxStopGridByMoveUpValuePercent, out decimal value) == false)
                 {
                     return;
                 }
 
-                TradeGrid.StopBy.StopGridByMoveUpValuePercent = TextBoxStopGridByMoveUpValuePercent.Text.ToDecimal();
+                TradeGrid.StopBy.StopGridByMoveUpValuePercent = value;
                 TradeGrid.Save();
             }
             catch
@@ -2288,12 +2288,12 @@ namespace OsEngine.OsTrader.Grids
         {
             try
             {
-                if (string.IsNullOrEmpty(TextBoxStopGridByMoveDownValuePercent.Text))
+                if (TryReadTextBoxDecimal(TextBoxStopGridByMoveDownValuePercent, out decimal value) == false)
                 {
                     return;
                 }
 
-                TradeGrid.StopBy.StopGridByMoveDownValuePercent = TextBoxStopGridByMoveDownValuePercent.Text.ToDecimal();
+                TradeGrid.StopBy.StopGridByMoveDownValuePercent = value;
                 TradeGrid.Save();
             }
             catch
@@ -2337,12 +2337,12 @@ namespace OsEngine.OsTrader.Grids
         {
             try
             {
-                if (string.IsNullOrEmpty(TextBoxStopGridByPositionsCountValue.Text))
+                if (TryReadTextBoxInt(TextBoxStopGridByPositionsCountValue, out int value) == false)
                 {
                     return;
                 }
 
-                TradeGrid.StopBy.StopGridByPositionsCountValue = Convert.ToInt32(TextBoxStopGridByPositionsCountValue.Text, CultureInfo.InvariantCulture);
+                TradeGrid.StopBy.StopGridByPositionsCountValue = value;
                 TradeGrid.Save();
             }
             catch
@@ -2386,12 +2386,12 @@ namespace OsEngine.OsTrader.Grids
         {
             try
             {
-                if (string.IsNullOrEmpty(TextBoxStopGridByLifeTimeSecondsToLife.Text))
+                if (TryReadTextBoxInt(TextBoxStopGridByLifeTimeSecondsToLife, out int value) == false)
                 {
                     return;
                 }
 
-                TradeGrid.StopBy.StopGridByLifeTimeSecondsToLife = Convert.ToInt32(TextBoxStopGridByLifeTimeSecondsToLife.Text, CultureInfo.InvariantCulture);
+                TradeGrid.StopBy.StopGridByLifeTimeSecondsToLife = value;
                 TradeGrid.Save();
             }
             catch
@@ -2435,12 +2435,12 @@ namespace OsEngine.OsTrader.Grids
         {
             try
             {
-                if (string.IsNullOrEmpty(TextBoxStopGridByTimeOfDayHour.Text))
+                if (TryReadTextBoxInt(TextBoxStopGridByTimeOfDayHour, out int value) == false)
                 {
                     return;
                 }
 
-                TradeGrid.StopBy.StopGridByTimeOfDayHour = Convert.ToInt32(TextBoxStopGridByTimeOfDayHour.Text, CultureInfo.InvariantCulture);
+                TradeGrid.StopBy.StopGridByTimeOfDayHour = value;
                 TradeGrid.Save();
             }
             catch
@@ -2453,12 +2453,12 @@ namespace OsEngine.OsTrader.Grids
         {
             try
             {
-                if (string.IsNullOrEmpty(TextBoxStopGridByTimeOfDayMinute.Text))
+                if (TryReadTextBoxInt(TextBoxStopGridByTimeOfDayMinute, out int value) == false)
                 {
                     return;
                 }
 
-                TradeGrid.StopBy.StopGridByTimeOfDayMinute = Convert.ToInt32(TextBoxStopGridByTimeOfDayMinute.Text, CultureInfo.InvariantCulture);
+                TradeGrid.StopBy.StopGridByTimeOfDayMinute = value;
                 TradeGrid.Save();
             }
             catch
@@ -2471,12 +2471,12 @@ namespace OsEngine.OsTrader.Grids
         {
             try
             {
-                if (string.IsNullOrEmpty(TextBoxStopGridByTimeOfDaySecond.Text))
+                if (TryReadTextBoxInt(TextBoxStopGridByTimeOfDaySecond, out int value) == false)
                 {
                     return;
                 }
 
-                TradeGrid.StopBy.StopGridByTimeOfDaySecond = Convert.ToInt32(TextBoxStopGridByTimeOfDaySecond.Text, CultureInfo.InvariantCulture);
+                TradeGrid.StopBy.StopGridByTimeOfDaySecond = value;
                 TradeGrid.Save();
             }
             catch
@@ -2511,12 +2511,12 @@ namespace OsEngine.OsTrader.Grids
         {
             try
             {
-                if (string.IsNullOrEmpty(TextBoxAutoStartPrice.Text))
+                if (TryReadTextBoxDecimal(TextBoxAutoStartPrice, out decimal value) == false)
                 {
                     return;
                 }
 
-                TradeGrid.AutoStarter.AutoStartPrice = TextBoxAutoStartPrice.Text.ToDecimal();
+                TradeGrid.AutoStarter.AutoStartPrice = value;
                 TradeGrid.Save();
             }
             catch
@@ -2553,12 +2553,12 @@ namespace OsEngine.OsTrader.Grids
         {
             try
             {
-                if (string.IsNullOrEmpty(TextBoxShiftFirstPrice.Text))
+                if (TryReadTextBoxDecimal(TextBoxShiftFirstPrice, out decimal value) == false)
                 {
                     return;
                 }
 
-                TradeGrid.AutoStarter.ShiftFirstPrice = TextBoxShiftFirstPrice.Text.ToDecimal();
+                TradeGrid.AutoStarter.ShiftFirstPrice = value;
                 TradeGrid.Save();
             }
             catch
@@ -2608,12 +2608,12 @@ namespace OsEngine.OsTrader.Grids
         {
             try
             {
-                if (string.IsNullOrEmpty(TextBoxStartGridByTimeOfDayHour.Text))
+                if (TryReadTextBoxInt(TextBoxStartGridByTimeOfDayHour, out int value) == false)
                 {
                     return;
                 }
 
-                TradeGrid.AutoStarter.StartGridByTimeOfDayHour = Convert.ToInt32(TextBoxStartGridByTimeOfDayHour.Text, CultureInfo.InvariantCulture);
+                TradeGrid.AutoStarter.StartGridByTimeOfDayHour = value;
                 TradeGrid.Save();
             }
             catch
@@ -2626,12 +2626,12 @@ namespace OsEngine.OsTrader.Grids
         {
             try
             {
-                if (string.IsNullOrEmpty(TextBoxStartGridByTimeOfDayMinute.Text))
+                if (TryReadTextBoxInt(TextBoxStartGridByTimeOfDayMinute, out int value) == false)
                 {
                     return;
                 }
 
-                TradeGrid.AutoStarter.StartGridByTimeOfDayMinute = Convert.ToInt32(TextBoxStartGridByTimeOfDayMinute.Text, CultureInfo.InvariantCulture);
+                TradeGrid.AutoStarter.StartGridByTimeOfDayMinute = value;
                 TradeGrid.Save();
             }
             catch
@@ -2644,12 +2644,12 @@ namespace OsEngine.OsTrader.Grids
         {
             try
             {
-                if (string.IsNullOrEmpty(TextBoxStartGridByTimeOfDaySecond.Text))
+                if (TryReadTextBoxInt(TextBoxStartGridByTimeOfDaySecond, out int value) == false)
                 {
                     return;
                 }
 
-                TradeGrid.AutoStarter.StartGridByTimeOfDaySecond = Convert.ToInt32(TextBoxStartGridByTimeOfDaySecond.Text, CultureInfo.InvariantCulture);
+                TradeGrid.AutoStarter.StartGridByTimeOfDaySecond = value;
                 TradeGrid.Save();
             }
             catch
@@ -2890,12 +2890,12 @@ namespace OsEngine.OsTrader.Grids
         {
             try
             {
-                if (string.IsNullOrEmpty(TextBoxMaxClosePositionsInJournal.Text))
+                if (TryReadTextBoxInt(TextBoxMaxClosePositionsInJournal, out int value) == false)
                 {
                     return;
                 }
 
-                TradeGrid.MaxClosePositionsInJournal = Convert.ToInt32(TextBoxMaxClosePositionsInJournal.Text, CultureInfo.InvariantCulture);
+                TradeGrid.MaxClosePositionsInJournal = value;
                 TradeGrid.Save();
             }
             catch
@@ -3066,12 +3066,12 @@ namespace OsEngine.OsTrader.Grids
         {
             try
             {
-                if (string.IsNullOrEmpty(TextBoxMaxOpenOrdersInMarket.Text))
+                if (TryReadTextBoxInt(TextBoxMaxOpenOrdersInMarket, out int value) == false)
                 {
                     return;
                 }
 
-                TradeGrid.MaxOpenOrdersInMarket = Convert.ToInt32(TextBoxMaxOpenOrdersInMarket.Text, CultureInfo.InvariantCulture);
+                TradeGrid.MaxOpenOrdersInMarket = value;
                 TradeGrid.Save();
             }
             catch
@@ -3084,12 +3084,12 @@ namespace OsEngine.OsTrader.Grids
         {
             try
             {
-                if (string.IsNullOrEmpty(TextBoxMaxCloseOrdersInMarket.Text))
+                if (TryReadTextBoxInt(TextBoxMaxCloseOrdersInMarket, out int value) == false)
                 {
                     return;
                 }
 
-                TradeGrid.MaxCloseOrdersInMarket = Convert.ToInt32(TextBoxMaxCloseOrdersInMarket.Text, CultureInfo.InvariantCulture);
+                TradeGrid.MaxCloseOrdersInMarket = value;
                 TradeGrid.Save();
             }
             catch
@@ -3202,12 +3202,12 @@ namespace OsEngine.OsTrader.Grids
         {
             try
             {
-                if (string.IsNullOrEmpty(TextBoxDelayInReal.Text))
+                if (TryReadTextBoxInt(TextBoxDelayInReal, out int value) == false)
                 {
                     return;
                 }
 
-                TradeGrid.DelayInReal = Convert.ToInt32(TextBoxDelayInReal.Text, CultureInfo.InvariantCulture);
+                TradeGrid.DelayInReal = value;
                 TradeGrid.Save();
             }
             catch
@@ -3220,12 +3220,12 @@ namespace OsEngine.OsTrader.Grids
         {
             try
             {
-                if (string.IsNullOrEmpty(TextBoxMaxDistanceToOrdersPercent.Text))
+                if (TryReadTextBoxDecimal(TextBoxMaxDistanceToOrdersPercent, out decimal value) == false)
                 {
                     return;
                 }
 
-                TradeGrid.MaxDistanceToOrdersPercent = TextBoxMaxDistanceToOrdersPercent.Text.ToDecimal();
+                TradeGrid.MaxDistanceToOrdersPercent = value;
                 TradeGrid.Save();
             }
             catch
@@ -3258,6 +3258,22 @@ namespace OsEngine.OsTrader.Grids
         private static bool GetCheckBoxValue(System.Windows.Controls.CheckBox checkBox)
         {
             return checkBox.IsChecked == true;
+        }
+
+        private static bool TryReadTextBoxInt(System.Windows.Controls.TextBox textBox, out int value)
+        {
+            value = default;
+            string text = textBox.Text;
+            return string.IsNullOrEmpty(text) == false
+                && int.TryParse(text, NumberStyles.Integer, CultureInfo.InvariantCulture, out value);
+        }
+
+        private static bool TryReadTextBoxDecimal(System.Windows.Controls.TextBox textBox, out decimal value)
+        {
+            value = default;
+            string text = textBox.Text;
+            return string.IsNullOrEmpty(text) == false
+                && decimal.TryParse(text, NumberStyles.Any, CultureInfo.InvariantCulture, out value);
         }
 
 
