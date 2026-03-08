@@ -27,11 +27,14 @@ public class Stage2PerformanceBaselineTests
 {
     private delegate List<TradeGridLine> TradeGridCloseSideCollectorDelegate(TradeGrid grid, BotTabSimple tab);
     private delegate List<TradeGridLine> TradeGridProfitCloseCollectorDelegate(TradeGrid grid, BotTabSimple tab, out int cancelledOrders);
+    private delegate void TradeGridProfitClosePlacementDelegate(TradeGrid grid, BotTabSimple tab, Security security, decimal lastPrice, List<TradeGridLine> linesOpenPoses);
 
     private static readonly TradeGridCloseSideCollectorDelegate TradeGridCloseSideCollector =
         CreateTradeGridCloseSideCollector();
     private static readonly TradeGridProfitCloseCollectorDelegate TradeGridProfitCloseCollector =
         CreateTradeGridProfitCloseCollector();
+    private static readonly TradeGridProfitClosePlacementDelegate TradeGridProfitClosePlacement =
+        CreateTradeGridProfitClosePlacement();
 
     [Fact]
     public void Stage2Perf_TradeGrid_QueryCollectionsHotPath_ShouldEmitMetricsAndDeterministicChecksum()
@@ -516,6 +519,68 @@ public class Stage2PerformanceBaselineTests
         Stage2PerfReportWriter.Append(new Stage2PerfMetric
         {
             Scenario = "indicator_cache_hit_path",
+            Iterations = iterations,
+            ElapsedMsTotal = elapsedMs,
+            NanosecondsPerOp = nsPerOp,
+            AllocatedBytesTotal = allocatedBytes,
+            AllocatedBytesPerOp = allocatedBytesPerOp,
+            Gen0Collections = gen0After - gen0Before,
+            Checksum = checksum
+        });
+    }
+
+    [Fact]
+    public void Stage2Perf_TradeGrid_ProfitCloseProductionPathV2_ShouldEmitMetricsAndDeterministicChecksum()
+    {
+        const int warmupIterations = 128;
+        const int iterations = 4096;
+
+        TradeGrid grid = CreateBareGrid();
+        AttachCloseSidePerfTab(grid);
+        SeedProfitCloseGridLines(grid, 64);
+
+        Security security = new Security
+        {
+            Name = "CodexPerfProfitClose",
+            PriceLimitHigh = 100000m,
+            PriceLimitLow = 1m
+        };
+
+        const decimal lastPrice = 100m;
+
+        for (int i = 0; i < warmupIterations; i++)
+        {
+            _ = RunTradeGridProfitCloseProductionEquivalentPass(grid, security, lastPrice);
+        }
+
+        ForceGc();
+
+        long allocatedBefore = GC.GetAllocatedBytesForCurrentThread();
+        int gen0Before = GC.CollectionCount(0);
+        Stopwatch stopwatch = Stopwatch.StartNew();
+
+        long checksum = 0;
+
+        for (int i = 0; i < iterations; i++)
+        {
+            checksum += RunTradeGridProfitCloseProductionEquivalentPass(grid, security, lastPrice);
+        }
+
+        stopwatch.Stop();
+
+        long allocatedAfter = GC.GetAllocatedBytesForCurrentThread();
+        int gen0After = GC.CollectionCount(0);
+
+        long allocatedBytes = allocatedAfter - allocatedBefore;
+        double elapsedMs = stopwatch.Elapsed.TotalMilliseconds;
+        double nsPerOp = elapsedMs * 1_000_000d / iterations;
+        double allocatedBytesPerOp = (double)allocatedBytes / iterations;
+
+        Assert.True(checksum > 0);
+
+        Stage2PerfReportWriter.Append(new Stage2PerfMetric
+        {
+            Scenario = "tradegrid_profit_close_production_path_v2",
             Iterations = iterations,
             ElapsedMsTotal = elapsedMs,
             NanosecondsPerOp = nsPerOp,
@@ -1176,6 +1241,30 @@ public class Stage2PerformanceBaselineTests
         return checksum;
     }
 
+    private static long RunTradeGridProfitCloseProductionEquivalentPass(TradeGrid grid, Security security, decimal lastPrice)
+    {
+        BotTabSimple tab = grid.Tab;
+        List<TradeGridLine> openPositions = TradeGridProfitCloseCollector(grid, tab, out int cancelledOrders);
+        TradeGridProfitClosePlacement(grid, tab, security, lastPrice, openPositions);
+
+        long checksum = cancelledOrders + openPositions.Count;
+
+        for (int i = 0; i < openPositions.Count; i++)
+        {
+            Position? position = openPositions[i].Position;
+            if (position == null)
+            {
+                continue;
+            }
+
+            checksum += (long)(position.OpenVolume * 100m);
+            checksum += position.ProfitOrderPrice != 0m ? 1000L : 0L;
+            checksum += position.CloseActive ? 10000L : 0L;
+        }
+
+        return checksum;
+    }
+
     private static long RunFractalAndCciProductionSignalPass(FractalAndCciPerfState state, Candle nextCandle)
     {
         state.Candles.Add(nextCandle);
@@ -1516,6 +1605,7 @@ public class Stage2PerformanceBaselineTests
         BotTabSimple tab = (BotTabSimple)RuntimeHelpers.GetUninitializedObject(typeof(BotTabSimple));
         tab.TabName = "CodexPerfCloseSideTab";
         tab.StartProgram = StartProgram.IsOsTrader;
+        tab.LogMessageEvent += static (_, _) => { };
         grid.Tab = tab;
     }
 
@@ -1537,6 +1627,16 @@ public class Stage2PerformanceBaselineTests
             ?? throw new InvalidOperationException("CollectOpenPositionsAndCancelWrongCloseProfitOrders not found.");
 
         return (TradeGridProfitCloseCollectorDelegate)method.CreateDelegate(typeof(TradeGridProfitCloseCollectorDelegate));
+    }
+
+    private static TradeGridProfitClosePlacementDelegate CreateTradeGridProfitClosePlacement()
+    {
+        MethodInfo method = typeof(TradeGrid).GetMethod(
+            "TrySetClosingProfitOrdersFromLines",
+            BindingFlags.NonPublic | BindingFlags.Instance)
+            ?? throw new InvalidOperationException("TrySetClosingProfitOrdersFromLines not found.");
+
+        return (TradeGridProfitClosePlacementDelegate)method.CreateDelegate(typeof(TradeGridProfitClosePlacementDelegate));
     }
 
     private static void SetPrivateField(object target, string fieldName, object value)
