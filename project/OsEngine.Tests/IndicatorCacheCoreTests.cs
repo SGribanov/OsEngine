@@ -132,6 +132,29 @@ public class IndicatorCacheCoreTests
     }
 
     [Fact]
+    public void IndicatorCache_SetExistingAtCapacity_ShouldOverwriteWithoutEviction()
+    {
+        IndicatorCache cache = new IndicatorCache(
+            maxEntries: 1,
+            isolationMode: IndicatorCacheIsolationMode.TrustedReferences);
+        IndicatorCacheKey key = BuildKey("A");
+        List<decimal>[] first = [new List<decimal> { 1m }];
+        List<decimal>[] second = [new List<decimal> { 2m }];
+
+        cache.Set(key, first);
+        cache.Set(key, second);
+
+        Assert.True(cache.TryGet(key, out List<decimal>[]? loaded));
+        Assert.NotNull(loaded);
+        Assert.Same(second, loaded);
+
+        IndicatorCacheStatistics stats = cache.GetStatisticsSnapshot();
+        Assert.Equal(0, stats.Evictions);
+        Assert.Equal(1, stats.EntriesCount);
+        Assert.Equal(2, stats.Writes);
+    }
+
+    [Fact]
     public void IndicatorCache_Clear_ShouldResetEntriesAndCounters()
     {
         IndicatorCache cache = new IndicatorCache(maxEntries: 4);

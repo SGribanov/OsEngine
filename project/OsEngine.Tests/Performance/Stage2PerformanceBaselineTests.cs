@@ -527,6 +527,70 @@ public class Stage2PerformanceBaselineTests
     }
 
     [Fact]
+    public void Stage2Perf_IndicatorCache_MissWritePath_ShouldEmitMetricsAndStableChecksums()
+    {
+        const int warmupIterations = 200;
+        const int iterations = 2000;
+
+        for (int i = 0; i < warmupIterations; i++)
+        {
+            IndicatorCache warmupCache = new IndicatorCache(
+                maxEntries: warmupIterations + iterations + 16,
+                isolationMode: IndicatorCacheIsolationMode.TrustedReferences);
+            warmupCache.Set(BuildIndicatorCachePerfKey(i), BuildIndicatorCachePerfPayload(i));
+        }
+
+        ForceGc();
+
+        IndicatorCache cache = new IndicatorCache(
+            maxEntries: warmupIterations + iterations + 16,
+            isolationMode: IndicatorCacheIsolationMode.TrustedReferences);
+        long allocatedBefore = GC.GetAllocatedBytesForCurrentThread();
+        int gen0Before = GC.CollectionCount(0);
+        Stopwatch stopwatch = Stopwatch.StartNew();
+
+        long checksum = 0;
+
+        for (int i = 0; i < iterations; i++)
+        {
+            IndicatorCacheKey key = BuildIndicatorCachePerfKey(i);
+            List<decimal>[] payload = BuildIndicatorCachePerfPayload(i);
+            cache.Set(key, payload);
+            checksum += key.GetHashCode();
+            checksum += (long)(payload[0][0] * 1000m);
+            checksum += (long)(payload[2][1] * 1000m);
+        }
+
+        stopwatch.Stop();
+
+        long allocatedAfter = GC.GetAllocatedBytesForCurrentThread();
+        int gen0After = GC.CollectionCount(0);
+        IndicatorCacheStatistics stats = cache.GetStatisticsSnapshot();
+
+        long allocatedBytes = allocatedAfter - allocatedBefore;
+        double elapsedMs = stopwatch.Elapsed.TotalMilliseconds;
+        double nsPerOp = elapsedMs * 1_000_000d / iterations;
+        double allocatedBytesPerOp = (double)allocatedBytes / iterations;
+
+        Assert.NotEqual(0, checksum);
+        Assert.Equal(iterations, stats.Writes);
+        Assert.Equal(iterations, stats.EntriesCount);
+        Assert.Equal(0, stats.Evictions);
+
+        Stage2PerfReportWriter.Append(new Stage2PerfMetric
+        {
+            Scenario = "indicator_cache_miss_write_path",
+            Iterations = iterations,
+            ElapsedMsTotal = elapsedMs,
+            NanosecondsPerOp = nsPerOp,
+            AllocatedBytesTotal = allocatedBytes,
+            AllocatedBytesPerOp = allocatedBytesPerOp,
+            Gen0Collections = gen0After - gen0Before,
+            Checksum = checksum
+        });
+    }
+
+    [Fact]
     public void Stage2Perf_OptimizerMethodCache_HitPath_ShouldEmitMetricsAndStableChecksums()
     {
         const int warmupIterations = 200;
@@ -869,6 +933,34 @@ public class Stage2PerformanceBaselineTests
             sourceId: index,
             dataFingerprint: 17 + (index & 15),
             resultTypeName: typeof(int).FullName ?? nameof(Int32));
+    }
+
+    private static IndicatorCacheKey BuildIndicatorCachePerfKey(int index)
+    {
+        return new IndicatorCacheKey(
+            securityName: "PERF",
+            timeframeTicks: 60,
+            firstTimeTicks: 1 + index,
+            lastTimeTicks: 2 + index,
+            candleCount: 256 + (index & 7),
+            calculationName: "Stage2IndicatorCachePerf",
+            parametersHash: BotPanelMethodHashPerfAccessor.BuildInt(index & 63),
+            sourceId: index,
+            outputSeriesCount: 3,
+            includeIndicatorsCount: index & 1,
+            dataFingerprint: 11 + (index & 15));
+    }
+
+    private static List<decimal>[] BuildIndicatorCachePerfPayload(int index)
+    {
+        decimal basis = index * 0.01m;
+
+        return
+        [
+            new List<decimal> { 1m + basis, 2m + basis, 3m + basis },
+            new List<decimal> { 10m + basis, 11m + basis },
+            new List<decimal> { 20m + basis, 21m + basis }
+        ];
     }
 
     private static long RunTradeGridCloseSideCollectorPass(TradeGrid grid)

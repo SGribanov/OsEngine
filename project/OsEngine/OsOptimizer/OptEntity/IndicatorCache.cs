@@ -426,19 +426,36 @@ namespace OsEngine.OsOptimizer.OptEntity
 
             lock (_sync)
             {
-                bool exists = _cache.ContainsKey(key);
+                int entriesCount = _cache.Count;
 
-                if (!exists && _cache.Count >= _maxEntries)
+                if (entriesCount < _maxEntries)
                 {
-                    int removed = _cache.Count;
+                    if (_cache.TryAdd(key, storedValues))
+                    {
+                        Interlocked.Increment(ref _writes);
+                        return;
+                    }
+
+                    _cache[key] = storedValues;
+                    Interlocked.Increment(ref _writes);
+                    return;
+                }
+
+                if (!_cache.TryGetValue(key, out _))
+                {
                     _cache.Clear();
-                    Interlocked.Add(ref _evictions, removed);
+                    Interlocked.Add(ref _evictions, entriesCount);
+
+                    if (_cache.TryAdd(key, storedValues))
+                    {
+                        Interlocked.Increment(ref _writes);
+                        return;
+                    }
                 }
 
                 _cache[key] = storedValues;
+                Interlocked.Increment(ref _writes);
             }
-
-            Interlocked.Increment(ref _writes);
         }
 
         public void Clear()
