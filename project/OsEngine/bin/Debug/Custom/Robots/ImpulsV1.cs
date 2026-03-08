@@ -17,13 +17,13 @@ trading robot for osengine
 Manual impulse strategy without indicators.
 
 Buy:
-1. Mid-price momentum is above 0 and rising.
+1. Both mid-price momentum values are above 0 and rising.
 2. Candle volume is above the average volume by X percent.
 3. Candle body is larger than Y * ATR.
 4. Close is above the candle midpoint.
 
 Sell:
-1. Mid-price momentum is below 0 and falling.
+1. Both mid-price momentum values are below 0 and falling.
 2. Candle volume is above the average volume by X percent.
 3. Candle body is larger than Y * ATR.
 4. Close is below the candle midpoint.
@@ -40,10 +40,12 @@ namespace OsEngine.Robots
     {
         private readonly BotTabSimple _tab;
         private readonly List<decimal> _momentumValues = new List<decimal>();
+        private readonly List<decimal> _secondMomentumValues = new List<decimal>();
         private readonly List<decimal> _trueRangeValues = new List<decimal>();
         private readonly List<decimal> _atrValues = new List<decimal>();
         private bool _isDeleted;
         private int _cachedMomentumLength;
+        private int _cachedSecondMomentumLength;
         private int _cachedAtrLength;
 
         private readonly StrategyParameterString _regime;
@@ -52,6 +54,7 @@ namespace OsEngine.Robots
         private readonly StrategyParameterTimeOfDay _endTradeTime;
 
         private readonly StrategyParameterInt _momentumLength;
+        private readonly StrategyParameterInt _secondMomentumLength;
         private readonly StrategyParameterInt _averageVolumeLength;
         private readonly StrategyParameterInt _atrLength;
         private readonly StrategyParameterDecimal _volumeExcessPercent;
@@ -71,6 +74,7 @@ namespace OsEngine.Robots
             _endTradeTime = CreateParameterTimeOfDay("End Trade Time", 24, 0, 0, 0, "Base");
 
             _momentumLength = CreateParameter("Momentum Length", 24, 2, 500, 1, "Signal");
+            _secondMomentumLength = CreateParameter("Second Momentum Length", 48, 2, 500, 1, "Signal");
             _averageVolumeLength = CreateParameter("Average Volume Length", 200, 5, 5000, 5, "Signal");
             _atrLength = CreateParameter("ATR Length", 5, 1, 200, 1, "Signal");
             _volumeExcessPercent = CreateParameter("Volume Excess Percent", 10.0m, 0.1m, 500m, 0.1m, "Signal");
@@ -82,7 +86,7 @@ namespace OsEngine.Robots
             _tab.CandleFinishedEvent += OnCandleFinished;
             DeleteEvent += OnDelete;
 
-            Description = "Manual impulse strategy using zero-centered mid-price momentum, volume expansion, ATR body filter and midpoint close confirmation.";
+            Description = "Manual impulse strategy using two zero-centered mid-price momentum confirmations, volume expansion, ATR body filter and midpoint close confirmation.";
         }
 
         public override string GetNameStrategyType()
@@ -155,7 +159,7 @@ namespace OsEngine.Robots
 
         private int GetMinCandlesCount()
         {
-            int minCandles = _momentumLength.ValueInt + 2;
+            int minCandles = Math.Max(_momentumLength.ValueInt, _secondMomentumLength.ValueInt) + 2;
             int volumeCandles = _averageVolumeLength.ValueInt + 1;
             int atrCandles = _atrLength.ValueInt;
 
@@ -179,6 +183,8 @@ namespace OsEngine.Robots
 
             decimal momentum = _momentumValues[lastIndex];
             decimal previousMomentum = _momentumValues[lastIndex - 1];
+            decimal secondMomentum = _secondMomentumValues[lastIndex];
+            decimal previousSecondMomentum = _secondMomentumValues[lastIndex - 1];
             decimal averageVolume = CalculateAverageVolume(candles, lastIndex, _averageVolumeLength.ValueInt);
             decimal atr = _atrValues[lastIndex];
 
@@ -205,18 +211,24 @@ namespace OsEngine.Robots
             }
 
             decimal slippage = GetSlippagePrice();
+            bool isLongMomentumConfirmed = momentum > 0m
+                && momentum > previousMomentum
+                && secondMomentum > 0m
+                && secondMomentum > previousSecondMomentum;
+            bool isShortMomentumConfirmed = momentum < 0m
+                && momentum < previousMomentum
+                && secondMomentum < 0m
+                && secondMomentum < previousSecondMomentum;
 
             if (_regime.ValueString != "OnlyShort"
-                && momentum > 0m
-                && momentum > previousMomentum
+                && isLongMomentumConfirmed
                 && lastCandle.Close > lastCandle.Low + 0.5m * (lastCandle.High - lastCandle.Low))
             {
                 _tab.BuyAtLimit(volume, GetBuyOrderPrice(lastCandle.Close, slippage), "ImpulseLong");
             }
 
             if (_regime.ValueString != "OnlyLong"
-                && momentum < 0m
-                && momentum < previousMomentum
+                && isShortMomentumConfirmed
                 && lastCandle.Close < lastCandle.High - 0.5m * (lastCandle.High - lastCandle.Low))
             {
                 _tab.SellAtLimit(volume, GetSellOrderPrice(lastCandle.Close, slippage), "ImpulseShort");
@@ -299,8 +311,10 @@ namespace OsEngine.Robots
         private void EnsureCalculatedValues(List<Candle> candles)
         {
             if (_cachedMomentumLength != _momentumLength.ValueInt
+                || _cachedSecondMomentumLength != _secondMomentumLength.ValueInt
                 || _cachedAtrLength != _atrLength.ValueInt
                 || _momentumValues.Count > candles.Count
+                || _secondMomentumValues.Count > candles.Count
                 || _trueRangeValues.Count > candles.Count
                 || _atrValues.Count > candles.Count)
             {
@@ -309,6 +323,7 @@ namespace OsEngine.Robots
             }
 
             if (_momentumValues.Count == candles.Count
+                && _secondMomentumValues.Count == candles.Count
                 && _trueRangeValues.Count == candles.Count
                 && _atrValues.Count == candles.Count)
             {
@@ -317,6 +332,7 @@ namespace OsEngine.Robots
             }
 
             if (_momentumValues.Count + 1 == candles.Count
+                && _secondMomentumValues.Count + 1 == candles.Count
                 && _trueRangeValues.Count + 1 == candles.Count
                 && _atrValues.Count + 1 == candles.Count)
             {
@@ -331,6 +347,7 @@ namespace OsEngine.Robots
         {
             ClearCalculatedValues();
             _cachedMomentumLength = _momentumLength.ValueInt;
+            _cachedSecondMomentumLength = _secondMomentumLength.ValueInt;
             _cachedAtrLength = _atrLength.ValueInt;
 
             for (int i = 0; i < candles.Count; i++)
@@ -342,34 +359,38 @@ namespace OsEngine.Robots
         private void ClearCalculatedValues()
         {
             _momentumValues.Clear();
+            _secondMomentumValues.Clear();
             _trueRangeValues.Clear();
             _atrValues.Clear();
             _cachedMomentumLength = 0;
+            _cachedSecondMomentumLength = 0;
             _cachedAtrLength = 0;
         }
 
         private void AppendCalculatedValue(List<Candle> candles, int index)
         {
-            _momentumValues.Add(CalculateMomentum(candles, index));
+            _momentumValues.Add(CalculateMomentum(candles, index, _momentumLength.ValueInt));
+            _secondMomentumValues.Add(CalculateMomentum(candles, index, _secondMomentumLength.ValueInt));
             _trueRangeValues.Add(CalculateTrueRange(candles, index));
             _atrValues.Add(CalculateAtr(index));
         }
 
         private void UpdateCalculatedValue(List<Candle> candles, int index)
         {
-            _momentumValues[index] = CalculateMomentum(candles, index);
+            _momentumValues[index] = CalculateMomentum(candles, index, _momentumLength.ValueInt);
+            _secondMomentumValues[index] = CalculateMomentum(candles, index, _secondMomentumLength.ValueInt);
             _trueRangeValues[index] = CalculateTrueRange(candles, index);
             _atrValues[index] = CalculateAtr(index);
         }
 
-        private decimal CalculateMomentum(List<Candle> candles, int index)
+        private decimal CalculateMomentum(List<Candle> candles, int index, int length)
         {
-            if (index < _momentumLength.ValueInt)
+            if (length <= 0 || index < length)
             {
                 return 0m;
             }
 
-            decimal baseMidPrice = GetMidPrice(candles[index - _momentumLength.ValueInt]);
+            decimal baseMidPrice = GetMidPrice(candles[index - length]);
 
             if (baseMidPrice <= 0m)
             {
