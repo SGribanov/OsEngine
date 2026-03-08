@@ -12,6 +12,9 @@ OsEngine is an open-source algorithmic trading platform written in C# / WPF. It 
 # Solution file
 project/OsEngine.sln
 
+# Canonical verification entrypoint (preferred)
+powershell -NoProfile -ExecutionPolicy Bypass -File tools/verify-dotnet.ps1
+
 # Restore
 dotnet restore project/OsEngine.sln
 
@@ -26,6 +29,7 @@ dotnet run --project project/OsEngine/OsEngine.csproj
 ```
 
 All `restore/build/test` commands must be executed in host context (outside sandbox).
+Prefer the repository script `tools/verify-dotnet.ps1` for local verification because it serializes restore/build/test and shuts down build servers before and after the run to reduce recurring WPF/generated-file lock noise.
 
 - SDK baseline: `.NET 10`
 - Language baseline: `C# 14`

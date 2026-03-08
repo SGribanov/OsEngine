@@ -85,6 +85,7 @@
   - `dotnet build`
   - `dotnet test`
 - Prefer a single chained command for restore/build/test when possible.
+- In this repository, prefer `powershell -NoProfile -ExecutionPolicy Bypass -File tools/verify-dotnet.ps1` as the canonical local verification entrypoint; it serializes restore/build/test and shuts down build servers before/after the run to reduce recurring WPF/generated-file lock noise.
 
 ## GitHub CLI auth in agent context
 - Prefer `gh auth status`/keyring auth first.
