@@ -364,6 +364,7 @@ namespace OsEngine.OsOptimizer.OptEntity
         private long _misses;
         private long _writes;
         private long _evictions;
+        private int _entriesCount;
 
         public IndicatorCache(
             int maxEntries = 512,
@@ -426,12 +427,18 @@ namespace OsEngine.OsOptimizer.OptEntity
 
             lock (_sync)
             {
-                int entriesCount = _cache.Count;
+                if (_cache.TryGetValue(key, out _))
+                {
+                    _cache[key] = storedValues;
+                    Interlocked.Increment(ref _writes);
+                    return;
+                }
 
-                if (entriesCount < _maxEntries)
+                if (_entriesCount < _maxEntries)
                 {
                     if (_cache.TryAdd(key, storedValues))
                     {
+                        _entriesCount++;
                         Interlocked.Increment(ref _writes);
                         return;
                     }
@@ -441,30 +448,34 @@ namespace OsEngine.OsOptimizer.OptEntity
                     return;
                 }
 
-                if (!_cache.TryGetValue(key, out _))
-                {
-                    _cache.Clear();
-                    Interlocked.Add(ref _evictions, entriesCount);
+                _cache.Clear();
+                Interlocked.Add(ref _evictions, _entriesCount);
+                _entriesCount = 0;
 
-                    if (_cache.TryAdd(key, storedValues))
-                    {
-                        Interlocked.Increment(ref _writes);
-                        return;
-                    }
+                if (_cache.TryAdd(key, storedValues))
+                {
+                    _entriesCount = 1;
+                    Interlocked.Increment(ref _writes);
+                    return;
                 }
 
                 _cache[key] = storedValues;
+                _entriesCount = 1;
                 Interlocked.Increment(ref _writes);
             }
         }
 
         public void Clear()
         {
-            _cache.Clear();
-            Interlocked.Exchange(ref _hits, 0);
-            Interlocked.Exchange(ref _misses, 0);
-            Interlocked.Exchange(ref _writes, 0);
-            Interlocked.Exchange(ref _evictions, 0);
+            lock (_sync)
+            {
+                _cache.Clear();
+                _entriesCount = 0;
+                Interlocked.Exchange(ref _hits, 0);
+                Interlocked.Exchange(ref _misses, 0);
+                Interlocked.Exchange(ref _writes, 0);
+                Interlocked.Exchange(ref _evictions, 0);
+            }
         }
 
         public IndicatorCacheStatistics GetStatisticsSnapshot()
@@ -474,7 +485,7 @@ namespace OsEngine.OsOptimizer.OptEntity
                 misses: Interlocked.Read(ref _misses),
                 writes: Interlocked.Read(ref _writes),
                 evictions: Interlocked.Read(ref _evictions),
-                entriesCount: _cache.Count);
+                entriesCount: Volatile.Read(ref _entriesCount));
         }
 
         private static List<decimal>[]? CloneSeries(List<decimal>[]? source)

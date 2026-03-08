@@ -120,4 +120,46 @@ public class OptimizerMethodCacheCoreTests
         Assert.True(cache.TryGet(key, out int value));
         Assert.Equal(42, value);
     }
+
+    [Fact]
+    public void OptimizerMethodCache_AddingNewKeyAtCapacity_ShouldEvictSingleEntryInsteadOfClearingAll()
+    {
+        OptimizerMethodCache cache = new OptimizerMethodCache(maxEntries: 2);
+        OptimizerMethodCacheKey first = BuildKey("first");
+        OptimizerMethodCacheKey second = BuildKey("second");
+        OptimizerMethodCacheKey third = BuildKey("third");
+
+        cache.Set(first, 1);
+        cache.Set(second, 2);
+        cache.Set(third, 3);
+
+        bool firstFound = cache.TryGet(first, out int firstValue);
+        bool secondFound = cache.TryGet(second, out int secondValue);
+        bool thirdFound = cache.TryGet(third, out int thirdValue);
+
+        Assert.True(thirdFound);
+        Assert.Equal(3, thirdValue);
+        Assert.True(firstFound || secondFound);
+        Assert.False(firstFound && secondFound);
+        Assert.True((firstFound && firstValue == 1) || (secondFound && secondValue == 2));
+
+        OptimizerMethodCacheStatistics stats = cache.GetStatisticsSnapshot();
+        Assert.Equal(2, stats.EntriesCount);
+        Assert.Equal(1, stats.Evictions);
+    }
+
+    private static OptimizerMethodCacheKey BuildKey(string sourceId)
+    {
+        return new OptimizerMethodCacheKey(
+            securityName: "SEC",
+            timeframeTicks: 60,
+            firstTimeTicks: 1,
+            lastTimeTicks: 2,
+            candleCount: 100,
+            calculationName: "Calc",
+            parametersHash: "p",
+            sourceId: sourceId,
+            dataFingerprint: 1,
+            resultTypeName: typeof(int).FullName!);
+    }
 }

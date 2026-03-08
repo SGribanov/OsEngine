@@ -132,6 +132,29 @@ public class IndicatorCacheCoreTests
     }
 
     [Fact]
+    public void IndicatorCache_ChurnAtCapacity_ShouldKeepLatestEntryAndCountEvictions()
+    {
+        IndicatorCache cache = new IndicatorCache(
+            maxEntries: 2,
+            isolationMode: IndicatorCacheIsolationMode.TrustedReferences);
+
+        cache.Set(BuildKey("A"), [new List<decimal> { 1m }]);
+        cache.Set(BuildKey("B"), [new List<decimal> { 2m }]);
+        cache.Set(BuildKey("C"), [new List<decimal> { 3m }]);
+
+        Assert.False(cache.TryGet(BuildKey("A"), out _));
+        Assert.False(cache.TryGet(BuildKey("B"), out _));
+        Assert.True(cache.TryGet(BuildKey("C"), out List<decimal>[]? loaded));
+        Assert.NotNull(loaded);
+        Assert.Equal(3m, loaded![0][0]);
+
+        IndicatorCacheStatistics stats = cache.GetStatisticsSnapshot();
+        Assert.Equal(2, stats.Evictions);
+        Assert.Equal(1, stats.EntriesCount);
+        Assert.Equal(3, stats.Writes);
+    }
+
+    [Fact]
     public void IndicatorCache_SetExistingAtCapacity_ShouldOverwriteWithoutEviction()
     {
         IndicatorCache cache = new IndicatorCache(
