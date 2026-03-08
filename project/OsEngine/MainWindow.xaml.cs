@@ -1076,7 +1076,7 @@ namespace OsEngine
                     Directory.CreateDirectory(@"Engine\Log");
 
                     //записываем дату сборки, далее ориентир будет по ней
-                    File.WriteAllText(@"Engine\Updater\LastUpdatesInfo.txt", insideVersionDate.ToString("G"));
+                    SaveLastUpdatesInfo(insideVersionDate);
                 }
                 else
                 {
@@ -1167,6 +1167,11 @@ namespace OsEngine
             }
         }
 
+        private static void SaveLastUpdatesInfo(DateTime insideVersionDate)
+        {
+            SafeFileWriter.WriteAllText(@"Engine\Updater\LastUpdatesInfo.txt", insideVersionDate.ToString("G"));
+        }
+
         private void WriteFilesVersionsTime(DateTime fileTime)
         {
             try
@@ -1183,7 +1188,7 @@ namespace OsEngine
 
                 }
 
-                File.WriteAllText(@"Engine\Updater\FilesVersionsTime.txt", sb.ToString());
+                SafeFileWriter.WriteAllText(@"Engine\Updater\FilesVersionsTime.txt", sb.ToString());
 
             }
             catch (Exception ex)
