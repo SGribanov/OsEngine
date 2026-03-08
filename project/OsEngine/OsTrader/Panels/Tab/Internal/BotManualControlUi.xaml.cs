@@ -20,6 +20,34 @@ namespace OsEngine.OsTrader.Panels.Tab.Internal
 {
     public partial class BotManualControlUi
     {
+        private static TEnum ParseEnumOrDefault<TEnum>(object selectedItem, string text, TEnum defaultValue)
+            where TEnum : struct
+        {
+            string candidate = selectedItem?.ToString();
+
+            if (string.IsNullOrWhiteSpace(candidate))
+            {
+                candidate = text;
+            }
+
+            if (!string.IsNullOrWhiteSpace(candidate)
+                && Enum.TryParse(candidate, true, out TEnum parsedValue))
+            {
+                return parsedValue;
+            }
+
+            return defaultValue;
+        }
+
+        private static int ParseIntInvariant(string text)
+        {
+            if (!int.TryParse(text, NumberStyles.Integer, CultureInfo.InvariantCulture, out int value))
+            {
+                throw new FormatException("Invalid integer value.");
+            }
+
+            return value;
+        }
 
         /// <summary>
         /// strategy settings /
@@ -199,12 +227,10 @@ namespace OsEngine.OsTrader.Panels.Tab.Internal
 
         private void ComboBoxOrdersTypeTime_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            OrderTypeTime typeTime = OrderTypeTime.Specified;
-
-            if (Enum.TryParse(ComboBoxOrdersTypeTime.SelectedItem.ToString(), out typeTime) == false)
-            {
-                return;
-            }
+            OrderTypeTime typeTime = ParseEnumOrDefault(
+                ComboBoxOrdersTypeTime.SelectedItem,
+                ComboBoxOrdersTypeTime.Text,
+                OrderTypeTime.Specified);
 
             if (typeTime == OrderTypeTime.Specified)
             {
@@ -231,14 +257,16 @@ namespace OsEngine.OsTrader.Panels.Tab.Internal
         {
             try
             {
-                if (Convert.ToInt32(TextBoxSecondToOpen.Text, CultureInfo.InvariantCulture) <= 0 ||
-                    Convert.ToInt32(TextBoxSecondToClose.Text, CultureInfo.InvariantCulture) <= 0 ||
+                int secondToOpen = ParseIntInvariant(TextBoxSecondToOpen.Text);
+                int secondToClose = ParseIntInvariant(TextBoxSecondToClose.Text);
+
+                if (secondToOpen <= 0 ||
+                    secondToClose <= 0 ||
                     TextBoxStopPercentLength.Text.ToDecimal() <= 0 ||
                     TextBoxSlippageStop.Text.ToDecimal() <= 0 ||
                     TextBoxProfitPercentLength.Text.ToDecimal() <= 0 ||
                     TextBoxSlippageProfit.Text.ToDecimal() <= 0 ||
                     TextBoxSetbackToClose.Text.ToDecimal() <= 0 ||
-                    Convert.ToInt32(TextBoxSecondToOpen.Text, CultureInfo.InvariantCulture) <= 0 ||
                     TextBoxSetbackToOpen.Text.ToDecimal() <= 0 ||
                     TextBoxSlippageDoubleExit.Text.ToDecimal() < -100)
                 {
@@ -256,61 +284,54 @@ namespace OsEngine.OsTrader.Panels.Tab.Internal
 
                 // stop
                 // стоп
-                _strategySettings.StopIsOn = CheckBoxStopIsOn.IsChecked.Value;
+                _strategySettings.StopIsOn = CheckBoxStopIsOn.IsChecked == true;
                 _strategySettings.StopDistance = TextBoxStopPercentLength.Text.ToDecimal();
                 _strategySettings.StopSlippage = TextBoxSlippageStop.Text.ToDecimal();
 
                 // profit
                 // профит
-                _strategySettings.ProfitIsOn = CheckBoxProfitIsOn.IsChecked.Value;
+                _strategySettings.ProfitIsOn = CheckBoxProfitIsOn.IsChecked == true;
                 _strategySettings.ProfitDistance = TextBoxProfitPercentLength.Text.ToDecimal();
                 _strategySettings.ProfitSlippage = TextBoxSlippageProfit.Text.ToDecimal();
 
                 // closing position
                 // закрытие позиции
 
-                if (CheckBoxSecondToCloseIsOn.IsChecked.HasValue)
-                {
-                    _strategySettings.SecondToCloseIsOn = CheckBoxSecondToCloseIsOn.IsChecked.Value;
-                }
-                _strategySettings.SecondToClose = new TimeSpan(0, 0, 0, Convert.ToInt32(TextBoxSecondToClose.Text, CultureInfo.InvariantCulture));
+                _strategySettings.SecondToCloseIsOn = CheckBoxSecondToCloseIsOn.IsChecked == true;
+                _strategySettings.SecondToClose = new TimeSpan(0, 0, 0, ParseIntInvariant(TextBoxSecondToClose.Text));
 
-                if (CheckBoxSetbackToCloseIsOn.IsChecked.HasValue)
-                {
-                    _strategySettings.SetbackToCloseIsOn = CheckBoxSetbackToCloseIsOn.IsChecked.Value;
-                }
+                _strategySettings.SetbackToCloseIsOn = CheckBoxSetbackToCloseIsOn.IsChecked == true;
                 _strategySettings.SetbackToClosePosition = TextBoxSetbackToClose.Text.ToDecimal();
 
-                if (CheckBoxDoubleExitIsOnIsOn.IsChecked.HasValue)
-                {
-                    _strategySettings.DoubleExitIsOn = CheckBoxDoubleExitIsOnIsOn.IsChecked.Value;
-                }
+                _strategySettings.DoubleExitIsOn = CheckBoxDoubleExitIsOnIsOn.IsChecked == true;
 
-                Enum.TryParse(ComboBoxTypeDoubleExitOrder.SelectedItem.ToString(),
-                    out _strategySettings.TypeDoubleExitOrder);
+                _strategySettings.TypeDoubleExitOrder = ParseEnumOrDefault(
+                    ComboBoxTypeDoubleExitOrder.SelectedItem,
+                    ComboBoxTypeDoubleExitOrder.Text,
+                    _strategySettings.TypeDoubleExitOrder);
 
                 _strategySettings.DoubleExitSlippage = TextBoxSlippageDoubleExit.Text.ToDecimal();
 
                 // opening position
                 // открытие позиции
 
-                if (CheckBoxSecondToOpenIsOn.IsChecked.HasValue)
-                {
-                    _strategySettings.SecondToOpenIsOn = CheckBoxSecondToOpenIsOn.IsChecked.Value;
-                }
-                _strategySettings.SecondToOpen = new TimeSpan(0, 0, 0, Convert.ToInt32(TextBoxSecondToOpen.Text, CultureInfo.InvariantCulture));
+                _strategySettings.SecondToOpenIsOn = CheckBoxSecondToOpenIsOn.IsChecked == true;
+                _strategySettings.SecondToOpen = new TimeSpan(0, 0, 0, ParseIntInvariant(TextBoxSecondToOpen.Text));
 
-                if (CheckBoxSetbackToOpenIsOn.IsChecked.HasValue)
-                {
-                    _strategySettings.SetbackToOpenIsOn = CheckBoxSetbackToOpenIsOn.IsChecked.Value;
-                }
+                _strategySettings.SetbackToOpenIsOn = CheckBoxSetbackToOpenIsOn.IsChecked == true;
                 _strategySettings.SetbackToOpenPosition = TextBoxSetbackToOpen.Text.ToDecimal();
 
-                Enum.TryParse(ComboBoxValuesType.SelectedItem.ToString(), out _strategySettings.ValuesType);
+                _strategySettings.ValuesType = ParseEnumOrDefault(
+                    ComboBoxValuesType.SelectedItem,
+                    ComboBoxValuesType.Text,
+                    _strategySettings.ValuesType);
 
-                Enum.TryParse(ComboBoxOrdersTypeTime.SelectedItem.ToString(), out _strategySettings.OrderTypeTime);
+                _strategySettings.OrderTypeTime = ParseEnumOrDefault(
+                    ComboBoxOrdersTypeTime.SelectedItem,
+                    ComboBoxOrdersTypeTime.Text,
+                    _strategySettings.OrderTypeTime);
 
-                _strategySettings.LimitsMakerOnly = CheckBoxLimitsMakerOnly.IsChecked.Value;
+                _strategySettings.LimitsMakerOnly = CheckBoxLimitsMakerOnly.IsChecked == true;
 
                 _strategySettings.Save();
             }
