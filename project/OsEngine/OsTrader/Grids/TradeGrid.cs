@@ -70,7 +70,6 @@ namespace OsEngine.OsTrader.Grids
             public List<TradeGridLine> ClosingOrdersFact { get; }
         }
 
-
         #region Service
 
         public TradeGrid(StartProgram startProgram, BotTabSimple tab, int number)
@@ -2146,9 +2145,15 @@ namespace OsEngine.OsTrader.Grids
                 return;
             }
 
+            Security security = tab.Security;
+            if (security == null)
+            {
+                return;
+            }
+
             // 1 проверяем отзыв не правильных лимиток
 
-            int countRejectOrders = TryCancelWrongCloseProfitOrders();
+            List<TradeGridLine> openPositions = CollectOpenPositionsAndCancelWrongCloseProfitOrders(tab, out int countRejectOrders);
 
             if (countRejectOrders > 0)
             {
@@ -2158,7 +2163,7 @@ namespace OsEngine.OsTrader.Grids
 
             // 2 выставляем лимитки 
 
-            TrySetClosingProfitOrders(tab.PriceBestAsk);
+            TrySetClosingProfitOrdersFromLines(tab, security, tab.PriceBestAsk, openPositions);
 
         }
 
@@ -2170,43 +2175,7 @@ namespace OsEngine.OsTrader.Grids
                 return 0;
             }
 
-            List<TradeGridLine> lines = GetLinesWithClosingOrdersFact();
-
-            int cancelledOrders = 0;
-
-            for (int i = 0; i < lines.Count; i++)
-            {
-                TradeGridLine line = lines[i];
-                if (line == null)
-                {
-                    continue;
-                }
-
-                Position pos = line.Position;
-
-                if (pos == null
-                    || pos.CloseActive == false)
-                {
-                    continue;
-                }
-
-                if (TryGetLastOrder(pos.CloseOrders, out Order order) == false)
-                {
-                    continue;
-                }
-
-                if (order.NumberMarket != null
-                    && order.LastCancelTryLocalTime.AddSeconds(5) < DateTime.Now)
-                {
-                    if (order.Price != pos.ProfitOrderPrice
-                        || order.Volume - order.VolumeExecute != pos.OpenVolume)
-                    {
-                        tab.CloseOrder(order);
-                        cancelledOrders++;
-                    }
-                }
-            }
-
+            CollectOpenPositionsAndCancelWrongCloseProfitOrders(tab, out int cancelledOrders);
             return cancelledOrders;
         }
 
@@ -2223,8 +2192,11 @@ namespace OsEngine.OsTrader.Grids
                 return;
             }
 
-            List<TradeGridLine> linesOpenPoses = GetLinesWithOpenPosition();
+            TrySetClosingProfitOrdersFromLines(tab, security, lastPrice, GetLinesWithOpenPosition());
+        }
 
+        private void TrySetClosingProfitOrdersFromLines(BotTabSimple tab, Security security, decimal lastPrice, List<TradeGridLine> linesOpenPoses)
+        {
             for (int i = 0; i < linesOpenPoses.Count; i++)
             {
                 TradeGridLine line = linesOpenPoses[i];
@@ -2283,6 +2255,60 @@ namespace OsEngine.OsTrader.Grids
 
                 tab.CloseAtLimitUnsafe(pos, pos.ProfitOrderPrice, volume);
             }
+        }
+
+        private List<TradeGridLine> CollectOpenPositionsAndCancelWrongCloseProfitOrders(BotTabSimple tab, out int cancelledOrders)
+        {
+            TradeGridCreator gridCreator = GridCreator;
+            if (tab == null || gridCreator == null)
+            {
+                cancelledOrders = 0;
+                return new List<TradeGridLine>();
+            }
+
+            List<TradeGridLine> linesAll = gridCreator.Lines;
+            if (linesAll == null || linesAll.Count == 0)
+            {
+                cancelledOrders = 0;
+                return new List<TradeGridLine>();
+            }
+
+            List<TradeGridLine> openPositions = new List<TradeGridLine>(linesAll.Count);
+            cancelledOrders = 0;
+            DateTime now = DateTime.Now;
+
+            for (int i = 0; i < linesAll.Count; i++)
+            {
+                TradeGridLine line = linesAll[i];
+                if (line == null)
+                {
+                    continue;
+                }
+
+                Position pos = line.Position;
+                if (pos == null)
+                {
+                    continue;
+                }
+
+                if (pos.CloseActive
+                    && TryGetLastOrder(pos.CloseOrders, out Order order)
+                    && order.NumberMarket != null
+                    && order.LastCancelTryLocalTime.AddSeconds(5) < now
+                    && (order.Price != pos.ProfitOrderPrice
+                        || order.Volume - order.VolumeExecute != pos.OpenVolume))
+                {
+                    tab.CloseOrder(order);
+                    cancelledOrders++;
+                }
+
+                if (pos.OpenVolume != 0)
+                {
+                    openPositions.Add(line);
+                }
+            }
+
+            return openPositions;
         }
 
         private void CheckStopTradingAfterProfit()

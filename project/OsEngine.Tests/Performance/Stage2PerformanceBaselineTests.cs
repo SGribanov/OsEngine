@@ -26,9 +26,12 @@ namespace OsEngine.Tests;
 public class Stage2PerformanceBaselineTests
 {
     private delegate List<TradeGridLine> TradeGridCloseSideCollectorDelegate(TradeGrid grid, BotTabSimple tab);
+    private delegate List<TradeGridLine> TradeGridProfitCloseCollectorDelegate(TradeGrid grid, BotTabSimple tab, out int cancelledOrders);
 
     private static readonly TradeGridCloseSideCollectorDelegate TradeGridCloseSideCollector =
         CreateTradeGridCloseSideCollector();
+    private static readonly TradeGridProfitCloseCollectorDelegate TradeGridProfitCloseCollector =
+        CreateTradeGridProfitCloseCollector();
 
     [Fact]
     public void Stage2Perf_TradeGrid_QueryCollectionsHotPath_ShouldEmitMetricsAndDeterministicChecksum()
@@ -179,6 +182,59 @@ public class Stage2PerformanceBaselineTests
         Stage2PerfReportWriter.Append(new Stage2PerfMetric
         {
             Scenario = "tradegrid_close_side_collector_hotpath",
+            Iterations = iterations,
+            ElapsedMsTotal = elapsedMs,
+            NanosecondsPerOp = nsPerOp,
+            AllocatedBytesTotal = allocatedBytes,
+            AllocatedBytesPerOp = allocatedBytesPerOp,
+            Gen0Collections = gen0After - gen0Before,
+            Checksum = checksum
+        });
+    }
+
+    [Fact]
+    public void Stage2Perf_TradeGrid_ProfitCloseCollectorHotPath_ShouldEmitMetricsAndDeterministicChecksum()
+    {
+        const int warmupIterations = 128;
+        const int iterations = 4096;
+
+        TradeGrid grid = CreateBareGrid();
+        AttachCloseSidePerfTab(grid);
+        SeedProfitCloseGridLines(grid, 64);
+
+        for (int i = 0; i < warmupIterations; i++)
+        {
+            _ = RunTradeGridProfitCloseCollectorPass(grid);
+        }
+
+        ForceGc();
+
+        long allocatedBefore = GC.GetAllocatedBytesForCurrentThread();
+        int gen0Before = GC.CollectionCount(0);
+        Stopwatch stopwatch = Stopwatch.StartNew();
+
+        long checksum = 0;
+
+        for (int i = 0; i < iterations; i++)
+        {
+            checksum += RunTradeGridProfitCloseCollectorPass(grid);
+        }
+
+        stopwatch.Stop();
+
+        long allocatedAfter = GC.GetAllocatedBytesForCurrentThread();
+        int gen0After = GC.CollectionCount(0);
+
+        long allocatedBytes = allocatedAfter - allocatedBefore;
+        double elapsedMs = stopwatch.Elapsed.TotalMilliseconds;
+        double nsPerOp = elapsedMs * 1_000_000d / iterations;
+        double allocatedBytesPerOp = (double)allocatedBytes / iterations;
+
+        Assert.True(checksum > 0);
+
+        Stage2PerfReportWriter.Append(new Stage2PerfMetric
+        {
+            Scenario = "tradegrid_profit_close_collector_hotpath",
             Iterations = iterations,
             ElapsedMsTotal = elapsedMs,
             NanosecondsPerOp = nsPerOp,
@@ -837,6 +893,29 @@ public class Stage2PerformanceBaselineTests
         return checksum;
     }
 
+    private static long RunTradeGridProfitCloseCollectorPass(TradeGrid grid)
+    {
+        BotTabSimple tab = grid.Tab;
+        List<TradeGridLine> openPositions = TradeGridProfitCloseCollector(grid, tab, out int cancelledOrders);
+
+        long checksum = cancelledOrders;
+
+        for (int i = 0; i < openPositions.Count; i++)
+        {
+            Position? position = openPositions[i].Position;
+            if (position == null)
+            {
+                continue;
+            }
+
+            checksum += (long)(position.OpenVolume * 100m);
+            checksum += position.ProfitOrderPrice != 0m ? 1000L : 0L;
+            checksum += position.CloseActive ? 10000L : 0L;
+        }
+
+        return checksum;
+    }
+
     private static long RunFractalAndCciProductionSignalPass(FractalAndCciPerfState state, Candle nextCandle)
     {
         state.Candles.Add(nextCandle);
@@ -1076,6 +1155,59 @@ public class Stage2PerformanceBaselineTests
         grid.MaxCloseOrdersInMarket = 8;
     }
 
+    private static void SeedProfitCloseGridLines(TradeGrid grid, int count)
+    {
+        List<TradeGridLine> lines = new List<TradeGridLine>(count);
+
+        for (int i = 0; i < count; i++)
+        {
+            TradeGridLine line = new TradeGridLine
+            {
+                PriceEnter = 90m + i,
+                PriceExit = 100m + i,
+                Side = i % 2 == 0 ? Side.Buy : Side.Sell,
+                CanReplaceExitOrder = true,
+                Volume = 1m
+            };
+
+            Position position = (Position)RuntimeHelpers.GetUninitializedObject(typeof(Position));
+            bool hasOpenVolume = i % 5 != 0;
+            decimal openVolume = hasOpenVolume ? 1m + (i % 4) : 0m;
+            bool closeActive = hasOpenVolume && i % 3 == 0;
+            decimal profitOrderPrice = hasOpenVolume && i % 2 == 0 ? 110m + i : 0m;
+
+            SetPrivateField(position, "_openOrders", new List<Order>
+            {
+                new Order
+                {
+                    State = OrderStateType.Done,
+                    VolumeExecute = openVolume
+                }
+            });
+
+            SetPrivateField(position, "_closeOrders", closeActive
+                ? new List<Order>
+                {
+                    new Order
+                    {
+                        State = OrderStateType.Active,
+                        Price = i % 6 == 0 ? profitOrderPrice + 1m : profitOrderPrice,
+                        Volume = i % 4 == 0 ? openVolume + 1m : openVolume,
+                        VolumeExecute = 0m,
+                        NumberMarket = "M" + i,
+                        LastCancelTryLocalTime = DateTime.Now
+                    }
+                }
+                : new List<Order>());
+
+            position.ProfitOrderPrice = profitOrderPrice;
+            line.Position = position;
+            lines.Add(line);
+        }
+
+        grid.GridCreator.Lines = lines;
+    }
+
     private static TradeGrid CreateBareGrid()
     {
         TradeGrid grid = (TradeGrid)RuntimeHelpers.GetUninitializedObject(typeof(TradeGrid));
@@ -1135,6 +1267,16 @@ public class Stage2PerformanceBaselineTests
             ?? throw new InvalidOperationException("CollectOpenPositionsAndCheckWrongCloseOrders not found.");
 
         return (TradeGridCloseSideCollectorDelegate)method.CreateDelegate(typeof(TradeGridCloseSideCollectorDelegate));
+    }
+
+    private static TradeGridProfitCloseCollectorDelegate CreateTradeGridProfitCloseCollector()
+    {
+        MethodInfo method = typeof(TradeGrid).GetMethod(
+            "CollectOpenPositionsAndCancelWrongCloseProfitOrders",
+            BindingFlags.NonPublic | BindingFlags.Instance)
+            ?? throw new InvalidOperationException("CollectOpenPositionsAndCancelWrongCloseProfitOrders not found.");
+
+        return (TradeGridProfitCloseCollectorDelegate)method.CreateDelegate(typeof(TradeGridProfitCloseCollectorDelegate));
     }
 
     private static void SetPrivateField(object target, string fieldName, object value)
