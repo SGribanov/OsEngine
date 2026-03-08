@@ -62,69 +62,58 @@ namespace OsEngine.Entity
 
         private void ButtonAccept_Click(object sender, RoutedEventArgs e)
         {
-            decimal marginBuy;
-            decimal marginSell;
-            decimal lot;
-            decimal step;
-            decimal stepCost;
-            int volDecimals;
-            DateTime expiration;
-
-            try
-            {
-                marginBuy = TextBoxGoPrice.Text.ToDecimal();
-                marginSell = TextBoxMarginSell.Text.ToDecimal();
-                lot = TextBoxLot.Text.ToDecimal();
-                step = TextBoxStep.Text.ToDecimal();
-                stepCost = TextBoxStepCost.Text.ToDecimal();
-                volDecimals = Convert.ToInt32(TextBoxVolumeDecimals.Text, CultureInfo.InvariantCulture);
-                expiration = ParseDateInvariantOrCurrentOrThrow(TextBoxExpiration.Text);
-
-                string message = OsLocalization.Message.HintMessageError5 + "\n";
-
-                int index = 0;
-
-                if (step < 0)
-                {
-                    message += index + 1 + ") " + OsLocalization.Message.HintMessageError0 + "\n";
-                    index++;
-                }
-
-                if (stepCost < 0)
-                {
-                    message += index + 1 + ") " + OsLocalization.Message.HintMessageError1 + "\n";
-                    index++;
-                }
-
-                if (marginBuy < 0
-                    || marginSell < 0)
-                {
-                    message += index + 1 + ") " + OsLocalization.Message.HintMessageError2 + "\n";
-                    index++;
-                }
-
-                if (lot < 0)
-                {
-                    message += index + 1 + ") " + OsLocalization.Message.HintMessageError3 + "\n";
-                    index++;
-                }
-
-                if (volDecimals < 0)
-                {
-                    message += index + 1 + ") " + OsLocalization.Message.HintMessageError4 + "\n";
-                    index++;
-                }
-
-                if (message != OsLocalization.Message.HintMessageError5 + "\n")
-                {
-                    CustomMessageBoxUi ui = new CustomMessageBoxUi(message);
-                    ui.ShowDialog();
-                    return;
-                }
-            }
-            catch (Exception)
+            if (TryReadSecurityValues(
+                    out decimal marginBuy,
+                    out decimal marginSell,
+                    out decimal lot,
+                    out decimal step,
+                    out decimal stepCost,
+                    out int volDecimals,
+                    out DateTime expiration) == false)
             {
                 CustomMessageBoxUi ui = new CustomMessageBoxUi(OsLocalization.Message.HintMessageError5);
+                ui.ShowDialog();
+                return;
+            }
+
+            string message = OsLocalization.Message.HintMessageError5 + "\n";
+
+            int index = 0;
+
+            if (step < 0)
+            {
+                message += index + 1 + ") " + OsLocalization.Message.HintMessageError0 + "\n";
+                index++;
+            }
+
+            if (stepCost < 0)
+            {
+                message += index + 1 + ") " + OsLocalization.Message.HintMessageError1 + "\n";
+                index++;
+            }
+
+            if (marginBuy < 0
+                || marginSell < 0)
+            {
+                message += index + 1 + ") " + OsLocalization.Message.HintMessageError2 + "\n";
+                index++;
+            }
+
+            if (lot < 0)
+            {
+                message += index + 1 + ") " + OsLocalization.Message.HintMessageError3 + "\n";
+                index++;
+            }
+
+            if (volDecimals < 0)
+            {
+                message += index + 1 + ") " + OsLocalization.Message.HintMessageError4 + "\n";
+                index++;
+            }
+
+            if (message != OsLocalization.Message.HintMessageError5 + "\n")
+            {
+                CustomMessageBoxUi ui = new CustomMessageBoxUi(message);
                 ui.ShowDialog();
                 return;
             }
@@ -182,29 +171,75 @@ namespace OsEngine.Entity
             ui.ShowDialog();
         }
 
-        private static DateTime ParseDateInvariantOrCurrentOrThrow(string value)
+        private bool TryReadSecurityValues(
+            out decimal marginBuy,
+            out decimal marginSell,
+            out decimal lot,
+            out decimal step,
+            out decimal stepCost,
+            out int volDecimals,
+            out DateTime expiration)
         {
-            if (DateTime.TryParse(value, CultureInfo.InvariantCulture, DateTimeStyles.RoundtripKind, out DateTime parsedDate))
+            marginBuy = 0;
+            marginSell = 0;
+            lot = 0;
+            step = 0;
+            stepCost = 0;
+            volDecimals = 0;
+            expiration = DateTime.MinValue;
+
+            return TryParseDecimalFlexible(TextBoxGoPrice.Text, out marginBuy)
+                && TryParseDecimalFlexible(TextBoxMarginSell.Text, out marginSell)
+                && TryParseDecimalFlexible(TextBoxLot.Text, out lot)
+                && TryParseDecimalFlexible(TextBoxStep.Text, out step)
+                && TryParseDecimalFlexible(TextBoxStepCost.Text, out stepCost)
+                && int.TryParse(TextBoxVolumeDecimals.Text, NumberStyles.Integer, CultureInfo.InvariantCulture, out volDecimals)
+                && TryParseDateFlexible(TextBoxExpiration.Text, out expiration);
+        }
+
+        private static bool TryParseDecimalFlexible(string value, out decimal parsed)
+        {
+            if (decimal.TryParse(value, NumberStyles.Any, CultureInfo.InvariantCulture, out parsed))
             {
-                return parsedDate;
+                return true;
             }
 
-            if (DateTime.TryParse(value, CultureInfo.InvariantCulture, DateTimeStyles.None, out parsedDate))
+            if (decimal.TryParse(value, NumberStyles.Any, CultureInfo.CurrentCulture, out parsed))
             {
-                return parsedDate;
+                return true;
             }
 
-            if (DateTime.TryParse(value, CultureInfo.CurrentCulture, DateTimeStyles.None, out parsedDate))
+            return decimal.TryParse(value, NumberStyles.Any, new CultureInfo("ru-RU"), out parsed);
+        }
+
+        private static bool TryParseDateFlexible(string value, out DateTime parsedDate)
+        {
+            if (DateTime.TryParse(value, CultureInfo.InvariantCulture, DateTimeStyles.RoundtripKind, out DateTime parsed))
             {
-                return parsedDate;
+                parsedDate = parsed;
+                return true;
             }
 
-            if (DateTime.TryParse(value, new CultureInfo("ru-RU"), DateTimeStyles.None, out parsedDate))
+            if (DateTime.TryParse(value, CultureInfo.InvariantCulture, DateTimeStyles.None, out parsed))
             {
-                return parsedDate;
+                parsedDate = parsed;
+                return true;
             }
 
-            throw new FormatException($"Cannot parse datetime value: {value}");
+            if (DateTime.TryParse(value, CultureInfo.CurrentCulture, DateTimeStyles.None, out parsed))
+            {
+                parsedDate = parsed;
+                return true;
+            }
+
+            if (DateTime.TryParse(value, new CultureInfo("ru-RU"), DateTimeStyles.None, out parsed))
+            {
+                parsedDate = parsed;
+                return true;
+            }
+
+            parsedDate = DateTime.MinValue;
+            return false;
         }
     }
 }
