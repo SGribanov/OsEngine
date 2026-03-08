@@ -312,26 +312,29 @@ namespace OsEngine.Market.Connectors
 
                 _candlesRealizationGrid.EndEdit();
 
-                Enum.TryParse(ComboBoxTypeServer.Text.Split('_')[0], true, out _connectorBot.ServerType);
+                string serverTypeText = GetServerTypePrefix(ComboBoxTypeServer.Text);
+                if (TryParseEnumValue(serverTypeText, out ServerType serverType))
+                {
+                    _connectorBot.ServerType = serverType;
+                }
                 _connectorBot.ServerFullName = _selectedServerName;
 
                 _connectorBot.PortfolioName = ComboBoxPortfolio.Text;
 
-                if (CheckBoxIsEmulator.IsChecked != null)
-                {
-                    _connectorBot.EmulatorIsOn = CheckBoxIsEmulator.IsChecked.Value;
-                }
+                _connectorBot.EmulatorIsOn = IsControlChecked(CheckBoxIsEmulator);
 
                 _connectorBot.SecurityName = security;
                 _connectorBot.SecurityClass = ComboBoxClass.Text;
 
-                CandleMarketDataType createType;
-                Enum.TryParse(ComboBoxCandleMarketDataType.Text, true, out createType);
-                _connectorBot.CandleMarketDataType = createType;
+                if (TryParseEnumValue(ComboBoxCandleMarketDataType.Text, out CandleMarketDataType createType))
+                {
+                    _connectorBot.CandleMarketDataType = createType;
+                }
 
-                CommissionType typeCommission;
-                Enum.TryParse(ComboBoxCommissionType.Text, true, out typeCommission);
-                _connectorBot.CommissionType = typeCommission;
+                if (TryParseEnumValue(ComboBoxCommissionType.Text, out CommissionType typeCommission))
+                {
+                    _connectorBot.CommissionType = typeCommission;
+                }
 
                 try
                 {
@@ -411,7 +414,7 @@ namespace OsEngine.Market.Connectors
         {
             try
             {
-                _saveTradesInCandles = CheckBoxSaveTradeArrayInCandle.IsChecked.Value;
+                _saveTradesInCandles = IsControlChecked(CheckBoxSaveTradeArrayInCandle);
             }
             catch (Exception ex)
             {
@@ -423,9 +426,7 @@ namespace OsEngine.Market.Connectors
         {
             try
             {
-                CandleMarketDataType currentDataType;
-
-                if (Enum.TryParse(ComboBoxCandleMarketDataType.SelectedValue.ToString(), out currentDataType))
+                if (TryParseComboBoxSelectedValue(ComboBoxCandleMarketDataType, out CandleMarketDataType currentDataType))
                 {
                     if (currentDataType == CandleMarketDataType.MarketDepth)
                     {
@@ -464,8 +465,10 @@ namespace OsEngine.Market.Connectors
         {
             try
             {
-                CommissionType typeCommission;
-                Enum.TryParse(ComboBoxCommissionType.SelectedValue.ToString(), true, out typeCommission);
+                if (TryParseComboBoxSelectedValue(ComboBoxCommissionType, out CommissionType typeCommission) == false)
+                {
+                    return;
+                }
 
                 if (typeCommission == CommissionType.None)
                 {
@@ -656,7 +659,7 @@ namespace OsEngine.Market.Connectors
 
                 if (ComboBoxPortfolio.SelectedItem != null)
                 {
-                    curPortfolio = ComboBoxPortfolio.SelectedItem.ToString();
+                    curPortfolio = GetComboBoxSelectedItemText(ComboBoxPortfolio);
                 }
 
                 if (_connectorBot.Portfolio != null)
@@ -960,7 +963,11 @@ namespace OsEngine.Market.Connectors
                 SecurityType securityType = SecurityType.None;
                 if (ComboBoxClass.SelectedItem != null)
                 {
-                    string classSec = ComboBoxClass.SelectedItem.ToString();
+                    string classSec = GetComboBoxSelectedItemText(ComboBoxClass);
+                    if (string.IsNullOrEmpty(classSec))
+                    {
+                        return;
+                    }
 
                     if (loadExpirationStrikeComboBox)
                     {
@@ -987,7 +994,11 @@ namespace OsEngine.Market.Connectors
                                 continue;
                             }
 
-                            string expirationString = ComboBoxExpiration.SelectedItem.ToString();
+                            string expirationString = GetComboBoxSelectedItemText(ComboBoxExpiration);
+                            if (string.IsNullOrEmpty(expirationString))
+                            {
+                                continue;
+                            }
 
                             if (expirationString == "All")
                             {
@@ -1050,7 +1061,10 @@ namespace OsEngine.Market.Connectors
             if (ComboBoxStrike.SelectedItem == null)
                 return true;
 
-            string strike = ComboBoxStrike.SelectedItem.ToString();
+            string strike = GetComboBoxSelectedItemText(ComboBoxStrike);
+
+            if (string.IsNullOrEmpty(strike))
+                return true;
 
             if (strike == "All")
                 return true;
@@ -1122,7 +1136,7 @@ namespace OsEngine.Market.Connectors
                         continue;
                     }
 
-                    if (Convert.ToBoolean(checkBox.Value.ToString()) == true)
+                    if (IsGridCheckBoxChecked(checkBox))
                     {
                         checkBox.Value = false;
 
@@ -1259,9 +1273,9 @@ namespace OsEngine.Market.Connectors
                     continue;
                 }
 
-                if (Convert.ToBoolean(checkBox.Value.ToString()) == true)
+                if (IsGridCheckBoxChecked(checkBox))
                 {
-                    security = _gridSecurities.Rows[i].Cells[2].Value.ToString();
+                    security = _gridSecurities.Rows[i].Cells[2].Value?.ToString() ?? string.Empty;
 
                     break;
                 }
@@ -1487,9 +1501,13 @@ namespace OsEngine.Market.Connectors
         {
             try
             {
-                int indexRow = Convert.ToInt32(LabelCurrentResultShow.Content, CultureInfo.InvariantCulture) - 1;
+                if (TryGetLabelContentInt(LabelCurrentResultShow, out int currentRow) == false
+                    || TryGetLabelContentInt(LabelCountResultsShow, out int maxRowIndex) == false)
+                {
+                    return;
+                }
 
-                int maxRowIndex = Convert.ToInt32(LabelCountResultsShow.Content, CultureInfo.InvariantCulture);
+                int indexRow = currentRow - 1;
 
                 if (indexRow <= 0)
                 {
@@ -1516,9 +1534,13 @@ namespace OsEngine.Market.Connectors
         {
             try
             {
-                int indexRow = Convert.ToInt32(LabelCurrentResultShow.Content, CultureInfo.InvariantCulture) - 1 + 1;
+                if (TryGetLabelContentInt(LabelCurrentResultShow, out int currentRow) == false
+                    || TryGetLabelContentInt(LabelCountResultsShow, out int maxRowIndex) == false)
+                {
+                    return;
+                }
 
-                int maxRowIndex = Convert.ToInt32(LabelCountResultsShow.Content, CultureInfo.InvariantCulture);
+                int indexRow = currentRow;
 
                 if (indexRow >= maxRowIndex)
                 {
@@ -1574,7 +1596,7 @@ namespace OsEngine.Market.Connectors
                         {
                             continue;
                         }
-                        if (Convert.ToBoolean(checkBox.Value) == true)
+                        if (IsGridCheckBoxChecked(checkBox))
                         {
                             checkBox.Value = false;
                             break;
@@ -1582,7 +1604,7 @@ namespace OsEngine.Market.Connectors
                     }
 
                     checkBox = (DataGridViewCheckBoxCell)_gridSecurities.Rows[rowIndex].Cells[4];
-                    if (Convert.ToBoolean(checkBox.Value) == false)
+                    if (IsGridCheckBoxChecked(checkBox) == false)
                     {
                         checkBox.Value = true;
                         TextBoxSearchSecurity.Text = "";
@@ -2002,17 +2024,17 @@ namespace OsEngine.Market.Connectors
                     return;
                 }
 
-                string value = _candlesRealizationGrid.Rows[row].Cells[1].Value.ToString();
+                string value = _candlesRealizationGrid.Rows[row].Cells[1].Value?.ToString() ?? string.Empty;
 
                 ICandleSeriesParameter param = _selectedSeries.Parameters[row];
 
                 if (param.Type == CandlesParameterType.Int)
                 {
-                    try
+                    if (int.TryParse(value, NumberStyles.Integer, CultureInfo.InvariantCulture, out int intValue))
                     {
-                        ((CandlesParameterInt)param).ValueInt = Convert.ToInt32(value, CultureInfo.InvariantCulture);
+                        ((CandlesParameterInt)param).ValueInt = intValue;
                     }
-                    catch
+                    else
                     {
                         _candlesRealizationGrid.Rows[row].Cells[1].Value = ((CandlesParameterInt)param).ValueInt.ToString();
                     }
@@ -2030,11 +2052,11 @@ namespace OsEngine.Market.Connectors
                 }
                 else if (param.Type == CandlesParameterType.Bool)
                 {
-                    try
+                    if (bool.TryParse(value, out bool boolValue))
                     {
-                        ((CandlesParameterBool)param).ValueBool = Convert.ToBoolean(value);
+                        ((CandlesParameterBool)param).ValueBool = boolValue;
                     }
-                    catch
+                    else
                     {
                         _candlesRealizationGrid.Rows[row].Cells[1].Value = ((CandlesParameterBool)param).ValueBool;
                     }
@@ -2054,7 +2076,11 @@ namespace OsEngine.Market.Connectors
         {
             try
             {
-                string seriesType = ComboBoxCandleCreateMethodType.SelectedValue.ToString();
+                string seriesType = GetComboBoxSelectedValueText(ComboBoxCandleCreateMethodType);
+                if (string.IsNullOrEmpty(seriesType))
+                {
+                    return;
+                }
 
                 for (int i = 0; i < _series.Count; i++)
                 {
@@ -2088,6 +2114,62 @@ namespace OsEngine.Market.Connectors
         public event Action<string, LogMessageType> LogMessageEvent;
 
         #endregion
+
+        private static bool IsControlChecked(System.Windows.Controls.CheckBox checkBox)
+        {
+            return checkBox?.IsChecked == true;
+        }
+
+        private static string GetComboBoxSelectedItemText(System.Windows.Controls.ComboBox comboBox)
+        {
+            return comboBox?.SelectedItem?.ToString() ?? string.Empty;
+        }
+
+        private static string GetComboBoxSelectedValueText(System.Windows.Controls.ComboBox comboBox)
+        {
+            return comboBox?.SelectedValue?.ToString() ?? string.Empty;
+        }
+
+        private static bool TryParseComboBoxSelectedValue<TEnum>(System.Windows.Controls.ComboBox comboBox, out TEnum value)
+            where TEnum : struct
+        {
+            return TryParseEnumValue(GetComboBoxSelectedValueText(comboBox), out value);
+        }
+
+        private static bool TryParseEnumValue<TEnum>(string? value, out TEnum parsed)
+            where TEnum : struct
+        {
+            parsed = default;
+            if (string.IsNullOrWhiteSpace(value))
+            {
+                return false;
+            }
+
+            return Enum.TryParse(value, true, out parsed);
+        }
+
+        private static string GetServerTypePrefix(string? serverText)
+        {
+            if (string.IsNullOrWhiteSpace(serverText))
+            {
+                return string.Empty;
+            }
+
+            int separatorIndex = serverText.IndexOf('_');
+            return separatorIndex >= 0 ? serverText.Substring(0, separatorIndex) : serverText;
+        }
+
+        private static bool IsGridCheckBoxChecked(DataGridViewCheckBoxCell checkBox)
+        {
+            return checkBox?.Value is bool isChecked
+                ? isChecked
+                : bool.TryParse(checkBox?.Value?.ToString(), out bool parsed) && parsed;
+        }
+
+        private static bool TryGetLabelContentInt(System.Windows.Controls.Label label, out int value)
+        {
+            return int.TryParse(label?.Content?.ToString(), NumberStyles.Integer, CultureInfo.InvariantCulture, out value);
+        }
 
     }
 }
