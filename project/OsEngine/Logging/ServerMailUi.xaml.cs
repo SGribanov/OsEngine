@@ -6,6 +6,7 @@
  *Ваши права на использование кода регулируются данной лицензией http://o-s-a.net/doc/license_simple_engine.pdf
 */
 
+using System.Collections.Generic;
 using System.Windows;
 using OsEngine.Language;
 
@@ -27,15 +28,7 @@ namespace OsEngine.Logging
 
             TextBoxMyAdress.Text = serverMail.MyAdress;
             TextBoxPassword.Text = serverMail.MyPassword;
-            TextBoxAdress.Text = "";
-
-            if (serverMail.Adress != null)
-            {
-                for (int i = 0; i < serverMail.Adress.Length; i++)
-                {
-                    TextBoxAdress.Text += serverMail.Adress[i] + "\r\n";
-                }
-            }
+            TextBoxAdress.Text = BuildAddressText(serverMail.Adress);
 
             ComboBoxMyMaster.Items.Add("Yandex");
             ComboBoxMyMaster.Items.Add("Google");
@@ -65,54 +58,43 @@ namespace OsEngine.Logging
             ServerMail serverMail = ServerMail.GetServer();
             serverMail.MyAdress = TextBoxMyAdress.Text;
             serverMail.MyPassword = TextBoxPassword.Text;
-            string[] lockal = TextBoxAdress.Text.Split('\r');
+            serverMail.Adress = ParseAddresses(TextBoxAdress.Text);
+            serverMail.Smtp = ResolveSmtpHost(ComboBoxMyMaster.SelectedItem);
+            serverMail.Save();
+            Close();
+        }
 
-
-            string shit = "";
-
-            for (int i = 0; i < lockal.Length; i++)
+        private static string BuildAddressText(string[] addresses)
+        {
+            if (addresses == null || addresses.Length == 0)
             {
-                shit += lockal[i];
+                return string.Empty;
             }
-            lockal = shit.Split('\n');
-            string[] lockal2 = null;
-            for (int i = 0, ii = 0; i < lockal.Length; i++)
+
+            return string.Join("\r\n", addresses) + "\r\n";
+        }
+
+        private static string[] ParseAddresses(string addressText)
+        {
+            string[] lines = addressText.Replace("\r", string.Empty).Split('\n');
+            List<string> addresses = new List<string>();
+
+            for (int i = 0; i < lines.Length; i++)
             {
-                if (lockal[i] != "")
+                if (lines[i] != string.Empty)
                 {
-                    if (lockal2 == null)
-                    {
-                        lockal2 = new string[1];
-                        lockal2[0] = lockal[i];
-                        ii++;
-                    }
-                    else
-                    {
-                        string[] newLock = new string[lockal2.Length + 1];
-                        for (int iii = 0; iii < lockal2.Length; iii++)
-                        {
-                            newLock[iii] = lockal2[iii];
-                        }
-                        newLock[ii] = lockal[i];
-                        lockal2 = newLock;
-                        ii++;
-                    }
+                    addresses.Add(lines[i]);
                 }
             }
 
+            return addresses.Count == 0 ? null : addresses.ToArray();
+        }
 
-            serverMail.Adress = lockal2;
-
-            if (ComboBoxMyMaster.SelectedItem.ToString() == "Yandex")
-            {
-                serverMail.Smtp = "smtp.yandex.ru";
-            }
-            else
-            {
-                serverMail.Smtp = "smtp.gmail.com";
-            }
-            serverMail.Save();
-            Close();
+        private static string ResolveSmtpHost(object selectedProvider)
+        {
+            return selectedProvider as string == "Yandex"
+                ? "smtp.yandex.ru"
+                : "smtp.gmail.com";
         }
     }
 }
