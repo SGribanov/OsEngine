@@ -2553,7 +2553,12 @@ namespace OsEngine.OsTrader.Grids
 
         private List<Order> GetOrdersBadPriceToGrid()
         {
-            return GetOrdersBadPriceToGridFromLines(GetLinesWithOpenOrdersFact(), GetLinesWithClosingOrdersFact());
+            QueryCollectionsSnapshotCore queryCollections = GetQueryCollectionsSnapshotCore(
+                0m,
+                QueryCollectionFlags.OpenOrdersFact
+                | QueryCollectionFlags.ClosingOrdersFact);
+
+            return GetOrdersBadPriceToGridFromLines(queryCollections.OpenOrdersFact, queryCollections.ClosingOrdersFact);
         }
 
         private List<Order> GetOrdersBadPriceToGridFromLines(List<TradeGridLine> linesWithOrdersToOpenFact, List<TradeGridLine> linesWithOrdersToCloseFact)
@@ -2619,7 +2624,11 @@ namespace OsEngine.OsTrader.Grids
 
         private List<Order> GetOrdersBadLinesMaxCount()
         {
-            return GetOrdersBadLinesMaxCountFromLines(GetLinesWithOpenOrdersFact());
+            QueryCollectionsSnapshotCore queryCollections = GetQueryCollectionsSnapshotCore(
+                0m,
+                QueryCollectionFlags.OpenOrdersFact);
+
+            return GetOrdersBadLinesMaxCountFromLines(queryCollections.OpenOrdersFact);
         }
 
         private List<Order> GetOrdersBadLinesMaxCountFromLines(List<TradeGridLine> linesWithOrdersToOpenFact)
@@ -2715,7 +2724,11 @@ namespace OsEngine.OsTrader.Grids
 
         private List<Order> GetCloseOrdersGridHole()
         {
-            return GetCloseOrdersGridHoleFromLines(GetLinesWithOpenPosition());
+            QueryCollectionsSnapshotCore queryCollections = GetQueryCollectionsSnapshotCore(
+                0m,
+                QueryCollectionFlags.OpenPositions);
+
+            return GetCloseOrdersGridHoleFromLines(queryCollections.OpenPositions ?? new List<TradeGridLine>());
         }
 
         private List<Order> GetCloseOrdersGridHoleFromLines(List<TradeGridLine> linesOpenPoses)
