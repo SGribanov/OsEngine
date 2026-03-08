@@ -112,11 +112,42 @@ namespace OsEngine.OsTrader.Panels.Tab
             SaveSettingsFromUiToBot();
         }
 
+        private static bool TryGetSelectedEnum<TEnum>(object selectedItem, out TEnum value)
+            where TEnum : struct
+        {
+            value = default;
+
+            if (selectedItem is TEnum typedValue)
+            {
+                value = typedValue;
+                return true;
+            }
+
+            return selectedItem != null
+                   && Enum.TryParse(selectedItem.ToString(), true, out value);
+        }
+
+        private static bool TryReadDecimal(string text, out decimal value)
+        {
+            return decimal.TryParse(text, NumberStyles.Any, CultureInfo.InvariantCulture, out value)
+                   || decimal.TryParse(text, NumberStyles.Any, CultureInfo.CurrentCulture, out value)
+                   || decimal.TryParse(text, NumberStyles.Any, CultureInfo.GetCultureInfo("ru-RU"), out value);
+        }
+
+        private static bool TryReadInt(string text, out int value)
+        {
+            return int.TryParse(text, NumberStyles.Integer, CultureInfo.InvariantCulture, out value)
+                   || int.TryParse(text, NumberStyles.Integer, CultureInfo.CurrentCulture, out value);
+        }
+
         private void SaveSettingsFromUiToBot()
         {
             try
             {
-                Enum.TryParse(ComboBoxOrderPriceType.SelectedItem.ToString(), out _polygon.OrderPriceType);
+                if (TryGetSelectedEnum(ComboBoxOrderPriceType.SelectedItem, out OrderPriceType orderPriceType))
+                {
+                    _polygon.OrderPriceType = orderPriceType;
+                }
             }
             catch (Exception ex)
             {
@@ -125,7 +156,10 @@ namespace OsEngine.OsTrader.Panels.Tab
 
             try
             {
-                Enum.TryParse(ComboBoxActionOnSignalType.SelectedItem.ToString(), out _polygon.ActionOnSignalType);
+                if (TryGetSelectedEnum(ComboBoxActionOnSignalType.SelectedItem, out PolygonActionOnSignalType actionOnSignalType))
+                {
+                    _polygon.ActionOnSignalType = actionOnSignalType;
+                }
             }
             catch (Exception ex)
             {
@@ -134,7 +168,10 @@ namespace OsEngine.OsTrader.Panels.Tab
 
             try
             {
-                _polygon.ProfitToSignal = TextBoxProfitToSignal.Text.ToString().ToDecimal();
+                if (TryReadDecimal(TextBoxProfitToSignal.Text, out decimal profitToSignal))
+                {
+                    _polygon.ProfitToSignal = profitToSignal;
+                }
             }
             catch (Exception ex)
             {
@@ -143,7 +180,10 @@ namespace OsEngine.OsTrader.Panels.Tab
 
             try
             {
-                _polygon.SlippagePercent = TextBoxLimitSlippage.Text.ToString().ToDecimal();
+                if (TryReadDecimal(TextBoxLimitSlippage.Text, out decimal slippagePercent))
+                {
+                    _polygon.SlippagePercent = slippagePercent;
+                }
             }
             catch (Exception ex)
             {
@@ -152,7 +192,10 @@ namespace OsEngine.OsTrader.Panels.Tab
 
             try
             {
-                _polygon.QtyStart = TextBoxLimitQtyStart.Text.ToString().ToDecimal();
+                if (TryReadDecimal(TextBoxLimitQtyStart.Text, out decimal qtyStart))
+                {
+                    _polygon.QtyStart = qtyStart;
+                }
             }
             catch (Exception ex)
             {
@@ -161,7 +204,10 @@ namespace OsEngine.OsTrader.Panels.Tab
 
             try
             {
-                _polygon.DelayMls = Convert.ToInt32(TextBoxDelayMls.Text.ToString(), CultureInfo.InvariantCulture);
+                if (TryReadInt(TextBoxDelayMls.Text, out int delayMls))
+                {
+                    _polygon.DelayMls = delayMls;
+                }
             }
             catch (Exception ex)
             {
@@ -170,7 +216,10 @@ namespace OsEngine.OsTrader.Panels.Tab
 
             try
             {
-                Enum.TryParse(ComboBoxDelayType.SelectedItem.ToString(), out _polygon.DelayType);
+                if (TryGetSelectedEnum(ComboBoxDelayType.SelectedItem, out DelayPolygonType delayType))
+                {
+                    _polygon.DelayType = delayType;
+                }
             }
             catch (Exception ex)
             {
@@ -179,7 +228,7 @@ namespace OsEngine.OsTrader.Panels.Tab
 
             try
             {
-                _polygon.CommissionIsSubstract = CheckBoxCommisionIsSubstract.IsChecked.Value;
+                _polygon.CommissionIsSubstract = CheckBoxCommisionIsSubstract.IsChecked == true;
             }
             catch (Exception ex)
             {
@@ -188,7 +237,10 @@ namespace OsEngine.OsTrader.Panels.Tab
 
             try
             {
-                _polygon.CommissionValue = TextBoxCommissionValue.Text.ToString().ToDecimal();
+                if (TryReadDecimal(TextBoxCommissionValue.Text, out decimal commissionValue))
+                {
+                    _polygon.CommissionValue = commissionValue;
+                }
             }
             catch (Exception ex)
             {
@@ -197,7 +249,10 @@ namespace OsEngine.OsTrader.Panels.Tab
 
             try
             {
-                Enum.TryParse(ComboBoxCommissionType.SelectedItem.ToString(), out _polygon.CommissionType);
+                if (TryGetSelectedEnum(ComboBoxCommissionType.SelectedItem, out CommissionPolygonType commissionType))
+                {
+                    _polygon.CommissionType = commissionType;
+                }
             }
             catch (Exception ex)
             {
