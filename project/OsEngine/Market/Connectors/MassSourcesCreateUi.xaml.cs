@@ -108,6 +108,62 @@ namespace OsEngine.Market.Connectors
 
         public MassSourcesCreator SourcesCreator;
 
+        private static string GetSelectedItemText(System.Windows.Controls.ComboBox comboBox)
+        {
+            return comboBox?.SelectedItem?.ToString() ?? string.Empty;
+        }
+
+        private static string GetCellValueText(DataGridViewCell cell)
+        {
+            return cell?.Value?.ToString() ?? string.Empty;
+        }
+
+        private static bool GetIsChecked(System.Windows.Controls.CheckBox checkBox)
+        {
+            return checkBox?.IsChecked == true;
+        }
+
+        private static bool TryGetBoolean(object value, out bool result)
+        {
+            if (value is bool boolValue)
+            {
+                result = boolValue;
+                return true;
+            }
+
+            string text = value?.ToString();
+            if (string.IsNullOrWhiteSpace(text))
+            {
+                result = false;
+                return false;
+            }
+
+            return bool.TryParse(text, out result);
+        }
+
+        private static bool TryParseDecimalInvariant(string value, out decimal result)
+        {
+            result = 0;
+
+            if (string.IsNullOrWhiteSpace(value))
+            {
+                return false;
+            }
+
+            if (decimal.TryParse(value, NumberStyles.Any, CultureInfo.InvariantCulture, out result))
+            {
+                return true;
+            }
+
+            return decimal.TryParse(value, NumberStyles.Any, CultureInfo.GetCultureInfo("ru-RU"), out result);
+        }
+
+        private static bool TryParseDialogCounter(object value, out int result)
+        {
+            string text = value?.ToString();
+            return int.TryParse(text, NumberStyles.Integer, CultureInfo.InvariantCulture, out result);
+        }
+
         private void ActivateGui()
         {
             List<IServer> servers = ServerMaster.GetServers();
@@ -189,7 +245,7 @@ namespace OsEngine.Market.Connectors
             CheckBoxSaveTradeArrayInCandle.IsChecked = SourcesCreator.SaveTradesInCandles;
             CheckBoxSaveTradeArrayInCandle.Click += delegate (object sender, RoutedEventArgs args)
             {
-                _saveTradesInCandles = CheckBoxSaveTradeArrayInCandle.IsChecked.Value;
+                _saveTradesInCandles = GetIsChecked(CheckBoxSaveTradeArrayInCandle);
             };
 
             ComboBoxCandleMarketDataType.Items.Add(CandleMarketDataType.Tick.ToString());
@@ -313,10 +369,7 @@ namespace OsEngine.Market.Connectors
             MassSourcesCreator curCreator = new MassSourcesCreator(StartProgram.IsTester);
 
             curCreator.PortfolioName = ComboBoxPortfolio.Text;
-            if (CheckBoxIsEmulator.IsChecked != null)
-            {
-                curCreator.EmulatorIsOn = CheckBoxIsEmulator.IsChecked.Value;
-            }
+            curCreator.EmulatorIsOn = GetIsChecked(CheckBoxIsEmulator);
 
             Enum.TryParse(ComboBoxTypeServer.Text.Split('_')[0], true, out curCreator.ServerType);
             curCreator.ServerName = ComboBoxTypeServer.Text;
@@ -331,16 +384,12 @@ namespace OsEngine.Market.Connectors
 
             if (ComboBoxClass.SelectedItem != null)
             {
-                curCreator.SecuritiesClass = ComboBoxClass.SelectedItem.ToString();
+                curCreator.SecuritiesClass = GetSelectedItemText(ComboBoxClass);
             }
 
-            try
+            if (TryParseDecimalInvariant(TextBoxCommissionValue.Text, out decimal commissionValue))
             {
-                curCreator.CommissionValue = TextBoxCommissionValue.Text.ToDecimal();
-            }
-            catch
-            {
-                // ignore
+                curCreator.CommissionValue = commissionValue;
             }
 
             curCreator.CandleCreateMethodType = ComboBoxCandleCreateMethodType.Text;
@@ -379,8 +428,8 @@ namespace OsEngine.Market.Connectors
             {
                 DataGridViewCheckBoxCell checkBoxCell = (DataGridViewCheckBoxCell)_gridSecurities.Rows[i].Cells[6];
 
-                if (checkBoxCell.Value == null ||
-                    Convert.ToBoolean(checkBoxCell.Value.ToString()) == false)
+                if (TryGetBoolean(checkBoxCell.Value, out bool isOn) == false ||
+                    isOn == false)
                 {
                     continue;
                 }
@@ -403,12 +452,12 @@ namespace OsEngine.Market.Connectors
         private ActivatedSecurity GetSecurity(DataGridViewRow row)
         {
             ActivatedSecurity sec = new ActivatedSecurity();
-            sec.SecurityClass = row.Cells[1].Value.ToString();
-            sec.SecurityName = row.Cells[3].Value.ToString();
+            sec.SecurityClass = GetCellValueText(row.Cells[1]);
+            sec.SecurityName = GetCellValueText(row.Cells[3]);
 
-            if (row.Cells[6].Value != null)
+            if (TryGetBoolean(row.Cells[6].Value, out bool isOn))
             {
-                sec.IsOn = Convert.ToBoolean(row.Cells[6].Value);
+                sec.IsOn = isOn;
             }
 
             return sec;
@@ -420,7 +469,7 @@ namespace OsEngine.Market.Connectors
             {
                 CandleMarketDataType currentDataType;
 
-                if (Enum.TryParse(ComboBoxCandleMarketDataType.SelectedValue.ToString(), out currentDataType))
+                if (Enum.TryParse(ComboBoxCandleMarketDataType.SelectedValue?.ToString(), out currentDataType))
                 {
                     if (currentDataType == CandleMarketDataType.MarketDepth)
                     {
@@ -464,7 +513,7 @@ namespace OsEngine.Market.Connectors
                     return;
                 }
 
-                string serverName = ComboBoxTypeServer.SelectedValue.ToString();
+                string serverName = ComboBoxTypeServer.SelectedValue?.ToString() ?? string.Empty;
 
                 ServerType serverType;
                 if (Enum.TryParse(serverName.Split('_')[0], out serverType) == false)
@@ -596,7 +645,7 @@ namespace OsEngine.Market.Connectors
 
                 if (ComboBoxPortfolio.SelectedItem != null)
                 {
-                    curPortfolio = ComboBoxPortfolio.SelectedItem.ToString();
+                    curPortfolio = GetSelectedItemText(ComboBoxPortfolio);
                 }
 
                 ComboBoxPortfolio.Items.Clear();
@@ -917,7 +966,7 @@ namespace OsEngine.Market.Connectors
 
                 if (securities != null && ComboBoxClass.SelectedItem != null)
                 {
-                    string classSec = ComboBoxClass.SelectedItem.ToString();
+                    string classSec = GetSelectedItemText(ComboBoxClass);
 
                     if (loadExpirationStrikeComboBox)
                     {
@@ -947,7 +996,7 @@ namespace OsEngine.Market.Connectors
                                 continue;
                             }
 
-                            string expirationString = ComboBoxExpiration.SelectedItem.ToString();
+                            string expirationString = GetSelectedItemText(ComboBoxExpiration);
 
                             if (expirationString == "All")
                             {
@@ -967,12 +1016,15 @@ namespace OsEngine.Market.Connectors
                             }
                             else
                             {
-                                DateTime expirationDateTime = DateTime.ParseExact(
+                                if (DateTime.TryParseExact(
                                     expirationString,
                                     "dd.MM.yyyy",
                                     CultureInfo.InvariantCulture,
-                                    DateTimeStyles.None
-                                );
+                                    DateTimeStyles.None,
+                                    out DateTime expirationDateTime) == false)
+                                {
+                                    continue;
+                                }
 
                                 if (expirationDateTime.Date == securities[i].Expiration.Date)
                                 {
@@ -1015,12 +1067,13 @@ namespace OsEngine.Market.Connectors
             if (ComboBoxStrike.SelectedItem == null)
                 return true;
 
-            string strike = ComboBoxStrike.SelectedItem.ToString();
+            string strike = GetSelectedItemText(ComboBoxStrike);
 
             if (strike == "All")
                 return true;
 
-            return strike.ToDecimal() == security.Strike;
+            return TryParseDecimalInvariant(strike, out decimal strikeValue)
+                && strikeValue == security.Strike;
         }
 
         private void UpdateGrid(List<Security> securities, SecurityType securityType)
@@ -1129,7 +1182,7 @@ namespace OsEngine.Market.Connectors
         {
             try
             {
-                bool isCheck = CheckBoxSelectAllCheckBox.IsChecked.Value;
+                bool isCheck = GetIsChecked(CheckBoxSelectAllCheckBox);
 
                 for (int i = 0; i < _gridSecurities.Rows.Count; i++)
                 {
@@ -1475,9 +1528,13 @@ namespace OsEngine.Market.Connectors
         {
             try
             {
-                int indexRow = Convert.ToInt32(LabelCurrentResultShow.Content, CultureInfo.InvariantCulture) - 1;
+                if (TryParseDialogCounter(LabelCurrentResultShow.Content, out int currentIndex) == false
+                    || TryParseDialogCounter(LabelCountResultsShow.Content, out int maxRowIndex) == false)
+                {
+                    return;
+                }
 
-                int maxRowIndex = Convert.ToInt32(LabelCountResultsShow.Content, CultureInfo.InvariantCulture);
+                int indexRow = currentIndex - 1;
 
                 if (indexRow <= 0)
                 {
@@ -1504,9 +1561,13 @@ namespace OsEngine.Market.Connectors
         {
             try
             {
-                int indexRow = Convert.ToInt32(LabelCurrentResultShow.Content, CultureInfo.InvariantCulture) - 1 + 1;
+                if (TryParseDialogCounter(LabelCurrentResultShow.Content, out int currentIndex) == false
+                    || TryParseDialogCounter(LabelCountResultsShow.Content, out int maxRowIndex) == false)
+                {
+                    return;
+                }
 
-                int maxRowIndex = Convert.ToInt32(LabelCountResultsShow.Content, CultureInfo.InvariantCulture);
+                int indexRow = currentIndex;
 
                 if (indexRow >= maxRowIndex)
                 {
@@ -1550,7 +1611,7 @@ namespace OsEngine.Market.Connectors
                     }
 
                     DataGridViewCheckBoxCell checkBox = (DataGridViewCheckBoxCell)_gridSecurities.Rows[rowIndex].Cells[6];
-                    if (Convert.ToBoolean(checkBox.Value) == false)
+                    if (TryGetBoolean(checkBox.Value, out bool isChecked) == false || isChecked == false)
                     {
                         checkBox.Value = true;
                         TextBoxSearchSecurity.Text = "";
@@ -1987,7 +2048,11 @@ namespace OsEngine.Market.Connectors
         {
             try
             {
-                string seriesType = ComboBoxCandleCreateMethodType.SelectedValue.ToString();
+                string seriesType = ComboBoxCandleCreateMethodType.SelectedValue?.ToString();
+                if (string.IsNullOrWhiteSpace(seriesType))
+                {
+                    return;
+                }
 
                 for (int i = 0; i < _series.Count; i++)
                 {
@@ -2017,39 +2082,39 @@ namespace OsEngine.Market.Connectors
                     return;
                 }
 
-                string value = _candlesRealizationGrid.Rows[row].Cells[1].Value.ToString();
+                string value = GetCellValueText(_candlesRealizationGrid.Rows[row].Cells[1]);
 
                 ICandleSeriesParameter param = _selectedSeries.Parameters[row];
 
                 if (param.Type == CandlesParameterType.Int)
                 {
-                    try
+                    if (int.TryParse(value, NumberStyles.Integer, CultureInfo.InvariantCulture, out int intValue))
                     {
-                        ((CandlesParameterInt)param).ValueInt = Convert.ToInt32(value, CultureInfo.InvariantCulture);
+                        ((CandlesParameterInt)param).ValueInt = intValue;
                     }
-                    catch
+                    else
                     {
-                        _candlesRealizationGrid.Rows[row].Cells[1].Value = ((CandlesParameterInt)param).ValueInt.ToString();
+                        _candlesRealizationGrid.Rows[row].Cells[1].Value = ((CandlesParameterInt)param).ValueInt.ToString(CultureInfo.InvariantCulture);
                     }
                 }
                 else if (param.Type == CandlesParameterType.Decimal)
                 {
-                    try
+                    if (TryParseDecimalInvariant(value, out decimal decimalValue))
                     {
-                        ((CandlesParameterDecimal)param).ValueDecimal = value.ToDecimal();
+                        ((CandlesParameterDecimal)param).ValueDecimal = decimalValue;
                     }
-                    catch
+                    else
                     {
-                        _candlesRealizationGrid.Rows[row].Cells[1].Value = ((CandlesParameterDecimal)param).ValueDecimal.ToString();
+                        _candlesRealizationGrid.Rows[row].Cells[1].Value = ((CandlesParameterDecimal)param).ValueDecimal.ToString(CultureInfo.InvariantCulture);
                     }
                 }
                 else if (param.Type == CandlesParameterType.Bool)
                 {
-                    try
+                    if (bool.TryParse(value, out bool boolValue))
                     {
-                        ((CandlesParameterBool)param).ValueBool = Convert.ToBoolean(value);
+                        ((CandlesParameterBool)param).ValueBool = boolValue;
                     }
-                    catch
+                    else
                     {
                         _candlesRealizationGrid.Rows[row].Cells[1].Value = ((CandlesParameterBool)param).ValueBool;
                     }
