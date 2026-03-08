@@ -229,13 +229,13 @@ namespace OsEngine.OsTrader.Grids
                     return;
                 }
 
-                string[]? array = null;
+                bool hasPayload = false;
                 string primeSegment;
                 int payloadSeparatorIndex = value.IndexOf('%');
                 if (payloadSeparatorIndex >= 0)
                 {
-                    array = value.Split('%');
-                    primeSegment = GetTrimmedToken(array, 0);
+                    hasPayload = true;
+                    primeSegment = GetTrimmedToken(value, 0, payloadSeparatorIndex);
                 }
                 else
                 {
@@ -417,11 +417,11 @@ namespace OsEngine.OsTrader.Grids
                     OpenOrdersMakerOnly = true;
                 }
 
-                if (array != null)
+                if (hasPayload)
                 {
                     // non trade periods
                     if (NonTradePeriods != null
-                        && TryGetPayloadSegment(array, 1, out string nonTradeSegment))
+                        && TryGetPayloadSegment(value, 1, out string nonTradeSegment))
                     {
                         NonTradePeriods.LoadFromString(nonTradeSegment);
                     }
@@ -431,42 +431,42 @@ namespace OsEngine.OsTrader.Grids
 
                     // stop grid by event
                     if (StopBy != null
-                        && TryGetPayloadSegment(array, 3, out string stopBySegment))
+                        && TryGetPayloadSegment(value, 3, out string stopBySegment))
                     {
                         StopBy.LoadFromString(stopBySegment);
                     }
 
                     // grid lines creation and storage
                     if (GridCreator != null
-                        && TryGetPayloadSegment(array, 4, out string gridCreatorSegment))
+                        && TryGetPayloadSegment(value, 4, out string gridCreatorSegment))
                     {
                         GridCreator.LoadFromString(gridCreatorSegment);
                     }
 
                     // stop and profit 
                     if (StopAndProfit != null
-                        && TryGetPayloadSegment(array, 5, out string stopAndProfitSegment))
+                        && TryGetPayloadSegment(value, 5, out string stopAndProfitSegment))
                     {
                         StopAndProfit.LoadFromString(stopAndProfitSegment);
                     }
 
                     // auto start
                     if (AutoStarter != null
-                        && TryGetPayloadSegment(array, 6, out string autoStarterSegment))
+                        && TryGetPayloadSegment(value, 6, out string autoStarterSegment))
                     {
                         AutoStarter.LoadFromString(autoStarterSegment);
                     }
 
                     // errors reaction
                     if (ErrorsReaction != null
-                        && TryGetPayloadSegment(array, 7, out string errorsReactionSegment))
+                        && TryGetPayloadSegment(value, 7, out string errorsReactionSegment))
                     {
                         ErrorsReaction.LoadFromString(errorsReactionSegment);
                     }
 
                     // trailing up / down
                     if (TrailingUp != null
-                        && TryGetPayloadSegment(array, 8, out string trailingUpSegment))
+                        && TryGetPayloadSegment(value, 8, out string trailingUpSegment))
                     {
                         TrailingUp.LoadFromString(trailingUpSegment);
                     }
@@ -637,35 +637,57 @@ namespace OsEngine.OsTrader.Grids
             return int.TryParse(value, NumberStyles.Integer, CultureInfo.InvariantCulture, out parsed);
         }
 
-        private static bool TryGetPayloadSegment(string[] sections, int index, out string segment)
+        private static bool TryGetPayloadSegment(string payload, int index, out string segment)
         {
             segment = string.Empty;
 
-            if (sections == null || index < 0 || index >= sections.Length)
+            if (string.IsNullOrEmpty(payload) || index < 0)
             {
                 return false;
             }
 
-            string candidate = sections[index];
+            int segmentStart = 0;
+            int currentIndex = 0;
 
-            if (string.IsNullOrWhiteSpace(candidate))
+            while (currentIndex < index)
+            {
+                int separatorIndex = payload.IndexOf('%', segmentStart);
+                if (separatorIndex < 0)
+                {
+                    return false;
+                }
+
+                segmentStart = separatorIndex + 1;
+                currentIndex++;
+            }
+
+            int segmentEnd = payload.IndexOf('%', segmentStart);
+            ReadOnlySpan<char> candidate = segmentEnd >= 0
+                ? payload.AsSpan(segmentStart, segmentEnd - segmentStart)
+                : payload.AsSpan(segmentStart);
+
+            candidate = candidate.Trim();
+
+            if (candidate.IsEmpty)
             {
                 return false;
             }
 
-            segment = candidate.Trim();
+            segment = candidate.ToString();
             return true;
         }
 
-        private static string GetTrimmedToken(string[] values, int index)
+        private static string GetTrimmedToken(string value, int startIndex, int endIndexExclusive)
         {
-            if (values == null || index < 0 || index >= values.Length)
+            if (string.IsNullOrEmpty(value)
+                || startIndex < 0
+                || endIndexExclusive < startIndex
+                || endIndexExclusive > value.Length)
             {
                 return string.Empty;
             }
 
-            string value = values[index];
-            return value == null ? string.Empty : value.Trim();
+            return value.AsSpan(startIndex, endIndexExclusive - startIndex).Trim().ToString();
         }
 
         private static bool TryParseEnumFlexible<TEnum>(ReadOnlySpan<char> value, out TEnum parsed)
