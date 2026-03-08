@@ -896,7 +896,7 @@ namespace OsEngine.OsTrader.Grids
         {
             try
             {
-                TradeGrid.ErrorsReaction.FailOpenOrdersReactionIsOn = CheckBoxFailOpenOrdersReactionIsOn.IsChecked.Value;
+                TradeGrid.ErrorsReaction.FailOpenOrdersReactionIsOn = GetCheckBoxValue(CheckBoxFailOpenOrdersReactionIsOn);
                 TradeGrid.Save();
             }
             catch
@@ -927,7 +927,7 @@ namespace OsEngine.OsTrader.Grids
         {
             try
             {
-                TradeGrid.ErrorsReaction.FailCancelOrdersReactionIsOn = CheckBoxFailCancelOrdersReactionIsOn.IsChecked.Value;
+                TradeGrid.ErrorsReaction.FailCancelOrdersReactionIsOn = GetCheckBoxValue(CheckBoxFailCancelOrdersReactionIsOn);
                 TradeGrid.Save();
             }
             catch
@@ -958,7 +958,7 @@ namespace OsEngine.OsTrader.Grids
         {
             try
             {
-                TradeGrid.ErrorsReaction.WaitOnStartConnectorIsOn = CheckBoxWaitOnStartConnectorIsOn.IsChecked.Value;
+                TradeGrid.ErrorsReaction.WaitOnStartConnectorIsOn = GetCheckBoxValue(CheckBoxWaitOnStartConnectorIsOn);
                 TradeGrid.Save();
             }
             catch (Exception ex)
@@ -989,7 +989,7 @@ namespace OsEngine.OsTrader.Grids
         {
             try
             {
-                TradeGrid.ErrorsReaction.ReduceOrdersCountInMarketOnNoFundsError = CheckBoxReduceOrdersCountInMarketOnNoFundsError.IsChecked.Value;
+                TradeGrid.ErrorsReaction.ReduceOrdersCountInMarketOnNoFundsError = GetCheckBoxValue(CheckBoxReduceOrdersCountInMarketOnNoFundsError);
                 TradeGrid.Save();
             }
             catch
@@ -1010,7 +1010,7 @@ namespace OsEngine.OsTrader.Grids
         {
             try
             {
-                bool value = CheckBoxTrailingUpIsOn.IsChecked.Value;
+                bool value = GetCheckBoxValue(CheckBoxTrailingUpIsOn);
 
                 if (value == true)
                 {
@@ -1094,7 +1094,7 @@ namespace OsEngine.OsTrader.Grids
         {
             try
             {
-                bool value = CheckBoxTrailingDownCanMoveExitOrder.IsChecked.Value;
+                bool value = GetCheckBoxValue(CheckBoxTrailingDownCanMoveExitOrder);
 
                 TradeGrid.TrailingUp.TrailingDownCanMoveExitOrder = value;
                 TradeGrid.Save();
@@ -1113,7 +1113,7 @@ namespace OsEngine.OsTrader.Grids
         {
             try
             {
-                bool value = CheckBoxTrailingDownIsOn.IsChecked.Value;
+                bool value = GetCheckBoxValue(CheckBoxTrailingDownIsOn);
 
                 if (value == true)
                 {
@@ -1197,7 +1197,7 @@ namespace OsEngine.OsTrader.Grids
         {
             try
             {
-                bool value = CheckBoxTrailingUpCanMoveExitOrder.IsChecked.Value;
+                bool value = GetCheckBoxValue(CheckBoxTrailingUpCanMoveExitOrder);
 
                 TradeGrid.TrailingUp.TrailingUpCanMoveExitOrder = value;
                 TradeGrid.Save();
@@ -1216,7 +1216,12 @@ namespace OsEngine.OsTrader.Grids
         {
             try
             {
-                Enum.TryParse(ComboBoxProfitRegime.SelectedItem.ToString(), out TradeGrid.StopAndProfit.ProfitRegime);
+                if (TryGetSelectedEnum(ComboBoxProfitRegime, out OnOffRegime regime) == false)
+                {
+                    return;
+                }
+
+                TradeGrid.StopAndProfit.ProfitRegime = regime;
                 TradeGrid.Save();
             }
             catch (Exception ex)
@@ -1229,7 +1234,12 @@ namespace OsEngine.OsTrader.Grids
         {
             try
             {
-                Enum.TryParse(ComboBoxProfitValueType.SelectedItem.ToString(), out TradeGrid.StopAndProfit.ProfitValueType);
+                if (TryGetSelectedEnum(ComboBoxProfitValueType, out TradeGridValueType valueType) == false)
+                {
+                    return;
+                }
+
+                TradeGrid.StopAndProfit.ProfitValueType = valueType;
                 TradeGrid.Save();
             }
             catch (Exception ex)
@@ -1260,7 +1270,7 @@ namespace OsEngine.OsTrader.Grids
         {
             try
             {
-                TradeGrid.StopAndProfit.StopTradingAfterProfit = CheckBoxStopByProfit.IsChecked.Value;
+                TradeGrid.StopAndProfit.StopTradingAfterProfit = GetCheckBoxValue(CheckBoxStopByProfit);
                 TradeGrid.Save();
             }
             catch
@@ -1273,15 +1283,23 @@ namespace OsEngine.OsTrader.Grids
         {
             try
             {
-                if (ComboBoxStopRegime.SelectedItem.ToString() != TradeGrid.StopAndProfit.StopRegime.ToString())
+                if (TryGetSelectedItemText(ComboBoxStopRegime, out string selectedRegime) == false
+                    || selectedRegime == TradeGrid.StopAndProfit.StopRegime.ToString())
                 {
-                    Enum.TryParse(ComboBoxStopRegime.SelectedItem.ToString(), out TradeGrid.StopAndProfit.StopRegime);
-                    TradeGrid.Save();
+                    return;
+                }
 
-                    if (TradeGrid.StopAndProfit.StopRegime != OnOffRegime.Off)
-                    {
-                        ComboBoxTrailStopRegime.SelectedItem = OnOffRegime.Off.ToString();
-                    }
+                if (Enum.TryParse(selectedRegime, out OnOffRegime stopRegime) == false)
+                {
+                    return;
+                }
+
+                TradeGrid.StopAndProfit.StopRegime = stopRegime;
+                TradeGrid.Save();
+
+                if (TradeGrid.StopAndProfit.StopRegime != OnOffRegime.Off)
+                {
+                    ComboBoxTrailStopRegime.SelectedItem = OnOffRegime.Off.ToString();
                 }
             }
             catch (Exception ex)
@@ -1294,7 +1312,12 @@ namespace OsEngine.OsTrader.Grids
         {
             try
             {
-                Enum.TryParse(ComboBoxStopValueType.SelectedItem.ToString(), out TradeGrid.StopAndProfit.StopValueType);
+                if (TryGetSelectedEnum(ComboBoxStopValueType, out TradeGridValueType valueType) == false)
+                {
+                    return;
+                }
+
+                TradeGrid.StopAndProfit.StopValueType = valueType;
                 TradeGrid.Save();
             }
             catch (Exception ex)
@@ -1343,7 +1366,12 @@ namespace OsEngine.OsTrader.Grids
         {
             try
             {
-                Enum.TryParse(ComboBoxTrailStopValueType.SelectedItem.ToString(), out TradeGrid.StopAndProfit.TrailStopValueType);
+                if (TryGetSelectedEnum(ComboBoxTrailStopValueType, out TradeGridValueType valueType) == false)
+                {
+                    return;
+                }
+
+                TradeGrid.StopAndProfit.TrailStopValueType = valueType;
                 TradeGrid.Save();
             }
             catch (Exception ex)
@@ -1356,16 +1384,23 @@ namespace OsEngine.OsTrader.Grids
         {
             try
             {
-                if (ComboBoxTrailStopRegime.SelectedItem.ToString() != TradeGrid.StopAndProfit.TrailStopRegime.ToString())
+                if (TryGetSelectedItemText(ComboBoxTrailStopRegime, out string selectedRegime) == false
+                    || selectedRegime == TradeGrid.StopAndProfit.TrailStopRegime.ToString())
                 {
-                    Enum.TryParse(ComboBoxTrailStopRegime.SelectedItem.ToString(), out TradeGrid.StopAndProfit.TrailStopRegime);
-                    TradeGrid.Save();
+                    return;
+                }
 
+                if (Enum.TryParse(selectedRegime, out OnOffRegime trailStopRegime) == false)
+                {
+                    return;
+                }
 
-                    if (TradeGrid.StopAndProfit.TrailStopRegime != OnOffRegime.Off)
-                    {
-                        ComboBoxStopRegime.SelectedItem = OnOffRegime.Off.ToString();
-                    }
+                TradeGrid.StopAndProfit.TrailStopRegime = trailStopRegime;
+                TradeGrid.Save();
+
+                if (TradeGrid.StopAndProfit.TrailStopRegime != OnOffRegime.Off)
+                {
+                    ComboBoxStopRegime.SelectedItem = OnOffRegime.Off.ToString();
                 }
             }
             catch (Exception ex)
@@ -1382,7 +1417,12 @@ namespace OsEngine.OsTrader.Grids
         {
             try
             {
-                Enum.TryParse(ComboBoxGridSide.SelectedItem.ToString(), out TradeGrid.GridCreator.GridSide);
+                if (TryGetSelectedEnum(ComboBoxGridSide, out Side gridSide) == false)
+                {
+                    return;
+                }
+
+                TradeGrid.GridCreator.GridSide = gridSide;
                 TradeGrid.Save();
             }
             catch (Exception ex)
@@ -1431,7 +1471,12 @@ namespace OsEngine.OsTrader.Grids
         {
             try
             {
-                Enum.TryParse(ComboBoxTypeStep.SelectedItem.ToString(), out TradeGrid.GridCreator.TypeStep);
+                if (TryGetSelectedEnum(ComboBoxTypeStep, out TradeGridValueType stepType) == false)
+                {
+                    return;
+                }
+
+                TradeGrid.GridCreator.TypeStep = stepType;
                 TradeGrid.Save();
             }
             catch (Exception ex)
@@ -1480,7 +1525,12 @@ namespace OsEngine.OsTrader.Grids
         {
             try
             {
-                Enum.TryParse(ComboBoxTypeProfit.SelectedItem.ToString(), out TradeGrid.GridCreator.TypeProfit);
+                if (TryGetSelectedEnum(ComboBoxTypeProfit, out TradeGridValueType typeProfit) == false)
+                {
+                    return;
+                }
+
+                TradeGrid.GridCreator.TypeProfit = typeProfit;
                 TradeGrid.Save();
             }
             catch (Exception ex)
@@ -1529,7 +1579,12 @@ namespace OsEngine.OsTrader.Grids
         {
             try
             {
-                Enum.TryParse(ComboBoxTypeVolume.SelectedItem.ToString(), out TradeGrid.GridCreator.TypeVolume);
+                if (TryGetSelectedEnum(ComboBoxTypeVolume, out TradeGridVolumeType typeVolume) == false)
+                {
+                    return;
+                }
+
+                TradeGrid.GridCreator.TypeVolume = typeVolume;
                 TradeGrid.Save();
             }
             catch (Exception ex)
@@ -2171,7 +2226,7 @@ namespace OsEngine.OsTrader.Grids
         {
             try
             {
-                TradeGrid.StopBy.StopGridByMoveUpIsOn = CheckBoxStopGridByMoveUpIsOn.IsChecked.Value;
+                TradeGrid.StopBy.StopGridByMoveUpIsOn = GetCheckBoxValue(CheckBoxStopGridByMoveUpIsOn);
                 TradeGrid.Save();
             }
             catch
@@ -2202,7 +2257,12 @@ namespace OsEngine.OsTrader.Grids
         {
             try
             {
-                Enum.TryParse(ComboBoxStopGridByMoveUpReaction.SelectedItem.ToString(), out TradeGrid.StopBy.StopGridByMoveUpReaction);
+                if (TryGetSelectedEnum(ComboBoxStopGridByMoveUpReaction, out TradeGridRegime reaction) == false)
+                {
+                    return;
+                }
+
+                TradeGrid.StopBy.StopGridByMoveUpReaction = reaction;
                 TradeGrid.Save();
             }
             catch (Exception ex)
@@ -2215,7 +2275,7 @@ namespace OsEngine.OsTrader.Grids
         {
             try
             {
-                TradeGrid.StopBy.StopGridByMoveDownIsOn = CheckBoxStopGridByMoveDownIsOn.IsChecked.Value;
+                TradeGrid.StopBy.StopGridByMoveDownIsOn = GetCheckBoxValue(CheckBoxStopGridByMoveDownIsOn);
                 TradeGrid.Save();
             }
             catch
@@ -2246,7 +2306,12 @@ namespace OsEngine.OsTrader.Grids
         {
             try
             {
-                Enum.TryParse(ComboBoxStopGridByMoveDownReaction.SelectedItem.ToString(), out TradeGrid.StopBy.StopGridByMoveDownReaction);
+                if (TryGetSelectedEnum(ComboBoxStopGridByMoveDownReaction, out TradeGridRegime reaction) == false)
+                {
+                    return;
+                }
+
+                TradeGrid.StopBy.StopGridByMoveDownReaction = reaction;
                 TradeGrid.Save();
             }
             catch (Exception ex)
@@ -2259,7 +2324,7 @@ namespace OsEngine.OsTrader.Grids
         {
             try
             {
-                TradeGrid.StopBy.StopGridByPositionsCountIsOn = CheckBoxStopGridByPositionsCountIsOn.IsChecked.Value;
+                TradeGrid.StopBy.StopGridByPositionsCountIsOn = GetCheckBoxValue(CheckBoxStopGridByPositionsCountIsOn);
                 TradeGrid.Save();
             }
             catch
@@ -2290,7 +2355,12 @@ namespace OsEngine.OsTrader.Grids
         {
             try
             {
-                Enum.TryParse(ComboBoxStopGridByPositionsCountReaction.SelectedItem.ToString(), out TradeGrid.StopBy.StopGridByPositionsCountReaction);
+                if (TryGetSelectedEnum(ComboBoxStopGridByPositionsCountReaction, out TradeGridRegime reaction) == false)
+                {
+                    return;
+                }
+
+                TradeGrid.StopBy.StopGridByPositionsCountReaction = reaction;
                 TradeGrid.Save();
             }
             catch (Exception ex)
@@ -2303,7 +2373,7 @@ namespace OsEngine.OsTrader.Grids
         {
             try
             {
-                TradeGrid.StopBy.StopGridByLifeTimeIsOn = CheckBoxStopGridByLifeTimeIsOn.IsChecked.Value;
+                TradeGrid.StopBy.StopGridByLifeTimeIsOn = GetCheckBoxValue(CheckBoxStopGridByLifeTimeIsOn);
                 TradeGrid.Save();
             }
             catch
@@ -2334,7 +2404,12 @@ namespace OsEngine.OsTrader.Grids
         {
             try
             {
-                Enum.TryParse(ComboBoxStopGridByLifeTimeReaction.SelectedItem.ToString(), out TradeGrid.StopBy.StopGridByLifeTimeReaction);
+                if (TryGetSelectedEnum(ComboBoxStopGridByLifeTimeReaction, out TradeGridRegime reaction) == false)
+                {
+                    return;
+                }
+
+                TradeGrid.StopBy.StopGridByLifeTimeReaction = reaction;
                 TradeGrid.Save();
             }
             catch (Exception ex)
@@ -2347,7 +2422,7 @@ namespace OsEngine.OsTrader.Grids
         {
             try
             {
-                TradeGrid.StopBy.StopGridByTimeOfDayIsOn = CheckBoxStopGridByTimeOfDayIsOn.IsChecked.Value;
+                TradeGrid.StopBy.StopGridByTimeOfDayIsOn = GetCheckBoxValue(CheckBoxStopGridByTimeOfDayIsOn);
                 TradeGrid.Save();
             }
             catch
@@ -2414,7 +2489,12 @@ namespace OsEngine.OsTrader.Grids
         {
             try
             {
-                Enum.TryParse(ComboBoxStopGridByTimeOfDayReaction.SelectedItem.ToString(), out TradeGrid.StopBy.StopGridByTimeOfDayReaction);
+                if (TryGetSelectedEnum(ComboBoxStopGridByTimeOfDayReaction, out TradeGridRegime reaction) == false)
+                {
+                    return;
+                }
+
+                TradeGrid.StopBy.StopGridByTimeOfDayReaction = reaction;
                 TradeGrid.Save();
             }
             catch (Exception ex)
@@ -2449,11 +2529,19 @@ namespace OsEngine.OsTrader.Grids
         {
             try
             {
-                if (ComboBoxAutoStartRegime.SelectedItem.ToString() != TradeGrid.AutoStarter.AutoStartRegime.ToString())
+                if (TryGetSelectedItemText(ComboBoxAutoStartRegime, out string selectedRegime) == false
+                    || selectedRegime == TradeGrid.AutoStarter.AutoStartRegime.ToString())
                 {
-                    Enum.TryParse(ComboBoxAutoStartRegime.SelectedItem.ToString(), out TradeGrid.AutoStarter.AutoStartRegime);
-                    TradeGrid.Save();
+                    return;
                 }
+
+                if (Enum.TryParse(selectedRegime, out TradeGridAutoStartRegime autoStartRegime) == false)
+                {
+                    return;
+                }
+
+                TradeGrid.AutoStarter.AutoStartRegime = autoStartRegime;
+                TradeGrid.Save();
             }
             catch (Exception ex)
             {
@@ -2483,11 +2571,19 @@ namespace OsEngine.OsTrader.Grids
         {
             try
             {
-                if (ComboBoxRebuildGridRegime.SelectedItem.ToString() != TradeGrid.AutoStarter.RebuildGridRegime.ToString())
+                if (TryGetSelectedItemText(ComboBoxRebuildGridRegime, out string selectedRegime) == false
+                    || selectedRegime == TradeGrid.AutoStarter.RebuildGridRegime.ToString())
                 {
-                    Enum.TryParse(ComboBoxRebuildGridRegime.SelectedItem.ToString(), out TradeGrid.AutoStarter.RebuildGridRegime);
-                    TradeGrid.Save();
+                    return;
                 }
+
+                if (Enum.TryParse(selectedRegime, out GridAutoStartShiftFirstPriceRegime rebuildGridRegime) == false)
+                {
+                    return;
+                }
+
+                TradeGrid.AutoStarter.RebuildGridRegime = rebuildGridRegime;
+                TradeGrid.Save();
             }
             catch (Exception ex)
             {
@@ -2499,7 +2595,7 @@ namespace OsEngine.OsTrader.Grids
         {
             try
             {
-                TradeGrid.AutoStarter.StartGridByTimeOfDayIsOn = CheckBoxStartGridByTimeOfDayIsOn.IsChecked.Value;
+                TradeGrid.AutoStarter.StartGridByTimeOfDayIsOn = GetCheckBoxValue(CheckBoxStartGridByTimeOfDayIsOn);
                 TradeGrid.Save();
             }
             catch
@@ -2566,7 +2662,7 @@ namespace OsEngine.OsTrader.Grids
         {
             try
             {
-                TradeGrid.AutoStarter.SingleActivationMode = CheckBoxSingleActivationMode.IsChecked.Value;
+                TradeGrid.AutoStarter.SingleActivationMode = GetCheckBoxValue(CheckBoxSingleActivationMode);
                 TradeGrid.Save();
             }
             catch
@@ -2607,7 +2703,12 @@ namespace OsEngine.OsTrader.Grids
         {
             try
             {
-                Enum.TryParse(ComboBoxNonTradePeriod1Regime.SelectedItem.ToString(), out TradeGrid.NonTradePeriods.NonTradePeriod1Regime);
+                if (TryGetSelectedEnum(ComboBoxNonTradePeriod1Regime, out TradeGridRegime regime) == false)
+                {
+                    return;
+                }
+
+                TradeGrid.NonTradePeriods.NonTradePeriod1Regime = regime;
                 TradeGrid.Save();
             }
             catch (Exception ex)
@@ -2620,7 +2721,12 @@ namespace OsEngine.OsTrader.Grids
         {
             try
             {
-                Enum.TryParse(ComboBoxNonTradePeriod2Regime.SelectedItem.ToString(), out TradeGrid.NonTradePeriods.NonTradePeriod2Regime);
+                if (TryGetSelectedEnum(ComboBoxNonTradePeriod2Regime, out TradeGridRegime regime) == false)
+                {
+                    return;
+                }
+
+                TradeGrid.NonTradePeriods.NonTradePeriod2Regime = regime;
                 TradeGrid.Save();
             }
             catch (Exception ex)
@@ -2633,7 +2739,12 @@ namespace OsEngine.OsTrader.Grids
         {
             try
             {
-                TradeGrid.OpenOrdersMakerOnly = Convert.ToBoolean(ComboBoxOpenOrdersMakerOnly.SelectedItem.ToString());
+                if (TryGetSelectedBool(ComboBoxOpenOrdersMakerOnly, out bool value) == false)
+                {
+                    return;
+                }
+
+                TradeGrid.OpenOrdersMakerOnly = value;
                 TradeGrid.Save();
             }
             catch (Exception ex)
@@ -2797,7 +2908,12 @@ namespace OsEngine.OsTrader.Grids
         {
             try
             {
-                TradeGrid.AutoClearJournalIsOn = Convert.ToBoolean(ComboBoxAutoClearJournal.SelectedItem.ToString());
+                if (TryGetSelectedBool(ComboBoxAutoClearJournal, out bool value) == false)
+                {
+                    return;
+                }
+
+                TradeGrid.AutoClearJournalIsOn = value;
                 TradeGrid.Save();
             }
             catch (Exception ex)
@@ -2810,7 +2926,12 @@ namespace OsEngine.OsTrader.Grids
         {
             try
             {
-                TradeGrid.CheckMicroVolumes = Convert.ToBoolean(ComboBoxCheckMicroVolumes.SelectedItem.ToString());
+                if (TryGetSelectedBool(ComboBoxCheckMicroVolumes, out bool value) == false)
+                {
+                    return;
+                }
+
+                TradeGrid.CheckMicroVolumes = value;
                 TradeGrid.Save();
             }
             catch (Exception ex)
@@ -2823,7 +2944,12 @@ namespace OsEngine.OsTrader.Grids
         {
             try
             {
-                Enum.TryParse(ComboBoxRegimeLogicEntry.SelectedItem.ToString(), out TradeGrid.RegimeLogicEntry);
+                if (TryGetSelectedEnum(ComboBoxRegimeLogicEntry, out TradeGridLogicEntryRegime regimeLogicEntry) == false)
+                {
+                    return;
+                }
+
+                TradeGrid.RegimeLogicEntry = regimeLogicEntry;
                 TradeGrid.Save();
 
                 if (TradeGrid.StartProgram == StartProgram.IsOsTrader
@@ -2844,18 +2970,21 @@ namespace OsEngine.OsTrader.Grids
         {
             try
             {
-                if (ComboBoxRegime.SelectedItem.ToString() != TradeGrid.Regime.ToString())
+                if (TryGetSelectedItemText(ComboBoxRegime, out string selectedRegime) == false
+                    || selectedRegime == TradeGrid.Regime.ToString())
                 {
-                    TradeGridRegime regime;
-
-                    if (Enum.TryParse(ComboBoxRegime.SelectedItem.ToString(), out regime))
-                    {
-                        TradeGrid.Regime = regime;
-                        TradeGrid.Save();
-                        TradeGrid.RePaintGrid();
-                        CheckEnabledItems();
-                    }
+                    return;
                 }
+
+                if (Enum.TryParse(selectedRegime, out TradeGridRegime regime) == false)
+                {
+                    return;
+                }
+
+                TradeGrid.Regime = regime;
+                TradeGrid.Save();
+                TradeGrid.RePaintGrid();
+                CheckEnabledItems();
             }
             catch (Exception ex)
             {
@@ -2865,13 +2994,21 @@ namespace OsEngine.OsTrader.Grids
 
         private void ComboBoxGridType_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            if (ComboBoxGridType.SelectedItem.ToString() != TradeGrid.GridType.ToString())
+            if (TryGetSelectedItemText(ComboBoxGridType, out string selectedGridType) == false
+                || selectedGridType == TradeGrid.GridType.ToString())
             {
-                Enum.TryParse(ComboBoxGridType.SelectedItem.ToString(), out TradeGrid.GridType);
-                TradeGrid.Save();
-                TradeGrid.RePaintGrid();
-                CheckEnabledItems();
+                return;
             }
+
+            if (Enum.TryParse(selectedGridType, out TradeGridPrimeType gridType) == false)
+            {
+                return;
+            }
+
+            TradeGrid.GridType = gridType;
+            TradeGrid.Save();
+            TradeGrid.RePaintGrid();
+            CheckEnabledItems();
         }
 
         private void ButtonStart_Click(object sender, RoutedEventArgs e)
@@ -3095,6 +3232,32 @@ namespace OsEngine.OsTrader.Grids
             {
                 // ignore
             }
+        }
+
+        private static bool TryGetSelectedItemText(System.Windows.Controls.ComboBox comboBox, out string selectedText)
+        {
+            selectedText = comboBox.SelectedItem?.ToString() ?? string.Empty;
+            return string.IsNullOrEmpty(selectedText) == false;
+        }
+
+        private static bool TryGetSelectedEnum<TEnum>(System.Windows.Controls.ComboBox comboBox, out TEnum value)
+            where TEnum : struct
+        {
+            value = default;
+            return TryGetSelectedItemText(comboBox, out string selectedText)
+                && Enum.TryParse(selectedText, out value);
+        }
+
+        private static bool TryGetSelectedBool(System.Windows.Controls.ComboBox comboBox, out bool value)
+        {
+            value = false;
+            return TryGetSelectedItemText(comboBox, out string selectedText)
+                && bool.TryParse(selectedText, out value);
+        }
+
+        private static bool GetCheckBoxValue(System.Windows.Controls.CheckBox checkBox)
+        {
+            return checkBox.IsChecked == true;
         }
 
 
