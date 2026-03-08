@@ -4088,24 +4088,25 @@ namespace OsEngine.OsTrader.Grids
                 }
 
                 Position position = line.Position;
+                bool hasPosition = position != null;
+                bool hasOpenVolume = hasPosition && position.OpenVolume != 0;
+                bool openActive = hasPosition && position.OpenActive;
+                bool closeActive = hasPosition && position.CloseActive;
 
                 if (collectOpenPositions
-                    && position != null
-                    && position.OpenVolume != 0)
+                    && hasOpenVolume)
                 {
                     openPositions.Add(line);
                 }
 
                 if (collectOpenOrdersFact
-                    && position != null
-                    && position.OpenActive)
+                    && openActive)
                 {
                     openOrdersFact.Add(line);
                 }
 
                 if (collectClosingOrdersFact
-                    && position != null
-                    && position.CloseActive)
+                    && closeActive)
                 {
                     closingOrdersFact.Add(line);
                 }
@@ -4116,9 +4117,9 @@ namespace OsEngine.OsTrader.Grids
                     continue;
                 }
 
-                if (position != null
+                if (hasPosition
                     && position.OpenVolume > 0
-                    && position.OpenActive == false)
+                    && !openActive)
                 {
                     continue;
                 }
