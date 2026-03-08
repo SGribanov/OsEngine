@@ -386,7 +386,7 @@ namespace OsEngine.OsOptimizer.OptEntity
 
                 if (_entriesCount >= _maxEntries)
                 {
-                    if (!TryEvictOneEntry())
+                    if (!TryEvictOneEntry(key))
                     {
                         _cache.Clear();
                         Interlocked.Add(ref _evictions, _entriesCount);
@@ -406,10 +406,15 @@ namespace OsEngine.OsOptimizer.OptEntity
             }
         }
 
-        private bool TryEvictOneEntry()
+        private bool TryEvictOneEntry(in OptimizerMethodCacheKey incomingKey)
         {
             foreach (KeyValuePair<OptimizerMethodCacheKey, object> entry in _cache)
             {
+                if (entry.Key == incomingKey)
+                {
+                    continue;
+                }
+
                 if (_cache.TryRemove(entry.Key, out _))
                 {
                     _entriesCount--;

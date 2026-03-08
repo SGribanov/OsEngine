@@ -148,6 +148,23 @@ public class OptimizerMethodCacheCoreTests
         Assert.Equal(1, stats.Evictions);
     }
 
+    [Fact]
+    public void OptimizerMethodCache_SetExistingAtCapacity_ShouldOverwriteWithoutEviction()
+    {
+        OptimizerMethodCache cache = new OptimizerMethodCache(maxEntries: 1);
+        OptimizerMethodCacheKey key = BuildKey("stable");
+
+        cache.Set(key, 1);
+        cache.Set(key, 2);
+
+        Assert.True(cache.TryGet(key, out int value));
+        Assert.Equal(2, value);
+
+        OptimizerMethodCacheStatistics stats = cache.GetStatisticsSnapshot();
+        Assert.Equal(0, stats.Evictions);
+        Assert.Equal(1, stats.EntriesCount);
+        Assert.Equal(2, stats.Writes);
+    }
     private static OptimizerMethodCacheKey BuildKey(string sourceId)
     {
         return new OptimizerMethodCacheKey(
