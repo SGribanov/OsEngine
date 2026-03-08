@@ -286,22 +286,21 @@ namespace OsEngine.OsTrader.Panels.Tab
                 _candlesRealizationGrid.EndEdit();
 
                 _screener.PortfolioName = ComboBoxPortfolio.Text;
-                if (CheckBoxIsEmulator.IsChecked != null)
-                {
-                    _screener.EmulatorIsOn = CheckBoxIsEmulator.IsChecked.Value;
-                }
+                _screener.EmulatorIsOn = CheckBoxIsEmulator.IsChecked == true;
 
-                Enum.TryParse(ComboBoxTypeServer.Text.Split('_')[0], true, out _screener.ServerType);
+                _screener.ServerType = ParseServerTypeOrDefault(ComboBoxTypeServer.Text, _screener.ServerType);
 
                 _screener.ServerName = _selectedServerName;
 
-                CandleMarketDataType createType;
-                Enum.TryParse(ComboBoxCandleMarketDataType.Text, true, out createType);
-                _screener.CandleMarketDataType = createType;
+                _screener.CandleMarketDataType = ParseEnumOrDefault(
+                    ComboBoxCandleMarketDataType.SelectedValue,
+                    ComboBoxCandleMarketDataType.Text,
+                    _screener.CandleMarketDataType);
 
-                CommissionType typeCommission;
-                Enum.TryParse(ComboBoxCommissionType.Text, true, out typeCommission);
-                _screener.CommissionType = typeCommission;
+                _screener.CommissionType = ParseEnumOrDefault(
+                    ComboBoxCommissionType.SelectedValue,
+                    ComboBoxCommissionType.Text,
+                    _screener.CommissionType);
 
                 if (ComboBoxClass.SelectedItem != null)
                 {
@@ -444,9 +443,11 @@ namespace OsEngine.OsTrader.Panels.Tab
         {
             try
             {
-                CandleMarketDataType currentDataType;
-
-                if (Enum.TryParse(ComboBoxCandleMarketDataType.SelectedValue.ToString(), out currentDataType))
+                CandleMarketDataType currentDataType = ParseEnumOrDefault(
+                    ComboBoxCandleMarketDataType.SelectedValue,
+                    ComboBoxCandleMarketDataType.Text,
+                    _screener.CandleMarketDataType);
+                if (Enum.IsDefined(typeof(CandleMarketDataType), currentDataType))
                 {
                     if (currentDataType == CandleMarketDataType.MarketDepth)
                     {
@@ -485,7 +486,7 @@ namespace OsEngine.OsTrader.Panels.Tab
         {
             try
             {
-                _saveTradesInCandles = CheckBoxSaveTradeArrayInCandle.IsChecked.Value;
+                _saveTradesInCandles = CheckBoxSaveTradeArrayInCandle.IsChecked == true;
             }
             catch (Exception ex)
             {
@@ -556,8 +557,10 @@ namespace OsEngine.OsTrader.Panels.Tab
         {
             try
             {
-                CommissionType typeCommission;
-                Enum.TryParse(ComboBoxCommissionType.SelectedValue.ToString(), true, out typeCommission);
+                CommissionType typeCommission = ParseEnumOrDefault(
+                    ComboBoxCommissionType.SelectedValue,
+                    ComboBoxCommissionType.Text,
+                    CommissionType.None);
 
                 if (typeCommission == CommissionType.None)
                 {
@@ -1223,7 +1226,7 @@ namespace OsEngine.OsTrader.Panels.Tab
         {
             try
             {
-                bool isCheck = CheckBoxSelectAllCheckBox.IsChecked.Value;
+                bool isCheck = CheckBoxSelectAllCheckBox.IsChecked == true;
 
                 for (int i = 0; i < _gridSecurities.Rows.Count; i++)
                 {
@@ -1586,9 +1589,9 @@ namespace OsEngine.OsTrader.Panels.Tab
         {
             try
             {
-                int indexRow = Convert.ToInt32(LabelCurrentResultShow.Content, CultureInfo.InvariantCulture) - 1;
+                int indexRow = ParseIntInvariantOrDefault(LabelCurrentResultShow.Content, 1) - 1;
 
-                int maxRowIndex = Convert.ToInt32(LabelCountResultsShow.Content, CultureInfo.InvariantCulture);
+                int maxRowIndex = ParseIntInvariantOrDefault(LabelCountResultsShow.Content, 0);
 
                 if (indexRow <= 0)
                 {
@@ -1615,9 +1618,9 @@ namespace OsEngine.OsTrader.Panels.Tab
         {
             try
             {
-                int indexRow = Convert.ToInt32(LabelCurrentResultShow.Content, CultureInfo.InvariantCulture) - 1 + 1;
+                int indexRow = ParseIntInvariantOrDefault(LabelCurrentResultShow.Content, 1);
 
-                int maxRowIndex = Convert.ToInt32(LabelCountResultsShow.Content, CultureInfo.InvariantCulture);
+                int maxRowIndex = ParseIntInvariantOrDefault(LabelCountResultsShow.Content, 0);
 
                 if (indexRow >= maxRowIndex)
                 {
@@ -1769,20 +1772,19 @@ namespace OsEngine.OsTrader.Panels.Tab
             MassSourcesCreator curCreator = new MassSourcesCreator(StartProgram.IsTester);
 
             curCreator.PortfolioName = ComboBoxPortfolio.Text;
-            if (CheckBoxIsEmulator.IsChecked != null)
-            {
-                curCreator.EmulatorIsOn = CheckBoxIsEmulator.IsChecked.Value;
-            }
+            curCreator.EmulatorIsOn = CheckBoxIsEmulator.IsChecked == true;
 
-            Enum.TryParse(ComboBoxTypeServer.Text, true, out curCreator.ServerType);
+            curCreator.ServerType = ParseServerTypeOrDefault(ComboBoxTypeServer.Text, curCreator.ServerType);
 
-            CandleMarketDataType createType;
-            Enum.TryParse(ComboBoxCandleMarketDataType.Text, true, out createType);
-            curCreator.CandleMarketDataType = createType;
+            curCreator.CandleMarketDataType = ParseEnumOrDefault(
+                ComboBoxCandleMarketDataType.SelectedValue,
+                ComboBoxCandleMarketDataType.Text,
+                curCreator.CandleMarketDataType);
 
-            CommissionType typeCommission;
-            Enum.TryParse(ComboBoxCommissionType.Text, true, out typeCommission);
-            curCreator.CommissionType = typeCommission;
+            curCreator.CommissionType = ParseEnumOrDefault(
+                ComboBoxCommissionType.SelectedValue,
+                ComboBoxCommissionType.Text,
+                curCreator.CommissionType);
 
             if (ComboBoxClass.SelectedItem != null)
             {
@@ -1853,6 +1855,56 @@ namespace OsEngine.OsTrader.Panels.Tab
             curCreator.SecuritiesNames = securities;
 
             return curCreator;
+        }
+
+        private static TEnum ParseEnumOrDefault<TEnum>(object selectedValue, string text, TEnum defaultValue)
+            where TEnum : struct
+        {
+            string candidate = selectedValue?.ToString();
+
+            if (string.IsNullOrWhiteSpace(candidate))
+            {
+                candidate = text;
+            }
+
+            if (!string.IsNullOrWhiteSpace(candidate)
+                && Enum.TryParse(candidate, true, out TEnum parsed))
+            {
+                return parsed;
+            }
+
+            return defaultValue;
+        }
+
+        private static ServerType ParseServerTypeOrDefault(string text, ServerType defaultValue)
+        {
+            if (string.IsNullOrWhiteSpace(text))
+            {
+                return defaultValue;
+            }
+
+            string[] parts = text.Split('_');
+            string candidate = parts.Length > 0 ? parts[0] : text;
+
+            if (Enum.TryParse(candidate, true, out ServerType parsed))
+            {
+                return parsed;
+            }
+
+            return defaultValue;
+        }
+
+        private static int ParseIntInvariantOrDefault(object value, int defaultValue)
+        {
+            string text = value?.ToString();
+
+            if (!string.IsNullOrWhiteSpace(text)
+                && int.TryParse(text, NumberStyles.Integer, CultureInfo.InvariantCulture, out int parsed))
+            {
+                return parsed;
+            }
+
+            return defaultValue;
         }
 
         private void LoadSettingsOnGui(MassSourcesCreator curCreator)
