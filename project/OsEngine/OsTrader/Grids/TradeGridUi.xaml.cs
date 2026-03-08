@@ -2117,7 +2117,10 @@ namespace OsEngine.OsTrader.Grids
 
                 for (int i = 0; i < Lines.Count; i++)
                 {
-                    decimal priceEntry = _gridDataGrid.Rows[i].Cells[2].Value.ToString().ToDecimal();
+                    if (TryReadGridCellDecimal(_gridDataGrid.Rows[i].Cells[2], out decimal priceEntry) == false)
+                    {
+                        continue;
+                    }
 
                     if (Lines[i].PriceEnter != priceEntry)
                     {
@@ -2125,10 +2128,10 @@ namespace OsEngine.OsTrader.Grids
                         needToSave = true;
                     }
 
-                    if (_gridDataGrid.Rows[i].Cells[3].Value.ToString() != "_")
+                    if (TryReadGridCellText(_gridDataGrid.Rows[i].Cells[3], out string priceExitText)
+                        && priceExitText != "_"
+                        && decimal.TryParse(priceExitText, NumberStyles.Any, CultureInfo.InvariantCulture, out decimal priceExit))
                     {
-                        decimal priceExit = _gridDataGrid.Rows[i].Cells[3].Value.ToString().ToDecimal();
-
                         if (Lines[i].PriceExit != priceExit)
                         {
                             Lines[i].PriceExit = priceExit;
@@ -2137,7 +2140,10 @@ namespace OsEngine.OsTrader.Grids
                         }
                     }
 
-                    decimal volume = _gridDataGrid.Rows[i].Cells[4].Value.ToString().ToDecimal();
+                    if (TryReadGridCellDecimal(_gridDataGrid.Rows[i].Cells[4], out decimal volume) == false)
+                    {
+                        continue;
+                    }
 
                     if (Lines[i].Volume != volume)
                     {
@@ -2190,17 +2196,20 @@ namespace OsEngine.OsTrader.Grids
 
                 if (column == 1)
                 {
-                    if (_gridDataGrid.Rows[row].Cells[column].Value == null)
+                    if (TryReadGridCellText(_gridDataGrid.Rows[row].Cells[column], out string numberText) == false)
                     {
                         return;
                     }
 
-                    if (_gridDataGrid.Rows[row].Cells[column].Value.ToString() == "_")
+                    if (numberText == "_")
                     {
                         return;
                     }
 
-                    int number = Convert.ToInt32(_gridDataGrid.Rows[row].Cells[column].Value.ToString(), CultureInfo.InvariantCulture);
+                    if (int.TryParse(numberText, NumberStyles.Integer, CultureInfo.InvariantCulture, out int number) == false)
+                    {
+                        return;
+                    }
 
                     Position pos = TradeGrid.Tab._journal.GetPositionForNumber(number);
 
@@ -3273,6 +3282,19 @@ namespace OsEngine.OsTrader.Grids
             value = default;
             string text = textBox.Text;
             return string.IsNullOrEmpty(text) == false
+                && decimal.TryParse(text, NumberStyles.Any, CultureInfo.InvariantCulture, out value);
+        }
+
+        private static bool TryReadGridCellText(DataGridViewCell cell, out string text)
+        {
+            text = cell?.Value?.ToString() ?? string.Empty;
+            return string.IsNullOrEmpty(text) == false;
+        }
+
+        private static bool TryReadGridCellDecimal(DataGridViewCell cell, out decimal value)
+        {
+            value = default;
+            return TryReadGridCellText(cell, out string text)
                 && decimal.TryParse(text, NumberStyles.Any, CultureInfo.InvariantCulture, out value);
         }
 
