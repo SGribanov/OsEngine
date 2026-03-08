@@ -9,6 +9,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Windows.Forms.Integration;
@@ -225,20 +226,16 @@ namespace OsEngine.OsConverter
 
         private void WorkerSpaceStreaming()
         {
-            string tempOutputPath = _exitFile + ".tmp";
+            string tempOutputPath = string.Empty;
+            bool isPromoted = false;
 
             try
             {
                 string fullExitPath = Path.GetFullPath(_exitFile);
-                string? exitDirectory = Path.GetDirectoryName(fullExitPath);
-
-                if (!string.IsNullOrWhiteSpace(exitDirectory))
-                {
-                    Directory.CreateDirectory(exitDirectory);
-                }
+                tempOutputPath = CreateStreamingTempOutputPath(fullExitPath);
 
                 using (StreamReader reader = new StreamReader(_sourceFile))
-                using (StreamWriter writer = new StreamWriter(tempOutputPath, false))
+                using (StreamWriter writer = CreateStreamingTempWriter(tempOutputPath))
                 {
                     SendNewLogMessage(OsLocalization.Converter.Message4, LogMessageType.System);
                     SendNewLogMessage(OsLocalization.Converter.Message5, LogMessageType.System);
@@ -258,7 +255,12 @@ namespace OsEngine.OsConverter
 
                         if (trade.Time.Date != currentDay || reader.EndOfStream)
                         {
-                            ProcessTradesAndWriteCandles(trades, writer);
+                            if (trades.Count > 0)
+                            {
+                                ProcessTradesAndWriteCandles(trades, writer);
+                                FlushStreamingTempWriter(writer);
+                            }
+
                             trades = new List<Trade>(); // Clear trades for the next day
                             currentDay = trade.Time.Date;
                         }
@@ -270,42 +272,100 @@ namespace OsEngine.OsConverter
                     if (trades.Count > 0)
                     {
                         ProcessTradesAndWriteCandles(trades, writer);
+                        FlushStreamingTempWriter(writer);
                     }
 
-                    writer.Flush();
-                    if (writer.BaseStream is FileStream fileStream)
-                    {
-                        fileStream.Flush(true);
-                    }
-                    else
-                    {
-                        writer.BaseStream.Flush();
-                    }
                     SendNewLogMessage(OsLocalization.Converter.Message9, LogMessageType.System);
                 }
 
-                if (File.Exists(_exitFile))
-                {
-                    File.Replace(tempOutputPath, _exitFile, _exitFile + ".bak", true);
-                }
-                else
-                {
-                    File.Move(tempOutputPath, _exitFile);
-                }
+                PromoteStreamingOutput(tempOutputPath, fullExitPath);
+                isPromoted = true;
             }
             catch (Exception ex)
             {
                 SendNewLogMessage(ex.ToString(), LogMessageType.Error);
+
+                if (string.IsNullOrWhiteSpace(tempOutputPath) == false
+                    && File.Exists(tempOutputPath))
+                {
+                    SendNewLogMessage("Converted output preserved in temp file: " + tempOutputPath, LogMessageType.Error);
+                }
             }
             finally
             {
-                if (File.Exists(tempOutputPath))
+                if (isPromoted
+                    && string.IsNullOrWhiteSpace(tempOutputPath) == false
+                    && File.Exists(tempOutputPath))
                 {
                     File.Delete(tempOutputPath);
                 }
             }
 
             _worker = null;
+        }
+
+        internal static string CreateStreamingTempOutputPath(string exitFilePath)
+        {
+            string fullExitPath = Path.GetFullPath(exitFilePath);
+            string? exitDirectory = Path.GetDirectoryName(fullExitPath);
+
+            if (string.IsNullOrWhiteSpace(exitDirectory))
+            {
+                throw new InvalidOperationException("Exit file directory cannot be resolved.");
+            }
+
+            Directory.CreateDirectory(exitDirectory);
+
+            return Path.Combine(
+                exitDirectory,
+                Path.GetFileName(fullExitPath) + "." + Guid.NewGuid().ToString("N") + ".tmp");
+        }
+
+        internal static StreamWriter CreateStreamingTempWriter(string tempOutputPath)
+        {
+            FileStream tempStream = new FileStream(
+                tempOutputPath,
+                new FileStreamOptions
+                {
+                    Mode = FileMode.Create,
+                    Access = FileAccess.Write,
+                    Share = FileShare.None,
+                    Options = FileOptions.None
+                });
+
+            return new StreamWriter(
+                tempStream,
+                new UTF8Encoding(encoderShouldEmitUTF8Identifier: false, throwOnInvalidBytes: true));
+        }
+
+        internal static void FlushStreamingTempWriter(StreamWriter writer)
+        {
+            writer.Flush();
+
+            if (writer.BaseStream is FileStream fileStream)
+            {
+                fileStream.Flush(flushToDisk: true);
+                return;
+            }
+
+            writer.BaseStream.Flush();
+        }
+
+        internal static void PromoteStreamingOutput(string tempOutputPath, string exitFilePath)
+        {
+            string fullExitPath = Path.GetFullPath(exitFilePath);
+
+            if (File.Exists(fullExitPath))
+            {
+                File.Replace(
+                    tempOutputPath,
+                    fullExitPath,
+                    destinationBackupFileName: null,
+                    ignoreMetadataErrors: true);
+                return;
+            }
+
+            File.Move(tempOutputPath, fullExitPath, overwrite: false);
         }
 
         private void ProcessTradesAndWriteCandles(List<Trade> trades, StreamWriter writer)
