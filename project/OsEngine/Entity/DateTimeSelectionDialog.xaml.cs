@@ -9,7 +9,6 @@ using System.Windows;
 using OsEngine.Language;
 
 #nullable enable
-#pragma warning disable CS8629
 
 namespace OsEngine.Entity
 {
@@ -43,21 +42,25 @@ namespace OsEngine.Entity
 
         private void ButtonSave_Click(object sender, RoutedEventArgs e)
         {
-            try
+            if (DateTimePicker.SelectedDate is DateTime selectedDate
+                && TryParseTimePart(TextBoxHour.Text, out int hour)
+                && TryParseTimePart(TextBoxMinute.Text, out int min)
+                && TryParseTimePart(TextBoxSecond.Text, out int sec))
             {
-                int hour = Convert.ToInt32(TextBoxHour.Text, CultureInfo.InvariantCulture);
-                int min = Convert.ToInt32(TextBoxMinute.Text, CultureInfo.InvariantCulture);
-                int sec = Convert.ToInt32(TextBoxSecond.Text, CultureInfo.InvariantCulture);
-
-                Time = new DateTime(DateTimePicker.SelectedDate.Value.Year, DateTimePicker.SelectedDate.Value.Month, DateTimePicker.SelectedDate.Value.Day, hour, min, sec);
+                Time = new DateTime(selectedDate.Year, selectedDate.Month, selectedDate.Day, hour, min, sec);
                 IsSaved = true;
             }
-            catch
+            else
             {
                 return;
             }
 
             Close();
+        }
+
+        private static bool TryParseTimePart(string? value, out int parsed)
+        {
+            return int.TryParse(value, NumberStyles.Integer, CultureInfo.InvariantCulture, out parsed);
         }
     }
 }
