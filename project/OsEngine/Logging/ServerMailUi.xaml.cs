@@ -6,6 +6,7 @@
  *Ваши права на использование кода регулируются данной лицензией http://o-s-a.net/doc/license_simple_engine.pdf
 */
 
+using System;
 using System.Collections.Generic;
 using System.Windows;
 using OsEngine.Language;
@@ -18,7 +19,12 @@ namespace OsEngine.Logging
     /// </summary>
     public partial class ServerMailDeliveryUi
     {
-         public ServerMailDeliveryUi() // constructor / конструктор
+        private const string YandexProviderName = "Yandex";
+        private const string GoogleProviderName = "Google";
+        private const string YandexSmtpHost = "smtp.yandex.ru";
+        private const string GoogleSmtpHost = "smtp.gmail.com";
+
+        public ServerMailDeliveryUi() // constructor / конструктор
         {
             InitializeComponent();
             OsEngine.Layout.StickyBorders.Listen(this);
@@ -30,17 +36,9 @@ namespace OsEngine.Logging
             TextBoxPassword.Text = serverMail.MyPassword;
             TextBoxAdress.Text = BuildAddressText(serverMail.Adress);
 
-            ComboBoxMyMaster.Items.Add("Yandex");
-            ComboBoxMyMaster.Items.Add("Google");
-
-            if (serverMail.Smtp == "smtp.yandex.ru")
-            {
-                ComboBoxMyMaster.SelectedItem = "Yandex";
-            }
-            else
-            {
-                ComboBoxMyMaster.SelectedItem = "Google";
-            }
+            ComboBoxMyMaster.Items.Add(YandexProviderName);
+            ComboBoxMyMaster.Items.Add(GoogleProviderName);
+            ComboBoxMyMaster.SelectedItem = GetProviderNameForSmtp(serverMail.Smtp);
 
             Title = OsLocalization.Logging.TitleEmailServer;
             ButtonAccept.Content = OsLocalization.Logging.Button1;
@@ -64,37 +62,49 @@ namespace OsEngine.Logging
             Close();
         }
 
-        private static string BuildAddressText(string[] addresses)
+        private static string BuildAddressText(string[]? addresses)
         {
             if (addresses == null || addresses.Length == 0)
             {
                 return string.Empty;
             }
 
-            return string.Join("\r\n", addresses) + "\r\n";
+            return string.Join(Environment.NewLine, addresses) + Environment.NewLine;
         }
 
-        private static string[] ParseAddresses(string addressText)
+        private static string[]? ParseAddresses(string? addressText)
         {
+            if (string.IsNullOrWhiteSpace(addressText))
+            {
+                return null;
+            }
+
             string[] lines = addressText.Replace("\r", string.Empty).Split('\n');
             List<string> addresses = new List<string>();
 
             for (int i = 0; i < lines.Length; i++)
             {
-                if (lines[i] != string.Empty)
+                if (string.IsNullOrWhiteSpace(lines[i]) == false)
                 {
-                    addresses.Add(lines[i]);
+                    addresses.Add(lines[i].Trim());
                 }
             }
 
             return addresses.Count == 0 ? null : addresses.ToArray();
         }
 
-        private static string ResolveSmtpHost(object selectedProvider)
+        private static string ResolveSmtpHost(object? selectedProvider)
         {
-            return selectedProvider as string == "Yandex"
-                ? "smtp.yandex.ru"
-                : "smtp.gmail.com";
+            return string.Equals(selectedProvider?.ToString(), YandexProviderName, StringComparison.Ordinal)
+                ? YandexSmtpHost
+                : GoogleSmtpHost;
+        }
+
+        private static string GetProviderNameForSmtp(string? smtpHost)
+        {
+            return string.Equals(smtpHost, YandexSmtpHost, StringComparison.OrdinalIgnoreCase)
+                ? YandexProviderName
+                : GoogleProviderName;
         }
     }
 }

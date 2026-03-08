@@ -42,12 +42,18 @@ namespace OsEngine.Logging
 
         private void buttonAccept_Click(object sender, RoutedEventArgs e) // accept / принять
         {
-            if (TryParseChatId(TextBoxChatId.Text, out long chatId))
+            if (TryReadSettings(
+                    TextBoxMyBotToken.Text,
+                    TextBoxChatId.Text,
+                    CheckBoxTelegramProcessingCommand.IsChecked,
+                    out string botToken,
+                    out long chatId,
+                    out bool processingCommand))
             {
                 ServerTelegram serverTelegram = ServerTelegram.GetServer();
-                serverTelegram.BotToken = TextBoxMyBotToken.Text;
+                serverTelegram.BotToken = botToken;
                 serverTelegram.ChatId = chatId;
-                serverTelegram.ProcessingCommand = CheckBoxTelegramProcessingCommand.IsChecked == true;
+                serverTelegram.ProcessingCommand = processingCommand;
                 Label25.Visibility = Visibility.Collapsed;
 
                 serverTelegram.Save();
@@ -59,8 +65,17 @@ namespace OsEngine.Logging
             }
         }
 
-        private static bool TryParseChatId(string chatIdText, out long chatId)
+        private static bool TryReadSettings(
+            string? botTokenText,
+            string? chatIdText,
+            bool? processingCommandIsChecked,
+            out string botToken,
+            out long chatId,
+            out bool processingCommand)
         {
+            botToken = botTokenText ?? string.Empty;
+            processingCommand = processingCommandIsChecked == true;
+
             return long.TryParse(chatIdText, NumberStyles.Integer, CultureInfo.InvariantCulture, out chatId);
         }
     }

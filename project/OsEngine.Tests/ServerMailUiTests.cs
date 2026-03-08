@@ -10,9 +10,9 @@ public class ServerMailUiTests
     [Fact]
     public void ParseAddresses_ShouldPreserveNonEmptyRecipientsAcrossCrLf()
     {
-        string[] addresses = InvokeStatic<string[]>("ParseAddresses", "first@example.com\r\n\r\nsecond@example.com\n");
+        string[] addresses = InvokeStatic<string[]>("ParseAddresses", " first@example.com \r\n\r\nsecond@example.com\n   \nthird@example.com ");
 
-        Assert.Equal(["first@example.com", "second@example.com"], addresses);
+        Assert.Equal(["first@example.com", "second@example.com", "third@example.com"], addresses);
     }
 
     [Fact]
@@ -23,20 +23,28 @@ public class ServerMailUiTests
         Assert.Null(addresses);
     }
 
-    [Fact]
-    public void ResolveSmtpHost_ShouldDefaultToGoogleForNullSelection()
+    [Theory]
+    [InlineData("smtp.yandex.ru", "Yandex")]
+    [InlineData("SMTP.YANDEX.RU", "Yandex")]
+    [InlineData("smtp.gmail.com", "Google")]
+    [InlineData(null, "Google")]
+    public void GetProviderNameForSmtp_ShouldMapHostsToProvider(string? smtpHost, string expectedProvider)
     {
-        string host = InvokeStatic<string>("ResolveSmtpHost", new object?[] { null });
+        string provider = InvokeStatic<string>("GetProviderNameForSmtp", smtpHost);
 
-        Assert.Equal("smtp.gmail.com", host);
+        Assert.Equal(expectedProvider, provider);
     }
 
-    [Fact]
-    public void ResolveSmtpHost_ShouldReturnYandexHostForYandexSelection()
+    [Theory]
+    [InlineData("Yandex", "smtp.yandex.ru")]
+    [InlineData("Google", "smtp.gmail.com")]
+    [InlineData(null, "smtp.gmail.com")]
+    [InlineData("Unknown", "smtp.gmail.com")]
+    public void ResolveSmtpHost_ShouldPreserveFallbackBehavior(string? selection, string expectedHost)
     {
-        string host = InvokeStatic<string>("ResolveSmtpHost", "Yandex");
+        string host = InvokeStatic<string>("ResolveSmtpHost", selection);
 
-        Assert.Equal("smtp.yandex.ru", host);
+        Assert.Equal(expectedHost, host);
     }
 
     private static T InvokeStatic<T>(string methodName, params object?[]? args)
