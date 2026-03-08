@@ -20,13 +20,13 @@ Buy:
 1. Mid-price momentum is above 0 and rising.
 2. Candle volume is above the average volume by X percent.
 3. Candle body is larger than Y * ATR.
-4. Close is above Open.
+4. Close is above the candle midpoint.
 
 Sell:
 1. Mid-price momentum is below 0 and falling.
 2. Candle volume is above the average volume by X percent.
 3. Candle body is larger than Y * ATR.
-4. Close is below Open.
+4. Close is below the candle midpoint.
 
 Exit:
 Take-profit in price steps or close after N bars.
@@ -82,7 +82,7 @@ namespace OsEngine.Robots
             _tab.CandleFinishedEvent += OnCandleFinished;
             DeleteEvent += OnDelete;
 
-            Description = "Manual impulse strategy using zero-centered mid-price momentum, volume expansion and ATR body filter.";
+            Description = "Manual impulse strategy using zero-centered mid-price momentum, volume expansion, ATR body filter and midpoint close confirmation.";
         }
 
         public override string GetNameStrategyType()
@@ -209,7 +209,7 @@ namespace OsEngine.Robots
             if (_regime.ValueString != "OnlyShort"
                 && momentum > 0m
                 && momentum > previousMomentum
-                && lastCandle.Close > lastCandle.Open)
+                && lastCandle.Close > lastCandle.Low + 0.5m * (lastCandle.High - lastCandle.Low))
             {
                 _tab.BuyAtLimit(volume, GetBuyOrderPrice(lastCandle.Close, slippage), "ImpulseLong");
             }
@@ -217,7 +217,7 @@ namespace OsEngine.Robots
             if (_regime.ValueString != "OnlyLong"
                 && momentum < 0m
                 && momentum < previousMomentum
-                && lastCandle.Close < lastCandle.Open)
+                && lastCandle.Close < lastCandle.High - 0.5m * (lastCandle.High - lastCandle.Low))
             {
                 _tab.SellAtLimit(volume, GetSellOrderPrice(lastCandle.Close, slippage), "ImpulseShort");
             }
