@@ -171,9 +171,7 @@ namespace OsEngine.Alerts
         /// </summary>
         private void HideTradeButton()
         {
-            SignalType type;
-
-            Enum.TryParse(ComboBoxSignalType.SelectedItem.ToString(), true, out type);
+            SignalType type = ParseEnumOrDefault(ComboBoxSignalType.SelectedItem, ComboBoxSignalType.Text, SignalType.None);
 
             if (type == SignalType.None)
             {
@@ -212,9 +210,7 @@ namespace OsEngine.Alerts
                 ComboBoxOrderType.IsEnabled = true;
             }
 
-            OrderPriceType orderType;
-
-            Enum.TryParse(ComboBoxOrderType.SelectedItem.ToString(), true, out orderType);
+            OrderPriceType orderType = ParseEnumOrDefault(ComboBoxOrderType.SelectedItem, ComboBoxOrderType.Text, OrderPriceType.Market);
 
             if (orderType == OrderPriceType.Limit)
             {
@@ -549,13 +545,15 @@ namespace OsEngine.Alerts
         /// </summary>
         private void SetSettingsForomWindow()
         {
+            decimal volumeReaction;
             try
             {
-                TextBoxVolumeReaction.Text.ToDecimal();
+                volumeReaction = TextBoxVolumeReaction.Text.ToDecimal();
             }
             catch (Exception)
             {
                 MessageBox.Show(OsLocalization.Alerts.Message3);
+                return;
             }
 
             if (MyAlert == null)
@@ -563,31 +561,31 @@ namespace OsEngine.Alerts
                 return;
             }
 
-            
-            MyAlert.IsMusicOn = CheckBoxMusicAlert.IsChecked.Value;
-            MyAlert.IsOn = CheckBoxOnOff.IsChecked.Value;
-            MyAlert.IsMessageOn = CheckBoxWindow.IsChecked.Value;
+             
+            MyAlert.IsMusicOn = CheckBoxMusicAlert.IsChecked == true;
+            MyAlert.IsOn = CheckBoxOnOff.IsChecked == true;
+            MyAlert.IsMessageOn = CheckBoxWindow.IsChecked == true;
 
             MyAlert.Label = TextBoxLabelAlert.Text;
           //  MyAlert.ColorLabel = HostColorLabel.Child.BackColor;
 
            // MyAlert.ColorLine = HostColorLine.Child.BackColor;
-            MyAlert.BorderWidth = Convert.ToInt32(ComboBoxFatLine.SelectedItem, CultureInfo.InvariantCulture);
+            MyAlert.BorderWidth = ParseIntOrDefault(ComboBoxFatLine.SelectedItem, ComboBoxFatLine.Text, MyAlert.BorderWidth);
 
             MyAlert.Message = TextBoxAlertMessage.Text;
 
-            Enum.TryParse(ComboBoxType.Text, true, out MyAlert.Type);
+            MyAlert.Type = ParseEnumOrDefault(ComboBoxType.SelectedItem, ComboBoxType.Text, MyAlert.Type);
 
-            Enum.TryParse(ComboBoxSignalType.Text, true, out MyAlert.SignalType);
-            MyAlert.VolumeReaction = TextBoxVolumeReaction.Text.ToDecimal();
+            MyAlert.SignalType = ParseEnumOrDefault(ComboBoxSignalType.SelectedItem, ComboBoxSignalType.Text, MyAlert.SignalType);
+            MyAlert.VolumeReaction = volumeReaction;
 
-            MyAlert.Slippage = TextBoxSlippage.Text.ToDecimal();
-            Enum.TryParse(ComboBoxSlippageType.SelectedItem.ToString(), true, out MyAlert.SlippageType);
+            MyAlert.Slippage = ParseDecimalOrDefault(TextBoxSlippage.Text, MyAlert.Slippage);
+            MyAlert.SlippageType = ParseEnumOrDefault(ComboBoxSlippageType.SelectedItem, ComboBoxSlippageType.Text, MyAlert.SlippageType);
 
-            MyAlert.NumberClosePosition = Convert.ToInt32(TextBoxClosePosition.Text, CultureInfo.InvariantCulture);
-            Enum.TryParse(ComboBoxOrderType.Text, true, out MyAlert.OrderPriceType);
+            MyAlert.NumberClosePosition = ParseIntOrDefault(TextBoxClosePosition.Text, string.Empty, MyAlert.NumberClosePosition);
+            MyAlert.OrderPriceType = ParseEnumOrDefault(ComboBoxOrderType.SelectedItem, ComboBoxOrderType.Text, MyAlert.OrderPriceType);
 
-            Enum.TryParse(ComboBoxMusicType.Text,out MyAlert.Music);
+            MyAlert.Music = ParseEnumOrDefault(ComboBoxMusicType.SelectedItem, ComboBoxMusicType.Text, MyAlert.Music);
 
 
             System.Windows.Media.Color  labelColor = ((SolidColorBrush)ButtonColorLabel.Background).Color;
@@ -597,6 +595,60 @@ namespace OsEngine.Alerts
             MyAlert.ColorLine = System.Drawing.Color.FromArgb(lineColor.A, lineColor.R, lineColor.G, lineColor.B);
 
 
+        }
+
+        private static TEnum ParseEnumOrDefault<TEnum>(object selectedItem, string text, TEnum defaultValue)
+            where TEnum : struct
+        {
+            string candidate = selectedItem?.ToString();
+
+            if (string.IsNullOrWhiteSpace(candidate))
+            {
+                candidate = text;
+            }
+
+            if (!string.IsNullOrWhiteSpace(candidate)
+                && Enum.TryParse(candidate, true, out TEnum parsed))
+            {
+                return parsed;
+            }
+
+            return defaultValue;
+        }
+
+        private static int ParseIntOrDefault(object selectedItem, string text, int defaultValue)
+        {
+            string candidate = selectedItem?.ToString();
+
+            if (string.IsNullOrWhiteSpace(candidate))
+            {
+                candidate = text;
+            }
+
+            if (!string.IsNullOrWhiteSpace(candidate)
+                && int.TryParse(candidate, NumberStyles.Integer, CultureInfo.InvariantCulture, out int parsed))
+            {
+                return parsed;
+            }
+
+            return defaultValue;
+        }
+
+        private static decimal ParseDecimalOrDefault(string text, decimal defaultValue)
+        {
+            if (string.IsNullOrWhiteSpace(text))
+            {
+                return defaultValue;
+            }
+
+            try
+            {
+                return text.ToDecimal();
+            }
+            catch
+            {
+                return defaultValue;
+            }
         }
 
         /// <summary>
