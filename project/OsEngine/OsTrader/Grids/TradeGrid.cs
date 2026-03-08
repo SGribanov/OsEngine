@@ -2324,7 +2324,9 @@ namespace OsEngine.OsTrader.Grids
                     cancelledOrders++;
                 }
 
-                if (pos.OpenVolume != 0)
+                if (pos.OpenVolume != 0
+                    && pos.CloseActive == false
+                    && pos.ProfitOrderPrice != 0)
                 {
                     openPositions.Add(line);
                 }
