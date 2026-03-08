@@ -35,6 +35,9 @@ namespace OsEngine.Market.Servers.TelegramNews
 
     public class TelegramNewsServerRealization : IServerRealization
     {
+        private const long TelegramLogMaxBytes = 1024 * 1024;
+        private static readonly System.Threading.Lock TelegramLogWriteLock = new();
+
         #region 1 Constructor, Status, Connection
 
         public TelegramNewsServerRealization()
@@ -44,10 +47,7 @@ namespace OsEngine.Market.Servers.TelegramNews
             string logDir = GetTelegramLogsDirectoryPath();
             Directory.CreateDirectory(logDir);
 
-            FileInfo logFile = new FileInfo(GetTelegramLogFilePath());
-
-            if (logFile.Exists && logFile.Length > 1024 * 1024)
-                SafeFileWriter.WriteAllText(logFile.FullName, string.Empty);
+            EnsureTelegramLogIsWithinSizeLimit(GetTelegramLogFilePath());
 
             // Logs settings
             WTelegram.Helpers.Log = (level, message) =>
@@ -57,8 +57,7 @@ namespace OsEngine.Market.Servers.TelegramNews
                     SendLogMessage(message, LogMessageType.Error);
                 }
 
-                string logPath = GetTelegramLogFilePath();
-                File.AppendAllText(logPath, $"[{DateTime.Now:HH:mm:ss}] LogEvent : {message}\n");
+                AppendTelegramLogLine(GetTelegramLogFilePath(), message, DateTime.Now);
             };
         }
 
@@ -251,6 +250,32 @@ namespace OsEngine.Market.Servers.TelegramNews
         private static string GetTelegramSessionPath()
         {
             return Path.Combine(GetTelegramLogsDirectoryPath(), "WTelegram.session");
+        }
+
+        private static void EnsureTelegramLogIsWithinSizeLimit(string logPath)
+        {
+            lock (TelegramLogWriteLock)
+            {
+                FileInfo logFile = new FileInfo(logPath);
+
+                if (logFile.Exists && logFile.Length > TelegramLogMaxBytes)
+                {
+                    SafeFileWriter.WriteAllText(logFile.FullName, string.Empty);
+                }
+            }
+        }
+
+        private static void AppendTelegramLogLine(string logPath, string message, DateTime timestamp)
+        {
+            lock (TelegramLogWriteLock)
+            {
+                string line = $"[{timestamp:HH:mm:ss}] LogEvent : {message}\n";
+                string existingContent = File.Exists(logPath)
+                    ? File.ReadAllText(logPath)
+                    : string.Empty;
+
+                SafeFileWriter.WriteAllText(logPath, existingContent + line);
+            }
         }
 
         private static string GetPassword()
