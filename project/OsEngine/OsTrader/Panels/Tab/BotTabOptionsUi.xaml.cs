@@ -157,9 +157,10 @@ namespace OsEngine.OsTrader.Panels.Tab
             var securitiesToDisplay = allSecurities.Where(s => underlyingAssetNames.Contains(s.Name)).ToList();
 
             // Further filter by class if a class is selected
-            if (ComboBoxClass.SelectedItem != null && ComboBoxClass.SelectedItem.ToString() != "All")
+            string selectedClass = ComboBoxClass.SelectedItem?.ToString();
+            if (!string.IsNullOrWhiteSpace(selectedClass) && selectedClass != "All")
             {
-                securitiesToDisplay = securitiesToDisplay.Where(s => s.NameClass == ComboBoxClass.SelectedItem.ToString()).ToList();
+                securitiesToDisplay = securitiesToDisplay.Where(s => s.NameClass == selectedClass).ToList();
             }
 
             UpdateGrid(securitiesToDisplay);
@@ -192,7 +193,7 @@ namespace OsEngine.OsTrader.Panels.Tab
             var selectedUnderlyingAssets = new List<String>();
             foreach (DataGridViewRow row in _gridSecurities.Rows)
             {
-                if (row.Cells[0].Value != null && Convert.ToBoolean(row.Cells[0].Value) == true)
+                if (TryGetCellBool(row.Cells[0].Value, out bool isChecked) && isChecked)
                 {
                     var security = (Security)row.Tag;
                     selectedUnderlyingAssets.Add(security.Name);
@@ -214,7 +215,13 @@ namespace OsEngine.OsTrader.Panels.Tab
                 return;
             }
 
-            string portfolioName = ComboBoxPortfolio.SelectedItem.ToString();
+            string portfolioName = ComboBoxPortfolio.SelectedItem?.ToString();
+            if (string.IsNullOrWhiteSpace(portfolioName))
+            {
+                AlertMessageSimpleUi uiMessage = new AlertMessageSimpleUi("Portfolio not selected");
+                uiMessage.Show();
+                return;
+            }
 
             _tab.SetUnderlyingAssetsAndStart(selectedUnderlyingAssets, portfolioName, selectedServer);
 
@@ -224,7 +231,31 @@ namespace OsEngine.OsTrader.Panels.Tab
         private IServer GetSelectedServer()
         {
             if (ComboBoxTypeServer.SelectedItem == null) return null;
-            return _servers.FirstOrDefault(s => s.ServerNameAndPrefix == ComboBoxTypeServer.SelectedItem.ToString());
+            string serverName = ComboBoxTypeServer.SelectedItem?.ToString();
+            if (string.IsNullOrWhiteSpace(serverName))
+            {
+                return null;
+            }
+
+            return _servers.FirstOrDefault(s => s.ServerNameAndPrefix == serverName);
+        }
+
+        private static bool TryGetCellBool(object value, out bool result)
+        {
+            result = false;
+
+            if (value == null)
+            {
+                return false;
+            }
+
+            if (value is bool boolValue)
+            {
+                result = boolValue;
+                return true;
+            }
+
+            return bool.TryParse(value.ToString(), out result);
         }
     }
 }
