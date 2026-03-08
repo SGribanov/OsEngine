@@ -2022,7 +2022,7 @@ namespace OsEngine.OsData
                     File.Delete(_pathMyTxtFile);
                 }
 
-                Trade lastTradeInLastPie = null;
+                List<List<Trade>> tradeBlocks = new List<List<Trade>>();
 
                 for (int i = 0; i < DataPies.Count; i++)
                 {
@@ -2034,25 +2034,21 @@ namespace OsEngine.OsData
                         continue;
                     }
 
-                    if (lastTradeInLastPie != null
-                        && curTrades[0].Time < lastTradeInLastPie.Time)
-                    {
-                        if (NewLogMessageEvent != null)
-                        {
-                            NewLogMessageEvent(SecName + " " + TimeFrame + " Connector error. Trade time in pie Out of order", LogMessageType.Error);
-                        }
-                        return;
-                    }
+                    tradeBlocks.Add(curTrades);
+                }
 
-                    lastTradeInLastPie = curTrades[^1];
-
-                    using (StreamWriter writer = new StreamWriter(_pathMyTxtFile, true))
+                if (!TryBuildTradeExitFileLines(tradeBlocks, out List<string> linesToSave))
+                {
+                    if (NewLogMessageEvent != null)
                     {
-                        for (int i2 = 0; i2 < curTrades.Count; i2++)
-                        {
-                            writer.WriteLine(curTrades[i2].GetSaveString());
-                        }
+                        NewLogMessageEvent(SecName + " " + TimeFrame + " Connector error. Trade time in pie Out of order", LogMessageType.Error);
                     }
+                    return;
+                }
+
+                if (linesToSave.Count > 0)
+                {
+                    SafeFileWriter.WriteAllLines(_pathMyTxtFile, linesToSave);
                 }
 
                 if (NewLogMessageEvent != null)
@@ -2069,6 +2065,44 @@ namespace OsEngine.OsData
                 }
             }
 
+        }
+
+        internal static bool TryBuildTradeExitFileLines(List<List<Trade>>? tradeBlocks, out List<string> linesToSave)
+        {
+            linesToSave = new List<string>();
+
+            if (tradeBlocks == null || tradeBlocks.Count == 0)
+            {
+                return true;
+            }
+
+            Trade? lastTradeInLastPie = null;
+
+            for (int i = 0; i < tradeBlocks.Count; i++)
+            {
+                List<Trade>? curTrades = tradeBlocks[i];
+
+                if (curTrades == null || curTrades.Count == 0)
+                {
+                    continue;
+                }
+
+                if (lastTradeInLastPie != null
+                    && curTrades[0].Time < lastTradeInLastPie.Time)
+                {
+                    linesToSave.Clear();
+                    return false;
+                }
+
+                lastTradeInLastPie = curTrades[^1];
+
+                for (int i2 = 0; i2 < curTrades.Count; i2++)
+                {
+                    linesToSave.Add(curTrades[i2].GetSaveString());
+                }
+            }
+
+            return true;
         }
 
         #endregion
