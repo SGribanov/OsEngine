@@ -783,6 +783,8 @@ namespace OsEngine.Logging
         /// </summary>
         private ConcurrentQueue<LogMessage> _messagesToSaveInFile = new ConcurrentQueue<LogMessage>();
 
+        private readonly Lock _fileSaveLocker = new();
+
         /// <summary>
         /// method for working saving log thread when the application starts closing
         /// метод в котором работает поток который сохранит лог когда приложение начнёт закрываться
@@ -807,21 +809,24 @@ namespace OsEngine.Logging
                 }
 
                 string path = GetCurrentDayLogPath();
+                LogMessage[] pendingMessages;
 
-                using (StreamWriter writer = new StreamWriter(
-                        path, true))
+                lock (_fileSaveLocker)
                 {
-                    while (_messagesToSaveInFile.IsEmpty == false)
+                    pendingMessages = _messagesToSaveInFile.ToArray();
+
+                    if (pendingMessages.Length == 0)
                     {
-                        LogMessage message;
+                        return;
+                    }
 
-                        if (_messagesToSaveInFile.TryDequeue(out message))
+                    AppendLogMessagesSafely(path, pendingMessages);
+
+                    for (int i = 0; i < pendingMessages.Length; i++)
+                    {
+                        if (_messagesToSaveInFile.TryDequeue(out _) == false)
                         {
-                            string mess = message.Time.ToLocalTime() + ";";
-                            mess += message.Type + ";";
-                            mess += message.Message + ";";
-
-                            writer.WriteLine(mess);
+                            break;
                         }
                     }
                 }
@@ -830,6 +835,36 @@ namespace OsEngine.Logging
             {
                 System.Windows.MessageBox.Show(error.ToString());
             }
+        }
+
+        private static void AppendLogMessagesSafely(string path, IReadOnlyList<LogMessage> messages)
+        {
+            if (messages == null || messages.Count == 0)
+            {
+                return;
+            }
+
+            List<string> linesToPersist = new List<string>();
+
+            if (File.Exists(path))
+            {
+                linesToPersist.AddRange(File.ReadAllLines(path));
+            }
+
+            for (int i = 0; i < messages.Count; i++)
+            {
+                linesToPersist.Add(SerializeLogMessage(messages[i]));
+            }
+
+            SafeFileWriter.WriteAllLines(path, linesToPersist);
+        }
+
+        private static string SerializeLogMessage(LogMessage message)
+        {
+            string line = message.Time.ToLocalTime() + ";";
+            line += message.Type + ";";
+            line += message.Message + ";";
+            return line;
         }
 
         private void TryLoadLog()

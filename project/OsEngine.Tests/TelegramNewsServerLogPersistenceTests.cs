@@ -10,6 +10,7 @@ using Xunit;
 
 namespace OsEngine.Tests;
 
+[Collection("FileSystemIsolation")]
 public class TelegramNewsServerLogPersistenceTests
 {
     [Fact]
