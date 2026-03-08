@@ -129,7 +129,7 @@ namespace OsEngine.OsTrader.Panels.Tab.Internal
 
         private void CheckBoxIsEmulator_Click(object sender, RoutedEventArgs e)
         {
-            Tab.EmulatorIsOn = CheckBoxIsEmulator.IsChecked.Value;
+            Tab.EmulatorIsOn = CheckBoxIsEmulator.IsChecked == true;
         }
 
         MarketDepthPainter _marketDepthPainter;
@@ -348,18 +348,26 @@ namespace OsEngine.OsTrader.Panels.Tab.Internal
             decimal volume = 0;
             decimal priceOrder = 0;
             decimal priceActivation = 0;
-            StopActivateType stopActivateType;
-            PositionOpenerToStopLifeTimeType lifeTimeType;
+            StopActivateType stopActivateType = StopActivateType.HigherOrEqual;
+            PositionOpenerToStopLifeTimeType lifeTimeType = PositionOpenerToStopLifeTimeType.CandlesCount;
             int lifeTime = 0;
 
             try
             {
-                volume = TextBoxStopVolume.Text.ToDecimal();
-                priceActivation = TextBoxStopActivationPrice.Text.ToDecimal();
-                priceOrder = TextBoxStopPrice.Text.ToDecimal();
-                lifeTime = Convert.ToInt32(TextBoxStopLifeTime.Text, CultureInfo.InvariantCulture);
-                Enum.TryParse(ComboBoxStopLimitType.SelectedItem.ToString(), out stopActivateType);
-                Enum.TryParse(ComboBoxStopLifetimeType.SelectedItem.ToString(), out lifeTimeType);
+                if (TryReadDecimal(TextBoxStopVolume.Text, out decimal parsedVolume) == false
+                    || TryReadDecimal(TextBoxStopActivationPrice.Text, out decimal parsedActivationPrice) == false
+                    || TryReadDecimal(TextBoxStopPrice.Text, out decimal parsedOrderPrice) == false
+                    || TryReadInt(TextBoxStopLifeTime.Text, out int parsedLifeTime) == false
+                    || TryGetSelectedEnum(ComboBoxStopLimitType.SelectedItem, out stopActivateType) == false
+                    || TryGetSelectedEnum(ComboBoxStopLifetimeType.SelectedItem, out lifeTimeType) == false)
+                {
+                    throw new InvalidOperationException("Invalid stop order parameters.");
+                }
+
+                volume = parsedVolume;
+                priceActivation = parsedActivationPrice;
+                priceOrder = parsedOrderPrice;
+                lifeTime = parsedLifeTime;
             }
             catch (Exception ex)
             {
@@ -380,18 +388,26 @@ namespace OsEngine.OsTrader.Panels.Tab.Internal
             decimal volume = 0;
             decimal priceOrder = 0;
             decimal priceActivation = 0;
-            StopActivateType stopActivateType;
-            PositionOpenerToStopLifeTimeType lifeTimeType;
+            StopActivateType stopActivateType = StopActivateType.HigherOrEqual;
+            PositionOpenerToStopLifeTimeType lifeTimeType = PositionOpenerToStopLifeTimeType.CandlesCount;
             int lifeTime = 0;
 
             try
             {
-                volume = TextBoxStopVolume.Text.ToDecimal();
-                priceActivation = TextBoxStopActivationPrice.Text.ToDecimal();
-                priceOrder = TextBoxStopPrice.Text.ToDecimal();
-                lifeTime = Convert.ToInt32(TextBoxStopLifeTime.Text, CultureInfo.InvariantCulture);
-                Enum.TryParse(ComboBoxStopLimitType.SelectedItem.ToString(), out stopActivateType);
-                Enum.TryParse(ComboBoxStopLifetimeType.SelectedItem.ToString(), out lifeTimeType);
+                if (TryReadDecimal(TextBoxStopVolume.Text, out decimal parsedVolume) == false
+                    || TryReadDecimal(TextBoxStopActivationPrice.Text, out decimal parsedActivationPrice) == false
+                    || TryReadDecimal(TextBoxStopPrice.Text, out decimal parsedOrderPrice) == false
+                    || TryReadInt(TextBoxStopLifeTime.Text, out int parsedLifeTime) == false
+                    || TryGetSelectedEnum(ComboBoxStopLimitType.SelectedItem, out stopActivateType) == false
+                    || TryGetSelectedEnum(ComboBoxStopLifetimeType.SelectedItem, out lifeTimeType) == false)
+                {
+                    throw new InvalidOperationException("Invalid stop order parameters.");
+                }
+
+                volume = parsedVolume;
+                priceActivation = parsedActivationPrice;
+                priceOrder = parsedOrderPrice;
+                lifeTime = parsedLifeTime;
             }
             catch (Exception ex)
             {
@@ -437,13 +453,16 @@ namespace OsEngine.OsTrader.Panels.Tab.Internal
 
             try
             {
-                price = TextBoxFakePrice.Text.ToDecimal();
-                volume = TextBoxFakeVolume.Text.ToDecimal();
-                timeOpen = DatePickerFakeOpenDate.SelectedDate.Value;
-                string[] openTimeStr = TextBoxFakeOpenTime.Text.ToString().Split(':');
+                if (TryReadDecimal(TextBoxFakePrice.Text, out decimal parsedPrice) == false
+                    || TryReadDecimal(TextBoxFakeVolume.Text, out decimal parsedVolume) == false
+                    || TryReadDateTime(DatePickerFakeOpenDate.SelectedDate, TextBoxFakeOpenTime.Text, out DateTime parsedTimeOpen) == false)
+                {
+                    throw new InvalidOperationException("Invalid fake order parameters.");
+                }
 
-                timeOpen = timeOpen.AddHours(Convert.ToInt32(openTimeStr[0], CultureInfo.InvariantCulture));
-                timeOpen = timeOpen.AddMinutes(Convert.ToInt32(openTimeStr[1], CultureInfo.InvariantCulture));
+                price = parsedPrice;
+                volume = parsedVolume;
+                timeOpen = parsedTimeOpen;
 
             }
             catch (Exception ex)
@@ -470,13 +489,16 @@ namespace OsEngine.OsTrader.Panels.Tab.Internal
 
             try
             {
-                price = TextBoxFakePrice.Text.ToDecimal();
-                volume = TextBoxFakeVolume.Text.ToDecimal();
-                timeOpen = DatePickerFakeOpenDate.SelectedDate.Value;
-                string[] openTimeStr = TextBoxFakeOpenTime.Text.ToString().Split(':');
+                if (TryReadDecimal(TextBoxFakePrice.Text, out decimal parsedPrice) == false
+                    || TryReadDecimal(TextBoxFakeVolume.Text, out decimal parsedVolume) == false
+                    || TryReadDateTime(DatePickerFakeOpenDate.SelectedDate, TextBoxFakeOpenTime.Text, out DateTime parsedTimeOpen) == false)
+                {
+                    throw new InvalidOperationException("Invalid fake order parameters.");
+                }
 
-                timeOpen = timeOpen.AddHours(Convert.ToInt32(openTimeStr[0], CultureInfo.InvariantCulture));
-                timeOpen = timeOpen.AddMinutes(Convert.ToInt32(openTimeStr[1], CultureInfo.InvariantCulture));
+                price = parsedPrice;
+                volume = parsedVolume;
+                timeOpen = parsedTimeOpen;
 
             }
             catch (Exception ex)
@@ -493,6 +515,63 @@ namespace OsEngine.OsTrader.Panels.Tab.Internal
             }
 
             Tab.SellAtFake(volume, price, timeOpen);
+        }
+
+        private static bool TryGetSelectedEnum<TEnum>(object selectedItem, out TEnum value)
+            where TEnum : struct
+        {
+            value = default;
+
+            if (selectedItem is TEnum typedValue)
+            {
+                value = typedValue;
+                return true;
+            }
+
+            return selectedItem != null
+                   && Enum.TryParse(selectedItem.ToString(), true, out value);
+        }
+
+        private static bool TryReadDecimal(string text, out decimal value)
+        {
+            return decimal.TryParse(text, NumberStyles.Any, CultureInfo.InvariantCulture, out value)
+                   || decimal.TryParse(text, NumberStyles.Any, CultureInfo.CurrentCulture, out value)
+                   || decimal.TryParse(text, NumberStyles.Any, CultureInfo.GetCultureInfo("ru-RU"), out value);
+        }
+
+        private static bool TryReadInt(string text, out int value)
+        {
+            return int.TryParse(text, NumberStyles.Integer, CultureInfo.InvariantCulture, out value)
+                   || int.TryParse(text, NumberStyles.Integer, CultureInfo.CurrentCulture, out value);
+        }
+
+        private static bool TryReadDateTime(DateTime? selectedDate, string timeText, out DateTime value)
+        {
+            value = DateTime.MinValue;
+
+            if (selectedDate.HasValue == false)
+            {
+                return false;
+            }
+
+            string[] openTimeStr = (timeText ?? string.Empty).Split(':');
+
+            if (openTimeStr.Length != 2
+                || TryReadInt(openTimeStr[0], out int hours) == false
+                || TryReadInt(openTimeStr[1], out int minutes) == false)
+            {
+                return false;
+            }
+
+            DateTime date = selectedDate.Value.Date;
+
+            if (hours < 0 || hours > 23 || minutes < 0 || minutes > 59)
+            {
+                return false;
+            }
+
+            value = date.AddHours(hours).AddMinutes(minutes);
+            return true;
         }
     }
 }
