@@ -8,6 +8,7 @@ using System.IO;
 using System.Runtime.CompilerServices;
 using System.Text.Json;
 using System.Threading;
+using OsEngine.Charts.CandleChart.Indicators;
 using OsEngine.Entity;
 using OsEngine.Market.Connectors;
 using OsEngine.Market.Servers;
@@ -227,18 +228,16 @@ public class Stage2PerformanceBaselineTests
     public void Stage2Perf_FractalAndCci_ManualSignalHotPath_ShouldEmitMetricsAndDeterministicChecksum()
     {
         const int period = 21;
+        const int seedCandles = 128;
         const int warmupIterations = 512;
         const int iterations = 20000;
 
-        List<Candle> candles = BuildCandlesForFractalSignalPath(600);
-        int minSignalIndex = period - 1;
-        int maxSignalIndex = candles.Count - 3;
-        int signalRange = maxSignalIndex - minSignalIndex + 1;
+        List<Candle> sourceCandles = BuildCandlesForFractalSignalPath(seedCandles + warmupIterations + iterations + 4);
+        FractalAndCciPerfState state = CreateFractalAndCciPerfState(sourceCandles, seedCandles, period);
 
         for (int i = 0; i < warmupIterations; i++)
         {
-            int signalIndex = minSignalIndex + (i % signalRange);
-            _ = RunFractalAndCciManualSignalPass(candles, signalIndex, period);
+            _ = RunFractalAndCciProductionSignalPass(state, sourceCandles[seedCandles + i]);
         }
 
         ForceGc();
@@ -251,8 +250,7 @@ public class Stage2PerformanceBaselineTests
 
         for (int i = 0; i < iterations; i++)
         {
-            int signalIndex = minSignalIndex + (i % signalRange);
-            checksum += RunFractalAndCciManualSignalPass(candles, signalIndex, period);
+            checksum += RunFractalAndCciProductionSignalPass(state, sourceCandles[seedCandles + warmupIterations + i]);
         }
 
         stopwatch.Stop();
@@ -269,7 +267,7 @@ public class Stage2PerformanceBaselineTests
 
         Stage2PerfReportWriter.Append(new Stage2PerfMetric
         {
-            Scenario = "fractal_and_cci_manual_signal_hotpath",
+            Scenario = "fractal_and_cci_production_signal_hotpath_v2",
             Iterations = iterations,
             ElapsedMsTotal = elapsedMs,
             NanosecondsPerOp = nsPerOp,
@@ -618,16 +616,20 @@ public class Stage2PerformanceBaselineTests
                + (closeOrdersFact.Count * 1000L);
     }
 
-    private static long RunFractalAndCciManualSignalPass(List<Candle> candles, int signalIndex, int period)
+    private static long RunFractalAndCciProductionSignalPass(FractalAndCciPerfState state, Candle nextCandle)
     {
-        int cciLastIndex = signalIndex + 1;
-        int cciPrevIndex = signalIndex;
+        state.Candles.Add(nextCandle);
+        state.Cci.Process(state.Candles);
+        state.Fractal.Process(state.Candles);
 
-        decimal lastCci = CalculateManualCci(candles, cciLastIndex, period);
-        decimal prevCci = CalculateManualCci(candles, cciPrevIndex, period);
-        decimal upFractal = GetLastUpFractal(candles, signalIndex);
-        decimal downFractal = GetLastDownFractal(candles, signalIndex);
-        decimal lastPrice = candles[signalIndex].Close;
+        int lastIndex = state.Candles.Count - 1;
+        int signalIndex = lastIndex - 2;
+
+        decimal lastCci = state.Cci.Values[lastIndex];
+        decimal prevCci = state.Cci.Values[lastIndex - 1];
+        decimal upFractal = GetLastConfirmedFractal(state.Fractal.ValuesUp, signalIndex);
+        decimal downFractal = GetLastConfirmedFractal(state.Fractal.ValuesDown, signalIndex);
+        decimal lastPrice = state.Candles[lastIndex].Close;
 
         long checksum = (long)(lastCci * 10m)
                         + (long)(prevCci * 10m)
@@ -648,85 +650,37 @@ public class Stage2PerformanceBaselineTests
         return checksum;
     }
 
-    private static decimal CalculateManualCci(List<Candle> candles, int index, int period)
+    private static FractalAndCciPerfState CreateFractalAndCciPerfState(List<Candle> sourceCandles, int seedCandles, int period)
     {
-        if (index < period - 1)
+        List<Candle> candles = new List<Candle>(seedCandles);
+
+        for (int i = 0; i < seedCandles; i++)
         {
-            return 0m;
+            candles.Add(sourceCandles[i]);
         }
 
-        int start = index - period + 1;
-        decimal sumTypicalPrice = 0m;
-
-        for (int i = start; i <= index; i++)
+        Cci cci = new Cci(canDelete: false)
         {
-            sumTypicalPrice += GetTypicalPrice(candles[i]);
-        }
+            Length = period,
+            TypePointsToSearch = PriceTypePoints.Typical
+        };
 
-        decimal sma = sumTypicalPrice / period;
-        decimal meanDeviationSum = 0m;
+        Fractal fractal = new Fractal(canDelete: false);
 
-        for (int i = start; i <= index; i++)
-        {
-            decimal typicalPrice = GetTypicalPrice(candles[i]);
-            meanDeviationSum += Math.Abs(typicalPrice - sma);
-        }
+        cci.Process(candles);
+        fractal.Process(candles);
 
-        decimal meanDeviation = meanDeviationSum / period;
-        if (meanDeviation == 0m)
-        {
-            return 0m;
-        }
-
-        decimal currentTypicalPrice = GetTypicalPrice(candles[index]);
-        return (currentTypicalPrice - sma) / (0.015m * meanDeviation);
+        return new FractalAndCciPerfState(candles, cci, fractal);
     }
 
-    private static decimal GetTypicalPrice(Candle candle)
+    private static decimal GetLastConfirmedFractal(List<decimal> values, int fromIndex)
     {
-        return (candle.High + candle.Low + candle.Close) / 3m;
-    }
-
-    private static decimal GetLastUpFractal(List<Candle> candles, int fromIndex)
-    {
-        for (int i = fromIndex; i >= 2; i--)
+        for (int i = fromIndex; i >= 0; i--)
         {
-            if (i + 2 >= candles.Count)
+            decimal value = values[i];
+            if (value != 0m)
             {
-                continue;
-            }
-
-            decimal high = candles[i].High;
-
-            if (high > candles[i - 1].High
-                && high > candles[i - 2].High
-                && high > candles[i + 1].High
-                && high > candles[i + 2].High)
-            {
-                return high;
-            }
-        }
-
-        return 0m;
-    }
-
-    private static decimal GetLastDownFractal(List<Candle> candles, int fromIndex)
-    {
-        for (int i = fromIndex; i >= 2; i--)
-        {
-            if (i + 2 >= candles.Count)
-            {
-                continue;
-            }
-
-            decimal low = candles[i].Low;
-
-            if (low < candles[i - 1].Low
-                && low < candles[i - 2].Low
-                && low < candles[i + 1].Low
-                && low < candles[i + 2].Low)
-            {
-                return low;
+                return value;
             }
         }
 
@@ -908,6 +862,22 @@ public class Stage2PerformanceBaselineTests
         GC.WaitForPendingFinalizers();
         GC.Collect();
     }
+}
+
+internal sealed class FractalAndCciPerfState
+{
+    public FractalAndCciPerfState(List<Candle> candles, Cci cci, Fractal fractal)
+    {
+        Candles = candles;
+        Cci = cci;
+        Fractal = fractal;
+    }
+
+    public List<Candle> Candles { get; }
+
+    public Cci Cci { get; }
+
+    public Fractal Fractal { get; }
 }
 
 [CollectionDefinition("Stage2PerfSerial", DisableParallelization = true)]
