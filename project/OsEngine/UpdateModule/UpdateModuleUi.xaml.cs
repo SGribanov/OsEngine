@@ -26,6 +26,7 @@ namespace OsEngine.UpdateModule
 {
     public partial class UpdateModuleUi : Window
     {
+        private static readonly Lock UpdaterLogWriteLock = new();
         private UpdateResponse _serverResp;
         private UpdaterStatus _status;
         private List<FileState> _filesInDebug;
@@ -747,7 +748,7 @@ namespace OsEngine.UpdateModule
 
                 // также в папку Temp кладём файл с временем последнего коммита  на сервере,
                 // чтобы после успешного обновления при следующем запуске от него смотреть изменения
-                File.WriteAllText(tempDir + "\\LastUpdatesInfo.txt", _serverResp.Commits[0].Timestamp.ToString("G"));
+                WriteUpdaterTextFile(Path.Combine(tempDir, "LastUpdatesInfo.txt"), _serverResp.Commits[0].Timestamp.ToString("G"));
 
                 //файлы с новым временем в папку Temp 
                 WriteFilesVersionsTime(tempDir);
@@ -805,15 +806,7 @@ namespace OsEngine.UpdateModule
                         // записать новые файлы, чтобы можно было удалить при откате
                         string newFilesPath = Path.Combine(buildReservePath, "NewFiles.txt");
 
-                        StringBuilder sb = new StringBuilder();
-
-                        for (int i = 0; i < newFiles.Count; i++)
-                        {
-                            FileState file = newFiles[i];
-                            sb.AppendLine(file.Name);
-                        }
-
-                        File.WriteAllText(newFilesPath, sb.ToString());
+                        WriteUpdaterLinesFile(newFilesPath, BuildFileListLines(newFiles));
                     }
 
                     SaveLogMessage(OsLocalization.Updater.Message35);
@@ -851,15 +844,7 @@ namespace OsEngine.UpdateModule
 
                     if (filesForDelete.Count > 0) // сохраняем список файлов, подлежащих удалению
                     {
-                        StringBuilder sb = new StringBuilder();
-
-                        for (int i = 0; i < filesForDelete.Count; i++)
-                        {
-                            FileState file = filesForDelete[i];
-                            sb.AppendLine(file.Name);
-                        }
-
-                        File.WriteAllText(tempDir + "\\Files_For_Delete.txt", sb.ToString());
+                        WriteUpdaterLinesFile(Path.Combine(tempDir, "Files_For_Delete.txt"), BuildFileListLines(filesForDelete));
 
                         SaveLogMessage(OsLocalization.Updater.Message39);
                     }
@@ -1061,21 +1046,59 @@ namespace OsEngine.UpdateModule
         {
             try
             {
-                StringBuilder sb = new StringBuilder();
-
-                for (int i = 0; i < _serverResp.Files.Count; i++)
-                {
-                    var fileInfo = _serverResp.Files[i];
-
-                    sb.AppendLine(fileInfo.Name + "#" + fileInfo.LastUpdate + "#" + fileInfo.Size);
-                }
-
-                File.WriteAllText(Path.Combine(tempDir, "FilesVersionsTime.txt"), sb.ToString());
+                WriteUpdaterLinesFile(Path.Combine(tempDir, "FilesVersionsTime.txt"), BuildFilesVersionsTimeLines(_serverResp.Files));
 
             }
             catch (Exception ex)
             {
                 SaveLogMessage($"{OsLocalization.Updater.Message48}: {ex.Message}");
+            }
+        }
+
+        private static string[] BuildFileListLines(List<FileState> files)
+        {
+            string[] result = new string[files.Count];
+
+            for (int i = 0; i < files.Count; i++)
+            {
+                result[i] = files[i].Name;
+            }
+
+            return result;
+        }
+
+        private static string[] BuildFilesVersionsTimeLines(List<GithubFileInfo> files)
+        {
+            string[] result = new string[files.Count];
+
+            for (int i = 0; i < files.Count; i++)
+            {
+                GithubFileInfo fileInfo = files[i];
+                result[i] = fileInfo.Name + "#" + fileInfo.LastUpdate + "#" + fileInfo.Size;
+            }
+
+            return result;
+        }
+
+        private static void WriteUpdaterTextFile(string path, string content)
+        {
+            SafeFileWriter.WriteAllText(path, content);
+        }
+
+        private static void WriteUpdaterLinesFile(string path, IEnumerable<string> lines)
+        {
+            SafeFileWriter.WriteAllLines(path, lines);
+        }
+
+        private static void AppendUpdaterLogMessage(string path, string message)
+        {
+            lock (UpdaterLogWriteLock)
+            {
+                string existingContent = File.Exists(path)
+                    ? File.ReadAllText(path)
+                    : string.Empty;
+
+                SafeFileWriter.WriteAllText(path, existingContent + message);
             }
         }
 
@@ -1202,7 +1225,7 @@ namespace OsEngine.UpdateModule
 
                 string fullMsg = $"{DateTime.Now:G}: {message}\n";
 
-                File.AppendAllText($"Engine\\Log\\UpdaterLog_{DateTime.Now:dd-MM-yyyy}.txt", fullMsg);
+                AppendUpdaterLogMessage($"Engine\\Log\\UpdaterLog_{DateTime.Now:dd-MM-yyyy}.txt", fullMsg);
             }
             catch (Exception ex)
             {
