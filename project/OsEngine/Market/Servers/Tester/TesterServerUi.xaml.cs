@@ -388,30 +388,35 @@ namespace OsEngine.Market.Servers.Tester
 
         private void CheckBoxRemoveTrades_Click(object sender, RoutedEventArgs e)
         {
-            _server.RemoveTradesFromMemory = CheckBoxRemoveTrades.IsChecked.Value;
+            _server.RemoveTradesFromMemory = GetCheckBoxIsChecked(CheckBoxRemoveTrades);
         }
 
         private void ComboBoxDataSourceType_SelectionChanged(object sender, System.Windows.Controls.SelectionChangedEventArgs e)
         {
-            TesterSourceDataType sourceDataType;
-            Enum.TryParse(ComboBoxDataSourceType.SelectedItem.ToString(), out sourceDataType);
-            _server.SourceDataType = sourceDataType;
+            if (TryGetSelectedComboBoxEnum(ComboBoxDataSourceType, out TesterSourceDataType sourceDataType))
+            {
+                _server.SourceDataType = sourceDataType;
+            }
         }
 
         private void ComboBoxDataType_SelectionChanged(object sender, System.Windows.Controls.SelectionChangedEventArgs e)
         {
-            TesterDataType type;
-            Enum.TryParse(ComboBoxDataType.SelectedItem.ToString(), out type);
-            _server.TypeTesterData = type;
-            _server.Save();
+            if (TryGetSelectedComboBoxEnum(ComboBoxDataType, out TesterDataType type))
+            {
+                _server.TypeTesterData = type;
+                _server.Save();
 
-            PaintGrid();
+                PaintGrid();
+            }
         }
 
         private void ComboBoxSets_SelectionChanged(object sender, System.Windows.Controls.SelectionChangedEventArgs e)
         {
-            _server.SetNewSet(ComboBoxSets.SelectedItem.ToString());
-            PaintGrid();
+            if (TryGetSelectedComboBoxText(ComboBoxSets, out string selectedSet))
+            {
+                _server.SetNewSet(selectedSet);
+                PaintGrid();
+            }
         }
 
         private void UpdaterProgressBarThreadArea()
@@ -463,15 +468,19 @@ namespace OsEngine.Market.Servers.Tester
         {
             try
             {
-                _server.SlippageToSimpleOrder = Convert.ToInt32(TextBoxSlippageSimpleOrder.Text, CultureInfo.InvariantCulture);
-                _server.Save();
+                if (TryParseIntInvariantOrCurrent(TextBoxSlippageSimpleOrder.Text, out int slippage))
+                {
+                    _server.SlippageToSimpleOrder = slippage;
+                    _server.Save();
+                    return;
+                }
             }
             catch (Exception)
             {
-                TextBoxSlippageSimpleOrder.Text = _server.SlippageToSimpleOrder.ToString(new CultureInfo("ru-RU"));
-                // ignore
             }
 
+            TextBoxSlippageSimpleOrder.Text = _server.SlippageToSimpleOrder.ToString(new CultureInfo("ru-RU"));
+            // ignore
         }
 
         private void TextBoxStartDeposit_TextChanged(object sender, System.Windows.Controls.TextChangedEventArgs e)
@@ -492,14 +501,19 @@ namespace OsEngine.Market.Servers.Tester
         {
             try
             {
-                _server.SlippageToStopOrder = Convert.ToInt32(TextBoxSlippageStop.Text, CultureInfo.InvariantCulture);
-                _server.Save();
+                if (TryParseIntInvariantOrCurrent(TextBoxSlippageStop.Text, out int slippage))
+                {
+                    _server.SlippageToStopOrder = slippage;
+                    _server.Save();
+                    return;
+                }
             }
             catch (Exception)
             {
-                TextBoxSlippageStop.Text = _server.SlippageToStopOrder.ToString(new CultureInfo("ru-RU"));
-                // ignore
             }
+
+            TextBoxSlippageStop.Text = _server.SlippageToStopOrder.ToString(new CultureInfo("ru-RU"));
+            // ignore
         }
 
         #region Server
@@ -1296,36 +1310,21 @@ namespace OsEngine.Market.Servers.Tester
                 if (column == 1)
                 { // Изменилось время клиринга
 
-                    string value = _gridClearing.Rows[row].Cells[column].Value.ToString();
-
-                    // "19:05"
-
-                    if (value.Length != 5
-                        || value.Contains(":") == false)
+                    if (TryGetGridCellText(_gridClearing, row, column, out string value) == false
+                        || TryParseClearingTime(value, out DateTime clearingTime) == false)
                     {
                         return;
                     }
 
-                    string[] values = value.Split(':');
-
-                    int hour = int.Parse(values[0], CultureInfo.InvariantCulture);
-                    int minute = int.Parse(values[1], CultureInfo.InvariantCulture);
-
-                    _server.ClearingTimes[row].Time = new DateTime(2022, 1, 1, hour, minute, 0);
+                    _server.ClearingTimes[row].Time = clearingTime;
                     _server.SaveClearingInfo();
                 }
                 else if (column == 2)
                 { // Изменилось состояние вкл/выкл
-                    string value = _gridClearing.Rows[row].Cells[column].Value.ToString();
-
-                    if (value == "True")
+                    if (TryGetGridCellText(_gridClearing, row, column, out string value)
+                        && bool.TryParse(value, out bool isOn))
                     {
-                        _server.ClearingTimes[row].IsOn = true;
-                        _server.SaveClearingInfo();
-                    }
-                    else if (value == "False")
-                    {
-                        _server.ClearingTimes[row].IsOn = false;
+                        _server.ClearingTimes[row].IsOn = isOn;
                         _server.SaveClearingInfo();
                     }
                 }
@@ -1939,6 +1938,90 @@ namespace OsEngine.Market.Servers.Tester
             throw new FormatException($"Cannot parse datetime value: {value}");
         }
 
+        private static bool TryGetSelectedComboBoxText(System.Windows.Controls.ComboBox comboBox, out string selectedText)
+        {
+            selectedText = comboBox?.SelectedItem?.ToString();
+            return string.IsNullOrWhiteSpace(selectedText) == false;
+        }
+
+        private static bool TryGetSelectedComboBoxEnum<TEnum>(System.Windows.Controls.ComboBox comboBox, out TEnum value)
+            where TEnum : struct
+        {
+            value = default;
+            return TryGetSelectedComboBoxText(comboBox, out string selectedText)
+                   && Enum.TryParse(selectedText, out value);
+        }
+
+        private static bool GetCheckBoxIsChecked(System.Windows.Controls.CheckBox checkBox)
+        {
+            return checkBox?.IsChecked == true;
+        }
+
+        private bool TryParseIntInvariantOrCurrent(string value, out int parsed)
+        {
+            if (int.TryParse(value, NumberStyles.Integer, CultureInfo.InvariantCulture, out parsed))
+            {
+                return true;
+            }
+
+            if (int.TryParse(value, NumberStyles.Integer, _currentCulture, out parsed))
+            {
+                return true;
+            }
+
+            return int.TryParse(value, NumberStyles.Integer, new CultureInfo("ru-RU"), out parsed);
+        }
+
+        private static bool TryGetGridCellText(DataGridView grid, int rowIndex, int columnIndex, out string value)
+        {
+            value = null;
+
+            if (grid == null
+                || rowIndex < 0
+                || columnIndex < 0
+                || rowIndex >= grid.Rows.Count
+                || columnIndex >= grid.Columns.Count)
+            {
+                return false;
+            }
+
+            object cellValue = grid.Rows[rowIndex].Cells[columnIndex].Value;
+            if (cellValue == null)
+            {
+                return false;
+            }
+
+            value = cellValue.ToString();
+            return string.IsNullOrWhiteSpace(value) == false;
+        }
+
+        private static bool TryParseClearingTime(string value, out DateTime time)
+        {
+            time = default;
+
+            if (string.IsNullOrWhiteSpace(value)
+                || value.Length != 5
+                || value.Contains(":") == false)
+            {
+                return false;
+            }
+
+            string[] values = value.Split(':');
+            if (values.Length != 2
+                || int.TryParse(values[0], NumberStyles.Integer, CultureInfo.InvariantCulture, out int hour) == false
+                || int.TryParse(values[1], NumberStyles.Integer, CultureInfo.InvariantCulture, out int minute) == false
+                || hour < 0
+                || hour > 23
+                || minute < 0
+                || minute > 59)
+            {
+                return false;
+            }
+
+            time = new DateTime(2022, 1, 1, hour, minute, 0);
+            return true;
+        }
+
         private void ButtonSetDataFromPath_Click(object sender, RoutedEventArgs e)
         {
             _server.ShowPathSenderDialog();
@@ -1975,9 +2058,7 @@ namespace OsEngine.Market.Servers.Tester
         {
             try
             {
-                OrderExecutionType type = OrderExecutionType.Intersection;
-
-                if (Enum.TryParse(ComboBoxOrderActivationType.SelectedItem.ToString(), out type))
+                if (TryGetSelectedComboBoxEnum(ComboBoxOrderActivationType, out OrderExecutionType type))
                 {
                     _server.OrderExecutionType = type;
                 }
