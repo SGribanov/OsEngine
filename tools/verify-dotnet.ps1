@@ -51,6 +51,22 @@ try {
         }
 
         Invoke-Step -Name "dotnet build" -Arguments $buildArgs
+
+        $testBuildArgs = @(
+            "build",
+            $testProjectPath,
+            "--configuration", $Configuration,
+            "--disable-build-servers"
+        )
+
+        if ($NoRestore) {
+            $testBuildArgs += "--no-restore"
+        }
+        else {
+            $testBuildArgs += "--no-dependencies"
+        }
+
+        Invoke-Step -Name "dotnet build tests" -Arguments $testBuildArgs
     }
 
     if (-not $SkipTest) {

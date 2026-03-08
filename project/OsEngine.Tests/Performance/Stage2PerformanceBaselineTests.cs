@@ -840,6 +840,105 @@ public class Stage2PerformanceBaselineTests
     }
 
     [Fact]
+    public void Stage2Perf_OptimizerCache_EvictionChurnPathV2_ShouldEmitMetricsAndStableChecksums()
+    {
+        const int warmupIterations = 64;
+        const int iterations = 2000;
+        const int indicatorCapacity = 24;
+        const int methodCapacity = 24;
+        const int hotKeyCount = 8;
+
+        IndicatorCache indicatorCache = new IndicatorCache(
+            maxEntries: indicatorCapacity,
+            isolationMode: IndicatorCacheIsolationMode.TrustedReferences);
+        OptimizerMethodCache methodCache = new OptimizerMethodCache(maxEntries: methodCapacity);
+
+        IndicatorCacheKey[] hotIndicatorKeys = new IndicatorCacheKey[hotKeyCount];
+        List<decimal>[][] hotIndicatorPayloads = new List<decimal>[hotKeyCount][];
+        OptimizerMethodCacheKey[] hotMethodKeys = new OptimizerMethodCacheKey[hotKeyCount];
+
+        for (int i = 0; i < hotKeyCount; i++)
+        {
+            hotIndicatorKeys[i] = BuildIndicatorCachePerfKey(i);
+            hotIndicatorPayloads[i] = BuildIndicatorCachePerfPayload(i);
+            hotMethodKeys[i] = BuildOptimizerMethodCachePerfKey(i);
+        }
+
+        for (int i = 0; i < warmupIterations; i++)
+        {
+            int keyIndex = i % hotKeyCount;
+            RunOptimizerCacheEvictionChurnPass(
+                indicatorCache,
+                methodCache,
+                hotIndicatorKeys[keyIndex],
+                hotIndicatorPayloads[keyIndex],
+                hotMethodKeys[keyIndex],
+                keyIndex,
+                BuildIndicatorCachePerfKey(i + 1000),
+                BuildIndicatorCachePerfPayload(i + 1000),
+                BuildOptimizerMethodCachePerfKey(i + 1000),
+                i + 1000);
+        }
+
+        indicatorCache.Clear();
+        methodCache.Clear();
+
+        ForceGc();
+
+        long allocatedBefore = GC.GetAllocatedBytesForCurrentThread();
+        int gen0Before = GC.CollectionCount(0);
+        Stopwatch stopwatch = Stopwatch.StartNew();
+
+        long checksum = 0;
+
+        for (int i = 0; i < iterations; i++)
+        {
+            int keyIndex = i % hotKeyCount;
+            checksum += RunOptimizerCacheEvictionChurnPass(
+                indicatorCache,
+                methodCache,
+                hotIndicatorKeys[keyIndex],
+                hotIndicatorPayloads[keyIndex],
+                hotMethodKeys[keyIndex],
+                keyIndex,
+                BuildIndicatorCachePerfKey(i + hotKeyCount + 1000),
+                BuildIndicatorCachePerfPayload(i + hotKeyCount + 1000),
+                BuildOptimizerMethodCachePerfKey(i + hotKeyCount + 1000),
+                i + hotKeyCount + 1000);
+        }
+
+        stopwatch.Stop();
+
+        long allocatedAfter = GC.GetAllocatedBytesForCurrentThread();
+        int gen0After = GC.CollectionCount(0);
+        IndicatorCacheStatistics indicatorStats = indicatorCache.GetStatisticsSnapshot();
+        OptimizerMethodCacheStatistics methodStats = methodCache.GetStatisticsSnapshot();
+
+        long allocatedBytes = allocatedAfter - allocatedBefore;
+        double elapsedMs = stopwatch.Elapsed.TotalMilliseconds;
+        double nsPerOp = elapsedMs * 1_000_000d / iterations;
+        double allocatedBytesPerOp = (double)allocatedBytes / iterations;
+
+        Assert.NotEqual(0, checksum);
+        Assert.True(indicatorStats.Writes > indicatorCapacity);
+        Assert.True(methodStats.Writes > methodCapacity);
+        Assert.True(indicatorStats.EntriesCount <= indicatorCapacity);
+        Assert.True(methodStats.EntriesCount <= methodCapacity);
+
+        Stage2PerfReportWriter.Append(new Stage2PerfMetric
+        {
+            Scenario = "optimizer_cache_eviction_churn_path_v2",
+            Iterations = iterations,
+            ElapsedMsTotal = elapsedMs,
+            NanosecondsPerOp = nsPerOp,
+            AllocatedBytesTotal = allocatedBytes,
+            AllocatedBytesPerOp = allocatedBytesPerOp,
+            Gen0Collections = gen0After - gen0Before,
+            Checksum = checksum
+        });
+    }
+
+    [Fact]
     public void Stage2Perf_OptimizerMethodParameterHashPath_ShouldEmitMetricsAndStableChecksums()
     {
         const int warmupIterations = 400;
@@ -918,6 +1017,75 @@ public class Stage2PerformanceBaselineTests
                + (openOrdersFact.Count * 100L)
                + (closeOrdersFact.Count * 1000L)
                + (haveOrdersInMarket ? 10000L : 0L);
+    }
+
+    private static long RunOptimizerCacheEvictionChurnPass(
+        IndicatorCache indicatorCache,
+        OptimizerMethodCache methodCache,
+        IndicatorCacheKey hotIndicatorKey,
+        List<decimal>[] hotIndicatorPayload,
+        OptimizerMethodCacheKey hotMethodKey,
+        int hotValueSeed,
+        IndicatorCacheKey churnIndicatorKey,
+        List<decimal>[] churnIndicatorPayload,
+        OptimizerMethodCacheKey churnMethodKey,
+        int churnValueSeed)
+    {
+        long checksum = hotValueSeed + churnValueSeed;
+
+        if (!indicatorCache.TryGet(hotIndicatorKey, out List<decimal>[]? hotSeries))
+        {
+            indicatorCache.Set(hotIndicatorKey, hotIndicatorPayload);
+            hotSeries = hotIndicatorPayload;
+            checksum += 101;
+        }
+        else
+        {
+            checksum += 17;
+        }
+
+        if (!methodCache.TryGet(hotMethodKey, out int hotMethodValue))
+        {
+            hotMethodValue = hotValueSeed * 7;
+            methodCache.Set(hotMethodKey, hotMethodValue);
+            checksum += 211;
+        }
+        else
+        {
+            checksum += 31;
+        }
+
+        // Force capacity pressure with a fresh churn key every iteration.
+        if (!indicatorCache.TryGet(churnIndicatorKey, out List<decimal>[]? churnSeries))
+        {
+            indicatorCache.Set(churnIndicatorKey, churnIndicatorPayload);
+            churnSeries = churnIndicatorPayload;
+            checksum += 307;
+        }
+        else
+        {
+            checksum += 43;
+        }
+
+        if (!methodCache.TryGet(churnMethodKey, out int churnMethodValue))
+        {
+            churnMethodValue = churnValueSeed * 7;
+            methodCache.Set(churnMethodKey, churnMethodValue);
+            checksum += 401;
+        }
+        else
+        {
+            checksum += 59;
+        }
+
+        checksum += (long)(hotSeries![0][0] * 1000m);
+        checksum += (long)(hotSeries[2][1] * 1000m);
+        checksum += hotMethodValue;
+        checksum += (long)(churnSeries![0][0] * 1000m);
+        checksum += (long)(churnSeries[2][1] * 1000m);
+        checksum += churnMethodValue;
+
+        return checksum;
     }
 
     private static OptimizerMethodCacheKey BuildOptimizerMethodCachePerfKey(int index)
