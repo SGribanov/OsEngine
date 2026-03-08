@@ -282,6 +282,7 @@ namespace OsEngine.Charts.CandleChart.Indicators
                 Values.Clear();
             }
             _myCandles = null;
+            _points = null;
         }
 
         /// <summary>
@@ -289,6 +290,11 @@ namespace OsEngine.Charts.CandleChart.Indicators
         /// свечи по которым строится индикатор
         /// </summary>
         private List<Candle> _myCandles;
+
+        /// <summary>
+        /// cached source points used by the current price mode
+        /// </summary>
+        private List<decimal> _points;
 
         /// <summary>
         /// display settings window
@@ -400,7 +406,8 @@ namespace OsEngine.Charts.CandleChart.Indicators
 
             if (Values == null) Values = new List<decimal>();
 
-            Values.Add(GetValueCci(candles, candles.Count - 1));
+            EnsurePointCache(candles);
+            Values.Add(GetValueCci(candles.Count - 1));
         }
 
         /// <summary>
@@ -411,12 +418,12 @@ namespace OsEngine.Charts.CandleChart.Indicators
         {
             if (candles == null) return;
 
-            Values = new List<decimal>();
+            Values = new List<decimal>(candles.Count);
+            RebuildPointCache(candles);
 
             for (int i = 0; i < candles.Count; i++)
             {
-                Values.Add(GetValueCci(candles, i));
-
+                Values.Add(GetValueCci(i));
             }
         }
 
@@ -428,25 +435,26 @@ namespace OsEngine.Charts.CandleChart.Indicators
         {
             if (candles == null) return;
 
-            Values[Values.Count - 1] = GetValueCci(candles, candles.Count - 1);
+            EnsurePointCache(candles);
+            Values[Values.Count - 1] = GetValueCci(candles.Count - 1);
         }
 
         /// <summary>
         /// take indicator value by index
         /// взять значение индикаторм по индексу
         /// </summary>
-        private decimal GetValueCci(List<Candle> candles, int index)
+        private decimal GetValueCci(int index)
         {
-
             if (index - Length <= 0)
             {
                 return 0;
             }
 
+            List<decimal> points = _points;
             decimal sum = 0;
             for (int i = index; i > index - Length; i--)
             {
-                sum += GetPoint(candles, i);
+                sum += points[i];
             }
             // average count
             // подсчет средней
@@ -455,11 +463,41 @@ namespace OsEngine.Charts.CandleChart.Indicators
             decimal md = 0;
             for (int i = index; i > index - Length; i--)
             {
-                md += Math.Abs(ma - GetPoint(candles, i));
+                md += Math.Abs(ma - points[i]);
             }
 
-            var cciP = (GetPoint(candles, index) - ma) / (md * 0.015m / Length);
+            var cciP = (points[index] - ma) / (md * 0.015m / Length);
             return Math.Round(cciP, 5);
+        }
+
+        private void EnsurePointCache(List<Candle> candles)
+        {
+            if (_points == null || _points.Count > candles.Count)
+            {
+                RebuildPointCache(candles);
+                return;
+            }
+
+            if (_points.Count == candles.Count)
+            {
+                _points[_points.Count - 1] = GetPoint(candles, candles.Count - 1);
+                return;
+            }
+
+            for (int i = _points.Count; i < candles.Count; i++)
+            {
+                _points.Add(GetPoint(candles, i));
+            }
+        }
+
+        private void RebuildPointCache(List<Candle> candles)
+        {
+            _points = new List<decimal>(candles.Count);
+
+            for (int i = 0; i < candles.Count; i++)
+            {
+                _points.Add(GetPoint(candles, i));
+            }
         }
     }
 }
