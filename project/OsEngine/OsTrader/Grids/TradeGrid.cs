@@ -2214,69 +2214,81 @@ namespace OsEngine.OsTrader.Grids
                 return;
             }
 
-            TrySetClosingProfitOrdersFromLines(tab, security, lastPrice, GetLinesWithOpenPosition());
+            if (!TryGetGridLines(out List<TradeGridLine> linesAll))
+            {
+                return;
+            }
+
+            for (int i = 0; i < linesAll.Count; i++)
+            {
+                TrySetClosingProfitOrderForLine(tab, security, lastPrice, linesAll[i]);
+            }
         }
 
         private void TrySetClosingProfitOrdersFromLines(BotTabSimple tab, Security security, decimal lastPrice, List<TradeGridLine> linesOpenPoses)
         {
             for (int i = 0; i < linesOpenPoses.Count; i++)
             {
-                TradeGridLine line = linesOpenPoses[i];
-                if (line == null)
-                {
-                    continue;
-                }
-
-                Position pos = line.Position;
-                if (pos == null)
-                {
-                    continue;
-                }
-
-                if (pos.CloseActive == true)
-                {
-                    continue;
-                }
-
-                if (pos.ProfitOrderPrice == 0)
-                {
-                    continue;
-                }
-
-                decimal volume = pos.OpenVolume;
-
-                if (CheckMicroVolumes == true
-                    && tab.CanTradeThisVolume(volume) == false)
-                {
-                    continue;
-                }
-
-                if (security.PriceLimitHigh != 0
-                 && security.PriceLimitLow != 0)
-                {
-                    if (line.PriceExit > security.PriceLimitHigh
-                        || line.PriceExit < security.PriceLimitLow)
-                    {
-                        continue;
-                    }
-                }
-
-                if (tab.StartProgram == StartProgram.IsOsTrader
-                    && MaxDistanceToOrdersPercent != 0
-                    && lastPrice != 0)
-                {
-                    decimal maxPriceUp = lastPrice + lastPrice * (MaxDistanceToOrdersPercent / 100);
-                    decimal minPriceDown = lastPrice - lastPrice * (MaxDistanceToOrdersPercent / 100);
-
-                    if (line.PriceExit > maxPriceUp
-                     || line.PriceExit < minPriceDown)
-                    {
-                        continue;
-                    }
-                }
-
-                tab.CloseAtLimitUnsafe(pos, pos.ProfitOrderPrice, volume);
+                TrySetClosingProfitOrderForLine(tab, security, lastPrice, linesOpenPoses[i]);
             }
+        }
+
+        private void TrySetClosingProfitOrderForLine(BotTabSimple tab, Security security, decimal lastPrice, TradeGridLine line)
+        {
+            if (line == null)
+            {
+                return;
+            }
+
+            Position pos = line.Position;
+            if (pos == null)
+            {
+                return;
+            }
+
+            if (pos.CloseActive == true)
+            {
+                return;
+            }
+
+            if (pos.ProfitOrderPrice == 0)
+            {
+                return;
+            }
+
+            decimal volume = pos.OpenVolume;
+
+            if (CheckMicroVolumes == true
+                && tab.CanTradeThisVolume(volume) == false)
+            {
+                return;
+            }
+
+            if (security.PriceLimitHigh != 0
+             && security.PriceLimitLow != 0)
+            {
+                if (line.PriceExit > security.PriceLimitHigh
+                    || line.PriceExit < security.PriceLimitLow)
+                {
+                    return;
+                }
+            }
+
+            if (tab.StartProgram == StartProgram.IsOsTrader
+                && MaxDistanceToOrdersPercent != 0
+                && lastPrice != 0)
+            {
+                decimal maxPriceUp = lastPrice + lastPrice * (MaxDistanceToOrdersPercent / 100);
+                decimal minPriceDown = lastPrice - lastPrice * (MaxDistanceToOrdersPercent / 100);
+
+                if (line.PriceExit > maxPriceUp
+                 || line.PriceExit < minPriceDown)
+                {
+                    return;
+                }
+            }
+
+            tab.CloseAtLimitUnsafe(pos, pos.ProfitOrderPrice, volume);
         }
 
         private List<TradeGridLine> CollectOpenPositionsAndCancelWrongCloseProfitOrders(BotTabSimple tab, out int cancelledOrders)
@@ -2337,12 +2349,9 @@ namespace OsEngine.OsTrader.Grids
 
         private void CheckStopTradingAfterProfit()
         {
-            List<TradeGridLine> linesOpenPoses = GetLinesWithOpenPosition();
-
             // И если линий с открытыми позами нет - переключаемся в CloseForced
 
-            if (linesOpenPoses == null
-                || linesOpenPoses.Count == 0)
+            if (HaveOpenPositionsByGrid == false)
             {
                 if (_firstPositionIsOpen == true)
                 {
@@ -2778,13 +2787,16 @@ namespace OsEngine.OsTrader.Grids
                 return 0;
             }
 
-            List<TradeGridLine> lines = GetLinesWithOpenOrdersFact();
+            if (!TryGetGridLines(out List<TradeGridLine> linesAll))
+            {
+                return 0;
+            }
 
             int cancelledOrders = 0;
 
-            for (int i = 0; i < lines.Count; i++)
+            for (int i = 0; i < linesAll.Count; i++)
             {
-                TradeGridLine line = lines[i];
+                TradeGridLine line = linesAll[i];
                 if (line == null)
                 {
                     continue;
@@ -3017,13 +3029,16 @@ namespace OsEngine.OsTrader.Grids
                 return 0;
             }
 
-            List<TradeGridLine> lines = GetLinesWithOpenPosition();
+            if (!TryGetGridLines(out List<TradeGridLine> linesAll))
+            {
+                return 0;
+            }
 
             int cancelledOrders = 0;
 
-            for (int i = 0; i < lines.Count; i++)
+            for (int i = 0; i < linesAll.Count; i++)
             {
-                TradeGridLine line = lines[i];
+                TradeGridLine line = linesAll[i];
                 if (line == null)
                 {
                     continue;
@@ -3407,13 +3422,16 @@ namespace OsEngine.OsTrader.Grids
                 return;
             }
 
-            List<TradeGridLine> lines = GetLinesWithOpenPosition();
+            if (!TryGetGridLines(out List<TradeGridLine> linesAll))
+            {
+                return;
+            }
 
             bool havePositions = false;
 
-            for (int i = 0; i < lines.Count; i++)
+            for (int i = 0; i < linesAll.Count; i++)
             {
-                TradeGridLine line = lines[i];
+                TradeGridLine line = linesAll[i];
                 if (line == null)
                 {
                     continue;
