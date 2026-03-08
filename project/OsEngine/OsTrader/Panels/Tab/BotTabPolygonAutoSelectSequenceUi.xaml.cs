@@ -243,12 +243,7 @@ namespace OsEngine.OsTrader.Panels.Tab
                     return;
                 }
 
-                string curPortfolio = null;
-
-                if (ComboBoxPortfolio.SelectedItem != null)
-                {
-                    curPortfolio = ComboBoxPortfolio.SelectedItem.ToString();
-                }
+                string curPortfolio = GetSelectedText(ComboBoxPortfolio.SelectedItem);
 
                 ComboBoxPortfolio.Items.Clear();
 
@@ -320,12 +315,11 @@ namespace OsEngine.OsTrader.Panels.Tab
         {
             try
             {
-                if (ComboBoxTypeServer.SelectedValue == null)
+                string serverName = GetSelectedText(ComboBoxTypeServer.SelectedValue);
+                if (string.IsNullOrEmpty(serverName))
                 {
                     return;
                 }
-
-                string serverName = ComboBoxTypeServer.SelectedValue.ToString();
 
                 ServerType serverType;
                 if (Enum.TryParse(serverName.Split('_')[0], out serverType) == false)
@@ -1074,11 +1068,16 @@ namespace OsEngine.OsTrader.Panels.Tab
                     continue;
                 }
 
-                if (Convert.ToBoolean(checkBox.Value.ToString()) == true)
+                if (TryReadBool(checkBox.Value, out bool isSelected) && isSelected)
                 {
-                    string name = curRow.Cells[3].Value.ToString().ToLower();
+                    string name = curRow.Cells[3].Value?.ToString();
 
-                    securities.Add(name);
+                    if (string.IsNullOrEmpty(name))
+                    {
+                        continue;
+                    }
+
+                    securities.Add(name.ToLower());
                 }
             }
 
@@ -1087,7 +1086,7 @@ namespace OsEngine.OsTrader.Panels.Tab
 
         private void CheckBoxSelectAllInSecondStep_Click(object sender, RoutedEventArgs e)
         {
-            bool isCheck = CheckBoxSelectAllInSecondStep.IsChecked.Value;
+            bool isCheck = CheckBoxSelectAllInSecondStep.IsChecked == true;
 
             for (int i = 0; i < _gridSecondStep.Rows.Count; i++)
             {
@@ -1316,10 +1315,14 @@ namespace OsEngine.OsTrader.Panels.Tab
                     continue;
                 }
 
-                if (Convert.ToBoolean(checkBox.Value.ToString()) == true)
+                if (TryReadBool(checkBox.Value, out bool isSelected) && isSelected)
                 {
-                    string name = curRow.Cells[1].Value.ToString();
-                    currencies.Add(name);
+                    string name = curRow.Cells[1].Value?.ToString();
+
+                    if (string.IsNullOrEmpty(name) == false)
+                    {
+                        currencies.Add(name);
+                    }
                 }
             }
 
@@ -1328,7 +1331,7 @@ namespace OsEngine.OsTrader.Panels.Tab
 
         private void CheckBoxSelectAllInFinalStep_Click(object sender, RoutedEventArgs e)
         {
-            bool isCheck = CheckBoxSelectAllInFinalStep.IsChecked.Value;
+            bool isCheck = CheckBoxSelectAllInFinalStep.IsChecked == true;
 
             for (int i = 0; i < _gridThirdStep.Rows.Count; i++)
             {
@@ -1344,17 +1347,14 @@ namespace OsEngine.OsTrader.Panels.Tab
         {
             string baseCurrency = _tabPolygon.AutoCreatorSequenceBaseCurrency;
             string separator = _tabPolygon.AutoCreatorSequenceSeparator;
-            string portfolio = null;
+            string portfolio = GetSelectedText(ComboBoxPortfolio.SelectedItem);
 
-            if (ComboBoxPortfolio.SelectedItem == null
-                || string.IsNullOrEmpty(ComboBoxPortfolio.SelectedItem.ToString()))
+            if (string.IsNullOrEmpty(portfolio))
             {
                 CustomMessageBoxUi ui = new CustomMessageBoxUi(OsLocalization.Trader.Label360);
                 ui.ShowDialog();
                 return;
             }
-
-            portfolio = ComboBoxPortfolio.SelectedItem.ToString();
 
             List<PairsToSequence> sequences = GetSelectedSequence();
 
@@ -1392,19 +1392,46 @@ namespace OsEngine.OsTrader.Panels.Tab
                     continue;
                 }
 
-                if (Convert.ToBoolean(checkBox.Value.ToString()) == true)
+                if (TryReadBool(checkBox.Value, out bool isSelected) && isSelected)
                 {
+                    string pair1 = curRow.Cells[1].Value?.ToString();
+                    string pair2 = curRow.Cells[2].Value?.ToString();
+                    string pair3 = curRow.Cells[3].Value?.ToString();
+
+                    if (string.IsNullOrEmpty(pair1)
+                        || string.IsNullOrEmpty(pair2)
+                        || string.IsNullOrEmpty(pair3))
+                    {
+                        continue;
+                    }
+
                     PairsToSequence newSequence = new PairsToSequence();
 
-                    newSequence.Pair1 = curRow.Cells[1].Value.ToString();
-                    newSequence.Pair2 = curRow.Cells[2].Value.ToString();
-                    newSequence.Pair3 = curRow.Cells[3].Value.ToString();
+                    newSequence.Pair1 = pair1;
+                    newSequence.Pair2 = pair2;
+                    newSequence.Pair3 = pair3;
 
                     currencies.Add(newSequence);
                 }
             }
 
             return currencies;
+        }
+
+        private static string GetSelectedText(object selectedItem)
+        {
+            return selectedItem?.ToString();
+        }
+
+        private static bool TryReadBool(object value, out bool result)
+        {
+            if (value is bool typed)
+            {
+                result = typed;
+                return true;
+            }
+
+            return bool.TryParse(value?.ToString(), out result);
         }
 
         #endregion
