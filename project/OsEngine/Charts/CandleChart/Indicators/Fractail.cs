@@ -269,6 +269,9 @@ namespace OsEngine.Charts.CandleChart.Indicators
                 ValuesUp.Clear();
                 ValuesDown.Clear();
             }
+
+            LastConfirmedUp = 0;
+            LastConfirmedDown = 0;
         }
 
         /// <summary>
@@ -300,6 +303,18 @@ namespace OsEngine.Charts.CandleChart.Indicators
         /// нижние фракталы
         /// </summary>
         public List<decimal> ValuesDown { get; set; }
+
+        /// <summary>
+        /// latest confirmed upper fractal value
+        /// последнее подтвержденное верхнее значение фрактала
+        /// </summary>
+        public decimal LastConfirmedUp { get; private set; }
+
+        /// <summary>
+        /// latest confirmed lower fractal value
+        /// последнее подтвержденное нижнее значение фрактала
+        /// </summary>
+        public decimal LastConfirmedDown { get; private set; }
 
         /// <summary>
         /// to upload new candles
@@ -350,6 +365,7 @@ namespace OsEngine.Charts.CandleChart.Indicators
                 ValuesDown = new List<decimal>();
                 ValuesUp.Add(GetValueUp(candles, candles.Count - 1));
                 ValuesDown.Add(GetValueDown(candles, candles.Count - 1));
+                UpdateLastConfirmedFromSeries();
             }
             else
             {
@@ -369,6 +385,12 @@ namespace OsEngine.Charts.CandleChart.Indicators
                 {
                     ValuesUp[ValuesUp.Count - 4] = 0;
                     ValuesUp[ValuesUp.Count - 5] = 0;
+                    LastConfirmedUp = ValuesUp[ValuesUp.Count - 3];
+                }
+
+                if (ValuesDown[ValuesDown.Count - 3] != 0)
+                {
+                    LastConfirmedDown = ValuesDown[ValuesDown.Count - 3];
                 }
             }
         }
@@ -408,6 +430,37 @@ namespace OsEngine.Charts.CandleChart.Indicators
                         ValuesDown[i - 2 - 2] = 0;
                     }
                 
+            }
+
+            UpdateLastConfirmedFromSeries();
+        }
+
+        private void UpdateLastConfirmedFromSeries()
+        {
+            LastConfirmedUp = 0;
+            LastConfirmedDown = 0;
+
+            if (ValuesUp == null || ValuesDown == null)
+            {
+                return;
+            }
+
+            for (int i = ValuesUp.Count - 1; i >= 0; i--)
+            {
+                if (LastConfirmedUp == 0 && ValuesUp[i] != 0)
+                {
+                    LastConfirmedUp = ValuesUp[i];
+                }
+
+                if (LastConfirmedDown == 0 && ValuesDown[i] != 0)
+                {
+                    LastConfirmedDown = ValuesDown[i];
+                }
+
+                if (LastConfirmedUp != 0 && LastConfirmedDown != 0)
+                {
+                    return;
+                }
             }
         }
 

@@ -1276,8 +1276,8 @@ public class Stage2PerformanceBaselineTests
 
         decimal lastCci = state.Cci.Values[lastIndex];
         decimal prevCci = state.Cci.Values[lastIndex - 1];
-        decimal upFractal = GetLastConfirmedFractal(state.Fractal.ValuesUp, signalIndex);
-        decimal downFractal = GetLastConfirmedFractal(state.Fractal.ValuesDown, signalIndex);
+        decimal upFractal = state.Fractal.LastConfirmedUp;
+        decimal downFractal = state.Fractal.LastConfirmedDown;
         decimal lastPrice = state.Candles[lastIndex].Close;
 
         long checksum = (long)(lastCci * 10m)
@@ -1320,20 +1320,6 @@ public class Stage2PerformanceBaselineTests
         fractal.Process(candles);
 
         return new FractalAndCciPerfState(candles, cci, fractal);
-    }
-
-    private static decimal GetLastConfirmedFractal(List<decimal> values, int fromIndex)
-    {
-        for (int i = fromIndex; i >= 0; i--)
-        {
-            decimal value = values[i];
-            if (value != 0m)
-            {
-                return value;
-            }
-        }
-
-        return 0m;
     }
 
     private static List<decimal>[] BuildSeriesPayload()
