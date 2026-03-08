@@ -3117,11 +3117,11 @@ namespace OsEngine.OsTrader.Grids
 
             QueryCollectionsSnapshotCore queryCollections = GetQueryCollectionsSnapshotCore(lastPrice, QueryCollectionFlags.OpenOrdersNeed | QueryCollectionFlags.OpenOrdersFact);
             List<TradeGridLine> linesWithOrdersToOpenNeed = queryCollections.OpenOrdersNeed;
-            List<TradeGridLine> linesWithOrdersToOpenFact = queryCollections.OpenOrdersFact;
+            int openOrdersFactCount = queryCollections.OpenOrdersFact.Count;
 
             // 2 ничего не делаем если уже кол-во ордеров максимально
 
-            if (linesWithOrdersToOpenFact.Count >= MaxOpenOrdersInMarket)
+            if (openOrdersFactCount >= MaxOpenOrdersInMarket)
             {
                 return;
             }
@@ -3178,6 +3178,10 @@ namespace OsEngine.OsTrader.Grids
                 {
                     curLineNeed.Position = newPosition;
                     curLineNeed.PositionNum = newPosition.Number;
+                    if (newPosition.OpenActive)
+                    {
+                        openOrdersFactCount++;
+                    }
 
                     if (_firstTradePrice == 0)
                     {
@@ -3192,9 +3196,7 @@ namespace OsEngine.OsTrader.Grids
                     _needToSave = true;
                 }
 
-                linesWithOrdersToOpenFact = GetLinesWithOpenOrdersFact();
-
-                if (linesWithOrdersToOpenFact.Count >= MaxOpenOrdersInMarket)
+                if (openOrdersFactCount >= MaxOpenOrdersInMarket)
                 {
                     return;
                 }
