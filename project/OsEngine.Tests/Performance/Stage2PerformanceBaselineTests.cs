@@ -78,6 +78,59 @@ public class Stage2PerformanceBaselineTests
     }
 
     [Fact]
+    public void Stage2Perf_TradeGrid_SubsetQueryUsageHotPathV2_ShouldEmitMetricsAndDeterministicChecksum()
+    {
+        const int warmupIterations = 128;
+        const int iterations = 4096;
+
+        TradeGrid grid = CreateBareGrid();
+        AttachReadyTabForQueries(grid);
+        SeedGridLines(grid, 64);
+
+        for (int i = 0; i < warmupIterations; i++)
+        {
+            _ = RunTradeGridSubsetQueryUsagePass(grid);
+        }
+
+        ForceGc();
+
+        long allocatedBefore = GC.GetAllocatedBytesForCurrentThread();
+        int gen0Before = GC.CollectionCount(0);
+        Stopwatch stopwatch = Stopwatch.StartNew();
+
+        long checksum = 0;
+
+        for (int i = 0; i < iterations; i++)
+        {
+            checksum += RunTradeGridSubsetQueryUsagePass(grid);
+        }
+
+        stopwatch.Stop();
+
+        long allocatedAfter = GC.GetAllocatedBytesForCurrentThread();
+        int gen0After = GC.CollectionCount(0);
+
+        long allocatedBytes = allocatedAfter - allocatedBefore;
+        double elapsedMs = stopwatch.Elapsed.TotalMilliseconds;
+        double nsPerOp = elapsedMs * 1_000_000d / iterations;
+        double allocatedBytesPerOp = (double)allocatedBytes / iterations;
+
+        Assert.True(checksum > 0);
+
+        Stage2PerfReportWriter.Append(new Stage2PerfMetric
+        {
+            Scenario = "tradegrid_subset_query_usage_hotpath_v2",
+            Iterations = iterations,
+            ElapsedMsTotal = elapsedMs,
+            NanosecondsPerOp = nsPerOp,
+            AllocatedBytesTotal = allocatedBytes,
+            AllocatedBytesPerOp = allocatedBytesPerOp,
+            Gen0Collections = gen0After - gen0Before,
+            Checksum = checksum
+        });
+    }
+
+    [Fact]
     public void Stage2Perf_TradeGrid_LoadFromStringRuPayloadPath_ShouldEmitMetricsAndDeterministicChecksum()
     {
         const int warmupIterations = 200;
@@ -614,6 +667,21 @@ public class Stage2PerformanceBaselineTests
                + (openOrdersNeed.Count * 10L)
                + (openOrdersFact.Count * 100L)
                + (closeOrdersFact.Count * 1000L);
+    }
+
+    private static long RunTradeGridSubsetQueryUsagePass(TradeGrid grid)
+    {
+        List<TradeGridLine> openPositions = grid.GetLinesWithOpenPosition();
+        List<TradeGridLine> openOrdersNeed = grid.GetLinesWithOpenOrdersNeed(100m);
+        List<TradeGridLine> openOrdersFact = grid.GetLinesWithOpenOrdersFact();
+        List<TradeGridLine> closeOrdersFact = grid.GetLinesWithClosingOrdersFact();
+        bool haveOrdersInMarket = grid.HaveOrdersInMarketInGrid;
+
+        return openPositions.Count
+               + (openOrdersNeed.Count * 10L)
+               + (openOrdersFact.Count * 100L)
+               + (closeOrdersFact.Count * 1000L)
+               + (haveOrdersInMarket ? 10000L : 0L);
     }
 
     private static long RunFractalAndCciProductionSignalPass(FractalAndCciPerfState state, Candle nextCandle)
