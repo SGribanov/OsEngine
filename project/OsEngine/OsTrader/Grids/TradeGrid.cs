@@ -2776,9 +2776,7 @@ namespace OsEngine.OsTrader.Grids
                 return;
             }
 
-            CheckWrongCloseOrders();
-
-            List<TradeGridLine> linesOpenPoses = GetLinesWithOpenPosition();
+            List<TradeGridLine> linesOpenPoses = CollectOpenPositionsAndCheckWrongCloseOrders(tab);
 
             int startIndex = linesOpenPoses.Count - MaxCloseOrdersInMarket;
 
@@ -2842,20 +2840,22 @@ namespace OsEngine.OsTrader.Grids
             }
         }
 
-        private void CheckWrongCloseOrders()
+        private List<TradeGridLine> CollectOpenPositionsAndCheckWrongCloseOrders(BotTabSimple tab)
         {
-            BotTabSimple tab = Tab;
             TradeGridCreator gridCreator = GridCreator;
-            if (tab == null || gridCreator == null || tab.StartProgram != StartProgram.IsOsTrader)
+            if (tab == null || gridCreator == null)
             {
-                return;
+                return new List<TradeGridLine>();
             }
 
             List<TradeGridLine> linesAll = gridCreator.Lines;
             if (linesAll == null || linesAll.Count == 0)
             {
-                return;
+                return new List<TradeGridLine>();
             }
+
+            bool checkWrongCloseOrders = tab.StartProgram == StartProgram.IsOsTrader;
+            List<TradeGridLine> openPositions = new List<TradeGridLine>(linesAll.Count);
 
             for (int i = 0; i < linesAll.Count; i++)
             {
@@ -2873,21 +2873,39 @@ namespace OsEngine.OsTrader.Grids
 
                 decimal volumePosOpen = pos.OpenVolume;
 
-                if (pos.CloseActive == true)
+                if (checkWrongCloseOrders
+                    && pos.CloseActive == true)
                 {
-                    if (TryGetLastOrder(pos.CloseOrders, out Order orderToClose) == false)
+                    if (TryGetLastOrder(pos.CloseOrders, out Order orderToClose))
                     {
-                        continue;
-                    }
-                    decimal volumeCloseOrder = orderToClose.Volume;
-                    decimal volumeExecuteCloseOrder = orderToClose.VolumeExecute;
+                        decimal volumeCloseOrder = orderToClose.Volume;
+                        decimal volumeExecuteCloseOrder = orderToClose.VolumeExecute;
 
-                    if (volumePosOpen != (volumeCloseOrder - volumeExecuteCloseOrder))
-                    {
-                        tab.CloseOrder(orderToClose);
+                        if (volumePosOpen != (volumeCloseOrder - volumeExecuteCloseOrder))
+                        {
+                            tab.CloseOrder(orderToClose);
+                        }
                     }
                 }
+
+                if (volumePosOpen != 0)
+                {
+                    openPositions.Add(curLine);
+                }
             }
+
+            return openPositions;
+        }
+
+        private void CheckWrongCloseOrders()
+        {
+            BotTabSimple tab = Tab;
+            if (tab == null)
+            {
+                return;
+            }
+
+            CollectOpenPositionsAndCheckWrongCloseOrders(tab);
         }
 
         private int TryCancelClosingOrders()
