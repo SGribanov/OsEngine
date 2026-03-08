@@ -2412,7 +2412,14 @@ namespace OsEngine.OsTrader.Grids
 
             // 1 убираем ордера на открытие и закрытие с неправильной ценой.
 
-            QueryCollectionsSnapshotCore queryCollections = GetQueryCollectionsSnapshotCore(lastPrice, QueryCollectionFlags.OpenOrdersFact | QueryCollectionFlags.ClosingOrdersFact);
+            QueryCollectionsSnapshotCore queryCollections = GetQueryCollectionsSnapshotCore(
+                lastPrice,
+                QueryCollectionFlags.OpenPositions
+                | QueryCollectionFlags.OpenOrdersNeed
+                | QueryCollectionFlags.OpenOrdersFact
+                | QueryCollectionFlags.ClosingOrdersFact);
+            List<TradeGridLine> linesWithOpenPositions = queryCollections.OpenPositions;
+            List<TradeGridLine> linesWithOrdersToOpenNeed = queryCollections.OpenOrdersNeed;
             List<TradeGridLine> linesWithOrdersToOpenFact = queryCollections.OpenOrdersFact;
             List<TradeGridLine> linesWithOrdersToCloseFact = queryCollections.ClosingOrdersFact;
 
@@ -2448,7 +2455,7 @@ namespace OsEngine.OsTrader.Grids
 
             // 3 убираем ордера на открытие, если имеет место дыра в сетке
 
-            List<Order> ordersToCancelOpenOrders = GetOpenOrdersGridHoleFromLines(linesWithOrdersToOpenFact, lastPrice);
+            List<Order> ordersToCancelOpenOrders = GetOpenOrdersGridHoleFromLines(linesWithOrdersToOpenNeed, linesWithOrdersToOpenFact);
 
             if (ordersToCancelOpenOrders != null
                 && ordersToCancelOpenOrders.Count > 0)
@@ -2468,7 +2475,7 @@ namespace OsEngine.OsTrader.Grids
 
             if (GridType == TradeGridPrimeType.MarketMaking)
             {
-                List<Order> ordersToCancelCloseOrders = GetCloseOrdersGridHole();
+                List<Order> ordersToCancelCloseOrders = GetCloseOrdersGridHoleFromLines(linesWithOpenPositions);
 
                 if (ordersToCancelCloseOrders != null
                     && ordersToCancelCloseOrders.Count > 0)
@@ -2584,32 +2591,17 @@ namespace OsEngine.OsTrader.Grids
 
         private List<Order> GetOpenOrdersGridHole()
         {
-            BotTabSimple tab = Tab;
-            TradeGridCreator gridCreator = GridCreator;
-            if (tab == null || gridCreator == null)
-            {
-                return null;
-            }
+            QueryCollectionsSnapshotCore queryCollections = GetQueryCollectionsSnapshotCore(
+                0m,
+                QueryCollectionFlags.OpenOrdersNeed
+                | QueryCollectionFlags.OpenOrdersFact);
 
-            if (TryGetLastCandle(tab.CandlesAll, out Candle lastCandle) == false)
-            {
-                return null;
-            }
-
-            return GetOpenOrdersGridHoleFromLines(GetLinesWithOpenOrdersFact(), lastCandle.Close);
+            return GetOpenOrdersGridHoleFromLines(queryCollections.OpenOrdersNeed, queryCollections.OpenOrdersFact);
         }
 
-        private List<Order> GetOpenOrdersGridHoleFromLines(List<TradeGridLine> linesWithOrdersToOpenFact, decimal lastPrice)
+        private List<Order> GetOpenOrdersGridHoleFromLines(List<TradeGridLine> linesWithOrdersToOpenNeed, List<TradeGridLine> linesWithOrdersToOpenFact)
         {
-            TradeGridCreator gridCreator = GridCreator;
-            if (gridCreator == null)
-            {
-                return null;
-            }
-
             // 1 берём текущие линии с позициями
-
-            List<TradeGridLine> linesWithOrdersToOpenNeed = GetLinesWithOpenOrdersNeed(lastPrice);
 
             if (linesWithOrdersToOpenFact == null ||
                 linesWithOrdersToOpenFact.Count == 0)
@@ -2664,7 +2656,11 @@ namespace OsEngine.OsTrader.Grids
 
         private List<Order> GetCloseOrdersGridHole()
         {
-            List<TradeGridLine> linesOpenPoses = GetLinesWithOpenPosition();
+            return GetCloseOrdersGridHoleFromLines(GetLinesWithOpenPosition());
+        }
+
+        private List<Order> GetCloseOrdersGridHoleFromLines(List<TradeGridLine> linesOpenPoses)
+        {
             int maxCloseOrdersInMarket = Math.Max(0, MaxCloseOrdersInMarket);
 
             List<Order> ordersToCancel = new List<Order>();
@@ -3669,22 +3665,7 @@ namespace OsEngine.OsTrader.Grids
         {
             get
             {
-                QueryCollectionsSnapshotCore queryCollections = GetQueryCollectionsSnapshotCore(0m, QueryCollectionFlags.OpenOrdersFact | QueryCollectionFlags.ClosingOrdersFact);
-                List<TradeGridLine> linesWithOpenOrders = queryCollections.OpenOrdersFact;
-                List<TradeGridLine> linesWithCloseOrders = queryCollections.ClosingOrdersFact;
-
-                if (linesWithOpenOrders != null
-                    && linesWithOpenOrders.Count > 0)
-                {
-                    return true;
-                }
-                if (linesWithCloseOrders != null
-                  && linesWithCloseOrders.Count > 0)
-                {
-                    return true;
-                }
-
-                return false;
+                return HasOrdersInMarketInGridCore();
             }
         }
 
@@ -4080,6 +4061,39 @@ namespace OsEngine.OsTrader.Grids
             }
 
             return new QueryCollectionsSnapshotCore(openPositions, openOrdersNeed, openOrdersFact, closingOrdersFact);
+        }
+
+        private bool HasOrdersInMarketInGridCore()
+        {
+            TradeGridCreator gridCreator = GridCreator;
+            if (gridCreator == null)
+            {
+                return false;
+            }
+
+            List<TradeGridLine> linesAll = gridCreator.Lines;
+            if (linesAll == null || linesAll.Count == 0)
+            {
+                return false;
+            }
+
+            for (int i = 0; i < linesAll.Count; i++)
+            {
+                TradeGridLine line = linesAll[i];
+                Position position = line?.Position;
+
+                if (position == null)
+                {
+                    continue;
+                }
+
+                if (position.OpenActive || position.CloseActive)
+                {
+                    return true;
+                }
+            }
+
+            return false;
         }
 
         #endregion
