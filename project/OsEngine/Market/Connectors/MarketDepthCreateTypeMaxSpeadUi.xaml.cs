@@ -118,19 +118,24 @@ namespace OsEngine.Market.Connectors
         {
             try
             {
+                if (TryGetMarketDepthBuildMaxSpread(out decimal marketDepthBuildMaxSpread) == false)
+                {
+                    return;
+                }
+
                 if(_timeFrameBuilder != null)
                 {
-                    _timeFrameBuilder.MarketDepthBuildMaxSpread = TextBoxMarketDepthBuildMaxSpread.Text.ToDecimal();
+                    _timeFrameBuilder.MarketDepthBuildMaxSpread = marketDepthBuildMaxSpread;
                 }
 
                 if(_creator != null)
                 {
-                    _creator.MarketDepthBuildMaxSpread = TextBoxMarketDepthBuildMaxSpread.Text.ToDecimal();
+                    _creator.MarketDepthBuildMaxSpread = marketDepthBuildMaxSpread;
                 }
 
                 if(_screener != null)
                 {
-                    _screener.MarketDepthBuildMaxSpread = TextBoxMarketDepthBuildMaxSpread.Text.ToDecimal();
+                    _screener.MarketDepthBuildMaxSpread = marketDepthBuildMaxSpread;
                 }
             }
             catch
@@ -143,25 +148,54 @@ namespace OsEngine.Market.Connectors
         {
             try
             {
+                bool isEnabled = IsMarketDepthBuildMaxSpreadEnabled();
+
                 if (_timeFrameBuilder != null)
                 {
-                    _timeFrameBuilder.MarketDepthBuildMaxSpreadIsOn = CheckBoxMarketDepthBuildMaxSpreadIsOn.IsChecked.Value;
+                    _timeFrameBuilder.MarketDepthBuildMaxSpreadIsOn = isEnabled;
                 }
 
                 if (_creator != null)
                 {
-                    _creator.MarketDepthBuildMaxSpreadIsOn = CheckBoxMarketDepthBuildMaxSpreadIsOn.IsChecked.Value;
+                    _creator.MarketDepthBuildMaxSpreadIsOn = isEnabled;
                 }
 
                 if (_screener != null)
                 {
-                    _screener.MarketDepthBuildMaxSpreadIsOn = CheckBoxMarketDepthBuildMaxSpreadIsOn.IsChecked.Value;
+                    _screener.MarketDepthBuildMaxSpreadIsOn = isEnabled;
                 }
             }
             catch
             {
                 // ignore
             }
+        }
+
+        private bool TryGetMarketDepthBuildMaxSpread(out decimal marketDepthBuildMaxSpread)
+        {
+            marketDepthBuildMaxSpread = 0;
+
+            string text = TextBoxMarketDepthBuildMaxSpread.Text;
+
+            if (string.IsNullOrWhiteSpace(text))
+            {
+                return false;
+            }
+
+            try
+            {
+                marketDepthBuildMaxSpread = text.ToDecimal();
+                return true;
+            }
+            catch
+            {
+                return false;
+            }
+        }
+
+        private bool IsMarketDepthBuildMaxSpreadEnabled()
+        {
+            return CheckBoxMarketDepthBuildMaxSpreadIsOn.IsChecked == true;
         }
     }
 }
