@@ -11,6 +11,7 @@ using System.Text.Json;
 using System.Threading;
 using OsEngine.Charts.CandleChart.Indicators;
 using OsEngine.Entity;
+using OsEngine.Indicators;
 using OsEngine.Market.Connectors;
 using OsEngine.Market.Servers;
 using OsEngine.Market.Servers.Tester;
@@ -527,6 +528,153 @@ public class Stage2PerformanceBaselineTests
             Gen0Collections = gen0After - gen0Before,
             Checksum = checksum
         });
+    }
+
+    [Fact]
+    public void Stage2Perf_Aindicator_OptimizerCache_ProcessAllMissAndHitPaths_ShouldEmitMetricsAndStableChecksums()
+    {
+        const int candleCount = 48;
+        const int warmupIterations = 32;
+        const int iterations = 256;
+        const int maxEntries = iterations;
+
+        List<Candle>[] warmupSets = BuildAindicatorOptimizerCacheCandleSets(warmupIterations, candleCount, seedOffset: 0);
+        List<Candle>[] measurementSets = BuildAindicatorOptimizerCacheCandleSets(iterations, candleCount, seedOffset: 128);
+
+        using (new AindicatorOptimizerCachePerfScope(maxEntries))
+        {
+            AindicatorOptimizerCachePerfIndicator warmupMissIndicator = CreateAindicatorOptimizerCachePerfIndicator();
+
+            for (int i = 0; i < warmupSets.Length; i++)
+            {
+                _ = RunAindicatorOptimizerCachePerfPass(warmupMissIndicator, warmupSets[i]);
+            }
+
+            AindicatorOptimizerCachePerfIndicator warmupHitIndicator = CreateAindicatorOptimizerCachePerfIndicator();
+
+            for (int i = 0; i < warmupSets.Length; i++)
+            {
+                _ = RunAindicatorOptimizerCachePerfPass(warmupHitIndicator, warmupSets[i]);
+            }
+        }
+
+        long missChecksum;
+        Stage2PerfMetric missMetric;
+
+        using (AindicatorOptimizerCachePerfScope missScope = new(maxEntries))
+        {
+            AindicatorOptimizerCachePerfIndicator missIndicator = CreateAindicatorOptimizerCachePerfIndicator();
+
+            ForceGc();
+
+            long allocatedBefore = GC.GetAllocatedBytesForCurrentThread();
+            int gen0Before = GC.CollectionCount(0);
+            Stopwatch stopwatch = Stopwatch.StartNew();
+
+            missChecksum = 0;
+
+            for (int i = 0; i < iterations; i++)
+            {
+                missChecksum += RunAindicatorOptimizerCachePerfPass(missIndicator, measurementSets[i]);
+            }
+
+            stopwatch.Stop();
+
+            long allocatedAfter = GC.GetAllocatedBytesForCurrentThread();
+            int gen0After = GC.CollectionCount(0);
+            IndicatorCacheStatistics stats = missScope.Cache.GetStatisticsSnapshot();
+
+            long allocatedBytes = allocatedAfter - allocatedBefore;
+            double elapsedMs = stopwatch.Elapsed.TotalMilliseconds;
+            double nsPerOp = elapsedMs * 1_000_000d / iterations;
+            double allocatedBytesPerOp = (double)allocatedBytes / iterations;
+
+            Assert.True(missChecksum > 0);
+            Assert.Equal(iterations * candleCount, missIndicator.OnProcessCalls);
+            Assert.Equal(0, stats.Hits);
+            Assert.Equal(iterations, stats.Misses);
+            Assert.Equal(iterations, stats.Writes);
+
+            missMetric = new Stage2PerfMetric
+            {
+                Scenario = "aindicator_optimizer_cache_process_all_miss_path",
+                Iterations = iterations,
+                ElapsedMsTotal = elapsedMs,
+                NanosecondsPerOp = nsPerOp,
+                AllocatedBytesTotal = allocatedBytes,
+                AllocatedBytesPerOp = allocatedBytesPerOp,
+                Gen0Collections = gen0After - gen0Before,
+                Checksum = missChecksum
+            };
+        }
+
+        long hitChecksum;
+        Stage2PerfMetric hitMetric;
+
+        using (AindicatorOptimizerCachePerfScope hitScope = new(maxEntries))
+        {
+            AindicatorOptimizerCachePerfIndicator seedingIndicator = CreateAindicatorOptimizerCachePerfIndicator();
+
+            for (int i = 0; i < iterations; i++)
+            {
+                _ = RunAindicatorOptimizerCachePerfPass(seedingIndicator, measurementSets[i]);
+            }
+
+            IndicatorCacheStatistics primedStats = hitScope.Cache.GetStatisticsSnapshot();
+            Assert.Equal(iterations * candleCount, seedingIndicator.OnProcessCalls);
+            Assert.Equal(0, primedStats.Hits);
+            Assert.Equal(iterations, primedStats.Misses);
+            Assert.Equal(iterations, primedStats.Writes);
+
+            AindicatorOptimizerCachePerfIndicator hitIndicator = CreateAindicatorOptimizerCachePerfIndicator();
+
+            ForceGc();
+
+            long allocatedBefore = GC.GetAllocatedBytesForCurrentThread();
+            int gen0Before = GC.CollectionCount(0);
+            Stopwatch stopwatch = Stopwatch.StartNew();
+
+            hitChecksum = 0;
+
+            for (int i = 0; i < iterations; i++)
+            {
+                hitChecksum += RunAindicatorOptimizerCachePerfPass(hitIndicator, measurementSets[i]);
+            }
+
+            stopwatch.Stop();
+
+            long allocatedAfter = GC.GetAllocatedBytesForCurrentThread();
+            int gen0After = GC.CollectionCount(0);
+            IndicatorCacheStatistics stats = hitScope.Cache.GetStatisticsSnapshot();
+
+            long allocatedBytes = allocatedAfter - allocatedBefore;
+            double elapsedMs = stopwatch.Elapsed.TotalMilliseconds;
+            double nsPerOp = elapsedMs * 1_000_000d / iterations;
+            double allocatedBytesPerOp = (double)allocatedBytes / iterations;
+
+            Assert.True(hitChecksum > 0);
+            Assert.Equal(0, hitIndicator.OnProcessCalls);
+            Assert.Equal(iterations, stats.Hits);
+            Assert.Equal(iterations, stats.Misses);
+            Assert.Equal(iterations, stats.Writes);
+
+            hitMetric = new Stage2PerfMetric
+            {
+                Scenario = "aindicator_optimizer_cache_process_all_hit_path",
+                Iterations = iterations,
+                ElapsedMsTotal = elapsedMs,
+                NanosecondsPerOp = nsPerOp,
+                AllocatedBytesTotal = allocatedBytes,
+                AllocatedBytesPerOp = allocatedBytesPerOp,
+                Gen0Collections = gen0After - gen0Before,
+                Checksum = hitChecksum
+            };
+        }
+
+        Assert.Equal(missChecksum, hitChecksum);
+
+        Stage2PerfReportWriter.Append(missMetric);
+        Stage2PerfReportWriter.Append(hitMetric);
     }
 
     [Fact]
@@ -1341,6 +1489,61 @@ public class Stage2PerformanceBaselineTests
         return new[] { first, second, third };
     }
 
+    private static AindicatorOptimizerCachePerfIndicator CreateAindicatorOptimizerCachePerfIndicator()
+    {
+        AindicatorOptimizerCachePerfIndicator indicator = new();
+        indicator.Init("CodexPerfAindicatorOptimizerCache", StartProgram.IsOsOptimizer);
+        indicator.StartProgram = StartProgram.IsOsOptimizer;
+        return indicator;
+    }
+
+    private static long RunAindicatorOptimizerCachePerfPass(
+        AindicatorOptimizerCachePerfIndicator indicator,
+        List<Candle> candles)
+    {
+        indicator.Process(candles);
+
+        List<decimal> values = indicator.DataSeries[0].Values;
+        Assert.Equal(candles.Count, values.Count);
+
+        return values.Count
+               + (long)(values[0] * 100m)
+               + (long)(values[^1] * 100m);
+    }
+
+    private static List<Candle>[] BuildAindicatorOptimizerCacheCandleSets(int setCount, int candleCount, int seedOffset)
+    {
+        List<Candle>[] candleSets = new List<Candle>[setCount];
+        DateTime baseStart = new(2026, 3, 2, 0, 0, 0, DateTimeKind.Utc);
+
+        for (int setIndex = 0; setIndex < setCount; setIndex++)
+        {
+            List<Candle> candles = new List<Candle>(candleCount);
+            DateTime setStart = baseStart.AddMinutes(((seedOffset + 1) * 1000L) + (setIndex * (candleCount + 3L)));
+            decimal seed = 100m + (seedOffset * 0.5m) + (setIndex * 0.25m);
+
+            for (int candleIndex = 0; candleIndex < candleCount; candleIndex++)
+            {
+                decimal center = seed + (candleIndex * 0.15m) + (((setIndex + candleIndex) % 5) * 0.02m);
+                decimal close = center + ((candleIndex & 1) == 0 ? 0.08m : -0.04m);
+
+                candles.Add(new Candle
+                {
+                    TimeStart = setStart.AddMinutes(candleIndex),
+                    Open = center - 0.1m,
+                    High = center + 0.3m,
+                    Low = center - 0.35m,
+                    Close = close,
+                    Volume = 50m + seedOffset + setIndex + candleIndex
+                });
+            }
+
+            candleSets[setIndex] = candles;
+        }
+
+        return candleSets;
+    }
+
     private static List<Candle> BuildCandlesForKeyBuild(int count)
     {
         List<Candle> candles = new List<Candle>(count);
@@ -1637,6 +1840,43 @@ public class Stage2PerformanceBaselineTests
         GC.Collect();
         GC.WaitForPendingFinalizers();
         GC.Collect();
+    }
+
+    private sealed class AindicatorOptimizerCachePerfScope : IDisposable
+    {
+        public AindicatorOptimizerCachePerfScope(int maxEntries)
+        {
+            Cache = new IndicatorCache(maxEntries: maxEntries);
+            Aindicator.SetOptimizerIndicatorCache(Cache);
+        }
+
+        public IndicatorCache Cache { get; }
+
+        public void Dispose()
+        {
+            Aindicator.ClearOptimizerIndicatorCache();
+        }
+    }
+
+    private sealed class AindicatorOptimizerCachePerfIndicator : Aindicator
+    {
+        public int OnProcessCalls { get; private set; }
+
+        public override void OnStateChange(IndicatorState state)
+        {
+            if (state != IndicatorState.Configure)
+            {
+                return;
+            }
+
+            CreateSeries("Main", System.Drawing.Color.Red, IndicatorChartPaintType.Line, true);
+        }
+
+        public override void OnProcess(List<Candle> source, int index)
+        {
+            OnProcessCalls++;
+            DataSeries[0].Values[index] = source[index].Close;
+        }
     }
 }
 
