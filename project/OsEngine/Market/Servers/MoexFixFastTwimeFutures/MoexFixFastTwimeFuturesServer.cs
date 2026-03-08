@@ -238,10 +238,25 @@ namespace OsEngine.Market.Servers.MoexFixFastTwimeFutures
 
             SendLogMessage("Connection Closed by TwimeFast. WebSocket Data Closed Event", LogMessageType.System);
 
-            try { _logFileTrades?.Close(); } catch (Exception ex) { SendLogMessage(ex.ToString(), LogMessageType.Error); }
-            try { _logFileOrders?.Close(); } catch (Exception ex) { SendLogMessage(ex.ToString(), LogMessageType.Error); }
-            try { _logTradingMsg?.Close(); } catch (Exception ex) { SendLogMessage(ex.ToString(), LogMessageType.Error); }
-            try { _logFileRecover?.Close(); } catch (Exception ex) { SendLogMessage(ex.ToString(), LogMessageType.Error); }
+            lock (_logLockTrade)
+            {
+                DisposePersistentLogWriter(ref _logFileTrades);
+            }
+
+            lock (_logLockOrder)
+            {
+                DisposePersistentLogWriter(ref _logFileOrders);
+            }
+
+            lock (_logLockTrading)
+            {
+                DisposePersistentLogWriter(ref _logTradingMsg);
+            }
+
+            lock (_logLockRecover)
+            {
+                DisposePersistentLogWriter(ref _logFileRecover);
+            }
 
             if (ServerStatus != ServerConnectStatus.Disconnect)
             {
@@ -4573,17 +4588,19 @@ namespace OsEngine.Market.Servers.MoexFixFastTwimeFutures
 
         #region 11 Log
 
+        private static readonly Encoding Utf8NoBomEncoding = new UTF8Encoding(false);
+
         private readonly Lock _logLockTrade = new();
-        private StreamWriter _logFileTrades = new StreamWriter(GetTradesLogPath());
+        private StreamWriter _logFileTrades;
 
         private readonly Lock _logLockOrder = new();
-        private StreamWriter _logFileOrders = new StreamWriter(GetOrdersLogPath());
+        private StreamWriter _logFileOrders;
 
         private readonly Lock _logLockTrading = new();
-        private StreamWriter _logTradingMsg = new StreamWriter(GetTradingServerLogPath(), false, Encoding.UTF8);
+        private StreamWriter _logTradingMsg;
 
         private readonly Lock _logLockRecover = new();
-        private StreamWriter _logFileRecover = new StreamWriter(GetRecoveryLogPath());
+        private StreamWriter _logFileRecover;
 
         private static string GetTradesLogPath()
         {
@@ -4609,7 +4626,7 @@ namespace OsEngine.Market.Servers.MoexFixFastTwimeFutures
         {
             lock (_logLockTrade)
             {
-                _logFileTrades.WriteLine($"{DateTime.Now}: {message}");
+                WritePersistentLogLine(ref _logFileTrades, GetTradesLogPath(), false, message, DateTime.Now);
             }
         }
 
@@ -4617,7 +4634,7 @@ namespace OsEngine.Market.Servers.MoexFixFastTwimeFutures
         {
             lock (_logLockOrder)
             {
-                _logFileOrders.WriteLine($"{DateTime.Now}: {message}");
+                WritePersistentLogLine(ref _logFileOrders, GetOrdersLogPath(), false, message, DateTime.Now);
             }
         }
 
@@ -4625,7 +4642,7 @@ namespace OsEngine.Market.Servers.MoexFixFastTwimeFutures
         {
             lock (_logLockTrading)
             {
-                _logTradingMsg.WriteLine($"{DateTime.Now}: {message}");
+                WritePersistentLogLine(ref _logTradingMsg, GetTradingServerLogPath(), false, message, DateTime.Now);
             }
         }
 
@@ -4633,8 +4650,104 @@ namespace OsEngine.Market.Servers.MoexFixFastTwimeFutures
         {
             lock (_logLockRecover)
             {
-                _logFileRecover.WriteLine($"{DateTime.Now}: {message}");
+                WritePersistentLogLine(ref _logFileRecover, GetRecoveryLogPath(), false, message, DateTime.Now);
             }
+        }
+
+        private void DisposePersistentLogWriter(ref StreamWriter writer)
+        {
+            StreamWriter currentWriter = writer;
+            writer = null;
+
+            if (currentWriter == null)
+            {
+                return;
+            }
+
+            try
+            {
+                currentWriter.Flush();
+                currentWriter.Dispose();
+            }
+            catch (Exception ex)
+            {
+                SendLogMessage(ex.ToString(), LogMessageType.Error);
+            }
+        }
+
+        private static void WritePersistentLogLine(ref StreamWriter writer, string path, bool append, string message, DateTime timestamp)
+        {
+            string line = FormatPersistentLogLine(message, timestamp);
+            StreamWriter currentWriter = EnsurePersistentLogWriter(ref writer, path, append);
+
+            try
+            {
+                currentWriter.WriteLine(line);
+                currentWriter.Flush();
+            }
+            catch (ObjectDisposedException)
+            {
+                currentWriter = RecreatePersistentLogWriter(ref writer, path, append);
+                currentWriter.WriteLine(line);
+                currentWriter.Flush();
+            }
+            catch (IOException)
+            {
+                currentWriter = RecreatePersistentLogWriter(ref writer, path, append);
+                currentWriter.WriteLine(line);
+                currentWriter.Flush();
+            }
+        }
+
+        private static StreamWriter EnsurePersistentLogWriter(ref StreamWriter writer, string path, bool append)
+        {
+            if (writer != null)
+            {
+                return writer;
+            }
+
+            writer = CreatePersistentLogWriter(path, append);
+            return writer;
+        }
+
+        private static StreamWriter RecreatePersistentLogWriter(ref StreamWriter writer, string path, bool append)
+        {
+            if (writer != null)
+            {
+                try
+                {
+                    writer.Dispose();
+                }
+                catch
+                {
+                    // ignore re-create cleanup failures
+                }
+            }
+
+            writer = CreatePersistentLogWriter(path, append);
+            return writer;
+        }
+
+        private static StreamWriter CreatePersistentLogWriter(string path, bool append)
+        {
+            string fullPath = Path.GetFullPath(path);
+            string directory = Path.GetDirectoryName(fullPath);
+
+            if (!string.IsNullOrWhiteSpace(directory))
+            {
+                Directory.CreateDirectory(directory);
+            }
+
+            FileMode mode = append ? FileMode.Append : FileMode.Create;
+            FileStream stream = new FileStream(fullPath, mode, FileAccess.Write, FileShare.Read);
+            StreamWriter writer = new StreamWriter(stream, Utf8NoBomEncoding);
+            writer.AutoFlush = true;
+            return writer;
+        }
+
+        private static string FormatPersistentLogLine(string message, DateTime timestamp)
+        {
+            return $"{timestamp}: {message}";
         }
 
         private string PrintOrderReport(Order order)
