@@ -267,9 +267,9 @@ namespace OsEngine.Market.Servers.MoexFixFastSpot
 
             SendLogMessage("Connection Closed by MoexFixFastSpot. Socket Data Closed Event", LogMessageType.System);
 
-            try { _logFile?.Close(); } catch (System.Exception ex) { SendLogMessage(ex.ToString(), LogMessageType.Error); }
-            try { _logFileXOrders?.Close(); } catch (System.Exception ex) { SendLogMessage(ex.ToString(), LogMessageType.Error); }
-            try { _logFileMFIX?.Close(); } catch (System.Exception ex) { SendLogMessage(ex.ToString(), LogMessageType.Error); }
+            try { _logFile.Dispose(); } catch (System.Exception ex) { SendLogMessage(ex.ToString(), LogMessageType.Error); }
+            try { _logFileXOrders.Dispose(); } catch (System.Exception ex) { SendLogMessage(ex.ToString(), LogMessageType.Error); }
+            try { _logFileMFIX.Dispose(); } catch (System.Exception ex) { SendLogMessage(ex.ToString(), LogMessageType.Error); }
 
             if (ServerStatus != ServerConnectStatus.Disconnect)
             {
@@ -3857,11 +3857,9 @@ namespace OsEngine.Market.Servers.MoexFixFastSpot
 
         #region 11 Log
 
-        private readonly Lock _logLock = new();
-        private StreamWriter _logFile = new StreamWriter(GetUdpLogPath());
-        private StreamWriter _logFileXOrders = new StreamWriter(GetXOrdersLogPath());
-
-        private StreamWriter _logFileMFIX = new StreamWriter(GetMfixLogPath());
+        private readonly PersistentLogWriter _logFile = new PersistentLogWriter(GetUdpLogPath(), append: false);
+        private readonly PersistentLogWriter _logFileXOrders = new PersistentLogWriter(GetXOrdersLogPath(), append: false);
+        private readonly PersistentLogWriter _logFileMFIX = new PersistentLogWriter(GetMfixLogPath(), append: true);
 
         private static string GetLogDirectoryPath()
         {
@@ -3883,23 +3881,78 @@ namespace OsEngine.Market.Servers.MoexFixFastSpot
             return Path.Combine(GetLogDirectoryPath(), $"MFIX_{DateTime.Now:yyyy-MM-dd}.txt");
         }
 
+        private static StreamWriter CreatePersistentLogWriter(string path, bool append)
+        {
+            string directoryPath = Path.GetDirectoryName(path);
+
+            if (string.IsNullOrEmpty(directoryPath) == false)
+            {
+                Directory.CreateDirectory(directoryPath);
+            }
+
+            FileStream stream = new FileStream(path, append ? FileMode.Append : FileMode.Create, FileAccess.Write, FileShare.Read);
+            return new StreamWriter(stream, new UTF8Encoding(encoderShouldEmitUTF8Identifier: false));
+        }
+
+        private static string FormatMfixLogLine(string marker, string message, DateTime timestampUtc)
+        {
+            return $"{timestampUtc} {marker} [MFIX Trade]: {message}";
+        }
+
+        private static string FormatUdpLogLine(string source, string message, DateTime timestampLocal)
+        {
+            return $"{timestampLocal} {source}: {message}";
+        }
+
         private void WriteLogOutgoingFIXMessage(string message)
         {
-            _logFileMFIX.WriteLine($"{DateTime.UtcNow} >>> [MFIX Trade]: {message}");
-            _logFileMFIX.Flush();
+            _logFileMFIX.WriteLine(FormatMfixLogLine(">>>", message, DateTime.UtcNow));
         }
 
         private void WriteLogIncomingFIXMessage(string message)
         {
-            _logFileMFIX.WriteLine($"{DateTime.UtcNow} <<< [MFIX Trade]: {message}");
-            _logFileMFIX.Flush();
+            _logFileMFIX.WriteLine(FormatMfixLogLine("<<<", message, DateTime.UtcNow));
         }
 
         private void WriteLog(string message, string source)
         {
-            lock (_logLock)
+            _logFile.WriteLine(FormatUdpLogLine(source, message, DateTime.Now));
+        }
+
+        private sealed class PersistentLogWriter : IDisposable
+        {
+            private readonly Lock _sync = new();
+            private readonly StreamWriter _writer;
+            private bool _disposed;
+
+            public PersistentLogWriter(string path, bool append)
             {
-                _logFile.WriteLine($"{DateTime.Now} {source}: {message}");
+                _writer = CreatePersistentLogWriter(path, append);
+            }
+
+            public void WriteLine(string line)
+            {
+                lock (_sync)
+                {
+                    ObjectDisposedException.ThrowIf(_disposed, this);
+                    _writer.WriteLine(line);
+                    _writer.Flush();
+                }
+            }
+
+            public void Dispose()
+            {
+                lock (_sync)
+                {
+                    if (_disposed)
+                    {
+                        return;
+                    }
+
+                    _disposed = true;
+                    _writer.Flush();
+                    _writer.Dispose();
+                }
             }
         }
 
