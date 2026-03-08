@@ -3500,27 +3500,26 @@ namespace OsEngine.OsTrader.Grids
         {
             get
             {
-                // 1 берём позиции по сетке
-
-                List<TradeGridLine> linesWithPositions = GetLinesWithOpenPosition();
-
-                if (linesWithPositions == null
-                    || linesWithPositions.Count == 0)
+                if (!TryGetGridLines(out List<TradeGridLine> linesAll))
                 {
                     return 0;
                 }
 
                 decimal result = 0;
 
-                for (int i = 0; i < linesWithPositions.Count; i++)
+                for (int i = 0; i < linesAll.Count; i++)
                 {
-                    TradeGridLine line = linesWithPositions[i];
+                    TradeGridLine line = linesAll[i];
                     if (line == null || line.Position == null)
                     {
                         continue;
                     }
 
-                    result += line.Position.OpenVolume;
+                    decimal openVolume = line.Position.OpenVolume;
+                    if (openVolume != 0)
+                    {
+                        result += openVolume;
+                    }
                 }
 
                 return result;
@@ -3735,13 +3734,14 @@ namespace OsEngine.OsTrader.Grids
         {
             get
             {
-                // 1 если уже есть позиции с ордерами на закрытие. Ничего не делаем
-
-                List<TradeGridLine> linesWithOpenPositions = GetLinesWithOpenPosition();
-
-                for (int i = 0; i < linesWithOpenPositions.Count; i++)
+                if (!TryGetGridLines(out List<TradeGridLine> linesAll))
                 {
-                    TradeGridLine line = linesWithOpenPositions[i];
+                    return false;
+                }
+
+                for (int i = 0; i < linesAll.Count; i++)
+                {
+                    TradeGridLine line = linesAll[i];
                     if (line == null)
                     {
                         continue;
@@ -3768,12 +3768,19 @@ namespace OsEngine.OsTrader.Grids
         {
             get
             {
-                List<TradeGridLine> linesWithPositions = GetLinesWithOpenPosition();
-
-                if (linesWithPositions != null &&
-                    linesWithPositions.Count != 0)
+                if (!TryGetGridLines(out List<TradeGridLine> linesAll))
                 {
-                    return true;
+                    return false;
+                }
+
+                for (int i = 0; i < linesAll.Count; i++)
+                {
+                    Position position = linesAll[i]?.Position;
+                    if (position != null
+                        && position.OpenVolume != 0)
+                    {
+                        return true;
+                    }
                 }
 
                 return false;
@@ -3939,18 +3946,23 @@ namespace OsEngine.OsTrader.Grids
             return queryCollections.OpenPositions ?? new List<TradeGridLine>();
         }
 
-        public List<Position> GetPositionByGrid()
+        private bool TryGetGridLines(out List<TradeGridLine> linesAll)
         {
+            linesAll = null;
+
             TradeGridCreator gridCreator = GridCreator;
             if (gridCreator == null)
             {
-                return new List<Position>();
+                return false;
             }
 
-            List<TradeGridLine> linesAll = gridCreator.Lines;
+            linesAll = gridCreator.Lines;
+            return linesAll != null && linesAll.Count != 0;
+        }
 
-            if (linesAll == null ||
-                linesAll.Count == 0)
+        public List<Position> GetPositionByGrid()
+        {
+            if (!TryGetGridLines(out List<TradeGridLine> linesAll))
             {
                 return new List<Position>();
             }
