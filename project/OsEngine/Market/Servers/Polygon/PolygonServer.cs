@@ -13,6 +13,7 @@ using System.IO;
 using System.Net.Http;
 using System.Net;
 using System.Threading;
+using System.Text;
 
 namespace OsEngine.Market.Servers.Polygon
 {
@@ -31,6 +32,9 @@ namespace OsEngine.Market.Servers.Polygon
 
     public class PolygonServerRealization : IServerRealization
     {
+        internal static readonly Encoding SecuritiesCacheEncoding = new UTF8Encoding(encoderShouldEmitUTF8Identifier: false);
+        internal const int SecuritiesCacheBufferSize = 4096;
+
         #region 1 Constructor, Status, Connection
 
         public PolygonServerRealization()
@@ -301,17 +305,10 @@ namespace OsEngine.Market.Servers.Polygon
         private void GetSecurityData()
         {
             string targetPath = GetSecuritiesCachePath();
-            string tempPath = targetPath + ".tmp";
+            string tempPath = GetSecuritiesCacheTempPath(targetPath);
 
             try
             {
-                string? directory = Path.GetDirectoryName(Path.GetFullPath(targetPath));
-
-                if (!string.IsNullOrWhiteSpace(directory))
-                {
-                    Directory.CreateDirectory(directory);
-                }
-
                 if (File.Exists(tempPath))
                 {
                     File.Delete(tempPath);
@@ -327,7 +324,7 @@ namespace OsEngine.Market.Servers.Polygon
 
                 RestResponceMessage<Tickers> response = JsonConvert.DeserializeObject<RestResponceMessage<Tickers>>(json);
 
-                using (StreamWriter writer = new StreamWriter(tempPath, false))
+                using (StreamWriter writer = CreateSecuritiesCacheWriter(tempPath))
                 {
                     SaveSecurityToFile(response, writer);
 
@@ -346,25 +343,10 @@ namespace OsEngine.Market.Servers.Polygon
                         SaveSecurityToFile(response, writer);
                     }
 
-                    writer.Flush();
-                    if (writer.BaseStream is FileStream fileStream)
-                    {
-                        fileStream.Flush(true);
-                    }
-                    else
-                    {
-                        writer.BaseStream.Flush();
-                    }
+                    FlushSecuritiesCacheWriter(writer);
                 }
 
-                if (File.Exists(targetPath))
-                {
-                    File.Replace(tempPath, targetPath, targetPath + ".bak", true);
-                }
-                else
-                {
-                    File.Move(tempPath, targetPath);
-                }
+                ReplaceSecuritiesCacheFromTemp(tempPath, targetPath);
 
                 SendLogMessage($"Writing to file is finished.", LogMessageType.System);
             }
@@ -385,15 +367,81 @@ namespace OsEngine.Market.Servers.Polygon
         {
             for (int i = 0; i < response.results.Count; i++)
             {
-                string saveString = response.results[i].ticker + ",";
-                saveString += response.results[i].name + ",";
-                saveString += response.results[i].type + ",";
-                saveString += response.results[i].primary_exchange;
-
-                writer.WriteLine(saveString);
+                writer.WriteLine(FormatSecurityCacheLine(response.results[i]));
             }
 
             SendLogMessage($"Write to file {response.results.Count} tickers", LogMessageType.System);
+        }
+
+        internal static string FormatSecurityCacheLine(Tickers ticker)
+        {
+            return ticker.ticker + ","
+                + ticker.name + ","
+                + ticker.type + ","
+                + ticker.primary_exchange;
+        }
+
+        internal static string GetSecuritiesCacheTempPath(string targetPath)
+        {
+            string fullTargetPath = Path.GetFullPath(targetPath);
+            return fullTargetPath + ".tmp";
+        }
+
+        internal static StreamWriter CreateSecuritiesCacheWriter(string tempPath)
+        {
+            string fullTempPath = Path.GetFullPath(tempPath);
+            string directoryPath = Path.GetDirectoryName(fullTempPath);
+
+            if (string.IsNullOrWhiteSpace(directoryPath))
+            {
+                throw new InvalidOperationException("Unable to resolve securities cache directory.");
+            }
+
+            Directory.CreateDirectory(directoryPath);
+
+            FileStream stream = new FileStream(
+                fullTempPath,
+                FileMode.Create,
+                FileAccess.Write,
+                FileShare.None,
+                SecuritiesCacheBufferSize);
+
+            return new StreamWriter(stream, SecuritiesCacheEncoding, SecuritiesCacheBufferSize);
+        }
+
+        internal static void FlushSecuritiesCacheWriter(StreamWriter writer)
+        {
+            if (writer == null)
+            {
+                throw new ArgumentNullException(nameof(writer));
+            }
+
+            writer.Flush();
+
+            if (writer.BaseStream is FileStream fileStream)
+            {
+                fileStream.Flush(flushToDisk: true);
+            }
+            else
+            {
+                writer.BaseStream.Flush();
+            }
+        }
+
+        internal static void ReplaceSecuritiesCacheFromTemp(string tempPath, string targetPath)
+        {
+            string fullTempPath = Path.GetFullPath(tempPath);
+            string fullTargetPath = Path.GetFullPath(targetPath);
+            string backupPath = fullTargetPath + ".bak";
+
+            if (File.Exists(fullTargetPath))
+            {
+                File.Replace(fullTempPath, fullTargetPath, backupPath, true);
+            }
+            else
+            {
+                File.Move(fullTempPath, fullTargetPath);
+            }
         }
 
         private static string GetSecuritiesCachePath()
