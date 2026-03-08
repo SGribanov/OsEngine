@@ -380,13 +380,13 @@ namespace OsEngine.OsTrader.Panels.Tab
 
         private void CheckBoxCointegrationAutoIsOn_Click(object sender, RoutedEventArgs e)
         {
-            _pair.AutoRebuildCointegration = CheckBoxCointegrationAutoIsOn.IsChecked.Value;
+            _pair.AutoRebuildCointegration = CheckBoxCointegrationAutoIsOn.IsChecked == true;
             _pair.Save();
         }
 
         private void CheckBoxCorrelationAutoIsOn_Click(object sender, RoutedEventArgs e)
         {
-            _pair.AutoRebuildCorrelation = CheckBoxCorrelationAutoIsOn.IsChecked.Value;
+            _pair.AutoRebuildCorrelation = CheckBoxCorrelationAutoIsOn.IsChecked == true;
             _pair.Save();
         }
 
@@ -469,13 +469,19 @@ namespace OsEngine.OsTrader.Panels.Tab
 
         private void ComboBoxSec2Regime_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            Enum.TryParse(ComboBoxSec2Regime.SelectedItem.ToString(), out _pair.Sec2TradeRegime);
+            _pair.Sec2TradeRegime = ParseEnumOrDefault(
+                ComboBoxSec2Regime.SelectedItem,
+                ComboBoxSec2Regime.Text,
+                _pair.Sec2TradeRegime);
             _pair.Save();
         }
 
         private void ComboBoxSec1Regime_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            Enum.TryParse(ComboBoxSec1Regime.SelectedItem.ToString(), out _pair.Sec1TradeRegime);
+            _pair.Sec1TradeRegime = ParseEnumOrDefault(
+                ComboBoxSec1Regime.SelectedItem,
+                ComboBoxSec1Regime.Text,
+                _pair.Sec1TradeRegime);
             _pair.Save();
         }
 
@@ -582,25 +588,37 @@ namespace OsEngine.OsTrader.Panels.Tab
 
         private void ComboBoxSec2Slippage_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            Enum.TryParse(ComboBoxSec2Slippage.SelectedItem.ToString(), out _pair.Sec2SlippageType);
+            _pair.Sec2SlippageType = ParseEnumOrDefault(
+                ComboBoxSec2Slippage.SelectedItem,
+                ComboBoxSec2Slippage.Text,
+                _pair.Sec2SlippageType);
             _pair.Save();
         }
 
         private void ComboBoxSec2Volume_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            Enum.TryParse(ComboBoxSec2Volume.SelectedItem.ToString(), out _pair.Sec2VolumeType);
+            _pair.Sec2VolumeType = ParseEnumOrDefault(
+                ComboBoxSec2Volume.SelectedItem,
+                ComboBoxSec2Volume.Text,
+                _pair.Sec2VolumeType);
             _pair.Save();
         }
 
         private void ComboBoxSec1Slippage_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            Enum.TryParse(ComboBoxSec1Slippage.SelectedItem.ToString(), out _pair.Sec1SlippageType);
+            _pair.Sec1SlippageType = ParseEnumOrDefault(
+                ComboBoxSec1Slippage.SelectedItem,
+                ComboBoxSec1Slippage.Text,
+                _pair.Sec1SlippageType);
             _pair.Save();
         }
 
         private void ComboBoxSec1Volume_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            Enum.TryParse(ComboBoxSec1Volume.SelectedItem.ToString(), out _pair.Sec1VolumeType);
+            _pair.Sec1VolumeType = ParseEnumOrDefault(
+                ComboBoxSec1Volume.SelectedItem,
+                ComboBoxSec1Volume.Text,
+                _pair.Sec1VolumeType);
             _pair.Save();
         }
 
@@ -692,7 +710,7 @@ namespace OsEngine.OsTrader.Panels.Tab
         {
             try
             {
-                _pair.CointegrationLookBack = Convert.ToInt32(TextBoxCointegrationLookBack.Text, CultureInfo.InvariantCulture);
+                _pair.CointegrationLookBack = ParseIntInvariantOrThrow(TextBoxCointegrationLookBack.Text);
                 _pair.Save();
             }
             catch
@@ -705,13 +723,42 @@ namespace OsEngine.OsTrader.Panels.Tab
         {
             try
             {
-                _pair.CorrelationLookBack = Convert.ToInt32(TextBoxCorrelationLookBack.Text, CultureInfo.InvariantCulture);
+                _pair.CorrelationLookBack = ParseIntInvariantOrThrow(TextBoxCorrelationLookBack.Text);
                 _pair.Save();
             }
             catch
             {
                 return;
             }
+        }
+
+        private static TEnum ParseEnumOrDefault<TEnum>(object selectedItem, string text, TEnum defaultValue)
+            where TEnum : struct
+        {
+            string candidate = selectedItem?.ToString();
+
+            if (string.IsNullOrWhiteSpace(candidate))
+            {
+                candidate = text;
+            }
+
+            if (!string.IsNullOrWhiteSpace(candidate)
+                && Enum.TryParse(candidate, true, out TEnum parsed))
+            {
+                return parsed;
+            }
+
+            return defaultValue;
+        }
+
+        private static int ParseIntInvariantOrThrow(string text)
+        {
+            if (!int.TryParse(text, NumberStyles.Integer, CultureInfo.InvariantCulture, out int parsed))
+            {
+                throw new FormatException("Invalid integer value.");
+            }
+
+            return parsed;
         }
 
         // управление прорисовкой во время тестирования
