@@ -2824,16 +2824,11 @@ namespace OsEngine.OsTrader.Grids
                 return;
             }
 
-            List<TradeGridLine> linesOpenPoses = CollectOpenPositionsAndCheckWrongCloseOrders(tab);
+            List<TradeGridLine> linesOpenPoses = CollectTailOpenPositionsAndCheckWrongCloseOrders(
+                tab,
+                Math.Max(0, MaxCloseOrdersInMarket));
 
-            int startIndex = linesOpenPoses.Count - MaxCloseOrdersInMarket;
-
-            if (startIndex < 0)
-            {
-                startIndex = 0;
-            }
-
-            for (int i = startIndex; i < linesOpenPoses.Count; i++)
+            for (int i = 0; i < linesOpenPoses.Count; i++)
             {
                 TradeGridLine line = linesOpenPoses[i];
                 if (line == null)
@@ -2890,6 +2885,16 @@ namespace OsEngine.OsTrader.Grids
 
         private List<TradeGridLine> CollectOpenPositionsAndCheckWrongCloseOrders(BotTabSimple tab)
         {
+            return CollectOpenPositionsAndCheckWrongCloseOrdersCore(tab, keepLastOpenPositionsCount: -1);
+        }
+
+        private List<TradeGridLine> CollectTailOpenPositionsAndCheckWrongCloseOrders(BotTabSimple tab, int keepLastOpenPositionsCount)
+        {
+            return CollectOpenPositionsAndCheckWrongCloseOrdersCore(tab, keepLastOpenPositionsCount);
+        }
+
+        private List<TradeGridLine> CollectOpenPositionsAndCheckWrongCloseOrdersCore(BotTabSimple tab, int keepLastOpenPositionsCount)
+        {
             TradeGridCreator gridCreator = GridCreator;
             if (tab == null || gridCreator == null)
             {
@@ -2903,7 +2908,18 @@ namespace OsEngine.OsTrader.Grids
             }
 
             bool checkWrongCloseOrders = tab.StartProgram == StartProgram.IsOsTrader;
-            List<TradeGridLine> openPositions = new List<TradeGridLine>(linesAll.Count);
+            bool keepAllOpenPositions = keepLastOpenPositionsCount < 0;
+            int boundedOpenPositionsCount = keepAllOpenPositions
+                ? linesAll.Count
+                : keepLastOpenPositionsCount;
+            List<TradeGridLine> openPositions = keepAllOpenPositions
+                ? new List<TradeGridLine>(linesAll.Count)
+                : new List<TradeGridLine>(Math.Min(linesAll.Count, Math.Max(0, keepLastOpenPositionsCount)));
+            TradeGridLine[] tailOpenPositions = !keepAllOpenPositions && boundedOpenPositionsCount > 0
+                ? new TradeGridLine[boundedOpenPositionsCount]
+                : null;
+            int tailStartIndex = 0;
+            int tailCount = 0;
 
             for (int i = 0; i < linesAll.Count; i++)
             {
@@ -2938,7 +2954,42 @@ namespace OsEngine.OsTrader.Grids
 
                 if (volumePosOpen != 0)
                 {
-                    openPositions.Add(curLine);
+                    if (keepAllOpenPositions)
+                    {
+                        openPositions.Add(curLine);
+                    }
+                    else if (tailOpenPositions != null)
+                    {
+                        if (tailCount < tailOpenPositions.Length)
+                        {
+                            tailOpenPositions[tailCount] = curLine;
+                            tailCount++;
+                        }
+                        else
+                        {
+                            tailOpenPositions[tailStartIndex] = curLine;
+                            tailStartIndex++;
+                            if (tailStartIndex >= tailOpenPositions.Length)
+                            {
+                                tailStartIndex = 0;
+                            }
+                        }
+                    }
+                }
+            }
+
+            if (keepAllOpenPositions == false
+                && tailOpenPositions != null
+                && tailCount > 0)
+            {
+                int boundedCount = tailCount;
+
+                for (int i = 0; i < boundedCount; i++)
+                {
+                    int sourceIndex = tailCount < tailOpenPositions.Length
+                        ? i
+                        : (tailStartIndex + i) % tailOpenPositions.Length;
+                    openPositions.Add(tailOpenPositions[sourceIndex]);
                 }
             }
 
