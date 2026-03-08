@@ -103,6 +103,34 @@ namespace OsEngine.Alerts
 
         public AlertToPrice MyAlert;
 
+        private static bool TryGetSelectedEnum<TEnum>(object selectedItem, out TEnum value)
+            where TEnum : struct
+        {
+            value = default;
+
+            if (selectedItem is TEnum typedValue)
+            {
+                value = typedValue;
+                return true;
+            }
+
+            return selectedItem != null
+                   && Enum.TryParse(selectedItem.ToString(), true, out value);
+        }
+
+        private static bool TryReadDecimal(string text, out decimal value)
+        {
+            return decimal.TryParse(text, NumberStyles.Any, CultureInfo.InvariantCulture, out value)
+                   || decimal.TryParse(text, NumberStyles.Any, CultureInfo.CurrentCulture, out value)
+                   || decimal.TryParse(text, NumberStyles.Any, CultureInfo.GetCultureInfo("ru-RU"), out value);
+        }
+
+        private static bool TryReadInt(string text, out int value)
+        {
+            return int.TryParse(text, NumberStyles.Integer, CultureInfo.InvariantCulture, out value)
+                   || int.TryParse(text, NumberStyles.Integer, CultureInfo.CurrentCulture, out value);
+        }
+
         private void ButtonSave_Click(object sender, RoutedEventArgs e)
         {
 
@@ -111,21 +139,45 @@ namespace OsEngine.Alerts
                 MyAlert.IsOn = CheckBoxOnOff.IsChecked.Value;
             }
  
-            Enum.TryParse(ComboBoxActivationType.SelectedItem.ToString(), out MyAlert.TypeActivation);
+            if (TryGetSelectedEnum(ComboBoxActivationType.SelectedItem, out PriceAlertTypeActivation activationType))
+            {
+                MyAlert.TypeActivation = activationType;
+            }
 
-            MyAlert.PriceActivation = TextBoxPriceActivation.Text.ToDecimal();
+            if (TryReadDecimal(TextBoxPriceActivation.Text, out decimal priceActivation))
+            {
+                MyAlert.PriceActivation = priceActivation;
+            }
 
-            Enum.TryParse(ComboBoxSignalType.SelectedItem.ToString(), out MyAlert.SignalType);
+            if (TryGetSelectedEnum(ComboBoxSignalType.SelectedItem, out SignalType signalType))
+            {
+                MyAlert.SignalType = signalType;
+            }
 
-            Enum.TryParse(ComboBoxOrderType.SelectedItem.ToString(), out MyAlert.OrderPriceType);
+            if (TryGetSelectedEnum(ComboBoxOrderType.SelectedItem, out OrderPriceType orderPriceType))
+            {
+                MyAlert.OrderPriceType = orderPriceType;
+            }
 
-            MyAlert.VolumeReaction = TextBoxVolumeReaction.Text.ToDecimal();
+            if (TryReadDecimal(TextBoxVolumeReaction.Text, out decimal volumeReaction))
+            {
+                MyAlert.VolumeReaction = volumeReaction;
+            }
 
-            MyAlert.Slippage = TextBoxSlippage.Text.ToDecimal();
+            if (TryReadDecimal(TextBoxSlippage.Text, out decimal slippage))
+            {
+                MyAlert.Slippage = slippage;
+            }
 
-            MyAlert.NumberClosePosition = Convert.ToInt32(TextBoxClosePosition.Text, CultureInfo.InvariantCulture);
+            if (TryReadInt(TextBoxClosePosition.Text, out int numberClosePosition))
+            {
+                MyAlert.NumberClosePosition = numberClosePosition;
+            }
 
-            Enum.TryParse(ComboBoxSlippageType.SelectedItem.ToString(), true, out MyAlert.SlippageType);
+            if (TryGetSelectedEnum(ComboBoxSlippageType.SelectedItem, out AlertSlippageType slippageType))
+            {
+                MyAlert.SlippageType = slippageType;
+            }
 
             if (CheckBoxWindow.IsChecked.HasValue)
             {
@@ -133,7 +185,10 @@ namespace OsEngine.Alerts
             }
 
             MyAlert.Message = TextBoxAlertMessage.Text;
-            Enum.TryParse(ComboBoxMusic.SelectedItem.ToString(), out MyAlert.MusicType);
+            if (TryGetSelectedEnum(ComboBoxMusic.SelectedItem, out AlertMusic musicType))
+            {
+                MyAlert.MusicType = musicType;
+            }
 
             Close();
         }
