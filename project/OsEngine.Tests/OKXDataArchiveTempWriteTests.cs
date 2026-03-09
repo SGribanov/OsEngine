@@ -2,6 +2,8 @@
 
 using System;
 using System.IO;
+using System.Net;
+using System.Net.Http;
 using System.Reflection;
 using OsEngine.Market.Servers.OKXData;
 
@@ -45,6 +47,38 @@ public sealed class OKXDataArchiveTempWriteTests : IDisposable
         Assert.False(File.Exists(archivePath + ".download"));
     }
 
+    [Fact]
+    public void CreateHttpClientHandler_WithProxy_ShouldEnableConfiguredProxy()
+    {
+        WebProxy proxy = new WebProxy("http://127.0.0.1:8080");
+
+        HttpClientHandler handler = InvokeCreateHttpClientHandler(proxy);
+
+        Assert.True(handler.UseProxy);
+        Assert.Same(proxy, handler.Proxy);
+        handler.Dispose();
+    }
+
+    [Fact]
+    public void RecreateHttpClient_ShouldReplaceDisposedClientInstance()
+    {
+        OKXDataServerRealization realization = new OKXDataServerRealization();
+
+        HttpClient firstClient = GetHttpClient(realization);
+        InvokeDisposeHttpClient(realization);
+        Assert.Null(GetHttpClientField(realization));
+
+        WebProxy proxy = new WebProxy("http://127.0.0.1:8081");
+        InvokeRecreateHttpClient(realization, proxy);
+
+        HttpClient secondClient = GetHttpClient(realization);
+
+        Assert.NotNull(secondClient);
+        Assert.NotSame(firstClient, secondClient);
+
+        InvokeDisposeHttpClient(realization);
+    }
+
     private static void InvokePersistArchiveContentToTempFile(Stream stream, string archivePath)
     {
         MethodInfo method = typeof(OKXDataServerRealization).GetMethod(
@@ -60,6 +94,51 @@ public sealed class OKXDataArchiveTempWriteTests : IDisposable
         {
             throw ex.InnerException;
         }
+    }
+
+    private static HttpClientHandler InvokeCreateHttpClientHandler(WebProxy proxy)
+    {
+        MethodInfo method = typeof(OKXDataServerRealization).GetMethod(
+            "CreateHttpClientHandler",
+            BindingFlags.NonPublic | BindingFlags.Static)
+            ?? throw new InvalidOperationException("CreateHttpClientHandler method not found.");
+
+        return (HttpClientHandler)(method.Invoke(null, [proxy]) ?? throw new InvalidOperationException("CreateHttpClientHandler returned null."));
+    }
+
+    private static void InvokeRecreateHttpClient(OKXDataServerRealization realization, WebProxy proxy)
+    {
+        MethodInfo method = typeof(OKXDataServerRealization).GetMethod(
+            "RecreateHttpClient",
+            BindingFlags.NonPublic | BindingFlags.Instance)
+            ?? throw new InvalidOperationException("RecreateHttpClient method not found.");
+
+        method.Invoke(realization, [proxy]);
+    }
+
+    private static void InvokeDisposeHttpClient(OKXDataServerRealization realization)
+    {
+        MethodInfo method = typeof(OKXDataServerRealization).GetMethod(
+            "DisposeHttpClient",
+            BindingFlags.NonPublic | BindingFlags.Instance)
+            ?? throw new InvalidOperationException("DisposeHttpClient method not found.");
+
+        method.Invoke(realization, null);
+    }
+
+    private static HttpClient GetHttpClient(OKXDataServerRealization realization)
+    {
+        return GetHttpClientField(realization) ?? throw new InvalidOperationException("_httpClient is null.");
+    }
+
+    private static HttpClient? GetHttpClientField(OKXDataServerRealization realization)
+    {
+        FieldInfo field = typeof(OKXDataServerRealization).GetField(
+            "_httpClient",
+            BindingFlags.NonPublic | BindingFlags.Instance)
+            ?? throw new InvalidOperationException("_httpClient field not found.");
+
+        return field.GetValue(realization) as HttpClient;
     }
 
     public void Dispose()

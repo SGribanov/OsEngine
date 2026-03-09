@@ -40,6 +40,8 @@ namespace OsEngine.Market.Servers.OKXData
             {
                 Directory.CreateDirectory(_tempDirectory);
             }
+
+            RecreateHttpClient(null);
         }
 
         private WebProxy _myProxy;
@@ -47,27 +49,28 @@ namespace OsEngine.Market.Servers.OKXData
         public void Connect(WebProxy proxy)
         {
             _myProxy = proxy;
+            RecreateHttpClient(_myProxy);
 
             string startUrl = "https://www.okx.com/historical-data";
 
-            HttpResponseMessage response = _httpClient.GetAsync(startUrl).Result;
-
-            if (response.StatusCode == HttpStatusCode.OK)
+            using (HttpResponseMessage response = _httpClient.GetAsync(startUrl).Result)
             {
-                ServerStatus = ServerConnectStatus.Connect;
-                ConnectEvent();
+                if (response.StatusCode == HttpStatusCode.OK)
+                {
+                    ServerStatus = ServerConnectStatus.Connect;
+                    ConnectEvent();
+                }
+                else
+                {
+                    SendLogMessage($"Connect server error: {response.StatusCode}", LogMessageType.Error);
+                }
             }
-            else
-            {
-                SendLogMessage($"Connect server error: {response.StatusCode}", LogMessageType.Error);
-            }
-
-            response.Dispose();
         }
 
         public void Dispose()
         {
             CleanTempFiles();
+            DisposeHttpClient();
 
             if (ServerStatus != ServerConnectStatus.Disconnect)
             {
@@ -119,7 +122,34 @@ namespace OsEngine.Market.Servers.OKXData
 
         public List<IServerParameter> ServerParameters { get; set; }
 
-        private HttpClient _httpClient = new HttpClient();
+        private HttpClient _httpClient;
+
+        private static HttpClientHandler CreateHttpClientHandler(WebProxy proxy)
+        {
+            HttpClientHandler handler = new HttpClientHandler();
+
+            if (proxy != null)
+            {
+                handler.Proxy = proxy;
+                handler.UseProxy = true;
+            }
+
+            return handler;
+        }
+
+        private void RecreateHttpClient(WebProxy proxy)
+        {
+            HttpClient previousClient = _httpClient;
+            _httpClient = new HttpClient(CreateHttpClientHandler(proxy));
+            previousClient?.Dispose();
+        }
+
+        private void DisposeHttpClient()
+        {
+            HttpClient currentClient = _httpClient;
+            _httpClient = null;
+            currentClient?.Dispose();
+        }
 
         private string _baseUrl = "https://www.okx.com";
 
