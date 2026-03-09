@@ -716,12 +716,7 @@ namespace OsEngine.Market.Servers.FinamGrpc
         {
             _cancellationTokenSource = new CancellationTokenSource();
 
-            HttpClient httpClient = new HttpClient(new HttpClientHandler
-            {
-                Proxy = _proxy,
-                UseProxy = _proxy != null
-            });
-            httpClient.Timeout = Timeout.InfiniteTimeSpan;
+            HttpClient httpClient = CreateGrpcChannelHttpClient(_proxy);
 
             _channel = GrpcChannel.ForAddress(_gRPCHost, new GrpcChannelOptions
             {
@@ -744,6 +739,25 @@ namespace OsEngine.Market.Servers.FinamGrpc
             connectMyOrderTradeStream();
 
             SendLogMessage("All streams activated. State: connected.", LogMessageType.System);
+        }
+
+        private static HttpClient CreateGrpcChannelHttpClient(WebProxy proxy)
+        {
+            HttpClient httpClient = new HttpClient(CreateGrpcChannelHttpHandler(proxy));
+            httpClient.Timeout = Timeout.InfiniteTimeSpan;
+            return httpClient;
+        }
+
+        private static SocketsHttpHandler CreateGrpcChannelHttpHandler(WebProxy proxy)
+        {
+            return new SocketsHttpHandler
+            {
+                Proxy = proxy,
+                UseProxy = proxy != null,
+                PooledConnectionIdleTimeout = TimeSpan.FromMinutes(5),
+                PooledConnectionLifetime = TimeSpan.FromHours(1),
+                EnableMultipleHttp2Connections = true
+            };
         }
 
         private void disconnectMyOrderTradeStream()

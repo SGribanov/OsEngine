@@ -10,6 +10,7 @@ using System.Net.Http;
 using System.Reflection;
 using OsEngine.Entity;
 using OsEngine.Entity.WebSocketOsEngine;
+using OsEngine.Market.Servers.FinamGrpc;
 using OsEngine.Market.Servers.Entity;
 using OsEngine.Market.Servers.OKX.Entity;
 using Xunit;
@@ -189,6 +190,24 @@ public class SecurityRefactorTests
         Assert.NotNull(handler);
         Assert.True(handler!.UseProxy);
         Assert.Same(proxy, handler.Proxy);
+    }
+
+    [Fact]
+    public void FinamGrpcHandler_ShouldConfigureProxyPooling_AndHttp2ConnectionReuse()
+    {
+        WebProxy proxy = new WebProxy("http://127.0.0.1:8888");
+        MethodInfo method = typeof(FinamGrpcServerRealization).GetMethod(
+            "CreateGrpcChannelHttpHandler",
+            BindingFlags.Static | BindingFlags.NonPublic)
+            ?? throw new InvalidOperationException("CreateGrpcChannelHttpHandler method not found.");
+
+        SocketsHttpHandler handler = (SocketsHttpHandler)(method.Invoke(null, [proxy]) ?? throw new InvalidOperationException("CreateGrpcChannelHttpHandler returned null."));
+
+        Assert.True(handler.UseProxy);
+        Assert.Same(proxy, handler.Proxy);
+        Assert.Equal(TimeSpan.FromMinutes(5), handler.PooledConnectionIdleTimeout);
+        Assert.Equal(TimeSpan.FromHours(1), handler.PooledConnectionLifetime);
+        Assert.True(handler.EnableMultipleHttp2Connections);
     }
 
     [Fact]
