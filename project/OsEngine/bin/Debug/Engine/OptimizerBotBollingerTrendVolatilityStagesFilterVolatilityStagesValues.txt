@@ -1,0 +1,6 @@
+Stages volatility&-16744448&Line&True&
+Up channel&-657931&Line&True&
+Down channel&-657931&Line&True&
+Volatility&-14774017&Line&False&
+Sma slow&-657931&Line&True&
+Sma fast&-7667712&Line&True&

@@ -1,0 +1,7 @@
+Min1
+False
+Tick
+Simple
+TimeFrame#Min1$NonTradingCandles#False
+False
+0,2

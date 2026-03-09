@@ -1,0 +1,11 @@
+Regime#On#Off#On#OnlyLong#OnlyShort#OnlyClosePosition#
+Volume type#Deposit percent#Contracts#Contract currency#Deposit percent#
+Volume#1,0#50#1,0#50#4#
+Asset in portfolio#Prime#Prime#
+Bollinger length#10#30#10#200#10#
+Bollinger deviation#1,0#2#1,0#50#4#
+Volatility filter is on#False#False#
+Volatility stage to trade#2#1#2#3#4#
+Volatility slow sma length#10#25#10#80#3#
+Volatility fast sma length#10#7#10#80#3#
+Volatility channel deviation#1,0#0,5#1,0#50#4#

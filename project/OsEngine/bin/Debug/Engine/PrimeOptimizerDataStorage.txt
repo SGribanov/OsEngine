@@ -1,0 +1,4 @@
+
+Candle
+Folder
+D:\HistoryData\OsEngineDataLoad\Debug\Data\Set_BinanceFTP\BTCUSD_PERP\Hour1

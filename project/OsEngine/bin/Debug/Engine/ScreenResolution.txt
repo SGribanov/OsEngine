@@ -1,0 +1,5 @@
+{
+  "Width": 2560,
+  "Height": 1600,
+  "MonitorCount": 2
+}

@@ -1,0 +1,5 @@
+{
+  "CurLocalization": 1,
+  "LongTimePattern": "H:mm:ss",
+  "ShortDatePattern": "dd.MM.yyyy"
+}

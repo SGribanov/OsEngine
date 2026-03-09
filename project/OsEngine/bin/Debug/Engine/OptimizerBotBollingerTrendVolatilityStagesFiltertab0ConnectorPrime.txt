@@ -1,0 +1,7 @@
+GodMode
+False
+BTCUSD_PERP.txt
+Tester
+
+True
+Optimizer

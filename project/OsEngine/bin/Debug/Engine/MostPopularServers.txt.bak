@@ -1,0 +1,32 @@
+{
+  "Servers": [
+    {
+      "ServerType": 18,
+      "CountOfCreation": 1
+    },
+    {
+      "ServerType": 65,
+      "CountOfCreation": 1
+    },
+    {
+      "ServerType": 1,
+      "CountOfCreation": 1
+    },
+    {
+      "ServerType": 9,
+      "CountOfCreation": 1
+    },
+    {
+      "ServerType": 23,
+      "CountOfCreation": 1
+    },
+    {
+      "ServerType": 16,
+      "CountOfCreation": 3
+    },
+    {
+      "ServerType": 27,
+      "CountOfCreation": 1
+    }
+  ]
+}

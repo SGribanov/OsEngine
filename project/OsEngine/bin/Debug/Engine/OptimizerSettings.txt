@@ -1,0 +1,34 @@
+6
+EnvelopsCountertrend
+100000
+0
+False
+0
+False
+0
+False
+0
+False
+01/01/0001 00:00:00
+12/31/9999 23:59:59
+0
+0
+False
+False
+1
+Percent
+0,03
+True
+Touch
+0
+0
+Bayesian
+TotalProfit
+20
+100
+10
+Maximize
+ExpectedImprovement
+0,25
+True
+20

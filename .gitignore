@@ -323,3 +323,13 @@ doc/BrokersProgrammDoc/
 
 # Local report artifacts
 /reports/stage2_perf_metrics.jsonl
+
+# Keep shipped debug automation assets in git
+!project/OsEngine/bin/
+project/OsEngine/bin/*
+!project/OsEngine/bin/Debug/
+project/OsEngine/bin/Debug/*
+!project/OsEngine/bin/Debug/Custom/
+!project/OsEngine/bin/Debug/Custom/**
+!project/OsEngine/bin/Debug/Engine/
+!project/OsEngine/bin/Debug/Engine/**

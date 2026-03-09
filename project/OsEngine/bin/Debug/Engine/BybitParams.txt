@@ -1,0 +1,22 @@
+String^Public key^2dUPcxm2tOrOUWF3dR
+Password^Secret key^3Xkju5snIGxSTyniKNq5WRxMiBDO5Kas53Da
+Enum^Server type^MainNet
+Enum^Margin Mode^Cross
+Bool^Hedge Mode^True
+Bool^Extended Data^False
+Bool^Use Options^False
+Bool^Сохранять историю трейдов^False
+Int^Трейдов подгружать, дней^5
+Bool^Сохранять историю свечек^True
+Int^Свечей подгружать^900
+Bool^Грузим данные bid/ask в трейды^False
+Bool^Удалять трейды из памяти^True
+Bool^Удалять свечи из памяти^False
+Bool^Использовать полный стакан^True
+Bool^Пропускать сделки с одинаковой ценой^True
+Button^Просмотр бумаг
+Button^Неторговые периоды
+Button^Настроить обеспечение
+Enum^Тип Прокси^None
+String^Прокси^
+Bool^Следить за разрывами связи дополнительно^False

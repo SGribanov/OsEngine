@@ -1,0 +1,6 @@
+Volatility stages regime#3#
+Volatility base type#Day#
+Volatility variable type#Percent#
+Slow sma len#25#
+Fast sma len#7#
+Channel Deviation#0,5#

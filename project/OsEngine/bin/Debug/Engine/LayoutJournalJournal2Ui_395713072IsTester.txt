@@ -1,0 +1,6 @@
+False
+Percent 1 contract
+True
+True
+True
+Off

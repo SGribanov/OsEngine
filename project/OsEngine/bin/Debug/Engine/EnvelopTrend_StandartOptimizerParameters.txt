@@ -1,0 +1,8 @@
+Regime#On#Off#On#
+Slippage#0#0#0#20#1#
+Volume type#Deposit percent#Contracts#Contract currency#Deposit percent#
+Volume#1,0#50#1,0#50#4#
+Asset in portfolio#Prime#Prime#
+Envelop Deviation#0,3#0,3#0,3#4#0,3#
+Envelop Moving Length#10#10#10#200#5#
+Trail Stop#0,1#0,1#0,1#5#0,1#

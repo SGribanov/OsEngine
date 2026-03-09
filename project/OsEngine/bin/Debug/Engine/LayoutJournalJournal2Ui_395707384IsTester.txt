@@ -1,0 +1,6 @@
+False
+Absolute
+True
+True
+True
+Off

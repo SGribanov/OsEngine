@@ -1,0 +1,8 @@
+20.02.2026 21:46:47;System;Proxy master.  Proxy master activated. Proxy count: 0;
+20.02.2026 21:46:47;System;Copy master.  Copy master activated. Copy traders: 0;
+20.02.2026 21:46:57;System;Создан сервер Alor;
+20.02.2026 19:14:18;System;Proxy master.  Proxy master activated. Proxy count: 0;
+20.02.2026 19:14:18;System;Copy master.  Copy master activated. Copy traders: 0;
+20.02.2026 19:14:27;System;Создан сервер Alor;
+20.02.2026 19:19:06;System;Proxy master.  Proxy master activated. Proxy count: 0;
+20.02.2026 19:19:06;System;Copy master.  Copy master activated. Copy traders: 0;

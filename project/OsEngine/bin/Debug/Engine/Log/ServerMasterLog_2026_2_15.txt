@@ -1,0 +1,2 @@
+15.02.2026 21:49:55;System;Proxy master.  Proxy master activated. Proxy count: 0;
+15.02.2026 21:49:55;System;Copy master.  Copy master activated. Copy traders: 0;

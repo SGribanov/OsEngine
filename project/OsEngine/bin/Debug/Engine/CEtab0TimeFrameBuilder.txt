@@ -1,0 +1,9 @@
+{
+  "TimeFrame": 10,
+  "SaveTradesInCandles": false,
+  "CandleCreateType": 0,
+  "SeriesName": "Simple",
+  "SeriesSaveString": "TimeFrame#Min5$NonTradingCandles#False",
+  "MarketDepthBuildMaxSpreadIsOn": false,
+  "MarketDepthBuildMaxSpread": 0.2
+}
