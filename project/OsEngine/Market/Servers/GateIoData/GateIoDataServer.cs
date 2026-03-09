@@ -1203,10 +1203,9 @@ namespace OsEngine.Market.Servers.GateIoData
             try
             {
                 using (FileStream originalFileStream = new FileStream(gzPath, FileMode.Open))
-                using (FileStream decompressedFileStream = File.Create(csvFilePath))
                 using (GZipStream decompressionStream = new GZipStream(originalFileStream, CompressionMode.Decompress))
                 {
-                    decompressionStream.CopyTo(decompressedFileStream);
+                    PersistExtractedCsv(csvFilePath, decompressionStream);
                 }
             }
             catch (InvalidDataException ex)
@@ -1446,6 +1445,56 @@ namespace OsEngine.Market.Servers.GateIoData
                 using (FileStream fileStream = new FileStream(tempPath, FileMode.Create, FileAccess.Write, FileShare.None))
                 {
                     fileStream.Write(bytes, 0, bytes.Length);
+                    fileStream.Flush(flushToDisk: true);
+                }
+
+                if (File.Exists(fullPath))
+                {
+                    File.Replace(tempPath, fullPath, null, true);
+                }
+                else
+                {
+                    File.Move(tempPath, fullPath);
+                }
+            }
+            finally
+            {
+                if (File.Exists(tempPath))
+                {
+                    File.Delete(tempPath);
+                }
+            }
+        }
+
+        private static void PersistExtractedCsv(string path, Stream contentStream)
+        {
+            if (string.IsNullOrWhiteSpace(path))
+            {
+                throw new ArgumentException("Path cannot be null or empty.", nameof(path));
+            }
+
+            if (contentStream == null)
+            {
+                throw new ArgumentNullException(nameof(contentStream));
+            }
+
+            string fullPath = Path.GetFullPath(path);
+            string directory = Path.GetDirectoryName(fullPath);
+
+            if (string.IsNullOrWhiteSpace(directory))
+            {
+                throw new InvalidOperationException("CSV path must include a directory.");
+            }
+
+            Directory.CreateDirectory(directory);
+
+            string tempPath = fullPath + ".tmp";
+
+            try
+            {
+                using (FileStream fileStream = new FileStream(tempPath, FileMode.Create, FileAccess.Write, FileShare.None))
+                {
+                    contentStream.CopyTo(fileStream);
                     fileStream.Flush(flushToDisk: true);
                 }
 
