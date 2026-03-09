@@ -385,28 +385,23 @@ namespace OsEngine.Market.Servers.SmartLabNews
                 return result;
             }
 
-            using (HttpClient client =  new HttpClient())
+            using (HttpClient client = new HttpClient())
             {
                 try
                 {
-                    string html = client.GetStringAsync(urlPost).GetAwaiter().GetResult();
+                    Uri requestUri = CreateFullNewsRequestUri(urlPost);
 
-                    string topicPattern = $@"<div class=""topic[^""]*""[^>]*tid=""{tid}""[^>]*>.*?<div class=""content"">(.*?)</div>";
-
-                    Match match = Regex.Match(html, topicPattern, RegexOptions.Singleline);
-
-                    if (match.Success)
+                    using (HttpRequestMessage request = CreateFullNewsRequestMessage(requestUri))
                     {
-                        string content = match.Groups[1].Value;
-                        content = Regex.Replace(content, "<br\\s*/?>", "\n", RegexOptions.IgnoreCase);
+                        string html = client.SendAsync(request, HttpCompletionOption.ResponseHeadersRead)
+                            .GetAwaiter()
+                            .GetResult()
+                            .Content
+                            .ReadAsStringAsync()
+                            .GetAwaiter()
+                            .GetResult();
 
-                        string plainText = Regex.Replace(content, "<.*?>", string.Empty);
-                        result = WebUtility.HtmlDecode(plainText.Trim());
-                        return Regex.Replace(result, @"(\r?\n)+", "\r\n");
-                    }
-                    else
-                    {
-                        return result;
+                        return ExtractFullNewsContent(html, tid) ?? result;
                     }
                 }
                 catch (Exception ex)
@@ -415,6 +410,62 @@ namespace OsEngine.Market.Servers.SmartLabNews
                     return result;
                 }
             }
+        }
+
+        internal static Uri CreateFullNewsRequestUri(string urlPost)
+        {
+            if (string.IsNullOrWhiteSpace(urlPost))
+            {
+                throw new ArgumentException("Full content URL is required.", nameof(urlPost));
+            }
+
+            if (!Uri.TryCreate(urlPost, UriKind.Absolute, out Uri requestUri))
+            {
+                throw new ArgumentException("Full content URL must be an absolute URI.", nameof(urlPost));
+            }
+
+            if (requestUri.Scheme != Uri.UriSchemeHttp &&
+                requestUri.Scheme != Uri.UriSchemeHttps)
+            {
+                throw new ArgumentException("Full content URL must use http or https.", nameof(urlPost));
+            }
+
+            return requestUri;
+        }
+
+        private static HttpRequestMessage CreateFullNewsRequestMessage(Uri requestUri)
+        {
+            if (requestUri == null)
+            {
+                throw new ArgumentNullException(nameof(requestUri));
+            }
+
+            return new HttpRequestMessage(HttpMethod.Get, requestUri);
+        }
+
+        internal static string ExtractFullNewsContent(string html, string tid)
+        {
+            if (string.IsNullOrEmpty(html) ||
+                string.IsNullOrWhiteSpace(tid))
+            {
+                return null;
+            }
+
+            string topicPattern = $@"<div class=""topic[^""]*""[^>]*tid=""{Regex.Escape(tid)}""[^>]*>.*?<div class=""content"">(.*?)</div>";
+
+            Match match = Regex.Match(html, topicPattern, RegexOptions.Singleline);
+
+            if (!match.Success)
+            {
+                return null;
+            }
+
+            string content = match.Groups[1].Value;
+            content = Regex.Replace(content, "<br\\s*/?>", "\n", RegexOptions.IgnoreCase);
+
+            string plainText = Regex.Replace(content, "<.*?>", string.Empty);
+            string result = WebUtility.HtmlDecode(plainText.Trim());
+            return Regex.Replace(result, @"(\r?\n)+", "\r\n");
         }
 
         private string ExtractTidFromUrl(string url)
