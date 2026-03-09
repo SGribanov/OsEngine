@@ -45,22 +45,19 @@ namespace OsEngine.Market.Servers.BybitData
 
         public void Connect(WebProxy proxy)
         {
-            ConfigureHttpClientForString();
-
-            HttpResponseMessage response = _httpClient.GetAsync(_mainFtpUrl).Result;
-
-            if (response.StatusCode == HttpStatusCode.OK)
+            using (HttpRequestMessage request = CreateConfiguredRequestMessage(_mainFtpUrl, BybitRequestProfile.StringContent))
+            using (HttpResponseMessage response = _httpClient.SendAsync(request).GetAwaiter().GetResult())
             {
-
-                ServerStatus = ServerConnectStatus.Connect;
-                ConnectEvent();
+                if (response.StatusCode == HttpStatusCode.OK)
+                {
+                    ServerStatus = ServerConnectStatus.Connect;
+                    ConnectEvent();
+                }
+                else
+                {
+                    SendLogMessage($"Connect server error: {response.StatusCode}", LogMessageType.Error);
+                }
             }
-            else
-            {
-                SendLogMessage($"Connect server error: {response.StatusCode}", LogMessageType.Error);
-            }
-
-            response.Dispose();
         }
 
         public void Dispose()
@@ -478,9 +475,8 @@ namespace OsEngine.Market.Servers.BybitData
             {
                 string tempGzipPath = @"Data\Temp\ByBitDataTempFiles\" + Path.GetRandomFileName();
 
-                ConfigureHttpClientForFile();
-
-                using (HttpResponseMessage response = _httpClient.GetAsync(path).GetAwaiter().GetResult())
+                using (HttpRequestMessage request = CreateConfiguredRequestMessage(path, BybitRequestProfile.FileDownload))
+                using (HttpResponseMessage response = _httpClient.SendAsync(request, HttpCompletionOption.ResponseHeadersRead).GetAwaiter().GetResult())
                 {
                     response.EnsureSuccessStatusCode();
 
@@ -628,9 +624,14 @@ namespace OsEngine.Market.Servers.BybitData
 
         private (List<string>, DateTime, DateTime) ParseFilesByDate(string url, DateTime startTime, DateTime endTime)
         {
-            ConfigureHttpClientForString();
+            string html;
 
-            string html = _httpClient.GetStringAsync(url).Result;
+            using (HttpRequestMessage request = CreateConfiguredRequestMessage(url, BybitRequestProfile.StringContent))
+            using (HttpResponseMessage response = _httpClient.SendAsync(request).GetAwaiter().GetResult())
+            {
+                response.EnsureSuccessStatusCode();
+                html = response.Content.ReadAsStringAsync().GetAwaiter().GetResult();
+            }
 
             Regex regex = new Regex(@"<a href=""([^""]+)"">([^<]+)</a>");
             MatchCollection matches = regex.Matches(html);
@@ -864,45 +865,58 @@ namespace OsEngine.Market.Servers.BybitData
             return res;
         }
 
-        private void ConfigureHttpClientForString()
+        private HttpRequestMessage CreateConfiguredRequestMessage(string requestUri, BybitRequestProfile profile)
         {
-            _httpClient.DefaultRequestHeaders.Clear();
+            HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, requestUri);
 
-            _httpClient.DefaultRequestHeaders.Add("Accept", "*/*");
-            _httpClient.DefaultRequestHeaders.Add("Accept-Encoding", "gzip, deflate, br, zstd");
-            _httpClient.DefaultRequestHeaders.Add("Accept-Language", "ru-RU,ru;q=0.9,en-US;q=0.8,en;q=0.7");
-            _httpClient.DefaultRequestHeaders.Add("Priority", "u=1, i");
-            _httpClient.DefaultRequestHeaders.Add("Referer", "https://www.bybit.com/derivatives/en/history-data");
-            _httpClient.DefaultRequestHeaders.Add("Sec-Ch-Ua", "\"Not;A=Brand\";v=\"99\", \"Google Chrome\";v=\"139\", \"Chromium\";v=\"139\"");
-            _httpClient.DefaultRequestHeaders.Add("Sec-Ch-Ua-Mobile", "?0");
-            _httpClient.DefaultRequestHeaders.Add("Sec-Ch-Ua-Platform", "\"Windows\"");
-            _httpClient.DefaultRequestHeaders.Add("Sec-Fetch-Dest", "empty");
-            _httpClient.DefaultRequestHeaders.Add("Sec-Fetch-Mode", "cors");
-            _httpClient.DefaultRequestHeaders.Add("Sec-Fetch-Site", "same-origin");
-            _httpClient.DefaultRequestHeaders.Add("Sec-Fetch-User", "?1");
-            _httpClient.DefaultRequestHeaders.Add("Upgrade-insecure-requests", "1");
-            _httpClient.DefaultRequestHeaders.Add("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36");
-            _httpClient.DefaultRequestHeaders.Add("X-Kl-Saas-Ajax-Request", "Ajax_Request");
+            if (profile == BybitRequestProfile.StringContent)
+            {
+                AddHeader(request, "Accept", "*/*");
+                AddHeader(request, "Accept-Encoding", "gzip, deflate, br, zstd");
+                AddHeader(request, "Accept-Language", "ru-RU,ru;q=0.9,en-US;q=0.8,en;q=0.7");
+                AddHeader(request, "Priority", "u=1, i");
+                AddHeader(request, "Referer", "https://www.bybit.com/derivatives/en/history-data");
+                AddHeader(request, "Sec-Ch-Ua", "\"Not;A=Brand\";v=\"99\", \"Google Chrome\";v=\"139\", \"Chromium\";v=\"139\"");
+                AddHeader(request, "Sec-Ch-Ua-Mobile", "?0");
+                AddHeader(request, "Sec-Ch-Ua-Platform", "\"Windows\"");
+                AddHeader(request, "Sec-Fetch-Dest", "empty");
+                AddHeader(request, "Sec-Fetch-Mode", "cors");
+                AddHeader(request, "Sec-Fetch-Site", "same-origin");
+                AddHeader(request, "Sec-Fetch-User", "?1");
+                AddHeader(request, "Upgrade-insecure-requests", "1");
+                AddHeader(request, "User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36");
+                AddHeader(request, "X-Kl-Saas-Ajax-Request", "Ajax_Request");
+            }
+            else
+            {
+                AddHeader(request, "Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/ap");
+                AddHeader(request, "Accept-Encoding", "gzip, deflate, br, zstd");
+                AddHeader(request, "Accept-Language", "ru-RU,ru;q=0.9,en-US;q=0.8,en;q=0.7");
+                AddHeader(request, "Cache-control", "max-age=0");
+                AddHeader(request, "Priority", "u=0, i");
+                AddHeader(request, "Sec-Ch-Ua", "\"Not_A Brand\";v=\"9\", \"Chromium\";v=\"139\", \"Google Chrome\";v=\"139\"");
+                AddHeader(request, "Sec-Ch-Ua-Mobile", "?0");
+                AddHeader(request, "Sec-Ch-Ua-Platform", "\"Windows\"");
+                AddHeader(request, "Sec-Fetch-Dest", "document");
+                AddHeader(request, "Sec-Fetch-Mode", "navigate");
+                AddHeader(request, "Sec-Fetch-Site", "none");
+                AddHeader(request, "Sec-Fetch-User", "?1");
+                AddHeader(request, "Upgrade-insecure-requests", "1");
+                AddHeader(request, "User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36");
+            }
+
+            return request;
         }
 
-        private void ConfigureHttpClientForFile()
+        private static void AddHeader(HttpRequestMessage request, string name, string value)
         {
-            _httpClient.DefaultRequestHeaders.Clear();
+            request.Headers.TryAddWithoutValidation(name, value);
+        }
 
-            _httpClient.DefaultRequestHeaders.Add("Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/ap");
-            _httpClient.DefaultRequestHeaders.Add("Accept-Encoding", "gzip, deflate, br, zstd");
-            _httpClient.DefaultRequestHeaders.Add("Accept-Language", "ru-RU,ru;q=0.9,en-US;q=0.8,en;q=0.7");
-            _httpClient.DefaultRequestHeaders.Add("Cache-control", "max-age=0");
-            _httpClient.DefaultRequestHeaders.Add("Priority", "u=0, i");
-            _httpClient.DefaultRequestHeaders.Add("Sec-Ch-Ua", "\"Not_A Brand\";v=\"9\", \"Chromium\";v=\"139\", \"Google Chrome\";v=\"139\"");
-            _httpClient.DefaultRequestHeaders.Add("Sec-Ch-Ua-Mobile", "?0");
-            _httpClient.DefaultRequestHeaders.Add("Sec-Ch-Ua-Platform", "\"Windows\"");
-            _httpClient.DefaultRequestHeaders.Add("Sec-Fetch-Dest", "document");
-            _httpClient.DefaultRequestHeaders.Add("Sec-Fetch-Mode", "navigate");
-            _httpClient.DefaultRequestHeaders.Add("Sec-Fetch-Site", "none");
-            _httpClient.DefaultRequestHeaders.Add("Sec-Fetch-User", "?1");
-            _httpClient.DefaultRequestHeaders.Add("Upgrade-insecure-requests", "1");
-            _httpClient.DefaultRequestHeaders.Add("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36");
+        private enum BybitRequestProfile
+        {
+            StringContent,
+            FileDownload
         }
 
         #endregion
