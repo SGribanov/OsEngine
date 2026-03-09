@@ -2593,10 +2593,11 @@ namespace OsEngine.OsData
 
         private void CreateStream(MarketDepth md)
         {
-            _fileStream = new FileStream(_filePath, FileMode.Create, FileAccess.Write);
+            _fileStream = OpenQuoteFileStream(FileMode.Create);
             _binaryWriter = new DataBinaryWriter(_fileStream);
 
             CreateHeader(_binaryWriter, md);
+            FlushQuoteStream();
         }
 
         private async void UpdateMarketDataAsync()
@@ -2611,8 +2612,6 @@ namespace OsEngine.OsData
 
                     if (MarketDepthQueue.IsEmpty)
                     {
-                        if (_binaryWriter != null) _binaryWriter.Flush();
-
                         OffStream();
 
                         await Task.Delay(500);
@@ -2632,38 +2631,14 @@ namespace OsEngine.OsData
 
                                 if (marketDepth == null) continue;
 
-                                if (_lastFrameDateTime.Date != marketDepth.Time.Date)
+                                string currentFilePath = BuildCurrentFilePath();
+
+                                if (_filePath != currentFilePath)
                                 {
-                                    _filePath = _pathSecurityFolder + "\\" + SecName.RemoveExcessFromSecurityName() + "." + DateTime.UtcNow.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture) + ".Quotes" + ".qsh";
-
-                                    bool fileExist = File.Exists(_filePath);
-
-                                    if (fileExist == false)
-                                    {
-                                        _lastMarketDepth = null;
-                                        _lastMarketDepthPrice = 0;
-                                        _lastTimeStamp = 0;
-
-                                        OffStream();
-                                        CreateStream(marketDepth);
-                                    }
-                                    else if (_lastMarketDepth == null
-                                        && fileExist == true)
-                                    {
-                                        OffStream();
-                                        ReadBinaryFile();
-                                    }
+                                    _filePath = currentFilePath;
                                 }
 
-                                if (_fileStream == null)
-                                {
-                                    _fileStream = new FileStream(_filePath, FileMode.Append, FileAccess.Write);
-                                }
-
-                                if (_binaryWriter == null)
-                                {
-                                    _binaryWriter = new DataBinaryWriter(_fileStream);
-                                }
+                                EnsureWritableStream(marketDepth);
 
                                 if (_lastMarketDepth == null)
                                 {
@@ -2693,8 +2668,101 @@ namespace OsEngine.OsData
             }
         }
 
+        private string BuildCurrentFilePath()
+        {
+            return _pathSecurityFolder + "\\" + SecName.RemoveExcessFromSecurityName() + "." + DateTime.UtcNow.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture) + ".Quotes" + ".qsh";
+        }
+
+        private void EnsureWritableStream(MarketDepth marketDepth)
+        {
+            bool fileExists = File.Exists(_filePath);
+
+            if (!fileExists)
+            {
+                ResetMarketDepthWriteState();
+                OffStream();
+                CreateStream(marketDepth);
+                return;
+            }
+
+            if (_lastMarketDepth == null)
+            {
+                OffStream();
+
+                if (!ReadBinaryFile())
+                {
+                    SendNewLogMessage("Market depth file is unreadable and will be recreated: " + _filePath, LogMessageType.Error);
+                    ResetMarketDepthWriteState();
+                    CreateStream(marketDepth);
+                    return;
+                }
+            }
+
+            if (_fileStream == null)
+            {
+                _fileStream = OpenQuoteFileStream(FileMode.Append);
+            }
+
+            if (_binaryWriter == null)
+            {
+                _binaryWriter = new DataBinaryWriter(_fileStream);
+            }
+        }
+
+        private FileStream OpenQuoteFileStream(FileMode mode)
+        {
+            return new FileStream(_filePath, mode, FileAccess.Write, FileShare.Read);
+        }
+
+        private void FlushQuoteStream()
+        {
+            try
+            {
+                _binaryWriter?.Flush();
+            }
+            catch (ObjectDisposedException)
+            {
+                return;
+            }
+            catch (Exception ex)
+            {
+                SendNewLogMessage(ex.ToString(), LogMessageType.Error);
+            }
+
+            try
+            {
+                _fileStream?.Flush(flushToDisk: true);
+            }
+            catch (ObjectDisposedException)
+            {
+                // stream is already closed
+            }
+            catch (Exception ex)
+            {
+                SendNewLogMessage(ex.ToString(), LogMessageType.Error);
+
+                try
+                {
+                    _fileStream?.Flush();
+                }
+                catch
+                {
+                    // ignore secondary flush failures after logging the primary error
+                }
+            }
+        }
+
+        private void ResetMarketDepthWriteState()
+        {
+            _lastMarketDepth = null;
+            _lastMarketDepthPrice = 0;
+            _lastTimeStamp = 0;
+        }
+
         private void OffStream()
         {
+            FlushQuoteStream();
+
             if (_binaryWriter != null)
             {
                 _binaryWriter.Dispose();
