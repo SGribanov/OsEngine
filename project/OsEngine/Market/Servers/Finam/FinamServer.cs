@@ -33,6 +33,9 @@ namespace OsEngine.Market.Servers.Finam
 
     public class FinamServerRealization : IServerRealization
     {
+        private const string FinamProbeUrl = "https://www.finam.ru/profile/moex-akcii/sberbank/export/old/";
+        private const string BrowserUserAgent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36";
+
         #region 1 Constructor, Status, Connection
 
         public FinamServerRealization()
@@ -48,6 +51,11 @@ namespace OsEngine.Market.Servers.Finam
         public void Connect(WebProxy proxy)
         {
             HttpResponseMessage response = CheckFinamServer();
+
+            if (response == null)
+            {
+                return;
+            }
 
             if (response.StatusCode == HttpStatusCode.OK)
             {
@@ -83,13 +91,10 @@ namespace OsEngine.Market.Servers.Finam
 
         private HttpResponseMessage CheckFinamServer()
         {
-            string url = "https://www.finam.ru/profile/moex-akcii/sberbank/export/old/";
-
-            HttpClient.DefaultRequestHeaders.Add("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36");
-
             try
             {
-                HttpResponseMessage response = HttpClient.GetAsync(url).Result;
+                using HttpRequestMessage request = CreateFinamProbeRequestMessage();
+                HttpResponseMessage response = HttpClient.SendAsync(request, HttpCompletionOption.ResponseHeadersRead).GetAwaiter().GetResult();
 
                 return response;
 
@@ -99,6 +104,13 @@ namespace OsEngine.Market.Servers.Finam
                 SendLogMessage($"Connect server error: {ex.Message}", LogMessageType.Error);
                 return null;
             }
+        }
+
+        private static HttpRequestMessage CreateFinamProbeRequestMessage()
+        {
+            HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, FinamProbeUrl);
+            request.Headers.TryAddWithoutValidation("User-Agent", BrowserUserAgent);
+            return request;
         }
 
         public ServerType ServerType
