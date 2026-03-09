@@ -13,6 +13,7 @@ using OsEngine.Entity.WebSocketOsEngine;
 using OsEngine.Market.Servers.FinamGrpc;
 using OsEngine.Market.Servers.Entity;
 using OsEngine.Market.Servers.OKX.Entity;
+using OsEngine.OsData;
 using Xunit;
 
 namespace OsEngine.Tests;
@@ -208,6 +209,24 @@ public class SecurityRefactorTests
         Assert.Equal(TimeSpan.FromMinutes(5), handler.PooledConnectionIdleTimeout);
         Assert.Equal(TimeSpan.FromHours(1), handler.PooledConnectionLifetime);
         Assert.True(handler.EnableMultipleHttp2Connections);
+    }
+
+    [Fact]
+    public void LqdtFrsRequest_ShouldApplyUserAgentPerRequest()
+    {
+        MethodInfo method = typeof(LqdtDataFakeServer).GetMethod(
+            "CreateFrsRequestMessage",
+            BindingFlags.Static | BindingFlags.NonPublic)
+            ?? throw new InvalidOperationException("CreateFrsRequestMessage method not found.");
+
+        using HttpRequestMessage request = (HttpRequestMessage)(method.Invoke(null, null)
+            ?? throw new InvalidOperationException("CreateFrsRequestMessage returned null."));
+
+        Assert.Equal(HttpMethod.Get, request.Method);
+        Assert.Equal("https://sbcharts.investing.com/events_charts/eu/168.json", request.RequestUri?.ToString());
+        Assert.Contains(
+            request.Headers.UserAgent.Select(value => value.ToString()),
+            value => value.Contains("Mozilla/5.0", StringComparison.Ordinal));
     }
 
     [Fact]

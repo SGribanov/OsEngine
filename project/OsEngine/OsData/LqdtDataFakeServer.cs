@@ -93,12 +93,8 @@ namespace OsEngine.OsData
             try
             {
                 using HttpClient httpClient = new HttpClient();
-
-                string url = "https://sbcharts.investing.com/events_charts/eu/168.json";
-
-                httpClient.DefaultRequestHeaders.Add("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36");
-
-                var response = httpClient.GetAsync(url).GetAwaiter().GetResult();
+                using HttpRequestMessage request = CreateFrsRequestMessage();
+                using HttpResponseMessage response = httpClient.SendAsync(request).GetAwaiter().GetResult();
 
                 var cont = response.Content.ReadAsStringAsync().Result;
 
@@ -159,6 +155,13 @@ namespace OsEngine.OsData
                 SendNewLogMessage($"Ошибка загрузки ставок ФРС\n{ex.Message}", LogMessageType.Error);
                 return null;
             }
+        }
+
+        private static HttpRequestMessage CreateFrsRequestMessage()
+        {
+            HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, "https://sbcharts.investing.com/events_charts/eu/168.json");
+            request.Headers.TryAddWithoutValidation("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36");
+            return request;
         }
 
         /// <summary>
