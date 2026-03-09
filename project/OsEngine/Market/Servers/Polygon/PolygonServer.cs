@@ -108,7 +108,7 @@ namespace OsEngine.Market.Servers.Polygon
             {               
                 _rateGateFreePlan.WaitToProceed();                
 
-                HttpResponseMessage responseMessage = _httpClient.GetAsync(_baseUrl + $"/v2/snapshot/locale/us/markets/stocks/tickers/AAPL?apiKey={_apiKey}").Result;
+                HttpResponseMessage responseMessage = _httpClient.GetAsync(CreateRequestUri("/v2/snapshot/locale/us/markets/stocks/tickers/AAPL")).Result;
                 string json = responseMessage.Content.ReadAsStringAsync().Result;
 
                 RestResponceMessage<ResponceTrades> response = JsonConvert.DeserializeObject<RestResponceMessage<ResponceTrades>>(json);
@@ -122,7 +122,7 @@ namespace OsEngine.Market.Servers.Polygon
                         _rateGateFreePlan.WaitToProceed();
                     }
 
-                    responseMessage = _httpClient.GetAsync(_baseUrl + $"/v3/reference/tickers?active=true&limit=10&apiKey={_apiKey}").Result;
+                    responseMessage = _httpClient.GetAsync(CreateRequestUri("/v3/reference/tickers?active=true&limit=10")).Result;
                     json = responseMessage.Content.ReadAsStringAsync().Result;
 
                     RestResponceMessage<Tickers> responsTickers = JsonConvert.DeserializeObject<RestResponceMessage<Tickers>>(json);
@@ -195,6 +195,86 @@ namespace OsEngine.Market.Servers.Polygon
 
         private string _tickersMarket;
 
+        private Uri CreateRequestUri(string requestPathOrUrl)
+        {
+            return CreateRequestUri(_baseUrl, requestPathOrUrl, _apiKey);
+        }
+
+        internal static Uri CreateRequestUri(string baseUrl, string requestPathOrUrl, string apiKey)
+        {
+            if (string.IsNullOrWhiteSpace(baseUrl))
+            {
+                throw new ArgumentException("Base URL is required.", nameof(baseUrl));
+            }
+
+            if (string.IsNullOrWhiteSpace(requestPathOrUrl))
+            {
+                throw new ArgumentException("Request path is required.", nameof(requestPathOrUrl));
+            }
+
+            Uri requestUri;
+
+            if (Uri.TryCreate(requestPathOrUrl, UriKind.Absolute, out Uri absoluteRequestUri))
+            {
+                requestUri = absoluteRequestUri;
+            }
+            else
+            {
+                requestUri = new Uri(new Uri(baseUrl, UriKind.Absolute), requestPathOrUrl);
+            }
+
+            return AppendQueryParameterIfMissing(requestUri, "apiKey", apiKey);
+        }
+
+        private static Uri AppendQueryParameterIfMissing(Uri requestUri, string parameterName, string parameterValue)
+        {
+            if (requestUri == null)
+            {
+                throw new ArgumentNullException(nameof(requestUri));
+            }
+
+            if (string.IsNullOrWhiteSpace(parameterName) ||
+                string.IsNullOrWhiteSpace(parameterValue))
+            {
+                return requestUri;
+            }
+
+            string query = requestUri.Query;
+
+            if (!string.IsNullOrEmpty(query))
+            {
+                string[] parameters = query.TrimStart('?').Split('&', StringSplitOptions.RemoveEmptyEntries);
+
+                for (int i = 0; i < parameters.Length; i++)
+                {
+                    string parameter = parameters[i];
+                    int separatorIndex = parameter.IndexOf('=');
+                    string currentName = separatorIndex >= 0
+                        ? parameter.Substring(0, separatorIndex)
+                        : parameter;
+
+                    if (string.Equals(currentName, parameterName, StringComparison.OrdinalIgnoreCase))
+                    {
+                        return requestUri;
+                    }
+                }
+            }
+
+            UriBuilder builder = new UriBuilder(requestUri);
+            string encodedParameter = parameterName + "=" + Uri.EscapeDataString(parameterValue);
+
+            if (string.IsNullOrEmpty(builder.Query))
+            {
+                builder.Query = encodedParameter;
+            }
+            else
+            {
+                builder.Query = builder.Query.TrimStart('?') + "&" + encodedParameter;
+            }
+
+            return builder.Uri;
+        }
+
         #endregion
 
         #region 3 Securities
@@ -213,7 +293,7 @@ namespace OsEngine.Market.Servers.Polygon
                     _rateGateFreePlan.WaitToProceed();
                 }
 
-                HttpResponseMessage responseMessage = _httpClient.GetAsync(_baseUrl + $"/v3/reference/tickers/types?&apiKey={_apiKey}").Result;
+                HttpResponseMessage responseMessage = _httpClient.GetAsync(CreateRequestUri("/v3/reference/tickers/types?")).Result;
                 string json = responseMessage.Content.ReadAsStringAsync().Result;
 
                 RestResponceMessage<TickerType> responseTickerType = JsonConvert.DeserializeObject<RestResponceMessage<TickerType>>(json);
@@ -223,7 +303,7 @@ namespace OsEngine.Market.Servers.Polygon
                     _rateGateFreePlan.WaitToProceed();
                 }
 
-                responseMessage = _httpClient.GetAsync(_baseUrl + $"/v3/reference/exchanges?&apiKey={_apiKey}").Result;
+                responseMessage = _httpClient.GetAsync(CreateRequestUri("/v3/reference/exchanges?")).Result;
                 json = responseMessage.Content.ReadAsStringAsync().Result;
 
                 RestResponceMessage<TickerExchange> responseTickerExchange = JsonConvert.DeserializeObject<RestResponceMessage<TickerExchange>>(json);
@@ -319,7 +399,7 @@ namespace OsEngine.Market.Servers.Polygon
                     _rateGateFreePlan.WaitToProceed();
                 }
 
-                HttpResponseMessage responseMessage = _httpClient.GetAsync(_baseUrl + $"/v3/reference/tickers?active=true&limit=1000&apiKey={_apiKey}" + _tickersMarket).Result;
+                HttpResponseMessage responseMessage = _httpClient.GetAsync(CreateRequestUri($"/v3/reference/tickers?active=true&limit=1000{_tickersMarket}")).Result;
                 string json = responseMessage.Content.ReadAsStringAsync().Result;
 
                 RestResponceMessage<Tickers> response = JsonConvert.DeserializeObject<RestResponceMessage<Tickers>>(json);
@@ -335,7 +415,7 @@ namespace OsEngine.Market.Servers.Polygon
                             _rateGateFreePlan.WaitToProceed();
                         }
 
-                        HttpResponseMessage responseMessageNextUrl = _httpClient.GetAsync($"{response.next_url}&apiKey={_apiKey}").Result;
+                        HttpResponseMessage responseMessageNextUrl = _httpClient.GetAsync(CreateRequestUri(response.next_url)).Result;
                         string jsonNextUrl = responseMessageNextUrl.Content.ReadAsStringAsync().Result;
 
                         response = JsonConvert.DeserializeObject<RestResponceMessage<Tickers>>(jsonNextUrl);
@@ -476,7 +556,7 @@ namespace OsEngine.Market.Servers.Polygon
 
             string strUrl = $"/v3/trades/{security.Name}?order=asc&sort=timestamp&limit=50000&timestamp.gte={timeStampFrom}&timestamp.lte={timeStampTo}&apiKey={_apiKey}";
 
-            HttpResponseMessage responseMessage = _httpClient.GetAsync(_baseUrl + strUrl).Result;
+            HttpResponseMessage responseMessage = _httpClient.GetAsync(CreateRequestUri(strUrl)).Result;
             string json = responseMessage.Content.ReadAsStringAsync().Result;
 
             RestResponceMessage<ResponceTrades> response = JsonConvert.DeserializeObject<RestResponceMessage<ResponceTrades>>(json);
@@ -492,7 +572,7 @@ namespace OsEngine.Market.Servers.Polygon
 
             while (response.next_url != null)
             {
-                HttpResponseMessage responseMessageNextUrl = _httpClient.GetAsync($"{response.next_url}&apiKey={_apiKey}").Result;
+                HttpResponseMessage responseMessageNextUrl = _httpClient.GetAsync(CreateRequestUri(response.next_url)).Result;
                 string jsonNextUrl = responseMessageNextUrl.Content.ReadAsStringAsync().Result;
 
                 response = JsonConvert.DeserializeObject<RestResponceMessage<ResponceTrades>>(jsonNextUrl);
@@ -583,7 +663,7 @@ namespace OsEngine.Market.Servers.Polygon
 
                 string strUrl = $"/v2/aggs/ticker/{security.Name}/range/{interval}/{fromData}/{toData}?adjusted={_adjusted}&sort=asc&limit=50000&apiKey={_apiKey}";
 
-                HttpResponseMessage responseMessage = _httpClient.GetAsync(_baseUrl + strUrl).Result;
+                HttpResponseMessage responseMessage = _httpClient.GetAsync(CreateRequestUri(strUrl)).Result;
                 string json = responseMessage.Content.ReadAsStringAsync().Result;
 
                 RestResponceMessage<ResponceCandles> response = JsonConvert.DeserializeObject<RestResponceMessage<ResponceCandles>>(json);
@@ -610,7 +690,7 @@ namespace OsEngine.Market.Servers.Polygon
                         _rateGateFreePlan.WaitToProceed();
                     }
 
-                    HttpResponseMessage responseMessageNextUrl = _httpClient.GetAsync($"{response.next_url}&apiKey={_apiKey}").Result;
+                    HttpResponseMessage responseMessageNextUrl = _httpClient.GetAsync(CreateRequestUri(response.next_url)).Result;
                     string jsonNextUrl = responseMessageNextUrl.Content.ReadAsStringAsync().Result;
 
                     response = JsonConvert.DeserializeObject<RestResponceMessage<ResponceCandles>>(jsonNextUrl);
