@@ -2,6 +2,8 @@
 
 using OsEngine.Entity;
 using OsEngine.OsTrader.Panels;
+using OsEngine.OsOptimizer.OptEntity;
+using System.Reflection;
 using Xunit;
 
 namespace OsEngine.Tests;
@@ -62,6 +64,29 @@ public class BotPanelOptimizerMethodHashTests
         Assert.Equal(BotPanelOptimizerMethodHashAccessor.BuildParams(4096), fallbackBoundaryFirst);
         Assert.Same(fastBoundaryFirst, fastBoundarySecond);
         Assert.Same(fallbackBoundaryFirst, fallbackBoundarySecond);
+    }
+
+    [Fact]
+    public void OptimizerMethodKeyParametersHashHasher_SameContentDifferentInstance_ShouldRetargetThreadStaticSource()
+    {
+        const BindingFlags flags = BindingFlags.NonPublic | BindingFlags.Static;
+        Type botPanelType = typeof(BotPanel);
+        MethodInfo method = botPanelType.GetMethod("GetOptimizerMethodKeyParametersHashHashed", flags)!;
+        FieldInfo sourceField = botPanelType.GetField("_optimizerMethodKeyParametersHashSource", flags)!;
+        FieldInfo hashedField = botPanelType.GetField("_optimizerMethodKeyParametersHashHashed", flags)!;
+
+        sourceField.SetValue(null, null);
+        hashedField.SetValue(null, default(OrdinalHashedString));
+
+        string first = new string("A1B2C3D4".ToCharArray());
+        string second = new string("A1B2C3D4".ToCharArray());
+
+        OrdinalHashedString firstHashed = (OrdinalHashedString)method.Invoke(null, [first])!;
+        OrdinalHashedString secondHashed = (OrdinalHashedString)method.Invoke(null, [second])!;
+
+        Assert.NotSame(first, second);
+        Assert.Equal(firstHashed, secondHashed);
+        Assert.Same(second, sourceField.GetValue(null));
     }
 
     private sealed class BotPanelOptimizerMethodHashAccessor : BotPanel

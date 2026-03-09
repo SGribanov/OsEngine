@@ -392,38 +392,52 @@ namespace OsEngine.OsTrader.Panels
 
         private static OrdinalHashedString GetOptimizerMethodKeySecurityNameHashed(string value)
         {
-            if (ReferenceEquals(_optimizerMethodKeySecurityNameHashSource, value))
-            {
-                return _optimizerMethodKeySecurityNameHashed;
-            }
-
-            _optimizerMethodKeySecurityNameHashSource = value;
-            _optimizerMethodKeySecurityNameHashed = new OrdinalHashedString(value);
-            return _optimizerMethodKeySecurityNameHashed;
+            return GetOptimizerMethodKeyHashed(
+                value,
+                ref _optimizerMethodKeySecurityNameHashSource,
+                ref _optimizerMethodKeySecurityNameHashed);
         }
 
         private static OrdinalHashedString GetOptimizerMethodKeyCalculationNameHashed(string value)
         {
-            if (ReferenceEquals(_optimizerMethodKeyCalculationNameHashSource, value))
-            {
-                return _optimizerMethodKeyCalculationNameHashed;
-            }
-
-            _optimizerMethodKeyCalculationNameHashSource = value;
-            _optimizerMethodKeyCalculationNameHashed = new OrdinalHashedString(value);
-            return _optimizerMethodKeyCalculationNameHashed;
+            return GetOptimizerMethodKeyHashed(
+                value,
+                ref _optimizerMethodKeyCalculationNameHashSource,
+                ref _optimizerMethodKeyCalculationNameHashed);
         }
 
         private static OrdinalHashedString GetOptimizerMethodKeyParametersHashHashed(string value)
         {
-            if (ReferenceEquals(_optimizerMethodKeyParametersHashSource, value))
+            return GetOptimizerMethodKeyHashed(
+                value,
+                ref _optimizerMethodKeyParametersHashSource,
+                ref _optimizerMethodKeyParametersHashHashed);
+        }
+
+        private static OrdinalHashedString GetOptimizerMethodKeyHashed(
+            string value,
+            ref string cachedSource,
+            ref OrdinalHashedString cachedHashed)
+        {
+            if (string.IsNullOrEmpty(value))
             {
-                return _optimizerMethodKeyParametersHashHashed;
+                return OrdinalHashedString.Empty;
             }
 
-            _optimizerMethodKeyParametersHashSource = value;
-            _optimizerMethodKeyParametersHashHashed = new OrdinalHashedString(value);
-            return _optimizerMethodKeyParametersHashHashed;
+            if (ReferenceEquals(cachedSource, value))
+            {
+                return cachedHashed;
+            }
+
+            if (cachedSource != null && StringComparer.Ordinal.Equals(cachedSource, value))
+            {
+                cachedSource = value;
+                return cachedHashed;
+            }
+
+            cachedSource = value;
+            cachedHashed = new OrdinalHashedString(value);
+            return cachedHashed;
         }
 
         /// <summary>
