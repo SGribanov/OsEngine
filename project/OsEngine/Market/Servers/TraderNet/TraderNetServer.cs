@@ -2175,17 +2175,22 @@ namespace OsEngine.Market.Servers.TraderNet
                 string url = $"{_baseUrl}{path}";
                 string strFromDict = StrFromDict(reqData);
                 string signature = GenerateSignature(_secretKey, strFromDict);
-
-                _httpClient.DefaultRequestHeaders.Clear();
-                _httpClient.DefaultRequestHeaders.Add("X-NtApi-Sig", signature);
-
-                return _httpClient.PostAsync(url, new StringContent(str, Encoding.UTF8, "application/x-www-form-urlencoded")).Result;
+                using HttpRequestMessage request = CreateAuthRequestMessage(url, method, str, signature);
+                return _httpClient.SendAsync(request).GetAwaiter().GetResult();
             }
             catch (Exception ex)
             {
                 Console.WriteLine(ex.Message);
                 return null;
             }
+        }
+
+        private static HttpRequestMessage CreateAuthRequestMessage(string url, string method, string payload, string signature)
+        {
+            HttpRequestMessage request = new HttpRequestMessage(new HttpMethod(method), url);
+            request.Headers.TryAddWithoutValidation("X-NtApi-Sig", signature);
+            request.Content = new StringContent(payload, Encoding.UTF8, "application/x-www-form-urlencoded");
+            return request;
         }
 
         private string QueryData(Dictionary<string, object> reqData)
@@ -2294,23 +2299,26 @@ namespace OsEngine.Market.Servers.TraderNet
                 }
 
                 string url = $"{_baseUrl}{path}";
-
-                _httpClient.DefaultRequestHeaders.Clear();
-
-                if (method.Equals("POST"))
-                {
-                    return _httpClient.PostAsync(url, new StringContent(json, Encoding.UTF8, contentType)).Result;
-                }
-                else
-                {
-                    return _httpClient.GetAsync(url).Result;
-                }
+                using HttpRequestMessage request = CreateRequestMessage(url, method, json, contentType);
+                return _httpClient.SendAsync(request).GetAwaiter().GetResult();
             }
             catch (Exception ex)
             {
                 Console.WriteLine(ex.ToString());
                 return null;
             }
+        }
+
+        private static HttpRequestMessage CreateRequestMessage(string url, string method, string payload, string contentType)
+        {
+            HttpRequestMessage request = new HttpRequestMessage(new HttpMethod(method), url);
+
+            if (method.Equals("POST"))
+            {
+                request.Content = new StringContent(payload, Encoding.UTF8, contentType);
+            }
+
+            return request;
         }
 
         public string GenerateSignature(string key, string message, string algorithmName = "sha256")
