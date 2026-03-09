@@ -673,10 +673,8 @@ namespace OsEngine.Market.Servers.OKXData
                     response.EnsureSuccessStatusCode();
 
                     using (Stream contentStream = response.Content.ReadAsStreamAsync().GetAwaiter().GetResult())
-
-                    using (FileStream fileStream = new FileStream(tempZipPath, FileMode.Create, FileAccess.Write, FileShare.None))
                     {
-                        contentStream.CopyTo(fileStream);
+                        PersistArchiveContentToTempFile(contentStream, tempZipPath);
                     }
                 }
 
@@ -686,6 +684,51 @@ namespace OsEngine.Market.Servers.OKXData
             {
                 SendLogMessage("Сouldn't upload zip archive.\n" + ex.Message, LogMessageType.System);
                 return null;
+            }
+        }
+
+        private static void PersistArchiveContentToTempFile(Stream contentStream, string tempZipPath)
+        {
+            if (contentStream == null)
+            {
+                throw new ArgumentNullException(nameof(contentStream));
+            }
+
+            if (string.IsNullOrWhiteSpace(tempZipPath))
+            {
+                throw new ArgumentException("Temp zip path cannot be null or empty.", nameof(tempZipPath));
+            }
+
+            string fullPath = Path.GetFullPath(tempZipPath);
+            string? directory = Path.GetDirectoryName(fullPath);
+
+            if (string.IsNullOrWhiteSpace(directory))
+            {
+                throw new InvalidOperationException("Unable to resolve temp archive directory.");
+            }
+
+            Directory.CreateDirectory(directory);
+
+            string stagingPath = fullPath + ".download";
+
+            try
+            {
+                using (FileStream fileStream = new FileStream(stagingPath, FileMode.Create, FileAccess.Write, FileShare.None))
+                {
+                    contentStream.CopyTo(fileStream);
+                    fileStream.Flush(flushToDisk: true);
+                }
+
+                File.Move(stagingPath, fullPath, overwrite: true);
+            }
+            catch
+            {
+                if (File.Exists(stagingPath))
+                {
+                    File.Delete(stagingPath);
+                }
+
+                throw;
             }
         }
 
