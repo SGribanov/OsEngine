@@ -7489,6 +7489,32 @@ public class TradeGridPersistenceCoreTests
     }
 
     [Fact]
+    public void Stage2Step2_2_TradeGrid_LoadFromString_WithMalformedTailSections_ShouldPreservePrimeAndSkipEmptyChildren()
+    {
+        TradeGrid grid = CreateBareGrid();
+        grid.NonTradePeriods.NonTradePeriod1Regime = TradeGridRegime.CloseOnly;
+        grid.AutoStarter.AutoStartPrice = 91m;
+        grid.ErrorsReaction.FailOpenOrdersCountToReaction = 7;
+        grid.TrailingUp.TrailingUpStep = 2.5m;
+
+        string payload =
+            "42@MarketMaking@CloseOnly@OncePerSecond@True@11@3@2@123.45@4@" +
+            new DateTime(2024, 1, 2, 3, 4, 5, DateTimeKind.Utc).ToString("O", CultureInfo.InvariantCulture) +
+            "@700@False@1.5@False@@@" +
+            "% %%%%bad-stop%%%";
+
+        Exception? error = Record.Exception(() => grid.LoadFromString(payload));
+
+        Assert.Null(error);
+        Assert.Equal(42, grid.Number);
+        Assert.Equal(TradeGridRegime.CloseOnly, grid.Regime);
+        Assert.Equal(TradeGridRegime.CloseOnly, grid.NonTradePeriods.NonTradePeriod1Regime);
+        Assert.Equal(91m, grid.AutoStarter.AutoStartPrice);
+        Assert.Equal(7, grid.ErrorsReaction.FailOpenOrdersCountToReaction);
+        Assert.Equal(2.5m, grid.TrailingUp.TrailingUpStep);
+    }
+
+    [Fact]
     public void Stage2Step2_2_TradeGrid_GetSaveString_LoadFromString_ShouldRoundTrip()
     {
         TradeGrid source = CreateBareGrid();

@@ -419,9 +419,12 @@ namespace OsEngine.OsTrader.Grids
 
                 if (hasPayload)
                 {
+                    Span<PayloadSegmentBounds> payloadSegments = stackalloc PayloadSegmentBounds[9];
+                    int payloadSegmentsCount = CollectPayloadSegments(value, payloadSegments);
+
                     // non trade periods
                     if (NonTradePeriods != null
-                        && TryGetPayloadSegment(value, 1, out string nonTradeSegment))
+                        && TryGetPayloadSegment(value, payloadSegments[..payloadSegmentsCount], 1, out string nonTradeSegment))
                     {
                         NonTradePeriods.LoadFromString(nonTradeSegment);
                     }
@@ -431,42 +434,42 @@ namespace OsEngine.OsTrader.Grids
 
                     // stop grid by event
                     if (StopBy != null
-                        && TryGetPayloadSegment(value, 3, out string stopBySegment))
+                        && TryGetPayloadSegment(value, payloadSegments[..payloadSegmentsCount], 3, out string stopBySegment))
                     {
                         StopBy.LoadFromString(stopBySegment);
                     }
 
                     // grid lines creation and storage
                     if (GridCreator != null
-                        && TryGetPayloadSegment(value, 4, out string gridCreatorSegment))
+                        && TryGetPayloadSegment(value, payloadSegments[..payloadSegmentsCount], 4, out string gridCreatorSegment))
                     {
                         GridCreator.LoadFromString(gridCreatorSegment);
                     }
 
                     // stop and profit 
                     if (StopAndProfit != null
-                        && TryGetPayloadSegment(value, 5, out string stopAndProfitSegment))
+                        && TryGetPayloadSegment(value, payloadSegments[..payloadSegmentsCount], 5, out string stopAndProfitSegment))
                     {
                         StopAndProfit.LoadFromString(stopAndProfitSegment);
                     }
 
                     // auto start
                     if (AutoStarter != null
-                        && TryGetPayloadSegment(value, 6, out string autoStarterSegment))
+                        && TryGetPayloadSegment(value, payloadSegments[..payloadSegmentsCount], 6, out string autoStarterSegment))
                     {
                         AutoStarter.LoadFromString(autoStarterSegment);
                     }
 
                     // errors reaction
                     if (ErrorsReaction != null
-                        && TryGetPayloadSegment(value, 7, out string errorsReactionSegment))
+                        && TryGetPayloadSegment(value, payloadSegments[..payloadSegmentsCount], 7, out string errorsReactionSegment))
                     {
                         ErrorsReaction.LoadFromString(errorsReactionSegment);
                     }
 
                     // trailing up / down
                     if (TrailingUp != null
-                        && TryGetPayloadSegment(value, 8, out string trailingUpSegment))
+                        && TryGetPayloadSegment(value, payloadSegments[..payloadSegmentsCount], 8, out string trailingUpSegment))
                     {
                         TrailingUp.LoadFromString(trailingUpSegment);
                     }
@@ -635,6 +638,63 @@ namespace OsEngine.OsTrader.Grids
         private static bool TryParseIntInvariant(ReadOnlySpan<char> value, out int parsed)
         {
             return int.TryParse(value, NumberStyles.Integer, CultureInfo.InvariantCulture, out parsed);
+        }
+
+        private readonly record struct PayloadSegmentBounds(int Start, int Length);
+
+        private static int CollectPayloadSegments(string payload, Span<PayloadSegmentBounds> segments)
+        {
+            if (string.IsNullOrEmpty(payload) || segments.IsEmpty)
+            {
+                return 0;
+            }
+
+            int count = 0;
+            int segmentStart = 0;
+
+            while (count < segments.Length && segmentStart <= payload.Length)
+            {
+                int separatorIndex = payload.IndexOf('%', segmentStart);
+                int segmentEnd = separatorIndex >= 0 ? separatorIndex : payload.Length;
+                segments[count] = new PayloadSegmentBounds(segmentStart, segmentEnd - segmentStart);
+                count++;
+
+                if (separatorIndex < 0)
+                {
+                    break;
+                }
+
+                segmentStart = separatorIndex + 1;
+            }
+
+            return count;
+        }
+
+        private static bool TryGetPayloadSegment(string payload, ReadOnlySpan<PayloadSegmentBounds> segments, int index, out string segment)
+        {
+            segment = string.Empty;
+
+            if (string.IsNullOrEmpty(payload)
+                || index < 0
+                || index >= segments.Length)
+            {
+                return false;
+            }
+
+            PayloadSegmentBounds bounds = segments[index];
+            if (bounds.Length < 0 || bounds.Start < 0 || bounds.Start + bounds.Length > payload.Length)
+            {
+                return false;
+            }
+
+            ReadOnlySpan<char> candidate = payload.AsSpan(bounds.Start, bounds.Length).Trim();
+            if (candidate.IsEmpty)
+            {
+                return false;
+            }
+
+            segment = candidate.ToString();
+            return true;
         }
 
         private static bool TryGetPayloadSegment(string payload, int index, out string segment)
