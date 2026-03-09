@@ -147,7 +147,7 @@ namespace OsEngine.Market.Servers.MoexAlgopack
                 try
                 {
                     string json;
-                    HttpResponseMessage responseMessage = _httpPublicClient.GetAsync(BaseUrl + "/engines/stock/markets/shares/boards/tqbr/securities.json?iss.meta=off&iss.only=securities").Result;
+                    HttpResponseMessage responseMessage = _httpPublicClient.GetAsync(CreatePublicRequestUri("/engines/stock/markets/shares/boards/tqbr/securities.json?iss.meta=off&iss.only=securities")).Result;
                     
                     if (responseMessage.StatusCode == HttpStatusCode.OK)
                     {
@@ -170,7 +170,7 @@ namespace OsEngine.Market.Servers.MoexAlgopack
                         SendLogMessage($"Error getting securities : json is null.", LogMessageType.Error);
                     }
 
-                    responseMessage = _httpPublicClient.GetAsync(BaseUrl + "/engines/futures/markets/forts/securities.json?iss.meta=off&iss.only=securities").Result;
+                    responseMessage = _httpPublicClient.GetAsync(CreatePublicRequestUri("/engines/futures/markets/forts/securities.json?iss.meta=off&iss.only=securities")).Result;
                     if (responseMessage.StatusCode == HttpStatusCode.OK)
                     {
                         json = responseMessage.Content.ReadAsStringAsync().Result;
@@ -663,7 +663,7 @@ namespace OsEngine.Market.Servers.MoexAlgopack
                     board = "tqbr";
                 }
                 
-                string str = "http://iss.moex.com/iss/engines/";
+                string str = "/engines/";
                 str += engine;
                 str += "/markets/";
                 str += market;
@@ -799,6 +799,35 @@ namespace OsEngine.Market.Servers.MoexAlgopack
 
             private List<Security> _subscribedSecurities = new List<Security>();
 
+            private Uri CreatePublicRequestUri(string requestPathOrUrl)
+            {
+                return CreatePublicRequestUri(BaseUrl, requestPathOrUrl);
+            }
+
+            internal static Uri CreatePublicRequestUri(string baseUrl, string requestPathOrUrl)
+            {
+                if (string.IsNullOrWhiteSpace(baseUrl))
+                {
+                    throw new ArgumentException("Base URL is required.", nameof(baseUrl));
+                }
+
+                if (string.IsNullOrWhiteSpace(requestPathOrUrl))
+                {
+                    throw new ArgumentException("Request path is required.", nameof(requestPathOrUrl));
+                }
+
+                if (Uri.TryCreate(requestPathOrUrl, UriKind.Absolute, out Uri absoluteRequestUri))
+                {
+                    return absoluteRequestUri;
+                }
+
+                Uri baseUri = new Uri(baseUrl, UriKind.Absolute);
+                string normalizedBaseUrl = baseUri.AbsoluteUri.TrimEnd('/') + "/";
+                string normalizedRequestPath = requestPathOrUrl.TrimStart('/');
+
+                return new Uri(new Uri(normalizedBaseUrl, UriKind.Absolute), normalizedRequestPath);
+            }
+
             private void CreateSubscribedSecurityMessage(Security security)
             {
                 try
@@ -826,7 +855,7 @@ namespace OsEngine.Market.Servers.MoexAlgopack
 
                 try
                 {
-                    HttpResponseMessage responseMessage = _httpPublicClient.GetAsync(str).Result;
+                    HttpResponseMessage responseMessage = _httpPublicClient.GetAsync(CreatePublicRequestUri(str)).Result;
                     string content = responseMessage.Content.ReadAsStringAsync().Result;
 
                     if (responseMessage.StatusCode == HttpStatusCode.OK)
@@ -896,7 +925,7 @@ namespace OsEngine.Market.Servers.MoexAlgopack
 
                 try
                 {
-                    HttpResponseMessage responseMessage = _httpPublicClient.GetAsync(BaseUrl + uriDepth).Result;
+                    HttpResponseMessage responseMessage = _httpPublicClient.GetAsync(CreatePublicRequestUri(uriDepth)).Result;
                     string content = responseMessage.Content.ReadAsStringAsync().Result;
                     
                     if (content.Contains("<!DOCTYPE html>"))
@@ -984,7 +1013,7 @@ namespace OsEngine.Market.Servers.MoexAlgopack
                     uriCandles = $"/engines/{engine}/markets/{market}/boards/{board}/securities/{sec.NameId}/trades.json?iss.only=trades&iss.meta=off&reversed=1&limit=1";
                     try
                     {
-                        HttpResponseMessage responseMessageStart = _httpPublicClient.GetAsync(BaseUrl + uriCandles).Result;
+                        HttpResponseMessage responseMessageStart = _httpPublicClient.GetAsync(CreatePublicRequestUri(uriCandles)).Result;
                         string contentStart = responseMessageStart.Content.ReadAsStringAsync().Result;
 
                         if (responseMessageStart.StatusCode == HttpStatusCode.OK)
@@ -1013,7 +1042,7 @@ namespace OsEngine.Market.Servers.MoexAlgopack
 
                 try
                 {
-                    HttpResponseMessage responseMessage = _httpPublicClient.GetAsync(BaseUrl + uriCandles).Result;
+                    HttpResponseMessage responseMessage = _httpPublicClient.GetAsync(CreatePublicRequestUri(uriCandles)).Result;
                     string content = responseMessage.Content.ReadAsStringAsync().Result;
 
                     if (responseMessage.StatusCode == HttpStatusCode.OK)
