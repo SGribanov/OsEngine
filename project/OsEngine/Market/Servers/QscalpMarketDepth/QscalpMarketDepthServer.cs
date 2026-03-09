@@ -538,10 +538,7 @@ namespace OsEngine.Market.Servers.QscalpMarketDepth
 
                 if (response.StatusCode == HttpStatusCode.OK && response.RawBytes != null && response.RawBytes.Length > 0)
                 {
-                    using (FileStream fileStream = new FileStream(tempFilePath, FileMode.Create, FileAccess.Write, FileShare.None))
-                    {
-                        fileStream.Write(response.RawBytes, 0, response.RawBytes.Length);
-                    }
+                    WriteTempQshBytes(tempFilePath, response.RawBytes);
                 }
                 else
                 {
@@ -555,6 +552,56 @@ namespace OsEngine.Market.Servers.QscalpMarketDepth
             {
                 SendLogMessage("Сouldn't upload qsh file.\n" + ex, LogMessageType.Error);
                 return null;
+            }
+        }
+
+        private static void WriteTempQshBytes(string path, byte[] bytes)
+        {
+            if (string.IsNullOrWhiteSpace(path))
+            {
+                throw new ArgumentException("Path cannot be null or empty.", nameof(path));
+            }
+
+            if (bytes == null)
+            {
+                throw new ArgumentNullException(nameof(bytes));
+            }
+
+            string fullPath = Path.GetFullPath(path);
+            string? directory = Path.GetDirectoryName(fullPath);
+
+            if (string.IsNullOrWhiteSpace(directory))
+            {
+                throw new InvalidOperationException("Path must include a directory.");
+            }
+
+            Directory.CreateDirectory(directory);
+
+            string tempPath = fullPath + ".tmp";
+
+            try
+            {
+                using (FileStream fileStream = new FileStream(tempPath, FileMode.Create, FileAccess.Write, FileShare.None))
+                {
+                    fileStream.Write(bytes, 0, bytes.Length);
+                    fileStream.Flush(flushToDisk: true);
+                }
+
+                if (File.Exists(fullPath))
+                {
+                    File.Replace(tempPath, fullPath, null, true);
+                }
+                else
+                {
+                    File.Move(tempPath, fullPath);
+                }
+            }
+            finally
+            {
+                if (File.Exists(tempPath))
+                {
+                    File.Delete(tempPath);
+                }
             }
         }
 
