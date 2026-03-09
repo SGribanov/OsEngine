@@ -36,14 +36,8 @@ namespace OsEngine.Market.Servers.MoexAlgopack.Entity
                 handler.CookieContainer = new CookieContainer();
 
                 using HttpClient httpClient = new HttpClient(handler);
-
-                byte[] binData;
-                binData = System.Text.Encoding.UTF8.GetBytes(_username + ":" + _password);
-
-                httpClient.DefaultRequestHeaders.Authorization =
-                    new AuthenticationHeaderValue("Basic", Convert.ToBase64String(binData));
-
-                HttpResponseMessage response = httpClient.GetAsync(_urlAuth).GetAwaiter().GetResult();
+                using HttpRequestMessage request = CreateAuthRequestMessage(_urlAuth, _username, _password);
+                using HttpResponseMessage response = httpClient.SendAsync(request).GetAwaiter().GetResult();
                 LastStatus = response.StatusCode;
 
                 CookieCollection cookies = handler.CookieContainer.GetCookies(new Uri(_urlUri));
@@ -73,6 +67,14 @@ namespace OsEngine.Market.Servers.MoexAlgopack.Entity
                 LastStatus = HttpStatusCode.BadRequest;
                 LastStatusText = e.Message;
             }
+        }
+
+        internal static HttpRequestMessage CreateAuthRequestMessage(string requestUrl, string username, string password)
+        {
+            byte[] binData = System.Text.Encoding.UTF8.GetBytes(username + ":" + password);
+            HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, requestUrl);
+            request.Headers.Authorization = new AuthenticationHeaderValue("Basic", Convert.ToBase64String(binData));
+            return request;
         }
 
         public bool IsRealTime()
