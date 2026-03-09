@@ -481,30 +481,36 @@ namespace OsEngine
         {
             try
             {
-                if (!Directory.Exists("Engine"))
-                {
-                    Directory.CreateDirectory("Engine");
-                }
-
-                if (File.Exists("Engine\\checkFile.txt"))
-                {
-                    File.Delete("Engine\\checkFile.txt");
-                }
-
-                File.Create("Engine\\checkFile.txt");
-
-                if (File.Exists("Engine\\checkFile.txt") == false)
-                {
-                    return false;
-                }
+                return ProbeEngineDirectoryWriteability();
             }
             catch
             {
                 return false;
             }
+        }
 
+        private static bool ProbeEngineDirectoryWriteability()
+        {
+            string engineDirectoryPath = Path.GetFullPath("Engine");
 
-            return true;
+            if (!Directory.Exists(engineDirectoryPath))
+            {
+                Directory.CreateDirectory(engineDirectoryPath);
+            }
+
+            string checkFilePath = Path.Combine(engineDirectoryPath, "checkFile.txt");
+
+            if (File.Exists(checkFilePath))
+            {
+                File.Delete(checkFilePath);
+            }
+
+            using (FileStream stream = new FileStream(checkFilePath, FileMode.CreateNew, FileAccess.Write, FileShare.None))
+            {
+                stream.Flush(flushToDisk: true);
+            }
+
+            return File.Exists(checkFilePath);
         }
 
         private bool CheckAlreadyWorkEngine()
