@@ -570,10 +570,9 @@ namespace OsEngine.Market.Servers.BybitData
             try
             {
                 using (FileStream originalFileStream = new FileStream(gzPath, FileMode.Open))
-                using (FileStream decompressedFileStream = File.Create(csvFilePath))
                 using (GZipStream decompressionStream = new GZipStream(originalFileStream, CompressionMode.Decompress))
                 {
-                    decompressionStream.CopyTo(decompressedFileStream);
+                    PersistExtractedCsvContent(decompressionStream, csvFilePath);
                 }
             }
             catch (InvalidDataException ex)
@@ -581,6 +580,49 @@ namespace OsEngine.Market.Servers.BybitData
                 SendLogMessage($"Couldn't extract archive\n" + ex, LogMessageType.Error);
 
                 File.Delete(gzPath);
+            }
+        }
+
+        private static void PersistExtractedCsvContent(Stream contentStream, string csvFilePath)
+        {
+            if (contentStream == null)
+            {
+                throw new ArgumentNullException(nameof(contentStream));
+            }
+
+            if (string.IsNullOrWhiteSpace(csvFilePath))
+            {
+                throw new ArgumentException("CSV path cannot be null or empty.", nameof(csvFilePath));
+            }
+
+            string fullPath = Path.GetFullPath(csvFilePath);
+            string? directory = Path.GetDirectoryName(fullPath);
+
+            if (string.IsNullOrWhiteSpace(directory))
+            {
+                throw new InvalidOperationException("CSV path must include a directory.");
+            }
+
+            Directory.CreateDirectory(directory);
+
+            string stagingPath = fullPath + ".tmp";
+
+            try
+            {
+                using (FileStream fileStream = new FileStream(stagingPath, FileMode.Create, FileAccess.Write, FileShare.None))
+                {
+                    contentStream.CopyTo(fileStream);
+                    fileStream.Flush(flushToDisk: true);
+                }
+
+                File.Move(stagingPath, fullPath, overwrite: true);
+            }
+            finally
+            {
+                if (File.Exists(stagingPath))
+                {
+                    File.Delete(stagingPath);
+                }
             }
         }
 
