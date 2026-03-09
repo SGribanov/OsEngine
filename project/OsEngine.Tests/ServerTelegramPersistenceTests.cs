@@ -2,10 +2,12 @@
 #pragma warning disable CS8600, CS8601, CS8602, CS8603, CS8604, CS8605, CS8618, CS8619, CS8620, CS8622, CS8625, CS8629, CS8765, CS8767
 
 using System;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.CompilerServices;
+using System.Threading;
 using OsEngine.Logging;
 using Xunit;
 
@@ -55,6 +57,43 @@ public class ServerTelegramPersistenceTests
         Assert.Equal(987654321L, loaded.ChatId);
         Assert.False(loaded.ProcessingCommand);
         Assert.True(scope.GetIsReady());
+    }
+
+    [Fact]
+    public void RequestBuilders_ShouldProduceEscapedCultureSafeTelegramUris()
+    {
+        using ServerTelegramFileScope scope = new ServerTelegramFileScope();
+
+        ServerTelegram server = scope.CreateServerWithoutConstructor();
+        server.BotToken = "  token-value  ";
+        server.ChatId = 1234567890123456789L;
+        server.ProcessingCommand = true;
+        scope.SetIsReady(true);
+
+        CultureInfo originalCulture = Thread.CurrentThread.CurrentCulture;
+        Thread.CurrentThread.CurrentCulture = CultureInfo.GetCultureInfo("fr-FR");
+
+        try
+        {
+            MethodInfo buildSendMessage = typeof(ServerTelegram).GetMethod("BuildSendMessageRequestUri", BindingFlags.NonPublic | BindingFlags.Instance)
+                ?? throw new InvalidOperationException("Method BuildSendMessageRequestUri not found.");
+            MethodInfo buildGetUpdates = typeof(ServerTelegram).GetMethod("BuildGetUpdatesRequestUri", BindingFlags.NonPublic | BindingFlags.Instance)
+                ?? throw new InvalidOperationException("Method BuildGetUpdatesRequestUri not found.");
+
+            Uri sendUri = (Uri)buildSendMessage.Invoke(server, new object?[] { "Risk _value_ [check]!" })!;
+            Uri updatesUri = (Uri)buildGetUpdates.Invoke(server, new object?[] { 1234567890123456790L })!;
+
+            Assert.Equal(
+                "https://api.telegram.org/bottoken-value/sendMessage?chat_id=1234567890123456789&text=Risk%20%5C_value%5C_%20%5C%5Bcheck%5C%5D%5C%21&parse_mode=MarkdownV2&reply_markup=%7B%22keyboard%22%3A%5B%5B%7B%22text%22%3A%22StopAllBots%22%7D%2C%7B%22text%22%3A%22StartAllBots%22%7D%5D%2C%5B%7B%22text%22%3A%22CancelAllActiveOrders%22%7D%2C%7B%22text%22%3A%22GetStatus%22%7D%5D%5D%2C%22resize_keyboard%22%3Atrue%7D",
+                sendUri.AbsoluteUri);
+            Assert.Equal(
+                "https://api.telegram.org/bottoken-value/getUpdates?offset=1234567890123456790&timeout=2&allowed_updates=%5B%22message%22%5D",
+                updatesUri.AbsoluteUri);
+        }
+        finally
+        {
+            Thread.CurrentThread.CurrentCulture = originalCulture;
+        }
     }
 
     private sealed class ServerTelegramFileScope : IDisposable
@@ -112,6 +151,11 @@ public class ServerTelegramPersistenceTests
         public bool GetIsReady()
         {
             return (bool)_isReadyField.GetValue(null)!;
+        }
+
+        public void SetIsReady(bool value)
+        {
+            _isReadyField.SetValue(null, value);
         }
 
         public void Dispose()

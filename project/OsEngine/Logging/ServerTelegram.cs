@@ -7,6 +7,7 @@ using System.Collections.Concurrent;
 using System.Globalization;
 using System.IO;
 using System.Net.Http;
+using System.Text;
 using System.Threading;
 using System.Windows;
 using OsEngine.Entity;
@@ -94,27 +95,14 @@ namespace OsEngine.Logging
         {
             try
             {
-                string replyKeyboardJson = $@"
-                    {{""keyboard"": 
-                    [
-                        [{{""text"": ""StopAllBots""}}, {{""text"": ""StartAllBots""}}],
-                        [{{""text"": ""CancelAllActiveOrders""}}, {{""text"": ""GetStatus""}}]
-                    ],
-                    ""resize_keyboard"": true
-                    }}";
+                Uri requestUri = BuildSendMessageRequestUri(messageText);
 
-                if(!ProcessingCommand)
+                if (requestUri == null)
                 {
-                    replyKeyboardJson = @"{""keyboard"": [[]]}";
+                    return;
                 }
-            
-                messageText = CheckString(messageText);
-                string requestUrl = $"https://api.telegram.org/bot{BotToken}/sendMessage?chat_id={ChatId}" +
-                                    $"&text={Uri.EscapeDataString(messageText)}" +
-                                    $"&parse_mode=MarkdownV2" +
-                                    $"&reply_markup={Uri.EscapeDataString(replyKeyboardJson)}"; 
 
-                HttpResponseMessage response = _httpClient.GetAsync(requestUrl).Result;
+                HttpResponseMessage response = _httpClient.GetAsync(requestUri).Result;
                 string responseContent = response.Content.ReadAsStringAsync().Result;
             }
             catch
@@ -138,10 +126,15 @@ namespace OsEngine.Logging
 
                 try
                 {
-                    HttpResponseMessage response = _httpClient.GetAsync($"https://api.telegram.org/bot{BotToken}/getUpdates" +
-                                                                        $"?offset={_lastUpdateId + 1}" +
-                                                                        $"&timeout=2" +
-                                                                        $"&allowed_updates=[\"message\"]").Result;
+                    Uri requestUri = BuildGetUpdatesRequestUri(_lastUpdateId + 1);
+
+                    if (requestUri == null)
+                    {
+                        Thread.Sleep(1000);
+                        continue;
+                    }
+
+                    HttpResponseMessage response = _httpClient.GetAsync(requestUri).Result;
                 
                     string responseContent = response.Content.ReadAsStringAsync().Result;
                 
@@ -274,6 +267,76 @@ namespace OsEngine.Logging
         }
 
         public event Action<string, Command> TelegramCommandEvent;
+
+        private Uri BuildSendMessageRequestUri(string messageText)
+        {
+            if (!TryBuildTelegramApiBaseUri(out string apiBaseUri))
+            {
+                return null;
+            }
+
+            string replyKeyboardJson = GetReplyKeyboardJson();
+            string normalizedMessage = CheckString(messageText ?? string.Empty);
+
+            StringBuilder builder = new StringBuilder(apiBaseUri);
+            builder.Append("/sendMessage?chat_id=");
+            builder.Append(ChatId.ToString(CultureInfo.InvariantCulture));
+            builder.Append("&text=");
+            builder.Append(Uri.EscapeDataString(normalizedMessage));
+            builder.Append("&parse_mode=MarkdownV2");
+            builder.Append("&reply_markup=");
+            builder.Append(Uri.EscapeDataString(replyKeyboardJson));
+
+            return Uri.TryCreate(builder.ToString(), UriKind.Absolute, out Uri requestUri)
+                ? requestUri
+                : null;
+        }
+
+        private Uri BuildGetUpdatesRequestUri(long nextOffset)
+        {
+            if (!TryBuildTelegramApiBaseUri(out string apiBaseUri))
+            {
+                return null;
+            }
+
+            StringBuilder builder = new StringBuilder(apiBaseUri);
+            builder.Append("/getUpdates?offset=");
+            builder.Append(nextOffset.ToString(CultureInfo.InvariantCulture));
+            builder.Append("&timeout=2&allowed_updates=%5B%22message%22%5D");
+
+            return Uri.TryCreate(builder.ToString(), UriKind.Absolute, out Uri requestUri)
+                ? requestUri
+                : null;
+        }
+
+        private bool TryBuildTelegramApiBaseUri(out string apiBaseUri)
+        {
+            apiBaseUri = null;
+
+            if (!_isReady)
+            {
+                return false;
+            }
+
+            string token = BotToken?.Trim();
+            if (string.IsNullOrEmpty(token) || ChatId == 0)
+            {
+                return false;
+            }
+
+            apiBaseUri = "https://api.telegram.org/bot" + token;
+            return true;
+        }
+
+        private string GetReplyKeyboardJson()
+        {
+            if (!ProcessingCommand)
+            {
+                return @"{""keyboard"": [[]]}";
+            }
+
+            return @"{""keyboard"":[[{""text"":""StopAllBots""},{""text"":""StartAllBots""}],[{""text"":""CancelAllActiveOrders""},{""text"":""GetStatus""}]],""resize_keyboard"":true}";
+        }
 
         /// <summary>
         /// Checking the message string for valid characters
