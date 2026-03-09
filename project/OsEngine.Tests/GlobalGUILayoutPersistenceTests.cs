@@ -67,6 +67,28 @@ public class GlobalGUILayoutPersistenceTests
         Assert.True(GlobalGUILayout.UiOpenWindows[0].Layout.IsExpand);
     }
 
+    [Fact]
+    public void Load_ShouldParseLegacyCommaSeparatedWindowMetrics()
+    {
+        using GlobalLayoutFileScope scope = new GlobalLayoutFileScope();
+
+        File.WriteAllLines(scope.SettingsPath, new[]
+        {
+            "mainWindow#430$574,666666666667$249,333333333333$625,333333333333$False"
+        });
+
+        GlobalGUILayout.UiOpenWindows = new List<OpenWindow>();
+        scope.InvokeLoad();
+
+        Assert.Single(GlobalGUILayout.UiOpenWindows);
+        Assert.Equal("mainWindow", GlobalGUILayout.UiOpenWindows[0].Name);
+        Assert.Equal(430m, GlobalGUILayout.UiOpenWindows[0].Layout.Height);
+        Assert.Equal(574.666666666667m, GlobalGUILayout.UiOpenWindows[0].Layout.Left);
+        Assert.Equal(249.333333333333m, GlobalGUILayout.UiOpenWindows[0].Layout.Top);
+        Assert.Equal(625.333333333333m, GlobalGUILayout.UiOpenWindows[0].Layout.Widht);
+        Assert.False(GlobalGUILayout.UiOpenWindows[0].Layout.IsExpand);
+    }
+
     private sealed class GlobalLayoutFileScope : IDisposable
     {
         private readonly string _engineDirPath;

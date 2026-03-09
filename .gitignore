@@ -320,3 +320,7 @@ __pycache__/
 /.dotnet_home/.dotnet
 .claude/session-memory/
 doc/BrokersProgrammDoc/
+
+# Local build and report artifacts
+/project/OsEngine/bin/Debug/
+/reports/stage2_perf_metrics.jsonl

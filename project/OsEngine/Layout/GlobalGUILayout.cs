@@ -178,6 +178,14 @@ namespace OsEngine.Layout
                 return;
             }           
 
+            if (layout.Height > int.MaxValue ||
+                layout.Widht > int.MaxValue ||
+                layout.Left > int.MaxValue ||
+                layout.Top > int.MaxValue)
+            {
+                return;
+            }
+
             if (layout.IsExpand == true)
             {
                 ui.Left = Convert.ToDouble(layout.Left);
@@ -535,18 +543,65 @@ namespace OsEngine.Layout
 
         public void LoadFromString(string str)
         {
+            Layout = new OpenWindowLayout();
+
+            if (string.IsNullOrWhiteSpace(str))
+            {
+                Name = string.Empty;
+                return;
+            }
+
             string[] save = str.Split('#');
             Name = save[0];
 
-            Layout = new OpenWindowLayout();
+            if (save.Length < 2)
+            {
+                return;
+            }
 
             string[] strLayout = save[1].Split('$');
 
-            Layout.Height = strLayout[0].ToDecimal();
-            Layout.Left = strLayout[1].ToDecimal();
-            Layout.Top = strLayout[2].ToDecimal();
-            Layout.Widht = strLayout[3].ToDecimal();
-            Layout.IsExpand = Convert.ToBoolean(strLayout[4]);
+            if (strLayout.Length < 5)
+            {
+                return;
+            }
+
+            Layout.Height = ParseLayoutDecimal(strLayout[0]);
+            Layout.Left = ParseLayoutDecimal(strLayout[1]);
+            Layout.Top = ParseLayoutDecimal(strLayout[2]);
+            Layout.Widht = ParseLayoutDecimal(strLayout[3]);
+
+            if (bool.TryParse(strLayout[4], out bool isExpand))
+            {
+                Layout.IsExpand = isExpand;
+            }
+        }
+
+        private static decimal ParseLayoutDecimal(string value)
+        {
+            if (TryParseLayoutDecimal(value, out decimal parsed))
+            {
+                return parsed;
+            }
+
+            return 0;
+        }
+
+        private static bool TryParseLayoutDecimal(string value, out decimal parsed)
+        {
+            const NumberStyles parseStyle = NumberStyles.Float | NumberStyles.AllowLeadingSign;
+
+            if (decimal.TryParse(value, parseStyle, CultureInfo.CurrentCulture, out parsed))
+            {
+                return true;
+            }
+
+            if (decimal.TryParse(value, parseStyle, CultureInfo.InvariantCulture, out parsed))
+            {
+                return true;
+            }
+
+            return decimal.TryParse(value, parseStyle, CultureInfo.GetCultureInfo("ru-RU"), out parsed);
         }
 
         public event Action<System.Windows.Window, string> UiLocationChangeEvent;
