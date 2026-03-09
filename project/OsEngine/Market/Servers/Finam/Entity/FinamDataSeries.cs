@@ -380,10 +380,8 @@ namespace OsEngine.Market.Servers.Finam.Entity
                     response.EnsureSuccessStatusCode();
 
                     using (Stream contentStream = response.Content.ReadAsStreamAsync().GetAwaiter().GetResult())
-
-                    using (FileStream fileStream = new FileStream(fileName, FileMode.Create, FileAccess.Write, FileShare.None))
                     {
-                        contentStream.CopyTo(fileStream);
+                        PersistTempFileContent(contentStream, fileName);
                     }
                 }
 
@@ -431,6 +429,45 @@ namespace OsEngine.Market.Servers.Finam.Entity
             SafeFileWriter.WriteAllText(fileName, list.ToString());
 
             return fileName;
+        }
+
+        private static void PersistTempFileContent(Stream contentStream, string fileName)
+        {
+            string directory = Path.GetDirectoryName(fileName);
+
+            if (!string.IsNullOrEmpty(directory))
+            {
+                Directory.CreateDirectory(directory);
+            }
+
+            string stagingPath = fileName + ".download";
+
+            try
+            {
+                using (FileStream fileStream = new FileStream(stagingPath, FileMode.Create, FileAccess.Write, FileShare.None))
+                {
+                    contentStream.CopyTo(fileStream);
+                    fileStream.Flush(flushToDisk: true);
+                }
+
+                if (File.Exists(fileName))
+                {
+                    File.Replace(stagingPath, fileName, destinationBackupFileName: null, ignoreMetadataErrors: true);
+                }
+                else
+                {
+                    File.Move(stagingPath, fileName);
+                }
+            }
+            catch
+            {
+                if (File.Exists(stagingPath))
+                {
+                    File.Delete(stagingPath);
+                }
+
+                throw;
+            }
         }
 
 
