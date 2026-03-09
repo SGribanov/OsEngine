@@ -1766,27 +1766,33 @@ namespace OsEngine.Market.Servers.Deribit
 
         private HttpResponseMessage CreatePrivateQuery(string requestPath, string method, string requestBody)
         {
+            using (HttpRequestMessage requestMessage = CreatePrivateRequestMessage(requestPath, method, requestBody))
+            {
+                return _httpClient.SendAsync(requestMessage).Result;
+            }
+        }
+
+        private HttpRequestMessage CreatePrivateRequestMessage(string requestPath, string method, string requestBody)
+        {
             long timestamp = (long)(DateTime.UtcNow - new DateTime(1970, 1, 1)).TotalMilliseconds;
             string nonce = "abcd";
             string requestData = $"{method}\n{requestPath}\n{requestBody}\n";
             string data = requestData;
             string signature = GenerateSignature(_secretKey, timestamp, nonce, data);
-            string url = _baseUrl + requestPath;
             string authValue = "id=" + _clientID
                 + ",ts=" + timestamp.ToString(CultureInfo.InvariantCulture)
                 + ",sig=" + signature
                 + ",nonce=" + nonce;
 
-            _httpClient.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("deri-hmac-sha256", authValue);
+            HttpRequestMessage requestMessage = new HttpRequestMessage(new HttpMethod(method), new Uri(new Uri(_baseUrl), requestPath));
+            requestMessage.Headers.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("deri-hmac-sha256", authValue);
 
-            if (method.Equals("POST"))
+            if (string.Equals(method, "POST", StringComparison.Ordinal))
             {
-                return _httpClient.PostAsync(url, new StringContent(requestBody, Encoding.UTF8, "application/json")).Result;
+                requestMessage.Content = new StringContent(requestBody ?? string.Empty, Encoding.UTF8, "application/json");
             }
-            else
-            {
-                return _httpClient.GetAsync(url).Result;
-            }
+
+            return requestMessage;
         }
 
         static string GenerateSignature(string clientSecret, long timestamp, string nonce, string data)
