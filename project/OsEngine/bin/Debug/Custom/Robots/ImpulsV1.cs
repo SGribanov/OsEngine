@@ -55,6 +55,10 @@ namespace OsEngine.Robots
 
         private readonly StrategyParameterInt _momentumLength;
         private readonly StrategyParameterInt _secondMomentumLength;
+        private readonly StrategyParameterBool _checkMomentumOneLongZero;
+        private readonly StrategyParameterBool _checkMomentumOneShortZero;
+        private readonly StrategyParameterBool _checkMomentumTwoLongZero;
+        private readonly StrategyParameterBool _checkMomentumTwoShortZero;
         private readonly StrategyParameterInt _averageVolumeLength;
         private readonly StrategyParameterInt _atrLength;
         private readonly StrategyParameterDecimal _volumeExcessPercent;
@@ -73,12 +77,17 @@ namespace OsEngine.Robots
             _startTradeTime = CreateParameterTimeOfDay("Start Trade Time", 0, 0, 0, 0, "Base");
             _endTradeTime = CreateParameterTimeOfDay("End Trade Time", 24, 0, 0, 0, "Base");
 
-            _momentumLength = CreateParameter("Momentum Length", 24, 2, 500, 1, "Signal");
-            _secondMomentumLength = CreateParameter("Second Momentum Length", 48, 2, 500, 1, "Signal");
-            _averageVolumeLength = CreateParameter("Average Volume Length", 200, 5, 5000, 5, "Signal");
-            _atrLength = CreateParameter("ATR Length", 5, 1, 200, 1, "Signal");
-            _volumeExcessPercent = CreateParameter("Volume Excess Percent", 10.0m, 0.1m, 500m, 0.1m, "Signal");
-            _bodyAtrMultiplier = CreateParameter("Body ATR Multiplier", 0.5m, 0.1m, 10m, 0.1m, "Signal");
+            _momentumLength = CreateParameter("Momentum Length", 24, 2, 500, 1, "Momentum");
+            _secondMomentumLength = CreateParameter("Second Momentum Length", 48, 2, 500, 1, "Momentum");
+            _checkMomentumOneLongZero = CreateParameter("Check Momentum 1 > 0 for Long", true, "Momentum");
+            _checkMomentumOneShortZero = CreateParameter("Check Momentum 1 < 0 for Short", true, "Momentum");
+            _checkMomentumTwoLongZero = CreateParameter("Check Momentum 2 > 0 for Long", true, "Momentum");
+            _checkMomentumTwoShortZero = CreateParameter("Check Momentum 2 < 0 for Short", true, "Momentum");
+
+            _averageVolumeLength = CreateParameter("Average Volume Length", 200, 5, 5000, 5, "Filters");
+            _atrLength = CreateParameter("ATR Length", 5, 1, 200, 1, "Filters");
+            _volumeExcessPercent = CreateParameter("Volume Excess Percent", 10.0m, 0.1m, 500m, 0.1m, "Filters");
+            _bodyAtrMultiplier = CreateParameter("Body ATR Multiplier", 0.5m, 0.1m, 10m, 0.1m, "Filters");
 
             _exitBars = CreateParameter("Exit Bars", 20, 1, 500, 1, "Exit");
             _takeProfitPoints = CreateParameter("Take Profit Points", 500.0m, 1m, 100000m, 1m, "Exit");
@@ -86,7 +95,7 @@ namespace OsEngine.Robots
             _tab.CandleFinishedEvent += OnCandleFinished;
             DeleteEvent += OnDelete;
 
-            Description = "Manual impulse strategy using two zero-centered mid-price momentum confirmations, volume expansion, ATR body filter and midpoint close confirmation.";
+            Description = "Manual impulse strategy using two mid-price momentum confirmations with configurable zero-threshold checks, volume expansion, ATR body filter and midpoint close confirmation.";
         }
 
         public override string GetNameStrategyType()
@@ -211,14 +220,15 @@ namespace OsEngine.Robots
             }
 
             decimal slippage = GetSlippagePrice();
-            bool isLongMomentumConfirmed = momentum > 0m
-                && momentum > previousMomentum
-                && secondMomentum > 0m
-                && secondMomentum > previousSecondMomentum;
-            bool isShortMomentumConfirmed = momentum < 0m
-                && momentum < previousMomentum
-                && secondMomentum < 0m
-                && secondMomentum < previousSecondMomentum;
+            bool isFirstMomentumLongConfirmed = IsLongMomentumConfirmed(momentum, previousMomentum, _checkMomentumOneLongZero.ValueBool);
+            bool isSecondMomentumLongConfirmed = IsLongMomentumConfirmed(secondMomentum, previousSecondMomentum, _checkMomentumTwoLongZero.ValueBool);
+            bool isLongMomentumConfirmed = isFirstMomentumLongConfirmed
+                && isSecondMomentumLongConfirmed;
+
+            bool isFirstMomentumShortConfirmed = IsShortMomentumConfirmed(momentum, previousMomentum, _checkMomentumOneShortZero.ValueBool);
+            bool isSecondMomentumShortConfirmed = IsShortMomentumConfirmed(secondMomentum, previousSecondMomentum, _checkMomentumTwoShortZero.ValueBool);
+            bool isShortMomentumConfirmed = isFirstMomentumShortConfirmed
+                && isSecondMomentumShortConfirmed;
 
             if (_regime.ValueString != "OnlyShort"
                 && isLongMomentumConfirmed
@@ -399,6 +409,26 @@ namespace OsEngine.Robots
 
             decimal currentMidPrice = GetMidPrice(candles[index]);
             return Math.Round((currentMidPrice / baseMidPrice - 1m) * 100m, 2);
+        }
+
+        private bool IsLongMomentumConfirmed(decimal currentMomentum, decimal previousMomentum, bool checkZeroThreshold)
+        {
+            if (currentMomentum <= previousMomentum)
+            {
+                return false;
+            }
+
+            return !checkZeroThreshold || currentMomentum > 0m;
+        }
+
+        private bool IsShortMomentumConfirmed(decimal currentMomentum, decimal previousMomentum, bool checkZeroThreshold)
+        {
+            if (currentMomentum >= previousMomentum)
+            {
+                return false;
+            }
+
+            return !checkZeroThreshold || currentMomentum < 0m;
         }
 
         private decimal CalculateTrueRange(List<Candle> candles, int index)
