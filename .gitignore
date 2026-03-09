@@ -321,6 +321,5 @@ __pycache__/
 .claude/session-memory/
 doc/BrokersProgrammDoc/
 
-# Local build and report artifacts
-/project/OsEngine/bin/Debug/
+# Local report artifacts
 /reports/stage2_perf_metrics.jsonl
