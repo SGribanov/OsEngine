@@ -485,10 +485,8 @@ namespace OsEngine.Market.Servers.BybitData
                     response.EnsureSuccessStatusCode();
 
                     using (Stream contentStream = response.Content.ReadAsStreamAsync().GetAwaiter().GetResult())
-
-                    using (FileStream fileStream = new FileStream(tempGzipPath, FileMode.Create, FileAccess.Write, FileShare.None))
                     {
-                        contentStream.CopyTo(fileStream);
+                        PersistArchiveContentToTempFile(contentStream, tempGzipPath);
                     }
                 }
 
@@ -498,6 +496,49 @@ namespace OsEngine.Market.Servers.BybitData
             {
                 SendLogMessage("Сouldn't upload zip archive.\n" + ex, LogMessageType.Error);
                 return null;
+            }
+        }
+
+        private static void PersistArchiveContentToTempFile(Stream contentStream, string archivePath)
+        {
+            if (contentStream == null)
+            {
+                throw new ArgumentNullException(nameof(contentStream));
+            }
+
+            if (string.IsNullOrWhiteSpace(archivePath))
+            {
+                throw new ArgumentException("Archive path cannot be null or empty.", nameof(archivePath));
+            }
+
+            string fullPath = Path.GetFullPath(archivePath);
+            string? directory = Path.GetDirectoryName(fullPath);
+
+            if (string.IsNullOrWhiteSpace(directory))
+            {
+                throw new InvalidOperationException("Archive path must include a directory.");
+            }
+
+            Directory.CreateDirectory(directory);
+
+            string stagingPath = fullPath + ".download";
+
+            try
+            {
+                using (FileStream fileStream = new FileStream(stagingPath, FileMode.Create, FileAccess.Write, FileShare.None))
+                {
+                    contentStream.CopyTo(fileStream);
+                    fileStream.Flush(flushToDisk: true);
+                }
+
+                File.Move(stagingPath, fullPath, overwrite: true);
+            }
+            finally
+            {
+                if (File.Exists(stagingPath))
+                {
+                    File.Delete(stagingPath);
+                }
             }
         }
 
