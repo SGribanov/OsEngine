@@ -817,10 +817,7 @@ namespace OsEngine.Market.Servers.BitGetData
 
                 if (response.StatusCode == HttpStatusCode.OK && response.RawBytes != null && response.RawBytes.Length > 0)
                 {
-                    using (FileStream fileStream = new FileStream(tempGzipPath, FileMode.Create, FileAccess.Write, FileShare.None))
-                    {
-                        fileStream.Write(response.RawBytes, 0, response.RawBytes.Length);
-                    }
+                    WriteTempArchiveBytes(tempGzipPath, response.RawBytes);
                 }
                 else if (response.StatusCode == HttpStatusCode.Forbidden || response.StatusCode == HttpStatusCode.NotFound)
                 {
@@ -841,6 +838,56 @@ namespace OsEngine.Market.Servers.BitGetData
             {
                 SendLogMessage("Сouldn't upload zip archive.\n" + ex, LogMessageType.Error);
                 return null;
+            }
+        }
+
+        private static void WriteTempArchiveBytes(string path, byte[] bytes)
+        {
+            if (string.IsNullOrWhiteSpace(path))
+            {
+                throw new ArgumentException("Path cannot be null or empty.", nameof(path));
+            }
+
+            if (bytes == null)
+            {
+                throw new ArgumentNullException(nameof(bytes));
+            }
+
+            string fullPath = Path.GetFullPath(path);
+            string directory = Path.GetDirectoryName(fullPath);
+
+            if (string.IsNullOrWhiteSpace(directory))
+            {
+                throw new InvalidOperationException("Unable to resolve archive directory.");
+            }
+
+            Directory.CreateDirectory(directory);
+
+            string tempPath = fullPath + ".tmp";
+
+            try
+            {
+                using (FileStream fileStream = new FileStream(tempPath, FileMode.Create, FileAccess.Write, FileShare.None))
+                {
+                    fileStream.Write(bytes, 0, bytes.Length);
+                    fileStream.Flush(flushToDisk: true);
+                }
+
+                if (File.Exists(fullPath))
+                {
+                    File.Replace(tempPath, fullPath, null, true);
+                }
+                else
+                {
+                    File.Move(tempPath, fullPath);
+                }
+            }
+            finally
+            {
+                if (File.Exists(tempPath))
+                {
+                    File.Delete(tempPath);
+                }
             }
         }
 
