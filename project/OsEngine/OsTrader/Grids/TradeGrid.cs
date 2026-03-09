@@ -4060,6 +4060,10 @@ namespace OsEngine.OsTrader.Grids
             bool collectOpenOrdersNeed = (flags & QueryCollectionFlags.OpenOrdersNeed) != 0;
             bool collectOpenOrdersFact = (flags & QueryCollectionFlags.OpenOrdersFact) != 0;
             bool collectClosingOrdersFact = (flags & QueryCollectionFlags.ClosingOrdersFact) != 0;
+            bool collectOnlyOpenOrdersNeed = collectOpenOrdersNeed
+                && !collectOpenPositions
+                && !collectOpenOrdersFact
+                && !collectClosingOrdersFact;
 
             Security security = null;
             if (collectOpenOrdersNeed)
@@ -4121,6 +4125,9 @@ namespace OsEngine.OsTrader.Grids
             bool havePriceLimits = collectOpenOrdersNeed
                 && security.PriceLimitHigh != 0
                 && security.PriceLimitLow != 0;
+            bool openOrdersMakerOnly = OpenOrdersMakerOnly;
+            decimal priceLimitHigh = havePriceLimits ? security.PriceLimitHigh : 0;
+            decimal priceLimitLow = havePriceLimits ? security.PriceLimitLow : 0;
             bool isBuyGrid = gridCreator.GridSide == Side.Buy;
             bool isSellGrid = gridCreator.GridSide == Side.Sell;
 
@@ -4134,14 +4141,25 @@ namespace OsEngine.OsTrader.Grids
 
                 Position position = line.Position;
                 bool hasPosition = position != null;
-                bool hasOpenVolume = hasPosition && position.OpenVolume != 0;
-                bool openActive = hasPosition && position.OpenActive;
-                bool closeActive = hasPosition && position.CloseActive;
+                decimal openVolume = 0;
+                bool openActive = false;
+
+                if (hasPosition
+                    && (collectOpenPositions || collectOpenOrdersNeed))
+                {
+                    openVolume = position.OpenVolume;
+                }
 
                 if (collectOpenPositions
-                    && hasOpenVolume)
+                    && openVolume != 0)
                 {
                     openPositions.Add(line);
+                }
+
+                if (hasPosition
+                    && (collectOpenOrdersFact || collectOpenOrdersNeed))
+                {
+                    openActive = position.OpenActive;
                 }
 
                 if (collectOpenOrdersFact
@@ -4151,7 +4169,8 @@ namespace OsEngine.OsTrader.Grids
                 }
 
                 if (collectClosingOrdersFact
-                    && closeActive)
+                    && hasPosition
+                    && position.CloseActive)
                 {
                     closingOrdersFact.Add(line);
                 }
@@ -4163,7 +4182,7 @@ namespace OsEngine.OsTrader.Grids
                 }
 
                 if (hasPosition
-                    && position.OpenVolume > 0
+                    && openVolume > 0
                     && !openActive)
                 {
                     continue;
@@ -4171,23 +4190,23 @@ namespace OsEngine.OsTrader.Grids
 
                 if (havePriceLimits)
                 {
-                    if (OpenOrdersMakerOnly == true
-                        && (line.PriceEnter > security.PriceLimitHigh
-                            || line.PriceEnter < security.PriceLimitLow))
+                    if (openOrdersMakerOnly == true
+                        && (line.PriceEnter > priceLimitHigh
+                            || line.PriceEnter < priceLimitLow))
                     {
                         continue;
                     }
 
-                    if (OpenOrdersMakerOnly == false
+                    if (openOrdersMakerOnly == false
                         && line.Side == Side.Buy
-                        && line.PriceEnter < security.PriceLimitLow)
+                        && line.PriceEnter < priceLimitLow)
                     {
                         continue;
                     }
 
-                    if (OpenOrdersMakerOnly == false
+                    if (openOrdersMakerOnly == false
                         && line.Side == Side.Sell
-                        && line.PriceEnter > security.PriceLimitHigh)
+                        && line.PriceEnter > priceLimitHigh)
                     {
                         continue;
                     }
@@ -4203,7 +4222,7 @@ namespace OsEngine.OsTrader.Grids
 
                 if (isBuyGrid)
                 {
-                    if (OpenOrdersMakerOnly
+                    if (openOrdersMakerOnly
                         && line.PriceEnter > lastPrice)
                     {
                         continue;
@@ -4211,7 +4230,7 @@ namespace OsEngine.OsTrader.Grids
                 }
                 else if (isSellGrid)
                 {
-                    if (OpenOrdersMakerOnly
+                    if (openOrdersMakerOnly
                         && line.PriceEnter < lastPrice)
                     {
                         continue;
@@ -4223,6 +4242,13 @@ namespace OsEngine.OsTrader.Grids
                 }
 
                 openOrdersNeed.Add(line);
+
+                if (collectOnlyOpenOrdersNeed
+                    && maxOpenOrdersInMarket > 0
+                    && openOrdersNeed.Count >= maxOpenOrdersInMarket)
+                {
+                    break;
+                }
             }
 
             return new QueryCollectionsSnapshotCore(openPositions, openOrdersNeed, openOrdersFact, closingOrdersFact);
