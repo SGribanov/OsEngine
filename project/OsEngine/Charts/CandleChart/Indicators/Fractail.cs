@@ -324,14 +324,6 @@ namespace OsEngine.Charts.CandleChart.Indicators
         {
             if (candles.Count <= 5 || ValuesUp == null)
             {
-                ValuesUp = new List<decimal>();
-                ValuesDown = new List<decimal>();
-
-                for (int i = 0; i < candles.Count; i++)
-                {
-                    ValuesUp.Add(0);
-                    ValuesDown.Add(0);
-                }
                 ProcessAll(candles);
                 return;
             }
@@ -361,14 +353,17 @@ namespace OsEngine.Charts.CandleChart.Indicators
         {
             if (ValuesUp == null)
             {
-                ValuesUp = new List<decimal>();
-                ValuesDown = new List<decimal>();
+                ValuesUp = new List<decimal>(candles.Count);
+                ValuesDown = new List<decimal>(candles.Count);
                 ValuesUp.Add(GetValueUp(candles, candles.Count - 1));
                 ValuesDown.Add(GetValueDown(candles, candles.Count - 1));
                 UpdateLastConfirmedFromSeries();
             }
             else
             {
+                EnsureSeriesCapacity(ValuesUp, candles.Count);
+                EnsureSeriesCapacity(ValuesDown, candles.Count);
+
                 ValuesUp.Add(0);
                 ValuesDown.Add(0);
 
@@ -405,8 +400,8 @@ namespace OsEngine.Charts.CandleChart.Indicators
             {
                 return;
             }
-            ValuesUp = new List<decimal>();
-            ValuesDown= new List<decimal>();
+            ValuesUp = new List<decimal>(candles.Count);
+            ValuesDown= new List<decimal>(candles.Count);
             for (int i = 0; i < candles.Count; i++)
             {
                 ValuesUp.Add(0);
@@ -461,6 +456,14 @@ namespace OsEngine.Charts.CandleChart.Indicators
                 {
                     return;
                 }
+            }
+        }
+
+        private static void EnsureSeriesCapacity(List<decimal> values, int requiredCount)
+        {
+            if (values.Capacity < requiredCount)
+            {
+                values.Capacity = requiredCount;
             }
         }
 

@@ -404,7 +404,12 @@ namespace OsEngine.Charts.CandleChart.Indicators
         {
             if (candles == null) return;
 
-            if (Values == null) Values = new List<decimal>();
+            if (Values == null)
+            {
+                Values = new List<decimal>(candles.Count);
+            }
+
+            EnsureSeriesCapacity(Values, candles.Count);
 
             EnsurePointCache(candles);
             Values.Add(GetValueCci(candles.Count - 1));
@@ -484,6 +489,8 @@ namespace OsEngine.Charts.CandleChart.Indicators
                 return;
             }
 
+            EnsureSeriesCapacity(_points, candles.Count);
+
             for (int i = _points.Count; i < candles.Count; i++)
             {
                 _points.Add(GetPoint(candles, i));
@@ -497,6 +504,14 @@ namespace OsEngine.Charts.CandleChart.Indicators
             for (int i = 0; i < candles.Count; i++)
             {
                 _points.Add(GetPoint(candles, i));
+            }
+        }
+
+        private static void EnsureSeriesCapacity(List<decimal> values, int requiredCount)
+        {
+            if (values.Capacity < requiredCount)
+            {
+                values.Capacity = requiredCount;
             }
         }
     }
