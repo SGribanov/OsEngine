@@ -85,6 +85,43 @@ public class MoexFixFastSpotLogWriterTests
     }
 
     [Fact]
+    public void WritePersistentLogLine_ShouldRecreateDisposedWriter_AndAppendMfixLine()
+    {
+        string root = Path.Combine(Path.GetTempPath(), "osengine-moexspot-log-" + Guid.NewGuid());
+        string path = Path.Combine(root, "MFIX_2026-03-08.txt");
+        MethodInfo createMethod = GetPrivateMethod("CreatePersistentLogWriter");
+        MethodInfo writeMethod = GetPrivateMethod("WritePersistentLogLine");
+        MethodInfo formatMfixMethod = GetPrivateMethod("FormatMfixLogLine");
+
+        try
+        {
+            Directory.CreateDirectory(root);
+
+            string firstLine = (string)formatMfixMethod.Invoke(null, new object[] { ">>>", "first-fix", new DateTime(2026, 3, 8, 9, 15, 30, DateTimeKind.Utc) })!;
+            string secondLine = (string)formatMfixMethod.Invoke(null, new object[] { "<<<", "second-fix", new DateTime(2026, 3, 8, 9, 15, 31, DateTimeKind.Utc) })!;
+
+            StreamWriter disposedWriter = (StreamWriter)createMethod.Invoke(null, new object[] { path, true })!;
+            disposedWriter.WriteLine(firstLine);
+            disposedWriter.Dispose();
+
+            object?[] args = { disposedWriter, path, true, secondLine };
+            writeMethod.Invoke(null, args);
+
+            StreamWriter recreatedWriter = Assert.IsType<StreamWriter>(args[0]);
+            recreatedWriter.Dispose();
+
+            Assert.Equal(new[] { firstLine, secondLine }, File.ReadAllLines(path));
+        }
+        finally
+        {
+            if (Directory.Exists(root))
+            {
+                Directory.Delete(root, true);
+            }
+        }
+    }
+
+    [Fact]
     public void FormatLogLines_ShouldPreserveCurrentUdpAndMfixShapes()
     {
         MethodInfo formatUdpMethod = GetPrivateMethod("FormatUdpLogLine");
