@@ -194,6 +194,12 @@ namespace OsEngine.OsTrader.Grids
 
         public TrailingUp TrailingUp;
 
+        private List<TradeGridLine>? _profitCloseOpenPositionsBufferA;
+
+        private List<TradeGridLine>? _profitCloseOpenPositionsBufferB;
+
+        private bool _useProfitCloseOpenPositionsBufferA = true;
+
         public string GetSaveString()
         {
             TradeGridNonTradePeriods nonTradePeriods = NonTradePeriods;
@@ -2410,7 +2416,7 @@ namespace OsEngine.OsTrader.Grids
                 return new List<TradeGridLine>();
             }
 
-            List<TradeGridLine> openPositions = new List<TradeGridLine>(linesAll.Count);
+            List<TradeGridLine> openPositions = RentProfitCloseOpenPositionsBuffer(linesAll.Count);
             cancelledOrders = 0;
             DateTime cancelCutoff = DateTime.Now.AddSeconds(-5);
 
@@ -2452,6 +2458,41 @@ namespace OsEngine.OsTrader.Grids
             }
 
             return openPositions;
+        }
+
+        private List<TradeGridLine> RentProfitCloseOpenPositionsBuffer(int minimumCapacity)
+        {
+            if (_profitCloseOpenPositionsBufferA == null)
+            {
+                _profitCloseOpenPositionsBufferA = new List<TradeGridLine>(minimumCapacity);
+            }
+            else if (_profitCloseOpenPositionsBufferA.Capacity < minimumCapacity)
+            {
+                _profitCloseOpenPositionsBufferA.Capacity = minimumCapacity;
+            }
+
+            if (_profitCloseOpenPositionsBufferB == null)
+            {
+                _profitCloseOpenPositionsBufferB = new List<TradeGridLine>(minimumCapacity);
+            }
+            else if (_profitCloseOpenPositionsBufferB.Capacity < minimumCapacity)
+            {
+                _profitCloseOpenPositionsBufferB.Capacity = minimumCapacity;
+            }
+
+            List<TradeGridLine> buffer;
+            if (_useProfitCloseOpenPositionsBufferA)
+            {
+                buffer = _profitCloseOpenPositionsBufferA;
+            }
+            else
+            {
+                buffer = _profitCloseOpenPositionsBufferB;
+            }
+
+            _useProfitCloseOpenPositionsBufferA = !_useProfitCloseOpenPositionsBufferA;
+            buffer.Clear();
+            return buffer;
         }
 
         private void CheckStopTradingAfterProfit()
