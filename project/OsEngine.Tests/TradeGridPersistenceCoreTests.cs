@@ -8094,6 +8094,99 @@ public class TradeGridPersistenceCoreTests
     }
 
     [Fact]
+    public void Stage2Step2_2_TradeGrid_CollectOpenPositionsAndCancelWrongCloseProfitOrders_WithMixedLineStates_ShouldPreserveOrderAndCountCancels()
+    {
+        TradeGrid grid = CreateBareGrid();
+
+        BotTabSimple tab = (BotTabSimple)RuntimeHelpers.GetUninitializedObject(typeof(BotTabSimple));
+        ConnectorCandles connector = (ConnectorCandles)RuntimeHelpers.GetUninitializedObject(typeof(ConnectorCandles));
+        SetPrivateField(tab, "_connector", connector);
+
+        Position cancelPosition = new Position();
+        cancelPosition.AddNewOpenOrder(new Order
+        {
+            State = OrderStateType.Done,
+            Volume = 2m,
+            VolumeExecute = 2m
+        });
+        cancelPosition.AddNewCloseOrder(new Order
+        {
+            State = OrderStateType.Active,
+            Price = 121m,
+            Volume = 2m,
+            VolumeExecute = 0m,
+            NumberMarket = "M-cancel",
+            LastCancelTryLocalTime = DateTime.Now.AddSeconds(-6)
+        });
+        cancelPosition.ProfitOrderPrice = 120m;
+
+        Position firstOpenPosition = new Position();
+        firstOpenPosition.AddNewOpenOrder(new Order
+        {
+            State = OrderStateType.Done,
+            Volume = 1m,
+            VolumeExecute = 1m
+        });
+        firstOpenPosition.ProfitOrderPrice = 110m;
+
+        Position noProfitPosition = new Position();
+        noProfitPosition.AddNewOpenOrder(new Order
+        {
+            State = OrderStateType.Done,
+            Volume = 1m,
+            VolumeExecute = 1m
+        });
+
+        Position secondOpenPosition = new Position();
+        secondOpenPosition.AddNewOpenOrder(new Order
+        {
+            State = OrderStateType.Done,
+            Volume = 3m,
+            VolumeExecute = 3m
+        });
+        secondOpenPosition.ProfitOrderPrice = 130m;
+
+        Position flatPosition = (Position)RuntimeHelpers.GetUninitializedObject(typeof(Position));
+        SetPrivateField(flatPosition, "_openOrders", new List<Order>());
+        SetPrivateField(flatPosition, "_closeOrders", new List<Order>());
+        flatPosition.ProfitOrderPrice = 140m;
+
+        TradeGridLine cancelLine = new TradeGridLine { Position = cancelPosition, PositionNum = 1 };
+        TradeGridLine firstOpenLine = new TradeGridLine { Position = firstOpenPosition, PositionNum = 2 };
+        TradeGridLine noProfitLine = new TradeGridLine { Position = noProfitPosition, PositionNum = 3 };
+        TradeGridLine secondOpenLine = new TradeGridLine { Position = secondOpenPosition, PositionNum = 4 };
+        TradeGridLine flatLine = new TradeGridLine { Position = flatPosition, PositionNum = 5 };
+
+        grid.GridCreator.Lines = new List<TradeGridLine>
+        {
+            null!,
+            cancelLine,
+            firstOpenLine,
+            noProfitLine,
+            secondOpenLine,
+            flatLine
+        };
+
+        MethodInfo method = typeof(TradeGrid).GetMethod(
+            "CollectOpenPositionsAndCancelWrongCloseProfitOrders",
+            BindingFlags.NonPublic | BindingFlags.Instance)
+            ?? throw new InvalidOperationException("CollectOpenPositionsAndCancelWrongCloseProfitOrders not found.");
+
+        object?[] args = { tab, 0 };
+        List<TradeGridLine> openPositions = (List<TradeGridLine>)(method.Invoke(grid, args)
+            ?? throw new InvalidOperationException("Collector returned null."));
+        int cancelledOrders = Assert.IsType<int>(args[1]);
+
+        Assert.Equal(1, cancelledOrders);
+        Assert.Equal(2, openPositions.Count);
+        Assert.Same(firstOpenLine, openPositions[0]);
+        Assert.Same(secondOpenLine, openPositions[1]);
+        Assert.DoesNotContain(cancelLine, openPositions);
+        Assert.DoesNotContain(noProfitLine, openPositions);
+        Assert.DoesNotContain(flatLine, openPositions);
+    }
+
+    [Fact]
     public void Stage2Step2_2_TradeGrid_GetLinesWithOpenOrdersNeed_WithEligibleBuyLine_ShouldReturnLine()
     {
         TradeGrid grid = CreateBareGrid();
