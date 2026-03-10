@@ -2322,82 +2322,76 @@ namespace OsEngine.OsTrader.Grids
                 return;
             }
 
-            TrySetClosingProfitOrdersCore(tab, security, lastPrice, linesAll);
+            for (int i = 0; i < linesAll.Count; i++)
+            {
+                TrySetClosingProfitOrderForLine(tab, security, lastPrice, linesAll[i]);
+            }
         }
 
         private void TrySetClosingProfitOrdersFromLines(BotTabSimple tab, Security security, decimal lastPrice, List<TradeGridLine> linesOpenPoses)
         {
-            TrySetClosingProfitOrdersCore(tab, security, lastPrice, linesOpenPoses);
+            for (int i = 0; i < linesOpenPoses.Count; i++)
+            {
+                TrySetClosingProfitOrderForLine(tab, security, lastPrice, linesOpenPoses[i]);
+            }
         }
 
-        private void TrySetClosingProfitOrdersCore(BotTabSimple tab, Security security, decimal lastPrice, List<TradeGridLine> lines)
+        private void TrySetClosingProfitOrderForLine(BotTabSimple tab, Security security, decimal lastPrice, TradeGridLine line)
         {
-            if (lines == null || lines.Count == 0)
+            if (line == null)
             {
                 return;
             }
 
-            bool checkMicroVolumes = CheckMicroVolumes;
-            decimal priceLimitHigh = security.PriceLimitHigh;
-            decimal priceLimitLow = security.PriceLimitLow;
-            bool havePriceLimits = priceLimitHigh != 0 && priceLimitLow != 0;
-            bool haveDistanceLimits = tab.StartProgram == StartProgram.IsOsTrader
+            Position pos = line.Position;
+            if (pos == null)
+            {
+                return;
+            }
+
+            if (pos.CloseActive == true)
+            {
+                return;
+            }
+
+            if (pos.ProfitOrderPrice == 0)
+            {
+                return;
+            }
+
+            decimal volume = pos.OpenVolume;
+
+            if (CheckMicroVolumes == true
+                && tab.CanTradeThisVolume(volume) == false)
+            {
+                return;
+            }
+
+            if (security.PriceLimitHigh != 0
+             && security.PriceLimitLow != 0)
+            {
+                if (line.PriceExit > security.PriceLimitHigh
+                    || line.PriceExit < security.PriceLimitLow)
+                {
+                    return;
+                }
+            }
+
+            if (tab.StartProgram == StartProgram.IsOsTrader
                 && MaxDistanceToOrdersPercent != 0
-                && lastPrice != 0;
-            decimal maxPriceUp = 0;
-            decimal minPriceDown = 0;
-
-            if (haveDistanceLimits)
+                && lastPrice != 0)
             {
-                decimal delta = lastPrice * (MaxDistanceToOrdersPercent / 100);
-                maxPriceUp = lastPrice + delta;
-                minPriceDown = lastPrice - delta;
+                decimal maxPriceUp = lastPrice + lastPrice * (MaxDistanceToOrdersPercent / 100);
+                decimal minPriceDown = lastPrice - lastPrice * (MaxDistanceToOrdersPercent / 100);
+
+                if (line.PriceExit > maxPriceUp
+                 || line.PriceExit < minPriceDown)
+                {
+                    return;
+                }
             }
 
-            for (int i = 0; i < lines.Count; i++)
-            {
-                TradeGridLine line = lines[i];
-                if (line == null)
-                {
-                    continue;
-                }
-
-                Position pos = line.Position;
-                if (pos == null || pos.CloseActive)
-                {
-                    continue;
-                }
-
-                decimal profitOrderPrice = pos.ProfitOrderPrice;
-                if (profitOrderPrice == 0)
-                {
-                    continue;
-                }
-
-                decimal volume = pos.OpenVolume;
-
-                if (checkMicroVolumes
-                    && tab.CanTradeThisVolume(volume) == false)
-                {
-                    continue;
-                }
-
-                decimal priceExit = line.PriceExit;
-
-                if (havePriceLimits
-                    && (priceExit > priceLimitHigh || priceExit < priceLimitLow))
-                {
-                    continue;
-                }
-
-                if (haveDistanceLimits
-                    && (priceExit > maxPriceUp || priceExit < minPriceDown))
-                {
-                    continue;
-                }
-
-                tab.CloseAtLimitUnsafe(pos, profitOrderPrice, volume);
-            }
+            tab.CloseAtLimitUnsafe(pos, pos.ProfitOrderPrice, volume);
         }
 
         private List<TradeGridLine> CollectOpenPositionsAndCancelWrongCloseProfitOrders(BotTabSimple tab, out int cancelledOrders)
