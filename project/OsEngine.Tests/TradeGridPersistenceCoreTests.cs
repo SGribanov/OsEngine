@@ -8081,6 +8081,88 @@ public class TradeGridPersistenceCoreTests
     }
 
     [Fact]
+    public void Stage2Step2_2_TradeGrid_GetQueryCollections_WithOpenOrdersNeedFilters_ShouldMatchWrappersAndPreserveEligibleOrder()
+    {
+        TradeGrid grid = CreateBareGrid();
+        grid.GridCreator.GridSide = Side.Buy;
+        grid.MaxOpenOrdersInMarket = 2;
+        grid.OpenOrdersMakerOnly = true;
+        grid.MaxDistanceToOrdersPercent = 5m;
+
+        BotTabSimple tab = (BotTabSimple)RuntimeHelpers.GetUninitializedObject(typeof(BotTabSimple));
+        tab.StartProgram = StartProgram.IsOsTrader;
+        ConnectorCandles connector = new ConnectorCandles("CodexGridQueryFilters", StartProgram.IsOsTrader, false);
+        SetPrivateField(tab, "_connector", connector);
+        SetPrivateField(tab, "_security", new Security
+        {
+            Name = connector.SecurityName,
+            PriceStep = 1m,
+            PriceLimitHigh = 110m,
+            PriceLimitLow = 90m
+        });
+        grid.Tab = tab;
+
+        Position openPosition = new Position();
+        openPosition.AddNewOpenOrder(new Order
+        {
+            State = OrderStateType.Done,
+            Volume = 1m,
+            VolumeExecute = 1m
+        });
+
+        Position activeOpenOrder = (Position)RuntimeHelpers.GetUninitializedObject(typeof(Position));
+        SetPrivateField(activeOpenOrder, "_openOrders", new List<Order>
+        {
+            new Order { State = OrderStateType.Active, Volume = 1m, VolumeExecute = 0m }
+        });
+        SetPrivateField(activeOpenOrder, "_closeOrders", new List<Order>());
+
+        TradeGridLine makerFiltered = new TradeGridLine { Side = Side.Buy, PriceEnter = 101m, PriceExit = 111m };
+        TradeGridLine firstEligible = new TradeGridLine { Side = Side.Buy, PriceEnter = 100m, PriceExit = 110m };
+        TradeGridLine distanceFiltered = new TradeGridLine { Side = Side.Buy, PriceEnter = 106m, PriceExit = 116m };
+        TradeGridLine secondEligible = new TradeGridLine { Side = Side.Buy, PriceEnter = 99m, PriceExit = 109m };
+        TradeGridLine openPositionLine = new TradeGridLine { Side = Side.Buy, PriceEnter = 98m, PriceExit = 108m, Position = openPosition };
+        TradeGridLine activeOpenLine = new TradeGridLine { Side = Side.Buy, PriceEnter = 97m, PriceExit = 107m, Position = activeOpenOrder };
+
+        grid.GridCreator.Lines = new List<TradeGridLine>
+        {
+            null!,
+            makerFiltered,
+            firstEligible,
+            distanceFiltered,
+            secondEligible,
+            openPositionLine,
+            activeOpenLine
+        };
+
+        var snapshot = grid.GetQueryCollections(100m);
+        List<TradeGridLine> openPositions = grid.GetLinesWithOpenPosition();
+        List<TradeGridLine> openNeed = grid.GetLinesWithOpenOrdersNeed(100m);
+        List<TradeGridLine> openFact = grid.GetLinesWithOpenOrdersFact();
+        List<TradeGridLine> closeFact = grid.GetLinesWithClosingOrdersFact();
+
+        Assert.Equal(openPositions, snapshot.OpenPositions);
+        Assert.Equal(openNeed, snapshot.OpenOrdersNeed);
+        Assert.Equal(openFact, snapshot.OpenOrdersFact);
+        Assert.Equal(closeFact, snapshot.ClosingOrdersFact);
+
+        Assert.Single(openPositions);
+        Assert.Same(openPositionLine, openPositions[0]);
+
+        Assert.Equal(2, openNeed.Count);
+        Assert.Same(firstEligible, openNeed[0]);
+        Assert.Same(secondEligible, openNeed[1]);
+        Assert.DoesNotContain(makerFiltered, openNeed);
+        Assert.DoesNotContain(distanceFiltered, openNeed);
+        Assert.DoesNotContain(openPositionLine, openNeed);
+        Assert.DoesNotContain(activeOpenLine, openNeed);
+
+        Assert.Single(openFact);
+        Assert.Same(activeOpenLine, openFact[0]);
+        Assert.Empty(closeFact);
+    }
+
+    [Fact]
     public void Stage2Step2_2_TradeGrid_GetQueryCollections_WithNullDependencies_ShouldReturnEmptyCollections()
     {
         TradeGrid grid = (TradeGrid)RuntimeHelpers.GetUninitializedObject(typeof(TradeGrid));
