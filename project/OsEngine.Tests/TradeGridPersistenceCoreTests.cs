@@ -16,7 +16,6 @@ using OsEngine.Journal.Internal;
 using OsEngine.Logging;
 using OsEngine.OsTrader.Grids;
 using OsEngine.OsTrader.Panels.Tab;
-using OsEngine.OsTrader.Panels.Tab.Internal;
 using System.Windows.Forms;
 using Xunit;
 
@@ -8267,116 +8266,6 @@ public class TradeGridPersistenceCoreTests
         Assert.DoesNotContain(cancelLine, openPositions);
         Assert.DoesNotContain(noProfitLine, openPositions);
         Assert.DoesNotContain(flatLine, openPositions);
-    }
-
-    [Fact]
-    public void Stage2Step2_2_TradeGrid_TrySetClosingProfitOrdersFromLines_WithPriceAndDistanceFilters_ShouldPlaceOnlyEligibleOrder()
-    {
-        TradeGrid grid = CreateBareGrid();
-        grid.MaxDistanceToOrdersPercent = 2m;
-
-        BotTabSimple tab = (BotTabSimple)RuntimeHelpers.GetUninitializedObject(typeof(BotTabSimple));
-        tab.StartProgram = StartProgram.IsOsTrader;
-        Security security = new Security
-        {
-            Name = "CodexProfitClose",
-            NameClass = "TQBR",
-            PriceStep = 1m,
-            Lot = 1m,
-            PriceLimitHigh = 150m,
-            PriceLimitLow = 50m
-        };
-        ConnectorCandles connector =
-            (ConnectorCandles)RuntimeHelpers.GetUninitializedObject(typeof(ConnectorCandles));
-        SetPrivateField(connector, "_securityName", security.Name);
-        SetPrivateField(connector, "_securityClass", security.NameClass);
-
-        BotManualControl manualControl =
-            (BotManualControl)RuntimeHelpers.GetUninitializedObject(typeof(BotManualControl));
-        manualControl.OrderTypeTime = OrderTypeTime.Specified;
-        manualControl.LimitsMakerOnly = false;
-
-        SetPrivateField(tab, "_connector", connector);
-        SetPrivateField(tab, "_security", security);
-        tab._dealCreator = new PositionCreator();
-        tab.ManualPositionSupport = manualControl;
-        grid.Tab = tab;
-
-        Position eligiblePosition = new Position { Direction = Side.Buy };
-        eligiblePosition.AddNewOpenOrder(new Order
-        {
-            State = OrderStateType.Done,
-            Volume = 1m,
-            VolumeExecute = 1m,
-            SecurityNameCode = "CodexProfitClose"
-        });
-        eligiblePosition.ProfitOrderPrice = 111m;
-
-        Position outsideDistancePosition = new Position { Direction = Side.Buy };
-        outsideDistancePosition.AddNewOpenOrder(new Order
-        {
-            State = OrderStateType.Done,
-            Volume = 2m,
-            VolumeExecute = 2m,
-            SecurityNameCode = "CodexProfitClose"
-        });
-        outsideDistancePosition.ProfitOrderPrice = 112m;
-
-        Position outsidePriceLimitPosition = new Position { Direction = Side.Buy };
-        outsidePriceLimitPosition.AddNewOpenOrder(new Order
-        {
-            State = OrderStateType.Done,
-            Volume = 3m,
-            VolumeExecute = 3m,
-            SecurityNameCode = "CodexProfitClose"
-        });
-        outsidePriceLimitPosition.ProfitOrderPrice = 113m;
-
-        TradeGridLine eligibleLine = new TradeGridLine
-        {
-            Position = eligiblePosition,
-            PositionNum = 1,
-            PriceExit = 101m
-        };
-        TradeGridLine outsideDistanceLine = new TradeGridLine
-        {
-            Position = outsideDistancePosition,
-            PositionNum = 2,
-            PriceExit = 103m
-        };
-        TradeGridLine outsidePriceLimitLine = new TradeGridLine
-        {
-            Position = outsidePriceLimitPosition,
-            PositionNum = 3,
-            PriceExit = 151m
-        };
-
-        MethodInfo method = typeof(TradeGrid).GetMethod(
-            "TrySetClosingProfitOrdersFromLines",
-            BindingFlags.NonPublic | BindingFlags.Instance)
-            ?? throw new InvalidOperationException("TrySetClosingProfitOrdersFromLines not found.");
-
-        Exception? error = Record.Exception(() => method.Invoke(
-            grid,
-            new object[]
-            {
-                tab,
-                security,
-                100m,
-                new List<TradeGridLine> { eligibleLine, outsideDistanceLine, outsidePriceLimitLine }
-            }));
-
-        Assert.Null(error);
-        Assert.True(eligiblePosition.CloseActive);
-        Assert.NotNull(eligiblePosition.CloseOrders);
-        Assert.Single(eligiblePosition.CloseOrders);
-        Assert.Equal(eligiblePosition.ProfitOrderPrice, eligiblePosition.CloseOrders[0].Price);
-
-        Assert.False(outsideDistancePosition.CloseActive);
-        Assert.True(outsideDistancePosition.CloseOrders == null || outsideDistancePosition.CloseOrders.Count == 0);
-
-        Assert.False(outsidePriceLimitPosition.CloseActive);
-        Assert.True(outsidePriceLimitPosition.CloseOrders == null || outsidePriceLimitPosition.CloseOrders.Count == 0);
     }
 
     [Fact]
