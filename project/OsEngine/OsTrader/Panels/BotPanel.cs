@@ -366,7 +366,7 @@ namespace OsEngine.OsTrader.Panels
                     for (int i = 0; i < parts.Length; i++)
                     {
                         string normalized = NormalizeMethodCachePart(parts[i]);
-                        hash = hash * 31 + StringComparer.Ordinal.GetHashCode(normalized);
+                        hash = hash * 31 + normalized.GetHashCode();
                     }
                 }
 
@@ -385,7 +385,7 @@ namespace OsEngine.OsTrader.Panels
             {
                 int hash = 17;
                 string normalized = part.ToString(CultureInfo.InvariantCulture);
-                hash = hash * 31 + StringComparer.Ordinal.GetHashCode(normalized);
+                hash = hash * 31 + normalized.GetHashCode();
                 return FormatMethodCacheParameterHash(hash);
             }
         }

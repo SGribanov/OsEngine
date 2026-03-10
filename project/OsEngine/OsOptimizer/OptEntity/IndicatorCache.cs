@@ -249,13 +249,13 @@ namespace OsEngine.OsOptimizer.OptEntity
                 hash = MixLong(hash, timeframeTicks);
                 hash = MixLong(hash, firstTimeTicks);
                 hash = MixLong(hash, lastTimeTicks);
-                hash = MixInt(hash, StringComparer.Ordinal.GetHashCode(securityName));
-                hash = MixInt(hash, StringComparer.Ordinal.GetHashCode(calculationName));
-                hash = MixInt(hash, StringComparer.Ordinal.GetHashCode(parametersHash));
+                hash = MixInt(hash, securityName.GetHashCode());
+                hash = MixInt(hash, calculationName.GetHashCode());
+                hash = MixInt(hash, parametersHash.GetHashCode());
                 hash = MixInt(hash, sourceIdIsToken ? 1 : 0);
                 hash = sourceIdIsToken
                     ? MixInt(hash, sourceIdToken)
-                    : MixInt(hash, StringComparer.Ordinal.GetHashCode(sourceId));
+                    : MixInt(hash, sourceId.GetHashCode());
                 return hash;
             }
         }

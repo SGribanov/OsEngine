@@ -936,7 +936,7 @@ namespace OsEngine.Indicators
                         string parameterSave = _parameters[i]?.GetStringToSave();
                         hash = hash * 31 + (parameterSave == null
                             ? 0
-                            : StringComparer.Ordinal.GetHashCode(parameterSave));
+                            : parameterSave.GetHashCode());
                     }
                 }
 
