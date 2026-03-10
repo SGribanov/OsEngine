@@ -2999,66 +2999,14 @@ namespace OsEngine.OsTrader.Grids
             }
 
             bool checkWrongCloseOrders = tab.StartProgram == StartProgram.IsOsTrader;
-
-            if (keepLastOpenPositionsCount < 0)
-            {
-                return CollectOpenPositionsAndCheckWrongCloseOrdersAll(tab, linesAll, checkWrongCloseOrders);
-            }
-
-            return CollectOpenPositionsAndCheckWrongCloseOrdersTail(tab, linesAll, checkWrongCloseOrders, keepLastOpenPositionsCount);
-        }
-
-        private static List<TradeGridLine> CollectOpenPositionsAndCheckWrongCloseOrdersAll(
-            BotTabSimple tab,
-            List<TradeGridLine> linesAll,
-            bool checkWrongCloseOrders)
-        {
-            List<TradeGridLine> openPositions = new List<TradeGridLine>(linesAll.Count);
-
-            for (int i = 0; i < linesAll.Count; i++)
-            {
-                TradeGridLine curLine = linesAll[i];
-                Position pos = curLine?.Position;
-
-                if (pos == null)
-                {
-                    continue;
-                }
-
-                decimal volumePosOpen = pos.OpenVolume;
-                bool closeActive = pos.CloseActive;
-
-                if (checkWrongCloseOrders
-                    && closeActive
-                    && TryGetLastOrder(pos.CloseOrders, out Order orderToClose))
-                {
-                    decimal volumeCloseOrder = orderToClose.Volume;
-                    decimal volumeExecuteCloseOrder = orderToClose.VolumeExecute;
-
-                    if (volumePosOpen != (volumeCloseOrder - volumeExecuteCloseOrder))
-                    {
-                        tab.CloseOrder(orderToClose);
-                    }
-                }
-
-                if (volumePosOpen != 0)
-                {
-                    openPositions.Add(curLine);
-                }
-            }
-
-            return openPositions;
-        }
-
-        private static List<TradeGridLine> CollectOpenPositionsAndCheckWrongCloseOrdersTail(
-            BotTabSimple tab,
-            List<TradeGridLine> linesAll,
-            bool checkWrongCloseOrders,
-            int keepLastOpenPositionsCount)
-        {
-            int boundedOpenPositionsCount = Math.Max(0, keepLastOpenPositionsCount);
-            List<TradeGridLine> openPositions = new List<TradeGridLine>(Math.Min(linesAll.Count, boundedOpenPositionsCount));
-            TradeGridLine[] tailOpenPositions = boundedOpenPositionsCount > 0
+            bool keepAllOpenPositions = keepLastOpenPositionsCount < 0;
+            int boundedOpenPositionsCount = keepAllOpenPositions
+                ? linesAll.Count
+                : keepLastOpenPositionsCount;
+            List<TradeGridLine> openPositions = keepAllOpenPositions
+                ? new List<TradeGridLine>(linesAll.Count)
+                : new List<TradeGridLine>(Math.Min(linesAll.Count, Math.Max(0, keepLastOpenPositionsCount)));
+            TradeGridLine[] tailOpenPositions = !keepAllOpenPositions && boundedOpenPositionsCount > 0
                 ? new TradeGridLine[boundedOpenPositionsCount]
                 : null;
             int tailStartIndex = 0;
@@ -3067,7 +3015,11 @@ namespace OsEngine.OsTrader.Grids
             for (int i = 0; i < linesAll.Count; i++)
             {
                 TradeGridLine curLine = linesAll[i];
-                Position pos = curLine?.Position;
+                if (curLine == null)
+                {
+                    continue;
+                }
+                Position pos = curLine.Position;
 
                 if (pos == null)
                 {
@@ -3075,10 +3027,9 @@ namespace OsEngine.OsTrader.Grids
                 }
 
                 decimal volumePosOpen = pos.OpenVolume;
-                bool closeActive = pos.CloseActive;
 
                 if (checkWrongCloseOrders
-                    && closeActive)
+                    && pos.CloseActive == true)
                 {
                     if (TryGetLastOrder(pos.CloseOrders, out Order orderToClose))
                     {
@@ -3094,29 +3045,32 @@ namespace OsEngine.OsTrader.Grids
 
                 if (volumePosOpen != 0)
                 {
-                    if (tailOpenPositions == null)
+                    if (keepAllOpenPositions)
                     {
-                        continue;
+                        openPositions.Add(curLine);
                     }
-
-                    if (tailCount < tailOpenPositions.Length)
+                    else if (tailOpenPositions != null)
                     {
-                        tailOpenPositions[tailCount] = curLine;
-                        tailCount++;
-                    }
-                    else
-                    {
-                        tailOpenPositions[tailStartIndex] = curLine;
-                        tailStartIndex++;
-                        if (tailStartIndex >= tailOpenPositions.Length)
+                        if (tailCount < tailOpenPositions.Length)
                         {
-                            tailStartIndex = 0;
+                            tailOpenPositions[tailCount] = curLine;
+                            tailCount++;
+                        }
+                        else
+                        {
+                            tailOpenPositions[tailStartIndex] = curLine;
+                            tailStartIndex++;
+                            if (tailStartIndex >= tailOpenPositions.Length)
+                            {
+                                tailStartIndex = 0;
+                            }
                         }
                     }
                 }
             }
 
-            if (tailOpenPositions != null
+            if (keepAllOpenPositions == false
+                && tailOpenPositions != null
                 && tailCount > 0)
             {
                 int boundedCount = tailCount;
