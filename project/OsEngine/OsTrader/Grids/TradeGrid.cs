@@ -2369,7 +2369,7 @@ namespace OsEngine.OsTrader.Grids
 
             List<TradeGridLine> openPositions = new List<TradeGridLine>(linesAll.Count);
             cancelledOrders = 0;
-            DateTime now = DateTime.Now;
+            DateTime cancelCutoff = DateTime.Now.AddSeconds(-5);
 
             for (int i = 0; i < linesAll.Count; i++)
             {
@@ -2385,20 +2385,24 @@ namespace OsEngine.OsTrader.Grids
                     continue;
                 }
 
-                if (pos.CloseActive
+                decimal openVolume = pos.OpenVolume;
+                bool closeActive = pos.CloseActive;
+                decimal profitOrderPrice = pos.ProfitOrderPrice;
+
+                if (closeActive
                     && TryGetLastOrder(pos.CloseOrders, out Order order)
                     && order.NumberMarket != null
-                    && order.LastCancelTryLocalTime.AddSeconds(5) < now
-                    && (order.Price != pos.ProfitOrderPrice
-                        || order.Volume - order.VolumeExecute != pos.OpenVolume))
+                    && order.LastCancelTryLocalTime < cancelCutoff
+                    && (order.Price != profitOrderPrice
+                        || order.Volume - order.VolumeExecute != openVolume))
                 {
                     tab.CloseOrder(order);
                     cancelledOrders++;
                 }
 
-                if (pos.OpenVolume != 0
-                    && pos.CloseActive == false
-                    && pos.ProfitOrderPrice != 0)
+                if (openVolume != 0
+                    && closeActive == false
+                    && profitOrderPrice != 0)
                 {
                     openPositions.Add(line);
                 }
@@ -2995,14 +2999,66 @@ namespace OsEngine.OsTrader.Grids
             }
 
             bool checkWrongCloseOrders = tab.StartProgram == StartProgram.IsOsTrader;
-            bool keepAllOpenPositions = keepLastOpenPositionsCount < 0;
-            int boundedOpenPositionsCount = keepAllOpenPositions
-                ? linesAll.Count
-                : keepLastOpenPositionsCount;
-            List<TradeGridLine> openPositions = keepAllOpenPositions
-                ? new List<TradeGridLine>(linesAll.Count)
-                : new List<TradeGridLine>(Math.Min(linesAll.Count, Math.Max(0, keepLastOpenPositionsCount)));
-            TradeGridLine[] tailOpenPositions = !keepAllOpenPositions && boundedOpenPositionsCount > 0
+
+            if (keepLastOpenPositionsCount < 0)
+            {
+                return CollectOpenPositionsAndCheckWrongCloseOrdersAll(tab, linesAll, checkWrongCloseOrders);
+            }
+
+            return CollectOpenPositionsAndCheckWrongCloseOrdersTail(tab, linesAll, checkWrongCloseOrders, keepLastOpenPositionsCount);
+        }
+
+        private static List<TradeGridLine> CollectOpenPositionsAndCheckWrongCloseOrdersAll(
+            BotTabSimple tab,
+            List<TradeGridLine> linesAll,
+            bool checkWrongCloseOrders)
+        {
+            List<TradeGridLine> openPositions = new List<TradeGridLine>(linesAll.Count);
+
+            for (int i = 0; i < linesAll.Count; i++)
+            {
+                TradeGridLine curLine = linesAll[i];
+                Position pos = curLine?.Position;
+
+                if (pos == null)
+                {
+                    continue;
+                }
+
+                decimal volumePosOpen = pos.OpenVolume;
+                bool closeActive = pos.CloseActive;
+
+                if (checkWrongCloseOrders
+                    && closeActive
+                    && TryGetLastOrder(pos.CloseOrders, out Order orderToClose))
+                {
+                    decimal volumeCloseOrder = orderToClose.Volume;
+                    decimal volumeExecuteCloseOrder = orderToClose.VolumeExecute;
+
+                    if (volumePosOpen != (volumeCloseOrder - volumeExecuteCloseOrder))
+                    {
+                        tab.CloseOrder(orderToClose);
+                    }
+                }
+
+                if (volumePosOpen != 0)
+                {
+                    openPositions.Add(curLine);
+                }
+            }
+
+            return openPositions;
+        }
+
+        private static List<TradeGridLine> CollectOpenPositionsAndCheckWrongCloseOrdersTail(
+            BotTabSimple tab,
+            List<TradeGridLine> linesAll,
+            bool checkWrongCloseOrders,
+            int keepLastOpenPositionsCount)
+        {
+            int boundedOpenPositionsCount = Math.Max(0, keepLastOpenPositionsCount);
+            List<TradeGridLine> openPositions = new List<TradeGridLine>(Math.Min(linesAll.Count, boundedOpenPositionsCount));
+            TradeGridLine[] tailOpenPositions = boundedOpenPositionsCount > 0
                 ? new TradeGridLine[boundedOpenPositionsCount]
                 : null;
             int tailStartIndex = 0;
@@ -3011,11 +3067,7 @@ namespace OsEngine.OsTrader.Grids
             for (int i = 0; i < linesAll.Count; i++)
             {
                 TradeGridLine curLine = linesAll[i];
-                if (curLine == null)
-                {
-                    continue;
-                }
-                Position pos = curLine.Position;
+                Position pos = curLine?.Position;
 
                 if (pos == null)
                 {
@@ -3023,9 +3075,10 @@ namespace OsEngine.OsTrader.Grids
                 }
 
                 decimal volumePosOpen = pos.OpenVolume;
+                bool closeActive = pos.CloseActive;
 
                 if (checkWrongCloseOrders
-                    && pos.CloseActive == true)
+                    && closeActive)
                 {
                     if (TryGetLastOrder(pos.CloseOrders, out Order orderToClose))
                     {
@@ -3041,32 +3094,29 @@ namespace OsEngine.OsTrader.Grids
 
                 if (volumePosOpen != 0)
                 {
-                    if (keepAllOpenPositions)
+                    if (tailOpenPositions == null)
                     {
-                        openPositions.Add(curLine);
+                        continue;
                     }
-                    else if (tailOpenPositions != null)
+
+                    if (tailCount < tailOpenPositions.Length)
                     {
-                        if (tailCount < tailOpenPositions.Length)
+                        tailOpenPositions[tailCount] = curLine;
+                        tailCount++;
+                    }
+                    else
+                    {
+                        tailOpenPositions[tailStartIndex] = curLine;
+                        tailStartIndex++;
+                        if (tailStartIndex >= tailOpenPositions.Length)
                         {
-                            tailOpenPositions[tailCount] = curLine;
-                            tailCount++;
-                        }
-                        else
-                        {
-                            tailOpenPositions[tailStartIndex] = curLine;
-                            tailStartIndex++;
-                            if (tailStartIndex >= tailOpenPositions.Length)
-                            {
-                                tailStartIndex = 0;
-                            }
+                            tailStartIndex = 0;
                         }
                     }
                 }
             }
 
-            if (keepAllOpenPositions == false
-                && tailOpenPositions != null
+            if (tailOpenPositions != null
                 && tailCount > 0)
             {
                 int boundedCount = tailCount;
