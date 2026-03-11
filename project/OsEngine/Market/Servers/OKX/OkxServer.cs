@@ -315,12 +315,18 @@ namespace OsEngine.Market.Servers.OKX
         private HttpClient _privateHttpClient;
         private readonly Lock _privateHttpClientLocker = new();
 
+        private HttpClient CreatePrivateHttpClient()
+        {
+            return new HttpClient(new HttpInterceptor(_publicKey, _secretKey, _password, _demoMode, _myProxy));
+        }
+
         private void RecreatePrivateHttpClient()
         {
             lock (_privateHttpClientLocker)
             {
-                _privateHttpClient?.Dispose();
-                _privateHttpClient = new HttpClient(new HttpInterceptor(_publicKey, _secretKey, _password, _demoMode, _myProxy));
+                HttpClient previousClient = _privateHttpClient;
+                _privateHttpClient = CreatePrivateHttpClient();
+                previousClient?.Dispose();
             }
         }
 
@@ -330,7 +336,7 @@ namespace OsEngine.Market.Servers.OKX
             {
                 if (_privateHttpClient == null)
                 {
-                    _privateHttpClient = new HttpClient(new HttpInterceptor(_publicKey, _secretKey, _password, _demoMode, _myProxy));
+                    _privateHttpClient = CreatePrivateHttpClient();
                 }
 
                 return _privateHttpClient;
@@ -341,8 +347,9 @@ namespace OsEngine.Market.Servers.OKX
         {
             lock (_privateHttpClientLocker)
             {
-                _privateHttpClient?.Dispose();
+                HttpClient currentClient = _privateHttpClient;
                 _privateHttpClient = null;
+                currentClient?.Dispose();
             }
         }
 
