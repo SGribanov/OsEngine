@@ -357,6 +357,21 @@ namespace OsEngine.Market.Servers.OKX
             return client.Execute(request);
         }
 
+        private static CandlesResponse ParsePublicCandlesResponse(string responseContent)
+        {
+            return JsonConvert.DeserializeAnonymousType(responseContent, new CandlesResponse());
+        }
+
+        private static TradesDataResponse ParsePublicTradesDataResponse(string responseContent)
+        {
+            return JsonConvert.DeserializeAnonymousType(responseContent, new TradesDataResponse());
+        }
+
+        private static ResponseRestMessage<List<FundingItemHistory>> ParsePublicFundingHistoryResponse(string responseContent)
+        {
+            return JsonConvert.DeserializeAnonymousType(responseContent, new ResponseRestMessage<List<FundingItemHistory>>());
+        }
+
         private HttpClient _privateHttpClient;
         private readonly Lock _privateHttpClientLocker = new();
 
@@ -925,7 +940,7 @@ namespace OsEngine.Market.Servers.OKX
 
                     if (Response.StatusCode == HttpStatusCode.OK)
                     {
-                        candlesResponse.data.AddRange(JsonConvert.DeserializeAnonymousType(Response.Content, new CandlesResponse()).data);
+                        candlesResponse.data.AddRange(ParsePublicCandlesResponse(Response.Content).data);
                     }
                     else
                     {
@@ -1082,7 +1097,7 @@ namespace OsEngine.Market.Servers.OKX
 
                 if (response.StatusCode == HttpStatusCode.OK)
                 {
-                    TradesDataResponse tradesResponse = JsonConvert.DeserializeAnonymousType(response.Content, new TradesDataResponse());
+                    TradesDataResponse tradesResponse = ParsePublicTradesDataResponse(response.Content);
 
                     if (tradesResponse.code == "0")
                     {
@@ -1783,7 +1798,7 @@ namespace OsEngine.Market.Servers.OKX
 
                 if (response.StatusCode == HttpStatusCode.OK)
                 {
-                    ResponseRestMessage<List<FundingItemHistory>> responseFunding = JsonConvert.DeserializeAnonymousType(response.Content, new ResponseRestMessage<List<FundingItemHistory>>());
+                    ResponseRestMessage<List<FundingItemHistory>> responseFunding = ParsePublicFundingHistoryResponse(response.Content);
 
                     if (responseFunding.code == "0")
                     {
