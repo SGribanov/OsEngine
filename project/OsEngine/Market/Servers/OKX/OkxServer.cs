@@ -382,6 +382,11 @@ namespace OsEngine.Market.Servers.OKX
             return JsonConvert.DeserializeAnonymousType(responseContent, new ResponseRestMessage<List<ResponseWsOrders>>());
         }
 
+        private static ResponseWsMessageAction<T> ParseWebSocketActionResponse<T>(string message)
+        {
+            return JsonConvert.DeserializeAnonymousType(message, new ResponseWsMessageAction<T>());
+        }
+
         private HttpClient _privateHttpClient;
         private readonly Lock _privateHttpClientLocker = new();
 
@@ -2018,7 +2023,7 @@ namespace OsEngine.Market.Servers.OKX
                             continue;
                         }
 
-                        ResponseWsMessageAction<object> action = JsonConvert.DeserializeAnonymousType(message, new ResponseWsMessageAction<object>());
+                        ResponseWsMessageAction<object> action = ParseWebSocketActionResponse<object>(message);
 
                         if (action.@event != null && action.@event.Contains("subscribe"))
                         {
@@ -2156,7 +2161,7 @@ namespace OsEngine.Market.Servers.OKX
                             continue;
                         }
 
-                        ResponseWsMessageAction<object> action = JsonConvert.DeserializeAnonymousType(message, new ResponseWsMessageAction<object>());
+                        ResponseWsMessageAction<object> action = ParseWebSocketActionResponse<object>(message);
 
                         if (action.arg != null)
                         {
@@ -2199,7 +2204,7 @@ namespace OsEngine.Market.Servers.OKX
         {
             try
             {
-                ResponseWsMessageAction<List<ResponseMessagePositions>> positions = JsonConvert.DeserializeAnonymousType(message, new ResponseWsMessageAction<List<ResponseMessagePositions>>());
+                ResponseWsMessageAction<List<ResponseMessagePositions>> positions = ParseWebSocketActionResponse<List<ResponseMessagePositions>>(message);
 
                 if (positions.data == null || Portfolios == null)
                 {
@@ -2288,7 +2293,7 @@ namespace OsEngine.Market.Servers.OKX
         {
             try
             {
-                ResponseWsMessageAction<List<ResponseWsAccount>> assets = JsonConvert.DeserializeAnonymousType(message, new ResponseWsMessageAction<List<ResponseWsAccount>>());
+                ResponseWsMessageAction<List<ResponseWsAccount>> assets = ParseWebSocketActionResponse<List<ResponseWsAccount>>(message);
 
                 if (Portfolios == null)
                 {
@@ -2621,7 +2626,7 @@ namespace OsEngine.Market.Servers.OKX
         {
             try
             {
-                ResponseWsMessageAction<List<ResponseWsDepthItem>> responseDepth = JsonConvert.DeserializeAnonymousType(message, new ResponseWsMessageAction<List<ResponseWsDepthItem>>());
+                ResponseWsMessageAction<List<ResponseWsDepthItem>> responseDepth = ParseWebSocketActionResponse<List<ResponseWsDepthItem>>(message);
 
                 if (responseDepth.data == null)
                 {
@@ -2699,7 +2704,7 @@ namespace OsEngine.Market.Servers.OKX
         {
             try
             {
-                ResponseWsMessageAction<List<ResponseWsTrade>> tradeRespone = JsonConvert.DeserializeAnonymousType(message, new ResponseWsMessageAction<List<ResponseWsTrade>>());
+                ResponseWsMessageAction<List<ResponseWsTrade>> tradeRespone = ParseWebSocketActionResponse<List<ResponseWsTrade>>(message);
 
                 if (tradeRespone.data == null)
                 {
@@ -2765,7 +2770,7 @@ namespace OsEngine.Market.Servers.OKX
         {
             try
             {
-                ResponseWsMessageAction<List<ResponseWsOrders>> OrderResponse = JsonConvert.DeserializeAnonymousType(message, new ResponseWsMessageAction<List<ResponseWsOrders>>());
+                ResponseWsMessageAction<List<ResponseWsOrders>> OrderResponse = ParseWebSocketActionResponse<List<ResponseWsOrders>>(message);
 
                 if (OrderResponse.data == null || OrderResponse.data.Count == 0)
                 {
@@ -2962,7 +2967,7 @@ namespace OsEngine.Market.Servers.OKX
         {
             try
             {
-                ResponseWsMessageAction<List<ResponseWsGreeks>> response = JsonConvert.DeserializeAnonymousType(message, new ResponseWsMessageAction<List<ResponseWsGreeks>>());
+                ResponseWsMessageAction<List<ResponseWsGreeks>> response = ParseWebSocketActionResponse<List<ResponseWsGreeks>>(message);
 
                 if (response.data == null || response.data.Count == 0)
                 {
@@ -3027,7 +3032,7 @@ namespace OsEngine.Market.Servers.OKX
         {
             try
             {
-                ResponseWsMessageAction<List<ResponseWsOpenInterest>> response = JsonConvert.DeserializeAnonymousType(message, new ResponseWsMessageAction<List<ResponseWsOpenInterest>>());
+                ResponseWsMessageAction<List<ResponseWsOpenInterest>> response = ParseWebSocketActionResponse<List<ResponseWsOpenInterest>>(message);
 
                 if (response.data == null || response.data.Count == 0)
                 {
@@ -3057,7 +3062,7 @@ namespace OsEngine.Market.Servers.OKX
         {
             try
             {
-                ResponseWsMessageAction<List<ResponseWsMarkPrice>> response = JsonConvert.DeserializeAnonymousType(message, new ResponseWsMessageAction<List<ResponseWsMarkPrice>>());
+                ResponseWsMessageAction<List<ResponseWsMarkPrice>> response = ParseWebSocketActionResponse<List<ResponseWsMarkPrice>>(message);
 
                 if (response.data == null || response.data.Count == 0)
                 {
@@ -3102,7 +3107,7 @@ namespace OsEngine.Market.Servers.OKX
         {
             try
             {
-                ResponseWsMessageAction<List<FundingItem>> response = JsonConvert.DeserializeAnonymousType(message, new ResponseWsMessageAction<List<FundingItem>>());
+                ResponseWsMessageAction<List<FundingItem>> response = ParseWebSocketActionResponse<List<FundingItem>>(message);
 
                 if (response.data == null || response.data.Count == 0)
                 {
@@ -3138,7 +3143,7 @@ namespace OsEngine.Market.Servers.OKX
         {
             try
             {
-                ResponseWsMessageAction<List<TickerItem>> response = JsonConvert.DeserializeAnonymousType(message, new ResponseWsMessageAction<List<TickerItem>>());
+                ResponseWsMessageAction<List<TickerItem>> response = ParseWebSocketActionResponse<List<TickerItem>>(message);
 
                 if (response.data == null || response.data.Count == 0)
                 {
