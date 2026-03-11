@@ -8903,6 +8903,131 @@ public class TradeGridPersistenceCoreTests
     }
 
     [Fact]
+    public void Stage2Step2_2_TradeGrid_GridTypeOpenPositionLogic_WithZeroCancelOpenOrdersAtLimit_ShouldKeepExistingState()
+    {
+        TradeGrid grid = CreateBareGrid();
+        grid.GridCreator.GridSide = Side.Buy;
+        grid.MaxOpenOrdersInMarket = 2;
+        grid.OpenOrdersMakerOnly = true;
+        grid.AutoClearJournalIsOn = false;
+
+        BotTabSimple tab = (BotTabSimple)RuntimeHelpers.GetUninitializedObject(typeof(BotTabSimple));
+        ConnectorCandles connector = (ConnectorCandles)RuntimeHelpers.GetUninitializedObject(typeof(ConnectorCandles));
+        connector.StartProgram = StartProgram.IsTester;
+
+        Security security = new Security
+        {
+            Name = "CodexGridZeroCancelOpenOrders",
+            PriceStep = 1m,
+            PriceLimitHigh = 200m,
+            PriceLimitLow = 1m
+        };
+
+        TimeFrameBuilder builder = new TimeFrameBuilder("CodexGridZeroCancelOpenOrders", StartProgram.IsTester);
+        CandleSeries series = new CandleSeries(builder, security, StartProgram.IsTester)
+        {
+            CandlesAll = new List<Candle> { new Candle { TimeStart = DateTime.UtcNow, Close = 100m } }
+        };
+
+        TesterServer server = (TesterServer)RuntimeHelpers.GetUninitializedObject(typeof(TesterServer));
+        server.LastStartServerTime = DateTime.UtcNow.AddMinutes(-10);
+
+        SetPrivateField(server, "_serverConnectStatus", ServerConnectStatus.Connect);
+        SetPrivateField(server, "_serverTime", DateTime.UtcNow);
+        SetPrivateField(connector, "_securityName", security.Name);
+        SetPrivateField(connector, "_mySeries", series);
+        SetPrivateField(connector, "_myServer", server);
+        SetPrivateField(connector, "_bestAsk", 101m);
+        SetPrivateField(connector, "_bestBid", 99m);
+        SetPrivateField(tab, "_connector", connector);
+        SetPrivateField(tab, "_security", security);
+        grid.Tab = tab;
+        List<string> errorMessages = new List<string>();
+        grid.LogMessageEvent += (message, type) =>
+        {
+            if (type == LogMessageType.Error)
+            {
+                errorMessages.Add(message);
+            }
+        };
+
+        Position firstPosition = (Position)RuntimeHelpers.GetUninitializedObject(typeof(Position));
+        SetPrivateField(firstPosition, "_openOrders", new List<Order>
+        {
+            new Order
+            {
+                State = OrderStateType.Active,
+                Price = 99m,
+                Volume = 1m,
+                VolumeExecute = 0m
+            }
+        });
+        SetPrivateField(firstPosition, "_closeOrders", new List<Order>());
+
+        Position secondPosition = (Position)RuntimeHelpers.GetUninitializedObject(typeof(Position));
+        SetPrivateField(secondPosition, "_openOrders", new List<Order>
+        {
+            new Order
+            {
+                State = OrderStateType.Active,
+                Price = 98m,
+                Volume = 1m,
+                VolumeExecute = 0m
+            }
+        });
+        SetPrivateField(secondPosition, "_closeOrders", new List<Order>());
+
+        TradeGridLine firstLine = new TradeGridLine
+        {
+            PriceEnter = 99m,
+            PriceExit = 109m,
+            Side = Side.Buy,
+            Volume = 1m,
+            Position = firstPosition
+        };
+        TradeGridLine secondLine = new TradeGridLine
+        {
+            PriceEnter = 98m,
+            PriceExit = 108m,
+            Side = Side.Buy,
+            Volume = 1m,
+            Position = secondPosition
+        };
+        TradeGridLine thirdLine = new TradeGridLine
+        {
+            PriceEnter = 97m,
+            PriceExit = 107m,
+            Side = Side.Buy,
+            Volume = 1m
+        };
+        TradeGridLine fourthLine = new TradeGridLine
+        {
+            PriceEnter = 96m,
+            PriceExit = 106m,
+            Side = Side.Buy,
+            Volume = 1m
+        };
+
+        grid.GridCreator.Lines = new List<TradeGridLine>
+        {
+            firstLine,
+            secondLine,
+            thirdLine,
+            fourthLine
+        };
+
+        Exception? error = Record.Exception(() =>
+            InvokePrivateWithArgs(grid, "GridTypeOpenPositionLogic", TradeGridRegime.On));
+
+        Assert.Null(error);
+        Assert.Same(firstPosition, firstLine.Position);
+        Assert.Same(secondPosition, secondLine.Position);
+        Assert.Null(thirdLine.Position);
+        Assert.Null(fourthLine.Position);
+        Assert.Empty(errorMessages);
+    }
+
+    [Fact]
     public void Stage2Step2_2_TradeGrid_GetOrdersBadLinesMaxCount_WithNullOpenLines_ShouldReturnEmpty()
     {
         TradeGrid grid = (TradeGrid)RuntimeHelpers.GetUninitializedObject(typeof(TradeGrid));
@@ -9051,7 +9176,7 @@ public class TradeGridPersistenceCoreTests
     {
         TradeGrid grid = (TradeGrid)RuntimeHelpers.GetUninitializedObject(typeof(TradeGrid));
 
-        MethodInfo method = typeof(TradeGrid).GetMethod("TryRemoveWrongOrders", BindingFlags.NonPublic | BindingFlags.Instance)
+        MethodInfo method = GetPrivateMethod(typeof(TradeGrid), "TryRemoveWrongOrders", 0)
             ?? throw new InvalidOperationException("Method TryRemoveWrongOrders not found.");
 
         int cancelledOrders = (int)(method.Invoke(grid, null)
@@ -9324,16 +9449,38 @@ public class TradeGridPersistenceCoreTests
 
     private static void InvokePrivateNoArg(object target, string methodName)
     {
-        MethodInfo method = target.GetType().GetMethod(methodName, BindingFlags.NonPublic | BindingFlags.Instance)
+        MethodInfo method = GetPrivateMethod(target.GetType(), methodName, 0)
             ?? throw new InvalidOperationException($"Method {methodName} not found.");
         method.Invoke(target, null);
     }
 
     private static void InvokePrivateWithArgs(object target, string methodName, params object[] args)
     {
-        MethodInfo method = target.GetType().GetMethod(methodName, BindingFlags.NonPublic | BindingFlags.Instance)
+        MethodInfo method = GetPrivateMethod(target.GetType(), methodName, args.Length)
             ?? throw new InvalidOperationException($"Method {methodName} not found.");
         method.Invoke(target, args);
+    }
+
+    private static MethodInfo? GetPrivateMethod(Type type, string methodName, int parameterCount)
+    {
+        MethodInfo[] methods = type.GetMethods(BindingFlags.NonPublic | BindingFlags.Instance);
+
+        for (int i = 0; i < methods.Length; i++)
+        {
+            MethodInfo method = methods[i];
+
+            if (method.Name != methodName)
+            {
+                continue;
+            }
+
+            if (method.GetParameters().Length == parameterCount)
+            {
+                return method;
+            }
+        }
+
+        return null;
     }
 
     private static void SetPrivateField(object target, string fieldName, object value)

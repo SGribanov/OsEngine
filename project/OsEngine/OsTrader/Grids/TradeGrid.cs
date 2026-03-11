@@ -70,6 +70,39 @@ namespace OsEngine.OsTrader.Grids
             public List<TradeGridLine> ClosingOrdersFact { get; }
         }
 
+        private readonly struct OpenOrdersPlacementContext
+        {
+            public OpenOrdersPlacementContext(
+                decimal lastPrice,
+                List<TradeGridLine> sourceLines,
+                List<TradeGridLine> openOrdersNeed,
+                int openOrdersFactCount)
+            {
+                LastPrice = lastPrice;
+                SourceLines = sourceLines;
+                OpenOrdersNeed = openOrdersNeed;
+                OpenOrdersFactCount = openOrdersFactCount;
+            }
+
+            public decimal LastPrice { get; }
+
+            public List<TradeGridLine> SourceLines { get; }
+
+            public List<TradeGridLine> OpenOrdersNeed { get; }
+
+            public int OpenOrdersFactCount { get; }
+
+            public bool IsReusable
+            {
+                get
+                {
+                    return LastPrice != 0
+                        && SourceLines != null
+                        && OpenOrdersNeed != null;
+                }
+            }
+        }
+
         private readonly struct OpenOrdersNeedFilterContext
         {
             public OpenOrdersNeedFilterContext(
@@ -2105,7 +2138,7 @@ namespace OsEngine.OsTrader.Grids
 
             // 2 удаляем ордера стоящие не на своём месте
 
-            int countRejectOrders = TryRemoveWrongOrders();
+            int countRejectOrders = TryRemoveWrongOrders(out OpenOrdersPlacementContext openOrdersPlacementContext);
 
             if (countRejectOrders > 0)
             {
@@ -2125,7 +2158,7 @@ namespace OsEngine.OsTrader.Grids
                     TryFreeJournal();
 
                     // 2 проверяем выставлены ли ордера на открытие
-                    TrySetOpenOrders();
+                    TrySetOpenOrders(openOrdersPlacementContext);
 
                     // 3 проверяем выставлены ли закрытия
                     TrySetStopAndProfit();
@@ -2533,7 +2566,7 @@ namespace OsEngine.OsTrader.Grids
 
             // 2 удаляем ордера стоящие не на своём месте
 
-            int countRejectOrders = TryRemoveWrongOrders();
+            int countRejectOrders = TryRemoveWrongOrders(out OpenOrdersPlacementContext openOrdersPlacementContext);
 
             if (countRejectOrders > 0)
             {
@@ -2549,7 +2582,7 @@ namespace OsEngine.OsTrader.Grids
                 TryFreeJournal();
 
                 // 2 проверяем выставлены ли ордера на открытие
-                TrySetOpenOrders();
+                TrySetOpenOrders(openOrdersPlacementContext);
 
                 // 3 проверяем выставлены ли закрытия
                 TrySetClosingOrders(tab.PriceBestAsk);
@@ -2603,6 +2636,13 @@ namespace OsEngine.OsTrader.Grids
 
         private int TryRemoveWrongOrders()
         {
+            return TryRemoveWrongOrders(out _);
+        }
+
+        private int TryRemoveWrongOrders(out OpenOrdersPlacementContext openOrdersPlacementContext)
+        {
+            openOrdersPlacementContext = default;
+
             BotTabSimple tab = Tab;
             TradeGridCreator gridCreator = GridCreator;
             if (tab == null || gridCreator == null)
@@ -2619,12 +2659,19 @@ namespace OsEngine.OsTrader.Grids
 
             // 1 убираем ордера на открытие и закрытие с неправильной ценой.
 
+            QueryCollectionFlags queryFlags = QueryCollectionFlags.OpenOrdersNeed
+                | QueryCollectionFlags.OpenOrdersFact
+                | QueryCollectionFlags.ClosingOrdersFact;
+
+            bool needOpenPositions = GridType == TradeGridPrimeType.MarketMaking;
+            if (needOpenPositions)
+            {
+                queryFlags |= QueryCollectionFlags.OpenPositions;
+            }
+
             QueryCollectionsSnapshotCore queryCollections = GetQueryCollectionsSnapshotCore(
                 lastPrice,
-                QueryCollectionFlags.OpenPositions
-                | QueryCollectionFlags.OpenOrdersNeed
-                | QueryCollectionFlags.OpenOrdersFact
-                | QueryCollectionFlags.ClosingOrdersFact);
+                queryFlags);
             List<TradeGridLine> linesWithOpenPositions = queryCollections.OpenPositions;
             List<TradeGridLine> linesWithOrdersToOpenNeed = queryCollections.OpenOrdersNeed;
             List<TradeGridLine> linesWithOrdersToOpenFact = queryCollections.OpenOrdersFact;
@@ -2680,7 +2727,7 @@ namespace OsEngine.OsTrader.Grids
             // Когда в сетке больше ордеров чем указал пользователь
             // И когда объём на закрытие не совпадает с тем что в ордере закрывающем
 
-            if (GridType == TradeGridPrimeType.MarketMaking)
+            if (needOpenPositions)
             {
                 List<Order> ordersToCancelCloseOrders = GetCloseOrdersGridHoleFromLines(linesWithOpenPositions);
 
@@ -2694,6 +2741,16 @@ namespace OsEngine.OsTrader.Grids
 
                     return ordersToCancelCloseOrders.Count;
                 }
+            }
+
+            if (linesWithOrdersToOpenNeed != null
+                && linesWithOrdersToOpenFact != null)
+            {
+                openOrdersPlacementContext = new OpenOrdersPlacementContext(
+                    lastPrice,
+                    gridCreator.Lines,
+                    linesWithOrdersToOpenNeed,
+                    linesWithOrdersToOpenFact.Count);
             }
 
             return 0;
@@ -3231,6 +3288,11 @@ namespace OsEngine.OsTrader.Grids
 
         private void TrySetOpenOrders()
         {
+            TrySetOpenOrders(default);
+        }
+
+        private void TrySetOpenOrders(OpenOrdersPlacementContext openOrdersPlacementContext)
+        {
             BotTabSimple tab = Tab;
             TradeGridCreator gridCreator = GridCreator;
             if (tab == null || gridCreator == null)
@@ -3243,12 +3305,26 @@ namespace OsEngine.OsTrader.Grids
                 return;
             }
 
-            if (TryGetLastCandle(tab.CandlesAll, out Candle lastCandle) == false)
-            {
-                return;
-            }
+            decimal lastPrice = openOrdersPlacementContext.LastPrice;
+            List<TradeGridLine> linesWithOrdersToOpenNeed = openOrdersPlacementContext.OpenOrdersNeed;
+            int openOrdersFactCount = openOrdersPlacementContext.OpenOrdersFactCount;
 
-            decimal lastPrice = lastCandle.Close;
+            if (!openOrdersPlacementContext.IsReusable
+                || !ReferenceEquals(gridCreator.Lines, openOrdersPlacementContext.SourceLines))
+            {
+                if (TryGetLastCandle(tab.CandlesAll, out Candle lastCandle) == false)
+                {
+                    return;
+                }
+
+                lastPrice = lastCandle.Close;
+
+                QueryCollectionsSnapshotCore queryCollections = GetQueryCollectionsSnapshotCore(
+                    lastPrice,
+                    QueryCollectionFlags.OpenOrdersNeed | QueryCollectionFlags.OpenOrdersFact);
+                linesWithOrdersToOpenNeed = queryCollections.OpenOrdersNeed;
+                openOrdersFactCount = queryCollections.OpenOrdersFact.Count;
+            }
 
             if (lastPrice == 0)
             {
@@ -3261,11 +3337,10 @@ namespace OsEngine.OsTrader.Grids
                 return;
             }
 
-            // 1 берём текущие линии с позициями
-
-            QueryCollectionsSnapshotCore queryCollections = GetQueryCollectionsSnapshotCore(lastPrice, QueryCollectionFlags.OpenOrdersNeed | QueryCollectionFlags.OpenOrdersFact);
-            List<TradeGridLine> linesWithOrdersToOpenNeed = queryCollections.OpenOrdersNeed;
-            int openOrdersFactCount = queryCollections.OpenOrdersFact.Count;
+            if (linesWithOrdersToOpenNeed == null)
+            {
+                return;
+            }
 
             // 2 ничего не делаем если уже кол-во ордеров максимально
 
