@@ -170,12 +170,7 @@ namespace OsEngine.Market.Servers.OKX
             try
             {
                 RestRequest requestRest = new RestRequest("/api/v5/public/time", Method.GET);
-                RestClient client = new RestClient(_baseUrl);
-
-                if (_myProxy != null)
-                {
-                    client.Proxy = _myProxy;
-                }
+                RestClient client = CreatePublicRestClient();
 
                 IRestResponse response = client.Execute(requestRest);
 
@@ -312,6 +307,18 @@ namespace OsEngine.Market.Servers.OKX
 
         private bool _extendedMarketData;
 
+        private RestClient CreatePublicRestClient()
+        {
+            RestClient client = new RestClient(_baseUrl);
+
+            if (_myProxy != null)
+            {
+                client.Proxy = _myProxy;
+            }
+
+            return client;
+        }
+
         private HttpClient _privateHttpClient;
         private readonly Lock _privateHttpClientLocker = new();
 
@@ -413,12 +420,7 @@ namespace OsEngine.Market.Servers.OKX
             try
             {
                 RestRequest requestRest = new RestRequest("/api/v5/public/instruments?instType=SWAP", Method.GET);
-                RestClient client = new RestClient(_baseUrl);
-
-                if (_myProxy != null)
-                {
-                    client.Proxy = _myProxy;
-                }
+                RestClient client = CreatePublicRestClient();
 
                 IRestResponse response = client.Execute(requestRest);
 
@@ -443,12 +445,7 @@ namespace OsEngine.Market.Servers.OKX
             try
             {
                 RestRequest requestRest = new RestRequest("/api/v5/public/instruments?instType=FUTURES", Method.GET);
-                RestClient client = new RestClient(_baseUrl);
-
-                if (_myProxy != null)
-                {
-                    client.Proxy = _myProxy;
-                }
+                RestClient client = CreatePublicRestClient();
 
                 IRestResponse response = client.Execute(requestRest);
 
@@ -473,12 +470,7 @@ namespace OsEngine.Market.Servers.OKX
             try
             {
                 RestRequest requestRest = new RestRequest("/api/v5/public/underlying?instType=OPTION", Method.GET);
-                RestClient client = new RestClient(_baseUrl);
-
-                if (_myProxy != null)
-                {
-                    client.Proxy = _myProxy;
-                }
+                RestClient client = CreatePublicRestClient();
 
                 IRestResponse response = client.Execute(requestRest);
 
@@ -519,12 +511,7 @@ namespace OsEngine.Market.Servers.OKX
                     string baseSecurity = baseSecurities[k];
 
                     RestRequest requestRest = new RestRequest("/api/v5/public/instruments?instType=OPTION&uly=" + baseSecurity, Method.GET);
-                    RestClient client = new RestClient(_baseUrl);
-
-                    if (_myProxy != null)
-                    {
-                        client.Proxy = _myProxy;
-                    }
+                    RestClient client = CreatePublicRestClient();
 
                     IRestResponse response = client.Execute(requestRest);
 
@@ -559,12 +546,7 @@ namespace OsEngine.Market.Servers.OKX
             try
             {
                 RestRequest requestRest = new RestRequest("/api/v5/public/instruments?instType=SPOT", Method.GET);
-                RestClient client = new RestClient(_baseUrl);
-
-                if (_myProxy != null)
-                {
-                    client.Proxy = _myProxy;
-                }
+                RestClient client = CreatePublicRestClient();
 
                 IRestResponse response = client.Execute(requestRest);
 
