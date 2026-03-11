@@ -387,6 +387,11 @@ namespace OsEngine.Market.Servers.OKX
             return JsonConvert.DeserializeAnonymousType(message, new ResponseWsMessageAction<T>());
         }
 
+        private static string ReadPrivateResponseContent(HttpResponseMessage response)
+        {
+            return response.Content.ReadAsStringAsync().Result;
+        }
+
         private HttpClient _privateHttpClient;
         private readonly Lock _privateHttpClientLocker = new();
 
@@ -1405,7 +1410,7 @@ namespace OsEngine.Market.Servers.OKX
             string url = $"{_baseUrl}{"/api/v5/account/set-position-mode"}";
             string bodyStr = JsonConvert.SerializeObject(requestParams);
             HttpResponseMessage res = SendPrivateRequest(HttpMethod.Post, url, bodyStr);
-            string contentStr = res.Content.ReadAsStringAsync().Result;
+            string contentStr = ReadPrivateResponseContent(res);
 
             ResponseRestMessage<List<RestMessageSendOrder>> message = ParsePrivateSendOrderResponse(contentStr);
 
@@ -3236,7 +3241,7 @@ namespace OsEngine.Market.Servers.OKX
                 string url = $"{_baseUrl}/api/v5/trade/order";
 
                 HttpResponseMessage res = SendPrivateRequest(HttpMethod.Post, url, json);
-                string contentStr = res.Content.ReadAsStringAsync().Result;
+                string contentStr = ReadPrivateResponseContent(res);
 
                 ResponseRestMessage<List<RestMessageSendOrder>> message = ParsePrivateSendOrderResponse(contentStr);
 
@@ -3299,7 +3304,7 @@ namespace OsEngine.Market.Servers.OKX
                 string url = $"{_baseUrl}/api/v5/trade/order";
 
                 HttpResponseMessage res = SendPrivateRequest(HttpMethod.Post, url, json);
-                string contentStr = res.Content.ReadAsStringAsync().Result;
+                string contentStr = ReadPrivateResponseContent(res);
 
                 if (res.StatusCode == HttpStatusCode.OK)
                 {
@@ -3366,7 +3371,7 @@ namespace OsEngine.Market.Servers.OKX
                 string url = $"{_baseUrl}/api/v5/trade/cancel-order";
 
                 HttpResponseMessage res = SendPrivateRequest(HttpMethod.Post, url, json);
-                string contentStr = res.Content.ReadAsStringAsync().Result;
+                string contentStr = ReadPrivateResponseContent(res);
 
                 ResponseRestMessage<List<RestMessageSendOrder>> message = ParsePrivateSendOrderResponse(contentStr);
 
@@ -3547,7 +3552,7 @@ namespace OsEngine.Market.Servers.OKX
             {
                 string url = $"{_baseUrl}/api/v5/trade/orders-pending";
                 HttpResponseMessage res = GetPrivateRequest(url);
-                string contentStr = res.Content.ReadAsStringAsync().Result;
+                string contentStr = ReadPrivateResponseContent(res);
 
                 if (res.StatusCode == HttpStatusCode.OK)
                 {
@@ -3646,7 +3651,7 @@ namespace OsEngine.Market.Servers.OKX
 
                 HttpResponseMessage res = GetPrivateRequest(url);
 
-                string contentStr = res.Content.ReadAsStringAsync().Result;
+                string contentStr = ReadPrivateResponseContent(res);
 
                 if (res.StatusCode == HttpStatusCode.OK)
                 {
@@ -3841,7 +3846,7 @@ namespace OsEngine.Market.Servers.OKX
             {
                 string url = $"{_baseUrl}/api/v5/trade/orders-history?instType={instType}&limit=50";
                 HttpResponseMessage res = GetPrivateRequest(url);
-                string contentStr = res.Content.ReadAsStringAsync().Result;
+                string contentStr = ReadPrivateResponseContent(res);
 
                 if (res.StatusCode == HttpStatusCode.OK)
                 {

@@ -117,6 +117,19 @@ public class OkxServerPrivateHttpClientTests
         Assert.NotNull(request.Content);
     }
 
+    [Fact]
+    public void ReadPrivateResponseContent_ShouldReturnResponseBody()
+    {
+        using HttpResponseMessage response = new HttpResponseMessage(HttpStatusCode.OK)
+        {
+            Content = new StringContent("{\"code\":\"0\"}")
+        };
+
+        string content = InvokeReadPrivateResponseContent(response);
+
+        Assert.Equal("{\"code\":\"0\"}", content);
+    }
+
     private static HttpClient InvokeGetPrivateHttpClient(OkxServerRealization realization)
     {
         MethodInfo method = typeof(OkxServerRealization).GetMethod(
@@ -176,6 +189,17 @@ public class OkxServerPrivateHttpClientTests
 
         return (HttpResponseMessage)(sendPrivateRequest.Invoke(realization, [method, url, bodyJson])
             ?? throw new InvalidOperationException("SendPrivateRequest returned null."));
+    }
+
+    private static string InvokeReadPrivateResponseContent(HttpResponseMessage response)
+    {
+        MethodInfo method = typeof(OkxServerRealization).GetMethod(
+            "ReadPrivateResponseContent",
+            BindingFlags.NonPublic | BindingFlags.Static)
+            ?? throw new InvalidOperationException("ReadPrivateResponseContent method not found.");
+
+        return (string)(method.Invoke(null, [response])
+            ?? throw new InvalidOperationException("ReadPrivateResponseContent returned null."));
     }
 
     private static HttpClient? GetPrivateHttpClientField(OkxServerRealization realization)
