@@ -61,6 +61,23 @@ public sealed class OkxServerPublicParseTests
         Assert.Null(loggedMessage);
     }
 
+    [Fact]
+    public void ExecutePublicQueryRequest_ShouldReturnParsedValueFromResponseContent()
+    {
+        const string responseBody = "{\"probe\":\"ok\"}";
+        using LocalHttpServer server = new LocalHttpServer(HttpStatusCode.OK, responseBody);
+        OkxServerRealization realization = CreateRealization(server.BaseUrl);
+
+        string? loggedMessage = null;
+        realization.LogMessageEvent += (message, _) => loggedMessage = message;
+
+        string parsed = InvokeExecutePublicQueryRequest(realization, "/probe", "Probe");
+
+        Assert.Equal("PROBE: {\"probe\":\"ok\"}", parsed);
+        Assert.Equal("/probe", server.LastRequestPath);
+        Assert.Null(loggedMessage);
+    }
+
     private static OkxServerRealization CreateRealization(string baseUrl)
     {
         OkxServerRealization realization = (OkxServerRealization)RuntimeHelpers.GetUninitializedObject(typeof(OkxServerRealization));
@@ -95,6 +112,23 @@ public sealed class OkxServerPublicParseTests
 
         return (SecurityUnderlyingResponse)(method.Invoke(realization, [resource, errorLogPrefix])
             ?? throw new InvalidOperationException("ExecutePublicSecurityUnderlyingResponseRequest returned null."));
+    }
+
+    private static string InvokeExecutePublicQueryRequest(
+        OkxServerRealization realization,
+        string resource,
+        string errorLogPrefix)
+    {
+        MethodInfo method = typeof(OkxServerRealization).GetMethod(
+            "ExecutePublicQueryRequest",
+            BindingFlags.NonPublic | BindingFlags.Instance)
+            ?? throw new InvalidOperationException("ExecutePublicQueryRequest method not found.");
+
+        MethodInfo genericMethod = method.MakeGenericMethod(typeof(string));
+        Func<string, string> parser = static content => "PROBE: " + content;
+
+        return (string)(genericMethod.Invoke(realization, [resource, errorLogPrefix, parser])
+            ?? throw new InvalidOperationException("ExecutePublicQueryRequest returned null."));
     }
 
     private static void SetPrivateField(OkxServerRealization realization, string fieldName, object? value)

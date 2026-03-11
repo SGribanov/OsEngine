@@ -338,16 +338,29 @@ namespace OsEngine.Market.Servers.OKX
             return response;
         }
 
-        private SecurityResponse ExecutePublicSecurityResponseRequest(string resource, string errorLogPrefix)
+        private T ExecutePublicQueryRequest<T>(
+            string resource,
+            string errorLogPrefix,
+            Func<string, T> parser)
         {
             IRestResponse response = ExecutePublicGetRequest(resource, errorLogPrefix);
-            return JsonConvert.DeserializeAnonymousType(response.Content, new SecurityResponse());
+            return parser(response.Content);
+        }
+
+        private SecurityResponse ExecutePublicSecurityResponseRequest(string resource, string errorLogPrefix)
+        {
+            return ExecutePublicQueryRequest(
+                resource,
+                errorLogPrefix,
+                static content => JsonConvert.DeserializeAnonymousType(content, new SecurityResponse()));
         }
 
         private SecurityUnderlyingResponse ExecutePublicSecurityUnderlyingResponseRequest(string resource, string errorLogPrefix)
         {
-            IRestResponse response = ExecutePublicGetRequest(resource, errorLogPrefix);
-            return JsonConvert.DeserializeAnonymousType(response.Content, new SecurityUnderlyingResponse());
+            return ExecutePublicQueryRequest(
+                resource,
+                errorLogPrefix,
+                static content => JsonConvert.DeserializeAnonymousType(content, new SecurityUnderlyingResponse()));
         }
 
         private static IRestResponse ExecutePublicAbsoluteGetRequest(string url)
