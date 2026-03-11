@@ -370,6 +370,14 @@ namespace OsEngine.Market.Servers.OKX
             return client.Execute(request);
         }
 
+        private static T ExecutePublicAbsoluteQueryRequest<T>(
+            string url,
+            Func<string, T> parser)
+        {
+            IRestResponse response = ExecutePublicAbsoluteGetRequest(url);
+            return parser(response.Content);
+        }
+
         private static CandlesResponse ParsePublicCandlesResponse(string responseContent)
         {
             return JsonConvert.DeserializeAnonymousType(responseContent, new CandlesResponse());
