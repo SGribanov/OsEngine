@@ -169,7 +169,7 @@ namespace OsEngine.Market.Servers.OKX
 
             try
             {
-                RestRequest requestRest = new RestRequest("/api/v5/public/time", Method.GET);
+                RestRequest requestRest = CreatePublicGetRequest("/api/v5/public/time");
                 RestClient client = CreatePublicRestClient();
 
                 IRestResponse response = client.Execute(requestRest);
@@ -319,6 +319,11 @@ namespace OsEngine.Market.Servers.OKX
             return client;
         }
 
+        private static RestRequest CreatePublicGetRequest(string resource)
+        {
+            return new RestRequest(resource, Method.GET);
+        }
+
         private HttpClient _privateHttpClient;
         private readonly Lock _privateHttpClientLocker = new();
 
@@ -419,7 +424,7 @@ namespace OsEngine.Market.Servers.OKX
         {
             try
             {
-                RestRequest requestRest = new RestRequest("/api/v5/public/instruments?instType=SWAP", Method.GET);
+                RestRequest requestRest = CreatePublicGetRequest("/api/v5/public/instruments?instType=SWAP");
                 RestClient client = CreatePublicRestClient();
 
                 IRestResponse response = client.Execute(requestRest);
@@ -444,7 +449,7 @@ namespace OsEngine.Market.Servers.OKX
         {
             try
             {
-                RestRequest requestRest = new RestRequest("/api/v5/public/instruments?instType=FUTURES", Method.GET);
+                RestRequest requestRest = CreatePublicGetRequest("/api/v5/public/instruments?instType=FUTURES");
                 RestClient client = CreatePublicRestClient();
 
                 IRestResponse response = client.Execute(requestRest);
@@ -469,7 +474,7 @@ namespace OsEngine.Market.Servers.OKX
         {
             try
             {
-                RestRequest requestRest = new RestRequest("/api/v5/public/underlying?instType=OPTION", Method.GET);
+                RestRequest requestRest = CreatePublicGetRequest("/api/v5/public/underlying?instType=OPTION");
                 RestClient client = CreatePublicRestClient();
 
                 IRestResponse response = client.Execute(requestRest);
@@ -510,7 +515,7 @@ namespace OsEngine.Market.Servers.OKX
                 {
                     string baseSecurity = baseSecurities[k];
 
-                    RestRequest requestRest = new RestRequest("/api/v5/public/instruments?instType=OPTION&uly=" + baseSecurity, Method.GET);
+                    RestRequest requestRest = CreatePublicGetRequest("/api/v5/public/instruments?instType=OPTION&uly=" + baseSecurity);
                     RestClient client = CreatePublicRestClient();
 
                     IRestResponse response = client.Execute(requestRest);
@@ -545,7 +550,7 @@ namespace OsEngine.Market.Servers.OKX
         {
             try
             {
-                RestRequest requestRest = new RestRequest("/api/v5/public/instruments?instType=SPOT", Method.GET);
+                RestRequest requestRest = CreatePublicGetRequest("/api/v5/public/instruments?instType=SPOT");
                 RestClient client = CreatePublicRestClient();
 
                 IRestResponse response = client.Execute(requestRest);
