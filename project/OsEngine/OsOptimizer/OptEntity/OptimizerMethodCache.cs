@@ -334,6 +334,7 @@ namespace OsEngine.OsOptimizer.OptEntity
         private readonly ConcurrentDictionary<OptimizerMethodCacheKey, object> _cache =
             new ConcurrentDictionary<OptimizerMethodCacheKey, object>();
 
+        private readonly List<OptimizerMethodCacheKey> _trackedKeys = new List<OptimizerMethodCacheKey>();
         private readonly Lock _sync = new();
         private readonly int _maxEntries;
         private long _hits;
@@ -341,6 +342,7 @@ namespace OsEngine.OsOptimizer.OptEntity
         private long _writes;
         private long _evictions;
         private int _entriesCount;
+        private int _nextTrackedKeyIndex;
 
         public OptimizerMethodCache(int maxEntries = 1024)
         {
@@ -396,31 +398,59 @@ namespace OsEngine.OsOptimizer.OptEntity
 
                 if (_cache.TryAdd(key, value))
                 {
+                    _trackedKeys.Add(key);
                     _entriesCount++;
                     Interlocked.Increment(ref _writes);
                     return;
                 }
 
                 _cache[key] = value;
+                TrackKeyIfMissing(key);
                 Interlocked.Increment(ref _writes);
             }
         }
 
         private bool TryEvictOneEntry(in OptimizerMethodCacheKey incomingKey)
         {
-            foreach (KeyValuePair<OptimizerMethodCacheKey, object> entry in _cache)
+            int scannedKeys = 0;
+
+            while (scannedKeys < _trackedKeys.Count)
             {
-                if (entry.Key == incomingKey)
+                if (_nextTrackedKeyIndex >= _trackedKeys.Count)
                 {
+                    _nextTrackedKeyIndex = 0;
+                }
+
+                OptimizerMethodCacheKey candidateKey = _trackedKeys[_nextTrackedKeyIndex];
+
+                if (candidateKey == incomingKey)
+                {
+                    _nextTrackedKeyIndex++;
+                    scannedKeys++;
                     continue;
                 }
 
-                if (_cache.TryRemove(entry.Key, out _))
+                if (_cache.TryRemove(candidateKey, out _))
                 {
+                    _trackedKeys.RemoveAt(_nextTrackedKeyIndex);
                     _entriesCount--;
                     Interlocked.Increment(ref _evictions);
+
+                    if (_nextTrackedKeyIndex >= _trackedKeys.Count)
+                    {
+                        _nextTrackedKeyIndex = 0;
+                    }
+
                     return true;
                 }
+
+                _trackedKeys.RemoveAt(_nextTrackedKeyIndex);
+                if (_nextTrackedKeyIndex >= _trackedKeys.Count)
+                {
+                    _nextTrackedKeyIndex = 0;
+                }
+
+                scannedKeys++;
             }
 
             return false;
@@ -431,6 +461,8 @@ namespace OsEngine.OsOptimizer.OptEntity
             lock (_sync)
             {
                 _cache.Clear();
+                _trackedKeys.Clear();
+                _nextTrackedKeyIndex = 0;
                 _entriesCount = 0;
                 Interlocked.Exchange(ref _hits, 0);
                 Interlocked.Exchange(ref _misses, 0);
@@ -447,6 +479,19 @@ namespace OsEngine.OsOptimizer.OptEntity
                 writes: Interlocked.Read(ref _writes),
                 evictions: Interlocked.Read(ref _evictions),
                 entriesCount: Volatile.Read(ref _entriesCount));
+        }
+
+        private void TrackKeyIfMissing(in OptimizerMethodCacheKey key)
+        {
+            for (int i = 0; i < _trackedKeys.Count; i++)
+            {
+                if (_trackedKeys[i] == key)
+                {
+                    return;
+                }
+            }
+
+            _trackedKeys.Add(key);
         }
     }
 }

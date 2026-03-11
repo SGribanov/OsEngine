@@ -165,6 +165,27 @@ public class OptimizerMethodCacheCoreTests
         Assert.Equal(1, stats.EntriesCount);
         Assert.Equal(2, stats.Writes);
     }
+
+    [Fact]
+    public void OptimizerMethodCache_RepeatedChurn_ShouldStayWithinCapacityAndKeepNewestKey()
+    {
+        OptimizerMethodCache cache = new OptimizerMethodCache(maxEntries: 3);
+        OptimizerMethodCacheKey newestKey = default;
+
+        for (int i = 0; i < 16; i++)
+        {
+            newestKey = BuildKey("churn-" + i);
+            cache.Set(newestKey, i);
+        }
+
+        Assert.True(cache.TryGet(newestKey, out int newestValue));
+        Assert.Equal(15, newestValue);
+
+        OptimizerMethodCacheStatistics stats = cache.GetStatisticsSnapshot();
+        Assert.Equal(3, stats.EntriesCount);
+        Assert.True(stats.Evictions >= 13);
+    }
+
     private static OptimizerMethodCacheKey BuildKey(string sourceId)
     {
         return new OptimizerMethodCacheKey(
