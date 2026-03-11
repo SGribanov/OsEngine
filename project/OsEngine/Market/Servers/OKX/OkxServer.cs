@@ -350,6 +350,13 @@ namespace OsEngine.Market.Servers.OKX
             return JsonConvert.DeserializeAnonymousType(response.Content, new SecurityUnderlyingResponse());
         }
 
+        private static IRestResponse ExecutePublicAbsoluteGetRequest(string url)
+        {
+            RestClient client = new RestClient(url);
+            RestRequest request = new RestRequest(Method.GET);
+            return client.Execute(request);
+        }
+
         private HttpClient _privateHttpClient;
         private readonly Lock _privateHttpClientLocker = new();
 
@@ -914,9 +921,7 @@ namespace OsEngine.Market.Servers.OKX
                         url = _baseUrl + "/api/v5/market/candles?instId=" + nameSec + "&bar=" + bar + "&limit=" + limit.ToString(CultureInfo.InvariantCulture) + after;
                     }
 
-                    RestClient client = new RestClient(url);
-                    RestRequest request = new RestRequest(Method.GET);
-                    IRestResponse Response = client.Execute(request);
+                    IRestResponse Response = ExecutePublicAbsoluteGetRequest(url);
 
                     if (Response.StatusCode == HttpStatusCode.OK)
                     {
@@ -1073,9 +1078,7 @@ namespace OsEngine.Market.Servers.OKX
 
                 string url = _baseUrl + $"/api/v5/market/history-trades?instId={securityName}&type=2&after={timeEnd}&limit=100";
 
-                RestClient client = new RestClient(url);
-                RestRequest request = new RestRequest(Method.GET);
-                IRestResponse response = client.Execute(request);
+                IRestResponse response = ExecutePublicAbsoluteGetRequest(url);
 
                 if (response.StatusCode == HttpStatusCode.OK)
                 {
@@ -1776,9 +1779,7 @@ namespace OsEngine.Market.Servers.OKX
             {
                 string url = _baseUrl + $"/api/v5/public/funding-rate-history?instId={securityName}";
 
-                RestClient client = new RestClient(url);
-                RestRequest request = new RestRequest(Method.GET);
-                IRestResponse response = client.Execute(request);
+                IRestResponse response = ExecutePublicAbsoluteGetRequest(url);
 
                 if (response.StatusCode == HttpStatusCode.OK)
                 {
