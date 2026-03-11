@@ -2,6 +2,7 @@
 #pragma warning disable CS9216
 
 using System;
+using System.Collections.Generic;
 using System.Net;
 using System.Net.Http;
 using System.Reflection;
@@ -130,6 +131,29 @@ public class OkxServerPrivateHttpClientTests
         Assert.Equal("{\"code\":\"0\"}", content);
     }
 
+    [Fact]
+    public void ExecutePrivateSendOrderRequest_ShouldReturnResponseContentAndParsedMessage()
+    {
+        OkxServerRealization realization = CreateRealizationForHttpClientTests();
+        ProbeHandler probe = new ProbeHandler
+        {
+            ResponseToReturn = new HttpResponseMessage(HttpStatusCode.OK)
+            {
+                Content = new StringContent("{\"code\":\"1\",\"msg\":\"error\",\"data\":[{\"sMsg\":\"insufficient balance\"}]}")
+            }
+        };
+        SetPrivateField(realization, "_privateHttpClient", new HttpClient(probe));
+
+        (HttpResponseMessage response, string content, ResponseRestMessage<List<RestMessageSendOrder>> message) =
+            InvokeExecutePrivateSendOrderRequest(realization, "https://www.okx.com/api/v5/trade/order", "{\"instId\":\"BTC-USDT\"}");
+
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+        Assert.Equal("{\"code\":\"1\",\"msg\":\"error\",\"data\":[{\"sMsg\":\"insufficient balance\"}]}", content);
+        Assert.Equal("1", message.code);
+        RestMessageSendOrder item = Assert.Single(message.data);
+        Assert.Equal("insufficient balance", item.sMsg);
+    }
+
     private static HttpClient InvokeGetPrivateHttpClient(OkxServerRealization realization)
     {
         MethodInfo method = typeof(OkxServerRealization).GetMethod(
@@ -202,6 +226,22 @@ public class OkxServerPrivateHttpClientTests
             ?? throw new InvalidOperationException("ReadPrivateResponseContent returned null."));
     }
 
+    private static (HttpResponseMessage response, string content, ResponseRestMessage<List<RestMessageSendOrder>> message) InvokeExecutePrivateSendOrderRequest(
+        OkxServerRealization realization,
+        string url,
+        string bodyJson)
+    {
+        MethodInfo method = typeof(OkxServerRealization).GetMethod(
+            "ExecutePrivateSendOrderRequest",
+            BindingFlags.NonPublic | BindingFlags.Instance)
+            ?? throw new InvalidOperationException("ExecutePrivateSendOrderRequest method not found.");
+
+        object tuple = method.Invoke(realization, [url, bodyJson])
+            ?? throw new InvalidOperationException("ExecutePrivateSendOrderRequest returned null.");
+
+        return ((HttpResponseMessage response, string content, ResponseRestMessage<List<RestMessageSendOrder>> message))tuple;
+    }
+
     private static HttpClient? GetPrivateHttpClientField(OkxServerRealization realization)
     {
         FieldInfo field = typeof(OkxServerRealization).GetField(
@@ -240,10 +280,12 @@ public class OkxServerPrivateHttpClientTests
     {
         public HttpRequestMessage? LastRequest { get; private set; }
 
+        public HttpResponseMessage? ResponseToReturn { get; set; }
+
         protected override Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
         {
             LastRequest = request;
-            return Task.FromResult(new HttpResponseMessage(HttpStatusCode.OK)
+            return Task.FromResult(ResponseToReturn ?? new HttpResponseMessage(HttpStatusCode.OK)
             {
                 Content = new StringContent("{}")
             });
