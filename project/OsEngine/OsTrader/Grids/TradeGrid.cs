@@ -2718,7 +2718,9 @@ namespace OsEngine.OsTrader.Grids
             // Когда в сетке больше ордеров чем указал пользователь
             // И когда объём на закрытие не совпадает с тем что в ордере закрывающем
 
-            if (needOpenPositions)
+            if (needOpenPositions
+                && linesWithOpenPositions != null
+                && linesWithOpenPositions.Count > 0)
             {
                 List<Order> ordersToCancelCloseOrders = GetCloseOrdersGridHoleFromLines(linesWithOpenPositions);
 
@@ -2754,7 +2756,8 @@ namespace OsEngine.OsTrader.Grids
                 QueryCollectionFlags.OpenOrdersFact
                 | QueryCollectionFlags.ClosingOrdersFact);
 
-            return GetOrdersBadPriceToGridFromLines(queryCollections.OpenOrdersFact, queryCollections.ClosingOrdersFact);
+            return GetOrdersBadPriceToGridFromLines(queryCollections.OpenOrdersFact, queryCollections.ClosingOrdersFact)
+                ?? new List<Order>();
         }
 
         private List<Order> GetOrdersBadPriceToGridFromLines(List<TradeGridLine> linesWithOrdersToOpenFact, List<TradeGridLine> linesWithOrdersToCloseFact)
@@ -2762,7 +2765,7 @@ namespace OsEngine.OsTrader.Grids
             // 1 смотрим совпадение цен у ордера на открытие с ценой открытия линии 
             // 2 смотрим совпадиние цен у ордера на закрытие с ценой закрытия линии
 
-            List<Order> ordersToCancel = new List<Order>();
+            List<Order> ordersToCancel = null;
 
             for (int i = 0; linesWithOrdersToOpenFact != null && i < linesWithOrdersToOpenFact.Count; i++)
             {
@@ -2778,6 +2781,7 @@ namespace OsEngine.OsTrader.Grids
 
                     if (openOrder.Price != currentLine.PriceEnter)
                     {
+                        ordersToCancel ??= new List<Order>();
                         ordersToCancel.Add(openOrder);
                     }
                 }
@@ -2801,6 +2805,7 @@ namespace OsEngine.OsTrader.Grids
                         if (closeOrder.Price != currentLine.PriceExit
                          && closeOrder.TypeOrder != OrderPriceType.Market)
                         {
+                            ordersToCancel ??= new List<Order>();
                             ordersToCancel.Add(closeOrder);
                         }
                     }
@@ -2809,6 +2814,7 @@ namespace OsEngine.OsTrader.Grids
                         if (closeOrder.Price != position.ProfitOrderPrice
                         && closeOrder.TypeOrder != OrderPriceType.Market)
                         {
+                            ordersToCancel ??= new List<Order>();
                             ordersToCancel.Add(closeOrder);
                         }
                     }
@@ -2824,7 +2830,8 @@ namespace OsEngine.OsTrader.Grids
                 0m,
                 QueryCollectionFlags.OpenOrdersFact);
 
-            return GetOrdersBadLinesMaxCountFromLines(queryCollections.OpenOrdersFact);
+            return GetOrdersBadLinesMaxCountFromLines(queryCollections.OpenOrdersFact)
+                ?? new List<Order>();
         }
 
         private List<Order> GetOrdersBadLinesMaxCountFromLines(List<TradeGridLine> linesWithOrdersToOpenFact)
@@ -2834,7 +2841,7 @@ namespace OsEngine.OsTrader.Grids
                 || linesWithOrdersToOpenFact.Count == 0
                 || maxOpenOrdersInMarket >= linesWithOrdersToOpenFact.Count)
             {
-                return new List<Order>();
+                return null;
             }
 
             List<Order> ordersToCancel = new List<Order>(linesWithOrdersToOpenFact.Count - maxOpenOrdersInMarket);
@@ -2924,14 +2931,20 @@ namespace OsEngine.OsTrader.Grids
                 0m,
                 QueryCollectionFlags.OpenPositions);
 
-            return GetCloseOrdersGridHoleFromLines(queryCollections.OpenPositions ?? new List<TradeGridLine>());
+            return GetCloseOrdersGridHoleFromLines(queryCollections.OpenPositions)
+                ?? new List<Order>();
         }
 
         private List<Order> GetCloseOrdersGridHoleFromLines(List<TradeGridLine> linesOpenPoses)
         {
             int maxCloseOrdersInMarket = Math.Max(0, MaxCloseOrdersInMarket);
 
-            List<Order> ordersToCancel = new List<Order>();
+            if (linesOpenPoses == null || linesOpenPoses.Count == 0)
+            {
+                return null;
+            }
+
+            List<Order> ordersToCancel = null;
 
             // 1 отправляем на отзыв ордера которые за пределами желаемого пользователем кол-ва
 
@@ -2944,6 +2957,7 @@ namespace OsEngine.OsTrader.Grids
                 {
                     if (TryGetLastOrder(pos.CloseOrders, out Order order))
                     {
+                        ordersToCancel ??= new List<Order>();
                         ordersToCancel.Add(order);
                     }
                 }
@@ -2980,6 +2994,7 @@ namespace OsEngine.OsTrader.Grids
                     }
                     if (isInArray == false)
                     {
+                        ordersToCancel ??= new List<Order>();
                         ordersToCancel.Add(orderToClose);
                     }
                 }

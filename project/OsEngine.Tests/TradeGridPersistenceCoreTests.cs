@@ -9208,6 +9208,65 @@ public class TradeGridPersistenceCoreTests
     }
 
     [Fact]
+    public void Stage2Step2_2_TradeGrid_GetOrdersBadPriceToGrid_WithAlignedOrderPrices_ShouldReturnEmpty()
+    {
+        TradeGrid grid = CreateBareGrid();
+
+        Position openPosition = new Position();
+        openPosition.AddNewOpenOrder(new Order
+        {
+            State = OrderStateType.Active,
+            Price = 101m,
+            Volume = 1m,
+            VolumeExecute = 0m
+        });
+
+        Position closePosition = new Position();
+        closePosition.AddNewOpenOrder(new Order
+        {
+            State = OrderStateType.Done,
+            Price = 100m,
+            Volume = 1m,
+            VolumeExecute = 1m
+        });
+        closePosition.AddNewCloseOrder(new Order
+        {
+            State = OrderStateType.Active,
+            Price = 111m,
+            Volume = 1m,
+            VolumeExecute = 0m
+        });
+
+        grid.GridCreator.Lines = new List<TradeGridLine>
+        {
+            new TradeGridLine
+            {
+                PriceEnter = 101m,
+                PriceExit = 111m,
+                Side = Side.Buy,
+                CanReplaceExitOrder = true,
+                Position = openPosition
+            },
+            new TradeGridLine
+            {
+                PriceEnter = 100m,
+                PriceExit = 111m,
+                Side = Side.Buy,
+                CanReplaceExitOrder = true,
+                Position = closePosition
+            }
+        };
+
+        MethodInfo method = typeof(TradeGrid).GetMethod("GetOrdersBadPriceToGrid", BindingFlags.NonPublic | BindingFlags.Instance)
+            ?? throw new InvalidOperationException("Method GetOrdersBadPriceToGrid not found.");
+
+        List<Order> orders = (List<Order>)(method.Invoke(grid, null)
+            ?? throw new InvalidOperationException("GetOrdersBadPriceToGrid returned null."));
+
+        Assert.Empty(orders);
+    }
+
+    [Fact]
     public void Stage2Step2_2_TradeGrid_GetOpenOrdersGridHole_WithNullTab_ShouldReturnNull()
     {
         TradeGrid grid = (TradeGrid)RuntimeHelpers.GetUninitializedObject(typeof(TradeGrid));
@@ -9219,6 +9278,49 @@ public class TradeGridPersistenceCoreTests
         object? result = method.Invoke(grid, null);
 
         Assert.Null(result);
+    }
+
+    [Fact]
+    public void Stage2Step2_2_TradeGrid_GetCloseOrdersGridHole_WithMatchingCloseOrders_ShouldReturnEmpty()
+    {
+        TradeGrid grid = CreateBareGrid();
+        grid.MaxCloseOrdersInMarket = 4;
+
+        Position position = new Position();
+        position.AddNewOpenOrder(new Order
+        {
+            State = OrderStateType.Done,
+            Price = 100m,
+            Volume = 2m,
+            VolumeExecute = 2m
+        });
+        position.AddNewCloseOrder(new Order
+        {
+            State = OrderStateType.Active,
+            Price = 110m,
+            Volume = 2m,
+            VolumeExecute = 0m
+        });
+
+        grid.GridCreator.Lines = new List<TradeGridLine>
+        {
+            new TradeGridLine
+            {
+                PriceEnter = 100m,
+                PriceExit = 110m,
+                Side = Side.Buy,
+                CanReplaceExitOrder = true,
+                Position = position
+            }
+        };
+
+        MethodInfo method = typeof(TradeGrid).GetMethod("GetCloseOrdersGridHole", BindingFlags.NonPublic | BindingFlags.Instance)
+            ?? throw new InvalidOperationException("Method GetCloseOrdersGridHole not found.");
+
+        List<Order> orders = (List<Order>)(method.Invoke(grid, null)
+            ?? throw new InvalidOperationException("GetCloseOrdersGridHole returned null."));
+
+        Assert.Empty(orders);
     }
 
     [Fact]
