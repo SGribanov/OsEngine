@@ -3074,12 +3074,20 @@ namespace OsEngine.OsTrader.Grids
                     continue;
                 }
 
-                if (pos.CloseActive == true)
+                decimal volume = GetPositionOpenVolumeAndLastCloseOrder(
+                    pos,
+                    out bool closeActive,
+                    out _);
+
+                if (closeActive)
                 {
                     continue;
                 }
 
-                decimal volume = pos.OpenVolume;
+                if (volume == 0)
+                {
+                    continue;
+                }
 
                 if (CheckMicroVolumes == true
                     && tab.CanTradeThisVolume(volume) == false)
@@ -3117,16 +3125,6 @@ namespace OsEngine.OsTrader.Grids
 
         private List<TradeGridLine> CollectOpenPositionsAndCheckWrongCloseOrders(BotTabSimple tab)
         {
-            return CollectOpenPositionsAndCheckWrongCloseOrdersCore(tab, keepLastOpenPositionsCount: -1);
-        }
-
-        private List<TradeGridLine> CollectTailOpenPositionsAndCheckWrongCloseOrders(BotTabSimple tab, int keepLastOpenPositionsCount)
-        {
-            return CollectOpenPositionsAndCheckWrongCloseOrdersCore(tab, keepLastOpenPositionsCount);
-        }
-
-        private List<TradeGridLine> CollectOpenPositionsAndCheckWrongCloseOrdersCore(BotTabSimple tab, int keepLastOpenPositionsCount)
-        {
             TradeGridCreator gridCreator = GridCreator;
             if (tab == null || gridCreator == null)
             {
@@ -3140,18 +3138,7 @@ namespace OsEngine.OsTrader.Grids
             }
 
             bool checkWrongCloseOrders = tab.StartProgram == StartProgram.IsOsTrader;
-            bool keepAllOpenPositions = keepLastOpenPositionsCount < 0;
-            int boundedOpenPositionsCount = keepAllOpenPositions
-                ? linesAll.Count
-                : keepLastOpenPositionsCount;
-            List<TradeGridLine> openPositions = keepAllOpenPositions
-                ? new List<TradeGridLine>(linesAll.Count)
-                : new List<TradeGridLine>(Math.Min(linesAll.Count, Math.Max(0, keepLastOpenPositionsCount)));
-            TradeGridLine[] tailOpenPositions = !keepAllOpenPositions && boundedOpenPositionsCount > 0
-                ? new TradeGridLine[boundedOpenPositionsCount]
-                : null;
-            int tailStartIndex = 0;
-            int tailCount = 0;
+            List<TradeGridLine> openPositions = new List<TradeGridLine>(linesAll.Count);
 
             for (int i = 0; i < linesAll.Count; i++)
             {
@@ -3160,6 +3147,7 @@ namespace OsEngine.OsTrader.Grids
                 {
                     continue;
                 }
+
                 Position pos = curLine.Position;
 
                 if (pos == null)
@@ -3186,11 +3174,84 @@ namespace OsEngine.OsTrader.Grids
 
                 if (volumePosOpen != 0)
                 {
-                    if (keepAllOpenPositions)
+                    openPositions.Add(curLine);
+                }
+            }
+
+            return openPositions;
+        }
+
+        private List<TradeGridLine> CollectTailOpenPositionsAndCheckWrongCloseOrders(BotTabSimple tab, int keepLastOpenPositionsCount)
+        {
+            return CollectOpenPositionsAndCheckWrongCloseOrdersCore(tab, keepLastOpenPositionsCount);
+        }
+
+        private List<TradeGridLine> CollectOpenPositionsAndCheckWrongCloseOrdersCore(BotTabSimple tab, int keepLastOpenPositionsCount)
+        {
+            TradeGridCreator gridCreator = GridCreator;
+            if (tab == null || gridCreator == null)
+            {
+                return new List<TradeGridLine>();
+            }
+
+            List<TradeGridLine> linesAll = gridCreator.Lines;
+            if (linesAll == null || linesAll.Count == 0)
+            {
+                return new List<TradeGridLine>();
+            }
+
+            if (keepLastOpenPositionsCount < 0)
+            {
+                return CollectOpenPositionsAndCheckWrongCloseOrders(tab);
+            }
+
+            bool checkWrongCloseOrders = tab.StartProgram == StartProgram.IsOsTrader;
+            int boundedOpenPositionsCount = keepLastOpenPositionsCount;
+            List<TradeGridLine> openPositions = new List<TradeGridLine>(
+                Math.Min(linesAll.Count, Math.Max(0, keepLastOpenPositionsCount)));
+            TradeGridLine[] tailOpenPositions = boundedOpenPositionsCount > 0
+                ? new TradeGridLine[boundedOpenPositionsCount]
+                : null;
+            int tailStartIndex = 0;
+            int tailCount = 0;
+
+            for (int i = 0; i < linesAll.Count; i++)
+            {
+                TradeGridLine curLine = linesAll[i];
+                if (curLine == null)
+                {
+                    continue;
+                }
+                Position pos = curLine.Position;
+
+                if (pos == null)
+                {
+                    continue;
+                }
+
+                decimal volumePosOpen = GetPositionOpenVolumeAndLastCloseOrder(
+                    pos,
+                    out bool closeActive,
+                    out Order lastCloseOrder);
+
+                if (checkWrongCloseOrders
+                    && closeActive)
+                {
+                    if (lastCloseOrder != null)
                     {
-                        openPositions.Add(curLine);
+                        decimal volumeCloseOrder = lastCloseOrder.Volume;
+                        decimal volumeExecuteCloseOrder = lastCloseOrder.VolumeExecute;
+
+                        if (volumePosOpen != (volumeCloseOrder - volumeExecuteCloseOrder))
+                        {
+                            tab.CloseOrder(lastCloseOrder);
+                        }
                     }
-                    else if (tailOpenPositions != null)
+                }
+
+                if (volumePosOpen != 0)
+                {
+                    if (tailOpenPositions != null)
                     {
                         if (tailCount < tailOpenPositions.Length)
                         {
@@ -3210,8 +3271,7 @@ namespace OsEngine.OsTrader.Grids
                 }
             }
 
-            if (keepAllOpenPositions == false
-                && tailOpenPositions != null
+            if (tailOpenPositions != null
                 && tailCount > 0)
             {
                 int boundedCount = tailCount;
@@ -3226,6 +3286,71 @@ namespace OsEngine.OsTrader.Grids
             }
 
             return openPositions;
+        }
+
+        private static decimal GetPositionOpenVolumeAndLastCloseOrder(
+            Position position,
+            out bool closeActive,
+            out Order lastCloseOrder)
+        {
+            closeActive = false;
+            lastCloseOrder = null;
+
+            decimal closeVolumeExecuted = 0m;
+            List<Order> closeOrders = position.CloseOrders;
+
+            if (closeOrders != null)
+            {
+                int closeOrdersCount = closeOrders.Count;
+
+                if (closeOrdersCount > 0)
+                {
+                    lastCloseOrder = closeOrders[closeOrdersCount - 1];
+                }
+
+                for (int i = 0; i < closeOrdersCount; i++)
+                {
+                    Order closeOrder = closeOrders[i];
+
+                    if (closeOrder == null)
+                    {
+                        continue;
+                    }
+
+                    closeVolumeExecuted += closeOrder.VolumeExecute;
+
+                    if (!closeActive
+                        && IsOrderConsideredActive(closeOrder.State))
+                    {
+                        closeActive = true;
+                    }
+                }
+            }
+
+            decimal openVolumeExecuted = 0m;
+            List<Order> openOrders = position.OpenOrders;
+
+            for (int i = 0; openOrders != null && i < openOrders.Count; i++)
+            {
+                Order openOrder = openOrders[i];
+
+                if (openOrder == null)
+                {
+                    continue;
+                }
+
+                openVolumeExecuted += openOrder.VolumeExecute;
+            }
+
+            return openVolumeExecuted - closeVolumeExecuted;
+        }
+
+        private static bool IsOrderConsideredActive(OrderStateType state)
+        {
+            return state == OrderStateType.Active
+                || state == OrderStateType.Pending
+                || state == OrderStateType.None
+                || state == OrderStateType.Partial;
         }
 
         private void CheckWrongCloseOrders()

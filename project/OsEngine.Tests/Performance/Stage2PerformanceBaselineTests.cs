@@ -27,12 +27,15 @@ namespace OsEngine.Tests;
 public class Stage2PerformanceBaselineTests
 {
     private delegate List<TradeGridLine> TradeGridCloseSideCollectorDelegate(TradeGrid grid, BotTabSimple tab);
+    private delegate List<TradeGridLine> TradeGridCloseSideTailCollectorDelegate(TradeGrid grid, BotTabSimple tab, int keepLastOpenPositionsCount);
     private delegate List<TradeGridLine> TradeGridProfitCloseCollectorDelegate(TradeGrid grid, BotTabSimple tab, out int cancelledOrders);
     private delegate void TradeGridProfitClosePlacementDelegate(TradeGrid grid, BotTabSimple tab, Security security, decimal lastPrice, List<TradeGridLine> linesOpenPoses);
     private delegate void TradeGridOpenPositionLogicDelegate(TradeGrid grid, TradeGridRegime baseRegime);
 
     private static readonly TradeGridCloseSideCollectorDelegate TradeGridCloseSideCollector =
         CreateTradeGridCloseSideCollector();
+    private static readonly TradeGridCloseSideTailCollectorDelegate TradeGridCloseSideTailCollector =
+        CreateTradeGridCloseSideTailCollector();
     private static readonly TradeGridProfitCloseCollectorDelegate TradeGridProfitCloseCollector =
         CreateTradeGridProfitCloseCollector();
     private static readonly TradeGridProfitClosePlacementDelegate TradeGridProfitClosePlacement =
@@ -250,6 +253,59 @@ public class Stage2PerformanceBaselineTests
         Stage2PerfReportWriter.Append(new Stage2PerfMetric
         {
             Scenario = "tradegrid_close_side_collector_hotpath",
+            Iterations = iterations,
+            ElapsedMsTotal = elapsedMs,
+            NanosecondsPerOp = nsPerOp,
+            AllocatedBytesTotal = allocatedBytes,
+            AllocatedBytesPerOp = allocatedBytesPerOp,
+            Gen0Collections = gen0After - gen0Before,
+            Checksum = checksum
+        });
+    }
+
+    [Fact]
+    public void Stage2Perf_TradeGrid_CloseSideTailCollectorPathV2_ShouldEmitMetricsAndDeterministicChecksum()
+    {
+        const int warmupIterations = 128;
+        const int iterations = 4096;
+
+        TradeGrid grid = CreateBareGrid();
+        AttachCloseSidePerfTab(grid);
+        SeedCloseSideGridLines(grid, 64);
+
+        for (int i = 0; i < warmupIterations; i++)
+        {
+            _ = RunTradeGridCloseSideTailCollectorPass(grid);
+        }
+
+        ForceGc();
+
+        long allocatedBefore = GC.GetAllocatedBytesForCurrentThread();
+        int gen0Before = GC.CollectionCount(0);
+        Stopwatch stopwatch = Stopwatch.StartNew();
+
+        long checksum = 0;
+
+        for (int i = 0; i < iterations; i++)
+        {
+            checksum += RunTradeGridCloseSideTailCollectorPass(grid);
+        }
+
+        stopwatch.Stop();
+
+        long allocatedAfter = GC.GetAllocatedBytesForCurrentThread();
+        int gen0After = GC.CollectionCount(0);
+
+        long allocatedBytes = allocatedAfter - allocatedBefore;
+        double elapsedMs = stopwatch.Elapsed.TotalMilliseconds;
+        double nsPerOp = elapsedMs * 1_000_000d / iterations;
+        double allocatedBytesPerOp = (double)allocatedBytes / iterations;
+
+        Assert.True(checksum > 0);
+
+        Stage2PerfReportWriter.Append(new Stage2PerfMetric
+        {
+            Scenario = "tradegrid_close_side_tail_collector_path_v2",
             Iterations = iterations,
             ElapsedMsTotal = elapsedMs,
             NanosecondsPerOp = nsPerOp,
@@ -1455,6 +1511,29 @@ public class Stage2PerformanceBaselineTests
         return checksum;
     }
 
+    private static long RunTradeGridCloseSideTailCollectorPass(TradeGrid grid)
+    {
+        BotTabSimple tab = grid.Tab;
+        int keepLastOpenPositionsCount = Math.Max(0, grid.MaxCloseOrdersInMarket);
+        List<TradeGridLine> openPositions = TradeGridCloseSideTailCollector(grid, tab, keepLastOpenPositionsCount);
+
+        long checksum = openPositions.Count;
+
+        for (int i = 0; i < openPositions.Count; i++)
+        {
+            Position? position = openPositions[i].Position;
+            if (position == null)
+            {
+                continue;
+            }
+
+            checksum += (long)(position.OpenVolume * 100m);
+            checksum += position.CloseActive ? 1000L : 0L;
+        }
+
+        return checksum;
+    }
+
     private static long RunTradeGridProfitCloseCollectorPass(TradeGrid grid)
     {
         BotTabSimple tab = grid.Tab;
@@ -1978,6 +2057,16 @@ public class Stage2PerformanceBaselineTests
             ?? throw new InvalidOperationException("CollectOpenPositionsAndCheckWrongCloseOrders not found.");
 
         return (TradeGridCloseSideCollectorDelegate)method.CreateDelegate(typeof(TradeGridCloseSideCollectorDelegate));
+    }
+
+    private static TradeGridCloseSideTailCollectorDelegate CreateTradeGridCloseSideTailCollector()
+    {
+        MethodInfo method = typeof(TradeGrid).GetMethod(
+            "CollectTailOpenPositionsAndCheckWrongCloseOrders",
+            BindingFlags.NonPublic | BindingFlags.Instance)
+            ?? throw new InvalidOperationException("CollectTailOpenPositionsAndCheckWrongCloseOrders not found.");
+
+        return (TradeGridCloseSideTailCollectorDelegate)method.CreateDelegate(typeof(TradeGridCloseSideTailCollectorDelegate));
     }
 
     private static TradeGridProfitCloseCollectorDelegate CreateTradeGridProfitCloseCollector()

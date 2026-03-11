@@ -9130,6 +9130,70 @@ public class TradeGridPersistenceCoreTests
     }
 
     [Fact]
+    public void Stage2Step2_2_TradeGrid_CollectTailOpenPositionsAndCheckWrongCloseOrders_ShouldKeepLastOpenPositionsInOrder()
+    {
+        TradeGrid grid = CreateBareGrid();
+
+        BotTabSimple tab = (BotTabSimple)RuntimeHelpers.GetUninitializedObject(typeof(BotTabSimple));
+        tab.StartProgram = StartProgram.IsTester;
+
+        Position firstPosition = new Position();
+        firstPosition.AddNewOpenOrder(new Order
+        {
+            State = OrderStateType.Done,
+            Volume = 1m,
+            VolumeExecute = 1m
+        });
+
+        Position secondPosition = new Position();
+        secondPosition.AddNewOpenOrder(new Order
+        {
+            State = OrderStateType.Done,
+            Volume = 2m,
+            VolumeExecute = 2m
+        });
+
+        Position thirdPosition = new Position();
+        thirdPosition.AddNewOpenOrder(new Order
+        {
+            State = OrderStateType.Done,
+            Volume = 3m,
+            VolumeExecute = 3m
+        });
+
+        Position flatPosition = (Position)RuntimeHelpers.GetUninitializedObject(typeof(Position));
+        SetPrivateField(flatPosition, "_openOrders", new List<Order>());
+        SetPrivateField(flatPosition, "_closeOrders", new List<Order>());
+
+        TradeGridLine firstLine = new TradeGridLine { Position = firstPosition, PositionNum = 1 };
+        TradeGridLine secondLine = new TradeGridLine { Position = secondPosition, PositionNum = 2 };
+        TradeGridLine flatLine = new TradeGridLine { Position = flatPosition, PositionNum = 3 };
+        TradeGridLine thirdLine = new TradeGridLine { Position = thirdPosition, PositionNum = 4 };
+
+        grid.GridCreator.Lines = new List<TradeGridLine>
+        {
+            firstLine,
+            secondLine,
+            flatLine,
+            thirdLine
+        };
+
+        MethodInfo method = typeof(TradeGrid).GetMethod(
+            "CollectTailOpenPositionsAndCheckWrongCloseOrders",
+            BindingFlags.NonPublic | BindingFlags.Instance)
+            ?? throw new InvalidOperationException("CollectTailOpenPositionsAndCheckWrongCloseOrders not found.");
+
+        List<TradeGridLine> result = (List<TradeGridLine>)(method.Invoke(grid, new object[] { tab, 2 })
+            ?? throw new InvalidOperationException("CollectTailOpenPositionsAndCheckWrongCloseOrders returned null."));
+
+        Assert.Equal(2, result.Count);
+        Assert.Same(secondLine, result[0]);
+        Assert.Same(thirdLine, result[1]);
+        Assert.DoesNotContain(firstLine, result);
+        Assert.DoesNotContain(flatLine, result);
+    }
+
+    [Fact]
     public void Stage2Step2_2_TradeGrid_GetOrdersBadPriceToGrid_WithNullOrderLines_ShouldReturnEmpty()
     {
         TradeGrid grid = (TradeGrid)RuntimeHelpers.GetUninitializedObject(typeof(TradeGrid));
