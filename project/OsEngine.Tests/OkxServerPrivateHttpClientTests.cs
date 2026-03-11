@@ -180,6 +180,32 @@ public class OkxServerPrivateHttpClientTests
         Assert.Equal("buy", order.side);
     }
 
+    [Fact]
+    public void ExecutePrivateTradeDetailsQueryRequest_ShouldReturnResponseContentAndParsedMessage()
+    {
+        OkxServerRealization realization = CreateRealizationForHttpClientTests();
+        ProbeHandler probe = new ProbeHandler
+        {
+            ResponseToReturn = new HttpResponseMessage(HttpStatusCode.OK)
+            {
+                Content = new StringContent("{\"code\":\"0\",\"msg\":\"\",\"data\":[{\"tradeId\":\"t1\",\"ordId\":\"42\",\"instId\":\"BTC-USDT-SWAP\",\"fillPx\":\"50000\"}]}")
+            }
+        };
+        SetPrivateField(realization, "_privateHttpClient", new HttpClient(probe));
+
+        (HttpResponseMessage response, string content, TradeDetailsResponse message) =
+            InvokeExecutePrivateTradeDetailsQueryRequest(realization, "https://www.okx.com/api/v5/trade/fills-history?ordId=42");
+
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+        Assert.Equal("{\"code\":\"0\",\"msg\":\"\",\"data\":[{\"tradeId\":\"t1\",\"ordId\":\"42\",\"instId\":\"BTC-USDT-SWAP\",\"fillPx\":\"50000\"}]}", content);
+        Assert.Equal("0", message.code);
+        TradeDetailsObject trade = Assert.Single(message.data);
+        Assert.Equal("t1", trade.tradeId);
+        Assert.Equal("42", trade.ordId);
+        Assert.Equal("BTC-USDT-SWAP", trade.instId);
+        Assert.Equal("50000", trade.fillPx);
+    }
+
     private static HttpClient InvokeGetPrivateHttpClient(OkxServerRealization realization)
     {
         MethodInfo method = typeof(OkxServerRealization).GetMethod(
@@ -281,6 +307,21 @@ public class OkxServerPrivateHttpClientTests
             ?? throw new InvalidOperationException("ExecutePrivateOrdersQueryRequest returned null.");
 
         return ((HttpResponseMessage response, string content, ResponseRestMessage<List<ResponseWsOrders>> message))tuple;
+    }
+
+    private static (HttpResponseMessage response, string content, TradeDetailsResponse message) InvokeExecutePrivateTradeDetailsQueryRequest(
+        OkxServerRealization realization,
+        string url)
+    {
+        MethodInfo method = typeof(OkxServerRealization).GetMethod(
+            "ExecutePrivateTradeDetailsQueryRequest",
+            BindingFlags.NonPublic | BindingFlags.Instance)
+            ?? throw new InvalidOperationException("ExecutePrivateTradeDetailsQueryRequest method not found.");
+
+        object tuple = method.Invoke(realization, [url])
+            ?? throw new InvalidOperationException("ExecutePrivateTradeDetailsQueryRequest returned null.");
+
+        return ((HttpResponseMessage response, string content, TradeDetailsResponse message))tuple;
     }
 
     private static HttpClient? GetPrivateHttpClientField(OkxServerRealization realization)

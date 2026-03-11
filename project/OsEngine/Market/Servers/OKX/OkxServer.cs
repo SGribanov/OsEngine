@@ -411,6 +411,15 @@ namespace OsEngine.Market.Servers.OKX
             return (response, content, message);
         }
 
+        private (HttpResponseMessage Response, string Content, TradeDetailsResponse Message) ExecutePrivateTradeDetailsQueryRequest(
+            string url)
+        {
+            HttpResponseMessage response = GetPrivateRequest(url);
+            string content = ReadPrivateResponseContent(response);
+            TradeDetailsResponse message = JsonConvert.DeserializeAnonymousType(content, new TradeDetailsResponse());
+            return (response, content, message);
+        }
+
         private HttpClient _privateHttpClient;
         private readonly Lock _privateHttpClientLocker = new();
 
@@ -3653,14 +3662,10 @@ namespace OsEngine.Market.Servers.OKX
 
                 string url = $"{_baseUrl}/api/v5/trade/fills-history?ordId={order.NumberMarket}&instId={order.SecurityNameCode}&instType={TypeInstr}";
 
-                HttpResponseMessage res = GetPrivateRequest(url);
-
-                string contentStr = ReadPrivateResponseContent(res);
+                (HttpResponseMessage res, string contentStr, TradeDetailsResponse quotes) = ExecutePrivateTradeDetailsQueryRequest(url);
 
                 if (res.StatusCode == HttpStatusCode.OK)
                 {
-                    TradeDetailsResponse quotes = JsonConvert.DeserializeAnonymousType(contentStr, new TradeDetailsResponse());
-
                     if (quotes.code.Equals("0"))
                     {
                         List<MyTrade> myTrades = new List<MyTrade>();
