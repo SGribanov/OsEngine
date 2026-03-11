@@ -402,6 +402,15 @@ namespace OsEngine.Market.Servers.OKX
             return (response, content, message);
         }
 
+        private (HttpResponseMessage Response, string Content, ResponseRestMessage<List<ResponseWsOrders>> Message) ExecutePrivateOrdersQueryRequest(
+            string url)
+        {
+            HttpResponseMessage response = GetPrivateRequest(url);
+            string content = ReadPrivateResponseContent(response);
+            ResponseRestMessage<List<ResponseWsOrders>> message = ParsePrivateOrdersResponse(content);
+            return (response, content, message);
+        }
+
         private HttpClient _privateHttpClient;
         private readonly Lock _privateHttpClientLocker = new();
 
@@ -3549,13 +3558,10 @@ namespace OsEngine.Market.Servers.OKX
             try
             {
                 string url = $"{_baseUrl}/api/v5/trade/orders-pending";
-                HttpResponseMessage res = GetPrivateRequest(url);
-                string contentStr = ReadPrivateResponseContent(res);
+                (HttpResponseMessage res, string contentStr, ResponseRestMessage<List<ResponseWsOrders>> OrderResponse) = ExecutePrivateOrdersQueryRequest(url);
 
                 if (res.StatusCode == HttpStatusCode.OK)
                 {
-                    ResponseRestMessage<List<ResponseWsOrders>> OrderResponse = ParsePrivateOrdersResponse(contentStr);
-
                     if (OrderResponse.code.Equals("0"))
                     {
                         List<Order> orders = new List<Order>();
@@ -3843,13 +3849,10 @@ namespace OsEngine.Market.Servers.OKX
             try
             {
                 string url = $"{_baseUrl}/api/v5/trade/orders-history?instType={instType}&limit=50";
-                HttpResponseMessage res = GetPrivateRequest(url);
-                string contentStr = ReadPrivateResponseContent(res);
+                (HttpResponseMessage res, string contentStr, ResponseRestMessage<List<ResponseWsOrders>> OrderResponse) = ExecutePrivateOrdersQueryRequest(url);
 
                 if (res.StatusCode == HttpStatusCode.OK)
                 {
-                    ResponseRestMessage<List<ResponseWsOrders>> OrderResponse = ParsePrivateOrdersResponse(contentStr);
-
                     if (OrderResponse.code.Equals("0"))
                     {
                         List<Order> orders = new List<Order>();

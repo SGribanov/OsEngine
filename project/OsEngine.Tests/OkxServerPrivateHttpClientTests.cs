@@ -154,6 +154,32 @@ public class OkxServerPrivateHttpClientTests
         Assert.Equal("insufficient balance", item.sMsg);
     }
 
+    [Fact]
+    public void ExecutePrivateOrdersQueryRequest_ShouldReturnResponseContentAndParsedMessage()
+    {
+        OkxServerRealization realization = CreateRealizationForHttpClientTests();
+        ProbeHandler probe = new ProbeHandler
+        {
+            ResponseToReturn = new HttpResponseMessage(HttpStatusCode.OK)
+            {
+                Content = new StringContent("{\"code\":\"0\",\"msg\":\"\",\"data\":[{\"ordId\":\"42\",\"instId\":\"BTC-USDT-SWAP\",\"state\":\"live\",\"side\":\"buy\"}]}")
+            }
+        };
+        SetPrivateField(realization, "_privateHttpClient", new HttpClient(probe));
+
+        (HttpResponseMessage response, string content, ResponseRestMessage<List<ResponseWsOrders>> message) =
+            InvokeExecutePrivateOrdersQueryRequest(realization, "https://www.okx.com/api/v5/trade/orders-pending");
+
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+        Assert.Equal("{\"code\":\"0\",\"msg\":\"\",\"data\":[{\"ordId\":\"42\",\"instId\":\"BTC-USDT-SWAP\",\"state\":\"live\",\"side\":\"buy\"}]}", content);
+        Assert.Equal("0", message.code);
+        ResponseWsOrders order = Assert.Single(message.data);
+        Assert.Equal("42", order.ordId);
+        Assert.Equal("BTC-USDT-SWAP", order.instId);
+        Assert.Equal("live", order.state);
+        Assert.Equal("buy", order.side);
+    }
+
     private static HttpClient InvokeGetPrivateHttpClient(OkxServerRealization realization)
     {
         MethodInfo method = typeof(OkxServerRealization).GetMethod(
@@ -240,6 +266,21 @@ public class OkxServerPrivateHttpClientTests
             ?? throw new InvalidOperationException("ExecutePrivateSendOrderRequest returned null.");
 
         return ((HttpResponseMessage response, string content, ResponseRestMessage<List<RestMessageSendOrder>> message))tuple;
+    }
+
+    private static (HttpResponseMessage response, string content, ResponseRestMessage<List<ResponseWsOrders>> message) InvokeExecutePrivateOrdersQueryRequest(
+        OkxServerRealization realization,
+        string url)
+    {
+        MethodInfo method = typeof(OkxServerRealization).GetMethod(
+            "ExecutePrivateOrdersQueryRequest",
+            BindingFlags.NonPublic | BindingFlags.Instance)
+            ?? throw new InvalidOperationException("ExecutePrivateOrdersQueryRequest method not found.");
+
+        object tuple = method.Invoke(realization, [url])
+            ?? throw new InvalidOperationException("ExecutePrivateOrdersQueryRequest returned null.");
+
+        return ((HttpResponseMessage response, string content, ResponseRestMessage<List<ResponseWsOrders>> message))tuple;
     }
 
     private static HttpClient? GetPrivateHttpClientField(OkxServerRealization realization)
