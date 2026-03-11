@@ -11,6 +11,52 @@ namespace OsEngine.Tests;
 
 public class PersistenceCultureTests
 {
+    [Theory]
+    [InlineData("en-US")]
+    [InlineData("ru-RU")]
+    public void Extensions_ToDecimal_ShouldKeepFraction_ForCommaDecimalValues(string cultureName)
+    {
+        CultureInfo originalCulture = CultureInfo.CurrentCulture;
+        CultureInfo originalUiCulture = CultureInfo.CurrentUICulture;
+
+        try
+        {
+            CultureInfo.CurrentCulture = new CultureInfo(cultureName);
+            CultureInfo.CurrentUICulture = new CultureInfo(cultureName);
+
+            Assert.Equal(0.5m, "0,5".ToDecimal());
+            Assert.Equal(0.5m, "0.5".ToDecimal());
+        }
+        finally
+        {
+            CultureInfo.CurrentCulture = originalCulture;
+            CultureInfo.CurrentUICulture = originalUiCulture;
+        }
+    }
+
+    [Theory]
+    [InlineData("en-US")]
+    [InlineData("ru-RU")]
+    public void Extensions_ToDouble_ShouldKeepFraction_ForCommaDecimalValues(string cultureName)
+    {
+        CultureInfo originalCulture = CultureInfo.CurrentCulture;
+        CultureInfo originalUiCulture = CultureInfo.CurrentUICulture;
+
+        try
+        {
+            CultureInfo.CurrentCulture = new CultureInfo(cultureName);
+            CultureInfo.CurrentUICulture = new CultureInfo(cultureName);
+
+            Assert.Equal(0.5d, "0,5".ToDouble(), 10);
+            Assert.Equal(0.5d, "0.5".ToDouble(), 10);
+        }
+        finally
+        {
+            CultureInfo.CurrentCulture = originalCulture;
+            CultureInfo.CurrentUICulture = originalUiCulture;
+        }
+    }
+
     [Fact]
     public void Order_GetStringForSave_ShouldUseInvariantDecimalSeparator()
     {

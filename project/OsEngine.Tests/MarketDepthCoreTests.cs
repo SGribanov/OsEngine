@@ -112,7 +112,7 @@ public class MarketDepthCoreTests
     }
 
     [Fact]
-    public void SetMarketDepthFromString_LegacyCommaDecimals_ShouldFollowCurrentInvariantFirstParsing()
+    public void SetMarketDepthFromString_LegacyCommaDecimals_ShouldPreserveFractionalValues()
     {
         CultureInfo originalCulture = CultureInfo.CurrentCulture;
         CultureInfo originalUiCulture = CultureInfo.CurrentUICulture;
@@ -130,10 +130,10 @@ public class MarketDepthCoreTests
             Assert.Equal(new DateTime(2026, 2, 27, 14, 15, 16, 250), loaded.Time);
             Assert.Equal(2, loaded.Asks.Count);
             Assert.Single(loaded.Bids);
-            Assert.Equal(25.0, loaded.Asks[0].Ask);
-            Assert.Equal(10125.0, loaded.Asks[0].Price);
-            Assert.Equal(375.0, loaded.Bids[0].Bid);
-            Assert.Equal(1010.0, loaded.Bids[0].Price);
+            Assert.Equal(2.5, loaded.Asks[0].Ask);
+            Assert.Equal(101.25, loaded.Asks[0].Price);
+            Assert.Equal(3.75, loaded.Bids[0].Bid);
+            Assert.Equal(101.0, loaded.Bids[0].Price);
         }
         finally
         {

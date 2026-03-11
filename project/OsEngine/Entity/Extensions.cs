@@ -116,36 +116,68 @@ namespace OsEngine.Entity
 
         private static bool TryParseDoubleInvariantOrCurrent(string value, out double result)
         {
-            const NumberStyles parseStyle = NumberStyles.Float | NumberStyles.AllowThousands;
+            const NumberStyles plainNumberStyle = NumberStyles.Float;
+            const NumberStyles groupedNumberStyle = NumberStyles.Float | NumberStyles.AllowThousands;
 
-            if (double.TryParse(value, parseStyle, CultureInfo.InvariantCulture, out result))
+            if (double.TryParse(value, plainNumberStyle, CultureInfo.InvariantCulture, out result))
             {
                 return true;
             }
 
-            if (double.TryParse(value, parseStyle, CultureInfo.CurrentCulture, out result))
+            if (double.TryParse(value, plainNumberStyle, CultureInfo.CurrentCulture, out result))
             {
                 return true;
             }
 
-            return double.TryParse(value, parseStyle, _culture, out result);
+            if (double.TryParse(value, plainNumberStyle, _culture, out result))
+            {
+                return true;
+            }
+
+            if (double.TryParse(value, groupedNumberStyle, CultureInfo.InvariantCulture, out result))
+            {
+                return true;
+            }
+
+            if (double.TryParse(value, groupedNumberStyle, CultureInfo.CurrentCulture, out result))
+            {
+                return true;
+            }
+
+            return double.TryParse(value, groupedNumberStyle, _culture, out result);
         }
 
         private static bool TryParseDecimalInvariantOrCurrent(string value, out decimal result)
         {
-            const NumberStyles parseStyle = NumberStyles.Float | NumberStyles.AllowThousands;
+            const NumberStyles plainNumberStyle = NumberStyles.Float;
+            const NumberStyles groupedNumberStyle = NumberStyles.Float | NumberStyles.AllowThousands;
 
-            if (decimal.TryParse(value, parseStyle, CultureInfo.InvariantCulture, out result))
+            if (decimal.TryParse(value, plainNumberStyle, CultureInfo.InvariantCulture, out result))
             {
                 return true;
             }
 
-            if (decimal.TryParse(value, parseStyle, CultureInfo.CurrentCulture, out result))
+            if (decimal.TryParse(value, plainNumberStyle, CultureInfo.CurrentCulture, out result))
             {
                 return true;
             }
 
-            return decimal.TryParse(value, parseStyle, _culture, out result);
+            if (decimal.TryParse(value, plainNumberStyle, _culture, out result))
+            {
+                return true;
+            }
+
+            if (decimal.TryParse(value, groupedNumberStyle, CultureInfo.InvariantCulture, out result))
+            {
+                return true;
+            }
+
+            if (decimal.TryParse(value, groupedNumberStyle, CultureInfo.CurrentCulture, out result))
+            {
+                return true;
+            }
+
+            return decimal.TryParse(value, groupedNumberStyle, _culture, out result);
         }
 
         /// <summary>

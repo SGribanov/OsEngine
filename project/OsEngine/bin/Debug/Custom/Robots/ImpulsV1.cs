@@ -29,7 +29,7 @@ Sell:
 4. Close is below the candle midpoint.
 
 Exit:
-Take-profit in price steps or close after N bars.
+Take-profit in absolute dollars or close after N bars.
 Open positions are not netted. Every new signal opens another position.
  */
 
@@ -65,7 +65,7 @@ namespace OsEngine.Robots
         private readonly StrategyParameterDecimal _bodyAtrMultiplier;
 
         private readonly StrategyParameterInt _exitBars;
-        private readonly StrategyParameterDecimal _takeProfitPoints;
+        private readonly StrategyParameterDecimal _takeProfitDollars;
 
         public ImpulsV1(string name, StartProgram startProgram) : base(name, startProgram)
         {
@@ -90,12 +90,12 @@ namespace OsEngine.Robots
             _bodyAtrMultiplier = CreateParameter("Body ATR Multiplier", 0.5m, 0.1m, 10m, 0.1m, "Filters");
 
             _exitBars = CreateParameter("Exit Bars", 20, 1, 500, 1, "Exit");
-            _takeProfitPoints = CreateParameter("Take Profit Points", 500.0m, 1m, 100000m, 1m, "Exit");
+            _takeProfitDollars = CreateParameter("Take Profit Dollars", 500.0m, 0.1m, 100000m, 0.1m, "Exit");
 
             _tab.CandleFinishedEvent += OnCandleFinished;
             DeleteEvent += OnDelete;
 
-            Description = "Manual impulse strategy using two mid-price momentum confirmations with configurable zero-threshold checks, volume expansion, ATR body filter and midpoint close confirmation.";
+            Description = "Manual impulse strategy using two mid-price momentum confirmations with configurable zero-threshold checks, volume expansion, ATR body filter, midpoint close confirmation and dollar-based take profit.";
         }
 
         public override string GetNameStrategyType()
@@ -249,7 +249,7 @@ namespace OsEngine.Robots
         {
             int lastIndex = candles.Count - 1;
             decimal slippage = GetSlippagePrice();
-            decimal takeProfitDistance = _takeProfitPoints.ValueDecimal * GetPriceStep();
+            decimal takeProfitDistance = _takeProfitDollars.ValueDecimal;
             decimal closePrice = candles[lastIndex].Close;
 
             for (int i = 0; i < openPositions.Count; i++)

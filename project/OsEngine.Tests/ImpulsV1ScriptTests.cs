@@ -92,6 +92,27 @@ public sealed class ImpulsV1ScriptTests
         bot.Delete();
     }
 
+    [Fact]
+    public void ImpulsV1Script_ShouldPlaceTakeProfitInAbsoluteDollars()
+    {
+        using ImpulsV1ScriptScope scope = new();
+        BotPanel bot = scope.CreateBot("CodexImpulsV1ScriptDollarTakeProfit");
+
+        GetPrivateField<StrategyParameterDecimal>(bot, "_slippageSteps").ValueDecimal = 0m;
+        GetPrivateField<StrategyParameterDecimal>(bot, "_takeProfitDollars").ValueDecimal = 50m;
+
+        List<Candle> candles = CreateBullishCandlesWithDoubleMomentumConfirmation();
+        PrepareTabForSignalTest(bot, candles, priceStep: 0.1m);
+        Position position = CreateOpenPosition(Side.Buy, 113.1m, 1m, candles[^1].TimeStart);
+
+        InvokePrivate(bot, "LogicClosePosition", candles, new List<Position> { position });
+
+        Assert.Equal(position.EntryPrice + 50m, position.ProfitOrderRedLine);
+        Assert.Equal(position.EntryPrice + 50m, position.ProfitOrderPrice);
+
+        bot.Delete();
+    }
+
     private static void ConfigureSignalParameters(BotPanel bot, int momentumLength, int secondMomentumLength)
     {
         GetPrivateField<StrategyParameterString>(bot, "_regime").ValueString = "On";
@@ -103,15 +124,38 @@ public sealed class ImpulsV1ScriptTests
         GetPrivateField<StrategyParameterDecimal>(bot, "_bodyAtrMultiplier").ValueDecimal = 0.1m;
     }
 
-    private static BotTabSimple PrepareTabForSignalTest(BotPanel bot, List<Candle> candles)
+    private static Position CreateOpenPosition(Side direction, decimal entryPrice, decimal volume, DateTime timeCreate)
+    {
+        Position position = new()
+        {
+            Direction = direction,
+            State = PositionStateType.Open
+        };
+        Order openOrder = new()
+        {
+            Side = direction,
+            Price = entryPrice,
+            Volume = volume,
+            VolumeExecute = volume,
+            State = OrderStateType.Done
+        };
+
+        position.AddNewOpenOrder(openOrder);
+        position.State = PositionStateType.Open;
+        SetPrivateField(position, "_timeCreate", timeCreate);
+
+        return position;
+    }
+
+    private static BotTabSimple PrepareTabForSignalTest(BotPanel bot, List<Candle> candles, decimal priceStep = 1m)
     {
         BotTabSimple tab = Assert.Single(bot.TabsSimple);
         Security security = new()
         {
             Name = "CODEx_TEST",
             NameClass = "CODEx_CLASS",
-            PriceStep = 1m,
-            PriceStepCost = 1m,
+            PriceStep = priceStep,
+            PriceStepCost = priceStep,
             Lot = 1m,
             DecimalsVolume = 0
         };
