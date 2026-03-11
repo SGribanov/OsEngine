@@ -311,25 +311,16 @@ namespace OsEngine.OsTrader.Grids
                     return;
                 }
 
-                bool hasPayload = false;
-                string primeSegment;
                 int payloadSeparatorIndex = value.IndexOf('%');
-                if (payloadSeparatorIndex >= 0)
-                {
-                    hasPayload = true;
-                    primeSegment = GetTrimmedToken(value, 0, payloadSeparatorIndex);
-                }
-                else
-                {
-                    primeSegment = value.Trim();
-                }
+                bool hasPayload = payloadSeparatorIndex >= 0;
+                ReadOnlySpan<char> primeValues = hasPayload
+                    ? value.AsSpan(0, payloadSeparatorIndex).Trim()
+                    : value.AsSpan().Trim();
 
-                if (string.IsNullOrWhiteSpace(primeSegment))
+                if (primeValues.IsEmpty)
                 {
                     return;
                 }
-
-                ReadOnlySpan<char> primeValues = primeSegment.AsSpan();
                 bool hasDelay = false;
                 bool hasMicro = false;
                 bool hasMaxDistance = false;
