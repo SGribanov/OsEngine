@@ -7,6 +7,7 @@ using System.Net.Http;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Threading;
+using System.Threading.Tasks;
 using OsEngine.Market.Servers.OKX;
 using OsEngine.Market.Servers.OKX.Entity;
 using Xunit;
@@ -93,6 +94,29 @@ public class OkxServerPrivateHttpClientTests
         Assert.Equal(body, savedBody);
     }
 
+    [Fact]
+    public void SendPrivateRequest_WithBody_ShouldSendSignedRequestThroughConfiguredClient()
+    {
+        OkxServerRealization realization = CreateRealizationForHttpClientTests();
+        ProbeHandler probe = new ProbeHandler();
+        SetPrivateField(realization, "_privateHttpClient", new HttpClient(probe));
+
+        using HttpResponseMessage response = InvokeSendPrivateRequest(
+            realization,
+            HttpMethod.Post,
+            "https://www.okx.com/api/v5/trade/order",
+            "{\"instId\":\"BTC-USDT\"}");
+
+        HttpRequestMessage request = probe.LastRequest
+            ?? throw new InvalidOperationException("Expected captured request.");
+
+        Assert.Equal(HttpMethod.Post, request.Method);
+        Assert.Equal("https://www.okx.com/api/v5/trade/order", request.RequestUri?.ToString());
+        Assert.True(request.Options.TryGetValue(HttpInterceptor.SignatureBodyOptionKey, out string? savedBody));
+        Assert.Equal("{\"instId\":\"BTC-USDT\"}", savedBody);
+        Assert.NotNull(request.Content);
+    }
+
     private static HttpClient InvokeGetPrivateHttpClient(OkxServerRealization realization)
     {
         MethodInfo method = typeof(OkxServerRealization).GetMethod(
@@ -139,6 +163,21 @@ public class OkxServerPrivateHttpClientTests
             ?? throw new InvalidOperationException("CreateSignedRequest returned null."));
     }
 
+    private static HttpResponseMessage InvokeSendPrivateRequest(
+        OkxServerRealization realization,
+        HttpMethod method,
+        string url,
+        string? bodyJson)
+    {
+        MethodInfo sendPrivateRequest = typeof(OkxServerRealization).GetMethod(
+            "SendPrivateRequest",
+            BindingFlags.NonPublic | BindingFlags.Instance)
+            ?? throw new InvalidOperationException("SendPrivateRequest method not found.");
+
+        return (HttpResponseMessage)(sendPrivateRequest.Invoke(realization, [method, url, bodyJson])
+            ?? throw new InvalidOperationException("SendPrivateRequest returned null."));
+    }
+
     private static HttpClient? GetPrivateHttpClientField(OkxServerRealization realization)
     {
         FieldInfo field = typeof(OkxServerRealization).GetField(
@@ -171,5 +210,19 @@ public class OkxServerPrivateHttpClientTests
         SetPrivateField(realization, "_myProxy", null);
 
         return realization;
+    }
+
+    private sealed class ProbeHandler : HttpMessageHandler
+    {
+        public HttpRequestMessage? LastRequest { get; private set; }
+
+        protected override Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
+        {
+            LastRequest = request;
+            return Task.FromResult(new HttpResponseMessage(HttpStatusCode.OK)
+            {
+                Content = new StringContent("{}")
+            });
+        }
     }
 }

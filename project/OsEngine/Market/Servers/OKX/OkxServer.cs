@@ -378,6 +378,12 @@ namespace OsEngine.Market.Servers.OKX
             return request;
         }
 
+        private HttpResponseMessage SendPrivateRequest(HttpMethod method, string url, string bodyJson = null)
+        {
+            using HttpRequestMessage request = CreateSignedRequest(method, url, bodyJson);
+            return GetPrivateHttpClient().SendAsync(request).Result;
+        }
+
         #endregion
 
         #region 3 Securities
@@ -1391,8 +1397,7 @@ namespace OsEngine.Market.Servers.OKX
         {
             string url = $"{_baseUrl}{"/api/v5/account/set-position-mode"}";
             string bodyStr = JsonConvert.SerializeObject(requestParams);
-            using HttpRequestMessage request = CreateSignedRequest(HttpMethod.Post, url, bodyStr);
-            HttpResponseMessage res = GetPrivateHttpClient().SendAsync(request).Result;
+            HttpResponseMessage res = SendPrivateRequest(HttpMethod.Post, url, bodyStr);
             string contentStr = res.Content.ReadAsStringAsync().Result;
 
             ResponseRestMessage<List<RestMessageSendOrder>> message = JsonConvert.DeserializeAnonymousType(contentStr, new ResponseRestMessage<List<RestMessageSendOrder>>());
@@ -3225,8 +3230,7 @@ namespace OsEngine.Market.Servers.OKX
 
                 string url = $"{_baseUrl}/api/v5/trade/order";
 
-                using HttpRequestMessage request = CreateSignedRequest(HttpMethod.Post, url, json);
-                HttpResponseMessage res = GetPrivateHttpClient().SendAsync(request).Result;
+                HttpResponseMessage res = SendPrivateRequest(HttpMethod.Post, url, json);
                 string contentStr = res.Content.ReadAsStringAsync().Result;
 
                 ResponseRestMessage<List<RestMessageSendOrder>> message = JsonConvert.DeserializeAnonymousType(contentStr, new ResponseRestMessage<List<RestMessageSendOrder>>());
@@ -3289,8 +3293,7 @@ namespace OsEngine.Market.Servers.OKX
 
                 string url = $"{_baseUrl}/api/v5/trade/order";
 
-                using HttpRequestMessage request = CreateSignedRequest(HttpMethod.Post, url, json);
-                HttpResponseMessage res = GetPrivateHttpClient().SendAsync(request).Result;
+                HttpResponseMessage res = SendPrivateRequest(HttpMethod.Post, url, json);
                 string contentStr = res.Content.ReadAsStringAsync().Result;
 
                 if (res.StatusCode == HttpStatusCode.OK)
@@ -3357,8 +3360,7 @@ namespace OsEngine.Market.Servers.OKX
 
                 string url = $"{_baseUrl}/api/v5/trade/cancel-order";
 
-                using HttpRequestMessage request = CreateSignedRequest(HttpMethod.Post, url, json);
-                HttpResponseMessage res = GetPrivateHttpClient().SendAsync(request).Result;
+                HttpResponseMessage res = SendPrivateRequest(HttpMethod.Post, url, json);
                 string contentStr = res.Content.ReadAsStringAsync().Result;
 
                 ResponseRestMessage<List<RestMessageSendOrder>> message = JsonConvert.DeserializeAnonymousType(contentStr, new ResponseRestMessage<List<RestMessageSendOrder>>());
@@ -3912,8 +3914,7 @@ namespace OsEngine.Market.Servers.OKX
 
         public HttpResponseMessage GetPrivateRequest(string url)
         {
-            using HttpRequestMessage request = CreateSignedRequest(HttpMethod.Get, url);
-            return GetPrivateHttpClient().SendAsync(request).Result;
+            return SendPrivateRequest(HttpMethod.Get, url);
         }
 
         public void SetLeverage(Security security, decimal leverage) { }
