@@ -324,6 +324,20 @@ namespace OsEngine.Market.Servers.OKX
             return new RestRequest(resource, Method.GET);
         }
 
+        private IRestResponse ExecutePublicGetRequest(string resource, string errorLogPrefix)
+        {
+            RestRequest requestRest = CreatePublicGetRequest(resource);
+            RestClient client = CreatePublicRestClient();
+            IRestResponse response = client.Execute(requestRest);
+
+            if (response.StatusCode != HttpStatusCode.OK)
+            {
+                SendLogMessage($"{errorLogPrefix} - {response.Content}", LogMessageType.Error);
+            }
+
+            return response;
+        }
+
         private HttpClient _privateHttpClient;
         private readonly Lock _privateHttpClientLocker = new();
 
@@ -430,15 +444,7 @@ namespace OsEngine.Market.Servers.OKX
         {
             try
             {
-                RestRequest requestRest = CreatePublicGetRequest("/api/v5/public/instruments?instType=SWAP");
-                RestClient client = CreatePublicRestClient();
-
-                IRestResponse response = client.Execute(requestRest);
-
-                if (response.StatusCode != HttpStatusCode.OK)
-                {
-                    SendLogMessage($"GetFuturesSecurities - {response.Content}", LogMessageType.Error);
-                }
+                IRestResponse response = ExecutePublicGetRequest("/api/v5/public/instruments?instType=SWAP", "GetFuturesSecurities");
 
                 SecurityResponse securityResponse = JsonConvert.DeserializeAnonymousType(response.Content, new SecurityResponse());
 
@@ -455,15 +461,7 @@ namespace OsEngine.Market.Servers.OKX
         {
             try
             {
-                RestRequest requestRest = CreatePublicGetRequest("/api/v5/public/instruments?instType=FUTURES");
-                RestClient client = CreatePublicRestClient();
-
-                IRestResponse response = client.Execute(requestRest);
-
-                if (response.StatusCode != HttpStatusCode.OK)
-                {
-                    SendLogMessage($"GetFuturesContractsSecurities - {response.Content}", LogMessageType.Error);
-                }
+                IRestResponse response = ExecutePublicGetRequest("/api/v5/public/instruments?instType=FUTURES", "GetFuturesContractsSecurities");
 
                 SecurityResponse securityResponse = JsonConvert.DeserializeAnonymousType(response.Content, new SecurityResponse());
 
@@ -480,15 +478,7 @@ namespace OsEngine.Market.Servers.OKX
         {
             try
             {
-                RestRequest requestRest = CreatePublicGetRequest("/api/v5/public/underlying?instType=OPTION");
-                RestClient client = CreatePublicRestClient();
-
-                IRestResponse response = client.Execute(requestRest);
-
-                if (response.StatusCode != HttpStatusCode.OK)
-                {
-                    SendLogMessage($"GetOptionSecurities - {response.Content}", LogMessageType.Error);
-                }
+                IRestResponse response = ExecutePublicGetRequest("/api/v5/public/underlying?instType=OPTION", "GetOptionSecurities");
 
                 SecurityUnderlyingResponse baseSecuritiesResponse = JsonConvert.DeserializeAnonymousType(response.Content, new SecurityUnderlyingResponse());
 
@@ -521,15 +511,7 @@ namespace OsEngine.Market.Servers.OKX
                 {
                     string baseSecurity = baseSecurities[k];
 
-                    RestRequest requestRest = CreatePublicGetRequest("/api/v5/public/instruments?instType=OPTION&uly=" + baseSecurity);
-                    RestClient client = CreatePublicRestClient();
-
-                    IRestResponse response = client.Execute(requestRest);
-
-                    if (response.StatusCode != HttpStatusCode.OK)
-                    {
-                        SendLogMessage($"GetOptionSecurities - {response.Content}", LogMessageType.Error);
-                    }
+                    IRestResponse response = ExecutePublicGetRequest("/api/v5/public/instruments?instType=OPTION&uly=" + baseSecurity, "GetOptionSecurities");
 
                     SecurityResponse securityResponse = JsonConvert.DeserializeAnonymousType(response.Content, new SecurityResponse());
 
@@ -556,15 +538,7 @@ namespace OsEngine.Market.Servers.OKX
         {
             try
             {
-                RestRequest requestRest = CreatePublicGetRequest("/api/v5/public/instruments?instType=SPOT");
-                RestClient client = CreatePublicRestClient();
-
-                IRestResponse response = client.Execute(requestRest);
-
-                if (response.StatusCode != HttpStatusCode.OK)
-                {
-                    SendLogMessage($"GetSpotSecurities - {response.Content}", LogMessageType.Error);
-                }
+                IRestResponse response = ExecutePublicGetRequest("/api/v5/public/instruments?instType=SPOT", "GetSpotSecurities");
 
                 SecurityResponse securityResponse = JsonConvert.DeserializeAnonymousType(response.Content, new SecurityResponse());
 
