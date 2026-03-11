@@ -372,6 +372,16 @@ namespace OsEngine.Market.Servers.OKX
             return JsonConvert.DeserializeAnonymousType(responseContent, new ResponseRestMessage<List<FundingItemHistory>>());
         }
 
+        private static ResponseRestMessage<List<RestMessageSendOrder>> ParsePrivateSendOrderResponse(string responseContent)
+        {
+            return JsonConvert.DeserializeAnonymousType(responseContent, new ResponseRestMessage<List<RestMessageSendOrder>>());
+        }
+
+        private static ResponseRestMessage<List<ResponseWsOrders>> ParsePrivateOrdersResponse(string responseContent)
+        {
+            return JsonConvert.DeserializeAnonymousType(responseContent, new ResponseRestMessage<List<ResponseWsOrders>>());
+        }
+
         private HttpClient _privateHttpClient;
         private readonly Lock _privateHttpClientLocker = new();
 
@@ -1392,7 +1402,7 @@ namespace OsEngine.Market.Servers.OKX
             HttpResponseMessage res = SendPrivateRequest(HttpMethod.Post, url, bodyStr);
             string contentStr = res.Content.ReadAsStringAsync().Result;
 
-            ResponseRestMessage<List<RestMessageSendOrder>> message = JsonConvert.DeserializeAnonymousType(contentStr, new ResponseRestMessage<List<RestMessageSendOrder>>());
+            ResponseRestMessage<List<RestMessageSendOrder>> message = ParsePrivateSendOrderResponse(contentStr);
 
             if (message.code.Equals("1"))
             {
@@ -3223,7 +3233,7 @@ namespace OsEngine.Market.Servers.OKX
                 HttpResponseMessage res = SendPrivateRequest(HttpMethod.Post, url, json);
                 string contentStr = res.Content.ReadAsStringAsync().Result;
 
-                ResponseRestMessage<List<RestMessageSendOrder>> message = JsonConvert.DeserializeAnonymousType(contentStr, new ResponseRestMessage<List<RestMessageSendOrder>>());
+                ResponseRestMessage<List<RestMessageSendOrder>> message = ParsePrivateSendOrderResponse(contentStr);
 
                 if (res.StatusCode == HttpStatusCode.OK)
                 {
@@ -3288,7 +3298,7 @@ namespace OsEngine.Market.Servers.OKX
 
                 if (res.StatusCode == HttpStatusCode.OK)
                 {
-                    ResponseRestMessage<List<RestMessageSendOrder>> message = JsonConvert.DeserializeAnonymousType(contentStr, new ResponseRestMessage<List<RestMessageSendOrder>>());
+                    ResponseRestMessage<List<RestMessageSendOrder>> message = ParsePrivateSendOrderResponse(contentStr);
 
                     if (message.code.Equals("1"))
                     {
@@ -3353,7 +3363,7 @@ namespace OsEngine.Market.Servers.OKX
                 HttpResponseMessage res = SendPrivateRequest(HttpMethod.Post, url, json);
                 string contentStr = res.Content.ReadAsStringAsync().Result;
 
-                ResponseRestMessage<List<RestMessageSendOrder>> message = JsonConvert.DeserializeAnonymousType(contentStr, new ResponseRestMessage<List<RestMessageSendOrder>>());
+                ResponseRestMessage<List<RestMessageSendOrder>> message = ParsePrivateSendOrderResponse(contentStr);
 
                 if (res.StatusCode == HttpStatusCode.OK)
                 {
@@ -3536,7 +3546,7 @@ namespace OsEngine.Market.Servers.OKX
 
                 if (res.StatusCode == HttpStatusCode.OK)
                 {
-                    ResponseRestMessage<List<ResponseWsOrders>> OrderResponse = JsonConvert.DeserializeAnonymousType(contentStr, new ResponseRestMessage<List<ResponseWsOrders>>());
+                    ResponseRestMessage<List<ResponseWsOrders>> OrderResponse = ParsePrivateOrdersResponse(contentStr);
 
                     if (OrderResponse.code.Equals("0"))
                     {
@@ -3830,7 +3840,7 @@ namespace OsEngine.Market.Servers.OKX
 
                 if (res.StatusCode == HttpStatusCode.OK)
                 {
-                    ResponseRestMessage<List<ResponseWsOrders>> OrderResponse = JsonConvert.DeserializeAnonymousType(contentStr, new ResponseRestMessage<List<ResponseWsOrders>>());
+                    ResponseRestMessage<List<ResponseWsOrders>> OrderResponse = ParsePrivateOrdersResponse(contentStr);
 
                     if (OrderResponse.code.Equals("0"))
                     {
