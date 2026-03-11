@@ -206,6 +206,27 @@ public class OkxServerPrivateHttpClientTests
         Assert.Equal("50000", trade.fillPx);
     }
 
+    [Fact]
+    public void ExecutePrivateQueryRequest_ShouldReturnResponseContentAndParserResult()
+    {
+        OkxServerRealization realization = CreateRealizationForHttpClientTests();
+        ProbeHandler probe = new ProbeHandler
+        {
+            ResponseToReturn = new HttpResponseMessage(HttpStatusCode.OK)
+            {
+                Content = new StringContent("probe-body")
+            }
+        };
+        SetPrivateField(realization, "_privateHttpClient", new HttpClient(probe));
+
+        (HttpResponseMessage response, string content, string message) =
+            InvokeExecutePrivateQueryRequest(realization, "https://www.okx.com/api/v5/trade/orders-pending");
+
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+        Assert.Equal("probe-body", content);
+        Assert.Equal("PROBE-BODY", message);
+    }
+
     private static HttpClient InvokeGetPrivateHttpClient(OkxServerRealization realization)
     {
         MethodInfo method = typeof(OkxServerRealization).GetMethod(
@@ -322,6 +343,24 @@ public class OkxServerPrivateHttpClientTests
             ?? throw new InvalidOperationException("ExecutePrivateTradeDetailsQueryRequest returned null.");
 
         return ((HttpResponseMessage response, string content, TradeDetailsResponse message))tuple;
+    }
+
+    private static (HttpResponseMessage response, string content, string message) InvokeExecutePrivateQueryRequest(
+        OkxServerRealization realization,
+        string url)
+    {
+        MethodInfo method = typeof(OkxServerRealization).GetMethod(
+            "ExecutePrivateQueryRequest",
+            BindingFlags.NonPublic | BindingFlags.Instance)
+            ?? throw new InvalidOperationException("ExecutePrivateQueryRequest method not found.");
+
+        MethodInfo genericMethod = method.MakeGenericMethod(typeof(string));
+        Func<string, string> parser = static content => content.ToUpperInvariant();
+
+        object tuple = genericMethod.Invoke(realization, [url, parser])
+            ?? throw new InvalidOperationException("ExecutePrivateQueryRequest returned null.");
+
+        return ((HttpResponseMessage response, string content, string message))tuple;
     }
 
     private static HttpClient? GetPrivateHttpClientField(OkxServerRealization realization)

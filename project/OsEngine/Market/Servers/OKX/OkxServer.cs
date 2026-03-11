@@ -405,18 +405,24 @@ namespace OsEngine.Market.Servers.OKX
         private (HttpResponseMessage Response, string Content, ResponseRestMessage<List<ResponseWsOrders>> Message) ExecutePrivateOrdersQueryRequest(
             string url)
         {
-            HttpResponseMessage response = GetPrivateRequest(url);
-            string content = ReadPrivateResponseContent(response);
-            ResponseRestMessage<List<ResponseWsOrders>> message = ParsePrivateOrdersResponse(content);
-            return (response, content, message);
+            return ExecutePrivateQueryRequest(url, ParsePrivateOrdersResponse);
         }
 
         private (HttpResponseMessage Response, string Content, TradeDetailsResponse Message) ExecutePrivateTradeDetailsQueryRequest(
             string url)
         {
+            return ExecutePrivateQueryRequest(
+                url,
+                static content => JsonConvert.DeserializeAnonymousType(content, new TradeDetailsResponse()));
+        }
+
+        private (HttpResponseMessage Response, string Content, T Message) ExecutePrivateQueryRequest<T>(
+            string url,
+            Func<string, T> parser)
+        {
             HttpResponseMessage response = GetPrivateRequest(url);
             string content = ReadPrivateResponseContent(response);
-            TradeDetailsResponse message = JsonConvert.DeserializeAnonymousType(content, new TradeDetailsResponse());
+            T message = parser(content);
             return (response, content, message);
         }
 
