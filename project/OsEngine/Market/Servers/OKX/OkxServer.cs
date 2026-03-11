@@ -338,6 +338,18 @@ namespace OsEngine.Market.Servers.OKX
             return response;
         }
 
+        private SecurityResponse ExecutePublicSecurityResponseRequest(string resource, string errorLogPrefix)
+        {
+            IRestResponse response = ExecutePublicGetRequest(resource, errorLogPrefix);
+            return JsonConvert.DeserializeAnonymousType(response.Content, new SecurityResponse());
+        }
+
+        private SecurityUnderlyingResponse ExecutePublicSecurityUnderlyingResponseRequest(string resource, string errorLogPrefix)
+        {
+            IRestResponse response = ExecutePublicGetRequest(resource, errorLogPrefix);
+            return JsonConvert.DeserializeAnonymousType(response.Content, new SecurityUnderlyingResponse());
+        }
+
         private HttpClient _privateHttpClient;
         private readonly Lock _privateHttpClientLocker = new();
 
@@ -444,11 +456,7 @@ namespace OsEngine.Market.Servers.OKX
         {
             try
             {
-                IRestResponse response = ExecutePublicGetRequest("/api/v5/public/instruments?instType=SWAP", "GetFuturesSecurities");
-
-                SecurityResponse securityResponse = JsonConvert.DeserializeAnonymousType(response.Content, new SecurityResponse());
-
-                return securityResponse;
+                return ExecutePublicSecurityResponseRequest("/api/v5/public/instruments?instType=SWAP", "GetFuturesSecurities");
             }
             catch (Exception error)
             {
@@ -461,11 +469,7 @@ namespace OsEngine.Market.Servers.OKX
         {
             try
             {
-                IRestResponse response = ExecutePublicGetRequest("/api/v5/public/instruments?instType=FUTURES", "GetFuturesContractsSecurities");
-
-                SecurityResponse securityResponse = JsonConvert.DeserializeAnonymousType(response.Content, new SecurityResponse());
-
-                return securityResponse;
+                return ExecutePublicSecurityResponseRequest("/api/v5/public/instruments?instType=FUTURES", "GetFuturesContractsSecurities");
             }
             catch (Exception error)
             {
@@ -478,9 +482,9 @@ namespace OsEngine.Market.Servers.OKX
         {
             try
             {
-                IRestResponse response = ExecutePublicGetRequest("/api/v5/public/underlying?instType=OPTION", "GetOptionSecurities");
-
-                SecurityUnderlyingResponse baseSecuritiesResponse = JsonConvert.DeserializeAnonymousType(response.Content, new SecurityUnderlyingResponse());
+                SecurityUnderlyingResponse baseSecuritiesResponse = ExecutePublicSecurityUnderlyingResponseRequest(
+                    "/api/v5/public/underlying?instType=OPTION",
+                    "GetOptionSecurities");
 
                 if (baseSecuritiesResponse == null ||
                     baseSecuritiesResponse.data == null ||
@@ -511,9 +515,9 @@ namespace OsEngine.Market.Servers.OKX
                 {
                     string baseSecurity = baseSecurities[k];
 
-                    IRestResponse response = ExecutePublicGetRequest("/api/v5/public/instruments?instType=OPTION&uly=" + baseSecurity, "GetOptionSecurities");
-
-                    SecurityResponse securityResponse = JsonConvert.DeserializeAnonymousType(response.Content, new SecurityResponse());
+                    SecurityResponse securityResponse = ExecutePublicSecurityResponseRequest(
+                        "/api/v5/public/instruments?instType=OPTION&uly=" + baseSecurity,
+                        "GetOptionSecurities");
 
                     if (ret == null)
                     {
@@ -538,11 +542,7 @@ namespace OsEngine.Market.Servers.OKX
         {
             try
             {
-                IRestResponse response = ExecutePublicGetRequest("/api/v5/public/instruments?instType=SPOT", "GetSpotSecurities");
-
-                SecurityResponse securityResponse = JsonConvert.DeserializeAnonymousType(response.Content, new SecurityResponse());
-
-                return securityResponse;
+                return ExecutePublicSecurityResponseRequest("/api/v5/public/instruments?instType=SPOT", "GetSpotSecurities");
             }
             catch (Exception error)
             {
