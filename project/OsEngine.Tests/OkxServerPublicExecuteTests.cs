@@ -56,6 +56,53 @@ public sealed class OkxServerPublicExecuteTests
         Assert.Equal("/probe", server.LastRequestPath);
     }
 
+    [Fact]
+    public void HasOkPublicAbsoluteStatus_WithOkStatus_ShouldReturnTrueWithoutLogging()
+    {
+        OkxServerRealization realization = CreateRealization("http://127.0.0.1");
+        RestResponse response = new RestResponse
+        {
+            StatusCode = HttpStatusCode.OK,
+            Content = "{\"data\":[]}",
+        };
+
+        string? loggedMessage = null;
+        realization.LogMessageEvent += (message, _) => loggedMessage = message;
+
+        bool result = InvokeHasOkPublicAbsoluteStatus(realization, response, static currentResponse => $"Probe - {currentResponse.Content}");
+
+        Assert.True(result);
+        Assert.Null(loggedMessage);
+    }
+
+    [Fact]
+    public void HasOkPublicAbsoluteStatus_WithNonOkStatus_ShouldLogFactoryMessageAndReturnFalse()
+    {
+        OkxServerRealization realization = CreateRealization("http://127.0.0.1");
+        RestResponse response = new RestResponse
+        {
+            StatusCode = HttpStatusCode.BadGateway,
+            Content = "gateway down",
+        };
+
+        string? loggedMessage = null;
+        LogMessageType? loggedType = null;
+        realization.LogMessageEvent += (message, type) =>
+        {
+            loggedMessage = message;
+            loggedType = type;
+        };
+
+        bool result = InvokeHasOkPublicAbsoluteStatus(
+            realization,
+            response,
+            static currentResponse => $"Probe - {currentResponse.StatusCode} - {currentResponse.Content}");
+
+        Assert.False(result);
+        Assert.Equal(LogMessageType.Error, loggedType);
+        Assert.Equal("Probe - BadGateway - gateway down", loggedMessage);
+    }
+
     private static OkxServerRealization CreateRealization(string baseUrl)
     {
         OkxServerRealization realization = (OkxServerRealization)RuntimeHelpers.GetUninitializedObject(typeof(OkxServerRealization));
@@ -73,6 +120,20 @@ public sealed class OkxServerPublicExecuteTests
 
         return (IRestResponse)(method.Invoke(realization, [resource, errorLogPrefix])
             ?? throw new InvalidOperationException("ExecutePublicGetRequest returned null."));
+    }
+
+    private static bool InvokeHasOkPublicAbsoluteStatus(
+        OkxServerRealization realization,
+        IRestResponse response,
+        Func<IRestResponse, string> errorMessageFactory)
+    {
+        MethodInfo method = typeof(OkxServerRealization).GetMethod(
+            "HasOkPublicAbsoluteStatus",
+            BindingFlags.NonPublic | BindingFlags.Instance)
+            ?? throw new InvalidOperationException("HasOkPublicAbsoluteStatus method not found.");
+
+        return (bool)(method.Invoke(realization, [response, errorMessageFactory])
+            ?? throw new InvalidOperationException("HasOkPublicAbsoluteStatus returned null."));
     }
 
     private static void SetPrivateField(OkxServerRealization realization, string fieldName, object? value)

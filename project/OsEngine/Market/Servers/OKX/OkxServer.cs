@@ -378,6 +378,19 @@ namespace OsEngine.Market.Servers.OKX
             return (response, parser(response.Content));
         }
 
+        private bool HasOkPublicAbsoluteStatus(
+            IRestResponse response,
+            Func<IRestResponse, string> errorMessageFactory)
+        {
+            if (response.StatusCode == HttpStatusCode.OK)
+            {
+                return true;
+            }
+
+            SendLogMessage(errorMessageFactory(response), LogMessageType.Error);
+            return false;
+        }
+
         private static CandlesResponse ParsePublicCandlesResponse(string responseContent)
         {
             return DeserializeAnonymousPayload(responseContent, new CandlesResponse());
@@ -1018,13 +1031,11 @@ namespace OsEngine.Market.Servers.OKX
 
                     (IRestResponse Response, CandlesResponse responseMessage) = ExecutePublicAbsoluteQueryRequest(url, ParsePublicCandlesResponse);
 
-                    if (Response.StatusCode == HttpStatusCode.OK)
+                    if (HasOkPublicAbsoluteStatus(
+                        Response,
+                        static response => $"GetResponseDataCandles - {response.Content}"))
                     {
                         candlesResponse.data.AddRange(responseMessage.data);
-                    }
-                    else
-                    {
-                        SendLogMessage($"GetResponseDataCandles - {Response.Content}", LogMessageType.Error);
                     }
 
                     NumberCandlesToLoad -= limit;
@@ -1175,7 +1186,9 @@ namespace OsEngine.Market.Servers.OKX
 
                 (IRestResponse response, TradesDataResponse tradesResponse) = ExecutePublicAbsoluteQueryRequest(url, ParsePublicTradesDataResponse);
 
-                if (response.StatusCode == HttpStatusCode.OK)
+                if (HasOkPublicAbsoluteStatus(
+                    response,
+                    static currentResponse => $"Trades request error: {currentResponse.StatusCode} - {currentResponse.Content}"))
                 {
                     if (tradesResponse.code == "0")
                     {
@@ -1202,10 +1215,6 @@ namespace OsEngine.Market.Servers.OKX
                     {
                         SendLogMessage($"Trades request error: {tradesResponse.code} - {tradesResponse.msg}", LogMessageType.Error);
                     }
-                }
-                else
-                {
-                    SendLogMessage($"Trades request error: {response.StatusCode} - {response.Content}", LogMessageType.Error);
                 }
             }
             catch (Exception error)
@@ -1872,7 +1881,9 @@ namespace OsEngine.Market.Servers.OKX
                 (IRestResponse response, ResponseRestMessage<List<FundingItemHistory>> responseFunding) =
                     ExecutePublicAbsoluteQueryRequest(url, ParsePublicFundingHistoryResponse);
 
-                if (response.StatusCode == HttpStatusCode.OK)
+                if (HasOkPublicAbsoluteStatus(
+                    response,
+                    static currentResponse => $"GetFundingHistory error. Code: {currentResponse.StatusCode} || msg: {currentResponse.Content}"))
                 {
                     if (responseFunding.code == "0")
                     {
@@ -1889,10 +1900,6 @@ namespace OsEngine.Market.Servers.OKX
                     {
                         SendLogMessage($"GetFundingHistory error. Code:{responseFunding.code} || msg: {responseFunding.msg}", LogMessageType.Error);
                     }
-                }
-                else
-                {
-                    SendLogMessage($"GetFundingHistory error. Code: {response.StatusCode} || msg: {response.Content}", LogMessageType.Error);
                 }
             }
             catch (Exception error)
