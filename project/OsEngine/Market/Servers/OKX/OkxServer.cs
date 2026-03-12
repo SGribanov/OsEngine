@@ -2426,242 +2426,51 @@ namespace OsEngine.Market.Servers.OKX
 
         private void ThreadMessageReaderTradesOption()
         {
-            while (true)
-            {
-                try
-                {
-                    if (_queueMessageTradesOption.IsEmpty)
-                    {
-                        if (IsCompletelyDeleted == true)
-                        {
-                            return;
-                        }
-
-                        Thread.Sleep(1);
-                    }
-                    else
-                    {
-                        string message;
-
-                        if (_queueMessageTradesOption.TryDequeue(out message))
-                        {
-                            UpdateTrades(message);
-                        }
-                    }
-                }
-                catch (System.Exception ex)
-                {
-                    Thread.Sleep(5000);
-                    SendLogMessage(ex.Message, LogMessageType.Error);
-                }
-            }
+            RunQueueMessageReader(_queueMessageTradesOption, UpdateTrades);
         }
 
         private void ThreadMessageReaderTradesFutures()
         {
-            while (true)
-            {
-                try
-                {
-                    if (_queueMessageTradesFutures.IsEmpty)
-                    {
-                        if (IsCompletelyDeleted == true)
-                        {
-                            return;
-                        }
-
-                        Thread.Sleep(1);
-                    }
-                    else
-                    {
-                        string message;
-
-                        if (_queueMessageTradesFutures.TryDequeue(out message))
-                        {
-                            UpdateTrades(message);
-                        }
-                    }
-                }
-                catch (System.Exception ex)
-                {
-                    Thread.Sleep(5000);
-                    SendLogMessage(ex.Message, LogMessageType.Error);
-                }
-            }
+            RunQueueMessageReader(_queueMessageTradesFutures, UpdateTrades);
         }
 
         private void ThreadMessageReaderTradesSwap()
         {
-            while (true)
-            {
-                try
-                {
-                    if (_queueMessageTradesSwap.IsEmpty)
-                    {
-                        if (IsCompletelyDeleted == true)
-                        {
-                            return;
-                        }
-
-                        Thread.Sleep(1);
-                    }
-                    else
-                    {
-                        string message;
-
-                        if (_queueMessageTradesSwap.TryDequeue(out message))
-                        {
-                            UpdateTrades(message);
-                        }
-                    }
-                }
-                catch (System.Exception ex)
-                {
-                    Thread.Sleep(5000);
-                    SendLogMessage(ex.Message, LogMessageType.Error);
-                }
-            }
+            RunQueueMessageReader(_queueMessageTradesSwap, UpdateTrades);
         }
 
         private void ThreadMessageReaderTradesSpot()
         {
-            while (true)
-            {
-                try
-                {
-                    if (_queueMessageTradesSpot.IsEmpty)
-                    {
-                        if (IsCompletelyDeleted == true)
-                        {
-                            return;
-                        }
-
-                        Thread.Sleep(1);
-                    }
-                    else
-                    {
-                        string message;
-
-                        if (_queueMessageTradesSpot.TryDequeue(out message))
-                        {
-                            UpdateTrades(message);
-                        }
-                    }
-                }
-                catch (System.Exception ex)
-                {
-                    Thread.Sleep(5000);
-                    SendLogMessage(ex.Message, LogMessageType.Error);
-                }
-            }
+            RunQueueMessageReader(_queueMessageTradesSpot, UpdateTrades);
         }
 
         private void ThreadMessageReaderMarketDepthOption()
         {
-            while (true)
-            {
-                try
-                {
-                    if (_queueMessageMarketDepthOption.IsEmpty)
-                    {
-                        if (IsCompletelyDeleted == true)
-                        {
-                            return;
-                        }
-
-                        Thread.Sleep(1);
-                    }
-                    else
-                    {
-                        string message;
-
-                        if (_queueMessageMarketDepthOption.TryDequeue(out message))
-                        {
-                            UpdateMarketDepth(message);
-                        }
-                    }
-                }
-                catch (System.Exception ex)
-                {
-                    Thread.Sleep(5000);
-                    SendLogMessage(ex.Message, LogMessageType.Error);
-                }
-            }
+            RunQueueMessageReader(_queueMessageMarketDepthOption, UpdateMarketDepth);
         }
 
         private void ThreadMessageReaderMarketDepthFutures()
         {
-            while (true)
-            {
-                try
-                {
-                    if (_queueMessageMarketDepthFutures.IsEmpty)
-                    {
-                        if (IsCompletelyDeleted == true)
-                        {
-                            return;
-                        }
-
-                        Thread.Sleep(1);
-                    }
-                    else
-                    {
-                        string message;
-
-                        if (_queueMessageMarketDepthFutures.TryDequeue(out message))
-                        {
-                            UpdateMarketDepth(message);
-                        }
-                    }
-                }
-                catch (System.Exception ex)
-                {
-                    Thread.Sleep(5000);
-                    SendLogMessage(ex.Message, LogMessageType.Error);
-                }
-            }
+            RunQueueMessageReader(_queueMessageMarketDepthFutures, UpdateMarketDepth);
         }
 
         private void ThreadMessageReaderMarketDepthSwap()
         {
-            while (true)
-            {
-                try
-                {
-                    if (_queueMessageMarketDepthSwap.IsEmpty)
-                    {
-                        if (IsCompletelyDeleted == true)
-                        {
-                            return;
-                        }
-
-                        Thread.Sleep(1);
-                    }
-                    else
-                    {
-                        string message;
-
-                        if (_queueMessageMarketDepthSwap.TryDequeue(out message))
-                        {
-                            UpdateMarketDepth(message);
-                        }
-                    }
-                }
-                catch (System.Exception ex)
-                {
-                    Thread.Sleep(5000);
-                    SendLogMessage(ex.Message, LogMessageType.Error);
-                }
-            }
+            RunQueueMessageReader(_queueMessageMarketDepthSwap, UpdateMarketDepth);
         }
 
         private void ThreadMessageReaderMarketDepthSpot()
+        {
+            RunQueueMessageReader(_queueMessageMarketDepthSpot, UpdateMarketDepth);
+        }
+
+        private void RunQueueMessageReader(ConcurrentQueue<string> messageQueue, Action<string> messageHandler)
         {
             while (true)
             {
                 try
                 {
-                    if (_queueMessageMarketDepthSpot.IsEmpty)
+                    if (messageQueue.IsEmpty)
                     {
                         if (IsCompletelyDeleted == true)
                         {
@@ -2672,11 +2481,9 @@ namespace OsEngine.Market.Servers.OKX
                     }
                     else
                     {
-                        string message;
-
-                        if (_queueMessageMarketDepthSpot.TryDequeue(out message))
+                        if (messageQueue.TryDequeue(out string message))
                         {
-                            UpdateMarketDepth(message);
+                            messageHandler(message);
                         }
                     }
                 }
