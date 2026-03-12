@@ -66,10 +66,11 @@ public sealed class OkxServerPublicMarketDataParseTests
     {
         using LocalHttpServer server = new LocalHttpServer(HttpStatusCode.OK, "{\"probe\":\"ok\"}");
 
-        string result = InvokeExecutePublicAbsoluteQueryRequest(
+        (HttpStatusCode statusCode, string result) = InvokeExecutePublicAbsoluteQueryRequest(
             $"{server.BaseUrl}/api/v5/market/candles?instId=BTC-USDT-SWAP",
             static content => "PROBE: " + content);
 
+        Assert.Equal(HttpStatusCode.OK, statusCode);
         Assert.Equal("PROBE: {\"probe\":\"ok\"}", result);
         Assert.Equal("/api/v5/market/candles?instId=BTC-USDT-SWAP", server.LastRequestPath);
     }
@@ -107,7 +108,7 @@ public sealed class OkxServerPublicMarketDataParseTests
             ?? throw new InvalidOperationException("ParsePublicFundingHistoryResponse returned null."));
     }
 
-    private static string InvokeExecutePublicAbsoluteQueryRequest(string url, Func<string, string> parser)
+    private static (HttpStatusCode statusCode, string result) InvokeExecutePublicAbsoluteQueryRequest(string url, Func<string, string> parser)
     {
         MethodInfo method = typeof(OkxServerRealization).GetMethod(
             "ExecutePublicAbsoluteQueryRequest",
@@ -116,8 +117,16 @@ public sealed class OkxServerPublicMarketDataParseTests
 
         MethodInfo genericMethod = method.MakeGenericMethod(typeof(string));
 
-        return (string)(genericMethod.Invoke(null, [url, parser])
-            ?? throw new InvalidOperationException("ExecutePublicAbsoluteQueryRequest returned null."));
+        object tuple = genericMethod.Invoke(null, [url, parser])
+            ?? throw new InvalidOperationException("ExecutePublicAbsoluteQueryRequest returned null.");
+
+        Type tupleType = tuple.GetType();
+        RestSharp.IRestResponse response = (RestSharp.IRestResponse)(tupleType.GetField("Item1")?.GetValue(tuple)
+            ?? throw new InvalidOperationException("Tuple Item1 not found."));
+        string result = (string)(tupleType.GetField("Item2")?.GetValue(tuple)
+            ?? throw new InvalidOperationException("Tuple Item2 not found."));
+
+        return (response.StatusCode, result);
     }
 
     private sealed class LocalHttpServer : IDisposable

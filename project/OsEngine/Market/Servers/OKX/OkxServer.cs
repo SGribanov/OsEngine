@@ -370,12 +370,12 @@ namespace OsEngine.Market.Servers.OKX
             return client.Execute(request);
         }
 
-        private static T ExecutePublicAbsoluteQueryRequest<T>(
+        private static (IRestResponse Response, T Message) ExecutePublicAbsoluteQueryRequest<T>(
             string url,
             Func<string, T> parser)
         {
             IRestResponse response = ExecutePublicAbsoluteGetRequest(url);
-            return parser(response.Content);
+            return (response, parser(response.Content));
         }
 
         private static CandlesResponse ParsePublicCandlesResponse(string responseContent)
@@ -1011,11 +1011,11 @@ namespace OsEngine.Market.Servers.OKX
                         url = _baseUrl + "/api/v5/market/candles?instId=" + nameSec + "&bar=" + bar + "&limit=" + limit.ToString(CultureInfo.InvariantCulture) + after;
                     }
 
-                    IRestResponse Response = ExecutePublicAbsoluteGetRequest(url);
+                    (IRestResponse Response, CandlesResponse responseMessage) = ExecutePublicAbsoluteQueryRequest(url, ParsePublicCandlesResponse);
 
                     if (Response.StatusCode == HttpStatusCode.OK)
                     {
-                        candlesResponse.data.AddRange(ParsePublicCandlesResponse(Response.Content).data);
+                        candlesResponse.data.AddRange(responseMessage.data);
                     }
                     else
                     {
@@ -1168,12 +1168,10 @@ namespace OsEngine.Market.Servers.OKX
 
                 string url = _baseUrl + $"/api/v5/market/history-trades?instId={securityName}&type=2&after={timeEnd}&limit=100";
 
-                IRestResponse response = ExecutePublicAbsoluteGetRequest(url);
+                (IRestResponse response, TradesDataResponse tradesResponse) = ExecutePublicAbsoluteQueryRequest(url, ParsePublicTradesDataResponse);
 
                 if (response.StatusCode == HttpStatusCode.OK)
                 {
-                    TradesDataResponse tradesResponse = ParsePublicTradesDataResponse(response.Content);
-
                     if (tradesResponse.code == "0")
                     {
                         for (int i = 0; i < tradesResponse.data.Count; i++)
@@ -1866,12 +1864,11 @@ namespace OsEngine.Market.Servers.OKX
             {
                 string url = _baseUrl + $"/api/v5/public/funding-rate-history?instId={securityName}";
 
-                IRestResponse response = ExecutePublicAbsoluteGetRequest(url);
+                (IRestResponse response, ResponseRestMessage<List<FundingItemHistory>> responseFunding) =
+                    ExecutePublicAbsoluteQueryRequest(url, ParsePublicFundingHistoryResponse);
 
                 if (response.StatusCode == HttpStatusCode.OK)
                 {
-                    ResponseRestMessage<List<FundingItemHistory>> responseFunding = ParsePublicFundingHistoryResponse(response.Content);
-
                     if (responseFunding.code == "0")
                     {
                         FundingItemHistory item = responseFunding.data[0];
