@@ -29,6 +29,7 @@ using OsEngine.Logging;
 using OsEngine.Market;
 using OsEngine.Market.Servers;
 using OsEngine.Market.Servers.Tester;
+using OsEngine.MachineLearning.Onnx;
 using OsEngine.OsOptimizer.OptEntity;
 using OsEngine.OsTrader.Panels.Tab;
 using OsEngine.OsTrader.RiskManager;
@@ -87,6 +88,9 @@ namespace OsEngine.OsTrader.Panels
     public abstract class BotPanel
     {
         #region Service
+
+        private readonly Lock _onnxRuntimeSync = new();
+        private readonly List<OnnxModelRuntime> _onnxRuntimes = new();
 
         protected BotPanel(string name, StartProgram startProgram)
         {
@@ -191,6 +195,8 @@ namespace OsEngine.OsTrader.Panels
                     _botTabs = null;
                 }
 
+                DisposeOnnxRuntimes();
+
                 if (ParamGuiSettings != null)
                 {
                     ParamGuiSettings.LogMessageEvent -= SendNewLogMessage;
@@ -250,6 +256,38 @@ namespace OsEngine.OsTrader.Panels
             catch (Exception error)
             {
                 SendNewLogMessage(error.ToString(), LogMessageType.Error);
+            }
+        }
+
+        protected OnnxModelRuntime CreateOnnxModelRuntime()
+        {
+            OnnxModelRuntime runtime = new();
+
+            lock (_onnxRuntimeSync)
+            {
+                _onnxRuntimes.Add(runtime);
+            }
+
+            return runtime;
+        }
+
+        private void DisposeOnnxRuntimes()
+        {
+            lock (_onnxRuntimeSync)
+            {
+                for (int i = 0; i < _onnxRuntimes.Count; i++)
+                {
+                    try
+                    {
+                        _onnxRuntimes[i].Dispose();
+                    }
+                    catch (Exception error)
+                    {
+                        SendNewLogMessage(error.ToString(), LogMessageType.Error);
+                    }
+                }
+
+                _onnxRuntimes.Clear();
             }
         }
 
