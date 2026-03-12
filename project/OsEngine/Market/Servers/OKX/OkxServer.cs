@@ -2647,7 +2647,7 @@ namespace OsEngine.Market.Servers.OKX
             {
                 ResponseWsMessageAction<List<ResponseWsOrders>> OrderResponse = ParseWebSocketActionResponse<List<ResponseWsOrders>>(message);
 
-                if (OrderResponse.data == null || OrderResponse.data.Count == 0)
+                if (!HasWebSocketListPayloadItems(OrderResponse))
                 {
                     return;
                 }
@@ -2838,13 +2838,18 @@ namespace OsEngine.Market.Servers.OKX
             return stateType;
         }
 
+        private static bool HasWebSocketListPayloadItems<T>(ResponseWsMessageAction<List<T>> response)
+        {
+            return response.data != null && response.data.Count != 0;
+        }
+
         private void UpdateOptionSummary(string message)
         {
             try
             {
                 ResponseWsMessageAction<List<ResponseWsGreeks>> response = ParseWebSocketActionResponse<List<ResponseWsGreeks>>(message);
 
-                if (response.data == null || response.data.Count == 0)
+                if (!HasWebSocketListPayloadItems(response))
                 {
                     return;
                 }
@@ -2909,7 +2914,7 @@ namespace OsEngine.Market.Servers.OKX
             {
                 ResponseWsMessageAction<List<ResponseWsOpenInterest>> response = ParseWebSocketActionResponse<List<ResponseWsOpenInterest>>(message);
 
-                if (response.data == null || response.data.Count == 0)
+                if (!HasWebSocketListPayloadItems(response))
                 {
                     return;
                 }
@@ -2939,7 +2944,7 @@ namespace OsEngine.Market.Servers.OKX
             {
                 ResponseWsMessageAction<List<ResponseWsMarkPrice>> response = ParseWebSocketActionResponse<List<ResponseWsMarkPrice>>(message);
 
-                if (response.data == null || response.data.Count == 0)
+                if (!HasWebSocketListPayloadItems(response))
                 {
                     return;
                 }
@@ -2984,7 +2989,7 @@ namespace OsEngine.Market.Servers.OKX
             {
                 ResponseWsMessageAction<List<FundingItem>> response = ParseWebSocketActionResponse<List<FundingItem>>(message);
 
-                if (response.data == null || response.data.Count == 0)
+                if (!HasWebSocketListPayloadItems(response))
                 {
                     return;
                 }
@@ -3020,7 +3025,7 @@ namespace OsEngine.Market.Servers.OKX
             {
                 ResponseWsMessageAction<List<TickerItem>> response = ParseWebSocketActionResponse<List<TickerItem>>(message);
 
-                if (response.data == null || response.data.Count == 0)
+                if (!HasWebSocketListPayloadItems(response))
                 {
                     return;
                 }
