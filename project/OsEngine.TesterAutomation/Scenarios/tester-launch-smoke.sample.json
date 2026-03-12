@@ -1,0 +1,49 @@
+{
+  "name": "tester-launch-smoke",
+  "workingDirectory": "..\\..\\OsEngine\\bin\\Debug",
+  "executablePath": "OsEngine.exe",
+  "arguments": [
+    "-tester"
+  ],
+  "clearLogDirectory": true,
+  "killProcessTreeOnExit": true,
+  "timeoutSeconds": 60,
+  "pollIntervalMilliseconds": 500,
+  "summaryOutputPath": "..\\..\\..\\reports\\tester_gui_harness_launch_smoke.json",
+  "actions": [
+    {
+      "type": "waitWindow",
+      "windowAutomationId": "TesterUi.Window",
+      "timeoutSeconds": 30
+    },
+    {
+      "type": "sleep",
+      "delayMilliseconds": 1500
+    },
+    {
+      "type": "closeWindow",
+      "windowAutomationId": "TesterUi.Window",
+      "timeoutSeconds": 15
+    },
+    {
+      "type": "waitWindow",
+      "windowAutomationId": "AcceptDialogUi.Window",
+      "timeoutSeconds": 15
+    },
+    {
+      "type": "click",
+      "windowAutomationId": "AcceptDialogUi.Window",
+      "automationId": "AcceptDialogUi.AcceptButton",
+      "timeoutSeconds": 15
+    }
+  ],
+  "completion": {
+    "type": "processExit"
+  },
+  "failure": {
+    "logRegexes": [
+      ";Error;"
+    ],
+    "failOnProcessExit": false
+  }
+}

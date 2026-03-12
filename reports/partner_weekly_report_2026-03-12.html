@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MyCloneOsEngine — Партнёрский недельный отчёт</title>
+<style>
+:root{--bg:#0f172a;--card:#111827;--line:#334155;--text:#e5e7eb;--muted:#94a3b8;--ok:#22c55e;--accent:#38bdf8}
+*{box-sizing:border-box}body{margin:0;font-family:'Segoe UI',system-ui,sans-serif;background:radial-gradient(circle at top,#1e293b,#0b1222 60%);color:var(--text);padding:28px}
+.wrap{max-width:1080px;margin:0 auto}.card{background:rgba(17,24,39,.9);border:1px solid var(--line);border-radius:14px;padding:18px;margin-bottom:14px}
+h1{margin:0 0 8px 0;font-size:34px}.sub{color:var(--muted);margin:0}.grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}
+.kpi{background:#0b1324;border:1px solid var(--line);border-radius:10px;padding:12px}.kpi .v{font-size:26px;font-weight:700}.kpi .l{font-size:12px;color:var(--muted)}
+ul{margin:8px 0 0 18px}li{margin:6px 0;color:#cbd5e1}.ok{color:var(--ok)}.mono{font-family:Consolas,Monaco,monospace}
+@media (max-width:900px){.grid{grid-template-columns:1fr 1fr}}@media (max-width:600px){.grid{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="card">
+    <h1>Партнёрский недельный отчёт</h1>
+    <p class="sub">Репозиторий: MyCloneOsEngine · Дата отчёта: 12 марта 2026 · Источник: локальный git и доступное состояние GitHub.</p>
+  </div>
+
+  <div class="card">
+    <div class="grid">
+      <div class="kpi"><div class="v">55</div><div class="l">Каталогов коннекторов в Market/Servers</div></div>
+      <div class="kpi"><div class="v">184</div><div class="l">Файлов роботов .cs</div></div>
+      <div class="kpi"><div class="v">168</div><div class="l">Коммитов за последнюю неделю</div></div>
+      <div class="kpi"><div class="v">4 / 10</div><div class="l">Изменённых / новых файлов в рабочем дереве</div></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3>Текущее состояние репозитория</h3>
+    <ul>
+      <li>Активная ветка: <span class="mono">codex/168-gui-tester-harness</span>.</li>
+      <li>Текущий коммит: <span class="mono">316e0e959</span> (время коммита: 12.03.2026 09:57 -0400).</li>
+      <li>Удалённый ориентир: <span class="mono">origin/master = 316e0e959</span>.</li>
+      <li class="ok">git fetch --all --prune выполнен успешно.</li>
+    </ul>
+  </div>
+
+  <div class="card">
+    <h3>Состояние GitHub в текущем запуске</h3>
+    <ul>
+      <li>CLI GitHub (<span class="mono">gh</span>) доступен и подтвердил, что issue <span class="mono">#168</span> открыт.</li>
+      <li>Карточка issue <span class="mono">#168</span> на доске <span class="mono">OsEngine</span> находится в статусе <span class="mono">In Progress</span>.</li>
+      <li>Для отчёта использован подтверждённый локальный снимок git после <span class="mono">fetch</span> и текущее состояние GitHub через <span class="mono">gh</span>.</li>
+    </ul>
+  </div>
+
+  <div class="card">
+    <h3>Операционный вывод</h3>
+    <ul>
+      <li>Позиция HEAD совпадает с <span class="mono">origin/master</span> по коммиту <span class="mono">316e0e959</span>.</li>
+      <li>Рабочее дерево содержит незакоммиченные изменения, поэтому автоматический pull --rebase корректно пропущен.</li>
+      <li>Требуется отдельный цикл для очистки/фиксации текущих локальных изменений.</li>
+    </ul>
+  </div>
+</div>
+</body>
+</html>

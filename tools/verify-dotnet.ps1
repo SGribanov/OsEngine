@@ -11,6 +11,7 @@ Set-StrictMode -Version Latest
 $repoRoot = Split-Path -Parent $PSScriptRoot
 $solutionPath = Join-Path $repoRoot "project/OsEngine.sln"
 $projectPath = Join-Path $repoRoot "project/OsEngine/OsEngine.csproj"
+$testerAutomationProjectPath = Join-Path $repoRoot "project/OsEngine.TesterAutomation/OsEngine.TesterAutomation.csproj"
 $testProjectPath = Join-Path $repoRoot "project/OsEngine.Tests/OsEngine.Tests.csproj"
 
 function Invoke-Step {
@@ -51,6 +52,21 @@ try {
         }
 
         Invoke-Step -Name "dotnet build" -Arguments $buildArgs
+
+        if (Test-Path $testerAutomationProjectPath) {
+            $testerAutomationBuildArgs = @(
+                "build",
+                $testerAutomationProjectPath,
+                "--configuration", $Configuration,
+                "--disable-build-servers"
+            )
+
+            if ($NoRestore) {
+                $testerAutomationBuildArgs += "--no-restore"
+            }
+
+            Invoke-Step -Name "dotnet build tester automation" -Arguments $testerAutomationBuildArgs
+        }
 
         $testBuildArgs = @(
             "build",

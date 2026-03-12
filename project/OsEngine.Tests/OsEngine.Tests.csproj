@@ -20,6 +20,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\OsEngine\OsEngine.csproj" />
+    <ProjectReference Include="..\OsEngine.TesterAutomation\OsEngine.TesterAutomation.csproj" />
   </ItemGroup>
 
   <Target Name="EnsureEngineFolder" AfterTargets="Build">

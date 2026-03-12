@@ -1,0 +1,54 @@
+{
+  "name": "tester-start-smoke",
+  "workingDirectory": "..\\..\\OsEngine\\bin\\Debug",
+  "executablePath": "OsEngine.exe",
+  "arguments": [
+    "-tester"
+  ],
+  "engineSeedPath": "..\\..\\..\\docs\\samples\\tester-smoke-engine-seed",
+  "clearLogDirectory": true,
+  "killProcessTreeOnExit": true,
+  "timeoutSeconds": 180,
+  "pollIntervalMilliseconds": 1000,
+  "summaryOutputPath": "..\\..\\..\\reports\\tester_gui_harness_smoke.json",
+  "actions": [
+    {
+      "type": "waitWindow",
+      "windowAutomationId": "TesterUi.Window",
+      "timeoutSeconds": 30
+    },
+    {
+      "type": "click",
+      "windowAutomationId": "TesterUi.Window",
+      "automationId": "TesterUi.ServerButton",
+      "timeoutSeconds": 15
+    },
+    {
+      "type": "waitWindow",
+      "windowAutomationId": "TesterServerUi.Window",
+      "timeoutSeconds": 30
+    },
+    {
+      "type": "waitElementEnabled",
+      "windowAutomationId": "TesterServerUi.Window",
+      "automationId": "TesterServerUi.StartTestButton",
+      "timeoutSeconds": 30
+    },
+    {
+      "type": "click",
+      "windowAutomationId": "TesterServerUi.Window",
+      "automationId": "TesterServerUi.StartTestButton",
+      "timeoutSeconds": 15
+    }
+  ],
+  "completion": {
+    "type": "logRegex",
+    "value": ";System;.*(тест|test).*(заверш|finish|end)"
+  },
+  "failure": {
+    "logRegexes": [
+      ";Error;"
+    ],
+    "failOnProcessExit": true
+  }
+}

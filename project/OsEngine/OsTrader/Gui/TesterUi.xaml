@@ -1,7 +1,8 @@
 ﻿<Window x:Class="OsEngine.OsTrader.Gui.TesterUi"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        Title="Tester" Height="800" Width="1350" Style="{StaticResource WindowStyleCanResize}" WindowStartupLocation="CenterScreen" MinWidth="700" MinHeight="500" Icon="/Images/OsLogo.ico">
+        Title="Tester" Height="800" Width="1350" Style="{StaticResource WindowStyleCanResize}" WindowStartupLocation="CenterScreen" MinWidth="700" MinHeight="500" Icon="/Images/OsLogo.ico"
+        AutomationProperties.AutomationId="TesterUi.Window">
     <Grid Name="GridPrime">
         <Grid.RowDefinitions>
             <RowDefinition Height="466*"/>
@@ -36,21 +37,21 @@
 
                     </Grid>
                 </TabItem>
-                <TabItem Name="TabItemControl" Header="Control" Width="80" >
+                <TabItem Name="TabItemControl" Header="Control" Width="80" AutomationProperties.AutomationId="TesterUi.ControlTab">
                     <Grid>
                         <Label Name="LabelGeneralSettings" Content="General settings" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="10,6,0,0" FontSize="18"/>
-                        <Button Name="ButtonServer" Content="Connection Servers" HorizontalAlignment="Left" Margin="66,43,0,0" VerticalAlignment="Top" Width="161" Click="ButtonServer_Click"/>
-                        <Button Name="ButtonNewBot" Content="Add bot" HorizontalAlignment="Left" Margin="66,70,0,0" VerticalAlignment="Top" Width="106" Click="ButtonNewBot_Click"/>
+                        <Button Name="ButtonServer" Content="Connection Servers" HorizontalAlignment="Left" Margin="66,43,0,0" VerticalAlignment="Top" Width="161" Click="ButtonServer_Click" AutomationProperties.AutomationId="TesterUi.ServerButton"/>
+                        <Button Name="ButtonNewBot" Content="Add bot" HorizontalAlignment="Left" Margin="66,70,0,0" VerticalAlignment="Top" Width="106" Click="ButtonNewBot_Click" AutomationProperties.AutomationId="TesterUi.NewBotButton"/>
                         <Button Name="ButtonDeleteBot"  Content="Delete" HorizontalAlignment="Left" Margin="172,70,0,0" VerticalAlignment="Top" Width="55" Click="ButtonDeleteBot_Click"/>
                         <Label Name="LabelBotControl" Content="Bot control" HorizontalAlignment="Left" Margin="10,190,0,0" VerticalAlignment="Top"  FontSize="18" Height="26"/>
                         <Button Name="ButtonStrategSettings" Content="Position support"  HorizontalAlignment="Left" Margin="65,337,0,0" VerticalAlignment="Top" Width="161" Click="buttonStrategManualSettings_Click"/>
-                        <Button Name="ButtonUpdateBot" Content="Update Bot"  HorizontalAlignment="Left" Margin="66,384,0,0" VerticalAlignment="Top" Width="161" Click="ButtonUpdateBot_Click" ToolTip="Hot update changes from source file"/>
+                        <Button Name="ButtonUpdateBot" Content="Update Bot"  HorizontalAlignment="Left" Margin="66,384,0,0" VerticalAlignment="Top" Width="161" Click="ButtonUpdateBot_Click" ToolTip="Hot update changes from source file" AutomationProperties.AutomationId="TesterUi.UpdateBotButton"/>
                         <Button Name="ButtonStrategSettingsIndividual" Content="Bot trade settings" HorizontalAlignment="Left" Margin="66,230,0,0" VerticalAlignment="Top" Width="161" Click="ButtonStrategIndividualSettings_Click" Height="24"/>
                         <Button Name="ButtonRedactTab" Content="Data settings"  HorizontalAlignment="Left" Margin="66,283,0,0" VerticalAlignment="Top" Width="161" Click="ButtonRedactTab_Click"  />
                         <Button Name="ButtonJournalCommunity" Content="Journal" HorizontalAlignment="Left" Margin="66,97,0,0" VerticalAlignment="Top" Width="161" Click="ButtonJournalCommunity_Click"/>
                         <Button Name="ButtonRiskManagerCommunity" Content="General risk manager" HorizontalAlignment="Left" Margin="66,124,0,0" VerticalAlignment="Top" Width="161" Click="ButtonRiskManagerCommunity_Click" />
-                        <Button Name="ButtonStrategParametr" Content="Parameters"  HorizontalAlignment="Left" Margin="66,256,0,0" VerticalAlignment="Top" Width="161" Click="ButtonStrategParametr_Click" />
-                        <Button Name="ButtonRiskManager" Content="Risk manager" HorizontalAlignment="Left" Margin="65,310,0,0" VerticalAlignment="Top" Width="161" Click="ButtonRiskManager_Click" />
+                        <Button Name="ButtonStrategParametr" Content="Parameters"  HorizontalAlignment="Left" Margin="66,256,0,0" VerticalAlignment="Top" Width="161" Click="ButtonStrategParametr_Click" AutomationProperties.AutomationId="TesterUi.ParametersButton" />
+                        <Button Name="ButtonRiskManager" Content="Risk manager" HorizontalAlignment="Left" Margin="65,310,0,0" VerticalAlignment="Top" Width="161" Click="ButtonRiskManager_Click" AutomationProperties.AutomationId="TesterUi.RiskManagerButton" />
                     </Grid>
                 </TabItem>
             </TabControl>

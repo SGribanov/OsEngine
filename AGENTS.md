@@ -94,6 +94,11 @@
   - `if (Test-Path $tokenPath) { $env:GH_TOKEN = (Get-Content $tokenPath -Raw).Trim() }`
 - Run `gh` commands in the same command invocation/session where token is loaded.
 
+## Reports language policy
+- For any newly generated graphical reports in this repository (`reports/*.html`, chart dashboards, redirect pages, summary pages), all human-facing text must be in Russian.
+- This includes titles, subtitles, badges, legends, axis labels, section headers, status labels, helper text, redirect-page text, and footer/meta copy.
+- Keep repository identifiers, file names, commit hashes, issue/PR numbers, and code identifiers unchanged unless there is a separate explicit requirement to localize them.
+
 ## OsEngine robot skill policy
 - For any robot task in OsEngine (create/edit/refactor robots in `Robots/*` or `Custom/Robots/*`), always load and follow local skill:
   - `$HOME/.codex-personal/skills/osengine-robot-authoring/SKILL.md`
