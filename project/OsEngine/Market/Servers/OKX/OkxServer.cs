@@ -3238,41 +3238,32 @@ namespace OsEngine.Market.Servers.OKX
                     {
                         return true;
                     }
-                    else
-                    {
-                        OrderStateType state = GetOrderStatus(order);
 
-                        if (state == OrderStateType.None)
-                        {
-                            SendLogMessage($"Cancel Order Error. {order.NumberUser} || {contentStr}.", LogMessageType.Error);
-                            return false;
-                        }
-                        else
-                        {
-                            return true;
-                        }
-                    }
+                    return ResolveCancelOrderFallback(
+                        GetOrderStatus(order),
+                        $"Cancel Order Error. {order.NumberUser} || {contentStr}.");
                 }
-                else
-                {
-                    OrderStateType state = GetOrderStatus(order);
 
-                    if (state == OrderStateType.None)
-                    {
-                        SendLogMessage($"Cancel order failed. Status: {res.StatusCode} || {contentStr}", LogMessageType.Error);
-                        return false;
-                    }
-                    else
-                    {
-                        return true;
-                    }
-                }
+                return ResolveCancelOrderFallback(
+                    GetOrderStatus(order),
+                    $"Cancel order failed. Status: {res.StatusCode} || {contentStr}");
             }
             catch (System.Exception ex)
             {
                 SendLogMessage($"CancelOrder - {ex.Message}", LogMessageType.Error);
             }
             return false;
+        }
+
+        private bool ResolveCancelOrderFallback(OrderStateType state, string failureMessage)
+        {
+            if (state == OrderStateType.None)
+            {
+                SendLogMessage(failureMessage, LogMessageType.Error);
+                return false;
+            }
+
+            return true;
         }
 
         public void CancelAllOrdersToSecurity(Security security)

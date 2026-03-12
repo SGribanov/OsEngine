@@ -225,6 +225,44 @@ public class OkxServerPrivateHttpClientTests
     }
 
     [Fact]
+    public void ResolveCancelOrderFallback_WithNoneState_ShouldReturnFalseAndLogFailureMessage()
+    {
+        OkxServerRealization realization = CreateRealizationForHttpClientTests();
+        string? loggedMessage = null;
+        LogMessageType? loggedType = null;
+        realization.LogMessageEvent += (message, type) =>
+        {
+            loggedMessage = message;
+            loggedType = type;
+        };
+
+        bool result = InvokeResolveCancelOrderFallback(
+            realization,
+            OrderStateType.None,
+            "Cancel Order Error. 42 || payload.");
+
+        Assert.False(result);
+        Assert.Equal(LogMessageType.Error, loggedType);
+        Assert.Equal("Cancel Order Error. 42 || payload.", loggedMessage);
+    }
+
+    [Fact]
+    public void ResolveCancelOrderFallback_WithResolvedState_ShouldReturnTrueWithoutLogging()
+    {
+        OkxServerRealization realization = CreateRealizationForHttpClientTests();
+        string? loggedMessage = null;
+        realization.LogMessageEvent += (message, _) => loggedMessage = message;
+
+        bool result = InvokeResolveCancelOrderFallback(
+            realization,
+            OrderStateType.Active,
+            "Cancel order failed. Status: BadGateway || payload");
+
+        Assert.True(result);
+        Assert.Null(loggedMessage);
+    }
+
+    [Fact]
     public void ExecutePrivateOrdersQueryRequest_ShouldReturnResponseContentAndParsedMessage()
     {
         OkxServerRealization realization = CreateRealizationForHttpClientTests();
@@ -400,6 +438,20 @@ public class OkxServerPrivateHttpClientTests
             ?? throw new InvalidOperationException("HandlePrivateSendOrderFailure method not found.");
 
         method.Invoke(realization, [order, statusCode, content, message, apiErrorPrefix, statusErrorPrefix]);
+    }
+
+    private static bool InvokeResolveCancelOrderFallback(
+        OkxServerRealization realization,
+        OrderStateType state,
+        string failureMessage)
+    {
+        MethodInfo method = typeof(OkxServerRealization).GetMethod(
+            "ResolveCancelOrderFallback",
+            BindingFlags.NonPublic | BindingFlags.Instance)
+            ?? throw new InvalidOperationException("ResolveCancelOrderFallback method not found.");
+
+        return (bool)(method.Invoke(realization, [state, failureMessage])
+            ?? throw new InvalidOperationException("ResolveCancelOrderFallback returned null."));
     }
 
     private static (HttpResponseMessage response, string content, ResponseRestMessage<List<ResponseWsOrders>> message) InvokeExecutePrivateOrdersQueryRequest(
