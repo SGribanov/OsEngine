@@ -42,48 +42,24 @@ jobs:
                 const byNumber = await github.graphql(
                   `
                   query($owner:String!, $number:Int!) {
-                    user(login:$owner) {
-                      projectV2(number:$number) {
-                        id
-                        title
-                        fields(first:50) {
-                          nodes {
-                            ... on ProjectV2SingleSelectField {
-                              id
-                              name
-                              options { id name }
+                    repositoryOwner(login:$owner) {
+                      ... on User {
+                        projectV2(number:$number) {
+                          id
+                          title
+                          fields(first:50) {
+                            nodes {
+                              ... on ProjectV2SingleSelectField {
+                                id
+                                name
+                                options { id name }
+                              }
                             }
                           }
                         }
                       }
-                    }
-                    organization(login:$owner) {
-                      projectV2(number:$number) {
-                        id
-                        title
-                        fields(first:50) {
-                          nodes {
-                            ... on ProjectV2SingleSelectField {
-                              id
-                              name
-                              options { id name }
-                            }
-                          }
-                        }
-                      }
-                    }
-                  }
-                  `,
-                  { owner, number: boardNumber }
-                );
-                project = byNumber.user?.projectV2 || byNumber.organization?.projectV2;
-              } else {
-                const byTitle = await github.graphql(
-                  `
-                  query($owner:String!, $first:Int!) {
-                    user(login:$owner) {
-                      projectsV2(first:$first) {
-                        nodes {
+                      ... on Organization {
+                        projectV2(number:$number) {
                           id
                           title
                           fields(first:50) {
@@ -98,17 +74,45 @@ jobs:
                         }
                       }
                     }
-                    organization(login:$owner) {
-                      projectsV2(first:$first) {
-                        nodes {
-                          id
-                          title
-                          fields(first:50) {
-                            nodes {
-                              ... on ProjectV2SingleSelectField {
-                                id
-                                name
-                                options { id name }
+                  }
+                  `,
+                  { owner, number: boardNumber }
+                );
+                project = byNumber.repositoryOwner?.projectV2 || null;
+              } else {
+                const byTitle = await github.graphql(
+                  `
+                  query($owner:String!, $first:Int!) {
+                    repositoryOwner(login:$owner) {
+                      ... on User {
+                        projectsV2(first:$first) {
+                          nodes {
+                            id
+                            title
+                            fields(first:50) {
+                              nodes {
+                                ... on ProjectV2SingleSelectField {
+                                  id
+                                  name
+                                  options { id name }
+                                }
+                              }
+                            }
+                          }
+                        }
+                      }
+                      ... on Organization {
+                        projectsV2(first:$first) {
+                          nodes {
+                            id
+                            title
+                            fields(first:50) {
+                              nodes {
+                                ... on ProjectV2SingleSelectField {
+                                  id
+                                  name
+                                  options { id name }
+                                }
                               }
                             }
                           }
@@ -120,10 +124,7 @@ jobs:
                   { owner, first: 100 }
                 );
 
-                const projects = [
-                  ...(byTitle.user?.projectsV2?.nodes || []),
-                  ...(byTitle.organization?.projectsV2?.nodes || []),
-                ].filter(Boolean);
+                const projects = (byTitle.repositoryOwner?.projectsV2?.nodes || []).filter(Boolean);
 
                 project = projects.find((p) => normalize(p.title) === normalize(boardTitle)) || null;
               }
