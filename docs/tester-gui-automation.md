@@ -2,6 +2,8 @@
 
 `project/OsEngine.TesterAutomation` is a standalone harness for repeatable Tester GUI runs.
 
+For robot test runs that need a final published result artifact, use the repo-level robot testing workflow from `docs/robot-testing-workflow.md` and publish the final report package into `reports/tests/` via `tools/Publish-RobotTestReport.ps1`.
+
 What it does:
 - starts `OsEngine.exe` directly in tester mode via `-tester`
 - optionally seeds `Engine\*` from a prepared fixture directory

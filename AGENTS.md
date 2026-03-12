@@ -102,6 +102,11 @@
 ## OsEngine robot skill policy
 - For any robot task in OsEngine (create/edit/refactor robots in `Robots/*` or `Custom/Robots/*`), always load and follow local skill:
   - `$HOME/.codex-personal/skills/osengine-robot-authoring/SKILL.md`
+- For any robot testing / backtesting / "прогони робота" request, always load and follow repo-level skill:
+  - `skills/osengine-robot-testing/SKILL.md`
+- If the request combines robot code changes and a subsequent run, use both skills:
+  - authoring rules from `$HOME/.codex-personal/skills/osengine-robot-authoring/SKILL.md`;
+  - run/reporting rules from `skills/osengine-robot-testing/SKILL.md`.
 - For script robots (`Custom/Robots/*`, `Custom/Robots/Scripts/*`, `project/OsEngine/bin/Debug/Custom/Robots/*`):
   - before `restore/build/test/perf`, temporarily include the robot file in `project/OsEngine/Robots/<TempCategory>/`;
   - after validation/testing, move it back to script location and remove the temporary project copy.
