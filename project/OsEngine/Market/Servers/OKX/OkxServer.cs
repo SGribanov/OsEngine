@@ -391,6 +391,17 @@ namespace OsEngine.Market.Servers.OKX
             return false;
         }
 
+        private bool HasSuccessfulPublicAbsoluteApiCode(string code, string failureMessage)
+        {
+            if (code == "0")
+            {
+                return true;
+            }
+
+            SendLogMessage(failureMessage, LogMessageType.Error);
+            return false;
+        }
+
         private static CandlesResponse ParsePublicCandlesResponse(string responseContent)
         {
             return DeserializeAnonymousPayload(responseContent, new CandlesResponse());
@@ -1219,34 +1230,30 @@ namespace OsEngine.Market.Servers.OKX
                 (IRestResponse response, TradesDataResponse tradesResponse) = ExecutePublicAbsoluteQueryRequest(url, ParsePublicTradesDataResponse);
 
                 if (HasOkPublicAbsoluteStatus(
-                    response,
-                    static currentResponse => $"Trades request error: {currentResponse.StatusCode} - {currentResponse.Content}"))
+                        response,
+                        static currentResponse => $"Trades request error: {currentResponse.StatusCode} - {currentResponse.Content}")
+                    && HasSuccessfulPublicAbsoluteApiCode(
+                        tradesResponse.code,
+                        $"Trades request error: {tradesResponse.code} - {tradesResponse.msg}"))
                 {
-                    if (tradesResponse.code == "0")
+                    for (int i = 0; i < tradesResponse.data.Count; i++)
                     {
-                        for (int i = 0; i < tradesResponse.data.Count; i++)
-                        {
-                            TradeData item = tradesResponse.data[i];
+                        TradeData item = tradesResponse.data[i];
 
-                            Trade trade = new Trade();
-                            trade.SecurityNameCode = item.instId;
-                            trade.Id = item.tradeId;
-                            trade.Time = TimeManager.GetDateTimeFromTimeStamp(Convert.ToInt64(item.ts, CultureInfo.InvariantCulture));
-                            trade.Price = item.px.ToDecimal();
-                            trade.Volume = item.sz.ToDecimal(); //For spot trading, the unit is base currency
-                                                                //For FUTURES / SWAP / OPTION, the unit is contract.
+                        Trade trade = new Trade();
+                        trade.SecurityNameCode = item.instId;
+                        trade.Id = item.tradeId;
+                        trade.Time = TimeManager.GetDateTimeFromTimeStamp(Convert.ToInt64(item.ts, CultureInfo.InvariantCulture));
+                        trade.Price = item.px.ToDecimal();
+                        trade.Volume = item.sz.ToDecimal(); //For spot trading, the unit is base currency
+                                                            //For FUTURES / SWAP / OPTION, the unit is contract.
 
-                            trade.Side = item.side == "Sell" ? Side.Sell : Side.Buy;
-                            trades.Add(trade);
-                        }
-
-                        trades.Reverse();
-                        return trades;
+                        trade.Side = item.side == "Sell" ? Side.Sell : Side.Buy;
+                        trades.Add(trade);
                     }
-                    else
-                    {
-                        SendLogMessage($"Trades request error: {tradesResponse.code} - {tradesResponse.msg}", LogMessageType.Error);
-                    }
+
+                    trades.Reverse();
+                    return trades;
                 }
             }
             catch (Exception error)
@@ -1915,23 +1922,19 @@ namespace OsEngine.Market.Servers.OKX
 
                 if (HasOkPublicAbsoluteStatus(
                     response,
-                    static currentResponse => $"GetFundingHistory error. Code: {currentResponse.StatusCode} || msg: {currentResponse.Content}"))
+                    static currentResponse => $"GetFundingHistory error. Code: {currentResponse.StatusCode} || msg: {currentResponse.Content}")
+                    && HasSuccessfulPublicAbsoluteApiCode(
+                        responseFunding.code,
+                        $"GetFundingHistory error. Code:{responseFunding.code} || msg: {responseFunding.msg}"))
                 {
-                    if (responseFunding.code == "0")
-                    {
-                        FundingItemHistory item = responseFunding.data[0];
+                    FundingItemHistory item = responseFunding.data[0];
 
-                        Funding data = new Funding();
+                    Funding data = new Funding();
 
-                        data.SecurityNameCode = item.instId;
-                        data.PreviousFundingTime = TimeManager.GetDateTimeFromTimeStamp((long)item.fundingTime.ToDecimal());
+                    data.SecurityNameCode = item.instId;
+                    data.PreviousFundingTime = TimeManager.GetDateTimeFromTimeStamp((long)item.fundingTime.ToDecimal());
 
-                        FundingUpdateEvent?.Invoke(data);
-                    }
-                    else
-                    {
-                        SendLogMessage($"GetFundingHistory error. Code:{responseFunding.code} || msg: {responseFunding.msg}", LogMessageType.Error);
-                    }
+                    FundingUpdateEvent?.Invoke(data);
                 }
             }
             catch (Exception error)

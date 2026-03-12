@@ -103,6 +103,46 @@ public sealed class OkxServerPublicExecuteTests
         Assert.Equal("Probe - BadGateway - gateway down", loggedMessage);
     }
 
+    [Fact]
+    public void HasSuccessfulPublicAbsoluteApiCode_WithSuccessCode_ShouldReturnTrueWithoutLogging()
+    {
+        OkxServerRealization realization = CreateRealization("http://127.0.0.1");
+
+        string? loggedMessage = null;
+        realization.LogMessageEvent += (message, _) => loggedMessage = message;
+
+        bool result = InvokeHasSuccessfulPublicAbsoluteApiCode(
+            realization,
+            "0",
+            "Probe API error");
+
+        Assert.True(result);
+        Assert.Null(loggedMessage);
+    }
+
+    [Fact]
+    public void HasSuccessfulPublicAbsoluteApiCode_WithFailureCode_ShouldLogMessageAndReturnFalse()
+    {
+        OkxServerRealization realization = CreateRealization("http://127.0.0.1");
+
+        string? loggedMessage = null;
+        LogMessageType? loggedType = null;
+        realization.LogMessageEvent += (message, type) =>
+        {
+            loggedMessage = message;
+            loggedType = type;
+        };
+
+        bool result = InvokeHasSuccessfulPublicAbsoluteApiCode(
+            realization,
+            "51000",
+            "Probe API error");
+
+        Assert.False(result);
+        Assert.Equal(LogMessageType.Error, loggedType);
+        Assert.Equal("Probe API error", loggedMessage);
+    }
+
     private static OkxServerRealization CreateRealization(string baseUrl)
     {
         OkxServerRealization realization = (OkxServerRealization)RuntimeHelpers.GetUninitializedObject(typeof(OkxServerRealization));
@@ -134,6 +174,20 @@ public sealed class OkxServerPublicExecuteTests
 
         return (bool)(method.Invoke(realization, [response, errorMessageFactory])
             ?? throw new InvalidOperationException("HasOkPublicAbsoluteStatus returned null."));
+    }
+
+    private static bool InvokeHasSuccessfulPublicAbsoluteApiCode(
+        OkxServerRealization realization,
+        string code,
+        string failureMessage)
+    {
+        MethodInfo method = typeof(OkxServerRealization).GetMethod(
+            "HasSuccessfulPublicAbsoluteApiCode",
+            BindingFlags.NonPublic | BindingFlags.Instance)
+            ?? throw new InvalidOperationException("HasSuccessfulPublicAbsoluteApiCode method not found.");
+
+        return (bool)(method.Invoke(realization, [code, failureMessage])
+            ?? throw new InvalidOperationException("HasSuccessfulPublicAbsoluteApiCode returned null."));
     }
 
     private static void SetPrivateField(OkxServerRealization realization, string fieldName, object? value)
