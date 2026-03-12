@@ -5,13 +5,18 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>MyCloneOsEngine — Технический недельный отчёт</title>
 <style>
-:root{--bg:#0b1220;--card:#111827;--line:#374151;--text:#e5e7eb;--muted:#9ca3af;--c1:#60a5fa;--c2:#34d399;--c3:#f59e0b}
+:root{--bg:#0b1220;--card:#111827;--line:#374151;--text:#e5e7eb;--muted:#9ca3af;--c1:#60a5fa;--c2:#34d399;--c3:#f59e0b;--c4:#f472b6;--stage:#0f1a30;--stage2:#0b1527}
 *{box-sizing:border-box}body{margin:0;background:linear-gradient(180deg,#0b1220,#0a0f1a);font-family:'Segoe UI',system-ui,sans-serif;color:var(--text);padding:26px}
 .wrap{max-width:1120px;margin:0 auto}.card{background:#111827;border:1px solid var(--line);border-radius:12px;padding:16px;margin-bottom:12px}
 h1{margin:0 0 8px 0;font-size:32px}.muted{color:var(--muted)}.mono{font-family:Consolas,Monaco,monospace}
 .table{width:100%;border-collapse:collapse}.table td{padding:10px;border-bottom:1px solid var(--line);vertical-align:top}.table td:first-child{width:38%;color:#cbd5e1}
 .badge{display:inline-block;padding:2px 8px;border-radius:999px;border:1px solid var(--line);font-size:12px;margin-right:6px}
-.b1{color:var(--c1)}.b2{color:var(--c2)}.b3{color:var(--c3)} ul{margin:8px 0 0 18px} li{margin:6px 0}
+.b1{color:var(--c1)}.b2{color:var(--c2)}.b3{color:var(--c3)}.b4{color:var(--c4)} ul{margin:8px 0 0 18px} li{margin:6px 0}
+.timeline{display:grid;gap:12px;margin-top:12px}.stage{background:linear-gradient(180deg,var(--stage),var(--stage2));border:1px solid #22304a;border-radius:14px;padding:14px;box-shadow:inset 0 0 0 1px rgba(255,255,255,.02)}
+.stage-head{display:flex;align-items:flex-start;gap:12px;justify-content:space-between;flex-wrap:wrap}.stage-left{display:flex;gap:12px;align-items:flex-start}
+.stage-num{width:34px;height:34px;border-radius:10px;background:#13213a;border:1px solid #2c456d;display:flex;align-items:center;justify-content:center;font-weight:700;color:var(--c1)}
+.stage-title{font-size:18px;font-weight:700;margin:0 0 4px 0}.stage-meta{color:var(--muted);font-size:13px}
+.stage-badge{display:inline-block;padding:4px 10px;border-radius:999px;border:1px solid #36557f;color:#dbeafe;font-size:12px}.stage ul{margin:10px 0 0 18px}
 </style>
 </head>
 <body>
@@ -22,20 +27,173 @@ h1{margin:0 0 8px 0;font-size:32px}.muted{color:var(--muted)}.mono{font-family:C
   </div>
 
   <div class="card">
-    <span class="badge b1">Ветка: codex/168-gui-tester-harness</span>
-    <span class="badge b2">HEAD: 316e0e959</span>
+    <span class="badge b1">Ветка: codex/170-technical-report-stages</span>
+    <span class="badge b2">HEAD: 626eecfae</span>
     <span class="badge b3">origin/master: 316e0e959</span>
+    <span class="badge b4">Этапов изменений: 9</span>
   </div>
 
   <div class="card">
+    <h3>Новые изменения за текущий отчётный период</h3>
     <table class="table">
-      <tr><td>Время последнего коммита</td><td>12.03.2026 09:57 -0400</td></tr>
-      <tr><td>Коммитов за 7 дней</td><td>168</td></tr>
+      <tr><td>Время последнего нового коммита в периоде</td><td>12.03.2026 19:20 +0100</td></tr>
+      <tr><td>Коммитов за 7 дней</td><td>170</td></tr>
       <tr><td>Каталогов коннекторов</td><td>55 (project/OsEngine/Market/Servers)</td></tr>
       <tr><td>Файлов роботов .cs</td><td>184 (project/OsEngine/Robots)</td></tr>
       <tr><td>Изменённых файлов</td><td>4</td></tr>
-      <tr><td>Новых неотслеживаемых файлов</td><td>10</td></tr>
+      <tr><td>Новых неотслеживаемых файлов</td><td>40+</td></tr>
     </table>
+  </div>
+
+  <div class="card">
+    <h3>Этапы существенных изменений с момента создания репозитория</h3>
+    <div class="muted">Это накопительная append-only timeline-секция. Еженедельное обновление должно подтягивать только новые изменения периода, а новый этап здесь добавляется только при появлении нового существенного рубежа.</div>
+    <div class="timeline">
+      <div class="stage">
+        <div class="stage-head">
+          <div class="stage-left">
+            <div class="stage-num">01</div>
+            <div>
+              <div class="stage-title">Создание репозитория и перенос зрелого OsEngine baseline</div>
+              <div class="stage-meta">Репозиторий создан 19 июля 2024 и унаследовал уже зрелую платформенную базу OsEngine с несколькими режимами работы и широкой матрицей коннекторов.</div>
+            </div>
+          </div>
+          <span class="stage-badge">Завершено</span>
+        </div>
+        <ul>
+          <li>Стартовая точка репозитория включала <span class="mono">Tester</span>, <span class="mono">Optimizer</span>, <span class="mono">Bot station</span>, развитый слой роботов и десятки рыночных подключений.</li>
+          <li>Это важно, потому что дальнейшие изменения развивались не с нуля, а поверх уже большого production-like codebase.</li>
+        </ul>
+      </div>
+      <div class="stage">
+        <div class="stage-head">
+          <div class="stage-left">
+            <div class="stage-num">02</div>
+            <div>
+              <div class="stage-title">Инженерная рамка репозитория и управляемый workflow</div>
+              <div class="stage-meta">Поверх исходного baseline репозиторий получил жёсткую схему issue/project sync, handoff и стандартов выполнения.</div>
+            </div>
+          </div>
+          <span class="stage-badge">Завершено</span>
+        </div>
+        <ul>
+          <li>Закреплены правила session sync, project status как source of truth и handoff через GitHub issue comments.</li>
+          <li>Этап снизил операционный риск и сделал крупные инженерные изменения воспроизводимыми и отслеживаемыми.</li>
+        </ul>
+      </div>
+      <div class="stage">
+        <div class="stage-head">
+          <div class="stage-left">
+            <div class="stage-num">03</div>
+            <div>
+              <div class="stage-title">Переход технологической базы на .NET 10 / C# 14</div>
+              <div class="stage-meta">Репозиторий был выровнен на современный runtime baseline, чтобы дальше развивать проект уже на едином техническом фундаменте.</div>
+            </div>
+          </div>
+          <span class="stage-badge">Завершено</span>
+        </div>
+        <ul>
+          <li>Проекты переведены на <span class="mono">net10.0*</span>, убраны legacy-артефакты старой конфигурации и закреплён baseline под <span class="mono">C# 14</span>.</li>
+          <li>Это важно, потому что последующие изменения по тестированию, кэшам и optimizer/runtime hardening уже опираются на единый современный стек.</li>
+        </ul>
+      </div>
+      <div class="stage">
+        <div class="stage-head">
+          <div class="stage-left">
+            <div class="stage-num">04</div>
+            <div>
+              <div class="stage-title">Слой кэширования в оптимизаторе и индикаторном контуре</div>
+              <div class="stage-meta">В Optimizer появился системный cache layer для снижения повторных вычислений и контроля hot paths.</div>
+            </div>
+          </div>
+          <span class="stage-badge">Stage2 cache wave · Завершено</span>
+        </div>
+        <ul>
+          <li>Добавлены и доведены <span class="mono">OptimizerMethodCache</span>, indicator cache, trusted cache mode, perf baseline и KPI-gated cache сценарии.</li>
+          <li>Это отдельный существенный этап, потому что он меняет не только код, но и вычислительную модель оптимизатора: меньше повторных пересчётов, меньше churn, лучше предсказуемость performance.</li>
+        </ul>
+      </div>
+      <div class="stage">
+        <div class="stage-head">
+          <div class="stage-left">
+            <div class="stage-num">05</div>
+            <div>
+              <div class="stage-title">Новая байесовская стратегия оптимизации в Optimizer</div>
+              <div class="stage-meta">В Optimizer был добавлен новый optimization mode с bayesian runtime-настройками и выделенным UI/validation контуром.</div>
+            </div>
+          </div>
+          <span class="stage-badge">Bayesian optimizer wave · Завершено</span>
+        </div>
+        <ul>
+          <li>Появились <span class="mono">BayesianOptimizationStrategy</span>, отдельные bayesian controls/tab, runtime validation, acquisition modes и тестовое покрытие для budget/tail-share логики.</li>
+          <li>Это отдельная веха проекта, потому что оптимизатор получил новый класс стратегии поиска параметров, а не только очередной refactor существующего brute-force пути.</li>
+        </ul>
+      </div>
+      <div class="stage">
+        <div class="stage-head">
+          <div class="stage-left">
+            <div class="stage-num">06</div>
+            <div>
+              <div class="stage-title">Runtime hardening и технический baseline</div>
+              <div class="stage-meta">Серия Stage2 работ снизила риск регрессий в runtime-путях и добавила измеримый технический baseline.</div>
+            </div>
+          </div>
+          <span class="stage-badge">Завершено</span>
+        </div>
+        <ul>
+          <li>Проведены многочисленные bounded-hardening изменения в storage / OKX / websocket / nullable-контрактах.</li>
+          <li>Сформированы performance-артефакты и технический baseline в <span class="mono">reports/stage2_perf_*.json*</span>.</li>
+        </ul>
+      </div>
+      <div class="stage">
+        <div class="stage-head">
+          <div class="stage-left">
+            <div class="stage-num">07</div>
+            <div>
+              <div class="stage-title">Поддержка локального ONNX inference для роботов</div>
+              <div class="stage-meta">Крупная функциональная поставка для robot-side inference поверх локальных моделей.</div>
+            </div>
+          </div>
+          <span class="stage-badge">Issue #166 · Завершено</span>
+        </div>
+        <ul>
+          <li>Добавлен runtime-слой ONNX и robot-friendly API для загрузки модели и вызова inference без прямой работы с <span class="mono">InferenceSession</span>.</li>
+          <li>Этот этап расширил проект от pure-rule-based роботов к сценариям с локальным ML inference.</li>
+        </ul>
+      </div>
+      <div class="stage">
+        <div class="stage-head">
+          <div class="stage-left">
+            <div class="stage-num">08</div>
+            <div>
+              <div class="stage-title">GUI automation harness для Tester</div>
+              <div class="stage-meta">Сделан отдельный automation entrypoint для воспроизводимых regression runs в Tester mode.</div>
+            </div>
+          </div>
+          <span class="stage-badge">Issue #168 · Завершено</span>
+        </div>
+        <ul>
+          <li>Harness запускает <span class="mono">OsEngine.exe -tester</span>, следит за процессом и логами, умеет выполнять smoke-сценарии.</li>
+          <li>Появилась база для автоматизированного контроля hangs, crashes и clean completion без ручного прогона GUI.</li>
+        </ul>
+      </div>
+      <div class="stage">
+        <div class="stage-head">
+          <div class="stage-left">
+            <div class="stage-num">09</div>
+            <div>
+              <div class="stage-title">Стандартизация robot testing workflow и итоговых отчётов</div>
+              <div class="stage-meta">Последний завершённый этап свёл together запуск, подтверждение настроек и публикацию финальных test reports.</div>
+            </div>
+          </div>
+          <span class="stage-badge">Issue #169 · Завершено</span>
+        </div>
+        <ul>
+          <li>Добавлены repo-level skill для robot testing, runbook и publisher итоговых отчётов в <span class="mono">reports/tests/</span>.</li>
+          <li>Результаты прогонов теперь укладываются в repeatable flow: pre-run confirmation, execution, статистика, финальный JSON + Markdown report.</li>
+        </ul>
+      </div>
+    </div>
   </div>
 
   <div class="card">
@@ -43,17 +201,17 @@ h1{margin:0 0 8px 0;font-size:32px}.muted{color:var(--muted)}.mono{font-family:C
     <ul>
       <li><span class="mono">git fetch --all --prune</span> выполнен успешно, состояние удалённых ссылок обновлено.</li>
       <li><span class="mono">git pull --rebase</span> не запускался по политике, так как рабочее дерево не чистое.</li>
-      <li>CLI GitHub (<span class="mono">gh</span>) доступен и возвращает актуальное состояние issue <span class="mono">#168</span>.</li>
-      <li>Карточка issue <span class="mono">#168</span> на проектной доске <span class="mono">OsEngine</span> подтверждена в статусе <span class="mono">In Progress</span>.</li>
+      <li>CLI GitHub (<span class="mono">gh</span>) доступен и подтверждает крупные завершённые этапы через issue <span class="mono">#166</span>, <span class="mono">#168</span> и <span class="mono">#169</span>.</li>
+      <li>Текущее улучшение структуры technical report отслеживается отдельным follow-up issue <span class="mono">#170</span> на доске <span class="mono">OsEngine</span>.</li>
     </ul>
   </div>
 
   <div class="card">
     <h3>Инженерное резюме</h3>
     <ul>
-      <li>Локальный снимок после <span class="mono">fetch</span> показывает синхронную позицию HEAD и origin/master на коммите <span class="mono">316e0e959</span>.</li>
-      <li>Основной технический риск текущего состояния: незавершённые локальные изменения (изменённые и новые файлы).</li>
-      <li>Следующий инженерный шаг по репозиторию: довести до конца issue <span class="mono">#168</span> с harness для Tester и верификацией через .NET pipeline.</li>
+      <li>Техническая картина проекта теперь читается как длинная эволюция от импортированного зрелого baseline к новым возможностям автоматизации и тестирования.</li>
+      <li>Самые значимые поздние этапы этой линии: ONNX support, Tester GUI harness и стандартизованный robot testing/reporting flow.</li>
+      <li>Основной риск локального состояния по-прежнему операционный: незавершённые runtime-артефакты в рабочем дереве после живых прогонов.</li>
     </ul>
   </div>
 </div>
