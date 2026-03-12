@@ -1,0 +1,12 @@
+Regime#On#Off#On#OnlyLong#OnlyShort#
+kTake#3#1,5#0,5#5,0#0,1#
+Comiss#0,03#0,1#0,01#1,0#0,01#
+kComiss#5#3,0#1,0#10,0#0,5#
+ATR Length#10#14#5#50#1#
+kATR#2#1,0#0,1#5,0#0,1#
+k2ATR#5#3,0#1,0#10,0#0,5#
+Ema1 Length#60#20#5#200#1#
+Ema2 Length#240#50#5#200#1#
+Volume type#Deposit percent#Contracts#Contract currency#Deposit percent#
+Volume#50#20#1,0#50#4#
+Asset in portfolio#Prime#Prime#

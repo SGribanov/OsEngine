@@ -39,6 +39,14 @@ public static class HarnessScenarioLoader
             scenario.SummaryOutputPath = ResolvePath(scenarioDirectory, scenario.SummaryOutputPath);
         }
 
+        if (scenario.RestoreFiles.Count > 0)
+        {
+            scenario.RestoreFiles = scenario.RestoreFiles
+                .Where(static path => !string.IsNullOrWhiteSpace(path))
+                .Select(path => ResolvePath(scenarioDirectory, path))
+                .ToList();
+        }
+
         if (Path.IsPathRooted(scenario.ExecutablePath) == false)
         {
             scenario.ExecutablePath = Path.GetFullPath(

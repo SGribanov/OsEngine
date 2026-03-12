@@ -24,6 +24,8 @@ public sealed class HarnessScenario
 
     public string? SummaryOutputPath { get; set; }
 
+    public List<string> RestoreFiles { get; set; } = new();
+
     public List<UiActionDefinition> Actions { get; set; } = new();
 
     public CompletionCondition Completion { get; set; } = new();

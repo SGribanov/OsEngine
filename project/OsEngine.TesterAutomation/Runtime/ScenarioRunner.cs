@@ -49,6 +49,7 @@ internal sealed class ScenarioRunner
             .ToArray();
 
         LogMonitor logMonitor = new(logDirectory);
+        List<RestoredFileSnapshot> restoredFileSnapshots = SnapshotRestoreFiles(scenario.RestoreFiles);
         Process? process = null;
         List<ProcessTreeEntry> previousTree = new();
 
@@ -148,6 +149,16 @@ internal sealed class ScenarioRunner
                 {
                     summary.RootExitCode ??= process.ExitCode;
                 }
+            }
+
+            try
+            {
+                RestoreFiles(restoredFileSnapshots);
+            }
+            catch (Exception ex)
+            {
+                summary.Status = RunStatus.Failed;
+                summary.FailureReason = AppendFailureReason(summary.FailureReason, $"Restore files failed: {ex.Message}");
             }
 
             summary.FinishedAtUtc = _timeProvider.GetUtcNow();
@@ -370,6 +381,46 @@ internal sealed class ScenarioRunner
             $"tester_gui_harness_{startedAtUtc:yyyy-MM-dd_HH-mm-ss}.json");
     }
 
+    private static List<RestoredFileSnapshot> SnapshotRestoreFiles(IReadOnlyList<string> restoreFiles)
+    {
+        if (restoreFiles.Count == 0)
+        {
+            return new List<RestoredFileSnapshot>();
+        }
+
+        return restoreFiles
+            .Distinct(StringComparer.OrdinalIgnoreCase)
+            .Select(static path => File.Exists(path)
+                ? new RestoredFileSnapshot(path, true, File.ReadAllBytes(path))
+                : new RestoredFileSnapshot(path, false, null))
+            .ToList();
+    }
+
+    private static void RestoreFiles(IReadOnlyList<RestoredFileSnapshot> restoredFiles)
+    {
+        foreach (RestoredFileSnapshot restoredFile in restoredFiles)
+        {
+            if (restoredFile.Exists)
+            {
+                Directory.CreateDirectory(Path.GetDirectoryName(restoredFile.Path)!);
+                File.WriteAllBytes(restoredFile.Path, restoredFile.Content!);
+                continue;
+            }
+
+            if (File.Exists(restoredFile.Path))
+            {
+                File.Delete(restoredFile.Path);
+            }
+        }
+    }
+
+    private static string AppendFailureReason(string? existingFailureReason, string additionalFailureReason)
+    {
+        return string.IsNullOrWhiteSpace(existingFailureReason)
+            ? additionalFailureReason
+            : $"{existingFailureReason} {additionalFailureReason}";
+    }
+
     private static void WriteSummary(string summaryPath, RunSummary summary)
     {
         string json = JsonSerializer.Serialize(summary, HarnessJsonSerializerContext.Default.RunSummary);
@@ -411,4 +462,6 @@ internal sealed class ScenarioRunner
             ProcessName = processName
         });
     }
+
+    private sealed record RestoredFileSnapshot(string Path, bool Exists, byte[]? Content);
 }

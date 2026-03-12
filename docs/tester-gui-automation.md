@@ -21,6 +21,7 @@ Key fields:
 - `workingDirectory`: folder that contains `OsEngine.exe` and `Engine\`
 - `executablePath`: usually `OsEngine.exe`
 - `engineSeedPath`: optional fixture directory copied into `workingDirectory\\Engine`
+- `restoreFiles`: optional absolute or scenario-relative file paths that should be restored after the run; use this for external `SecurityTestSettings.txt`-style dependencies
 - `actions`: ordered UI steps such as `waitWindow`, `click`, `setText`, `selectComboBoxItem`
 - `completion`: pass condition, for example a log regex or process exit
 - `failure`: log regexes and process-exit behavior that should fail the run
@@ -45,3 +46,4 @@ The harness writes a JSON result to `reports/` by default, or to `summaryOutputP
 - The harness intentionally prefers file-seeded setup plus targeted UI actions over full visual scraping.
 - Completion and failure are log/process-driven; chart contents are not parsed from the GUI.
 - Full test-start execution still depends on a valid local Tester data fixture in `docs/samples/tester-smoke-engine-seed`.
+- The sample start-smoke fixture points to a local history folder; if that path differs on the machine, update `TestServer.txt` and the scenario `restoreFiles` entry accordingly.

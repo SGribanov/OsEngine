@@ -1,0 +1,11 @@
+
+0
+100000
+Candle
+Folder
+D:\HistoryData\OsEngineDataLoad\Debug\Data\Set_BinanceFTP\BTCUSD_PERP\Min1
+0
+Touch
+True
+True
+False

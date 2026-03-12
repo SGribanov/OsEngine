@@ -33,6 +33,9 @@ public sealed class TesterAutomationScenarioLoaderTests
         Assert.Equal(
             Path.Combine(repoRoot, "reports", "tester_gui_harness_smoke.json"),
             scenario.SummaryOutputPath);
+        Assert.Equal(
+            ["D:\\HistoryData\\OsEngineDataLoad\\Debug\\Data\\Set_BinanceFTP\\BTCUSD_PERP\\Min1\\SecurityTestSettings.txt"],
+            scenario.RestoreFiles);
     }
 
     private static string FindRepositoryRoot()

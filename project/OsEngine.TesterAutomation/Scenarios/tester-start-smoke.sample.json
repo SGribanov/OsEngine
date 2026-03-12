@@ -6,10 +6,13 @@
     "-tester"
   ],
   "engineSeedPath": "..\\..\\..\\docs\\samples\\tester-smoke-engine-seed",
+  "restoreFiles": [
+    "D:\\HistoryData\\OsEngineDataLoad\\Debug\\Data\\Set_BinanceFTP\\BTCUSD_PERP\\Min1\\SecurityTestSettings.txt"
+  ],
   "clearLogDirectory": true,
   "killProcessTreeOnExit": true,
   "timeoutSeconds": 180,
-  "pollIntervalMilliseconds": 1000,
+  "pollIntervalMilliseconds": 500,
   "summaryOutputPath": "..\\..\\..\\reports\\tester_gui_harness_smoke.json",
   "actions": [
     {
@@ -29,6 +32,24 @@
       "timeoutSeconds": 30
     },
     {
+      "type": "setText",
+      "windowAutomationId": "TesterServerUi.Window",
+      "automationId": "TesterServerUi.FromTextBox",
+      "value": "2020-08-11T07:02:00",
+      "timeoutSeconds": 15
+    },
+    {
+      "type": "setText",
+      "windowAutomationId": "TesterServerUi.Window",
+      "automationId": "TesterServerUi.ToTextBox",
+      "value": "2020-08-11T07:15:00",
+      "timeoutSeconds": 15
+    },
+    {
+      "type": "sleep",
+      "delayMilliseconds": 3000
+    },
+    {
       "type": "waitElementEnabled",
       "windowAutomationId": "TesterServerUi.Window",
       "automationId": "TesterServerUi.StartTestButton",
@@ -39,15 +60,33 @@
       "windowAutomationId": "TesterServerUi.Window",
       "automationId": "TesterServerUi.StartTestButton",
       "timeoutSeconds": 15
+    },
+    {
+      "type": "sleep",
+      "delayMilliseconds": 3000
+    },
+    {
+      "type": "waitElementEnabled",
+      "windowAutomationId": "TesterServerUi.Window",
+      "automationId": "TesterServerUi.FastButton",
+      "timeoutSeconds": 15
+    },
+    {
+      "type": "click",
+      "windowAutomationId": "TesterServerUi.Window",
+      "automationId": "TesterServerUi.FastButton",
+      "timeoutSeconds": 15
     }
   ],
   "completion": {
     "type": "logRegex",
-    "value": ";System;.*(тест|test).*(заверш|finish|end)"
+    "value": ";System;(Testing completed because the timer has come to an end|Тестирование завершилось т\\.к\\. время таймера подошло к концу)"
   },
   "failure": {
     "logRegexes": [
-      ";Error;"
+      ";Error;",
+      ";System;(Testing completed because no robot is subscribed to server data|Тестирование завершилось т\\.к\\. на инструменты сервера не подписан ни один бот)",
+      ";System;(The testing process is interrupted, because no initial test date has been determined|Процесс тестирования прерван, т\\.к\\. не определена начальная дата тестирования)"
     ],
     "failOnProcessExit": true
   }
