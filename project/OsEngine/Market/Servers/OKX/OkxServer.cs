@@ -1554,15 +1554,7 @@ namespace OsEngine.Market.Servers.OKX
         {
             try
             {
-                if (ServerStatus != ServerConnectStatus.Disconnect)
-                {
-                    string message = this.GetType().Name + OsLocalization.Market.Message101 + "\n";
-                    message += OsLocalization.Market.Message102;
-
-                    SendLogMessage(message, LogMessageType.Error);
-                    ServerStatus = ServerConnectStatus.Disconnect;
-                    DisconnectEvent();
-                }
+                HandleWebSocketClosed(e, includeServerReason: false);
             }
             catch (System.Exception ex)
             {
@@ -1639,21 +1631,40 @@ namespace OsEngine.Market.Servers.OKX
         {
             try
             {
-                if (ServerStatus != ServerConnectStatus.Disconnect)
-                {
-                    string message = this.GetType().Name + OsLocalization.Market.Message101 + "\n";
-                    message += OsLocalization.Market.Message102;
-                    message += $"Server: {e.Code} {e.Reason}";
-
-                    SendLogMessage(message, LogMessageType.Error);
-                    ServerStatus = ServerConnectStatus.Disconnect;
-                    DisconnectEvent();
-                }
+                HandleWebSocketClosed(e, includeServerReason: true);
             }
             catch (System.Exception ex)
             {
                 SendLogMessage(ex.ToString(), LogMessageType.Error);
             }
+        }
+
+        private bool HandleWebSocketClosed(CloseEventArgs e, bool includeServerReason)
+        {
+            if (ServerStatus == ServerConnectStatus.Disconnect)
+            {
+                return false;
+            }
+
+            string message = GetWebSocketClosedMessage(e, includeServerReason);
+
+            SendLogMessage(message, LogMessageType.Error);
+            ServerStatus = ServerConnectStatus.Disconnect;
+            DisconnectEvent();
+            return true;
+        }
+
+        private string GetWebSocketClosedMessage(CloseEventArgs e, bool includeServerReason)
+        {
+            string message = this.GetType().Name + OsLocalization.Market.Message101 + "\n";
+            message += OsLocalization.Market.Message102;
+
+            if (includeServerReason)
+            {
+                message += $"Server: {e.Code} {e.Reason}";
+            }
+
+            return message;
         }
 
         private void WebSocketPrivate_MessageReceived(object sender, MessageEventArgs e)
