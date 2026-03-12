@@ -3414,48 +3414,7 @@ namespace OsEngine.Market.Servers.OKX
                 {
                     if (OrderResponse.code.Equals("0"))
                     {
-                        List<Order> orders = new List<Order>();
-
-                        for (int i = 0; i < OrderResponse.data.Count; i++)
-                        {
-                            Order newOrder = null;
-
-                            if ((OrderResponse.data[i].ordType.Equals("limit") ||
-                                OrderResponse.data[i].ordType.Equals("market")))
-                            {
-                                newOrder = OrderUpdate(OrderResponse.data[i]);
-                            }
-
-                            if (newOrder == null)
-                            {
-                                continue;
-                            }
-
-                            orders.Add(newOrder);
-                        }
-
-                        if (orders.Count > 0)
-                        {
-                            array.AddRange(orders);
-
-                            if (array.Count > maxCount)
-                            {
-                                while (array.Count > maxCount)
-                                {
-                                    array.RemoveAt(array.Count - 1);
-                                }
-                                return;
-                            }
-                            else if (array.Count < 100)
-                            {
-                                return;
-                            }
-                        }
-                        else
-                        {
-                            return;
-                        }
-
+                        AppendOrdersFromPrivateResponse(array, OrderResponse.data, maxCount);
                         return;
                     }
                     else
@@ -3688,6 +3647,44 @@ namespace OsEngine.Market.Servers.OKX
             return ordersOpenAll;
         }
 
+        private void AppendOrdersFromPrivateResponse(List<Order> array, List<ResponseWsOrders> responseData, int maxCount)
+        {
+            List<Order> orders = new List<Order>();
+
+            for (int i = 0; i < responseData.Count; i++)
+            {
+                Order newOrder = null;
+
+                if ((responseData[i].ordType.Equals("limit") ||
+                    responseData[i].ordType.Equals("market")))
+                {
+                    newOrder = OrderUpdate(responseData[i]);
+                }
+
+                if (newOrder == null)
+                {
+                    continue;
+                }
+
+                orders.Add(newOrder);
+            }
+
+            if (orders.Count == 0)
+            {
+                return;
+            }
+
+            array.AddRange(orders);
+
+            if (array.Count > maxCount)
+            {
+                while (array.Count > maxCount)
+                {
+                    array.RemoveAt(array.Count - 1);
+                }
+            }
+        }
+
         private void GetAllHistoricalOrders(List<Order> array, int maxCount, string instType)
         {
             _rateGateOrder.WaitToProceed();
@@ -3701,48 +3698,7 @@ namespace OsEngine.Market.Servers.OKX
                 {
                     if (OrderResponse.code.Equals("0"))
                     {
-                        List<Order> orders = new List<Order>();
-
-                        for (int i = 0; i < OrderResponse.data.Count; i++)
-                        {
-                            Order newOrder = null;
-
-                            if ((OrderResponse.data[i].ordType.Equals("limit") ||
-                                OrderResponse.data[i].ordType.Equals("market")))
-                            {
-                                newOrder = OrderUpdate(OrderResponse.data[i]);
-                            }
-
-                            if (newOrder == null)
-                            {
-                                continue;
-                            }
-
-                            orders.Add(newOrder);
-                        }
-
-                        if (orders.Count > 0)
-                        {
-                            array.AddRange(orders);
-
-                            if (array.Count > maxCount)
-                            {
-                                while (array.Count > maxCount)
-                                {
-                                    array.RemoveAt(array.Count - 1);
-                                }
-                                return;
-                            }
-                            else if (array.Count < 100)
-                            {
-                                return;
-                            }
-                        }
-                        else
-                        {
-                            return;
-                        }
-
+                        AppendOrdersFromPrivateResponse(array, OrderResponse.data, maxCount);
                         return;
                     }
                     else
