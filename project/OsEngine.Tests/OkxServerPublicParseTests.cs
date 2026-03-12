@@ -1,7 +1,9 @@
 #nullable enable
 
 using System;
+using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Net;
 using System.Net.Sockets;
 using System.Reflection;
@@ -138,6 +140,64 @@ public sealed class OkxServerPublicParseTests
         Assert.Contains("probe failure", loggedMessage, StringComparison.Ordinal);
     }
 
+    [Fact]
+    public void ExecuteSafePublicOperation_WithSuccessfulFactory_ShouldReturnResultWithoutLogging()
+    {
+        OkxServerRealization realization = CreateRealization("http://127.0.0.1");
+        string? loggedMessage = null;
+        realization.LogMessageEvent += (message, _) => loggedMessage = message;
+
+        string? result = InvokeExecuteSafePublicOperation(realization, static () => "probe");
+
+        Assert.Equal("probe", result);
+        Assert.Null(loggedMessage);
+    }
+
+    [Fact]
+    public void ExecuteSafePublicOperation_WithThrowingFactory_ShouldLogAndReturnNull()
+    {
+        OkxServerRealization realization = CreateRealization("http://127.0.0.1");
+        string? loggedMessage = null;
+        LogMessageType? loggedType = null;
+        realization.LogMessageEvent += (message, type) =>
+        {
+            loggedMessage = message;
+            loggedType = type;
+        };
+
+        string? result = InvokeExecuteSafePublicOperation(
+            realization,
+            static () => throw new InvalidOperationException("public op failure"));
+
+        Assert.Null(result);
+        Assert.Equal(LogMessageType.Error, loggedType);
+        Assert.NotNull(loggedMessage);
+        Assert.Contains("public op failure", loggedMessage, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void GetOptionBaseSecurities_WithEmptyUnderlying_ShouldLogExistingMessageAndReturnNull()
+    {
+        const string responseBody = "{\"code\":\"0\",\"data\":[]}";
+        using LocalHttpServer server = new LocalHttpServer(HttpStatusCode.OK, responseBody);
+        OkxServerRealization realization = CreateRealization(server.BaseUrl);
+
+        string? loggedMessage = null;
+        LogMessageType? loggedType = null;
+        realization.LogMessageEvent += (message, type) =>
+        {
+            loggedMessage = message;
+            loggedType = type;
+        };
+
+        List<string>? response = InvokeGetOptionBaseSecurities(realization);
+
+        Assert.Null(response);
+        Assert.Equal(LogMessageType.Error, loggedType);
+        Assert.Equal("GetOptionSecurities - Empty underlying", loggedMessage);
+        Assert.Equal("/api/v5/public/underlying?instType=OPTION", server.LastRequestPath);
+    }
+
     private static OkxServerRealization CreateRealization(string baseUrl)
     {
         OkxServerRealization realization = (OkxServerRealization)RuntimeHelpers.GetUninitializedObject(typeof(OkxServerRealization));
@@ -223,15 +283,36 @@ public sealed class OkxServerPublicParseTests
         OkxServerRealization realization,
         Func<SecurityResponse> requestFactory)
     {
-        MethodInfo method = typeof(OkxServerRealization).GetMethod(
-            "ExecuteSafePublicSecurityResponseRequest",
-            BindingFlags.NonPublic | BindingFlags.Instance,
-            binder: null,
-            types: [typeof(Func<SecurityResponse>)],
-            modifiers: null)
-            ?? throw new InvalidOperationException("ExecuteSafePublicSecurityResponseRequest factory overload not found.");
+        MethodInfo methodDefinition = typeof(OkxServerRealization)
+            .GetMethods(BindingFlags.NonPublic | BindingFlags.Instance)
+            .FirstOrDefault(method => method.Name == "ExecuteSafePublicOperation" && method.IsGenericMethodDefinition)
+            ?? throw new InvalidOperationException("ExecuteSafePublicOperation generic method not found.");
 
+        MethodInfo method = methodDefinition.MakeGenericMethod(typeof(SecurityResponse));
         return (SecurityResponse?)method.Invoke(realization, [requestFactory]);
+    }
+
+    private static string? InvokeExecuteSafePublicOperation(
+        OkxServerRealization realization,
+        Func<string> requestFactory)
+    {
+        MethodInfo methodDefinition = typeof(OkxServerRealization)
+            .GetMethods(BindingFlags.NonPublic | BindingFlags.Instance)
+            .FirstOrDefault(method => method.Name == "ExecuteSafePublicOperation" && method.IsGenericMethodDefinition)
+            ?? throw new InvalidOperationException("ExecuteSafePublicOperation generic method not found.");
+
+        MethodInfo method = methodDefinition.MakeGenericMethod(typeof(string));
+        return (string?)method.Invoke(realization, [requestFactory]);
+    }
+
+    private static List<string>? InvokeGetOptionBaseSecurities(OkxServerRealization realization)
+    {
+        MethodInfo method = typeof(OkxServerRealization).GetMethod(
+            "GetOptionBaseSecurities",
+            BindingFlags.NonPublic | BindingFlags.Instance)
+            ?? throw new InvalidOperationException("GetOptionBaseSecurities method not found.");
+
+        return (List<string>?)method.Invoke(realization, Array.Empty<object>());
     }
 
     private static void SetPrivateField(OkxServerRealization realization, string fieldName, object? value)

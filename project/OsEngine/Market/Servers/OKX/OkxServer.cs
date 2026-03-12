@@ -626,7 +626,7 @@ namespace OsEngine.Market.Servers.OKX
 
         private List<string> GetOptionBaseSecurities()
         {
-            try
+            return ExecuteSafePublicOperation(() =>
             {
                 SecurityUnderlyingResponse baseSecuritiesResponse = ExecutePublicSecurityUnderlyingResponseRequest(
                     "/api/v5/public/underlying?instType=OPTION",
@@ -643,17 +643,12 @@ namespace OsEngine.Market.Servers.OKX
                 var baseSecurities = baseSecuritiesResponse.data[0];
 
                 return baseSecurities;
-            }
-            catch (Exception error)
-            {
-                SendLogMessage($"{error.Message} {error.StackTrace}", LogMessageType.Error);
-                return null;
-            }
+            });
         }
 
         private SecurityResponse GetOptionSecurities(List<string> baseSecurities)
         {
-            try
+            return ExecuteSafePublicOperation(() =>
             {
                 SecurityResponse ret = null;
 
@@ -676,12 +671,7 @@ namespace OsEngine.Market.Servers.OKX
                 }
 
                 return ret;
-            }
-            catch (Exception error)
-            {
-                SendLogMessage($"{error.Message} {error.StackTrace}", LogMessageType.Error);
-                return null;
-            }
+            });
         }
 
         private SecurityResponse GetSpotSecurities()
@@ -693,20 +683,20 @@ namespace OsEngine.Market.Servers.OKX
 
         private SecurityResponse ExecuteSafePublicSecurityResponseRequest(string resource, string errorLogPrefix)
         {
-            return ExecuteSafePublicSecurityResponseRequest(
+            return ExecuteSafePublicOperation(
                 () => ExecutePublicSecurityResponseRequest(resource, errorLogPrefix));
         }
 
-        private SecurityResponse ExecuteSafePublicSecurityResponseRequest(Func<SecurityResponse> requestFactory)
+        private T ExecuteSafePublicOperation<T>(Func<T> operation)
         {
             try
             {
-                return requestFactory();
+                return operation();
             }
             catch (Exception error)
             {
                 SendLogMessage($"{error.Message} {error.StackTrace}", LogMessageType.Error);
-                return null;
+                return default;
             }
         }
 
