@@ -1574,16 +1574,8 @@ namespace OsEngine.Market.Servers.OKX
         {
             try
             {
-                if (e == null)
+                if (!TryGetWebSocketMessageData(e, out string messageData))
                 {
-                    return;
-                }
-                if (string.IsNullOrEmpty(e.Data))
-                {
-                    return;
-                }
-                if (e.Data.Length == 4)
-                { // pong message
                     return;
                 }
 
@@ -1592,7 +1584,7 @@ namespace OsEngine.Market.Servers.OKX
                     return;
                 }
 
-                _fIFOListWebSocketPublicMessage.Enqueue(e.Data);
+                _fIFOListWebSocketPublicMessage.Enqueue(messageData);
             }
             catch (Exception error)
             {
@@ -1668,27 +1660,19 @@ namespace OsEngine.Market.Servers.OKX
         {
             try
             {
-                if (e == null)
+                if (!TryGetWebSocketMessageData(e, out string messageData))
                 {
-                    return;
-                }
-                if (string.IsNullOrEmpty(e.Data))
-                {
-                    return;
-                }
-                if (e.Data.Length == 4)
-                { // pong message
                     return;
                 }
 
-                if (e.Data.Contains("login"))
+                if (messageData.Contains("login"))
                 {
                     SubscribePrivate();
                 }
 
-                if (e.Data.Contains("error"))
+                if (messageData.Contains("error"))
                 {
-                    SendLogMessage("Error received from server: " + e.Data.ToString(), LogMessageType.Error);
+                    SendLogMessage("Error received from server: " + messageData, LogMessageType.Error);
                 }
 
                 if (_fIFOListWebSocketPrivateMessage == null)
@@ -1696,12 +1680,26 @@ namespace OsEngine.Market.Servers.OKX
                     return;
                 }
 
-                _fIFOListWebSocketPrivateMessage.Enqueue(e.Data);
+                _fIFOListWebSocketPrivateMessage.Enqueue(messageData);
             }
             catch (Exception error)
             {
                 SendLogMessage(error.ToString(), LogMessageType.Error);
             }
+        }
+
+        private static bool TryGetWebSocketMessageData(MessageEventArgs e, out string messageData)
+        {
+            if (e == null
+                || string.IsNullOrEmpty(e.Data)
+                || e.Data.Length == 4)
+            { // pong message
+                messageData = null;
+                return false;
+            }
+
+            messageData = e.Data;
+            return true;
         }
 
         private void WebSocketPrivate_Error(object sender, ErrorEventArgs e)
