@@ -9,6 +9,8 @@ using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Threading.Tasks;
+using OsEngine.Entity;
+using OsEngine.Logging;
 using OsEngine.Market.Servers.OKX;
 using OsEngine.Market.Servers.OKX.Entity;
 using Xunit;
@@ -152,6 +154,74 @@ public class OkxServerPrivateHttpClientTests
         Assert.Equal("1", message.code);
         RestMessageSendOrder item = Assert.Single(message.data);
         Assert.Equal("insufficient balance", item.sMsg);
+    }
+
+    [Fact]
+    public void HandlePrivateSendOrderFailure_WithApiError_ShouldFailOrderAndLogApiMessage()
+    {
+        OkxServerRealization realization = CreateRealizationForHttpClientTests();
+        Order order = new Order();
+        Order? reportedOrder = null;
+        string? loggedMessage = null;
+        LogMessageType? loggedType = null;
+        realization.MyOrderEvent += newOrder => reportedOrder = newOrder;
+        realization.LogMessageEvent += (message, type) =>
+        {
+            loggedMessage = message;
+            loggedType = type;
+        };
+
+        InvokeHandlePrivateSendOrderFailure(
+            realization,
+            order,
+            HttpStatusCode.OK,
+            "{\"code\":\"1\"}",
+            new ResponseRestMessage<List<RestMessageSendOrder>>
+            {
+                code = "1",
+                data = new List<RestMessageSendOrder> { new RestMessageSendOrder { sMsg = "insufficient balance" } },
+            },
+            "SendOrderSpot",
+            "Spot Order Fail");
+
+        Assert.Equal(OrderStateType.Fail, order.State);
+        Assert.Same(order, reportedOrder);
+        Assert.Equal(LogMessageType.Error, loggedType);
+        Assert.Equal("SendOrderSpot - insufficient balance", loggedMessage);
+    }
+
+    [Fact]
+    public void HandlePrivateSendOrderFailure_WithTransportError_ShouldFailOrderAndLogStatusMessage()
+    {
+        OkxServerRealization realization = CreateRealizationForHttpClientTests();
+        Order order = new Order();
+        Order? reportedOrder = null;
+        string? loggedMessage = null;
+        LogMessageType? loggedType = null;
+        realization.MyOrderEvent += newOrder => reportedOrder = newOrder;
+        realization.LogMessageEvent += (message, type) =>
+        {
+            loggedMessage = message;
+            loggedType = type;
+        };
+
+        InvokeHandlePrivateSendOrderFailure(
+            realization,
+            order,
+            HttpStatusCode.BadGateway,
+            "gateway down",
+            new ResponseRestMessage<List<RestMessageSendOrder>>
+            {
+                code = "0",
+                data = new List<RestMessageSendOrder>(),
+            },
+            "SendOrderSwap",
+            "Swap Order Fail");
+
+        Assert.Equal(OrderStateType.Fail, order.State);
+        Assert.Same(order, reportedOrder);
+        Assert.Equal(LogMessageType.Error, loggedType);
+        Assert.Equal("Swap Order Fail. Status: BadGateway || gateway down", loggedMessage);
     }
 
     [Fact]
@@ -313,6 +383,23 @@ public class OkxServerPrivateHttpClientTests
             ?? throw new InvalidOperationException("ExecutePrivateSendOrderRequest returned null.");
 
         return ((HttpResponseMessage response, string content, ResponseRestMessage<List<RestMessageSendOrder>> message))tuple;
+    }
+
+    private static void InvokeHandlePrivateSendOrderFailure(
+        OkxServerRealization realization,
+        Order order,
+        HttpStatusCode statusCode,
+        string content,
+        ResponseRestMessage<List<RestMessageSendOrder>> message,
+        string apiErrorPrefix,
+        string statusErrorPrefix)
+    {
+        MethodInfo method = typeof(OkxServerRealization).GetMethod(
+            "HandlePrivateSendOrderFailure",
+            BindingFlags.NonPublic | BindingFlags.Instance)
+            ?? throw new InvalidOperationException("HandlePrivateSendOrderFailure method not found.");
+
+        method.Invoke(realization, [order, statusCode, content, message, apiErrorPrefix, statusErrorPrefix]);
     }
 
     private static (HttpResponseMessage response, string content, ResponseRestMessage<List<ResponseWsOrders>> message) InvokeExecutePrivateOrdersQueryRequest(

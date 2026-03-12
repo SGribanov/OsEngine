@@ -3110,20 +3110,7 @@ namespace OsEngine.Market.Servers.OKX
                 string url = $"{_baseUrl}/api/v5/trade/order";
 
                 (HttpResponseMessage res, string contentStr, ResponseRestMessage<List<RestMessageSendOrder>> message) = ExecutePrivateSendOrderRequest(url, json);
-
-                if (res.StatusCode == HttpStatusCode.OK)
-                {
-                    if (message.code.Equals("1"))
-                    {
-                        CreateOrderFail(order);
-                        SendLogMessage($"SendOrderSpot - {message.data[0].sMsg}", LogMessageType.Error);
-                    }
-                }
-                else
-                {
-                    SendLogMessage($"Spot Order Fail. Status: {res.StatusCode} || {contentStr}", LogMessageType.Error);
-                    CreateOrderFail(order);
-                }
+                HandlePrivateSendOrderFailure(order, res.StatusCode, contentStr, message, "SendOrderSpot", "Spot Order Fail");
             }
             catch (System.Exception ex)
             {
@@ -3170,25 +3157,35 @@ namespace OsEngine.Market.Servers.OKX
                 string url = $"{_baseUrl}/api/v5/trade/order";
 
                 (HttpResponseMessage res, string contentStr, ResponseRestMessage<List<RestMessageSendOrder>> message) = ExecutePrivateSendOrderRequest(url, json);
-
-                if (res.StatusCode == HttpStatusCode.OK)
-                {
-                    if (message.code.Equals("1"))
-                    {
-                        CreateOrderFail(order);
-                        SendLogMessage($"SendOrderSwap - {message.data[0].sMsg}", LogMessageType.Error);
-                    }
-                }
-                else
-                {
-                    SendLogMessage($"Swap Order Fail. Status: {res.StatusCode} || {contentStr}", LogMessageType.Error);
-                    CreateOrderFail(order);
-                }
+                HandlePrivateSendOrderFailure(order, res.StatusCode, contentStr, message, "SendOrderSwap", "Swap Order Fail");
             }
             catch (System.Exception ex)
             {
                 SendLogMessage($"SendOrderSwap - {ex.Message}", LogMessageType.Error);
             }
+        }
+
+        private void HandlePrivateSendOrderFailure(
+            Order order,
+            HttpStatusCode statusCode,
+            string contentStr,
+            ResponseRestMessage<List<RestMessageSendOrder>> message,
+            string apiErrorPrefix,
+            string statusErrorPrefix)
+        {
+            if (statusCode == HttpStatusCode.OK)
+            {
+                if (message.code.Equals("1"))
+                {
+                    CreateOrderFail(order);
+                    SendLogMessage($"{apiErrorPrefix} - {message.data[0].sMsg}", LogMessageType.Error);
+                }
+
+                return;
+            }
+
+            SendLogMessage($"{statusErrorPrefix}. Status: {statusCode} || {contentStr}", LogMessageType.Error);
+            CreateOrderFail(order);
         }
 
         private decimal GetVolume(string securityName)
