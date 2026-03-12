@@ -2,9 +2,11 @@
 
 using System;
 using System.Collections.Generic;
+using System.Net;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using OsEngine.Entity;
+using OsEngine.Logging;
 using OsEngine.Market.Servers.OKX;
 using OsEngine.Market.Servers.OKX.Entity;
 
@@ -47,6 +49,98 @@ public sealed class OkxServerOrderExpansionTests
         Assert.Empty(orders);
     }
 
+    [Fact]
+    public void ResolvePrivateOrdersQueryResult_WithSuccessCode_ShouldAppendOrdersWithoutLogging()
+    {
+        OkxServerRealization realization = CreateRealization();
+        List<Order> orders = new List<Order>();
+        string? loggedMessage = null;
+        realization.LogMessageEvent += (message, _) => loggedMessage = message;
+
+        InvokeResolvePrivateOrdersQueryResult(
+            realization,
+            orders,
+            5,
+            HttpStatusCode.OK,
+            "ignored",
+            new ResponseRestMessage<List<ResponseWsOrders>>
+            {
+                code = "0",
+                data = new List<ResponseWsOrders> { CreateResponseOrder("1", "limit", "buy") },
+            },
+            static response => $"API {response.code}",
+            static (statusCode, content) => $"HTTP {statusCode} {content}");
+
+        Order order = Assert.Single(orders);
+        Assert.Equal("1", order.NumberMarket);
+        Assert.Null(loggedMessage);
+    }
+
+    [Fact]
+    public void ResolvePrivateOrdersQueryResult_WithApiError_ShouldLogApiFormatter()
+    {
+        OkxServerRealization realization = CreateRealization();
+        List<Order> orders = new List<Order>();
+        string? loggedMessage = null;
+        LogMessageType? loggedType = null;
+        realization.LogMessageEvent += (message, type) =>
+        {
+            loggedMessage = message;
+            loggedType = type;
+        };
+
+        InvokeResolvePrivateOrdersQueryResult(
+            realization,
+            orders,
+            5,
+            HttpStatusCode.OK,
+            "ignored",
+            new ResponseRestMessage<List<ResponseWsOrders>>
+            {
+                code = "1",
+                msg = "bad request",
+                data = new List<ResponseWsOrders>(),
+            },
+            static response => $"API {response.code} {response.msg}",
+            static (statusCode, content) => $"HTTP {statusCode} {content}");
+
+        Assert.Empty(orders);
+        Assert.Equal(LogMessageType.Error, loggedType);
+        Assert.Equal("API 1 bad request", loggedMessage);
+    }
+
+    [Fact]
+    public void ResolvePrivateOrdersQueryResult_WithTransportError_ShouldLogTransportFormatter()
+    {
+        OkxServerRealization realization = CreateRealization();
+        List<Order> orders = new List<Order>();
+        string? loggedMessage = null;
+        LogMessageType? loggedType = null;
+        realization.LogMessageEvent += (message, type) =>
+        {
+            loggedMessage = message;
+            loggedType = type;
+        };
+
+        InvokeResolvePrivateOrdersQueryResult(
+            realization,
+            orders,
+            5,
+            HttpStatusCode.BadGateway,
+            "gateway down",
+            new ResponseRestMessage<List<ResponseWsOrders>>
+            {
+                code = "0",
+                data = new List<ResponseWsOrders>(),
+            },
+            static response => $"API {response.code}",
+            static (statusCode, content) => $"HTTP {statusCode} {content}");
+
+        Assert.Empty(orders);
+        Assert.Equal(LogMessageType.Error, loggedType);
+        Assert.Equal("HTTP BadGateway gateway down", loggedMessage);
+    }
+
     private static OkxServerRealization CreateRealization()
     {
         return (OkxServerRealization)RuntimeHelpers.GetUninitializedObject(typeof(OkxServerRealization));
@@ -64,6 +158,24 @@ public sealed class OkxServerOrderExpansionTests
             ?? throw new InvalidOperationException("AppendOrdersFromPrivateResponse method not found.");
 
         method.Invoke(realization, [orders, responseData, maxCount]);
+    }
+
+    private static void InvokeResolvePrivateOrdersQueryResult(
+        OkxServerRealization realization,
+        List<Order> orders,
+        int maxCount,
+        HttpStatusCode statusCode,
+        string contentStr,
+        ResponseRestMessage<List<ResponseWsOrders>> response,
+        Func<ResponseRestMessage<List<ResponseWsOrders>>, string> apiErrorMessageFactory,
+        Func<HttpStatusCode, string, string> transportErrorMessageFactory)
+    {
+        MethodInfo method = typeof(OkxServerRealization).GetMethod(
+            "ResolvePrivateOrdersQueryResult",
+            BindingFlags.NonPublic | BindingFlags.Instance)
+            ?? throw new InvalidOperationException("ResolvePrivateOrdersQueryResult method not found.");
+
+        method.Invoke(realization, [orders, maxCount, statusCode, contentStr, response, apiErrorMessageFactory, transportErrorMessageFactory]);
     }
 
     private static ResponseWsOrders CreateResponseOrder(string ordId, string ordType, string side)

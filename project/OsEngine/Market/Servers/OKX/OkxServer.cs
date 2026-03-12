@@ -3409,25 +3409,14 @@ namespace OsEngine.Market.Servers.OKX
             {
                 string url = $"{_baseUrl}/api/v5/trade/orders-pending";
                 (HttpResponseMessage res, string contentStr, ResponseRestMessage<List<ResponseWsOrders>> OrderResponse) = ExecutePrivateOrdersQueryRequest(url);
-
-                if (res.StatusCode == HttpStatusCode.OK)
-                {
-                    if (OrderResponse.code.Equals("0"))
-                    {
-                        AppendOrdersFromPrivateResponse(array, OrderResponse.data, maxCount);
-                        return;
-                    }
-                    else
-                    {
-                        SendLogMessage($"Get all open orders failed: {OrderResponse.code} || msg: {OrderResponse.msg}", LogMessageType.Error);
-                        return;
-                    }
-                }
-                else
-                {
-                    SendLogMessage($"Get all open orders request error {res.StatusCode} || {contentStr}", LogMessageType.Error);
-                    return;
-                }
+                ResolvePrivateOrdersQueryResult(
+                    array,
+                    maxCount,
+                    res.StatusCode,
+                    contentStr,
+                    OrderResponse,
+                    static response => $"Get all open orders failed: {response.code} || msg: {response.msg}",
+                    static (statusCode, content) => $"Get all open orders request error {statusCode} || {content}");
             }
             catch (System.Exception ex)
             {
@@ -3685,6 +3674,30 @@ namespace OsEngine.Market.Servers.OKX
             }
         }
 
+        private void ResolvePrivateOrdersQueryResult(
+            List<Order> array,
+            int maxCount,
+            HttpStatusCode statusCode,
+            string contentStr,
+            ResponseRestMessage<List<ResponseWsOrders>> orderResponse,
+            Func<ResponseRestMessage<List<ResponseWsOrders>>, string> apiErrorMessageFactory,
+            Func<HttpStatusCode, string, string> transportErrorMessageFactory)
+        {
+            if (statusCode == HttpStatusCode.OK)
+            {
+                if (orderResponse.code.Equals("0"))
+                {
+                    AppendOrdersFromPrivateResponse(array, orderResponse.data, maxCount);
+                    return;
+                }
+
+                SendLogMessage(apiErrorMessageFactory(orderResponse), LogMessageType.Error);
+                return;
+            }
+
+            SendLogMessage(transportErrorMessageFactory(statusCode, contentStr), LogMessageType.Error);
+        }
+
         private void GetAllHistoricalOrders(List<Order> array, int maxCount, string instType)
         {
             _rateGateOrder.WaitToProceed();
@@ -3693,26 +3706,14 @@ namespace OsEngine.Market.Servers.OKX
             {
                 string url = $"{_baseUrl}/api/v5/trade/orders-history?instType={instType}&limit=50";
                 (HttpResponseMessage res, string contentStr, ResponseRestMessage<List<ResponseWsOrders>> OrderResponse) = ExecutePrivateOrdersQueryRequest(url);
-
-                if (res.StatusCode == HttpStatusCode.OK)
-                {
-                    if (OrderResponse.code.Equals("0"))
-                    {
-                        AppendOrdersFromPrivateResponse(array, OrderResponse.data, maxCount);
-                        return;
-                    }
-                    else
-                    {
-                        SendLogMessage($"Get all historical orders request error. {OrderResponse.code} || {OrderResponse.msg}", LogMessageType.Error);
-                        return;
-                    }
-
-                }
-                else
-                {
-                    SendLogMessage($"Get all historical orders request error. Code: {res.StatusCode} || {contentStr}", LogMessageType.Error);
-                    return;
-                }
+                ResolvePrivateOrdersQueryResult(
+                    array,
+                    maxCount,
+                    res.StatusCode,
+                    contentStr,
+                    OrderResponse,
+                    static response => $"Get all historical orders request error. {response.code} || {response.msg}",
+                    static (statusCode, content) => $"Get all historical orders request error. Code: {statusCode} || {content}");
             }
             catch (System.Exception ex)
             {
