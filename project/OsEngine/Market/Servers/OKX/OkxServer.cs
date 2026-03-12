@@ -2908,6 +2908,11 @@ namespace OsEngine.Market.Servers.OKX
 
         private ConcurrentDictionary<string, string> _underlyingPrice = new ConcurrentDictionary<string, string>();
 
+        private AdditionalOptionData GetOrAddAdditionalOptionData(string instId)
+        {
+            return _additionalOptionData.GetOrAdd(instId, static _ => new AdditionalOptionData());
+        }
+
         private void UpdateOpenInterest(string message)
         {
             try
@@ -2922,13 +2927,7 @@ namespace OsEngine.Market.Servers.OKX
                 for (int i = 0; i < response.data.Count; i++)
                 {
                     ResponseWsOpenInterest data = response.data[i];
-
-                    if (!_additionalOptionData.ContainsKey(data.instId))
-                    {
-                        _additionalOptionData.TryAdd(data.instId, new AdditionalOptionData());
-                    }
-
-                    _additionalOptionData[data.instId].OpenInterest = data.oi;
+                    GetOrAddAdditionalOptionData(data.instId).OpenInterest = data.oi;
                 }
             }
             catch (Exception exception)
@@ -2967,12 +2966,7 @@ namespace OsEngine.Market.Servers.OKX
                     }
                     else
                     {
-                        if (!_additionalOptionData.ContainsKey(data.instId))
-                        {
-                            _additionalOptionData.TryAdd(data.instId, new AdditionalOptionData());
-                        }
-
-                        _additionalOptionData[data.instId].MarkPrice = data.markPx;
+                        GetOrAddAdditionalOptionData(data.instId).MarkPrice = data.markPx;
                     }
                 }
             }
