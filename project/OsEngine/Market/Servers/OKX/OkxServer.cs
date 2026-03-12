@@ -426,6 +426,38 @@ namespace OsEngine.Market.Servers.OKX
             return JsonConvert.DeserializeAnonymousType(content, template);
         }
 
+        private static void EnqueuePublicInstrumentMessage(
+            string instId,
+            string message,
+            ConcurrentQueue<string> spotQueue,
+            ConcurrentQueue<string> swapQueue,
+            ConcurrentQueue<string> futuresQueue,
+            ConcurrentQueue<string> optionQueue)
+        {
+            if (instId.EndsWith("SWAP"))
+            {
+                swapQueue.Enqueue(message);
+                return;
+            }
+
+            if (instId.EndsWith("P")
+                || instId.EndsWith("C"))
+            {
+                optionQueue.Enqueue(message);
+                return;
+            }
+
+            bool endsWithDigit = Char.IsDigit(instId[instId.Length - 1]);
+
+            if (endsWithDigit)
+            {
+                futuresQueue.Enqueue(message);
+                return;
+            }
+
+            spotQueue.Enqueue(message);
+        }
+
         private static string ReadPrivateResponseContent(HttpResponseMessage response)
         {
             return response.Content.ReadAsStringAsync().Result;
@@ -2100,56 +2132,26 @@ namespace OsEngine.Market.Servers.OKX
                         {
                             if (action.arg.channel.Equals("books5"))
                             {
-                                if (action.arg.instId.EndsWith("SWAP"))
-                                {
-                                    _queueMessageMarketDepthSwap.Enqueue(message);
-                                }
-                                else if (action.arg.instId.EndsWith("P")
-                                    || action.arg.instId.EndsWith("C"))
-                                {
-                                    _queueMessageMarketDepthOption.Enqueue(message);
-                                }
-                                else
-                                {
-                                    bool endsWithDigit = Char.IsDigit(action.arg.instId[action.arg.instId.Length - 1]);
-
-                                    if (endsWithDigit)
-                                    {
-                                        _queueMessageMarketDepthFutures.Enqueue(message);
-                                    }
-                                    else
-                                    {
-                                        _queueMessageMarketDepthSpot.Enqueue(message);
-                                    }
-                                }
+                                EnqueuePublicInstrumentMessage(
+                                    action.arg.instId,
+                                    message,
+                                    _queueMessageMarketDepthSpot,
+                                    _queueMessageMarketDepthSwap,
+                                    _queueMessageMarketDepthFutures,
+                                    _queueMessageMarketDepthOption);
 
                                 continue;
                             }
 
                             if (action.arg.channel.Equals("trades"))
                             {
-                                if (action.arg.instId.EndsWith("SWAP"))
-                                {
-                                    _queueMessageTradesSwap.Enqueue(message);
-                                }
-                                else if (action.arg.instId.EndsWith("P")
-                                    || action.arg.instId.EndsWith("C"))
-                                {
-                                    _queueMessageTradesOption.Enqueue(message);
-                                }
-                                else
-                                {
-                                    bool endsWithDigit = Char.IsDigit(action.arg.instId[action.arg.instId.Length - 1]);
-
-                                    if (endsWithDigit)
-                                    {
-                                        _queueMessageTradesFutures.Enqueue(message);
-                                    }
-                                    else
-                                    {
-                                        _queueMessageTradesSpot.Enqueue(message);
-                                    }
-                                }
+                                EnqueuePublicInstrumentMessage(
+                                    action.arg.instId,
+                                    message,
+                                    _queueMessageTradesSpot,
+                                    _queueMessageTradesSwap,
+                                    _queueMessageTradesFutures,
+                                    _queueMessageTradesOption);
 
                                 continue;
                             }
