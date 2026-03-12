@@ -6,6 +6,7 @@ on:
       - opened
       - reopened
       - ready_for_review
+      - synchronize
 
 permissions:
   contents: read
