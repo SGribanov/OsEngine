@@ -78,6 +78,20 @@ public sealed class OkxServerPublicParseTests
         Assert.Null(loggedMessage);
     }
 
+    [Fact]
+    public void DeserializeAnonymousPayload_WithSecurityResponseTemplate_ShouldReturnParsedPayload()
+    {
+        const string responseBody = "{\"code\":\"0\",\"data\":[{\"instId\":\"BTC-USDT-SWAP\",\"instType\":\"SWAP\",\"tickSz\":\"0.1\"}]}";
+
+        SecurityResponse response = InvokeDeserializeAnonymousPayload(responseBody, new SecurityResponse());
+
+        Assert.Equal("0", response.code);
+        SecurityResponseItem item = Assert.Single(response.data);
+        Assert.Equal("BTC-USDT-SWAP", item.instId);
+        Assert.Equal("SWAP", item.instType);
+        Assert.Equal("0.1", item.tickSz);
+    }
+
     private static OkxServerRealization CreateRealization(string baseUrl)
     {
         OkxServerRealization realization = (OkxServerRealization)RuntimeHelpers.GetUninitializedObject(typeof(OkxServerRealization));
@@ -129,6 +143,18 @@ public sealed class OkxServerPublicParseTests
 
         return (string)(genericMethod.Invoke(realization, [resource, errorLogPrefix, parser])
             ?? throw new InvalidOperationException("ExecutePublicQueryRequest returned null."));
+    }
+
+    private static T InvokeDeserializeAnonymousPayload<T>(string content, T template)
+    {
+        MethodInfo method = typeof(OkxServerRealization).GetMethod(
+            "DeserializeAnonymousPayload",
+            BindingFlags.NonPublic | BindingFlags.Static)
+            ?? throw new InvalidOperationException("DeserializeAnonymousPayload method not found.");
+
+        MethodInfo genericMethod = method.MakeGenericMethod(typeof(T));
+        return (T)(genericMethod.Invoke(null, [content, template])
+            ?? throw new InvalidOperationException("DeserializeAnonymousPayload returned null."));
     }
 
     private static void SetPrivateField(OkxServerRealization realization, string fieldName, object? value)

@@ -352,7 +352,7 @@ namespace OsEngine.Market.Servers.OKX
             return ExecutePublicQueryRequest(
                 resource,
                 errorLogPrefix,
-                static content => JsonConvert.DeserializeAnonymousType(content, new SecurityResponse()));
+                static content => DeserializeAnonymousPayload(content, new SecurityResponse()));
         }
 
         private SecurityUnderlyingResponse ExecutePublicSecurityUnderlyingResponseRequest(string resource, string errorLogPrefix)
@@ -360,7 +360,7 @@ namespace OsEngine.Market.Servers.OKX
             return ExecutePublicQueryRequest(
                 resource,
                 errorLogPrefix,
-                static content => JsonConvert.DeserializeAnonymousType(content, new SecurityUnderlyingResponse()));
+                static content => DeserializeAnonymousPayload(content, new SecurityUnderlyingResponse()));
         }
 
         private static IRestResponse ExecutePublicAbsoluteGetRequest(string url)
@@ -380,32 +380,37 @@ namespace OsEngine.Market.Servers.OKX
 
         private static CandlesResponse ParsePublicCandlesResponse(string responseContent)
         {
-            return JsonConvert.DeserializeAnonymousType(responseContent, new CandlesResponse());
+            return DeserializeAnonymousPayload(responseContent, new CandlesResponse());
         }
 
         private static TradesDataResponse ParsePublicTradesDataResponse(string responseContent)
         {
-            return JsonConvert.DeserializeAnonymousType(responseContent, new TradesDataResponse());
+            return DeserializeAnonymousPayload(responseContent, new TradesDataResponse());
         }
 
         private static ResponseRestMessage<List<FundingItemHistory>> ParsePublicFundingHistoryResponse(string responseContent)
         {
-            return JsonConvert.DeserializeAnonymousType(responseContent, new ResponseRestMessage<List<FundingItemHistory>>());
+            return DeserializeAnonymousPayload(responseContent, new ResponseRestMessage<List<FundingItemHistory>>());
         }
 
         private static ResponseRestMessage<List<RestMessageSendOrder>> ParsePrivateSendOrderResponse(string responseContent)
         {
-            return JsonConvert.DeserializeAnonymousType(responseContent, new ResponseRestMessage<List<RestMessageSendOrder>>());
+            return DeserializeAnonymousPayload(responseContent, new ResponseRestMessage<List<RestMessageSendOrder>>());
         }
 
         private static ResponseRestMessage<List<ResponseWsOrders>> ParsePrivateOrdersResponse(string responseContent)
         {
-            return JsonConvert.DeserializeAnonymousType(responseContent, new ResponseRestMessage<List<ResponseWsOrders>>());
+            return DeserializeAnonymousPayload(responseContent, new ResponseRestMessage<List<ResponseWsOrders>>());
         }
 
         private static ResponseWsMessageAction<T> ParseWebSocketActionResponse<T>(string message)
         {
-            return JsonConvert.DeserializeAnonymousType(message, new ResponseWsMessageAction<T>());
+            return DeserializeAnonymousPayload(message, new ResponseWsMessageAction<T>());
+        }
+
+        private static T DeserializeAnonymousPayload<T>(string content, T template)
+        {
+            return JsonConvert.DeserializeAnonymousType(content, template);
         }
 
         private static string ReadPrivateResponseContent(HttpResponseMessage response)
@@ -434,7 +439,7 @@ namespace OsEngine.Market.Servers.OKX
         {
             return ExecutePrivateQueryRequest(
                 url,
-                static content => JsonConvert.DeserializeAnonymousType(content, new TradeDetailsResponse()));
+                static content => DeserializeAnonymousPayload(content, new TradeDetailsResponse()));
         }
 
         private (HttpResponseMessage Response, string Content, T Message) ExecutePrivateQueryRequest<T>(
