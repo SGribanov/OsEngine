@@ -22,4 +22,8 @@
     <ProjectReference Include="..\OsEngine\OsEngine.csproj" />
   </ItemGroup>
 
+  <Target Name="EnsureEngineFolder" AfterTargets="Build">
+    <MakeDir Directories="$(OutputPath)Engine" />
+  </Target>
+
 </Project>
