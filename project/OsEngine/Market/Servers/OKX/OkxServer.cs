@@ -1945,24 +1945,32 @@ namespace OsEngine.Market.Servers.OKX
 
         public void SubscribeOptionSummary(string securityName, WebSocket webSocketPublic)
         {
-            RequestSubscribe<SubscribeArgsOption> requestTrade = new RequestSubscribe<SubscribeArgsOption>();
-            requestTrade.args = new List<SubscribeArgsOption>() { new SubscribeArgsOption() };
-            requestTrade.args[0].channel = "opt-summary";
-            requestTrade.args[0].instFamily = securityName; //"BTC-USD"
-
-            string json = JsonConvert.SerializeObject(requestTrade);
+            string json = CreateSingleArgSubscribeRequestJson(new SubscribeArgsOption
+            {
+                channel = "opt-summary",
+                instFamily = securityName,
+            });
             webSocketPublic.SendAsync(json);
         }
 
         public void SubscribeMarkPrice(string name, WebSocket webSocketPublic)
         {
-            RequestSubscribe<SubscribeArgs> requestTrade = new RequestSubscribe<SubscribeArgs>();
-            requestTrade.args = new List<SubscribeArgs>() { new SubscribeArgs() };
-            requestTrade.args[0].channel = "mark-price";
-            requestTrade.args[0].instId = name; //"LTC-USD-SWAP"
-
-            string json = JsonConvert.SerializeObject(requestTrade);
+            string json = CreateSingleArgSubscribeRequestJson(new SubscribeArgs
+            {
+                channel = "mark-price",
+                instId = name,
+            });
             webSocketPublic.SendAsync(json);
+        }
+
+        private static string CreateSingleArgSubscribeRequestJson<T>(T subscribeArgs)
+        {
+            RequestSubscribe<T> request = new RequestSubscribe<T>
+            {
+                args = new List<T> { subscribeArgs },
+            };
+
+            return JsonConvert.SerializeObject(request);
         }
 
         private void SubscribePrivate()
