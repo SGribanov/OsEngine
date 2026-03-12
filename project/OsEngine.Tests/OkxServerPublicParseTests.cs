@@ -92,6 +92,52 @@ public sealed class OkxServerPublicParseTests
         Assert.Equal("0.1", item.tickSz);
     }
 
+    [Fact]
+    public void ExecuteSafePublicSecurityResponseRequest_WithOkPayload_ShouldReturnParsedResponse()
+    {
+        const string responseBody = "{\"code\":\"0\",\"data\":[{\"instId\":\"BTC-USDT\",\"instType\":\"SPOT\",\"tickSz\":\"0.01\"}]}";
+        using LocalHttpServer server = new LocalHttpServer(HttpStatusCode.OK, responseBody);
+        OkxServerRealization realization = CreateRealization(server.BaseUrl);
+
+        string? loggedMessage = null;
+        realization.LogMessageEvent += (message, _) => loggedMessage = message;
+
+        SecurityResponse? response = InvokeExecuteSafePublicSecurityResponseRequest(
+            realization,
+            "/probe?instType=SPOT",
+            "Probe");
+
+        Assert.NotNull(response);
+        Assert.Equal("0", response.code);
+        SecurityResponseItem item = Assert.Single(response.data);
+        Assert.Equal("BTC-USDT", item.instId);
+        Assert.Equal("SPOT", item.instType);
+        Assert.Equal("/probe?instType=SPOT", server.LastRequestPath);
+        Assert.Null(loggedMessage);
+    }
+
+    [Fact]
+    public void ExecuteSafePublicSecurityResponseRequest_WhenInnerRequestThrows_ShouldLogAndReturnNull()
+    {
+        OkxServerRealization realization = CreateRealization("http://127.0.0.1");
+        string? loggedMessage = null;
+        LogMessageType? loggedType = null;
+        realization.LogMessageEvent += (message, type) =>
+        {
+            loggedMessage = message;
+            loggedType = type;
+        };
+
+        SecurityResponse? response = InvokeExecuteSafePublicSecurityResponseRequest(
+            realization,
+            static () => throw new InvalidOperationException("probe failure"));
+
+        Assert.Null(response);
+        Assert.Equal(LogMessageType.Error, loggedType);
+        Assert.NotNull(loggedMessage);
+        Assert.Contains("probe failure", loggedMessage, StringComparison.Ordinal);
+    }
+
     private static OkxServerRealization CreateRealization(string baseUrl)
     {
         OkxServerRealization realization = (OkxServerRealization)RuntimeHelpers.GetUninitializedObject(typeof(OkxServerRealization));
@@ -155,6 +201,37 @@ public sealed class OkxServerPublicParseTests
         MethodInfo genericMethod = method.MakeGenericMethod(typeof(T));
         return (T)(genericMethod.Invoke(null, [content, template])
             ?? throw new InvalidOperationException("DeserializeAnonymousPayload returned null."));
+    }
+
+    private static SecurityResponse? InvokeExecuteSafePublicSecurityResponseRequest(
+        OkxServerRealization realization,
+        string resource,
+        string errorLogPrefix)
+    {
+        MethodInfo method = typeof(OkxServerRealization).GetMethod(
+            "ExecuteSafePublicSecurityResponseRequest",
+            BindingFlags.NonPublic | BindingFlags.Instance,
+            binder: null,
+            types: [typeof(string), typeof(string)],
+            modifiers: null)
+            ?? throw new InvalidOperationException("ExecuteSafePublicSecurityResponseRequest method not found.");
+
+        return (SecurityResponse?)method.Invoke(realization, [resource, errorLogPrefix]);
+    }
+
+    private static SecurityResponse? InvokeExecuteSafePublicSecurityResponseRequest(
+        OkxServerRealization realization,
+        Func<SecurityResponse> requestFactory)
+    {
+        MethodInfo method = typeof(OkxServerRealization).GetMethod(
+            "ExecuteSafePublicSecurityResponseRequest",
+            BindingFlags.NonPublic | BindingFlags.Instance,
+            binder: null,
+            types: [typeof(Func<SecurityResponse>)],
+            modifiers: null)
+            ?? throw new InvalidOperationException("ExecuteSafePublicSecurityResponseRequest factory overload not found.");
+
+        return (SecurityResponse?)method.Invoke(realization, [requestFactory]);
     }
 
     private static void SetPrivateField(OkxServerRealization realization, string fieldName, object? value)

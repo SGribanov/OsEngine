@@ -612,28 +612,16 @@ namespace OsEngine.Market.Servers.OKX
 
         private SecurityResponse GetSwapSecurities()
         {
-            try
-            {
-                return ExecutePublicSecurityResponseRequest("/api/v5/public/instruments?instType=SWAP", "GetFuturesSecurities");
-            }
-            catch (Exception error)
-            {
-                SendLogMessage($"{error.Message} {error.StackTrace}", LogMessageType.Error);
-                return null;
-            }
+            return ExecuteSafePublicSecurityResponseRequest(
+                "/api/v5/public/instruments?instType=SWAP",
+                "GetFuturesSecurities");
         }
 
         private SecurityResponse GetFuturesContractsSecurities()
         {
-            try
-            {
-                return ExecutePublicSecurityResponseRequest("/api/v5/public/instruments?instType=FUTURES", "GetFuturesContractsSecurities");
-            }
-            catch (Exception error)
-            {
-                SendLogMessage($"{error.Message} {error.StackTrace}", LogMessageType.Error);
-                return null;
-            }
+            return ExecuteSafePublicSecurityResponseRequest(
+                "/api/v5/public/instruments?instType=FUTURES",
+                "GetFuturesContractsSecurities");
         }
 
         private List<string> GetOptionBaseSecurities()
@@ -698,9 +686,22 @@ namespace OsEngine.Market.Servers.OKX
 
         private SecurityResponse GetSpotSecurities()
         {
+            return ExecuteSafePublicSecurityResponseRequest(
+                "/api/v5/public/instruments?instType=SPOT",
+                "GetSpotSecurities");
+        }
+
+        private SecurityResponse ExecuteSafePublicSecurityResponseRequest(string resource, string errorLogPrefix)
+        {
+            return ExecuteSafePublicSecurityResponseRequest(
+                () => ExecutePublicSecurityResponseRequest(resource, errorLogPrefix));
+        }
+
+        private SecurityResponse ExecuteSafePublicSecurityResponseRequest(Func<SecurityResponse> requestFactory)
+        {
             try
             {
-                return ExecutePublicSecurityResponseRequest("/api/v5/public/instruments?instType=SPOT", "GetSpotSecurities");
+                return requestFactory();
             }
             catch (Exception error)
             {
