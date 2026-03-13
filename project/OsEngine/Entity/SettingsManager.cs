@@ -6,16 +6,20 @@
 using System;
 using System.IO;
 using System.Text.Json;
+using Tomlyn;
 
 #nullable enable
 
 namespace OsEngine.Entity
 {
     /// <summary>
-    /// Json-based settings persistence with optional legacy fallback loader.
+    /// Structured settings persistence with TOML as canonical format and
+    /// JSON/legacy fallback support for backward compatibility.
     /// </summary>
     public static class SettingsManager
     {
+        private const string TomlExtension = ".toml";
+
         private static readonly JsonSerializerOptions DefaultOptions = new JsonSerializerOptions
         {
             WriteIndented = true
@@ -26,6 +30,13 @@ namespace OsEngine.Entity
             if (string.IsNullOrWhiteSpace(path))
             {
                 throw new ArgumentException("Path cannot be null or empty.", nameof(path));
+            }
+
+            if (IsTomlPath(path))
+            {
+                string toml = TomlSerializer.Serialize(settings);
+                SafeFileWriter.WriteAllText(path, toml);
+                return;
             }
 
             string json = JsonSerializer.Serialize(settings, options ?? DefaultOptions);
@@ -43,37 +54,90 @@ namespace OsEngine.Entity
                 return defaultValue;
             }
 
-            if (!File.Exists(path))
+            if (IsTomlPath(path))
             {
+                if (TryLoadToml(path, defaultValue, out T? tomlModel))
+                {
+                    return tomlModel;
+                }
+
+                string jsonPath = Path.ChangeExtension(path, ".json");
+                if (TryLoadJsonOrLegacy(jsonPath, defaultValue, legacyLoader, options, out T? jsonModel))
+                {
+                    return jsonModel;
+                }
+
+                string txtPath = Path.ChangeExtension(path, ".txt");
+                if (TryLoadJsonOrLegacy(txtPath, defaultValue, legacyLoader, options, out T? txtModel))
+                {
+                    return txtModel;
+                }
+
                 return defaultValue;
             }
 
-            string content;
+            if (TryLoadJsonOrLegacy(path, defaultValue, legacyLoader, options, out T? model))
+            {
+                return model;
+            }
+
+            return defaultValue;
+        }
+
+        private static bool TryLoadToml<T>(string path, T? defaultValue, out T? model)
+        {
+            model = defaultValue;
+
+            string? content = TryReadContent(path);
+            if (string.IsNullOrWhiteSpace(content))
+            {
+                return false;
+            }
 
             try
             {
-                content = File.ReadAllText(path);
+                T? loaded = TomlSerializer.Deserialize<T>(content);
+
+                if (loaded == null)
+                {
+                    return false;
+                }
+
+                model = loaded;
+                return true;
             }
             catch
             {
-                return defaultValue;
+                return false;
             }
+        }
 
+        private static bool TryLoadJsonOrLegacy<T>(
+            string path,
+            T? defaultValue,
+            Func<string, T?>? legacyLoader,
+            JsonSerializerOptions? options,
+            out T? model)
+        {
+            model = defaultValue;
+
+            string? content = TryReadContent(path);
             if (string.IsNullOrWhiteSpace(content))
             {
-                return defaultValue;
+                return false;
             }
 
             try
             {
-                T? model = JsonSerializer.Deserialize<T>(content, options ?? DefaultOptions);
+                T? loaded = JsonSerializer.Deserialize<T>(content, options ?? DefaultOptions);
 
-                if (model == null)
+                if (loaded == null)
                 {
-                    return defaultValue;
+                    return false;
                 }
 
-                return model;
+                model = loaded;
+                return true;
             }
             catch
             {
@@ -81,16 +145,45 @@ namespace OsEngine.Entity
                 {
                     try
                     {
-                        return legacyLoader(content);
+                        T? legacyModel = legacyLoader(content);
+                        if (legacyModel == null)
+                        {
+                            return false;
+                        }
+
+                        model = legacyModel;
+                        return true;
                     }
                     catch
                     {
-                        return defaultValue;
+                        return false;
                     }
                 }
 
-                return defaultValue;
+                return false;
             }
+        }
+
+        private static string? TryReadContent(string path)
+        {
+            if (!File.Exists(path))
+            {
+                return null;
+            }
+
+            try
+            {
+                return File.ReadAllText(path);
+            }
+            catch
+            {
+                return null;
+            }
+        }
+
+        private static bool IsTomlPath(string path)
+        {
+            return string.Equals(Path.GetExtension(path), TomlExtension, StringComparison.OrdinalIgnoreCase);
         }
     }
 }
