@@ -14,10 +14,10 @@ namespace OsEngine.Tests;
 public class AlertToChartPersistenceTests
 {
     [Fact]
-    public void Save_ShouldPersistJson_AndLoadRoundTrip()
+    public void Save_ShouldPersistToml_AndLoadRoundTrip()
     {
         const string name = "CodexChartAlertJson";
-        using AlertToChartFileScope scope = new AlertToChartFileScope(name);
+        using StructuredSettingsFileScope scope = new StructuredSettingsFileScope(Path.Combine("Engine", name + "Alert.toml"));
 
         AlertToChart source = new AlertToChart(name, null)
         {
@@ -51,8 +51,8 @@ public class AlertToChartPersistenceTests
         };
         source.Save();
 
-        string content = File.ReadAllText(scope.SettingsPath);
-        Assert.StartsWith("{", content.TrimStart());
+        string content = File.ReadAllText(scope.CanonicalPath);
+        Assert.Contains("Label = \"json-label\"", content);
 
         AlertToChart loaded = new AlertToChart(name, null);
         Assert.Equal("json-label", loaded.Label);
@@ -77,10 +77,10 @@ public class AlertToChartPersistenceTests
     }
 
     [Fact]
-    public void Load_ShouldSupportLegacyLineBasedFormat()
+    public void Load_ShouldSupportLegacyLineBasedFormat_AndSaveToml()
     {
         const string name = "CodexChartAlertLegacy";
-        using AlertToChartFileScope scope = new AlertToChartFileScope(name);
+        using StructuredSettingsFileScope scope = new StructuredSettingsFileScope(Path.Combine("Engine", name + "Alert.toml"));
 
         ChartAlertLine line = new ChartAlertLine
         {
@@ -91,7 +91,7 @@ public class AlertToChartPersistenceTests
             LastPoint = 220m
         };
 
-        File.WriteAllLines(scope.SettingsPath, new[]
+        File.WriteAllLines(scope.LegacyTxtPath, new[]
         {
             "Line",
             line.GetStringToSave() + "%",
@@ -132,69 +132,9 @@ public class AlertToChartPersistenceTests
         Assert.Single(loaded.Lines);
         Assert.Equal(200m, loaded.Lines[0].ValueFirstPoint);
         Assert.Equal(210m, loaded.Lines[0].ValueSecondPoint);
-    }
 
-    private sealed class AlertToChartFileScope : IDisposable
-    {
-        private readonly string _engineDirPath;
-        private readonly bool _engineDirExisted;
-        private readonly bool _settingsFileExisted;
-        private readonly string _settingsBackup;
-
-        public AlertToChartFileScope(string name)
-        {
-            _engineDirPath = Path.GetFullPath("Engine");
-            SettingsPath = Path.Combine(_engineDirPath, name + "Alert.txt");
-            _settingsBackup = SettingsPath + ".codex.bak";
-
-            _engineDirExisted = Directory.Exists(_engineDirPath);
-            if (!_engineDirExisted)
-            {
-                Directory.CreateDirectory(_engineDirPath);
-            }
-
-            _settingsFileExisted = File.Exists(SettingsPath);
-            if (_settingsFileExisted)
-            {
-                File.Copy(SettingsPath, _settingsBackup, overwrite: true);
-            }
-            else if (File.Exists(_settingsBackup))
-            {
-                File.Delete(_settingsBackup);
-            }
-        }
-
-        public string SettingsPath { get; }
-
-        public void Dispose()
-        {
-            if (_settingsFileExisted)
-            {
-                if (File.Exists(_settingsBackup))
-                {
-                    File.Copy(_settingsBackup, SettingsPath, overwrite: true);
-                    File.Delete(_settingsBackup);
-                }
-            }
-            else
-            {
-                if (File.Exists(SettingsPath))
-                {
-                    File.Delete(SettingsPath);
-                }
-
-                if (File.Exists(_settingsBackup))
-                {
-                    File.Delete(_settingsBackup);
-                }
-            }
-
-            if (!_engineDirExisted
-                && Directory.Exists(_engineDirPath)
-                && !Directory.EnumerateFileSystemEntries(_engineDirPath).Any())
-            {
-                Directory.Delete(_engineDirPath);
-            }
-        }
+        loaded.Save();
+        Assert.True(File.Exists(scope.CanonicalPath));
+        Assert.Contains("Label = \"legacy-label\"", File.ReadAllText(scope.CanonicalPath));
     }
 }

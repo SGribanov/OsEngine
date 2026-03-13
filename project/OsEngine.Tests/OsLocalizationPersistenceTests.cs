@@ -14,15 +14,15 @@ namespace OsEngine.Tests;
 public class OsLocalizationPersistenceTests
 {
     [Fact]
-    public void Save_ShouldPersistJson_AndLoadRoundTrip()
+    public void Save_ShouldPersistToml_AndLoadRoundTrip()
     {
         using OsLocalizationFileScope scope = new OsLocalizationFileScope();
 
         scope.SetState(OsLocalization.OsLocalType.Eng, "h:mm:ss tt", "M/d/yyyy");
         OsLocalization.Save();
 
-        string content = File.ReadAllText(scope.SettingsPath);
-        Assert.StartsWith("{", content.TrimStart());
+        string content = File.ReadAllText(scope.CanonicalPath);
+        Assert.Contains("CurLocalization = 2", content);
 
         scope.SetState(OsLocalization.OsLocalType.None, null, null);
         scope.InvokePrivateLoad();
@@ -33,11 +33,11 @@ public class OsLocalizationPersistenceTests
     }
 
     [Fact]
-    public void Load_ShouldSupportLegacyLineBasedFormat()
+    public void Load_ShouldSupportLegacyLineBasedFormat_AndSaveToml()
     {
         using OsLocalizationFileScope scope = new OsLocalizationFileScope();
 
-        File.WriteAllLines(scope.SettingsPath, new[]
+        File.WriteAllLines(scope.LegacyTxtPath, new[]
         {
             "Ru",
             "H:mm:ss",
@@ -50,14 +50,15 @@ public class OsLocalizationPersistenceTests
         Assert.Equal(OsLocalization.OsLocalType.Ru, scope.GetLocalization());
         Assert.Equal("H:mm:ss", scope.GetLongTimePattern());
         Assert.Equal("dd.MM.yyyy", scope.GetShortDatePattern());
+
+        OsLocalization.Save();
+        Assert.True(File.Exists(scope.CanonicalPath));
+        Assert.Contains("ShortDatePattern = \"dd.MM.yyyy\"", File.ReadAllText(scope.CanonicalPath));
     }
 
     private sealed class OsLocalizationFileScope : IDisposable
     {
-        private readonly string _engineDirPath;
-        private readonly bool _engineDirExisted;
-        private readonly bool _settingsFileExisted;
-        private readonly string _settingsBackup;
+        private readonly StructuredSettingsFileScope _settingsScope;
         private readonly FieldInfo _localizationField;
         private readonly FieldInfo _longTimePatternField;
         private readonly FieldInfo _shortDatePatternField;
@@ -68,10 +69,6 @@ public class OsLocalizationPersistenceTests
 
         public OsLocalizationFileScope()
         {
-            _engineDirPath = Path.GetFullPath("Engine");
-            SettingsPath = Path.Combine(_engineDirPath, "local.txt");
-            _settingsBackup = SettingsPath + ".codex.bak";
-
             _localizationField = typeof(OsLocalization).GetField("_curLocalization", BindingFlags.NonPublic | BindingFlags.Static)
                 ?? throw new InvalidOperationException("Field _curLocalization not found.");
             _longTimePatternField = typeof(OsLocalization).GetField("_longTimePattern", BindingFlags.NonPublic | BindingFlags.Static)
@@ -84,25 +81,12 @@ public class OsLocalizationPersistenceTests
             _originalLocalization = (OsLocalization.OsLocalType)_localizationField.GetValue(null)!;
             _originalLongTimePattern = _longTimePatternField.GetValue(null) as string;
             _originalShortDatePattern = _shortDatePatternField.GetValue(null) as string;
-
-            _engineDirExisted = Directory.Exists(_engineDirPath);
-            if (!_engineDirExisted)
-            {
-                Directory.CreateDirectory(_engineDirPath);
-            }
-
-            _settingsFileExisted = File.Exists(SettingsPath);
-            if (_settingsFileExisted)
-            {
-                File.Copy(SettingsPath, _settingsBackup, overwrite: true);
-            }
-            else if (File.Exists(_settingsBackup))
-            {
-                File.Delete(_settingsBackup);
-            }
+            _settingsScope = new StructuredSettingsFileScope(Path.Combine("Engine", "local.toml"));
         }
 
-        public string SettingsPath { get; }
+        public string CanonicalPath => _settingsScope.CanonicalPath;
+
+        public string LegacyTxtPath => _settingsScope.LegacyTxtPath;
 
         public void SetState(OsLocalization.OsLocalType localization, string? longTimePattern, string? shortDatePattern)
         {
@@ -135,33 +119,7 @@ public class OsLocalizationPersistenceTests
         {
             SetState(_originalLocalization, _originalLongTimePattern, _originalShortDatePattern);
 
-            if (_settingsFileExisted)
-            {
-                if (File.Exists(_settingsBackup))
-                {
-                    File.Copy(_settingsBackup, SettingsPath, overwrite: true);
-                    File.Delete(_settingsBackup);
-                }
-            }
-            else
-            {
-                if (File.Exists(SettingsPath))
-                {
-                    File.Delete(SettingsPath);
-                }
-
-                if (File.Exists(_settingsBackup))
-                {
-                    File.Delete(_settingsBackup);
-                }
-            }
-
-            if (!_engineDirExisted
-                && Directory.Exists(_engineDirPath)
-                && !Directory.EnumerateFileSystemEntries(_engineDirPath).Any())
-            {
-                Directory.Delete(_engineDirPath);
-            }
+            _settingsScope.Dispose();
         }
     }
 }

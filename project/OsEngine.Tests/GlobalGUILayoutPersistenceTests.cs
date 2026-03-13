@@ -14,7 +14,7 @@ namespace OsEngine.Tests;
 public class GlobalGUILayoutPersistenceTests
 {
     [Fact]
-    public void Save_ShouldPersistJson_AndLoadRoundTrip()
+    public void Save_ShouldPersistToml_AndLoadRoundTrip()
     {
         using GlobalLayoutFileScope scope = new GlobalLayoutFileScope();
 
@@ -36,8 +36,8 @@ public class GlobalGUILayoutPersistenceTests
 
         scope.InvokeSave();
 
-        string content = File.ReadAllText(scope.SettingsPath);
-        Assert.StartsWith("{", content.TrimStart());
+        string content = File.ReadAllText(scope.CanonicalPath);
+        Assert.Contains("Windows =", content);
 
         GlobalGUILayout.UiOpenWindows = new List<OpenWindow>();
         scope.InvokeLoad();
@@ -49,11 +49,11 @@ public class GlobalGUILayoutPersistenceTests
     }
 
     [Fact]
-    public void Load_ShouldSupportLegacyLineBasedFormat()
+    public void Load_ShouldSupportLegacyLineBasedFormat_AndSaveToml()
     {
         using GlobalLayoutFileScope scope = new GlobalLayoutFileScope();
 
-        File.WriteAllLines(scope.SettingsPath, new[]
+        File.WriteAllLines(scope.LegacyTxtPath, new[]
         {
             "LegacyWindow#500$10$20$900$True"
         });
@@ -65,6 +65,9 @@ public class GlobalGUILayoutPersistenceTests
         Assert.Equal("LegacyWindow", GlobalGUILayout.UiOpenWindows[0].Name);
         Assert.Equal(500, GlobalGUILayout.UiOpenWindows[0].Layout.Height);
         Assert.True(GlobalGUILayout.UiOpenWindows[0].Layout.IsExpand);
+
+        scope.InvokeSave();
+        Assert.True(File.Exists(scope.CanonicalPath));
     }
 
     [Fact]
@@ -72,7 +75,7 @@ public class GlobalGUILayoutPersistenceTests
     {
         using GlobalLayoutFileScope scope = new GlobalLayoutFileScope();
 
-        File.WriteAllLines(scope.SettingsPath, new[]
+        File.WriteAllLines(scope.LegacyTxtPath, new[]
         {
             "mainWindow#430$574,666666666667$249,333333333333$625,333333333333$False"
         });
@@ -91,44 +94,25 @@ public class GlobalGUILayoutPersistenceTests
 
     private sealed class GlobalLayoutFileScope : IDisposable
     {
-        private readonly string _engineDirPath;
-        private readonly bool _engineDirExisted;
-        private readonly bool _settingsFileExisted;
-        private readonly string _settingsBackup;
         private readonly MethodInfo _saveMethod;
         private readonly MethodInfo _loadMethod;
         private readonly List<OpenWindow> _originalWindows;
+        private readonly StructuredSettingsFileScope _settingsScope;
 
         public GlobalLayoutFileScope()
         {
-            _engineDirPath = Path.GetFullPath("Engine");
-            SettingsPath = Path.Combine(_engineDirPath, "LayoutGui.txt");
-            _settingsBackup = SettingsPath + ".codex.bak";
+            _settingsScope = new StructuredSettingsFileScope(Path.Combine("Engine", "LayoutGui.toml"));
 
             _saveMethod = typeof(GlobalGUILayout).GetMethod("Save", BindingFlags.NonPublic | BindingFlags.Static)
                 ?? throw new InvalidOperationException("Method Save not found.");
             _loadMethod = typeof(GlobalGUILayout).GetMethod("Load", BindingFlags.NonPublic | BindingFlags.Static)
                 ?? throw new InvalidOperationException("Method Load not found.");
             _originalWindows = GlobalGUILayout.UiOpenWindows;
-
-            _engineDirExisted = Directory.Exists(_engineDirPath);
-            if (!_engineDirExisted)
-            {
-                Directory.CreateDirectory(_engineDirPath);
-            }
-
-            _settingsFileExisted = File.Exists(SettingsPath);
-            if (_settingsFileExisted)
-            {
-                File.Copy(SettingsPath, _settingsBackup, overwrite: true);
-            }
-            else if (File.Exists(_settingsBackup))
-            {
-                File.Delete(_settingsBackup);
-            }
         }
 
-        public string SettingsPath { get; }
+        public string CanonicalPath => _settingsScope.CanonicalPath;
+
+        public string LegacyTxtPath => _settingsScope.LegacyTxtPath;
 
         public void InvokeSave()
         {
@@ -143,34 +127,7 @@ public class GlobalGUILayoutPersistenceTests
         public void Dispose()
         {
             GlobalGUILayout.UiOpenWindows = _originalWindows;
-
-            if (_settingsFileExisted)
-            {
-                if (File.Exists(_settingsBackup))
-                {
-                    File.Copy(_settingsBackup, SettingsPath, overwrite: true);
-                    File.Delete(_settingsBackup);
-                }
-            }
-            else
-            {
-                if (File.Exists(SettingsPath))
-                {
-                    File.Delete(SettingsPath);
-                }
-
-                if (File.Exists(_settingsBackup))
-                {
-                    File.Delete(_settingsBackup);
-                }
-            }
-
-            if (!_engineDirExisted
-                && Directory.Exists(_engineDirPath)
-                && !Directory.EnumerateFileSystemEntries(_engineDirPath).Any())
-            {
-                Directory.Delete(_engineDirPath);
-            }
+            _settingsScope.Dispose();
         }
     }
 }

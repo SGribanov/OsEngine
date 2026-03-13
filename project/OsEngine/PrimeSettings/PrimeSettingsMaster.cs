@@ -198,7 +198,7 @@ namespace OsEngine.PrimeSettings
 
         private static string GetSettingsPath()
         {
-            return @"Engine\PrimeSettings.txt";
+            return @"Engine\PrimeSettings.toml";
         }
 
         private static PrimeSettingsDto ParseLegacySettings(string content)

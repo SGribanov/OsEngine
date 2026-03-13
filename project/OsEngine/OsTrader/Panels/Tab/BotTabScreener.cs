@@ -485,7 +485,7 @@ namespace OsEngine.OsTrader.Panels.Tab
             }
             _tabIsLoad = true;
 
-            if (!File.Exists(GetScreenerTabSetPath()))
+            if (!SettingsManager.Exists(GetScreenerTabSetPath()))
             {
                 return;
             }
@@ -587,7 +587,7 @@ namespace OsEngine.OsTrader.Panels.Tab
         /// </summary>
         public void LoadSettings()
         {
-            if (!File.Exists(GetScreenerSettingsPath()))
+            if (!SettingsManager.Exists(GetScreenerSettingsPath()))
             {
                 _candleCreateMethodType = "Simple";
                 CandleSeriesRealization = CandleFactory.CreateCandleSeriesRealization("Simple");
@@ -687,20 +687,9 @@ namespace OsEngine.OsTrader.Panels.Tab
                 Tabs[i].Delete();
             }
 
-            if (File.Exists(GetScreenerSettingsPath()))
-            {
-                File.Delete(GetScreenerSettingsPath());
-            }
-
-            if (File.Exists(GetScreenerTabSetPath()))
-            {
-                File.Delete(GetScreenerTabSetPath());
-            }
-
-            if (File.Exists(GetIndicatorsPath()))
-            {
-                File.Delete(GetIndicatorsPath());
-            }
+            SettingsManager.Delete(GetScreenerSettingsPath());
+            SettingsManager.Delete(GetScreenerTabSetPath());
+            SettingsManager.Delete(GetIndicatorsPath());
 
             if (_positionViewer != null)
             {
@@ -1963,7 +1952,7 @@ namespace OsEngine.OsTrader.Panels.Tab
         /// </summary>
         private void LoadIndicators()
         {
-            if (!File.Exists(GetIndicatorsPath()))
+            if (!SettingsManager.Exists(GetIndicatorsPath()))
             {
                 return;
             }
@@ -2028,12 +2017,12 @@ namespace OsEngine.OsTrader.Panels.Tab
 
         private string GetScreenerSettingsPath()
         {
-            return GetScreenerStoragePrefix() + @"ScreenerSet.txt";
+            return GetScreenerStoragePrefix() + @"ScreenerSet.toml";
         }
 
         private string GetScreenerTabSetPath()
         {
-            return GetScreenerStoragePrefix() + @"ScreenerTabSet.txt";
+            return GetScreenerStoragePrefix() + @"ScreenerTabSet.toml";
         }
 
         private static BotTabScreenerTabSetSettingsDto ParseLegacyScreenerTabSetSettings(string content)
@@ -2173,7 +2162,7 @@ namespace OsEngine.OsTrader.Panels.Tab
 
         private string GetIndicatorsPath()
         {
-            return GetScreenerStoragePrefix() + @"ScreenerIndicators.txt";
+            return GetScreenerStoragePrefix() + @"ScreenerIndicators.toml";
         }
 
         private string GetScreenerStoragePrefix()

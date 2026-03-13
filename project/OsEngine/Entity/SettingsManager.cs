@@ -84,6 +84,42 @@ namespace OsEngine.Entity
             return defaultValue;
         }
 
+        public static bool Exists(string path)
+        {
+            if (string.IsNullOrWhiteSpace(path))
+            {
+                return false;
+            }
+
+            string[] candidatePaths = GetCandidatePaths(path);
+
+            for (int i = 0; i < candidatePaths.Length; i++)
+            {
+                if (File.Exists(candidatePaths[i]))
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        public static void Delete(string path)
+        {
+            if (string.IsNullOrWhiteSpace(path))
+            {
+                return;
+            }
+
+            string[] candidatePaths = GetCandidatePaths(path);
+
+            for (int i = 0; i < candidatePaths.Length; i++)
+            {
+                TryDeleteFile(candidatePaths[i]);
+                TryDeleteFile(candidatePaths[i] + ".bak");
+            }
+        }
+
         private static bool TryLoadToml<T>(string path, T? defaultValue, out T? model)
         {
             model = defaultValue;
@@ -184,6 +220,38 @@ namespace OsEngine.Entity
         private static bool IsTomlPath(string path)
         {
             return string.Equals(Path.GetExtension(path), TomlExtension, StringComparison.OrdinalIgnoreCase);
+        }
+
+        private static string[] GetCandidatePaths(string path)
+        {
+            if (!IsTomlPath(path))
+            {
+                return new[] { path };
+            }
+
+            return new[]
+            {
+                path,
+                Path.ChangeExtension(path, ".json"),
+                Path.ChangeExtension(path, ".txt")
+            };
+        }
+
+        private static void TryDeleteFile(string path)
+        {
+            if (!File.Exists(path))
+            {
+                return;
+            }
+
+            try
+            {
+                File.Delete(path);
+            }
+            catch
+            {
+                // Ignore best-effort cleanup failures.
+            }
         }
     }
 }

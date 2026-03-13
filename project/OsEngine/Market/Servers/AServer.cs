@@ -44,20 +44,9 @@ namespace OsEngine.Market.Servers
 
             try
             {
-                if (File.Exists(GetServerParamsPath()))
-                {
-                    File.Delete(GetServerParamsPath());
-                }
-
-                if (File.Exists(GetServerSettingsPath()))
-                {
-                    File.Delete(GetServerSettingsPath());
-                }
-
-                if (File.Exists(GetNonTradePeriodsPath()))
-                {
-                    File.Delete(GetNonTradePeriodsPath());
-                }
+                SettingsManager.Delete(GetServerParamsPath());
+                SettingsManager.Delete(GetServerSettingsPath());
+                SettingsManager.Delete(GetNonTradePeriodsPath());
             }
             catch (Exception ex)
             {
@@ -1127,7 +1116,7 @@ namespace OsEngine.Market.Servers
 
         private string GetNonTradePeriodsPath()
         {
-            return GetServerStoragePrefix() + @"nonTradePeriod.txt";
+            return GetServerStoragePrefix() + @"nonTradePeriod.toml";
         }
 
         private string GetServerStoragePrefix()

@@ -206,7 +206,7 @@ namespace OsEngine.Entity
 
         private static string GetSettingsPath()
         {
-            return @"Engine\" + @"NumberGen.txt";
+            return @"Engine\" + @"NumberGen.toml";
         }
 
         private static NumberGenSettings? ParseLegacySettings(string content)

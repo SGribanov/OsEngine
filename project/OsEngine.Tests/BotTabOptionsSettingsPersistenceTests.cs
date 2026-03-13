@@ -17,7 +17,7 @@ namespace OsEngine.Tests;
 public class BotTabOptionsSettingsPersistenceTests
 {
     [Fact]
-    public void SaveSettings_ShouldPersistJson_AndLoadRoundTrip()
+    public void SaveSettings_ShouldPersistToml_AndLoadRoundTrip()
     {
         using BotTabOptionsSettingsFileScope scope = new BotTabOptionsSettingsFileScope("CodexOptionsSettings");
 
@@ -33,8 +33,8 @@ public class BotTabOptionsSettingsPersistenceTests
 
         scope.InvokePrivateSaveSettings(source);
 
-        string content = File.ReadAllText(scope.SettingsPath);
-        Assert.StartsWith("{", content.TrimStart());
+        string content = File.ReadAllText(scope.CanonicalPath);
+        Assert.Contains("PortfolioName = \"PF_OPT\"", content);
 
         BotTabOptions target = scope.CreateWithoutConstructor();
         scope.Setup(target);
@@ -50,7 +50,7 @@ public class BotTabOptionsSettingsPersistenceTests
     }
 
     [Fact]
-    public void LoadSettings_ShouldSupportLegacyKeyValueFormat()
+    public void LoadSettings_ShouldSupportLegacyKeyValueFormat_AndSaveToml()
     {
         using BotTabOptionsSettingsFileScope scope = new BotTabOptionsSettingsFileScope("CodexOptionsLegacy");
 
@@ -63,7 +63,7 @@ public class BotTabOptionsSettingsPersistenceTests
             "ServerName:MetaTrader5_Main",
             "EmulatorIsOn:False",
             "EventsIsOn:True");
-        File.WriteAllText(scope.SettingsPath, legacyContent);
+        File.WriteAllText(scope.LegacyTxtPath, legacyContent);
 
         BotTabOptions target = scope.CreateWithoutConstructor();
         scope.Setup(target);
@@ -76,28 +76,26 @@ public class BotTabOptionsSettingsPersistenceTests
         Assert.Equal(7m, scope.GetStrikesToShow(target));
         Assert.False(scope.GetEmulatorIsOn(target));
         Assert.True(scope.GetEventsOn(target));
+
+        scope.InvokePrivateSaveSettings(target);
+        Assert.True(File.Exists(scope.CanonicalPath));
     }
 
     private sealed class BotTabOptionsSettingsFileScope : IDisposable
     {
         private readonly string _tabName;
-        private readonly string _settingsFolderPath;
-        private readonly bool _settingsFolderExisted;
-        private readonly bool _settingsFileExisted;
-        private readonly string _settingsBackupPath;
         private readonly MethodInfo _saveSettingsMethod;
         private readonly FieldInfo _strikesField;
         private readonly FieldInfo _emulatorField;
         private readonly FieldInfo _eventsField;
         private readonly FieldInfo _portfolioNameBackingField;
         private readonly FieldInfo _underlyingAssetsBackingField;
+        private readonly StructuredSettingsFileScope _settingsScope;
 
         public BotTabOptionsSettingsFileScope(string tabName)
         {
             _tabName = tabName;
-            _settingsFolderPath = Path.GetFullPath(Path.Combine("Engine", _tabName));
-            SettingsPath = Path.Combine(_settingsFolderPath, "OptionsSettings.txt");
-            _settingsBackupPath = SettingsPath + ".codex.bak";
+            _settingsScope = new StructuredSettingsFileScope(Path.Combine("Engine", _tabName, "OptionsSettings.toml"));
 
             _saveSettingsMethod = typeof(BotTabOptions).GetMethod("SaveSettings", BindingFlags.NonPublic | BindingFlags.Instance)
                 ?? throw new InvalidOperationException("Method SaveSettings not found.");
@@ -112,24 +110,11 @@ public class BotTabOptionsSettingsPersistenceTests
             _underlyingAssetsBackingField = typeof(BotTabOptions).GetField("<UnderlyingAssets>k__BackingField", BindingFlags.NonPublic | BindingFlags.Instance)
                 ?? throw new InvalidOperationException("Backing field for UnderlyingAssets not found.");
 
-            _settingsFolderExisted = Directory.Exists(_settingsFolderPath);
-            if (!_settingsFolderExisted)
-            {
-                Directory.CreateDirectory(_settingsFolderPath);
-            }
-
-            _settingsFileExisted = File.Exists(SettingsPath);
-            if (_settingsFileExisted)
-            {
-                File.Copy(SettingsPath, _settingsBackupPath, overwrite: true);
-            }
-            else if (File.Exists(_settingsBackupPath))
-            {
-                File.Delete(_settingsBackupPath);
-            }
         }
 
-        public string SettingsPath { get; }
+        public string CanonicalPath => _settingsScope.CanonicalPath;
+
+        public string LegacyTxtPath => _settingsScope.LegacyTxtPath;
 
         public BotTabOptions CreateWithoutConstructor()
         {
@@ -197,33 +182,7 @@ public class BotTabOptionsSettingsPersistenceTests
 
         public void Dispose()
         {
-            if (_settingsFileExisted)
-            {
-                if (File.Exists(_settingsBackupPath))
-                {
-                    File.Copy(_settingsBackupPath, SettingsPath, overwrite: true);
-                    File.Delete(_settingsBackupPath);
-                }
-            }
-            else
-            {
-                if (File.Exists(SettingsPath))
-                {
-                    File.Delete(SettingsPath);
-                }
-
-                if (File.Exists(_settingsBackupPath))
-                {
-                    File.Delete(_settingsBackupPath);
-                }
-            }
-
-            if (!_settingsFolderExisted
-                && Directory.Exists(_settingsFolderPath)
-                && !Directory.EnumerateFileSystemEntries(_settingsFolderPath).Any())
-            {
-                Directory.Delete(_settingsFolderPath);
-            }
+            _settingsScope.Dispose();
         }
     }
 }

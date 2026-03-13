@@ -13,7 +13,7 @@ namespace OsEngine.Tests;
 public class ServerWebhookPersistenceTests
 {
     [Fact]
-    public void Save_ShouldPersistJson_AndLoadRoundTrip()
+    public void Save_ShouldPersistToml_AndLoadRoundTrip()
     {
         using ServerWebhookFileScope scope = new ServerWebhookFileScope();
 
@@ -26,8 +26,8 @@ public class ServerWebhookPersistenceTests
         };
         source.Save();
 
-        string content = File.ReadAllText(scope.SettingsPath);
-        Assert.StartsWith("{", content.TrimStart());
+        string content = File.ReadAllText(scope.CanonicalPath);
+        Assert.Contains("SlackBotToken = \"slack-token-json\"", content);
 
         scope.ResetSingleton();
         ServerWebhook loaded = ServerWebhook.GetServer();
@@ -41,11 +41,11 @@ public class ServerWebhookPersistenceTests
     }
 
     [Fact]
-    public void Load_ShouldSupportLegacyLineBasedFormat()
+    public void Load_ShouldSupportLegacyLineBasedFormat_AndSaveToml()
     {
         using ServerWebhookFileScope scope = new ServerWebhookFileScope();
 
-        File.WriteAllLines(scope.SettingsPath, new[]
+        File.WriteAllLines(scope.LegacyTxtPath, new[]
         {
             "legacy-slack-token",
             "https://legacy.example/webhook/1",
@@ -61,24 +61,21 @@ public class ServerWebhookPersistenceTests
         Assert.Equal("https://legacy.example/webhook/1", loaded.Webhooks[0]);
         Assert.Equal("https://legacy.example/webhook/2", loaded.Webhooks[1]);
         Assert.True(ServerWebhook.IsReady);
+
+        loaded.Save();
+        Assert.True(File.Exists(scope.CanonicalPath));
+        Assert.Contains("Webhooks = [", File.ReadAllText(scope.CanonicalPath));
     }
 
     private sealed class ServerWebhookFileScope : IDisposable
     {
-        private readonly string _engineDirPath;
-        private readonly bool _engineDirExisted;
-        private readonly bool _settingsFileExisted;
-        private readonly string _settingsBackup;
+        private readonly StructuredSettingsFileScope _settingsScope;
         private readonly FieldInfo _serverField;
         private readonly object? _originalServer;
         private readonly bool _originalIsReady;
 
         public ServerWebhookFileScope()
         {
-            _engineDirPath = Path.GetFullPath("Engine");
-            SettingsPath = Path.Combine(_engineDirPath, "webhookSet.txt");
-            _settingsBackup = SettingsPath + ".codex.bak";
-
             _serverField = typeof(ServerWebhook).GetField("_server", BindingFlags.NonPublic | BindingFlags.Static)
                 ?? throw new InvalidOperationException("Field _server not found.");
             _originalServer = _serverField.GetValue(null);
@@ -87,24 +84,12 @@ public class ServerWebhookPersistenceTests
             _serverField.SetValue(null, null);
             ServerWebhook.IsReady = false;
 
-            _engineDirExisted = Directory.Exists(_engineDirPath);
-            if (!_engineDirExisted)
-            {
-                Directory.CreateDirectory(_engineDirPath);
-            }
-
-            _settingsFileExisted = File.Exists(SettingsPath);
-            if (_settingsFileExisted)
-            {
-                File.Copy(SettingsPath, _settingsBackup, overwrite: true);
-            }
-            else if (File.Exists(_settingsBackup))
-            {
-                File.Delete(_settingsBackup);
-            }
+            _settingsScope = new StructuredSettingsFileScope(Path.Combine("Engine", "webhookSet.toml"));
         }
 
-        public string SettingsPath { get; }
+        public string CanonicalPath => _settingsScope.CanonicalPath;
+
+        public string LegacyTxtPath => _settingsScope.LegacyTxtPath;
 
         public void ResetSingleton()
         {
@@ -117,33 +102,7 @@ public class ServerWebhookPersistenceTests
             _serverField.SetValue(null, _originalServer);
             ServerWebhook.IsReady = _originalIsReady;
 
-            if (_settingsFileExisted)
-            {
-                if (File.Exists(_settingsBackup))
-                {
-                    File.Copy(_settingsBackup, SettingsPath, overwrite: true);
-                    File.Delete(_settingsBackup);
-                }
-            }
-            else
-            {
-                if (File.Exists(SettingsPath))
-                {
-                    File.Delete(SettingsPath);
-                }
-
-                if (File.Exists(_settingsBackup))
-                {
-                    File.Delete(_settingsBackup);
-                }
-            }
-
-            if (!_engineDirExisted
-                && Directory.Exists(_engineDirPath)
-                && !Directory.EnumerateFileSystemEntries(_engineDirPath).Any())
-            {
-                Directory.Delete(_engineDirPath);
-            }
+            _settingsScope.Dispose();
         }
     }
 }

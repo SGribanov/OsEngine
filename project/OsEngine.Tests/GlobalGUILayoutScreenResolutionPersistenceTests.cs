@@ -14,7 +14,7 @@ namespace OsEngine.Tests;
 public class GlobalGUILayoutScreenResolutionPersistenceTests
 {
     [Fact]
-    public void SaveResolution_ShouldPersistJson_AndScreenSettingsCheckReturnTrue()
+    public void SaveResolution_ShouldPersistToml_AndScreenSettingsCheckReturnTrue()
     {
         using ScreenResolutionFileScope scope = new ScreenResolutionFileScope();
 
@@ -27,13 +27,13 @@ public class GlobalGUILayoutScreenResolutionPersistenceTests
 
         scope.InvokeSaveResolution(width, height, monitors);
 
-        string content = File.ReadAllText(scope.SettingsPath);
-        Assert.StartsWith("{", content.TrimStart());
+        string content = File.ReadAllText(scope.CanonicalPath);
+        Assert.Contains("Width =", content);
         Assert.True(scope.InvokeScreenSettingsIsAllRight());
     }
 
     [Fact]
-    public void ScreenSettingsIsAllRight_ShouldSupportLegacyLineBasedFormat()
+    public void ScreenSettingsIsAllRight_ShouldSupportLegacyLineBasedFormat_AndSaveToml()
     {
         using ScreenResolutionFileScope scope = new ScreenResolutionFileScope();
 
@@ -44,7 +44,7 @@ public class GlobalGUILayoutScreenResolutionPersistenceTests
         int height = primaryScreen.Bounds.Size.Height;
         int monitors = Screen.AllScreens.Length;
 
-        File.WriteAllLines(scope.SettingsPath, new[]
+        File.WriteAllLines(scope.LegacyTxtPath, new[]
         {
             width.ToString(),
             height.ToString(),
@@ -52,46 +52,28 @@ public class GlobalGUILayoutScreenResolutionPersistenceTests
         });
 
         Assert.True(scope.InvokeScreenSettingsIsAllRight());
+        Assert.True(File.Exists(scope.CanonicalPath));
     }
 
     private sealed class ScreenResolutionFileScope : IDisposable
     {
-        private readonly string _engineDirPath;
-        private readonly bool _engineDirExisted;
-        private readonly bool _settingsFileExisted;
-        private readonly string _settingsBackup;
         private readonly MethodInfo _saveResolutionMethod;
         private readonly MethodInfo _screenSettingsIsAllRightMethod;
+        private readonly StructuredSettingsFileScope _settingsScope;
 
         public ScreenResolutionFileScope()
         {
-            _engineDirPath = Path.GetFullPath("Engine");
-            SettingsPath = Path.Combine(_engineDirPath, "ScreenResolution.txt");
-            _settingsBackup = SettingsPath + ".codex.bak";
+            _settingsScope = new StructuredSettingsFileScope(Path.Combine("Engine", "ScreenResolution.toml"));
 
             _saveResolutionMethod = typeof(GlobalGUILayout).GetMethod("SaveResolution", BindingFlags.NonPublic | BindingFlags.Static)
                 ?? throw new InvalidOperationException("Method SaveResolution not found.");
             _screenSettingsIsAllRightMethod = typeof(GlobalGUILayout).GetMethod("ScreenSettingsIsAllRight", BindingFlags.NonPublic | BindingFlags.Static)
                 ?? throw new InvalidOperationException("Method ScreenSettingsIsAllRight not found.");
-
-            _engineDirExisted = Directory.Exists(_engineDirPath);
-            if (!_engineDirExisted)
-            {
-                Directory.CreateDirectory(_engineDirPath);
-            }
-
-            _settingsFileExisted = File.Exists(SettingsPath);
-            if (_settingsFileExisted)
-            {
-                File.Copy(SettingsPath, _settingsBackup, overwrite: true);
-            }
-            else if (File.Exists(_settingsBackup))
-            {
-                File.Delete(_settingsBackup);
-            }
         }
 
-        public string SettingsPath { get; }
+        public string CanonicalPath => _settingsScope.CanonicalPath;
+
+        public string LegacyTxtPath => _settingsScope.LegacyTxtPath;
 
         public void InvokeSaveResolution(int width, int height, int monitors)
         {
@@ -105,33 +87,7 @@ public class GlobalGUILayoutScreenResolutionPersistenceTests
 
         public void Dispose()
         {
-            if (_settingsFileExisted)
-            {
-                if (File.Exists(_settingsBackup))
-                {
-                    File.Copy(_settingsBackup, SettingsPath, overwrite: true);
-                    File.Delete(_settingsBackup);
-                }
-            }
-            else
-            {
-                if (File.Exists(SettingsPath))
-                {
-                    File.Delete(SettingsPath);
-                }
-
-                if (File.Exists(_settingsBackup))
-                {
-                    File.Delete(_settingsBackup);
-                }
-            }
-
-            if (!_engineDirExisted
-                && Directory.Exists(_engineDirPath)
-                && !Directory.EnumerateFileSystemEntries(_engineDirPath).Any())
-            {
-                Directory.Delete(_engineDirPath);
-            }
+            _settingsScope.Dispose();
         }
     }
 }

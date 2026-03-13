@@ -139,7 +139,7 @@ namespace OsEngine.Logging
 
         private static string GetSettingsPath()
         {
-            return @"Engine\mailSet.txt";
+            return @"Engine\mailSet.toml";
         }
 
         private static ServerMailSettingsDto ParseLegacyMailSettings(string content)

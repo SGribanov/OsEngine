@@ -160,10 +160,7 @@ namespace OsEngine.OsTrader.Panels.Tab
 
                 try
                 {
-                    if (File.Exists(GetStandartPolygonSettingsPath()))
-                    {
-                        File.Delete(GetStandartPolygonSettingsPath());
-                    }
+                    SettingsManager.Delete(GetStandartPolygonSettingsPath());
                 }
                 catch (Exception ex)
                 {
@@ -184,10 +181,7 @@ namespace OsEngine.OsTrader.Panels.Tab
 
                 try
                 {
-                    if (File.Exists(GetPolygonsNamesToLoadPath()))
-                    {
-                        File.Delete(GetPolygonsNamesToLoadPath());
-                    }
+                    SettingsManager.Delete(GetPolygonsNamesToLoadPath());
                 }
                 catch (Exception ex)
                 {
@@ -330,7 +324,7 @@ namespace OsEngine.OsTrader.Panels.Tab
         /// </summary>
         private void LoadStandartSettings()
         {
-            if (!File.Exists(GetStandartPolygonSettingsPath()))
+            if (!SettingsManager.Exists(GetStandartPolygonSettingsPath()))
             {
                 return;
             }
@@ -371,7 +365,7 @@ namespace OsEngine.OsTrader.Panels.Tab
 
         private string GetStandartPolygonSettingsPath()
         {
-            return GetTabStoragePrefix() + @"StandartPolygonSettings.txt";
+            return GetTabStoragePrefix() + @"StandartPolygonSettings.toml";
         }
 
         private string GetLegacyStrategSettingsPath()
@@ -674,7 +668,7 @@ namespace OsEngine.OsTrader.Panels.Tab
         /// </summary>
         private void LoadSequences()
         {
-            if (!File.Exists(GetPolygonsNamesToLoadPath()))
+            if (!SettingsManager.Exists(GetPolygonsNamesToLoadPath()))
             {
                 return;
             }
@@ -715,7 +709,7 @@ namespace OsEngine.OsTrader.Panels.Tab
 
         private string GetPolygonsNamesToLoadPath()
         {
-            return GetTabStoragePrefix() + @"PolygonsNamesToLoad.txt";
+            return GetTabStoragePrefix() + @"PolygonsNamesToLoad.toml";
         }
 
         private string GetTabStoragePrefix()

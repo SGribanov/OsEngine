@@ -156,10 +156,7 @@ namespace OsEngine.OsTrader.Panels.Tab
 
                 try
                 {
-                    if (File.Exists(GetStandartSettingsPath()))
-                    {
-                        File.Delete(GetStandartSettingsPath());
-                    }
+                    SettingsManager.Delete(GetStandartSettingsPath());
                 }
                 catch (Exception ex)
                 {
@@ -180,10 +177,7 @@ namespace OsEngine.OsTrader.Panels.Tab
 
                 try
                 {
-                    if (File.Exists(GetPairsNamesToLoadPath()))
-                    {
-                        File.Delete(GetPairsNamesToLoadPath());
-                    }
+                    SettingsManager.Delete(GetPairsNamesToLoadPath());
                 }
                 catch (Exception ex)
                 {
@@ -434,7 +428,7 @@ namespace OsEngine.OsTrader.Panels.Tab
         /// </summary>
         private void LoadStandartSettings()
         {
-            if (!File.Exists(GetStandartSettingsPath()))
+            if (!SettingsManager.Exists(GetStandartSettingsPath()))
             {
                 return;
             }
@@ -477,7 +471,7 @@ namespace OsEngine.OsTrader.Panels.Tab
 
         private string GetStandartSettingsPath()
         {
-            return GetTabStoragePrefix() + @"StandartPairsSettings.txt";
+            return GetTabStoragePrefix() + @"StandartPairsSettings.toml";
         }
 
         private string GetLegacyStrategSettingsPath()
@@ -487,7 +481,7 @@ namespace OsEngine.OsTrader.Panels.Tab
 
         private string GetPairsNamesToLoadPath()
         {
-            return GetTabStoragePrefix() + @"PairsNamesToLoad.txt";
+            return GetTabStoragePrefix() + @"PairsNamesToLoad.toml";
         }
 
         private string GetTabStoragePrefix()
@@ -751,7 +745,7 @@ namespace OsEngine.OsTrader.Panels.Tab
         /// </summary>
         private void LoadPairs()
         {
-            if (!File.Exists(GetPairsNamesToLoadPath()))
+            if (!SettingsManager.Exists(GetPairsNamesToLoadPath()))
             {
                 return;
             }

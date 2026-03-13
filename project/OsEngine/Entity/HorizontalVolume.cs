@@ -78,7 +78,7 @@ namespace OsEngine.Entity
 
         private string GetSettingsPath()
         {
-            return @"Engine\" + _name + @"HorizontalVolumeSet.txt";
+            return @"Engine\" + _name + @"HorizontalVolumeSet.toml";
         }
 
         private HorizontalVolumeSettingsDto ParseLegacySettings(string content)
@@ -113,10 +113,7 @@ namespace OsEngine.Entity
         /// </summary>
         public void Delete()
         {
-            if (File.Exists(GetSettingsPath()))
-            {
-                File.Delete(GetSettingsPath());
-            }
+            SettingsManager.Delete(GetSettingsPath());
         }
 
         // cluster calculation

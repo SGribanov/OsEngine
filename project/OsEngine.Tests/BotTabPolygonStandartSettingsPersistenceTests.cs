@@ -15,7 +15,7 @@ namespace OsEngine.Tests;
 public class BotTabPolygonStandartSettingsPersistenceTests
 {
     [Fact]
-    public void SaveStandartSettings_ShouldPersistJson_AndLoadRoundTrip()
+    public void SaveStandartSettings_ShouldPersistToml_AndLoadRoundTrip()
     {
         const string tabName = "CodexPolygonStandartSettings";
         using BotTabPolygonStandartSettingsFileScope scope = new BotTabPolygonStandartSettingsFileScope(tabName);
@@ -40,8 +40,8 @@ public class BotTabPolygonStandartSettingsPersistenceTests
 
         source.SaveStandartSettings();
 
-        string content = File.ReadAllText(scope.SettingsPath);
-        Assert.StartsWith("{", content.TrimStart());
+        string content = File.ReadAllText(scope.CanonicalPath);
+        Assert.Contains("SeparatorToSecurities = \"/\"", content);
 
         BotTabPolygon target = scope.CreateWithoutConstructor();
         scope.InvokePrivateLoadStandartSettings(target);
@@ -65,7 +65,7 @@ public class BotTabPolygonStandartSettingsPersistenceTests
     }
 
     [Fact]
-    public void LoadStandartSettings_ShouldSupportLegacyLineBasedFormat()
+    public void LoadStandartSettings_ShouldSupportLegacyLineBasedFormat_AndSaveToml()
     {
         const string tabName = "CodexPolygonStandartLegacy";
         using BotTabPolygonStandartSettingsFileScope scope = new BotTabPolygonStandartSettingsFileScope(tabName);
@@ -88,7 +88,7 @@ public class BotTabPolygonStandartSettingsPersistenceTests
             "BTC",
             "-",
             "True");
-        File.WriteAllText(scope.SettingsPath, legacyContent);
+        File.WriteAllText(scope.LegacyTxtPath, legacyContent);
 
         BotTabPolygon target = scope.CreateWithoutConstructor();
         scope.InvokePrivateLoadStandartSettings(target);
@@ -109,25 +109,23 @@ public class BotTabPolygonStandartSettingsPersistenceTests
         Assert.Equal("BTC", target.AutoCreatorSequenceBaseCurrency);
         Assert.Equal("-", target.AutoCreatorSequenceSeparator);
         Assert.True(target.SortingOnOff);
+
+        target.SaveStandartSettings();
+        Assert.True(File.Exists(scope.CanonicalPath));
     }
 
     private sealed class BotTabPolygonStandartSettingsFileScope : IDisposable
     {
         private readonly string _tabName;
-        private readonly string _engineDirPath;
-        private readonly bool _engineDirExisted;
-        private readonly bool _settingsFileExisted;
-        private readonly string _settingsBackupPath;
         private readonly MethodInfo _loadStandartSettingsMethod;
         private readonly FieldInfo _eventsField;
         private readonly FieldInfo _emulatorField;
+        private readonly StructuredSettingsFileScope _settingsScope;
 
         public BotTabPolygonStandartSettingsFileScope(string tabName)
         {
             _tabName = tabName;
-            _engineDirPath = Path.GetFullPath("Engine");
-            SettingsPath = Path.Combine(_engineDirPath, _tabName + "StandartPolygonSettings.txt");
-            _settingsBackupPath = SettingsPath + ".codex.bak";
+            _settingsScope = new StructuredSettingsFileScope(Path.Combine("Engine", _tabName + "StandartPolygonSettings.toml"));
 
             _loadStandartSettingsMethod = typeof(BotTabPolygon).GetMethod("LoadStandartSettings", BindingFlags.NonPublic | BindingFlags.Instance)
                 ?? throw new InvalidOperationException("Method LoadStandartSettings not found.");
@@ -136,24 +134,11 @@ public class BotTabPolygonStandartSettingsPersistenceTests
             _emulatorField = typeof(BotTabPolygon).GetField("_emulatorIsOn", BindingFlags.NonPublic | BindingFlags.Instance)
                 ?? throw new InvalidOperationException("Field _emulatorIsOn not found.");
 
-            _engineDirExisted = Directory.Exists(_engineDirPath);
-            if (!_engineDirExisted)
-            {
-                Directory.CreateDirectory(_engineDirPath);
-            }
-
-            _settingsFileExisted = File.Exists(SettingsPath);
-            if (_settingsFileExisted)
-            {
-                File.Copy(SettingsPath, _settingsBackupPath, overwrite: true);
-            }
-            else if (File.Exists(_settingsBackupPath))
-            {
-                File.Delete(_settingsBackupPath);
-            }
         }
 
-        public string SettingsPath { get; }
+        public string CanonicalPath => _settingsScope.CanonicalPath;
+
+        public string LegacyTxtPath => _settingsScope.LegacyTxtPath;
 
         public BotTabPolygon CreateWithoutConstructor()
         {
@@ -190,33 +175,7 @@ public class BotTabPolygonStandartSettingsPersistenceTests
 
         public void Dispose()
         {
-            if (_settingsFileExisted)
-            {
-                if (File.Exists(_settingsBackupPath))
-                {
-                    File.Copy(_settingsBackupPath, SettingsPath, overwrite: true);
-                    File.Delete(_settingsBackupPath);
-                }
-            }
-            else
-            {
-                if (File.Exists(SettingsPath))
-                {
-                    File.Delete(SettingsPath);
-                }
-
-                if (File.Exists(_settingsBackupPath))
-                {
-                    File.Delete(_settingsBackupPath);
-                }
-            }
-
-            if (!_engineDirExisted
-                && Directory.Exists(_engineDirPath)
-                && !Directory.EnumerateFileSystemEntries(_engineDirPath).Any())
-            {
-                Directory.Delete(_engineDirPath);
-            }
+            _settingsScope.Dispose();
         }
     }
 }

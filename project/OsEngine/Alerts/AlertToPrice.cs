@@ -99,7 +99,7 @@ namespace OsEngine.Alerts
 
         private string GetSettingsPath()
         {
-            return @"Engine\" + Name + @"Alert.txt";
+            return @"Engine\" + Name + @"Alert.toml";
         }
 
         private static AlertToPriceSettingsDto ParseLegacySettings(string content)
@@ -193,10 +193,7 @@ namespace OsEngine.Alerts
 
         public void Delete()
         {
-            if (File.Exists(GetSettingsPath()))
-            {
-                File.Delete(GetSettingsPath());
-            }
+            SettingsManager.Delete(GetSettingsPath());
         }
 
         public void ShowDialog()

@@ -69,7 +69,7 @@ namespace OsEngine.Entity
 
         private string GetStoragePath()
         {
-            return @"Engine\" + NameUnique + ".txt";
+            return @"Engine\" + NameUnique + ".toml";
         }
 
         private NonTradePeriodsSettingsDto CreateSettingsSnapshot()
@@ -240,10 +240,7 @@ namespace OsEngine.Entity
         {
             try
             {
-                if (File.Exists(GetStoragePath()))
-                {
-                    File.Delete(GetStoragePath());
-                }
+                SettingsManager.Delete(GetStoragePath());
             }
             catch (Exception ex)
             {

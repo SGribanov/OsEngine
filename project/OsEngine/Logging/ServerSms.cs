@@ -85,7 +85,7 @@ namespace OsEngine.Logging
 
         private static string GetSettingsPath()
         {
-            return @"Engine\smsSet.txt";
+            return @"Engine\smsSet.toml";
         }
 
         private static ServerSmsSettingsDto ParseLegacySmsSettings(string content)

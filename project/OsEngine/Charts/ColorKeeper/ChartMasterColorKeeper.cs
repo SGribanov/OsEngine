@@ -138,10 +138,7 @@ namespace OsEngine.Charts.ColorKeeper
         {
             try
             {
-                if (File.Exists(GetSettingsPath()))
-                {
-                    File.Delete(GetSettingsPath());
-                }
+                SettingsManager.Delete(GetSettingsPath());
             }
             catch (Exception error)
             {
@@ -271,7 +268,7 @@ namespace OsEngine.Charts.ColorKeeper
 
         private string GetSettingsPath()
         {
-            return Path.Combine(GetSettingsDirectoryPath(), _name + "Color.txt");
+            return Path.Combine(GetSettingsDirectoryPath(), _name + "Color.toml");
         }
 
         private static string GetSettingsDirectoryPath()

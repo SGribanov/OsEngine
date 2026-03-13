@@ -132,7 +132,7 @@ namespace OsEngine.Logging
 
         private static string GetSettingsPath()
         {
-            return @"Engine\webhookSet.txt";
+            return @"Engine\webhookSet.toml";
         }
 
         private static ServerWebhookSettingsDto ParseLegacyWebhookSettings(string content)

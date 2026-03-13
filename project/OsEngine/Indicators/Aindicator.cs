@@ -99,20 +99,9 @@ namespace OsEngine.Indicators
         {
             if (StartProgram != StartProgram.IsOsOptimizer)
             {
-                if (File.Exists(GetValuesPath()))
-                {
-                    File.Delete(GetValuesPath());
-                }
-
-                if (File.Exists(GetParametersPath()))
-                {
-                    File.Delete(GetParametersPath());
-                }
-
-                if (File.Exists(GetBasePath()))
-                {
-                    File.Delete(GetBasePath());
-                }
+                SettingsManager.Delete(GetValuesPath());
+                SettingsManager.Delete(GetParametersPath());
+                SettingsManager.Delete(GetBasePath());
             }
 
             if (IncludeIndicators != null)
@@ -394,7 +383,7 @@ namespace OsEngine.Indicators
                 return;
             }
 
-            if (!File.Exists(GetParametersPath()))
+            if (!SettingsManager.Exists(GetParametersPath()))
             {
                 return;
             }
@@ -557,7 +546,7 @@ namespace OsEngine.Indicators
                 return;
             }
 
-            if (!File.Exists(GetValuesPath()))
+            if (!SettingsManager.Exists(GetValuesPath()))
             {
                 return;
             }
@@ -634,17 +623,17 @@ namespace OsEngine.Indicators
 
         private string GetParametersPath()
         {
-            return GetIndicatorStoragePrefix() + @"Parametrs.txt";
+            return GetIndicatorStoragePrefix() + @"Parametrs.toml";
         }
 
         private string GetValuesPath()
         {
-            return GetIndicatorStoragePrefix() + @"Values.txt";
+            return GetIndicatorStoragePrefix() + @"Values.toml";
         }
 
         private string GetBasePath()
         {
-            return GetIndicatorStoragePrefix() + @"Base.txt";
+            return GetIndicatorStoragePrefix() + @"Base.toml";
         }
 
         private string GetIndicatorStoragePrefix()

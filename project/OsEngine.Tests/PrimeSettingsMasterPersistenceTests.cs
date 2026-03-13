@@ -14,7 +14,7 @@ namespace OsEngine.Tests;
 public class PrimeSettingsMasterPersistenceTests
 {
     [Fact]
-    public void Save_ShouldPersistJson_AndLoadRoundTrip()
+    public void Save_ShouldPersistToml_AndLoadRoundTrip()
     {
         using PrimeSettingsFileScope scope = new PrimeSettingsFileScope();
 
@@ -27,8 +27,8 @@ public class PrimeSettingsMasterPersistenceTests
         PrimeSettingsMaster.MemoryCleanerRegime = MemoryCleanerRegime.At30Minutes;
         PrimeSettingsMaster.Save();
 
-        string content = File.ReadAllText(scope.SettingsPath);
-        Assert.StartsWith("{", content.TrimStart());
+        string content = File.ReadAllText(scope.CanonicalPath);
+        Assert.Contains("LabelInHeaderBotStation = \"json_header\"", content);
 
         scope.ResetStateForLoad();
 
@@ -42,11 +42,11 @@ public class PrimeSettingsMasterPersistenceTests
     }
 
     [Fact]
-    public void Load_ShouldSupportLegacyLineBasedFormat()
+    public void Load_ShouldSupportLegacyLineBasedFormat_AndSaveToml()
     {
         using PrimeSettingsFileScope scope = new PrimeSettingsFileScope();
 
-        File.WriteAllLines(scope.SettingsPath, new[]
+        File.WriteAllLines(scope.LegacyTxtPath, new[]
         {
             "True",
             "False",
@@ -66,42 +66,26 @@ public class PrimeSettingsMasterPersistenceTests
         Assert.True(PrimeSettingsMaster.RebootTradeUiLight);
         Assert.False(PrimeSettingsMaster.ReportCriticalErrors);
         Assert.Equal(MemoryCleanerRegime.At5Minutes, PrimeSettingsMaster.MemoryCleanerRegime);
+
+        PrimeSettingsMaster.Save();
+        Assert.True(File.Exists(scope.CanonicalPath));
+        Assert.Contains("MemoryCleanerRegime = 1", File.ReadAllText(scope.CanonicalPath));
     }
 
     private sealed class PrimeSettingsFileScope : IDisposable
     {
-        private readonly string _engineDirPath;
-        private readonly bool _engineDirExisted;
-        private readonly bool _settingsFileExisted;
-        private readonly string _settingsBackup;
+        private readonly StructuredSettingsFileScope _settingsScope;
         private readonly Dictionary<string, object?> _originalFields;
 
         public PrimeSettingsFileScope()
         {
-            _engineDirPath = Path.GetFullPath("Engine");
-            SettingsPath = Path.Combine(_engineDirPath, "PrimeSettings.txt");
-            _settingsBackup = SettingsPath + ".codex.bak";
-
-            _engineDirExisted = Directory.Exists(_engineDirPath);
-            if (!_engineDirExisted)
-            {
-                Directory.CreateDirectory(_engineDirPath);
-            }
-
-            _settingsFileExisted = File.Exists(SettingsPath);
-            if (_settingsFileExisted)
-            {
-                File.Copy(SettingsPath, _settingsBackup, overwrite: true);
-            }
-            else if (File.Exists(_settingsBackup))
-            {
-                File.Delete(_settingsBackup);
-            }
-
+            _settingsScope = new StructuredSettingsFileScope(Path.Combine("Engine", "PrimeSettings.toml"));
             _originalFields = CaptureFields();
         }
 
-        public string SettingsPath { get; }
+        public string CanonicalPath => _settingsScope.CanonicalPath;
+
+        public string LegacyTxtPath => _settingsScope.LegacyTxtPath;
 
         public void ResetStateForLoad()
         {
@@ -122,33 +106,7 @@ public class PrimeSettingsMasterPersistenceTests
                 SetField(key, value);
             }
 
-            if (_settingsFileExisted)
-            {
-                if (File.Exists(_settingsBackup))
-                {
-                    File.Copy(_settingsBackup, SettingsPath, overwrite: true);
-                    File.Delete(_settingsBackup);
-                }
-            }
-            else
-            {
-                if (File.Exists(SettingsPath))
-                {
-                    File.Delete(SettingsPath);
-                }
-
-                if (File.Exists(_settingsBackup))
-                {
-                    File.Delete(_settingsBackup);
-                }
-            }
-
-            if (!_engineDirExisted
-                && Directory.Exists(_engineDirPath)
-                && !Directory.EnumerateFileSystemEntries(_engineDirPath).Any())
-            {
-                Directory.Delete(_engineDirPath);
-            }
+            _settingsScope.Dispose();
         }
 
         private static Dictionary<string, object?> CaptureFields()

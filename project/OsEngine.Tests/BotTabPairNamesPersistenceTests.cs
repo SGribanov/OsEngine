@@ -16,7 +16,7 @@ namespace OsEngine.Tests;
 public class BotTabPairNamesPersistenceTests
 {
     [Fact]
-    public void SavePairNames_ShouldPersistJson()
+    public void SavePairNames_ShouldPersistToml()
     {
         const string tabName = "CodexPairNamesJson";
         using BotTabPairNamesFileScope scope = new BotTabPairNamesFileScope(tabName);
@@ -30,8 +30,8 @@ public class BotTabPairNamesPersistenceTests
 
         source.SavePairNames();
 
-        string content = File.ReadAllText(scope.SettingsPath);
-        Assert.StartsWith("{", content.TrimStart());
+        string content = File.ReadAllText(scope.CanonicalPath);
+        Assert.Contains("PairNames =", content);
     }
 
     [Fact]
@@ -55,19 +55,14 @@ public class BotTabPairNamesPersistenceTests
     private sealed class BotTabPairNamesFileScope : IDisposable
     {
         private readonly string _tabName;
-        private readonly string _engineDirPath;
-        private readonly bool _engineDirExisted;
-        private readonly bool _settingsFileExisted;
-        private readonly string _settingsBackupPath;
         private readonly MethodInfo _parseLegacyMethod;
         private readonly FieldInfo _pairNameField;
+        private readonly StructuredSettingsFileScope _settingsScope;
 
         public BotTabPairNamesFileScope(string tabName)
         {
             _tabName = tabName;
-            _engineDirPath = Path.GetFullPath("Engine");
-            SettingsPath = Path.Combine(_engineDirPath, _tabName + "PairsNamesToLoad.txt");
-            _settingsBackupPath = SettingsPath + ".codex.bak";
+            _settingsScope = new StructuredSettingsFileScope(Path.Combine("Engine", _tabName + "PairsNamesToLoad.toml"));
 
             _parseLegacyMethod = typeof(BotTabPair).GetMethod(
                 "ParseLegacyPairNamesToLoadSettings",
@@ -76,24 +71,9 @@ public class BotTabPairNamesPersistenceTests
             _pairNameField = typeof(PairToTrade).GetField("Name", BindingFlags.Public | BindingFlags.Instance)
                 ?? throw new InvalidOperationException("Field PairToTrade.Name not found.");
 
-            _engineDirExisted = Directory.Exists(_engineDirPath);
-            if (!_engineDirExisted)
-            {
-                Directory.CreateDirectory(_engineDirPath);
-            }
-
-            _settingsFileExisted = File.Exists(SettingsPath);
-            if (_settingsFileExisted)
-            {
-                File.Copy(SettingsPath, _settingsBackupPath, overwrite: true);
-            }
-            else if (File.Exists(_settingsBackupPath))
-            {
-                File.Delete(_settingsBackupPath);
-            }
         }
 
-        public string SettingsPath { get; }
+        public string CanonicalPath => _settingsScope.CanonicalPath;
 
         public BotTabPair CreateWithoutConstructor()
         {
@@ -125,33 +105,7 @@ public class BotTabPairNamesPersistenceTests
 
         public void Dispose()
         {
-            if (_settingsFileExisted)
-            {
-                if (File.Exists(_settingsBackupPath))
-                {
-                    File.Copy(_settingsBackupPath, SettingsPath, overwrite: true);
-                    File.Delete(_settingsBackupPath);
-                }
-            }
-            else
-            {
-                if (File.Exists(SettingsPath))
-                {
-                    File.Delete(SettingsPath);
-                }
-
-                if (File.Exists(_settingsBackupPath))
-                {
-                    File.Delete(_settingsBackupPath);
-                }
-            }
-
-            if (!_engineDirExisted
-                && Directory.Exists(_engineDirPath)
-                && !Directory.EnumerateFileSystemEntries(_engineDirPath).Any())
-            {
-                Directory.Delete(_engineDirPath);
-            }
+            _settingsScope.Dispose();
         }
     }
 }

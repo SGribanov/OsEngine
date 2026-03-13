@@ -16,7 +16,7 @@ namespace OsEngine.Tests;
 public class AindicatorPersistenceTests
 {
     [Fact]
-    public void Save_ShouldPersistJson_ForParametersAndSeries()
+    public void Save_ShouldPersistToml_ForParametersAndSeries()
     {
         const string name = "CodexAindicatorJson";
         using AindicatorFileScope scope = new AindicatorFileScope(name);
@@ -31,11 +31,41 @@ public class AindicatorPersistenceTests
 
         indicator.Save();
 
-        string parametersContent = File.ReadAllText(scope.ParametersPath);
-        Assert.StartsWith("{", parametersContent.TrimStart());
+        string parametersContent = File.ReadAllText(scope.ParametersCanonicalPath);
+        Assert.Contains("Lines =", parametersContent);
 
-        string valuesContent = File.ReadAllText(scope.ValuesPath);
-        Assert.StartsWith("{", valuesContent.TrimStart());
+        string valuesContent = File.ReadAllText(scope.ValuesCanonicalPath);
+        Assert.Contains("Lines =", valuesContent);
+    }
+
+    [Fact]
+    public void Save_ShouldReadLegacyTxt_AndWriteToml_ForParametersAndSeries()
+    {
+        const string name = "CodexAindicatorLegacyRoundTrip";
+        using AindicatorFileScope scope = new AindicatorFileScope(name);
+
+        File.WriteAllText(scope.ParametersLegacyTxtPath, "Length#42");
+        File.WriteAllText(scope.ValuesLegacyTxtPath, "Main&Color [Red]&False&True&0");
+
+        TestIndicator indicator = new TestIndicator
+        {
+            Name = name,
+            StartProgram = StartProgram.IsOsTrader
+        };
+
+        IndicatorParameterInt length = indicator.CreateParameterInt("Length", 14);
+        IndicatorDataSeries series = indicator.CreateSeries("Main", Color.Red, IndicatorChartPaintType.Line, true);
+
+        Assert.Equal(42, length.ValueInt);
+        Assert.Equal("Main", series.Name);
+        Assert.Equal(Color.Red.ToArgb(), series.Color.ToArgb());
+        Assert.Equal(IndicatorChartPaintType.Line, series.ChartPaintType);
+        Assert.True(series.IsPaint);
+
+        indicator.Save();
+
+        Assert.True(File.Exists(scope.ParametersCanonicalPath));
+        Assert.True(File.Exists(scope.ValuesCanonicalPath));
     }
 
     [Fact]
@@ -66,57 +96,28 @@ public class AindicatorPersistenceTests
 
     private sealed class AindicatorFileScope : IDisposable
     {
-        private readonly string _name;
-        private readonly string _engineDirPath;
-        private readonly bool _engineDirExisted;
-        private readonly bool _parametersFileExisted;
-        private readonly bool _valuesFileExisted;
-        private readonly string _parametersBackupPath;
-        private readonly string _valuesBackupPath;
         private readonly MethodInfo _parseLegacyMethod;
+        private readonly StructuredSettingsFileScope _parametersScope;
+        private readonly StructuredSettingsFileScope _valuesScope;
+        private readonly StructuredSettingsFileScope _baseScope;
 
         public AindicatorFileScope(string name)
         {
-            _name = name;
-            _engineDirPath = Path.GetFullPath("Engine");
-            ParametersPath = Path.Combine(_engineDirPath, _name + "Parametrs.txt");
-            ValuesPath = Path.Combine(_engineDirPath, _name + "Values.txt");
-            _parametersBackupPath = ParametersPath + ".codex.bak";
-            _valuesBackupPath = ValuesPath + ".codex.bak";
+            _parametersScope = new StructuredSettingsFileScope(Path.Combine("Engine", name + "Parametrs.toml"));
+            _valuesScope = new StructuredSettingsFileScope(Path.Combine("Engine", name + "Values.toml"));
+            _baseScope = new StructuredSettingsFileScope(Path.Combine("Engine", name + "Base.toml"));
 
             _parseLegacyMethod = typeof(Aindicator).GetMethod("ParseLegacyLinesSettings", BindingFlags.NonPublic | BindingFlags.Static)
                 ?? throw new InvalidOperationException("Method ParseLegacyLinesSettings not found.");
-
-            _engineDirExisted = Directory.Exists(_engineDirPath);
-            if (!_engineDirExisted)
-            {
-                Directory.CreateDirectory(_engineDirPath);
-            }
-
-            _parametersFileExisted = File.Exists(ParametersPath);
-            if (_parametersFileExisted)
-            {
-                File.Copy(ParametersPath, _parametersBackupPath, overwrite: true);
-            }
-            else if (File.Exists(_parametersBackupPath))
-            {
-                File.Delete(_parametersBackupPath);
-            }
-
-            _valuesFileExisted = File.Exists(ValuesPath);
-            if (_valuesFileExisted)
-            {
-                File.Copy(ValuesPath, _valuesBackupPath, overwrite: true);
-            }
-            else if (File.Exists(_valuesBackupPath))
-            {
-                File.Delete(_valuesBackupPath);
-            }
         }
 
-        public string ParametersPath { get; }
+        public string ParametersCanonicalPath => _parametersScope.CanonicalPath;
 
-        public string ValuesPath { get; }
+        public string ParametersLegacyTxtPath => _parametersScope.LegacyTxtPath;
+
+        public string ValuesCanonicalPath => _valuesScope.CanonicalPath;
+
+        public string ValuesLegacyTxtPath => _valuesScope.LegacyTxtPath;
 
         public object ParseLegacy(string content)
         {
@@ -133,39 +134,9 @@ public class AindicatorPersistenceTests
 
         public void Dispose()
         {
-            RestoreFile(ParametersPath, _parametersBackupPath, _parametersFileExisted);
-            RestoreFile(ValuesPath, _valuesBackupPath, _valuesFileExisted);
-
-            if (!_engineDirExisted
-                && Directory.Exists(_engineDirPath)
-                && !Directory.EnumerateFileSystemEntries(_engineDirPath).Any())
-            {
-                Directory.Delete(_engineDirPath);
-            }
-        }
-
-        private static void RestoreFile(string path, string backupPath, bool fileExisted)
-        {
-            if (fileExisted)
-            {
-                if (File.Exists(backupPath))
-                {
-                    File.Copy(backupPath, path, overwrite: true);
-                    File.Delete(backupPath);
-                }
-            }
-            else
-            {
-                if (File.Exists(path))
-                {
-                    File.Delete(path);
-                }
-
-                if (File.Exists(backupPath))
-                {
-                    File.Delete(backupPath);
-                }
-            }
+            _parametersScope.Dispose();
+            _valuesScope.Dispose();
+            _baseScope.Dispose();
         }
     }
 }

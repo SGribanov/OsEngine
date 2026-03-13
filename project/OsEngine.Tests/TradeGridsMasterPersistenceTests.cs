@@ -16,7 +16,7 @@ namespace OsEngine.Tests;
 public class TradeGridsMasterPersistenceTests
 {
     [Fact]
-    public void SaveGrids_ShouldPersistJson()
+    public void SaveGrids_ShouldPersistToml()
     {
         const string botName = "CodexTradeGridsJson";
         using TradeGridsMasterFileScope scope = new TradeGridsMasterFileScope(botName);
@@ -26,8 +26,8 @@ public class TradeGridsMasterPersistenceTests
 
         scope.InvokePrivateSaveGrids(source);
 
-        string content = File.ReadAllText(scope.SettingsPath);
-        Assert.StartsWith("{", content.TrimStart());
+        string content = File.ReadAllText(scope.CanonicalPath);
+        Assert.Contains("GridSaveStrings =", content);
     }
 
     [Fact]
@@ -75,10 +75,6 @@ public class TradeGridsMasterPersistenceTests
     private sealed class TradeGridsMasterFileScope : IDisposable
     {
         private readonly string _botName;
-        private readonly string _engineDirPath;
-        private readonly bool _engineDirExisted;
-        private readonly bool _settingsFileExisted;
-        private readonly string _settingsBackupPath;
         private readonly MethodInfo _saveGridsMethod;
         private readonly MethodInfo _parseLegacyMethod;
         private readonly MethodInfo _tryExtractGridNumberMethod;
@@ -87,13 +83,12 @@ public class TradeGridsMasterPersistenceTests
         private readonly FieldInfo _gridFirstTradePriceField;
         private readonly FieldInfo _gridOpenPositionsBySessionField;
         private readonly FieldInfo _gridFirstTradeTimeField;
+        private readonly StructuredSettingsFileScope _settingsScope;
 
         public TradeGridsMasterFileScope(string botName)
         {
             _botName = botName;
-            _engineDirPath = Path.GetFullPath("Engine");
-            SettingsPath = Path.Combine(_engineDirPath, _botName + "GridsSettings.txt");
-            _settingsBackupPath = SettingsPath + ".codex.bak";
+            _settingsScope = new StructuredSettingsFileScope(Path.Combine("Engine", _botName + "GridsSettings.toml"));
 
             _saveGridsMethod = typeof(TradeGridsMaster).GetMethod("SaveGrids", BindingFlags.NonPublic | BindingFlags.Instance)
                 ?? throw new InvalidOperationException("Method SaveGrids not found.");
@@ -116,24 +111,9 @@ public class TradeGridsMasterPersistenceTests
             _gridFirstTradeTimeField = typeof(TradeGrid).GetField("_firstTradeTime", BindingFlags.NonPublic | BindingFlags.Instance)
                 ?? throw new InvalidOperationException("Field _firstTradeTime not found.");
 
-            _engineDirExisted = Directory.Exists(_engineDirPath);
-            if (!_engineDirExisted)
-            {
-                Directory.CreateDirectory(_engineDirPath);
-            }
-
-            _settingsFileExisted = File.Exists(SettingsPath);
-            if (_settingsFileExisted)
-            {
-                File.Copy(SettingsPath, _settingsBackupPath, overwrite: true);
-            }
-            else if (File.Exists(_settingsBackupPath))
-            {
-                File.Delete(_settingsBackupPath);
-            }
         }
 
-        public string SettingsPath { get; }
+        public string CanonicalPath => _settingsScope.CanonicalPath;
 
         public TradeGridsMaster CreateMasterWithoutConstructor()
         {
@@ -204,33 +184,7 @@ public class TradeGridsMasterPersistenceTests
 
         public void Dispose()
         {
-            if (_settingsFileExisted)
-            {
-                if (File.Exists(_settingsBackupPath))
-                {
-                    File.Copy(_settingsBackupPath, SettingsPath, overwrite: true);
-                    File.Delete(_settingsBackupPath);
-                }
-            }
-            else
-            {
-                if (File.Exists(SettingsPath))
-                {
-                    File.Delete(SettingsPath);
-                }
-
-                if (File.Exists(_settingsBackupPath))
-                {
-                    File.Delete(_settingsBackupPath);
-                }
-            }
-
-            if (!_engineDirExisted
-                && Directory.Exists(_engineDirPath)
-                && !Directory.EnumerateFileSystemEntries(_engineDirPath).Any())
-            {
-                Directory.Delete(_engineDirPath);
-            }
+            _settingsScope.Dispose();
         }
     }
 }

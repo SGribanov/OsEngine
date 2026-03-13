@@ -15,7 +15,7 @@ namespace OsEngine.Tests;
 public class BotTabPolygonNamesPersistenceTests
 {
     [Fact]
-    public void SaveSequencesNames_ShouldPersistJson()
+    public void SaveSequencesNames_ShouldPersistToml()
     {
         const string tabName = "CodexPolygonNamesJson";
         using BotTabPolygonNamesFileScope scope = new BotTabPolygonNamesFileScope(tabName);
@@ -29,8 +29,8 @@ public class BotTabPolygonNamesPersistenceTests
 
         source.SaveSequencesNames();
 
-        string content = File.ReadAllText(scope.SettingsPath);
-        Assert.StartsWith("{", content.TrimStart());
+        string content = File.ReadAllText(scope.CanonicalPath);
+        Assert.Contains("SequenceNames =", content);
     }
 
     [Fact]
@@ -54,42 +54,22 @@ public class BotTabPolygonNamesPersistenceTests
     private sealed class BotTabPolygonNamesFileScope : IDisposable
     {
         private readonly string _tabName;
-        private readonly string _engineDirPath;
-        private readonly bool _engineDirExisted;
-        private readonly bool _settingsFileExisted;
-        private readonly string _settingsBackupPath;
         private readonly MethodInfo _parseLegacyMethod;
+        private readonly StructuredSettingsFileScope _settingsScope;
 
         public BotTabPolygonNamesFileScope(string tabName)
         {
             _tabName = tabName;
-            _engineDirPath = Path.GetFullPath("Engine");
-            SettingsPath = Path.Combine(_engineDirPath, _tabName + "PolygonsNamesToLoad.txt");
-            _settingsBackupPath = SettingsPath + ".codex.bak";
+            _settingsScope = new StructuredSettingsFileScope(Path.Combine("Engine", _tabName + "PolygonsNamesToLoad.toml"));
 
             _parseLegacyMethod = typeof(BotTabPolygon).GetMethod(
                 "ParseLegacyPolygonNamesToLoadSettings",
                 BindingFlags.NonPublic | BindingFlags.Static)
                 ?? throw new InvalidOperationException("Method ParseLegacyPolygonNamesToLoadSettings not found.");
 
-            _engineDirExisted = Directory.Exists(_engineDirPath);
-            if (!_engineDirExisted)
-            {
-                Directory.CreateDirectory(_engineDirPath);
-            }
-
-            _settingsFileExisted = File.Exists(SettingsPath);
-            if (_settingsFileExisted)
-            {
-                File.Copy(SettingsPath, _settingsBackupPath, overwrite: true);
-            }
-            else if (File.Exists(_settingsBackupPath))
-            {
-                File.Delete(_settingsBackupPath);
-            }
         }
 
-        public string SettingsPath { get; }
+        public string CanonicalPath => _settingsScope.CanonicalPath;
 
         public BotTabPolygon CreateWithoutConstructor()
         {
@@ -121,33 +101,7 @@ public class BotTabPolygonNamesPersistenceTests
 
         public void Dispose()
         {
-            if (_settingsFileExisted)
-            {
-                if (File.Exists(_settingsBackupPath))
-                {
-                    File.Copy(_settingsBackupPath, SettingsPath, overwrite: true);
-                    File.Delete(_settingsBackupPath);
-                }
-            }
-            else
-            {
-                if (File.Exists(SettingsPath))
-                {
-                    File.Delete(SettingsPath);
-                }
-
-                if (File.Exists(_settingsBackupPath))
-                {
-                    File.Delete(_settingsBackupPath);
-                }
-            }
-
-            if (!_engineDirExisted
-                && Directory.Exists(_engineDirPath)
-                && !Directory.EnumerateFileSystemEntries(_engineDirPath).Any())
-            {
-                Directory.Delete(_engineDirPath);
-            }
+            _settingsScope.Dispose();
         }
     }
 }

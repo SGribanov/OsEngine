@@ -1781,7 +1781,7 @@ public class TradeGridPersistenceCoreTests
         string path = (string)(method.Invoke(master, null)
             ?? throw new InvalidOperationException("GetGridsSettingsPath returned null."));
 
-        Assert.Equal(@"Engine\CodexBotGridsSettings.txt", path);
+        Assert.Equal(@"Engine\CodexBotGridsSettings.toml", path);
     }
 
     [Fact]
@@ -1856,7 +1856,7 @@ public class TradeGridPersistenceCoreTests
         SetPrivateField(master, "_nameBot", "CodexMissingDelete");
         SetPrivateField(master, "_tab", (BotTabSimple)RuntimeHelpers.GetUninitializedObject(typeof(BotTabSimple)));
 
-        string path = Path.Combine("Engine", "CodexMissingDeleteGridsSettings.txt");
+        string path = Path.Combine("Engine", "CodexMissingDeleteGridsSettings.toml");
         if (File.Exists(path))
         {
             File.Delete(path);
@@ -1882,7 +1882,7 @@ public class TradeGridPersistenceCoreTests
         SetPrivateField(master, "_tab", (BotTabSimple)RuntimeHelpers.GetUninitializedObject(typeof(BotTabSimple)));
 
         Directory.CreateDirectory("Engine");
-        string path = Path.Combine("Engine", "CodexExistingDeleteGridsSettings.txt");
+        string path = Path.Combine("Engine", "CodexExistingDeleteGridsSettings.toml");
         File.WriteAllText(path, "codex");
 
         Exception? error = Record.Exception(() =>

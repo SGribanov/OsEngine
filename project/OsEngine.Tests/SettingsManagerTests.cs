@@ -145,6 +145,65 @@ public class SettingsManagerTests
         }
     }
 
+    [Fact]
+    public void Exists_ShouldRecognizeLegacyTxtCompanion_ForTomlPath()
+    {
+        string root = Path.Combine(Path.GetTempPath(), "osengine-settings-" + Guid.NewGuid());
+        Directory.CreateDirectory(root);
+
+        try
+        {
+            string path = Path.Combine(root, "settings.toml");
+            File.WriteAllText(Path.ChangeExtension(path, ".txt"), "legacy");
+
+            Assert.True(SettingsManager.Exists(path));
+        }
+        finally
+        {
+            if (Directory.Exists(root))
+            {
+                Directory.Delete(root, true);
+            }
+        }
+    }
+
+    [Fact]
+    public void Delete_ShouldRemoveTomlAndLegacyCompanions()
+    {
+        string root = Path.Combine(Path.GetTempPath(), "osengine-settings-" + Guid.NewGuid());
+        Directory.CreateDirectory(root);
+
+        try
+        {
+            string path = Path.Combine(root, "settings.toml");
+            string jsonPath = Path.ChangeExtension(path, ".json");
+            string txtPath = Path.ChangeExtension(path, ".txt");
+
+            File.WriteAllText(path, "toml");
+            File.WriteAllText(path + ".bak", "toml-bak");
+            File.WriteAllText(jsonPath, "json");
+            File.WriteAllText(jsonPath + ".bak", "json-bak");
+            File.WriteAllText(txtPath, "txt");
+            File.WriteAllText(txtPath + ".bak", "txt-bak");
+
+            SettingsManager.Delete(path);
+
+            Assert.False(File.Exists(path));
+            Assert.False(File.Exists(path + ".bak"));
+            Assert.False(File.Exists(jsonPath));
+            Assert.False(File.Exists(jsonPath + ".bak"));
+            Assert.False(File.Exists(txtPath));
+            Assert.False(File.Exists(txtPath + ".bak"));
+        }
+        finally
+        {
+            if (Directory.Exists(root))
+            {
+                Directory.Delete(root, true);
+            }
+        }
+    }
+
     private static TestSettings LegacyParser(string content)
     {
         string[] parts = content.Split(';');

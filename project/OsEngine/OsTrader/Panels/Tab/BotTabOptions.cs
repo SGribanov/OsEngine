@@ -139,7 +139,7 @@ namespace OsEngine.OsTrader.Panels.Tab
 
         #region Settings
 
-        private string SettingsFilePath => $@"Engine\{TabName}\OptionsSettings.txt";
+        private string SettingsFilePath => $@"Engine\{TabName}\OptionsSettings.toml";
         private string SettingsFolderPath => $@"Engine\{TabName}";
 
         private void SaveSettings()
@@ -174,7 +174,7 @@ namespace OsEngine.OsTrader.Panels.Tab
 
         public void LoadSettings()
         {
-            if (!File.Exists(SettingsFilePath))
+            if (!SettingsManager.Exists(SettingsFilePath))
             {
                 return;
             }

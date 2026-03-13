@@ -19,7 +19,7 @@ namespace OsEngine.Tests;
 public class BotTabScreenerTabSetPersistenceTests
 {
     [Fact]
-    public void SaveTabs_ShouldPersistJson()
+    public void SaveTabs_ShouldPersistToml()
     {
         const string tabName = "CodexScreenerTabSetJson";
         using BotTabScreenerTabSetFileScope scope = new BotTabScreenerTabSetFileScope(tabName);
@@ -30,8 +30,8 @@ public class BotTabScreenerTabSetPersistenceTests
 
         scope.InvokeSaveTabs(source);
 
-        string content = File.ReadAllText(scope.SettingsPath);
-        Assert.StartsWith("{", content.TrimStart());
+        string content = File.ReadAllText(scope.CanonicalPath);
+        Assert.Contains("TabNames =", content);
     }
 
     [Fact]
@@ -53,21 +53,16 @@ public class BotTabScreenerTabSetPersistenceTests
     private sealed class BotTabScreenerTabSetFileScope : IDisposable
     {
         private readonly string _tabName;
-        private readonly string _engineDirPath;
-        private readonly bool _engineDirExisted;
-        private readonly bool _settingsFileExisted;
-        private readonly string _settingsBackupPath;
         private readonly MethodInfo _saveTabsMethod;
         private readonly MethodInfo _parseLegacyMethod;
         private readonly FieldInfo _screenerStartProgramField;
         private readonly FieldInfo _botTabSimpleConnectorField;
+        private readonly StructuredSettingsFileScope _settingsScope;
 
         public BotTabScreenerTabSetFileScope(string tabName)
         {
             _tabName = tabName;
-            _engineDirPath = Path.GetFullPath("Engine");
-            SettingsPath = Path.Combine(_engineDirPath, _tabName + "ScreenerTabSet.txt");
-            _settingsBackupPath = SettingsPath + ".codex.bak";
+            _settingsScope = new StructuredSettingsFileScope(Path.Combine("Engine", _tabName + "ScreenerTabSet.toml"));
 
             _saveTabsMethod = typeof(BotTabScreener).GetMethod("SaveTabs", BindingFlags.NonPublic | BindingFlags.Instance)
                 ?? throw new InvalidOperationException("Method SaveTabs not found.");
@@ -80,24 +75,9 @@ public class BotTabScreenerTabSetPersistenceTests
             _botTabSimpleConnectorField = typeof(BotTabSimple).GetField("_connector", BindingFlags.NonPublic | BindingFlags.Instance)
                 ?? throw new InvalidOperationException("Field _connector not found.");
 
-            _engineDirExisted = Directory.Exists(_engineDirPath);
-            if (!_engineDirExisted)
-            {
-                Directory.CreateDirectory(_engineDirPath);
-            }
-
-            _settingsFileExisted = File.Exists(SettingsPath);
-            if (_settingsFileExisted)
-            {
-                File.Copy(SettingsPath, _settingsBackupPath, overwrite: true);
-            }
-            else if (File.Exists(_settingsBackupPath))
-            {
-                File.Delete(_settingsBackupPath);
-            }
         }
 
-        public string SettingsPath { get; }
+        public string CanonicalPath => _settingsScope.CanonicalPath;
 
         public BotTabScreener CreateScreenerWithoutConstructor()
         {
@@ -144,33 +124,7 @@ public class BotTabScreenerTabSetPersistenceTests
 
         public void Dispose()
         {
-            if (_settingsFileExisted)
-            {
-                if (File.Exists(_settingsBackupPath))
-                {
-                    File.Copy(_settingsBackupPath, SettingsPath, overwrite: true);
-                    File.Delete(_settingsBackupPath);
-                }
-            }
-            else
-            {
-                if (File.Exists(SettingsPath))
-                {
-                    File.Delete(SettingsPath);
-                }
-
-                if (File.Exists(_settingsBackupPath))
-                {
-                    File.Delete(_settingsBackupPath);
-                }
-            }
-
-            if (!_engineDirExisted
-                && Directory.Exists(_engineDirPath)
-                && !Directory.EnumerateFileSystemEntries(_engineDirPath).Any())
-            {
-                Directory.Delete(_engineDirPath);
-            }
+            _settingsScope.Dispose();
         }
     }
 }

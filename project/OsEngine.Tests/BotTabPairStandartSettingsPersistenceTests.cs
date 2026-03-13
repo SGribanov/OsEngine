@@ -15,7 +15,7 @@ namespace OsEngine.Tests;
 public class BotTabPairStandartSettingsPersistenceTests
 {
     [Fact]
-    public void SaveStandartSettings_ShouldPersistJson_AndLoadRoundTrip()
+    public void SaveStandartSettings_ShouldPersistToml_AndLoadRoundTrip()
     {
         using BotTabPairSettingsFileScope scope = new BotTabPairSettingsFileScope("CodexPairSettings");
 
@@ -42,8 +42,8 @@ public class BotTabPairStandartSettingsPersistenceTests
 
         source.SaveStandartSettings();
 
-        string content = File.ReadAllText(scope.SettingsPath);
-        Assert.StartsWith("{", content.TrimStart());
+        string content = File.ReadAllText(scope.CanonicalPath);
+        Assert.Contains("Sec1Slippage = 0.1", content);
 
         BotTabPair target = scope.CreateWithoutConstructor();
         scope.Setup(target);
@@ -74,7 +74,7 @@ public class BotTabPairStandartSettingsPersistenceTests
     }
 
     [Fact]
-    public void LoadStandartSettings_ShouldSupportLegacyLineBasedFormat()
+    public void LoadStandartSettings_ShouldSupportLegacyLineBasedFormat_AndSaveToml()
     {
         using BotTabPairSettingsFileScope scope = new BotTabPairSettingsFileScope("CodexPairLegacy");
 
@@ -98,7 +98,7 @@ public class BotTabPairStandartSettingsPersistenceTests
             "Off",
             "False",
             "True");
-        File.WriteAllText(scope.SettingsPath, legacyContent);
+        File.WriteAllText(scope.LegacyTxtPath, legacyContent);
 
         BotTabPair target = scope.CreateWithoutConstructor();
         scope.Setup(target);
@@ -122,25 +122,23 @@ public class BotTabPairStandartSettingsPersistenceTests
         Assert.True(target.AutoRebuildCorrelation);
         Assert.True(scope.GetEventsIsOn(target));
         Assert.False(scope.GetEmulatorIsOn(target));
+
+        target.SaveStandartSettings();
+        Assert.True(File.Exists(scope.CanonicalPath));
     }
 
     private sealed class BotTabPairSettingsFileScope : IDisposable
     {
         private readonly string _tabName;
-        private readonly string _engineDirPath;
-        private readonly bool _engineDirExisted;
-        private readonly bool _settingsFileExisted;
-        private readonly string _settingsBackupPath;
         private readonly MethodInfo _loadStandartSettingsMethod;
         private readonly FieldInfo _eventsField;
         private readonly FieldInfo _emulatorField;
+        private readonly StructuredSettingsFileScope _settingsScope;
 
         public BotTabPairSettingsFileScope(string tabName)
         {
             _tabName = tabName;
-            _engineDirPath = Path.GetFullPath("Engine");
-            SettingsPath = Path.Combine(_engineDirPath, $"{_tabName}StandartPairsSettings.txt");
-            _settingsBackupPath = SettingsPath + ".codex.bak";
+            _settingsScope = new StructuredSettingsFileScope(Path.Combine("Engine", $"{_tabName}StandartPairsSettings.toml"));
 
             _loadStandartSettingsMethod = typeof(BotTabPair).GetMethod("LoadStandartSettings", BindingFlags.NonPublic | BindingFlags.Instance)
                 ?? throw new InvalidOperationException("Method LoadStandartSettings not found.");
@@ -149,24 +147,11 @@ public class BotTabPairStandartSettingsPersistenceTests
             _emulatorField = typeof(BotTabPair).GetField("_emulatorIsOn", BindingFlags.NonPublic | BindingFlags.Instance)
                 ?? throw new InvalidOperationException("Field _emulatorIsOn not found.");
 
-            _engineDirExisted = Directory.Exists(_engineDirPath);
-            if (!_engineDirExisted)
-            {
-                Directory.CreateDirectory(_engineDirPath);
-            }
-
-            _settingsFileExisted = File.Exists(SettingsPath);
-            if (_settingsFileExisted)
-            {
-                File.Copy(SettingsPath, _settingsBackupPath, overwrite: true);
-            }
-            else if (File.Exists(_settingsBackupPath))
-            {
-                File.Delete(_settingsBackupPath);
-            }
         }
 
-        public string SettingsPath { get; }
+        public string CanonicalPath => _settingsScope.CanonicalPath;
+
+        public string LegacyTxtPath => _settingsScope.LegacyTxtPath;
 
         public BotTabPair CreateWithoutConstructor()
         {
@@ -206,33 +191,7 @@ public class BotTabPairStandartSettingsPersistenceTests
 
         public void Dispose()
         {
-            if (_settingsFileExisted)
-            {
-                if (File.Exists(_settingsBackupPath))
-                {
-                    File.Copy(_settingsBackupPath, SettingsPath, overwrite: true);
-                    File.Delete(_settingsBackupPath);
-                }
-            }
-            else
-            {
-                if (File.Exists(SettingsPath))
-                {
-                    File.Delete(SettingsPath);
-                }
-
-                if (File.Exists(_settingsBackupPath))
-                {
-                    File.Delete(_settingsBackupPath);
-                }
-            }
-
-            if (!_engineDirExisted
-                && Directory.Exists(_engineDirPath)
-                && !Directory.EnumerateFileSystemEntries(_engineDirPath).Any())
-            {
-                Directory.Delete(_engineDirPath);
-            }
+            _settingsScope.Dispose();
         }
     }
 }

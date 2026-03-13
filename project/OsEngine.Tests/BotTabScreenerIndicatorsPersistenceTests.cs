@@ -15,7 +15,7 @@ namespace OsEngine.Tests;
 public class BotTabScreenerIndicatorsPersistenceTests
 {
     [Fact]
-    public void SaveIndicators_ShouldPersistJson_AndLoadRoundTrip()
+    public void SaveIndicators_ShouldPersistToml_AndLoadRoundTrip()
     {
         using BotTabScreenerIndicatorsFileScope scope = new BotTabScreenerIndicatorsFileScope("CodexScreenerIndicators");
 
@@ -32,8 +32,8 @@ public class BotTabScreenerIndicatorsPersistenceTests
 
         scope.InvokePrivateSaveIndicators(source);
 
-        string content = File.ReadAllText(scope.SettingsPath);
-        Assert.StartsWith("{", content.TrimStart());
+        string content = File.ReadAllText(scope.CanonicalPath);
+        Assert.Contains("Indicators =", content);
 
         BotTabScreener target = scope.CreateWithoutConstructor();
         scope.Setup(target);
@@ -49,7 +49,7 @@ public class BotTabScreenerIndicatorsPersistenceTests
     }
 
     [Fact]
-    public void LoadIndicators_ShouldSupportLegacyLineBasedFormat()
+    public void LoadIndicators_ShouldSupportLegacyLineBasedFormat_AndSaveToml()
     {
         using BotTabScreenerIndicatorsFileScope scope = new BotTabScreenerIndicatorsFileScope("CodexScreenerLegacy");
 
@@ -61,7 +61,7 @@ public class BotTabScreenerIndicatorsPersistenceTests
             CanDelete = true,
             Parameters = new List<string> { "14" }
         };
-        File.WriteAllText(scope.SettingsPath, legacy.GetSaveStr());
+        File.WriteAllText(scope.LegacyTxtPath, legacy.GetSaveStr());
 
         BotTabScreener target = scope.CreateWithoutConstructor();
         scope.Setup(target);
@@ -73,48 +73,33 @@ public class BotTabScreenerIndicatorsPersistenceTests
         Assert.Equal(2, loaded.Num);
         Assert.True(loaded.CanDelete);
         Assert.Equal(new List<string> { "14" }, loaded.Parameters);
+
+        scope.InvokePrivateSaveIndicators(target);
+        Assert.True(File.Exists(scope.CanonicalPath));
     }
 
     private sealed class BotTabScreenerIndicatorsFileScope : IDisposable
     {
         private readonly string _tabName;
-        private readonly string _engineDirPath;
-        private readonly bool _engineDirExisted;
-        private readonly bool _settingsFileExisted;
-        private readonly string _settingsBackupPath;
         private readonly MethodInfo _saveIndicatorsMethod;
         private readonly MethodInfo _loadIndicatorsMethod;
+        private readonly StructuredSettingsFileScope _settingsScope;
 
         public BotTabScreenerIndicatorsFileScope(string tabName)
         {
             _tabName = tabName;
-            _engineDirPath = Path.GetFullPath("Engine");
-            SettingsPath = Path.Combine(_engineDirPath, $"{_tabName}ScreenerIndicators.txt");
-            _settingsBackupPath = SettingsPath + ".codex.bak";
+            _settingsScope = new StructuredSettingsFileScope(Path.Combine("Engine", $"{_tabName}ScreenerIndicators.toml"));
 
             _saveIndicatorsMethod = typeof(BotTabScreener).GetMethod("SaveIndicators", BindingFlags.NonPublic | BindingFlags.Instance)
                 ?? throw new InvalidOperationException("Method SaveIndicators not found.");
             _loadIndicatorsMethod = typeof(BotTabScreener).GetMethod("LoadIndicators", BindingFlags.NonPublic | BindingFlags.Instance)
                 ?? throw new InvalidOperationException("Method LoadIndicators not found.");
 
-            _engineDirExisted = Directory.Exists(_engineDirPath);
-            if (!_engineDirExisted)
-            {
-                Directory.CreateDirectory(_engineDirPath);
-            }
-
-            _settingsFileExisted = File.Exists(SettingsPath);
-            if (_settingsFileExisted)
-            {
-                File.Copy(SettingsPath, _settingsBackupPath, overwrite: true);
-            }
-            else if (File.Exists(_settingsBackupPath))
-            {
-                File.Delete(_settingsBackupPath);
-            }
         }
 
-        public string SettingsPath { get; }
+        public string CanonicalPath => _settingsScope.CanonicalPath;
+
+        public string LegacyTxtPath => _settingsScope.LegacyTxtPath;
 
         public BotTabScreener CreateWithoutConstructor()
         {
@@ -139,33 +124,7 @@ public class BotTabScreenerIndicatorsPersistenceTests
 
         public void Dispose()
         {
-            if (_settingsFileExisted)
-            {
-                if (File.Exists(_settingsBackupPath))
-                {
-                    File.Copy(_settingsBackupPath, SettingsPath, overwrite: true);
-                    File.Delete(_settingsBackupPath);
-                }
-            }
-            else
-            {
-                if (File.Exists(SettingsPath))
-                {
-                    File.Delete(SettingsPath);
-                }
-
-                if (File.Exists(_settingsBackupPath))
-                {
-                    File.Delete(_settingsBackupPath);
-                }
-            }
-
-            if (!_engineDirExisted
-                && Directory.Exists(_engineDirPath)
-                && !Directory.EnumerateFileSystemEntries(_engineDirPath).Any())
-            {
-                Directory.Delete(_engineDirPath);
-            }
+            _settingsScope.Dispose();
         }
     }
 }

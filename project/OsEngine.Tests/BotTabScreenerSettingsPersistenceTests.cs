@@ -19,7 +19,7 @@ namespace OsEngine.Tests;
 public class BotTabScreenerSettingsPersistenceTests
 {
     [Fact]
-    public void SaveSettings_ShouldPersistJson_AndLoadRoundTrip()
+    public void SaveSettings_ShouldPersistToml_AndLoadRoundTrip()
     {
         using BotTabScreenerSettingsFileScope scope = new BotTabScreenerSettingsFileScope("CodexScreenerSettings");
 
@@ -48,8 +48,8 @@ public class BotTabScreenerSettingsPersistenceTests
 
         source.SaveSettings();
 
-        string content = File.ReadAllText(scope.SettingsPath);
-        Assert.StartsWith("{", content.TrimStart());
+        string content = File.ReadAllText(scope.CanonicalPath);
+        Assert.Contains("PortfolioName = \"PF_SCREENER\"", content);
 
         BotTabScreener target = scope.CreateWithoutConstructor();
         scope.Setup(target);
@@ -74,7 +74,7 @@ public class BotTabScreenerSettingsPersistenceTests
     }
 
     [Fact]
-    public void LoadSettings_ShouldSupportLegacyLineBasedFormat()
+    public void LoadSettings_ShouldSupportLegacyLineBasedFormat_AndSaveToml()
     {
         using BotTabScreenerSettingsFileScope scope = new BotTabScreenerSettingsFileScope("CodexScreenerLegacy");
 
@@ -104,7 +104,7 @@ public class BotTabScreenerSettingsPersistenceTests
             "Simple",
             simpleSeries.GetSaveString(),
             sec.GetSaveStr());
-        File.WriteAllText(scope.SettingsPath, legacyContent);
+        File.WriteAllText(scope.LegacyTxtPath, legacyContent);
 
         BotTabScreener target = scope.CreateWithoutConstructor();
         scope.Setup(target);
@@ -121,26 +121,24 @@ public class BotTabScreenerSettingsPersistenceTests
         Assert.True(scope.GetEventsIsOn(target));
         Assert.Single(target.SecuritiesNames);
         Assert.Equal("GAZP", target.SecuritiesNames[0].SecurityName);
+
+        target.SaveSettings();
+        Assert.True(File.Exists(scope.CanonicalPath));
     }
 
     private sealed class BotTabScreenerSettingsFileScope : IDisposable
     {
         private readonly string _tabName;
-        private readonly string _engineDirPath;
-        private readonly bool _engineDirExisted;
-        private readonly bool _settingsFileExisted;
-        private readonly string _settingsBackupPath;
         private readonly FieldInfo _startProgramField;
         private readonly FieldInfo _emulatorField;
         private readonly FieldInfo _eventsField;
         private readonly FieldInfo _candleCreateMethodTypeField;
+        private readonly StructuredSettingsFileScope _settingsScope;
 
         public BotTabScreenerSettingsFileScope(string tabName)
         {
             _tabName = tabName;
-            _engineDirPath = Path.GetFullPath("Engine");
-            SettingsPath = Path.Combine(_engineDirPath, $"{_tabName}ScreenerSet.txt");
-            _settingsBackupPath = SettingsPath + ".codex.bak";
+            _settingsScope = new StructuredSettingsFileScope(Path.Combine("Engine", $"{_tabName}ScreenerSet.toml"));
 
             _startProgramField = typeof(BotTabScreener).GetField("_startProgram", BindingFlags.NonPublic | BindingFlags.Instance)
                 ?? throw new InvalidOperationException("Field _startProgram not found.");
@@ -151,24 +149,11 @@ public class BotTabScreenerSettingsPersistenceTests
             _candleCreateMethodTypeField = typeof(BotTabScreener).GetField("_candleCreateMethodType", BindingFlags.NonPublic | BindingFlags.Instance)
                 ?? throw new InvalidOperationException("Field _candleCreateMethodType not found.");
 
-            _engineDirExisted = Directory.Exists(_engineDirPath);
-            if (!_engineDirExisted)
-            {
-                Directory.CreateDirectory(_engineDirPath);
-            }
-
-            _settingsFileExisted = File.Exists(SettingsPath);
-            if (_settingsFileExisted)
-            {
-                File.Copy(SettingsPath, _settingsBackupPath, overwrite: true);
-            }
-            else if (File.Exists(_settingsBackupPath))
-            {
-                File.Delete(_settingsBackupPath);
-            }
         }
 
-        public string SettingsPath { get; }
+        public string CanonicalPath => _settingsScope.CanonicalPath;
+
+        public string LegacyTxtPath => _settingsScope.LegacyTxtPath;
 
         public BotTabScreener CreateWithoutConstructor()
         {
@@ -213,33 +198,7 @@ public class BotTabScreenerSettingsPersistenceTests
 
         public void Dispose()
         {
-            if (_settingsFileExisted)
-            {
-                if (File.Exists(_settingsBackupPath))
-                {
-                    File.Copy(_settingsBackupPath, SettingsPath, overwrite: true);
-                    File.Delete(_settingsBackupPath);
-                }
-            }
-            else
-            {
-                if (File.Exists(SettingsPath))
-                {
-                    File.Delete(SettingsPath);
-                }
-
-                if (File.Exists(_settingsBackupPath))
-                {
-                    File.Delete(_settingsBackupPath);
-                }
-            }
-
-            if (!_engineDirExisted
-                && Directory.Exists(_engineDirPath)
-                && !Directory.EnumerateFileSystemEntries(_engineDirPath).Any())
-            {
-                Directory.Delete(_engineDirPath);
-            }
+            _settingsScope.Dispose();
         }
     }
 }

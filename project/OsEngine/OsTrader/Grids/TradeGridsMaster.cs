@@ -68,10 +68,7 @@ namespace OsEngine.OsTrader.Grids
 
             try
             {
-                if (File.Exists(GetGridsSettingsPath()))
-                {
-                    File.Delete(GetGridsSettingsPath());
-                }
+                SettingsManager.Delete(GetGridsSettingsPath());
             }
             catch (Exception ex)
             {
@@ -302,7 +299,7 @@ namespace OsEngine.OsTrader.Grids
                 return;
             }
 
-            if (!File.Exists(GetGridsSettingsPath()))
+            if (!SettingsManager.Exists(GetGridsSettingsPath()))
             {
                 return;
             }
@@ -351,7 +348,7 @@ namespace OsEngine.OsTrader.Grids
 
         private string GetGridsSettingsPath()
         {
-            return @"Engine\" + _nameBot + @"GridsSettings.txt";
+            return @"Engine\" + _nameBot + @"GridsSettings.toml";
         }
 
         private static TradeGridsMasterSettingsDto ParseLegacyGridsSettings(string content)

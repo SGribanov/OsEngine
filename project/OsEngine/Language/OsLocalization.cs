@@ -198,7 +198,7 @@ namespace OsEngine.Language
         /// </summary>
         private static void Load()
         {
-            if (!File.Exists(GetSettingsPath()))
+            if (!SettingsManager.Exists(GetSettingsPath()))
             {
                 _longTimePattern = "H:mm:ss";
                 _shortDatePattern = "dd.MM.yyyy";
@@ -238,7 +238,7 @@ namespace OsEngine.Language
 
         private static string GetSettingsPath()
         {
-            return @"Engine\local.txt";
+            return @"Engine\local.toml";
         }
 
         private static OsLocalizationSettingsDto ParseLegacySettings(string content)

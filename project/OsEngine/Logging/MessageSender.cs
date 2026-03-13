@@ -205,7 +205,7 @@ namespace OsEngine.Logging
 
         private string GetSettingsPath()
         {
-            return @"Engine\" + _name + @"MessageSender.txt";
+            return @"Engine\" + _name + @"MessageSender.toml";
         }
 
         private static MessageSenderSettingsDto ParseLegacySettings(string content)
@@ -309,10 +309,7 @@ namespace OsEngine.Logging
         /// </summary>
         public void Delete() 
         {
-            if (File.Exists(GetSettingsPath()))
-            {
-                File.Delete(GetSettingsPath());
-            }
+            SettingsManager.Delete(GetSettingsPath());
         }
 
         /// <summary>

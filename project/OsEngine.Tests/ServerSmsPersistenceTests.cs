@@ -13,7 +13,7 @@ namespace OsEngine.Tests;
 public class ServerSmsPersistenceTests
 {
     [Fact]
-    public void Save_ShouldPersistJson_AndLoadRoundTrip()
+    public void Save_ShouldPersistToml_AndLoadRoundTrip()
     {
         using ServerSmsFileScope scope = new ServerSmsFileScope();
 
@@ -23,8 +23,8 @@ public class ServerSmsPersistenceTests
         source.Phones = "+10000000000";
         source.Save();
 
-        string content = File.ReadAllText(scope.SettingsPath);
-        Assert.StartsWith("{", content.TrimStart());
+        string content = File.ReadAllText(scope.CanonicalPath);
+        Assert.Contains("SmscLogin = \"json_login\"", content);
 
         scope.ResetSingleton();
         ServerSms loaded = ServerSms.GetSmsServer();
@@ -35,11 +35,11 @@ public class ServerSmsPersistenceTests
     }
 
     [Fact]
-    public void Load_ShouldSupportLegacyLineBasedFormat()
+    public void Load_ShouldSupportLegacyLineBasedFormat_AndSaveToml()
     {
         using ServerSmsFileScope scope = new ServerSmsFileScope();
 
-        File.WriteAllLines(scope.SettingsPath, new[]
+        File.WriteAllLines(scope.LegacyTxtPath, new[]
         {
             "legacy_login",
             "legacy_password",
@@ -52,46 +52,30 @@ public class ServerSmsPersistenceTests
         Assert.Equal("legacy_login", loaded.SmscLogin);
         Assert.Equal("legacy_password", loaded.SmscPassword);
         Assert.Equal("+79990000000", loaded.Phones);
+
+        loaded.Save();
+        Assert.True(File.Exists(scope.CanonicalPath));
+        Assert.Contains("Phones = \"+79990000000\"", File.ReadAllText(scope.CanonicalPath));
     }
 
     private sealed class ServerSmsFileScope : IDisposable
     {
-        private readonly string _engineDirPath;
-        private readonly bool _engineDirExisted;
-        private readonly bool _settingsFileExisted;
-        private readonly string _settingsBackup;
+        private readonly StructuredSettingsFileScope _settingsScope;
         private readonly FieldInfo _serverField;
         private readonly object? _originalServer;
 
         public ServerSmsFileScope()
         {
-            _engineDirPath = Path.GetFullPath("Engine");
-            SettingsPath = Path.Combine(_engineDirPath, "smsSet.txt");
-            _settingsBackup = SettingsPath + ".codex.bak";
-
             _serverField = typeof(ServerSms).GetField("_server", BindingFlags.NonPublic | BindingFlags.Static)
                 ?? throw new InvalidOperationException("Field _server not found.");
             _originalServer = _serverField.GetValue(null);
             _serverField.SetValue(null, null);
-
-            _engineDirExisted = Directory.Exists(_engineDirPath);
-            if (!_engineDirExisted)
-            {
-                Directory.CreateDirectory(_engineDirPath);
-            }
-
-            _settingsFileExisted = File.Exists(SettingsPath);
-            if (_settingsFileExisted)
-            {
-                File.Copy(SettingsPath, _settingsBackup, overwrite: true);
-            }
-            else if (File.Exists(_settingsBackup))
-            {
-                File.Delete(_settingsBackup);
-            }
+            _settingsScope = new StructuredSettingsFileScope(Path.Combine("Engine", "smsSet.toml"));
         }
 
-        public string SettingsPath { get; }
+        public string CanonicalPath => _settingsScope.CanonicalPath;
+
+        public string LegacyTxtPath => _settingsScope.LegacyTxtPath;
 
         public void ResetSingleton()
         {
@@ -102,33 +86,7 @@ public class ServerSmsPersistenceTests
         {
             _serverField.SetValue(null, _originalServer);
 
-            if (_settingsFileExisted)
-            {
-                if (File.Exists(_settingsBackup))
-                {
-                    File.Copy(_settingsBackup, SettingsPath, overwrite: true);
-                    File.Delete(_settingsBackup);
-                }
-            }
-            else
-            {
-                if (File.Exists(SettingsPath))
-                {
-                    File.Delete(SettingsPath);
-                }
-
-                if (File.Exists(_settingsBackup))
-                {
-                    File.Delete(_settingsBackup);
-                }
-            }
-
-            if (!_engineDirExisted
-                && Directory.Exists(_engineDirPath)
-                && !Directory.EnumerateFileSystemEntries(_engineDirPath).Any())
-            {
-                Directory.Delete(_engineDirPath);
-            }
+            _settingsScope.Dispose();
         }
     }
 }

@@ -13,7 +13,7 @@ namespace OsEngine.Tests;
 public class ChartMasterColorKeeperPersistenceTests
 {
     [Fact]
-    public void Save_ShouldPersistJson_AndLoadRoundTrip()
+    public void Save_ShouldPersistToml_AndLoadRoundTrip()
     {
         const string name = "CodexColorKeeperJson";
         using ChartMasterColorKeeperFileScope scope = new ChartMasterColorKeeperFileScope(name);
@@ -30,8 +30,8 @@ public class ChartMasterColorKeeperPersistenceTests
         source.PointType = PointType.TriAngle;
         source.Save();
 
-        string content = File.ReadAllText(scope.SettingsPath);
-        Assert.StartsWith("{", content.TrimStart());
+        string content = File.ReadAllText(scope.CanonicalPath);
+        Assert.Contains("PointType = 3", content);
 
         ChartMasterColorKeeper loaded = new ChartMasterColorKeeper(name);
         Assert.Equal(Color.Red.ToArgb(), loaded.ColorUpBodyCandle.ToArgb());
@@ -47,12 +47,12 @@ public class ChartMasterColorKeeperPersistenceTests
     }
 
     [Fact]
-    public void Load_ShouldSupportLegacyLineBasedFormat()
+    public void Load_ShouldSupportLegacyLineBasedFormat_AndSaveToml()
     {
         const string name = "CodexColorKeeperLegacy";
         using ChartMasterColorKeeperFileScope scope = new ChartMasterColorKeeperFileScope(name);
 
-        File.WriteAllLines(scope.SettingsPath, new[]
+        File.WriteAllLines(scope.LegacyTxtPath, new[]
         {
             Color.AliceBlue.ToArgb().ToString(),
             Color.Beige.ToArgb().ToString(),
@@ -77,85 +77,28 @@ public class ChartMasterColorKeeperPersistenceTests
         Assert.Equal(Color.DarkGreen.ToArgb(), loaded.ColorText.ToArgb());
         Assert.Equal(PointType.Circle, loaded.PointType);
         Assert.Equal(ChartColorScheme.White, loaded.ColorScheme);
+
+        loaded.Save();
+        Assert.True(File.Exists(scope.CanonicalPath));
+        Assert.Contains("ColorScheme = 1", File.ReadAllText(scope.CanonicalPath));
     }
 
     private sealed class ChartMasterColorKeeperFileScope : IDisposable
     {
-        private readonly string _engineDirPath;
-        private readonly string _colorDirPath;
-        private readonly bool _engineDirExisted;
-        private readonly bool _colorDirExisted;
-        private readonly bool _settingsFileExisted;
-        private readonly string _settingsBackup;
+        private readonly StructuredSettingsFileScope _settingsScope;
 
         public ChartMasterColorKeeperFileScope(string name)
         {
-            _engineDirPath = Path.GetFullPath("Engine");
-            _colorDirPath = Path.Combine(_engineDirPath, "Color");
-            SettingsPath = Path.Combine(_colorDirPath, name + "Color.txt");
-            _settingsBackup = SettingsPath + ".codex.bak";
-
-            _engineDirExisted = Directory.Exists(_engineDirPath);
-            if (!_engineDirExisted)
-            {
-                Directory.CreateDirectory(_engineDirPath);
-            }
-
-            _colorDirExisted = Directory.Exists(_colorDirPath);
-            if (!_colorDirExisted)
-            {
-                Directory.CreateDirectory(_colorDirPath);
-            }
-
-            _settingsFileExisted = File.Exists(SettingsPath);
-            if (_settingsFileExisted)
-            {
-                File.Copy(SettingsPath, _settingsBackup, overwrite: true);
-            }
-            else if (File.Exists(_settingsBackup))
-            {
-                File.Delete(_settingsBackup);
-            }
+            _settingsScope = new StructuredSettingsFileScope(Path.Combine("Engine", "Color", name + "Color.toml"));
         }
 
-        public string SettingsPath { get; }
+        public string CanonicalPath => _settingsScope.CanonicalPath;
+
+        public string LegacyTxtPath => _settingsScope.LegacyTxtPath;
 
         public void Dispose()
         {
-            if (_settingsFileExisted)
-            {
-                if (File.Exists(_settingsBackup))
-                {
-                    File.Copy(_settingsBackup, SettingsPath, overwrite: true);
-                    File.Delete(_settingsBackup);
-                }
-            }
-            else
-            {
-                if (File.Exists(SettingsPath))
-                {
-                    File.Delete(SettingsPath);
-                }
-
-                if (File.Exists(_settingsBackup))
-                {
-                    File.Delete(_settingsBackup);
-                }
-            }
-
-            if (!_colorDirExisted
-                && Directory.Exists(_colorDirPath)
-                && !Directory.EnumerateFileSystemEntries(_colorDirPath).Any())
-            {
-                Directory.Delete(_colorDirPath);
-            }
-
-            if (!_engineDirExisted
-                && Directory.Exists(_engineDirPath)
-                && !Directory.EnumerateFileSystemEntries(_engineDirPath).Any())
-            {
-                Directory.Delete(_engineDirPath);
-            }
+            _settingsScope.Dispose();
         }
     }
 }

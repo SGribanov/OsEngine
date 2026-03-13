@@ -285,7 +285,7 @@ namespace OsEngine.Layout
 
         private static void Load()
         {
-            if (!File.Exists(GetLayoutSettingsPath()))
+            if (!SettingsManager.Exists(GetLayoutSettingsPath()))
             {
                 return;
             }
@@ -324,7 +324,7 @@ namespace OsEngine.Layout
 
         private static string GetLayoutSettingsPath()
         {
-            return GetLayoutFilePath("LayoutGui.txt");
+            return GetLayoutFilePath("LayoutGui.toml");
         }
 
         private static string GetLayoutFilePath(string fileName)
@@ -366,7 +366,7 @@ namespace OsEngine.Layout
             int heightCur = System.Windows.Forms.Screen.PrimaryScreen.Bounds.Size.Height;
             int monitorCountCur = System.Windows.Forms.Screen.AllScreens.Length;
 
-            if (!File.Exists(GetScreenResolutionPath()))
+            if (!SettingsManager.Exists(GetScreenResolutionPath()))
             {
                 SaveResolution(widthCur, heightCur, monitorCountCur);
                 return true;
@@ -414,7 +414,7 @@ namespace OsEngine.Layout
 
         private static string GetScreenResolutionPath()
         {
-            return GetLayoutFilePath("ScreenResolution.txt");
+            return GetLayoutFilePath("ScreenResolution.toml");
         }
 
         private static ScreenResolutionSettingsDto ParseLegacyScreenResolutionSettings(string content)
