@@ -333,3 +333,18 @@ project/OsEngine/bin/Debug/*
 !project/OsEngine/bin/Debug/Custom/**
 !project/OsEngine/bin/Debug/Engine/
 !project/OsEngine/bin/Debug/Engine/**
+
+# Local runtime artifacts inside shipped debug fixtures
+project/OsEngine/bin/Debug/Engine/CodexBreakEma*.txt
+project/OsEngine/bin/Debug/Engine/CodexBreakEma*.txt.bak
+project/OsEngine/bin/Debug/Engine/123tab0*.bak
+project/OsEngine/bin/Debug/Engine/README.md
+project/OsEngine/bin/Debug/Engine/TestServer.txt.bak
+project/OsEngine/bin/Debug/Engine/Log/PrimeLog_*.txt
+project/OsEngine/bin/Debug/Engine/Log/ServerMasterLog_*.txt
+project/OsEngine/bin/Debug/Engine/Log/TesterServerLog_*.txt
+project/OsEngine/bin/Debug/Engine/Log/TesterServerLog_*.txt.bak
+
+# Local raw test/backtest outputs
+/reports/breakema_*.json
+/reports/tester_gui_harness*.json
